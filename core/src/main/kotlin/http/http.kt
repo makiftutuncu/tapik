@@ -1,9 +1,15 @@
 package dev.akif.tapik.http
 
 import dev.akif.tapik.Endpoint
-import dev.akif.tapik.tuple.TupleLike
+import dev.akif.tapik.tuple.Tuple
 
 val root: URIBuilder<PathVariables0, QueryParameters0> = URIBuilder(emptyList(), PathVariables0, QueryParameters0)
+
+val path: PathVariable.Companion = PathVariable.Companion
+
+val query: QueryParameter.Companion = QueryParameter.Companion
+
+val header: Header.Companion = Header.Companion
 
 val http: HttpEndpointWithoutMethod = HttpEndpointWithoutMethod
 
@@ -48,7 +54,7 @@ data class HttpEndpointWithoutURI(override val method: Method) : Endpoint<Method
     override val outputs: Nothing
         get() = undefined("outputs")
 
-    fun <PathVariables : TupleLike, QueryParameters: TupleLike> uri(
+    fun <PathVariables : Tuple, QueryParameters: Tuple> uri(
         uri: URIBuilder<PathVariables, QueryParameters>
     ): HttpEndpoint<PathVariables, QueryParameters, Headers0, EmptyBody, Outputs0> =
         HttpEndpoint(
@@ -60,7 +66,7 @@ data class HttpEndpointWithoutURI(override val method: Method) : Endpoint<Method
         )
 }
 
-data class HttpEndpoint<PathVariables : TupleLike, QueryParameters : TupleLike, Headers: TupleLike, Input: Body<*>, Outputs: TupleLike>(
+data class HttpEndpoint<PathVariables : Tuple, QueryParameters : Tuple, Headers: Tuple, Input: Body<*>, Outputs: Tuple>(
     override val method: Method,
     override val uri: URIBuilder<PathVariables, QueryParameters>,
     override val headers: Headers,

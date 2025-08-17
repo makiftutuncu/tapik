@@ -1,8 +1,8 @@
 package dev.akif.tapik.http
 
-import dev.akif.tapik.tuple.TupleLike
+import dev.akif.tapik.tuple.Tuple
 
-fun <PathVariables: TupleLike, QueryParameters: TupleLike, Headers: TupleLike, Input: Body<*>> HttpEndpoint<PathVariables, QueryParameters, Headers, EmptyBody, Outputs0>.input(
+fun <PathVariables: Tuple, QueryParameters: Tuple, Headers: Tuple, Input: Body<*>> HttpEndpoint<PathVariables, QueryParameters, Headers, EmptyBody, Outputs0>.input(
     input: Input
 ): HttpEndpoint<PathVariables, QueryParameters, Headers, Input, Outputs0> =
     HttpEndpoint(

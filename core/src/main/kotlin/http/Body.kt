@@ -23,5 +23,5 @@ data class JsonBody<T>(val codec: StringCodec<T>): Body<T> {
 fun rawBody(mediaType: MediaType? = null): RawBody =
     RawBody(mediaType)
 
-inline fun <reified T> jsonBody(codec: StringCodec<T> = StringCodecs.default()): JsonBody<T> =
+inline fun <reified T> jsonBody(codec: StringCodec<T>): JsonBody<T> =
     JsonBody(codec)
