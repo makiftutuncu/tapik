@@ -7,7 +7,7 @@ import java.math.BigInteger
 import java.net.URI
 import java.util.UUID
 
-data class Header<T>(val name: String, val codec: StringCodec<T>, val values: List<T> = emptyList()) {
+data class Header<T : Any>(val name: String, val codec: StringCodec<T>, val values: List<T> = emptyList()) {
     companion object: Defaults<Header<Unit>, Header<Boolean>, Header<Byte>, Header<Short>, Header<Int>, Header<Long>, Header<Float>, Header<Double>, Header<BigInteger>, Header<BigDecimal>, Header<String>, Header<UUID>> {
         override fun unit(name: String): Header<Unit> = Header(name, StringCodecs.unit(name))
         override fun boolean(name: String): Header<Boolean> = Header(name, StringCodecs.boolean(name))
@@ -31,31 +31,37 @@ data class Header<T>(val name: String, val codec: StringCodec<T>, val values: Li
         val Location: Header<URI> = Header(LOCATION, Codecs.uriString(LOCATION))
     }
 
-    operator fun <T2> plus(that: Header<T2>): Headers2<T, T2> = Headers2(this, that)
+    operator fun <T2 : Any> plus(that: Header<T2>): Headers2<T, T2> = Headers2(this, that)
 
     operator fun invoke(vararg values: T): Header<T> = copy(values = values.toList())
 }
 
-inline fun <reified T> header(name: String, codec: StringCodec<T>): Header<T> = Header(name, codec)
+inline fun <reified T : Any> header(name: String, codec: StringCodec<T>): Header<T> = Header(name, codec)
 
-fun <PathVariables : Tuple, QueryParameters: Tuple, H> HttpEndpoint<PathVariables, QueryParameters, Headers0, EmptyBody, Outputs0>.headers(
+fun <PathVariables : Tuple<PathVariable<*>>, QueryParameters : Tuple<QueryParameter<*>>, H : Any> HttpEndpoint<PathVariables, QueryParameters, Headers0, EmptyBody, Outputs0>.headers(
     header: Header<H>
 ): HttpEndpoint<PathVariables, QueryParameters, Headers1<H>, EmptyBody, Outputs0> =
     HttpEndpoint(
+        id = this.id,
         method = this.method,
         uri = this.uri,
         headers = Headers1(header),
         input = this.input,
-        outputs = this.outputs
+        outputs = this.outputs,
+        description = this.description,
+        details = this.details,
     )
 
-fun <PathVariables : Tuple, QueryParameters: Tuple, Headers: Tuple> HttpEndpoint<PathVariables, QueryParameters, Headers0, EmptyBody, Outputs0>.headers(
+fun <PathVariables : Tuple<PathVariable<*>>, QueryParameters : Tuple<QueryParameter<*>>, Headers: Tuple<Header<*>>> HttpEndpoint<PathVariables, QueryParameters, Headers0, EmptyBody, Outputs0>.headers(
     headers: Headers
 ): HttpEndpoint<PathVariables, QueryParameters, Headers, EmptyBody, Outputs0> =
     HttpEndpoint(
+        id = this.id,
         method = this.method,
         uri = this.uri,
         headers = headers,
         input = this.input,
-        outputs = this.outputs
+        outputs = this.outputs,
+        description = this.description,
+        details = this.details,
     )

@@ -18,6 +18,8 @@ sealed class MediaType(open val major: String, open val minor: String) {
             }
     }
 
+    override fun toString(): String = "$major/$minor"
+
     data object PlainText : MediaType("text", "plain")
 
     data object Json : MediaType("application", "json")

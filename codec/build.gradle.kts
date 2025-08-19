@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":tuple"))
     implementation(libs.bundles.arrow)
     testImplementation(kotlin("test"))
 }

@@ -16,12 +16,12 @@ data object StringBody: Body<String> {
 
 data class RawBody(override val mediaType: MediaType?): Body<ByteArray>
 
-data class JsonBody<T>(val codec: StringCodec<T>): Body<T> {
+data class JsonBody<T : Any>(val codec: StringCodec<T>): Body<T> {
     override val mediaType: MediaType = MediaType.Json
 }
 
 fun rawBody(mediaType: MediaType? = null): RawBody =
     RawBody(mediaType)
 
-inline fun <reified T> jsonBody(codec: StringCodec<T>): JsonBody<T> =
+inline fun <reified T : Any> jsonBody(codec: StringCodec<T>): JsonBody<T> =
     JsonBody(codec)

@@ -6,7 +6,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.UUID
 
-data class QueryParameter<T>(val name: String, val codec: StringCodec<T>) {
+data class QueryParameter<T : Any>(val name: String, val codec: StringCodec<T>) {
     companion object: Defaults<QueryParameter<Unit>, QueryParameter<Boolean>, QueryParameter<Byte>, QueryParameter<Short>, QueryParameter<Int>, QueryParameter<Long>, QueryParameter<Float>, QueryParameter<Double>, QueryParameter<BigInteger>, QueryParameter<BigDecimal>, QueryParameter<String>, QueryParameter<UUID>> {
         override fun unit(name: String): QueryParameter<Unit> = QueryParameter(name, StringCodecs.unit(name))
         override fun boolean(name: String): QueryParameter<Boolean> = QueryParameter(name, StringCodecs.boolean(name))
@@ -22,47 +22,47 @@ data class QueryParameter<T>(val name: String, val codec: StringCodec<T>) {
         override fun uuid(name: String): QueryParameter<UUID> = QueryParameter(name, StringCodecs.uuid(name))
     }
 
-    operator fun <T2> plus(that: QueryParameter<T2>): QueryParameters2<T, T2> = QueryParameters2(this, that)
+    operator fun <T2 : Any> plus(that: QueryParameter<T2>): QueryParameters2<T, T2> = QueryParameters2(this, that)
 }
 
-fun <T> query(name: String, codec: StringCodec<T>): QueryParameter<T> = QueryParameter(name, codec)
+fun <T : Any> query(name: String, codec: StringCodec<T>): QueryParameter<T> = QueryParameter(name, codec)
 
 @JvmName("plus1")
-operator fun <PathVariables: Tuple, T1> URIBuilder<PathVariables, QueryParameters0>.plus(parameter: QueryParameter<T1>): URIBuilder<PathVariables, QueryParameters1<T1>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any> URIBuilder<PathVariables, QueryParameters0>.plus(parameter: QueryParameter<T1>): URIBuilder<PathVariables, QueryParameters1<T1>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus2")
-operator fun <PathVariables: Tuple, T1, T2> URIBuilder<PathVariables, QueryParameters1<T1>>.plus(parameter: QueryParameter<T2>): URIBuilder<PathVariables, QueryParameters2<T1, T2>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any> URIBuilder<PathVariables, QueryParameters1<T1>>.plus(parameter: QueryParameter<T2>): URIBuilder<PathVariables, QueryParameters2<T1, T2>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus3")
-operator fun <PathVariables: Tuple, T1, T2, T3> URIBuilder<PathVariables, QueryParameters2<T1, T2>>.plus(parameter: QueryParameter<T3>): URIBuilder<PathVariables, QueryParameters3<T1, T2, T3>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any> URIBuilder<PathVariables, QueryParameters2<T1, T2>>.plus(parameter: QueryParameter<T3>): URIBuilder<PathVariables, QueryParameters3<T1, T2, T3>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus4")
-operator fun <PathVariables: Tuple, T1, T2, T3, T4> URIBuilder<PathVariables, QueryParameters3<T1, T2, T3>>.plus(parameter: QueryParameter<T4>): URIBuilder<PathVariables, QueryParameters4<T1, T2, T3, T4>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any, T4 : Any> URIBuilder<PathVariables, QueryParameters3<T1, T2, T3>>.plus(parameter: QueryParameter<T4>): URIBuilder<PathVariables, QueryParameters4<T1, T2, T3, T4>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus5")
-operator fun <PathVariables: Tuple, T1, T2, T3, T4, T5> URIBuilder<PathVariables, QueryParameters4<T1, T2, T3, T4>>.plus(parameter: QueryParameter<T5>): URIBuilder<PathVariables, QueryParameters5<T1, T2, T3, T4, T5>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any, T4 : Any, T5 : Any> URIBuilder<PathVariables, QueryParameters4<T1, T2, T3, T4>>.plus(parameter: QueryParameter<T5>): URIBuilder<PathVariables, QueryParameters5<T1, T2, T3, T4, T5>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus6")
-operator fun <PathVariables: Tuple, T1, T2, T3, T4, T5, T6> URIBuilder<PathVariables, QueryParameters5<T1, T2, T3, T4, T5>>.plus(parameter: QueryParameter<T6>): URIBuilder<PathVariables, QueryParameters6<T1, T2, T3, T4, T5, T6>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any, T4 : Any, T5 : Any, T6 : Any> URIBuilder<PathVariables, QueryParameters5<T1, T2, T3, T4, T5>>.plus(parameter: QueryParameter<T6>): URIBuilder<PathVariables, QueryParameters6<T1, T2, T3, T4, T5, T6>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus7")
-operator fun <PathVariables: Tuple, T1, T2, T3, T4, T5, T6, T7> URIBuilder<PathVariables, QueryParameters6<T1, T2, T3, T4, T5, T6>>.plus(parameter: QueryParameter<T7>): URIBuilder<PathVariables, QueryParameters7<T1, T2, T3, T4, T5, T6, T7>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any, T4 : Any, T5 : Any, T6 : Any, T7 : Any> URIBuilder<PathVariables, QueryParameters6<T1, T2, T3, T4, T5, T6>>.plus(parameter: QueryParameter<T7>): URIBuilder<PathVariables, QueryParameters7<T1, T2, T3, T4, T5, T6, T7>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus8")
-operator fun <PathVariables: Tuple, T1, T2, T3, T4, T5, T6, T7, T8> URIBuilder<PathVariables, QueryParameters7<T1, T2, T3, T4, T5, T6, T7>>.plus(parameter: QueryParameter<T8>): URIBuilder<PathVariables, QueryParameters8<T1, T2, T3, T4, T5, T6, T7, T8>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any, T4 : Any, T5 : Any, T6 : Any, T7 : Any, T8 : Any> URIBuilder<PathVariables, QueryParameters7<T1, T2, T3, T4, T5, T6, T7>>.plus(parameter: QueryParameter<T8>): URIBuilder<PathVariables, QueryParameters8<T1, T2, T3, T4, T5, T6, T7, T8>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus9")
-operator fun <PathVariables: Tuple, T1, T2, T3, T4, T5, T6, T7, T8, T9> URIBuilder<PathVariables, QueryParameters8<T1, T2, T3, T4, T5, T6, T7, T8>>.plus(parameter: QueryParameter<T9>): URIBuilder<PathVariables, QueryParameters9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any, T4 : Any, T5 : Any, T6 : Any, T7 : Any, T8 : Any, T9 : Any> URIBuilder<PathVariables, QueryParameters8<T1, T2, T3, T4, T5, T6, T7, T8>>.plus(parameter: QueryParameter<T9>): URIBuilder<PathVariables, QueryParameters9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
 
 @JvmName("plus10")
-operator fun <PathVariables: Tuple, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> URIBuilder<PathVariables, QueryParameters9<T1, T2, T3, T4, T5, T6, T7, T8, T9>>.plus(parameter: QueryParameter<T10>): URIBuilder<PathVariables, QueryParameters10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> =
+operator fun <PathVariables: Tuple<PathVariable<*>>, T1 : Any, T2 : Any, T3 : Any, T4 : Any, T5 : Any, T6 : Any, T7 : Any, T8 : Any, T9 : Any, T10 : Any> URIBuilder<PathVariables, QueryParameters9<T1, T2, T3, T4, T5, T6, T7, T8, T9>>.plus(parameter: QueryParameter<T10>): URIBuilder<PathVariables, QueryParameters10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> =
     URIBuilder(segments, pathVariables, queryParameters + parameter)
