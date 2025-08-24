@@ -2,7 +2,7 @@
 
 This endpoint lists all users with pagination.
 
-`GET /api/v1/users?{page: Int}&{perPage: Int}`
+`GET /api/v1/users`
 
 ### URI Parameters
 
@@ -33,7 +33,7 @@ This endpoint creates a new user with given information.
 
 This endpoint gets the user with given id.
 
-`GET /api/v1/users/{id: Long}`
+`GET /api/v1/users/{id}`
 
 ### URI Parameters
 
@@ -51,7 +51,7 @@ This endpoint gets the user with given id.
 
 This endpoint gets the status of the user with given id.
 
-`GET /api/v1/users/{id: Long}/status`
+`GET /api/v1/users/{id}/status`
 
 ### URI Parameters
 
@@ -63,7 +63,7 @@ This endpoint gets the status of the user with given id.
 
 This endpoint gets the avatar of the user with given id.
 
-`GET /api/v1/users/{id: Long}/avatar?{size: Int}`
+`GET /api/v1/users/{id}/avatar`
 
 ### URI Parameters
 

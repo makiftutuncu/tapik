@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    api(project(":codec"))
-    api(project(":tuple"))
+    api(project(":core"))
     implementation(libs.arrowCore)
+    implementation(libs.jacksonKotlin)
     testImplementation(kotlin("test"))
 }

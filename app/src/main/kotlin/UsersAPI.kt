@@ -1,41 +1,21 @@
 package dev.akif.app
 
-import dev.akif.tapik.codec.*
 import dev.akif.tapik.http.*
-import dev.akif.tapik.tuple.*
+import dev.akif.tapik.jackson.*
 
-data class UserResponse(val id: Long, val name: String, val status: String) {
-    companion object {
-        val codec: StringCodec<UserResponse> =
-            StringCodec.unsafe("userResponse", { TODO() }) { TODO() }
-    }
-}
+data class UserResponse(val id: Long, val name: String, val status: String)
 
-data class CreateUserRequest(val name: String, val status: String) {
-    companion object {
-        val codec: StringCodec<CreateUserRequest> =
-            StringCodec.unsafe("createUserResponse", { TODO() }) { TODO() }
-    }
-}
+data class CreateUserRequest(val name: String, val status: String)
 
-data class APIError(val code: Int, val message: String) {
-    companion object {
-        val codec: StringCodec<APIError> =
-            StringCodec.unsafe("apiError", { TODO() }) { TODO() }
-    }
-}
+data class APIError(val code: Int, val message: String)
 
-data class UserPage(val items: List<UserResponse>, val total: Long) {
-    companion object {
-        val codec: StringCodec<UserPage> =
-            StringCodec.unsafe("userPage", { TODO() }) { TODO() }
-    }
-}
+data class UserPage(val items: List<UserResponse>, val total: Long)
 
 object Users {
     private val base = root / "api" / "v1" / "users"
     private val id = path.long("id")
-    private val errorBody = jsonBody<APIError>(APIError.codec)
+    private val errorResponse = jsonBody<APIError>("error")
+    private val userResponse = jsonBody<UserResponse>("response")
 
     val list =
         http(
@@ -46,7 +26,7 @@ object Users {
             .get
             .uri(base + query.int("page") + query.int("perPage"))
             .output {
-                jsonBody<UserPage>(UserPage.codec)
+                jsonBody<UserPage>("response")
             }
 
     val create =
@@ -58,9 +38,9 @@ object Users {
             .post
             .uri(base)
             .headers(header.Accept(MediaType.Json))
-            .input(jsonBody<CreateUserRequest>(CreateUserRequest.codec))
-            .output(Status.CREATED, header.Location) { jsonBody<UserResponse>(UserResponse.codec) }
-            .output(Status.BAD_REQUEST) { errorBody }
+            .input(jsonBody<CreateUserRequest>("createUserRequest"))
+            .output(Status.CREATED, header.Location) { userResponse }
+            .output(Status.BAD_REQUEST) { errorResponse }
 
     val get =
         http(
@@ -71,8 +51,8 @@ object Users {
             .get
             .uri(base / id)
             .headers(header.boolean("Proxied"))
-            .output { jsonBody<UserResponse>(UserResponse.codec) }
-            .output(Status.NOT_FOUND) { errorBody }
+            .output { userResponse }
+            .output(Status.NOT_FOUND) { errorResponse }
 
     val getStatus =
         http(
@@ -82,8 +62,8 @@ object Users {
         )
             .get
             .uri(base / id / "status")
-            .output { StringBody }
-            .output(Status.NOT_FOUND) { errorBody }
+            .output { stringBody() }
+            .output(Status.NOT_FOUND) { errorResponse }
 
     val getAvatar =
         http(

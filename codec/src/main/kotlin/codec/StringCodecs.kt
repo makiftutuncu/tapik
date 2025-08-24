@@ -1,5 +1,6 @@
 package dev.akif.tapik.codec
 
+import dev.akif.tapik.codec.Codec.Companion.identity
 import dev.akif.tapik.codec.Codec.Companion.nullable
 import dev.akif.tapik.codec.Codec.Companion.unsafe
 import java.math.BigDecimal
@@ -38,7 +39,7 @@ object StringCodecs: Defaults<StringCodec<Unit>, StringCodec<Boolean>, StringCod
         unsafe(name, { it.toString() }) { BigDecimal(it) }
 
     override fun string(name: String): StringCodec<String> =
-        nullable(name, { it }) { it }
+        identity(name)
 
     override fun uuid(name: String): StringCodec<UUID> =
         unsafe(name, { it.toString() }) { UUID.fromString(it) }

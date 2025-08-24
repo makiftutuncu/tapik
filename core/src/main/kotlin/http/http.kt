@@ -1,9 +1,9 @@
 package dev.akif.tapik.http
 
 import dev.akif.tapik.Endpoint
-import dev.akif.tapik.tuple.Tuple
+import dev.akif.tapik.types.*
 
-val root: URIBuilder<PathVariables0, QueryParameters0> = URIBuilder(emptyList(), PathVariables0.instance(), QueryParameters0.instance())
+val root: URIWithParameters<Parameters0> = emptyList<String>() to Parameters0()
 
 val path: PathVariable.Companion = PathVariable.Companion
 
@@ -14,78 +14,57 @@ val header: Header.Companion = Header.Companion
 fun http(id: String, description: String? = null, details: String? = null): HttpEndpointWithoutMethod =
     HttpEndpointWithoutMethod(id, description, details)
 
-internal fun undefined(what: String): Nothing = throw NotImplementedError("Undefined $what")
-
 data class HttpEndpointWithoutMethod(
     override val id: String,
     override val description: String?,
     override val details: String?,
-): Endpoint<Nothing, Nothing, Nothing, Nothing, Nothing>() {
-    override val method: Nothing
-        get() = undefined("method")
+): Endpoint<Parameters0, EmptyBody, Outputs0>() {
+    override val parameters: Parameters0 = Parameters0()
+    override val input: EmptyBody = EmptyBody
+    override val outputs: Outputs0 = Outputs0()
 
-    override val uri: Nothing
-        get() = undefined("uri")
-
-    override val headers: Nothing
-        get() = undefined("headers")
-
-    override val input: Nothing
-        get() = undefined("input")
-
-    override val outputs: Nothing
-        get() = undefined("outputs")
-
-    val get: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.GET, description, details)
-    val head: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.HEAD, description, details)
-    val post: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.POST, description, details)
-    val put: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.PUT, description, details)
-    val patch: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.PATCH, description, details)
-    val delete: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.DELETE, description, details)
-    val options: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.OPTIONS, description, details)
-    val trace: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, Method.TRACE, description, details)
+    val get: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.GET)
+    val head: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.HEAD)
+    val post: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.POST)
+    val put: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.PUT)
+    val patch: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.PATCH)
+    val delete: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.DELETE)
+    val options: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.OPTIONS)
+    val trace: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.TRACE)
 }
 
 data class HttpEndpointWithoutURI(
     override val id: String,
-    override val method: Method,
     override val description: String?,
     override val details: String?,
-) : Endpoint<Method, Nothing, Nothing, Nothing, Nothing>() {
-    override val uri: Nothing
-        get() = undefined("uri")
+    private val method: Method
+) : Endpoint<Parameters0, EmptyBody, Outputs0>() {
+    override val parameters: Parameters0 = Parameters0()
+    override val input: EmptyBody = EmptyBody
+    override val outputs: Outputs0 = Outputs0()
 
-    override val headers: Nothing
-        get() = undefined("headers")
-
-    override val input: Nothing
-        get() = undefined("input")
-
-    override val outputs: Nothing
-        get() = undefined("outputs")
-
-    fun <PathVariables : Tuple<PathVariable<*>>, QueryParameters : Tuple<QueryParameter<*>>> uri(
-        uri: URIBuilder<PathVariables, QueryParameters>
-    ): HttpEndpoint<PathVariables, QueryParameters, Headers0, EmptyBody, Outputs0> =
-        HttpEndpoint(
+    fun <P: Parameters> uri(uriWithParameters: URIWithParameters<P>): HttpEndpoint<P, EmptyBody, Outputs0> {
+        val (uri, parameters) = uriWithParameters
+        return HttpEndpoint(
             id = this.id,
+            description = this.description,
+            details = this.details,
             method = this.method,
             uri = uri,
-            headers = Headers0.instance(),
+            parameters = parameters,
             input = EmptyBody,
-            outputs = Outputs0.instance(),
-            details = this.details,
-            description = this.description,
+            outputs = Outputs0()
         )
+    }
 }
 
-data class HttpEndpoint<PathVariables : Tuple<PathVariable<*>>, QueryParameters : Tuple<QueryParameter<*>>, Headers: Tuple<Header<*>>, Input: Body<*>, Outputs: Tuple<Output<*, *>>>(
-    override val id: String,
-    override val method: Method,
-    override val uri: URIBuilder<PathVariables, QueryParameters>,
-    override val headers: Headers,
-    override val input: Input,
-    override val outputs: Outputs,
-    override val description: String?,
-    override val details: String?
-) : Endpoint<Method, URIBuilder<PathVariables, QueryParameters>, Headers, Input, Outputs>()
+data class HttpEndpoint<out P: Parameters, out I: Body<*>, out O: Tuple<Output<*, *>>>(
+    public override val id: String,
+    public override val description: String?,
+    public override val details: String?,
+    val method: Method,
+    val uri: List<String>,
+    public override val parameters: P,
+    public override val input: I,
+    public override val outputs: O,
+) : Endpoint<P, I, O>()

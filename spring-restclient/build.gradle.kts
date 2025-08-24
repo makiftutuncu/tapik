@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":jackson"))
-    implementation(project(":spring-restclient"))
+    api(project(":core"))
+    api(project(":jackson"))
     implementation(libs.arrowCore)
     implementation(libs.springWeb)
+    testImplementation(kotlin("test"))
 }

@@ -1,12 +1,10 @@
 package dev.akif.tapik
 
-abstract class Endpoint<Method, UriBuilder, Headers, Input, Outputs> {
-    abstract val id: String
-    abstract val description: String?
-    abstract val details: String?
-    abstract val method: Method
-    abstract val uri: UriBuilder
-    abstract val headers: Headers
-    abstract val input: Input
-    abstract val outputs: Outputs
+abstract class Endpoint<out Parameters, out Input, out Outputs> {
+    internal abstract val id: String
+    internal abstract val description: String?
+    internal abstract val details: String?
+    internal abstract val parameters: Parameters
+    internal abstract val input: Input
+    internal abstract val outputs: Outputs
 }

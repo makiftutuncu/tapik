@@ -5,6 +5,7 @@ import dev.akif.tapik.http.Body
 import dev.akif.tapik.http.EmptyBody
 import dev.akif.tapik.http.Header
 import dev.akif.tapik.http.JsonBody
+import dev.akif.tapik.http.Parameter
 import dev.akif.tapik.http.PathVariable
 import dev.akif.tapik.http.QueryParameter
 import dev.akif.tapik.http.RawBody
@@ -14,23 +15,24 @@ class MarkdownDocumentationInterpreter(private val api: List<AnyHttpEndpoint>) {
     fun generate(): String = api.joinToString("\n\n") { it.document() }.trim()
 
     private fun AnyHttpEndpoint.document(): String {
-        val path = uri.pathVariables.toList()
-        val query = uri.queryParameters.toList()
+        val path = parameters.toList().filterIsInstance<PathVariable<*>>()
+        val query = parameters.toList().filterIsInstance<QueryParameter<*>>()
+        val headers = parameters.toList().filterIsInstance<Header<*>>()
 
         return """
         \/## $id${description?.let { ": $it" } ?: ""}${details?.let { "\n\n$it" } ?: ""}
         \/
-        \/`$method $uri`
+        \/`$method ${uri.joinToString(separator = "/", prefix = "/")}`
         \/
         \/${documentParameters(path, query)}
         \/
-        \/${documentHeaders(headers.toList())}
+        \/${documentHeaders(headers)}
         \/
         \/${documentInput(input)}
         """.trimMargin("\\/").trim()
     }
 
-    private fun documentParameters(path: List<PathVariable<*>>, query: List<QueryParameter<*>>): String =
+    private fun documentParameters(path: List<Parameter<*>>, query: List<Parameter<*>>): String =
         if (path.isEmpty() && query.isEmpty()) {
             ""
         } else {
@@ -43,7 +45,7 @@ class MarkdownDocumentationInterpreter(private val api: List<AnyHttpEndpoint>) {
             """.trimMargin("\\/").trim()
         }
 
-    private fun documentHeaders(headers: List<Header<*>>): String =
+    private fun documentHeaders(headers: List<Parameter<*>>): String =
         if (headers.isEmpty()) "" else
         """
         \/### Headers
@@ -62,7 +64,7 @@ class MarkdownDocumentationInterpreter(private val api: List<AnyHttpEndpoint>) {
             EmptyBody -> ""
             is JsonBody<*> -> "`${input.codec.sourceClass.simpleName}` as `${input.mediaType}`"
             is RawBody -> "Raw bytes as `${input.mediaType}`"
-            StringBody -> "Plain string"
+            is StringBody -> "Plain string"
         }}
         """.trimMargin("\\/").trim()
 }

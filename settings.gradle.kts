@@ -12,6 +12,8 @@ plugins {
 include(":app")
 include(":codec")
 include(":core")
+include(":jackson")
+include(":spring-restclient")
 include(":tuple")
 
 rootProject.name = "tapik"

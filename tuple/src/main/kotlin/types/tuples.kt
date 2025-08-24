@@ -1,14 +1,10 @@
-package dev.akif.tapik.tuple
+package dev.akif.tapik.types
 
 sealed interface Tuple<out T> {
     fun toList(): List<T>
 }
 
 class Tuple0<T> : Tuple<T> {
-    companion object {
-        fun <T> instance(): Tuple0<T> = Tuple0()
-    }
-
     operator fun <T, T1: T> plus(item1: T1): Tuple1<T, T1> = Tuple1(item1)
 
     override fun toList(): List<Nothing> = emptyList()
