@@ -2,7 +2,7 @@
 arrow = "2.1.2"
 jackson = "2.19.0"
 kotlin = "2.2.10"
-spring = "6.2.9"
+spring = "6.2.10"
 
 [libraries]
 arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
