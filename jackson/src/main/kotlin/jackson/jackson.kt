@@ -6,8 +6,12 @@ import dev.akif.tapik.http.*
 
 val defaultObjectMapper: ObjectMapper = jacksonObjectMapper()
 
-inline fun <reified T: Any> jacksonCodec(name: String, mapper: ObjectMapper? = null): JacksonCodec<T> =
-    JacksonCodec(name, mapper ?: defaultObjectMapper, T::class)
+inline fun <reified T : Any> jacksonCodec(
+    name: String,
+    mapper: ObjectMapper? = null
+): JacksonCodec<T> = JacksonCodec(name, mapper ?: defaultObjectMapper, T::class)
 
-inline fun <reified T : Any> jsonBody(name: String, mapper: ObjectMapper? = null): JsonBody<T> =
-    jsonBody(jacksonCodec<T>(name, mapper))
+inline fun <reified T : Any> jsonBody(
+    name: String,
+    mapper: ObjectMapper? = null
+): JsonBody<T> = jsonBody(jacksonCodec<T>(name, mapper))

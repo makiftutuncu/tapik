@@ -11,7 +11,9 @@ import dev.akif.tapik.http.QueryParameter
 import dev.akif.tapik.http.RawBody
 import dev.akif.tapik.http.StringBody
 
-class MarkdownDocumentationInterpreter(private val api: List<AnyHttpEndpoint>) {
+class MarkdownDocumentationInterpreter(
+    private val api: List<AnyHttpEndpoint>
+) {
     fun generate(): String = api.joinToString("\n\n") { it.document() }.trim()
 
     private fun AnyHttpEndpoint.document(): String {
@@ -32,11 +34,16 @@ class MarkdownDocumentationInterpreter(private val api: List<AnyHttpEndpoint>) {
         """.trimMargin("\\/").trim()
     }
 
-    private fun documentParameters(path: List<Parameter<*>>, query: List<Parameter<*>>): String =
+    private fun documentParameters(
+        path: List<Parameter<*>>,
+        query: List<Parameter<*>>
+    ): String =
         if (path.isEmpty() && query.isEmpty()) {
             ""
         } else {
-            val all = path.map { "| ${it.name} | ${it.codec.sourceClass.simpleName} | In Path |" } + query.map { "| ${it.name} | ${it.codec.sourceClass.simpleName} | In Query |" }
+            val all =
+                path.map { "| ${it.name} | ${it.codec.sourceClass.simpleName} | In Path |" } +
+                    query.map { "| ${it.name} | ${it.codec.sourceClass.simpleName} | In Query |" }
             """
             \/### URI Parameters
             \/
@@ -46,26 +53,31 @@ class MarkdownDocumentationInterpreter(private val api: List<AnyHttpEndpoint>) {
         }
 
     private fun documentHeaders(headers: List<Parameter<*>>): String =
-        if (headers.isEmpty()) "" else
-        """
+        if (headers.isEmpty()) {
+            ""
+        } else {
+            """
         \/### Headers
         \/
         \/| Name | Type |
         \/| ---- | ---- |
         \/${headers.joinToString("\n") { "| ${it.name} | ${it.codec.sourceClass.simpleName} |" }}
         """.trimMargin("\\/").trim()
+        }
 
     private fun documentInput(input: Body<*>): String =
-        if (input == EmptyBody) "" else
-        """
+        if (input == EmptyBody) {
+            ""
+        } else {
+            """
         \/### Input
         \/
         \/${when (input) {
-            EmptyBody -> ""
-            is JsonBody<*> -> "`${input.codec.sourceClass.simpleName}` as `${input.mediaType}`"
-            is RawBody -> "Raw bytes as `${input.mediaType}`"
-            is StringBody -> "Plain string"
-        }}
+                EmptyBody -> ""
+                is JsonBody<*> -> "`${input.codec.sourceClass.simpleName}` as `${input.mediaType}`"
+                is RawBody -> "Raw bytes as `${input.mediaType}`"
+                is StringBody -> "Plain string"
+            }}
         """.trimMargin("\\/").trim()
+        }
 }
-

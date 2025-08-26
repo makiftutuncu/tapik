@@ -2,7 +2,9 @@ package dev.akif.tapik.http
 
 sealed interface Response<B>
 
-data class EmptyResponse<B>(val status: Status) : Response<B>
+data class EmptyResponse<B>(
+    val status: Status
+) : Response<B>
 
 data class Response0<B>(
     val status: Status,

@@ -12,6 +12,5 @@ object StringCodecs {
             of(parts[0], parts[1])
         }
 
-    fun uri(name: String): StringCodec<URI> =
-        Codec.unsafe(name, { it.toString() }) { URI.create(it) }
+    fun uri(name: String): StringCodec<URI> = Codec.unsafe(name, { it.toString() }) { URI.create(it) }
 }

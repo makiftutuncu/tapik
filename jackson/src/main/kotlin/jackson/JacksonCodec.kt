@@ -9,7 +9,7 @@ class JacksonCodec<T : Any>(
     val name: String,
     val mapper: ObjectMapper,
     override val sourceClass: KClass<T>
-): ByteArrayCodec<T> {
+) : ByteArrayCodec<T> {
     override val targetClass: KClass<ByteArray> = ByteArray::class
 
     override fun decode(input: ByteArray): Either<NonEmptyList<String>, T> =
@@ -19,6 +19,5 @@ class JacksonCodec<T : Any>(
             "Cannot decode '$name' as ${sourceClass.simpleName}: $input: $e".nel().left()
         }
 
-    override fun encode(input: T): ByteArray =
-        mapper.writeValueAsBytes(input)
+    override fun encode(input: T): ByteArray = mapper.writeValueAsBytes(input)
 }

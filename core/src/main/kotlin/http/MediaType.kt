@@ -1,18 +1,26 @@
 package dev.akif.tapik.http
 
-sealed class MediaType(open val major: String, open val minor: String) {
+sealed class MediaType(
+    open val major: String,
+    open val minor: String
+) {
     companion object {
-        fun of(major: String, minor: String): MediaType =
+        fun of(
+            major: String,
+            minor: String
+        ): MediaType =
             when (major) {
-                "text" -> when (minor) {
-                    "plain" -> PlainText
-                    else -> Custom(major, minor)
-                }
+                "text" ->
+                    when (minor) {
+                        "plain" -> PlainText
+                        else -> Custom(major, minor)
+                    }
 
-                "application" -> when (minor) {
-                    "json" -> Json
-                    else -> Custom(major, minor)
-                }
+                "application" ->
+                    when (minor) {
+                        "json" -> Json
+                        else -> Custom(major, minor)
+                    }
 
                 else -> Custom(major, minor)
             }

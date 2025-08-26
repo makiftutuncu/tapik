@@ -8,19 +8,24 @@ import arrow.core.right
 import dev.akif.tapik.types.*
 import kotlin.reflect.KClass
 
-interface Codec<Source : Any, Target : Any> : Decoder<Target, Source>, Encoder<Source, Target> {
+interface Codec<Source : Any, Target : Any> :
+    Decoder<Target, Source>,
+    Encoder<Source, Target> {
     val sourceClass: KClass<Source>
     val targetClass: KClass<Target>
 
-    operator fun <Source2: Any, Target2: Any> plus(that: Codec<Source2, Target2>): Tuple2<Codec<*, *>, Codec<Source, Target>, Codec<Source2, Target2>> =
-        Tuple2(this, that)
+    operator fun <Source2 : Any, Target2 : Any> plus(
+        that: Codec<Source2, Target2>
+    ): Tuple2<Codec<*, *>, Codec<Source, Target>, Codec<Source2, Target2>> = Tuple2(this, that)
 
     companion object {
         inline fun <reified T : Any> identity(name: String): Codec<T, T> =
             object : Codec<T, T> {
                 override val sourceClass: KClass<T> = T::class
                 override val targetClass: KClass<T> = T::class
+
                 override fun decode(input: T): Either<NonEmptyList<String>, T> = input.right()
+
                 override fun encode(input: T): T = input
             }
 
@@ -39,11 +44,10 @@ interface Codec<Source : Any, Target : Any> : Decoder<Target, Source>, Encoder<S
                         else -> value.right()
                     }
 
-                override fun encode(input: I): O =
-                    encoder(input)
+                override fun encode(input: I): O = encoder(input)
             }
 
-        inline fun <reified I: Any, reified O: Any> unsafe(
+        inline fun <reified I : Any, reified O : Any> unsafe(
             name: String,
             crossinline encoder: (I) -> O,
             crossinline decoder: (O) -> I
@@ -59,15 +63,14 @@ interface Codec<Source : Any, Target : Any> : Decoder<Target, Source>, Encoder<S
                         "Cannot decode '$name' as ${I::class.simpleName}: $input: $e".nel().left()
                     }
 
-                override fun encode(input: I): O =
-                    encoder(input)
+                override fun encode(input: I): O = encoder(input)
             }
     }
 }
 
-inline fun <Source: Any, Target: Any, reified Target2: Any> Codec<Source, Target>.unsafeTransform(
+inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Target>.unsafeTransform(
     crossinline from: (Target2) -> Target,
-    crossinline to: (Target) -> Target2,
+    crossinline to: (Target) -> Target2
 ): Codec<Source, Target2> =
     object : Codec<Source, Target2> {
         override val sourceClass: KClass<Source> = this@unsafeTransform.sourceClass
@@ -77,8 +80,7 @@ inline fun <Source: Any, Target: Any, reified Target2: Any> Codec<Source, Target
         override fun decode(input: Target2): Either<NonEmptyList<String>, Source> =
             this@unsafeTransform.decode(from(input))
 
-        override fun encode(input: Source): Target2 =
-            to(this@unsafeTransform.encode(input))
+        override fun encode(input: Source): Target2 = to(this@unsafeTransform.encode(input))
     }
 
 fun <T : Any> StringCodec<T>.toByteArrayCodec(): ByteArrayCodec<T> =

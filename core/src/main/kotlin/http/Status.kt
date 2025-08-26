@@ -1,6 +1,8 @@
 package dev.akif.tapik.http
 
-enum class Status(val code: Int) {
+enum class Status(
+    val code: Int
+) {
     OK(200),
     CREATED(201),
     NO_CONTENT(204),

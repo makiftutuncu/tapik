@@ -11,14 +11,17 @@ val query: QueryParameter.Companion = QueryParameter.Companion
 
 val header: Header.Companion = Header.Companion
 
-fun http(id: String, description: String? = null, details: String? = null): HttpEndpointWithoutMethod =
-    HttpEndpointWithoutMethod(id, description, details)
+fun http(
+    id: String,
+    description: String? = null,
+    details: String? = null
+): HttpEndpointWithoutMethod = HttpEndpointWithoutMethod(id, description, details)
 
 data class HttpEndpointWithoutMethod(
     override val id: String,
     override val description: String?,
-    override val details: String?,
-): Endpoint<Parameters0, EmptyBody, Outputs0>() {
+    override val details: String?
+) : Endpoint<Parameters0, EmptyBody, Outputs0>() {
     override val parameters: Parameters0 = Parameters0()
     override val input: EmptyBody = EmptyBody
     override val outputs: Outputs0 = Outputs0()
@@ -43,7 +46,7 @@ data class HttpEndpointWithoutURI(
     override val input: EmptyBody = EmptyBody
     override val outputs: Outputs0 = Outputs0()
 
-    fun <P: Parameters> uri(uriWithParameters: URIWithParameters<P>): HttpEndpoint<P, EmptyBody, Outputs0> {
+    fun <P : Parameters> uri(uriWithParameters: URIWithParameters<P>): HttpEndpoint<P, EmptyBody, Outputs0> {
         val (uri, parameters) = uriWithParameters
         return HttpEndpoint(
             id = this.id,
@@ -58,7 +61,7 @@ data class HttpEndpointWithoutURI(
     }
 }
 
-data class HttpEndpoint<out P: Parameters, out I: Body<*>, out O: Tuple<Output<*, *>>>(
+data class HttpEndpoint<out P : Parameters, out I : Body<*>, out O : Tuple<Output<*, *>>>(
     public override val id: String,
     public override val description: String?,
     public override val details: String?,
@@ -66,5 +69,5 @@ data class HttpEndpoint<out P: Parameters, out I: Body<*>, out O: Tuple<Output<*
     val uri: List<String>,
     public override val parameters: P,
     public override val input: I,
-    public override val outputs: O,
+    public override val outputs: O
 ) : Endpoint<P, I, O>()

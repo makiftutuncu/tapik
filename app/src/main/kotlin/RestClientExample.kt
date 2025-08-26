@@ -10,6 +10,6 @@ fun main() {
 
     response.handle(
         { (_, user) -> println("Got user: $user") },
-        { (status, body) -> println("Error $status: $body") },
+        { (status, body) -> println("Error $status: $body") }
     )
 }

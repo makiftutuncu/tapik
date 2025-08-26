@@ -3,13 +3,26 @@ package dev.akif.app
 import dev.akif.tapik.http.*
 import dev.akif.tapik.jackson.*
 
-data class UserResponse(val id: Long, val name: String, val status: String)
+data class UserResponse(
+    val id: Long,
+    val name: String,
+    val status: String
+)
 
-data class CreateUserRequest(val name: String, val status: String)
+data class CreateUserRequest(
+    val name: String,
+    val status: String
+)
 
-data class APIError(val code: Int, val message: String)
+data class APIError(
+    val code: Int,
+    val message: String
+)
 
-data class UserPage(val items: List<UserResponse>, val total: Long)
+data class UserPage(
+    val items: List<UserResponse>,
+    val total: Long
+)
 
 object Users {
     private val base = root / "api" / "v1" / "users"
@@ -22,8 +35,7 @@ object Users {
             id = "listUsers",
             description = "List all users",
             details = "This endpoint lists all users with pagination."
-        )
-            .get
+        ).get
             .uri(base + query.int("page") + query.int("perPage"))
             .output {
                 jsonBody<UserPage>("response")
@@ -34,8 +46,7 @@ object Users {
             id = "createUser",
             description = "Create new user",
             details = "This endpoint creates a new user with given information."
-        )
-            .post
+        ).post
             .uri(base)
             .headers(header.Accept(MediaType.Json))
             .input(jsonBody<CreateUserRequest>("createUserRequest"))
@@ -47,8 +58,7 @@ object Users {
             id = "getUser",
             description = "Get a user",
             details = "This endpoint gets the user with given id."
-        )
-            .get
+        ).get
             .uri(base / id)
             .headers(header.boolean("Proxied"))
             .output { userResponse }
@@ -59,8 +69,7 @@ object Users {
             id = "getUserStatus",
             description = "Get status of a user",
             details = "This endpoint gets the status of the user with given id."
-        )
-            .get
+        ).get
             .uri(base / id / "status")
             .output { stringBody() }
             .output(Status.NOT_FOUND) { errorResponse }
@@ -70,8 +79,7 @@ object Users {
             id = "getUserAvatar",
             description = "Get avatar of a user",
             details = "This endpoint gets the avatar of the user with given id."
-        )
-            .get
+        ).get
             .uri(base / id / "avatar" + query.int("size"))
             .output {
                 rawBody(MediaType.Custom("image", "png"))

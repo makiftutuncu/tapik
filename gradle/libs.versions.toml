@@ -2,6 +2,7 @@
 arrow = "2.1.2"
 jackson = "2.19.2"
 kotlin = "2.2.10"
+ktlint = "13.0.0"
 spring = "6.2.10"
 
 [libraries]
@@ -13,3 +14,4 @@ springWeb = { module = "org.springframework:spring-web", version.ref = "spring" 
 [bundles]
 
 [plugins]
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
