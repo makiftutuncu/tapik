@@ -28,12 +28,18 @@ sealed class MediaType(
 
     override fun toString(): String = "$major/$minor"
 
-    data object PlainText : MediaType("text", "plain")
+    data object PlainText : MediaType("text", "plain") {
+        override fun toString(): String = super.toString()
+    }
 
-    data object Json : MediaType("application", "json")
+    data object Json : MediaType("application", "json") {
+        override fun toString(): String = super.toString()
+    }
 
     data class Custom(
         override val major: String,
         override val minor: String
-    ) : MediaType(major, minor)
+    ) : MediaType(major, minor) {
+        override fun toString(): String = super.toString()
+    }
 }

@@ -25,65 +25,50 @@ data class UserPage(
 )
 
 object Users {
-    private val base = root / "api" / "v1" / "users"
+    private val base = "api" / "v1" / "users"
     private val id = path.long("id")
     private val errorResponse = jsonBody<APIError>("error")
     private val userResponse = jsonBody<UserResponse>("response")
 
-    val list =
-        http(
-            id = "listUsers",
-            description = "List all users",
-            details = "This endpoint lists all users with pagination."
-        ).get
-            .uri(base + query.int("page") + query.int("perPage"))
+    val list by http(description = "List all users", details = "This endpoint lists all users with pagination.") {
+        get
+            .uri(base + query.int("page").optional(0) + query.int("perPage").optional(10))
             .output {
                 jsonBody<UserPage>("response")
             }
+    }
 
-    val create =
-        http(
-            id = "createUser",
-            description = "Create new user",
-            details = "This endpoint creates a new user with given information."
-        ).post
+    val create by http(description = "Create new user", details = "This endpoint creates a new user with given information.") {
+        post
             .uri(base)
-            .headers(header.Accept(MediaType.Json))
+            .headers(header.Accept(MediaType.Json, MediaType.PlainText))
             .input(jsonBody<CreateUserRequest>("createUserRequest"))
-            .output(Status.CREATED, header.Location) { userResponse }
+            .output(Status.CREATED, Header.Location) { userResponse }
             .output(Status.BAD_REQUEST) { errorResponse }
+    }
 
-    val get =
-        http(
-            id = "getUser",
-            description = "Get a user",
-            details = "This endpoint gets the user with given id."
-        ).get
+    val get by http(description = "Get a user", details = "This endpoint gets the user with given id.") {
+        get
             .uri(base / id)
             .headers(header.boolean("Proxied"))
             .output { userResponse }
             .output(Status.NOT_FOUND) { errorResponse }
+    }
 
-    val getStatus =
-        http(
-            id = "getUserStatus",
-            description = "Get status of a user",
-            details = "This endpoint gets the status of the user with given id."
-        ).get
+    val getStatus by http(description = "Get status of a user", details = "This endpoint gets the status of the user with given id.") {
+        get
             .uri(base / id / "status")
             .output { stringBody() }
             .output(Status.NOT_FOUND) { errorResponse }
+    }
 
-    val getAvatar =
-        http(
-            id = "getUserAvatar",
-            description = "Get avatar of a user",
-            details = "This endpoint gets the avatar of the user with given id."
-        ).get
+    val getAvatar by http(description = "Get avatar of a user", details = "This endpoint gets the avatar of the user with given id.") {
+        get
             .uri(base / id / "avatar" + query.int("size"))
             .output {
                 rawBody(MediaType.Custom("image", "png"))
             }
+    }
 
     val api: List<AnyHttpEndpoint> = listOf(list, create, get, getStatus, getAvatar)
 }

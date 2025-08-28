@@ -15,6 +15,7 @@ sealed interface Parameter<T : Any> {
     val name: String
     val codec: StringCodec<T>
     val position: ParameterPosition
+    val required: Boolean
 }
 
 data class PathVariable<P : Any>(
@@ -22,6 +23,7 @@ data class PathVariable<P : Any>(
     override val codec: StringCodec<P>
 ) : Parameter<P> {
     override val position: ParameterPosition = ParameterPosition.Path
+    override val required: Boolean = true
 
     companion object : Defaults<PathVariable<Unit>, PathVariable<Boolean>, PathVariable<Byte>, PathVariable<Short>, PathVariable<Int>, PathVariable<Long>, PathVariable<Float>, PathVariable<Double>, PathVariable<BigInteger>, PathVariable<BigDecimal>, PathVariable<String>, PathVariable<UUID>> {
         override fun unit(name: String): PathVariable<Unit> = PathVariable(name, StringCodecs.unit(name))
@@ -54,36 +56,43 @@ data class PathVariable<P : Any>(
 
 data class QueryParameter<Q : Any>(
     override val name: String,
-    override val codec: StringCodec<Q>
+    override val codec: StringCodec<Q>,
+    override val required: Boolean,
+    val default: Q?
 ) : Parameter<Q> {
     override val position: ParameterPosition = ParameterPosition.Query
 
+    val optional: QueryParameter<Q>
+        get() = copy(required = false, default = null)
+
+    fun optional(default: Q): QueryParameter<Q> = copy(required = false, default = default)
+
     companion object : Defaults<QueryParameter<Unit>, QueryParameter<Boolean>, QueryParameter<Byte>, QueryParameter<Short>, QueryParameter<Int>, QueryParameter<Long>, QueryParameter<Float>, QueryParameter<Double>, QueryParameter<BigInteger>, QueryParameter<BigDecimal>, QueryParameter<String>, QueryParameter<UUID>> {
-        override fun unit(name: String): QueryParameter<Unit> = QueryParameter(name, StringCodecs.unit(name))
+        override fun unit(name: String): QueryParameter<Unit> = QueryParameter(name, StringCodecs.unit(name), required = true, default = null)
 
-        override fun boolean(name: String): QueryParameter<Boolean> = QueryParameter(name, StringCodecs.boolean(name))
+        override fun boolean(name: String): QueryParameter<Boolean> = QueryParameter(name, StringCodecs.boolean(name), required = true, default = null)
 
-        override fun byte(name: String): QueryParameter<Byte> = QueryParameter(name, StringCodecs.byte(name))
+        override fun byte(name: String): QueryParameter<Byte> = QueryParameter(name, StringCodecs.byte(name), required = true, default = null)
 
-        override fun short(name: String): QueryParameter<Short> = QueryParameter(name, StringCodecs.short(name))
+        override fun short(name: String): QueryParameter<Short> = QueryParameter(name, StringCodecs.short(name), required = true, default = null)
 
-        override fun int(name: String): QueryParameter<Int> = QueryParameter(name, StringCodecs.int(name))
+        override fun int(name: String): QueryParameter<Int> = QueryParameter(name, StringCodecs.int(name), required = true, default = null)
 
-        override fun long(name: String): QueryParameter<Long> = QueryParameter(name, StringCodecs.long(name))
+        override fun long(name: String): QueryParameter<Long> = QueryParameter(name, StringCodecs.long(name), required = true, default = null)
 
-        override fun float(name: String): QueryParameter<Float> = QueryParameter(name, StringCodecs.float(name))
+        override fun float(name: String): QueryParameter<Float> = QueryParameter(name, StringCodecs.float(name), required = true, default = null)
 
-        override fun double(name: String): QueryParameter<Double> = QueryParameter(name, StringCodecs.double(name))
+        override fun double(name: String): QueryParameter<Double> = QueryParameter(name, StringCodecs.double(name), required = true, default = null)
 
         override fun bigInteger(name: String): QueryParameter<BigInteger> =
-            QueryParameter(name, StringCodecs.bigInteger(name))
+            QueryParameter(name, StringCodecs.bigInteger(name), required = true, default = null)
 
         override fun bigDecimal(name: String): QueryParameter<BigDecimal> =
-            QueryParameter(name, StringCodecs.bigDecimal(name))
+            QueryParameter(name, StringCodecs.bigDecimal(name), required = true, default = null)
 
-        override fun string(name: String): QueryParameter<String> = QueryParameter(name, StringCodecs.string(name))
+        override fun string(name: String): QueryParameter<String> = QueryParameter(name, StringCodecs.string(name), required = true, default = null)
 
-        override fun uuid(name: String): QueryParameter<UUID> = QueryParameter(name, StringCodecs.uuid(name))
+        override fun uuid(name: String): QueryParameter<UUID> = QueryParameter(name, StringCodecs.uuid(name), required = true, default = null)
     }
 }
 
@@ -130,6 +139,7 @@ data class HeaderInput<H : Any>(
     override val codec: StringCodec<H>
 ) : Header<H> {
     override val position: ParameterPosition = ParameterPosition.Header
+    override val required: Boolean = true
 }
 
 data class HeaderValues<H : Any>(
@@ -138,4 +148,5 @@ data class HeaderValues<H : Any>(
     val values: List<H>
 ) : Header<H> {
     override val position: ParameterPosition = ParameterPosition.Header
+    override val required: Boolean = false
 }

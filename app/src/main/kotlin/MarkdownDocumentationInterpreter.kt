@@ -1,83 +1,148 @@
 package dev.akif.app
 
-import dev.akif.tapik.http.AnyHttpEndpoint
-import dev.akif.tapik.http.Body
-import dev.akif.tapik.http.EmptyBody
-import dev.akif.tapik.http.Header
-import dev.akif.tapik.http.JsonBody
-import dev.akif.tapik.http.Parameter
-import dev.akif.tapik.http.PathVariable
-import dev.akif.tapik.http.QueryParameter
-import dev.akif.tapik.http.RawBody
-import dev.akif.tapik.http.StringBody
+import dev.akif.tapik.codec.Codec
+import dev.akif.tapik.http.*
 
 class MarkdownDocumentationInterpreter(
     private val api: List<AnyHttpEndpoint>
 ) {
-    fun generate(): String = api.joinToString("\n\n") { it.document() }.trim()
+    companion object {
+        private const val MARGIN = ">>>"
+        private const val BR = "<br />"
+    }
+
+    fun generate(): String = api.joinToString("\n\n---\n\n") { it.document() }.trim()
 
     private fun AnyHttpEndpoint.document(): String {
-        val path = parameters.toList().filterIsInstance<PathVariable<*>>()
-        val query = parameters.toList().filterIsInstance<QueryParameter<*>>()
-        val headers = parameters.toList().filterIsInstance<Header<*>>()
-
-        return """
-        \/## $id${description?.let { ": $it" } ?: ""}${details?.let { "\n\n$it" } ?: ""}
-        \/
-        \/`$method ${uri.joinToString(separator = "/", prefix = "/")}`
-        \/
-        \/${documentParameters(path, query)}
-        \/
-        \/${documentHeaders(headers)}
-        \/
-        \/${documentInput(input)}
-        """.trimMargin("\\/").trim()
+        val parameterList = parameters.toList()
+        return listOfNotNull(
+            h2(description ?: id),
+            description?.let { "Operation id: ${mono(id)}" },
+            details,
+            mono("$method ${uri.joinToString(separator = "/", prefix = "/")}"),
+            documentParameters(parameterList),
+            documentHeaders(parameterList),
+            documentInput(input),
+            documentOutputs(outputs.toList())
+        ).joinToString("\n\n")
     }
 
     private fun documentParameters(
-        path: List<Parameter<*>>,
-        query: List<Parameter<*>>
-    ): String =
-        if (path.isEmpty() && query.isEmpty()) {
-            ""
+        parameters: List<Parameter<*>>
+    ): String? {
+        val uriParameters = parameters.filter { it is PathVariable<*> || it is QueryParameter<*> }
+        return if (uriParameters.isEmpty()) {
+            null
         } else {
-            val all =
-                path.map { "| ${it.name} | ${it.codec.sourceClass.simpleName} | In Path |" } +
-                    query.map { "| ${it.name} | ${it.codec.sourceClass.simpleName} | In Query |" }
-            """
-            \/### URI Parameters
-            \/
-            \/| Name | Type | Position |
-            \/| ---- | ---- | -------- |${all.joinToString("\n", prefix = "\n")}
-            """.trimMargin("\\/").trim()
+            val headers = listOf("Name", "Type", "Position", "Required", "Default Value")
+            val rows = uriParameters.map {
+                listOf(
+                    mono(it.name),
+                    documentCodec(it.codec),
+                    "In ${it.position}",
+                    it.required.toString(),
+                    (it as? QueryParameter<*>)?.default?.let { d -> "$d" }.orEmpty()
+                )
+            }
+            """${h3("URI Parameters")}
+            $MARGIN
+            $MARGIN${table(headers, rows)}""".trimMargin(MARGIN)
+        }
+    }
+
+    private fun documentHeaders(parameters: List<Parameter<*>>): String? {
+        val headers = parameters.toList().filterIsInstance<Header<*>>()
+        return if (headers.isEmpty()) {
+            null
+        } else {
+            val tableHeaders = listOf("Name", "Type", "Value(s)", "Required")
+            val rows = headers.map { header ->
+                val values = (header as? HeaderValues<*>)?.values?.let { vs -> inlineList(vs) { mono("$it") } }.orEmpty()
+                listOf(
+                    mono(header.name),
+                    documentCodec(header.codec),
+                    values,
+                    header.required.toString()
+                )
+            }
+            """${h3("Headers")}
+            $MARGIN
+            $MARGIN${table(tableHeaders, rows)}""".trimMargin(MARGIN)
+        }
+    }
+
+    private fun documentInput(input: Body<*>): String? =
+        documentBody(input)?.let {
+            """${h3("Input")}
+            $MARGIN
+            $MARGIN$it""".trimMargin(MARGIN)
         }
 
-    private fun documentHeaders(headers: List<Parameter<*>>): String =
-        if (headers.isEmpty()) {
-            ""
+    private fun documentOutputs(outputs: List<Output<*, *>>): String? =
+        if (outputs.isEmpty()) {
+            null
         } else {
-            """
-        \/### Headers
-        \/
-        \/| Name | Type |
-        \/| ---- | ---- |
-        \/${headers.joinToString("\n") { "| ${it.name} | ${it.codec.sourceClass.simpleName} |" }}
-        """.trimMargin("\\/").trim()
+            val headers = listOf("Status", "Body", "Header(s)")
+            val rows = outputs.map { output ->
+                val (statusMatcher, body, headers) = output
+                listOf(
+                    when (statusMatcher) {
+                        is StatusMatcher.Is -> documentStatus(statusMatcher.status)
+                        is StatusMatcher.AnyOf -> inlineList(statusMatcher.statuses) { documentStatus(it) }
+                        is StatusMatcher.Predicate -> statusMatcher.description
+                        StatusMatcher.Unmatched -> "Any unmatched status"
+                    },
+                    documentBody(body).orEmpty(),
+                    inlineList(headers.toList()) { documentHeader(it) },
+                )
+            }
+            """${h3("Outputs")}
+            $MARGIN
+            $MARGIN${table(headers, rows)}""".trimMargin(MARGIN)
         }
 
-    private fun documentInput(input: Body<*>): String =
-        if (input == EmptyBody) {
-            ""
+    private fun documentStatus(status: Status): String = "${status.code} ${status.name}"
+
+    private fun documentHeader(header: Header<*>): String =
+        when (header) {
+            is HeaderInput<*> -> "${mono(header.name)} as ${documentCodec(header.codec)}"
+            is HeaderValues<*> -> inlineList(header.values) {
+                "${mono("${header.name}: $it")} as ${documentCodec(header.codec)}"
+            }
+        }
+
+    private fun documentBody(body: Body<*>): String? =
+        when (body) {
+            EmptyBody -> null
+            is JsonBody<*> -> "${documentCodec(body.codec)}${" as ${documentMediaType(body.mediaType)}" }"
+            is RawBody -> "Raw bytes${body.mediaType?.let { " as ${documentMediaType(it)}" }.orEmpty()}"
+            is StringBody -> "Plain text"
+        }
+
+    private fun documentCodec(codec: Codec<*, *>): String = mono(codec.sourceClass.simpleName.orEmpty())
+
+    private fun documentMediaType(mediaType: MediaType): String = mono(mediaType.toString())
+
+    private fun h(level: Int, text: String): String = "${"#".repeat(level)} $text"
+    private fun h2(text: String): String = h(2, text)
+    private fun h3(text: String): String = h(3, text)
+
+    private fun mono(text: String): String = "`$text`"
+
+    private fun table(headers: List<String>, rows: List<List<String>>): String =
+        """${headers.joinToString(separator = " | ", prefix = "| ", postfix = " |")}
+        $MARGIN${headers.joinToString(separator = " | ", prefix = "| ", postfix = " |") { "-".repeat(it.length) }}
+        $MARGIN${
+            rows.joinToString(separator = "\n") { columns ->
+                columns.joinToString(separator = " | ", prefix = "| ", postfix = " |")
+            }
+        }
+        """.trimMargin(MARGIN)
+
+    private fun <T> inlineList(items: Iterable<T>, document: (T) -> String): String =
+        if (items.count() == 1) {
+            document(items.first())
         } else {
-            """
-        \/### Input
-        \/
-        \/${when (input) {
-                EmptyBody -> ""
-                is JsonBody<*> -> "`${input.codec.sourceClass.simpleName}` as `${input.mediaType}`"
-                is RawBody -> "Raw bytes as `${input.mediaType}`"
-                is StringBody -> "Plain string"
-            }}
-        """.trimMargin("\\/").trim()
+            items.zip(1..items.count()).joinToString(separator = BR) { (item, index)  -> "$index. ${document(item)}" }
         }
 }

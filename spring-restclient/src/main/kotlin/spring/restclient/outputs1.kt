@@ -11,7 +11,8 @@ fun <B1, OB1 : Body<B1>, OH1 : Headers> RestClientInterpreter.sendWithRestClient
             uri = endpoint.buildURI(),
             headers = endpoint.buildHeaders(),
             contentType = endpoint.input.mediaType,
-            body = null
+            body = null,
+            outputs = endpoint.outputs.toList()
         )
 
     return endpoint.outputs.buildResponse(
@@ -30,7 +31,8 @@ fun <P1 : Any, B1, OB1 : Body<B1>, OH1 : Headers> RestClientInterpreter.sendWith
             uri = endpoint.buildURI(p1),
             headers = endpoint.buildHeaders(p1),
             contentType = endpoint.input.mediaType,
-            body = null
+            body = null,
+            outputs = endpoint.outputs.toList()
         )
 
     return endpoint.outputs.buildResponse(
@@ -50,7 +52,8 @@ fun <P1 : Any, P2 : Any, B1, OB1 : Body<B1>, OH1 : Headers> RestClientInterprete
             uri = endpoint.buildURI(p1, p2),
             headers = endpoint.buildHeaders(p1, p2),
             contentType = endpoint.input.mediaType,
-            body = null
+            body = null,
+            outputs = endpoint.outputs.toList()
         )
 
     return endpoint.outputs.buildResponse(

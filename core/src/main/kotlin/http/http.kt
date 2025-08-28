@@ -2,8 +2,7 @@ package dev.akif.tapik.http
 
 import dev.akif.tapik.Endpoint
 import dev.akif.tapik.types.*
-
-val root: URIWithParameters<Parameters0> = emptyList<String>() to Parameters0()
+import kotlin.properties.ReadOnlyProperty
 
 val path: PathVariable.Companion = PathVariable.Companion
 
@@ -11,11 +10,19 @@ val query: QueryParameter.Companion = QueryParameter.Companion
 
 val header: Header.Companion = Header.Companion
 
-fun http(
-    id: String,
-    description: String? = null,
-    details: String? = null
-): HttpEndpointWithoutMethod = HttpEndpointWithoutMethod(id, description, details)
+fun anyStatus(first: Status, vararg rest: Status): StatusMatcher =
+    StatusMatcher.AnyOf(setOf(first, *rest))
+
+fun matchStatus(description: String, predicate: (Status) -> Boolean): StatusMatcher =
+    StatusMatcher.Predicate(description, predicate)
+
+val unmatchedStatus: StatusMatcher =
+    StatusMatcher.Unmatched
+
+fun <T, P : Parameters, I : Body<*>, O : Tuple<Output<*, *>>> http(description: String? = null, details: String? = null, builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<P, I, O>): ReadOnlyProperty<T, HttpEndpoint<P, I, O>> =
+    ReadOnlyProperty { _, property ->
+        HttpEndpointWithoutMethod(id = property.name, description = description, details = details).builder()
+    }
 
 data class HttpEndpointWithoutMethod(
     override val id: String,
@@ -45,6 +52,32 @@ data class HttpEndpointWithoutURI(
     override val parameters: Parameters0 = Parameters0()
     override val input: EmptyBody = EmptyBody
     override val outputs: Outputs0 = Outputs0()
+
+    fun uri(segment: String): HttpEndpoint<Parameters0, EmptyBody, Outputs0> {
+        return HttpEndpoint(
+            id = this.id,
+            description = this.description,
+            details = this.details,
+            method = this.method,
+            uri = listOf(segment),
+            parameters = this.parameters,
+            input = EmptyBody,
+            outputs = Outputs0()
+        )
+    }
+
+    fun <P : Any> uri(parameter: Parameter<P>): HttpEndpoint<Parameters1<P>, EmptyBody, Outputs0> {
+        return HttpEndpoint(
+            id = this.id,
+            description = this.description,
+            details = this.details,
+            method = this.method,
+            uri = emptyList(),
+            parameters = Parameters1(parameter),
+            input = EmptyBody,
+            outputs = Outputs0()
+        )
+    }
 
     fun <P : Parameters> uri(uriWithParameters: URIWithParameters<P>): HttpEndpoint<P, EmptyBody, Outputs0> {
         val (uri, parameters) = uriWithParameters

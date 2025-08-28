@@ -6,8 +6,10 @@ import dev.akif.tapik.codec.*
 
 fun <Q : Any> query(
     name: String,
-    codec: StringCodec<Q>
-): QueryParameter<Q> = QueryParameter(name, codec)
+    codec: StringCodec<Q>,
+    required: Boolean,
+    default: Q?
+): QueryParameter<Q> = QueryParameter(name, codec, required, default)
 
 @JvmName("plus1")
 operator fun <Q1 : Any> URIWithParameters<Parameters0>.plus(

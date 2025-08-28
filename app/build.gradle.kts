@@ -1,4 +1,7 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
+    application
     id("buildsrc.convention.kotlin-jvm")
     alias(libs.plugins.ktlint)
 }
@@ -9,4 +12,14 @@ dependencies {
     implementation(project(":spring-restclient"))
     implementation(libs.arrowCore)
     implementation(libs.springWeb)
+}
+
+application {
+//    mainClass = "dev.akif.app.MarkdownDocumentExampleKt"
+    mainClass = "dev.akif.app.RestClientExampleKt"
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
 }

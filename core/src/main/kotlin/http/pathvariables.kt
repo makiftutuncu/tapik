@@ -9,6 +9,9 @@ inline fun <reified P : Any> path(
     codec: StringCodec<P>
 ): PathVariable<P> = PathVariable(name, codec)
 
+operator fun String.div(segment: String): URIWithParameters<Parameters0> =
+    listOf(this, segment) to Parameters0()
+
 operator fun <P : Parameters> URIWithParameters<P>.div(segment: String): URIWithParameters<P> {
     val (uri, parameters) = this
     return (uri + segment) to parameters

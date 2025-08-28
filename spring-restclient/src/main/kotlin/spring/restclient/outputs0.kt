@@ -11,7 +11,8 @@ fun RestClientInterpreter.sendWithRestClient(
             uri = endpoint.buildURI(),
             headers = endpoint.buildHeaders(),
             contentType = null,
-            body = null
+            body = null,
+            outputs = emptyList()
         )
     return endpoint.outputs.buildResponse(Status.of(response.statusCode.value()))
 }
@@ -26,7 +27,8 @@ fun <P1 : Any> RestClientInterpreter.sendWithRestClient(
             uri = endpoint.buildURI(p1),
             headers = endpoint.buildHeaders(p1),
             contentType = null,
-            body = null
+            body = null,
+            outputs = emptyList()
         )
     return endpoint.outputs.buildResponse(Status.of(response.statusCode.value()))
 }
@@ -42,7 +44,8 @@ fun <P1 : Any, P2 : Any> RestClientInterpreter.sendWithRestClient(
             uri = endpoint.buildURI(p1, p2),
             headers = endpoint.buildHeaders(p1, p2),
             contentType = null,
-            body = null
+            body = null,
+            outputs = emptyList()
         )
     return endpoint.outputs.buildResponse(Status.of(response.statusCode.value()))
 }

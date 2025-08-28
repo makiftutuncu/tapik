@@ -1,15 +1,18 @@
 package dev.akif.app
 
+import dev.akif.tapik.http.MediaType
 import dev.akif.tapik.spring.restclient.*
 import org.springframework.web.client.RestClient
 
 fun main() {
     val interpreter = RestClientInterpreter(RestClient.create("http://localhost:8080"))
 
-    val response = interpreter.sendWithRestClient(Users.get, 1L, false)
+    val response = with(interpreter) {
+        Users.create.send(MediaType.Json, CreateUserRequest("Akif", "new"))
+    }
 
     response.handle(
-        { (_, user) -> println("Got user: $user") },
-        { (status, body) -> println("Error $status: $body") }
+        { (_, body) -> println("Got: $body") },
+        { (status, problem) -> println("Error $status: $problem") }
     )
 }
