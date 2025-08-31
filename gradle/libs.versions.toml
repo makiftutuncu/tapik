@@ -1,6 +1,6 @@
 [versions]
 arrow = "2.1.2"
-jackson = "2.19.2"
+jackson = "2.20.0"
 kotlin = "2.2.10"
 ktlint = "13.1.0"
 spring = "6.2.10"
