@@ -24,7 +24,10 @@ fun main(args: Array<String>) {
     val limit = requireNotNull((arguments["--limit"] ?: arguments["-l"])?.toIntOrNull()) { "Invalid limit: $arguments" }
     val verbose = "--verbose" in arguments || "-v" in arguments
 
-    val generators = listOf(TupleGenerator)
+    val generators = listOf(
+        TupleGenerator,
+        SelectionsGenerator
+    )
 
     generators.forEach { it.run(limit, verbose) }
 }

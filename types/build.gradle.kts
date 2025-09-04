@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("buildsrc.convention.kotlin-jvm")
     alias(libs.plugins.ktlint)
@@ -5,4 +7,8 @@ plugins {
 
 dependencies {
     testImplementation(kotlin("test"))
+}
+
+tasks.named<KotlinCompile>("compileKotlin") {
+    dependsOn(":code-generator:run")
 }

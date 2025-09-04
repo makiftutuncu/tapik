@@ -1,6 +1,6 @@
 package dev.akif.tapik.http
 
-import dev.akif.tapik.types.*
+import dev.akif.tapik.selections.*
 
 fun <B> Outputs0.buildResponse(status: Status): EmptyResponse<B> = EmptyResponse(status)
 
@@ -16,21 +16,21 @@ fun <B1, OB1 : Body<B1>, H1 : Headers> Outputs1<OB1, H1>.buildResponse(
 fun <B1, OB1 : Body<B1>, H1 : Headers, B2, OB2 : Body<B2>, H2 : Headers> Outputs2<OB1, H1, OB2, H2>.buildResponse(
     status: Status,
     bytes: ByteArray
-): OneOf2<Response0<B1>, Response0<B2>> =
+): Selection2<Response0<B1>, Response0<B2>> =
     when {
-        item1.statusMatcher(status) -> item1.decode(bytes, status, { Response0(status, it) }) { OneOf2.Value1(it) }
-        item2.statusMatcher(status) -> item2.decode(bytes, status, { Response0(status, it) }) { OneOf2.Value2(it) }
+        item1.statusMatcher(status) -> item1.decode(bytes, status, { Response0(status, it) }) { Selection2.Option1(it) }
+        item2.statusMatcher(status) -> item2.decode(bytes, status, { Response0(status, it) }) { Selection2.Option2(it) }
         else -> error("Unexpected response status $status and body: ${String(bytes)}")
     }
 
 fun <B1, OB1 : Body<B1>, H1 : Headers, B2, OB2 : Body<B2>, H2 : Headers, B3, OB3 : Body<B3>, H3 : Headers> Outputs3<OB1, H1, OB2, H2, OB3, H3>.buildResponse(
     status: Status,
     bytes: ByteArray
-): OneOf3<Response0<B1>, Response0<B2>, Response0<B3>> =
+): Selection3<Response0<B1>, Response0<B2>, Response0<B3>> =
     when {
-        item1.statusMatcher(status) -> item1.decode(bytes, status, { Response0(status, it) }) { OneOf3.Value1(it) }
-        item2.statusMatcher(status) -> item2.decode(bytes, status, { Response0(status, it) }) { OneOf3.Value2(it) }
-        item3.statusMatcher(status) -> item3.decode(bytes, status, { Response0(status, it) }) { OneOf3.Value3(it) }
+        item1.statusMatcher(status) -> item1.decode(bytes, status, { Response0(status, it) }) { Selection3.Option1(it) }
+        item2.statusMatcher(status) -> item2.decode(bytes, status, { Response0(status, it) }) { Selection3.Option2(it) }
+        item3.statusMatcher(status) -> item3.decode(bytes, status, { Response0(status, it) }) { Selection3.Option3(it) }
         else -> error("Unexpected response status $status and body: ${String(bytes)}")
     }
 

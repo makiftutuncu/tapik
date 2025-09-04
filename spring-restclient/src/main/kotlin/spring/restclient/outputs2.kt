@@ -3,11 +3,11 @@
 package dev.akif.tapik.spring.restclient
 
 import dev.akif.tapik.http.*
-import dev.akif.tapik.types.*
+import dev.akif.tapik.selections.*
 
 fun <B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, OH2 : Headers> RestClientInterpreter.sendWithRestClient(
     endpoint: HttpEndpoint<Parameters0, EmptyBody, Outputs2<OB1, OH1, OB2, OH2>>
-): OneOf2<Response0<B1>, Response0<B2>> {
+): Selection2<Response0<B1>, Response0<B2>> {
     val response =
         send(
             method = endpoint.method,
@@ -27,7 +27,7 @@ fun <B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, OH2 : Headers> RestC
 fun <P1 : Any, B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, OH2 : Headers> RestClientInterpreter.sendWithRestClient(
     endpoint: HttpEndpoint<Parameters1<P1>, EmptyBody, Outputs2<OB1, OH1, OB2, OH2>>,
     p1: P1
-): OneOf2<Response0<B1>, Response0<B2>> {
+): Selection2<Response0<B1>, Response0<B2>> {
     val response =
         send(
             method = endpoint.method,
@@ -49,7 +49,7 @@ fun <P1 : Any, P2 : Any, B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, 
     endpoint: HttpEndpoint<Parameters2<P1, P2>, EmptyBody, Outputs2<OB1, OH1, OB2, OH2>>,
     p1: P1,
     p2: P2
-): OneOf2<Response0<B1>, Response0<B2>> {
+): Selection2<Response0<B1>, Response0<B2>> {
     val response =
         send(
             method = endpoint.method,
@@ -71,7 +71,7 @@ context(interpreter: RestClientInterpreter)
 fun <P1 : Any, B, IB : Body<B>, B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, OH2 : Headers> HttpEndpoint<Parameters1<P1>, IB, Outputs2<OB1, OH1, OB2, OH2>>.send(
     p1: P1,
     input: B
-): OneOf2<Response0<B1>, Response0<B2>> {
+): Selection2<Response0<B1>, Response0<B2>> {
     val response =
         interpreter.send(
             method = this.method,

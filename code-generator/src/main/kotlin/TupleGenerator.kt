@@ -7,11 +7,13 @@ object TupleGenerator: Generator {
     override val fileName: String = "Tuples.kt"
 
     override fun generate(limit: Int): String =
-     """|sealed interface Tuple<out T> {
+        """
+        |sealed interface Tuple<out T> {
         |    fun toList(): List<T>
         |}
         |
-        |${(0..limit).joinToString(separator = "\n\n", postfix = "\n\n") { tupleClass(it, limit) }}""".trimMargin()
+        |${(0..limit).joinToString(separator = "\n\n", postfix = "\n\n") { tupleClass(it, limit) }}
+        """.trimMargin()
 
     private fun tupleClass(index: Int, limit: Int): String {
         val data = if (index == 0) "" else "data "
@@ -44,15 +46,17 @@ object TupleGenerator: Generator {
         } else {
             val nextIndex = index + 1
             val separator = if (index == 0) "" else ", "
-            """|    operator fun <T$nextIndex : T> plus(item$nextIndex: T$nextIndex): Tuple$nextIndex<T$typeParameters, T$nextIndex> =
-               |        Tuple$nextIndex($items${separator}item$nextIndex)
-               |
-               |""".trimMargin()
+            """
+            |    operator fun <T$nextIndex : T> plus(item$nextIndex: T$nextIndex): Tuple$nextIndex<T$typeParameters, T$nextIndex> =
+            |        Tuple$nextIndex($items${separator}item$nextIndex)
+            |
+            |""".trimMargin()
         }
 
-        return """|${data}class Tuple$index<T$typeParametersWithConstraints>$constructor: Tuple<T> {
-                  |${plusMethod}    override fun toList(): List<T> =
-                  |        ${if (index == 0) "emptyList()" else "listOf($items)"}
-                  |}""".trimMargin()
+        return """
+        |${data}class Tuple$index<T$typeParametersWithConstraints>$constructor: Tuple<T> {
+        |${plusMethod}    override fun toList(): List<T> =
+        |        ${if (index == 0) "emptyList()" else "listOf($items)"}
+        |}""".trimMargin()
     }
 }

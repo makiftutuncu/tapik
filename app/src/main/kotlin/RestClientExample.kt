@@ -11,7 +11,7 @@ fun main() {
         Users.create.send(MediaType.Json, CreateUserRequest("Akif", "new"))
     }
 
-    response.handle(
+    response.select(
         { (_, body) -> println("Got: $body") },
         { (status, problem) -> println("Error $status: $problem") }
     )
