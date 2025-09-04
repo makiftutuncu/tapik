@@ -3,13 +3,15 @@
 package dev.akif.tapik.http
 
 internal fun buildHeaders(vararg parameters: Pair<String, String>?): Map<String, List<String>> =
-    listOfNotNull(*parameters).groupBy({
-        it.first
-    }, { it.second })
+    listOfNotNull(*parameters).groupBy({ it.first }) {
+        it.second
+    }
 
 internal fun <P : Any> buildPairIfHeader(pair: Pair<Parameter<P>, P>): Pair<String, String>? {
     val (parameter, value) = pair
-    return parameter.takeIf { it.position == ParameterPosition.Header }?.let { it.name to it.codec.encode(value) }
+    return parameter
+        .takeIf { it.position == ParameterPosition.Header }
+        ?.let { it.name to it.codec.encode(value) }
 }
 
 fun HttpEndpoint<Parameters0, *, *>.buildHeaders(): Map<String, List<String>> = buildHeaders()
@@ -24,9 +26,7 @@ fun <P1 : Any, P2 : Any> HttpEndpoint<Parameters2<P1, P2>, *, *>.buildHeaders(
     with(parameters) {
         buildHeaders(
             buildPairIfHeader(item1 to p1),
-            buildPairIfHeader(
-                item2 to p2
-            )
+            buildPairIfHeader(item2 to p2)
         )
     }
 
@@ -38,9 +38,7 @@ fun <P1 : Any, P2 : Any, P3 : Any> HttpEndpoint<Parameters3<P1, P2, P3>, *, *>.b
     with(parameters) {
         buildHeaders(
             buildPairIfHeader(item1 to p1),
-            buildPairIfHeader(
-                item2 to p2
-            ),
+            buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3)
         )
     }
@@ -56,9 +54,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any> HttpEndpoint<Parameters4<P1, P2, P3
             buildPairIfHeader(item1 to p1),
             buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3),
-            buildPairIfHeader(
-                item4 to p4
-            )
+            buildPairIfHeader(item4 to p4)
         )
     }
 
@@ -74,9 +70,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any> HttpEndpoint<Parameters5<
             buildPairIfHeader(item1 to p1),
             buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3),
-            buildPairIfHeader(
-                item4 to p4
-            ),
+            buildPairIfHeader(item4 to p4),
             buildPairIfHeader(item5 to p5)
         )
     }
@@ -94,9 +88,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any> HttpEndpoint<Pa
             buildPairIfHeader(item1 to p1),
             buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3),
-            buildPairIfHeader(
-                item4 to p4
-            ),
+            buildPairIfHeader(item4 to p4),
             buildPairIfHeader(item5 to p5),
             buildPairIfHeader(item6 to p6)
         )
@@ -116,9 +108,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any> HttpE
             buildPairIfHeader(item1 to p1),
             buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3),
-            buildPairIfHeader(
-                item4 to p4
-            ),
+            buildPairIfHeader(item4 to p4),
             buildPairIfHeader(item5 to p5),
             buildPairIfHeader(item6 to p6),
             buildPairIfHeader(item7 to p7)
@@ -140,15 +130,11 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : 
             buildPairIfHeader(item1 to p1),
             buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3),
-            buildPairIfHeader(
-                item4 to p4
-            ),
+            buildPairIfHeader(item4 to p4),
             buildPairIfHeader(item5 to p5),
             buildPairIfHeader(item6 to p6),
             buildPairIfHeader(item7 to p7),
-            buildPairIfHeader(
-                item8 to p8
-            )
+            buildPairIfHeader(item8 to p8)
         )
     }
 
@@ -168,15 +154,11 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : 
             buildPairIfHeader(item1 to p1),
             buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3),
-            buildPairIfHeader(
-                item4 to p4
-            ),
+            buildPairIfHeader(item4 to p4),
             buildPairIfHeader(item5 to p5),
             buildPairIfHeader(item6 to p6),
             buildPairIfHeader(item7 to p7),
-            buildPairIfHeader(
-                item8 to p8
-            ),
+            buildPairIfHeader(item8 to p8),
             buildPairIfHeader(item9 to p9)
         )
     }
@@ -198,15 +180,11 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : 
             buildPairIfHeader(item1 to p1),
             buildPairIfHeader(item2 to p2),
             buildPairIfHeader(item3 to p3),
-            buildPairIfHeader(
-                item4 to p4
-            ),
+            buildPairIfHeader(item4 to p4),
             buildPairIfHeader(item5 to p5),
             buildPairIfHeader(item6 to p6),
             buildPairIfHeader(item7 to p7),
-            buildPairIfHeader(
-                item8 to p8
-            ),
+            buildPairIfHeader(item8 to p8),
             buildPairIfHeader(item9 to p9),
             buildPairIfHeader(item10 to p10)
         )

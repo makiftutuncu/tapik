@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     api(project(":codec"))
-    api(project(":tuple"))
+    api(project(":types"))
     implementation(libs.arrowCore)
     testImplementation(kotlin("test"))
 }

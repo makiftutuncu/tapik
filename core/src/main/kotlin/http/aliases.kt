@@ -2,7 +2,7 @@
 
 package dev.akif.tapik.http
 
-import dev.akif.tapik.types.*
+import dev.akif.tapik.tuples.*
 
 typealias Headers = Tuple<Header<*>>
 typealias Headers0 = Tuple0<Header<*>>
@@ -56,4 +56,4 @@ typealias URIWithParameters8<P1, P2, P3, P4, P5, P6, P7, P8> = URIWithParameters
 typealias URIWithParameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9> = URIWithParameters<Parameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9>>
 typealias URIWithParameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> = URIWithParameters<Parameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>>
 
-typealias AnyHttpEndpoint = HttpEndpoint<Tuple<Parameter<*>>, Body<*>, Tuple<Output<*, *>>>
+typealias AnyHttpEndpoint = HttpEndpoint<Parameters, Body<*>, Outputs>

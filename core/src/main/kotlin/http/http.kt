@@ -1,7 +1,7 @@
 package dev.akif.tapik.http
 
 import dev.akif.tapik.Endpoint
-import dev.akif.tapik.types.*
+import dev.akif.tapik.tuples.*
 import kotlin.properties.ReadOnlyProperty
 
 val path: PathVariable.Companion = PathVariable.Companion

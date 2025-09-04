@@ -44,6 +44,7 @@ fun <P1 : Any, B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, OH2 : Head
     )
 }
 
+@JvmName("sendWith2Parameters")
 fun <P1 : Any, P2 : Any, B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, OH2 : Headers> RestClientInterpreter.send(
     endpoint: HttpEndpoint<Parameters2<P1, P2>, EmptyBody, Outputs2<OB1, OH1, OB2, OH2>>,
     p1: P1,
@@ -65,6 +66,7 @@ fun <P1 : Any, P2 : Any, B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, 
     )
 }
 
+@JvmName("sendWith1ParameterAndInput")
 context(interpreter: RestClientInterpreter)
 fun <P1 : Any, B, IB : Body<B>, B1, OB1 : Body<B1>, OH1 : Headers, B2, OB2 : Body<B2>, OH2 : Headers> HttpEndpoint<Parameters1<P1>, IB, Outputs2<OB1, OH1, OB2, OH2>>.send(
     p1: P1,

@@ -5,7 +5,7 @@ import arrow.core.NonEmptyList
 import arrow.core.left
 import arrow.core.nel
 import arrow.core.right
-import dev.akif.tapik.types.*
+import dev.akif.tapik.tuples.*
 import kotlin.reflect.KClass
 
 interface Codec<Source : Any, Target : Any> :
