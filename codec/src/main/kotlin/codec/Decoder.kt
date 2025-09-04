@@ -1,8 +1,7 @@
 package dev.akif.tapik.codec
 
-import arrow.core.Either
-import arrow.core.NonEmptyList
+import arrow.core.EitherNel
 
 fun interface Decoder<in I, out O> {
-    fun decode(input: I): Either<NonEmptyList<String>, O>
+    fun decode(input: I): EitherNel<String, O>
 }

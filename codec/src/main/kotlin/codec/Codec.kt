@@ -1,9 +1,7 @@
 package dev.akif.tapik.codec
 
-import arrow.core.Either
-import arrow.core.NonEmptyList
-import arrow.core.left
-import arrow.core.nel
+import arrow.core.EitherNel
+import arrow.core.leftNel
 import arrow.core.right
 import dev.akif.tapik.tuples.*
 import kotlin.reflect.KClass
@@ -24,7 +22,7 @@ interface Codec<Source : Any, Target : Any> :
                 override val sourceClass: KClass<T> = T::class
                 override val targetClass: KClass<T> = T::class
 
-                override fun decode(input: T): Either<NonEmptyList<String>, T> = input.right()
+                override fun decode(input: T): EitherNel<String, T> = input.right()
 
                 override fun encode(input: T): T = input
             }
@@ -38,9 +36,9 @@ interface Codec<Source : Any, Target : Any> :
                 override val sourceClass: KClass<I> = I::class
                 override val targetClass: KClass<O> = O::class
 
-                override fun decode(input: O): Either<NonEmptyList<String>, I> =
+                override fun decode(input: O): EitherNel<String, I> =
                     when (val value = decoder(input)) {
-                        null -> "Cannot decode '$name' as ${I::class.simpleName}: $input".nel().left()
+                        null -> "Cannot decode '$name' as ${I::class.simpleName}: $input".leftNel()
                         else -> value.right()
                     }
 
@@ -56,11 +54,11 @@ interface Codec<Source : Any, Target : Any> :
                 override val sourceClass: KClass<I> = I::class
                 override val targetClass: KClass<O> = O::class
 
-                override fun decode(input: O): Either<NonEmptyList<String>, I> =
+                override fun decode(input: O): EitherNel<String, I> =
                     try {
                         decoder(input).right()
                     } catch (e: Exception) {
-                        "Cannot decode '$name' as ${I::class.simpleName}: $input: $e".nel().left()
+                        "Cannot decode '$name' as ${I::class.simpleName}: $input: $e".leftNel()
                     }
 
                 override fun encode(input: I): O = encoder(input)
@@ -77,7 +75,7 @@ inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Tar
 
         override val targetClass: KClass<Target2> = Target2::class
 
-        override fun decode(input: Target2): Either<NonEmptyList<String>, Source> =
+        override fun decode(input: Target2): EitherNel<String, Source> =
             this@unsafeTransform.decode(from(input))
 
         override fun encode(input: Source): Target2 = to(this@unsafeTransform.encode(input))

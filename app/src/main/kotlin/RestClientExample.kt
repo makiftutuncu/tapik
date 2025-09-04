@@ -7,12 +7,12 @@ import org.springframework.web.client.RestClient
 fun main() {
     val interpreter = RestClientInterpreter(RestClient.create("http://localhost:8080"))
 
-    val response = with(interpreter) {
-        Users.create.send(MediaType.Json, CreateUserRequest("Akif", "new"))
-    }
-
-    response.select(
-        { (_, body) -> println("Got: $body") },
-        { (status, problem) -> println("Error $status: $problem") }
-    )
+//    val response = with(interpreter) {
+//        Users.create.send(MediaType.Json, CreateUserRequest("Akif", "new"))
+//    }
+//
+//    response.select(
+//        { (_, body) -> println("Got: $body") },
+//        { (status, problem) -> println("Error $status: $problem") }
+//    )
 }

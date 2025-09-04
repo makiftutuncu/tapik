@@ -1,6 +1,16 @@
 package dev.akif.tapik
 
+import dev.akif.tapik.generators.method.BuildResponseMethodGenerator
+import dev.akif.tapik.generators.method.DecodeHeadersMethodGenerator
+import dev.akif.tapik.generators.type.ResponseGenerator
+import dev.akif.tapik.generators.type.SelectionsGenerator
+import dev.akif.tapik.generators.type.TupleGenerator
 import kotlin.system.exitProcess
+
+val requiredArguments = setOf(
+    setOf("--module", "-m"),
+    setOf("--limit", "-l"),
+)
 
 fun main(args: Array<String>) {
     val arguments = args
@@ -10,24 +20,36 @@ fun main(args: Array<String>) {
         ?.associateBy({ (k, _) -> k.trim() }) { it.getOrNull(1)?.trim().orEmpty() }
         .orEmpty()
 
-    if ("--limit" !in arguments && "-l" !in arguments) {
-        println(
-            """
+    val missing = requiredArguments.any { alternatives ->
+        alternatives.all { it !in arguments }.also {
+            if (it) {
+                println(
+                    """Missing argument ${alternatives.joinToString(" | ")}
 
-            Usage: java dev.akif.tapik.CodeGeneratorKt [--limit <limit> | -l <limit>] [--verbose | -v]
+                    Usage: java dev.akif.tapik.CodeGeneratorKt ${alternatives.joinToString(" | ") { "$it <value>" }} [--verbose | -v]
 
-            """.trimIndent()
-        )
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+    if (missing) {
         exitProcess(1)
     }
 
+    val module = requireNotNull((arguments["--module"] ?: arguments["-m"])) { "Invalid module: $arguments" }
     val limit = requireNotNull((arguments["--limit"] ?: arguments["-l"])?.toIntOrNull()) { "Invalid limit: $arguments" }
     val verbose = "--verbose" in arguments || "-v" in arguments
 
     val generators = listOf(
         TupleGenerator,
-        SelectionsGenerator
+        SelectionsGenerator,
+        ResponseGenerator,
+//        BuildResponseMethodGenerator(0),
+//        BuildResponseMethodGenerator(1),
+//        BuildResponseMethodGenerator(2),
+        DecodeHeadersMethodGenerator
     )
 
-    generators.forEach { it.run(limit, verbose) }
+    generators.filter { it.module == module }.forEach { it.run(limit, verbose) }
 }

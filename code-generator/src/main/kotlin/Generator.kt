@@ -13,7 +13,6 @@ interface Generator {
         val kotlinSourceRoot: List<String> = listOf("src", "main", "kotlin")
     }
 
-    val name: String
     val module: String
     val packages: List<String>
     val fileName: String
@@ -21,7 +20,7 @@ interface Generator {
     fun generate(limit: Int): String
 
     fun run(limit: Int, verbose: Boolean) {
-        println("Generating $name code up to $limit...")
+        println("Running $this with limit=$limit and verbose=$verbose...")
 
         val content =
             """|$GENERATED_COMMENT

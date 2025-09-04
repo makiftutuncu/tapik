@@ -1,7 +1,8 @@
-package dev.akif.tapik
+package dev.akif.tapik.generators.type
 
-object TupleGenerator: Generator {
-    override val name: String = "Tuple"
+import dev.akif.tapik.Generator
+
+data object TupleGenerator: Generator {
     override val module: String = "types"
     override val packages: List<String> = listOf("tuples")
     override val fileName: String = "Tuples.kt"

@@ -7,7 +7,14 @@ application {
     mainClass = "dev.akif.tapik.CodeGeneratorKt"
 }
 
-tasks.named<JavaExec>("run") {
-    args = listOf("--limit", "16")
+fun generateCode(module: String) = tasks.register<JavaExec>("generate-$module") {
+    description = "Run code generator for $module module"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set(application.mainClass)
     workingDir(rootProject.projectDir)
+    args("--limit", "16", "--module", module)
+    dependsOn(tasks.named("classes"))
 }
+
+val core by generateCode("core")
+val types by generateCode("types")

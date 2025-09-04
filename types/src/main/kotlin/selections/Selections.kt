@@ -3,17 +3,6 @@ package dev.akif.tapik.selections
 
 sealed interface Selection
 
-sealed interface Selection1<out T1>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection1<T>
-
-    fun <R> select(
-        when1: (T1) -> R
-    ): R =
-        when (this) {
-            is Option1<T1> -> when1(value)
-        }
-}
-
 sealed interface Selection2<out T1, out T2>: Selection {
     @JvmInline value class Option1<T>(val value: T): Selection2<T, Nothing>
     @JvmInline value class Option2<T>(val value: T): Selection2<Nothing, T>

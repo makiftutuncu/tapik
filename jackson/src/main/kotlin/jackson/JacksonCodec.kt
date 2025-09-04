@@ -12,11 +12,11 @@ class JacksonCodec<T : Any>(
 ) : ByteArrayCodec<T> {
     override val targetClass: KClass<ByteArray> = ByteArray::class
 
-    override fun decode(input: ByteArray): Either<NonEmptyList<String>, T> =
+    override fun decode(input: ByteArray): EitherNel<String, T> =
         try {
             mapper.readValue(input, sourceClass.java).right()
         } catch (e: Exception) {
-            "Cannot decode '$name' as ${sourceClass.simpleName}: $input: $e".nel().left()
+            "Cannot decode '$name' as ${sourceClass.simpleName}: $input: $e".leftNel()
         }
 
     override fun encode(input: T): ByteArray = mapper.writeValueAsBytes(input)

@@ -10,5 +10,5 @@ dependencies {
 }
 
 tasks.named<KotlinCompile>("compileKotlin") {
-    dependsOn(":code-generator:run")
+    dependsOn(":code-generator:generate-types")
 }

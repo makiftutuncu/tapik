@@ -1,7 +1,8 @@
-package dev.akif.tapik
+package dev.akif.tapik.generators.type
 
-object SelectionsGenerator: Generator {
-    override val name: String = "Selection"
+import dev.akif.tapik.Generator
+
+data object SelectionsGenerator: Generator {
     override val module: String = "types"
     override val packages: List<String> = listOf("selections")
     override val fileName: String = "Selections.kt"
@@ -10,7 +11,7 @@ object SelectionsGenerator: Generator {
         """
         |sealed interface Selection
         |
-        |${(1..limit).joinToString(separator = "\n\n", postfix = "\n\n") { selectionInterface(it) }}
+        |${(2..limit).joinToString(separator = "\n\n", postfix = "\n\n") { selectionInterface(it) }}
         """.trimMargin()
 
     private fun selectionInterface(index: Int): String {
@@ -19,10 +20,14 @@ object SelectionsGenerator: Generator {
         val selectMethod =
             """
             |    fun <R> select(
-            |${(1..index).joinToString(separator = "\n") { "        when$it: (T$it) -> R${if (it == index) "" else ","}" }}
+            |${(1..index).joinToString(separator = "\n") {
+            "        when$it: (T$it) -> R${if (it == index) "" else ","}" }
+            }
             |    ): R =
             |        when (this) {
-            |${(1..index).joinToString(separator = "\n") { "            is Option$it<T$it> -> when$it(value)" }}
+            |${(1..index).joinToString(separator = "\n") {
+            "            is Option$it<T$it> -> when$it(value)" }
+            }
             |        }""".trimMargin()
 
         return """|sealed interface Selection$index<$typeParameters>: Selection {
