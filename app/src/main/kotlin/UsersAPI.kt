@@ -33,39 +33,38 @@ object Users {
     val list by http(description = "List all users", details = "This endpoint lists all users with pagination.") {
         get
             .uri(base + query.int("page").optional(0) + query.int("perPage").optional(10))
-            .output {
-                jsonBody<UserPage>("response")
-            }
+            .outputBody { jsonBody<UserPage>("response") }
     }
 
     val create by http(description = "Create new user", details = "This endpoint creates a new user with given information.") {
         post
             .uri(base)
-            .headers(header.Accept(MediaType.Json, MediaType.PlainText))
-            .input(jsonBody<CreateUserRequest>("createUserRequest"))
-            .output(Status.CREATED, Header.Location) { userResponse }
-            .output(Status.BAD_REQUEST) { errorResponse }
+            .inputHeader(header.Accept(MediaType.Json, MediaType.PlainText))
+            .inputBody { jsonBody<CreateUserRequest>("createUserRequest") }
+            .outputHeader(Header.Location)
+            .outputBody(Status.CREATED) { userResponse }
+            .outputBody(Status.BAD_REQUEST) { errorResponse }
     }
 
     val get by http(description = "Get a user", details = "This endpoint gets the user with given id.") {
         get
             .uri(base / id)
-            .headers(header.boolean("Proxied"))
-            .output { userResponse }
-            .output(Status.NOT_FOUND) { errorResponse }
+            .inputHeader(header.boolean("Proxied"))
+            .outputBody { userResponse }
+            .outputBody(Status.NOT_FOUND) { errorResponse }
     }
 
     val getStatus by http(description = "Get status of a user", details = "This endpoint gets the status of the user with given id.") {
         get
             .uri(base / id / "status")
-            .output { stringBody() }
-            .output(Status.NOT_FOUND) { errorResponse }
+            .outputBody { stringBody() }
+            .outputBody(Status.NOT_FOUND) { errorResponse }
     }
 
     val getAvatar by http(description = "Get avatar of a user", details = "This endpoint gets the avatar of the user with given id.") {
         get
             .uri(base / id / "avatar" + query.int("size"))
-            .output {
+            .outputBody {
                 rawBody(MediaType.Custom("image", "png"))
             }
     }

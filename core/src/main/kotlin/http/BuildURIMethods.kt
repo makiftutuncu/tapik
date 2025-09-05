@@ -4,9 +4,10 @@ package dev.akif.tapik.http
 
 import java.net.URI
 
-fun HttpEndpoint<Parameters0, *, *>.buildURI(): URI = buildURI(uri)
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies> HttpEndpoint<Parameters0, IH, IB, OH, OB>.buildURI(): URI =
+    buildURI(uri)
 
-fun <P1 : Any> HttpEndpoint<Parameters1<P1>, *, *>.buildURI(p1: P1): URI =
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any> HttpEndpoint<Parameters1<P1>, IH, IB, OH, OB>.buildURI(p1: P1): URI =
     with(parameters) {
         buildURI(
             uri,
@@ -14,12 +15,12 @@ fun <P1 : Any> HttpEndpoint<Parameters1<P1>, *, *>.buildURI(p1: P1): URI =
         )
     }
 
-fun <P1 : Any, P2 : Any> HttpEndpoint<Parameters2<P1, P2>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any> HttpEndpoint<Parameters2<P1, P2>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2
 ): URI = with(parameters) { buildURI(uri, item1 to item1.codec.encode(p1), item2 to item2.codec.encode(p2)) }
 
-fun <P1 : Any, P2 : Any, P3 : Any> HttpEndpoint<Parameters3<P1, P2, P3>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any> HttpEndpoint<Parameters3<P1, P2, P3>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3
@@ -33,7 +34,7 @@ fun <P1 : Any, P2 : Any, P3 : Any> HttpEndpoint<Parameters3<P1, P2, P3>, *, *>.b
         )
     }
 
-fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any> HttpEndpoint<Parameters4<P1, P2, P3, P4>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any> HttpEndpoint<Parameters4<P1, P2, P3, P4>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -49,7 +50,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any> HttpEndpoint<Parameters4<P1, P2, P3
         )
     }
 
-fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any> HttpEndpoint<Parameters5<P1, P2, P3, P4, P5>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any> HttpEndpoint<Parameters5<P1, P2, P3, P4, P5>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -67,7 +68,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any> HttpEndpoint<Parameters5<
         )
     }
 
-fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any> HttpEndpoint<Parameters6<P1, P2, P3, P4, P5, P6>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any> HttpEndpoint<Parameters6<P1, P2, P3, P4, P5, P6>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -87,7 +88,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any> HttpEndpoint<Pa
         )
     }
 
-fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any> HttpEndpoint<Parameters7<P1, P2, P3, P4, P5, P6, P7>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any> HttpEndpoint<Parameters7<P1, P2, P3, P4, P5, P6, P7>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -109,7 +110,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any> HttpE
         )
     }
 
-fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any> HttpEndpoint<Parameters8<P1, P2, P3, P4, P5, P6, P7, P8>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any> HttpEndpoint<Parameters8<P1, P2, P3, P4, P5, P6, P7, P8>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -133,7 +134,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : 
         )
     }
 
-fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any, P9 : Any> HttpEndpoint<Parameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any, P9 : Any> HttpEndpoint<Parameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -159,7 +160,7 @@ fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : 
         )
     }
 
-fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any, P9 : Any, P10 : Any> HttpEndpoint<Parameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>, *, *>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any, P9 : Any, P10 : Any> HttpEndpoint<Parameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,

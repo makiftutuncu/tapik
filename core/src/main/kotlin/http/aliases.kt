@@ -17,18 +17,18 @@ typealias Headers8<T1, T2, T3, T4, T5, T6, T7, T8> = Tuple8<Header<*>, Header<T1
 typealias Headers9<T1, T2, T3, T4, T5, T6, T7, T8, T9> = Tuple9<Header<*>, Header<T1>, Header<T2>, Header<T3>, Header<T4>, Header<T5>, Header<T6>, Header<T7>, Header<T8>, Header<T9>>
 typealias Headers10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> = Tuple10<Header<*>, Header<T1>, Header<T2>, Header<T3>, Header<T4>, Header<T5>, Header<T6>, Header<T7>, Header<T8>, Header<T9>, Header<T10>>
 
-typealias Outputs = Tuple<Output<*, *>>
-typealias Outputs0 = Tuple0<Output<*, *>>
-typealias Outputs1<B1, H1> = Tuple1<Output<*, *>, Output<B1, H1>>
-typealias Outputs2<B1, H1, B2, H2> = Tuple2<Output<*, *>, Output<B1, H1>, Output<B2, H2>>
-typealias Outputs3<B1, H1, B2, H2, B3, H3> = Tuple3<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>>
-typealias Outputs4<B1, H1, B2, H2, B3, H3, B4, H4> = Tuple4<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>, Output<B4, H4>>
-typealias Outputs5<B1, H1, B2, H2, B3, H3, B4, H4, B5, H5> = Tuple5<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>, Output<B4, H4>, Output<B5, H5>>
-typealias Outputs6<B1, H1, B2, H2, B3, H3, B4, H4, B5, H5, B6, H6> = Tuple6<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>, Output<B4, H4>, Output<B5, H5>, Output<B6, H6>>
-typealias Outputs7<B1, H1, B2, H2, B3, H3, B4, H4, B5, H5, B6, H6, B7, H7> = Tuple7<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>, Output<B4, H4>, Output<B5, H5>, Output<B6, H6>, Output<B7, H7>>
-typealias Outputs8<B1, H1, B2, H2, B3, H3, B4, H4, B5, H5, B6, H6, B7, H7, B8, H8> = Tuple8<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>, Output<B4, H4>, Output<B5, H5>, Output<B6, H6>, Output<B7, H7>, Output<B8, H8>>
-typealias Outputs9<B1, H1, B2, H2, B3, H3, B4, H4, B5, H5, B6, H6, B7, H7, B8, H8, B9, H9> = Tuple9<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>, Output<B4, H4>, Output<B5, H5>, Output<B6, H6>, Output<B7, H7>, Output<B8, H8>, Output<B9, H9>>
-typealias Outputs10<B1, H1, B2, H2, B3, H3, B4, H4, B5, H5, B6, H6, B7, H7, B8, H8, B9, H9, B10, H10> = Tuple10<Output<*, *>, Output<B1, H1>, Output<B2, H2>, Output<B3, H3>, Output<B4, H4>, Output<B5, H5>, Output<B6, H6>, Output<B7, H7>, Output<B8, H8>, Output<B9, H9>, Output<B10, H10>>
+typealias OutputBodies = Tuple<OutputBody<*>>
+typealias OutputBodies0 = Tuple0<OutputBody<*>>
+typealias OutputBodies1<B1> = Tuple1<OutputBody<*>, OutputBody<B1>>
+typealias OutputBodies2<B1, B2> = Tuple2<OutputBody<*>, OutputBody<B1>, OutputBody<B2>>
+typealias OutputBodies3<B1, B2, B3> = Tuple3<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>>
+typealias OutputBodies4<B1, B2, B3, B4> = Tuple4<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>, OutputBody<B4>>
+typealias OutputBodies5<B1, B2, B3, B4, B5> = Tuple5<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>, OutputBody<B4>, OutputBody<B5>>
+typealias OutputBodies6<B1, B2, B3, B4, B5, B6> = Tuple6<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>, OutputBody<B4>, OutputBody<B5>, OutputBody<B6>>
+typealias OutputBodies7<B1, B2, B3, B4, B5, B6, B7> = Tuple7<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>, OutputBody<B4>, OutputBody<B5>, OutputBody<B6>, OutputBody<B7>>
+typealias OutputBodies8<B1, B2, B3, B4, B5, B6, B7, B8> = Tuple8<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>, OutputBody<B4>, OutputBody<B5>, OutputBody<B6>, OutputBody<B7>, OutputBody<B8>>
+typealias OutputBodies9<B1, B2, B3, B4, B5, B6, B7, B8, B9> = Tuple9<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>, OutputBody<B4>, OutputBody<B5>, OutputBody<B6>, OutputBody<B7>, OutputBody<B8>, OutputBody<B9>>
+typealias OutputBodies10<B1, B2, B3, B4, B5, B6, B7, B8, B9, B10> = Tuple10<OutputBody<*>, OutputBody<B1>, OutputBody<B2>, OutputBody<B3>, OutputBody<B4>, OutputBody<B5>, OutputBody<B6>, OutputBody<B7>, OutputBody<B8>, OutputBody<B9>, OutputBody<B10>>
 
 typealias Parameters = Tuple<Parameter<*>>
 typealias Parameters0 = Tuple0<Parameter<*>>
@@ -56,4 +56,4 @@ typealias URIWithParameters8<P1, P2, P3, P4, P5, P6, P7, P8> = URIWithParameters
 typealias URIWithParameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9> = URIWithParameters<Parameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9>>
 typealias URIWithParameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> = URIWithParameters<Parameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>>
 
-typealias AnyHttpEndpoint = HttpEndpoint<Parameters, Body<*>, Outputs>
+typealias AnyHttpEndpoint = HttpEndpoint<Parameters, Headers, Body<*>, Headers, OutputBodies>

@@ -19,7 +19,7 @@ data class RestClientInterpreter(
         headers: Map<String, List<String>>,
         contentType: MediaType?,
         body: ByteArray?,
-        outputs: List<Output<*, *>>
+        outputBodies: List<OutputBody<*>>
     ): ResponseEntity<ByteArray> =
         client
             .method(SpringMethod.valueOf(method.name))
@@ -36,20 +36,20 @@ data class RestClientInterpreter(
             }
             .retrieve()
             .apply {
-                outputs.fold(this) { spec, output ->
+                outputBodies.fold(this) { spec, output ->
                     spec.onStatus(
                         { output.statusMatcher(Status.of(it.value())) },
                         statusHandler(output, method, uri)
                     )
                 }
             }
-            .onStatus(unmatchedStatusHandler(outputs))
+            .onStatus(unmatchedStatusHandler(outputBodies))
             .toEntity(ByteArray::class.java)
 
-    internal fun statusHandler(output: Output<*, *>, method: Method, uri: URI): RestClient.ResponseSpec.ErrorHandler =
+    internal fun statusHandler(outputBody: OutputBody<*>, method: Method, uri: URI): RestClient.ResponseSpec.ErrorHandler =
         RestClient.ResponseSpec.ErrorHandler { _, response ->
             val status = Status.of(response.statusCode.value())
-            val mediaType = output.body.mediaType
+            val mediaType = outputBody.body.mediaType
             val responseContentType = response.headers.contentType
             if (mediaType != null && responseContentType != null && mediaType.toString() !in responseContentType.toString()) {
                 throw RestClientResponseException(
@@ -63,7 +63,7 @@ data class RestClientInterpreter(
             }
         }
 
-    internal fun unmatchedStatusHandler(outputs: List<Output<*, *>>): ResponseErrorHandler = object: ResponseErrorHandler {
+    internal fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler = object: ResponseErrorHandler {
         override fun hasError(response: ClientHttpResponse): Boolean =
             true
 
@@ -73,7 +73,7 @@ data class RestClientInterpreter(
             response: ClientHttpResponse
         ) {
             val status = Status.of(response.statusCode.value())
-            val expected = outputs.flatMap {
+            val expected = outputBodies.flatMap {
                 when (val matcher = it.statusMatcher) {
                     is StatusMatcher.Is -> listOf(matcher.status.toString())
                     is StatusMatcher.AnyOf -> matcher.statuses.map { s -> s.toString() }

@@ -21,9 +21,10 @@ class MarkdownDocumentationInterpreter(
             details,
             mono("$method ${uri.joinToString(separator = "/", prefix = "/")}"),
             documentParameters(parameterList),
-            documentHeaders(parameterList),
-            documentInput(input),
-            documentOutputs(outputs.toList())
+            documentHeaders("Input", inputHeaders.toList()),
+            documentInput(inputBody),
+            documentHeaders("Output", outputHeaders.toList()),
+            documentOutputs(outputBodies.toList())
         ).joinToString("\n\n")
     }
 
@@ -50,8 +51,7 @@ class MarkdownDocumentationInterpreter(
         }
     }
 
-    private fun documentHeaders(parameters: List<Parameter<*>>): String? {
-        val headers = parameters.toList().filterIsInstance<Header<*>>()
+    private fun documentHeaders(type: String, headers: List<Header<*>>): String? {
         return if (headers.isEmpty()) {
             null
         } else {
@@ -65,7 +65,7 @@ class MarkdownDocumentationInterpreter(
                     header.required.toString()
                 )
             }
-            """${h3("Headers")}
+            """${h3("$type Headers")}
             $MARGIN
             $MARGIN${table(tableHeaders, rows)}""".trimMargin(MARGIN)
         }
@@ -78,13 +78,13 @@ class MarkdownDocumentationInterpreter(
             $MARGIN$it""".trimMargin(MARGIN)
         }
 
-    private fun documentOutputs(outputs: List<Output<*, *>>): String? =
-        if (outputs.isEmpty()) {
+    private fun documentOutputs(outputBodies: List<OutputBody<*>>): String? =
+        if (outputBodies.isEmpty()) {
             null
         } else {
-            val headers = listOf("Status", "Body", "Header(s)")
-            val rows = outputs.map { output ->
-                val (statusMatcher, body, headers) = output
+            val headers = listOf("Status", "Body")
+            val rows = outputBodies.map { output ->
+                val (statusMatcher, body) = output
                 listOf(
                     when (statusMatcher) {
                         is StatusMatcher.Is -> documentStatus(statusMatcher.status)
@@ -93,7 +93,6 @@ class MarkdownDocumentationInterpreter(
                         StatusMatcher.Unmatched -> "Any unmatched status"
                     },
                     documentBody(body).orEmpty(),
-                    inlineList(headers.toList()) { documentHeader(it) },
                 )
             }
             """${h3("Outputs")}
@@ -102,14 +101,6 @@ class MarkdownDocumentationInterpreter(
         }
 
     private fun documentStatus(status: Status): String = "${status.code} ${status.name}"
-
-    private fun documentHeader(header: Header<*>): String =
-        when (header) {
-            is HeaderInput<*> -> "${mono(header.name)} as ${documentCodec(header.codec)}"
-            is HeaderValues<*> -> inlineList(header.values) {
-                "${mono("${header.name}: $it")} as ${documentCodec(header.codec)}"
-            }
-        }
 
     private fun documentBody(body: Body<*>): String? =
         when (body) {
