@@ -1,7 +1,9 @@
 package dev.akif.tapik
 
+import dev.akif.tapik.generators.AliasesGenerator
 import dev.akif.tapik.generators.method.BuildResponseMethodGenerator
 import dev.akif.tapik.generators.method.DecodeHeadersMethodGenerator
+import dev.akif.tapik.generators.method.EncodeHeadersMethodGenerator
 import dev.akif.tapik.generators.type.ResponseGenerator
 import dev.akif.tapik.generators.type.SelectionsGenerator
 import dev.akif.tapik.generators.type.TupleGenerator
@@ -42,13 +44,13 @@ fun main(args: Array<String>) {
     val verbose = "--verbose" in arguments || "-v" in arguments
 
     val generators = listOf(
-        TupleGenerator,
-        SelectionsGenerator,
+        AliasesGenerator,
+        BuildResponseMethodGenerator,
+        DecodeHeadersMethodGenerator,
+        EncodeHeadersMethodGenerator,
         ResponseGenerator,
-//        BuildResponseMethodGenerator(0),
-//        BuildResponseMethodGenerator(1),
-//        BuildResponseMethodGenerator(2),
-        DecodeHeadersMethodGenerator
+        SelectionsGenerator,
+        TupleGenerator
     )
 
     generators.filter { it.module == module }.forEach { it.run(limit, verbose) }

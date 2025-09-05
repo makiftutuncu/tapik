@@ -54,10 +54,11 @@ data object DecodeHeadersMethodGenerator: Generator {
         }}
         |): EitherNel<String, Tuple$index<List<H>, $listTypeParameters>> =
         |    either {
+        |        Tuple$index(
         |${(1..index).joinToString(separator = "\n") {
-        "        val values$it = decodeHeader(headers, header$it).bind()"
+        "            decodeHeader(headers, header$it).bind()${if (it == index) "" else ","}"
         }}
-        |        Tuple$index(${(1..index).joinToString(separator = ", ") { "values$it" }})
+        |        )
         |    }
         """.trimMargin()
     }

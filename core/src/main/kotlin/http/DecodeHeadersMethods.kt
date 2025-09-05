@@ -15,8 +15,9 @@ fun <H: Any, H1: H> decodeHeaders1(
     header1: Header<H1>
 ): EitherNel<String, Tuple1<List<H>, List<H1>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        Tuple1(values1)
+        Tuple1(
+            decodeHeader(headers, header1).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H> decodeHeaders2(
@@ -25,9 +26,10 @@ fun <H: Any, H1: H, H2: H> decodeHeaders2(
     header2: Header<H2>
 ): EitherNel<String, Tuple2<List<H>, List<H1>, List<H2>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        Tuple2(values1, values2)
+        Tuple2(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H> decodeHeaders3(
@@ -37,10 +39,11 @@ fun <H: Any, H1: H, H2: H, H3: H> decodeHeaders3(
     header3: Header<H3>
 ): EitherNel<String, Tuple3<List<H>, List<H1>, List<H2>, List<H3>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        Tuple3(values1, values2, values3)
+        Tuple3(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H> decodeHeaders4(
@@ -51,11 +54,12 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H> decodeHeaders4(
     header4: Header<H4>
 ): EitherNel<String, Tuple4<List<H>, List<H1>, List<H2>, List<H3>, List<H4>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        Tuple4(values1, values2, values3, values4)
+        Tuple4(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H> decodeHeaders5(
@@ -67,12 +71,13 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H> decodeHeaders5(
     header5: Header<H5>
 ): EitherNel<String, Tuple5<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        Tuple5(values1, values2, values3, values4, values5)
+        Tuple5(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H> decodeHeaders6(
@@ -85,13 +90,14 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H> decodeHeaders6(
     header6: Header<H6>
 ): EitherNel<String, Tuple6<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        Tuple6(values1, values2, values3, values4, values5, values6)
+        Tuple6(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H> decodeHeaders7(
@@ -105,14 +111,15 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H> decodeHeaders7(
     header7: Header<H7>
 ): EitherNel<String, Tuple7<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        Tuple7(values1, values2, values3, values4, values5, values6, values7)
+        Tuple7(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H> decodeHeaders8(
@@ -127,15 +134,16 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H> decodeHeade
     header8: Header<H8>
 ): EitherNel<String, Tuple8<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        Tuple8(values1, values2, values3, values4, values5, values6, values7, values8)
+        Tuple8(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H> decodeHeaders9(
@@ -151,16 +159,17 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H> deco
     header9: Header<H9>
 ): EitherNel<String, Tuple9<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        Tuple9(values1, values2, values3, values4, values5, values6, values7, values8, values9)
+        Tuple9(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H> decodeHeaders10(
@@ -177,17 +186,18 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10:
     header10: Header<H10>
 ): EitherNel<String, Tuple10<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>, List<H10>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        val values10 = decodeHeader(headers, header10).bind()
-        Tuple10(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10)
+        Tuple10(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind(),
+            decodeHeader(headers, header10).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H, H11: H> decodeHeaders11(
@@ -205,18 +215,19 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10:
     header11: Header<H11>
 ): EitherNel<String, Tuple11<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>, List<H10>, List<H11>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        val values10 = decodeHeader(headers, header10).bind()
-        val values11 = decodeHeader(headers, header11).bind()
-        Tuple11(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10, values11)
+        Tuple11(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind(),
+            decodeHeader(headers, header10).bind(),
+            decodeHeader(headers, header11).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H, H11: H, H12: H> decodeHeaders12(
@@ -235,19 +246,20 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10:
     header12: Header<H12>
 ): EitherNel<String, Tuple12<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>, List<H10>, List<H11>, List<H12>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        val values10 = decodeHeader(headers, header10).bind()
-        val values11 = decodeHeader(headers, header11).bind()
-        val values12 = decodeHeader(headers, header12).bind()
-        Tuple12(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10, values11, values12)
+        Tuple12(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind(),
+            decodeHeader(headers, header10).bind(),
+            decodeHeader(headers, header11).bind(),
+            decodeHeader(headers, header12).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H, H11: H, H12: H, H13: H> decodeHeaders13(
@@ -267,20 +279,21 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10:
     header13: Header<H13>
 ): EitherNel<String, Tuple13<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>, List<H10>, List<H11>, List<H12>, List<H13>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        val values10 = decodeHeader(headers, header10).bind()
-        val values11 = decodeHeader(headers, header11).bind()
-        val values12 = decodeHeader(headers, header12).bind()
-        val values13 = decodeHeader(headers, header13).bind()
-        Tuple13(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10, values11, values12, values13)
+        Tuple13(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind(),
+            decodeHeader(headers, header10).bind(),
+            decodeHeader(headers, header11).bind(),
+            decodeHeader(headers, header12).bind(),
+            decodeHeader(headers, header13).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H, H11: H, H12: H, H13: H, H14: H> decodeHeaders14(
@@ -301,21 +314,22 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10:
     header14: Header<H14>
 ): EitherNel<String, Tuple14<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>, List<H10>, List<H11>, List<H12>, List<H13>, List<H14>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        val values10 = decodeHeader(headers, header10).bind()
-        val values11 = decodeHeader(headers, header11).bind()
-        val values12 = decodeHeader(headers, header12).bind()
-        val values13 = decodeHeader(headers, header13).bind()
-        val values14 = decodeHeader(headers, header14).bind()
-        Tuple14(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10, values11, values12, values13, values14)
+        Tuple14(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind(),
+            decodeHeader(headers, header10).bind(),
+            decodeHeader(headers, header11).bind(),
+            decodeHeader(headers, header12).bind(),
+            decodeHeader(headers, header13).bind(),
+            decodeHeader(headers, header14).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H, H11: H, H12: H, H13: H, H14: H, H15: H> decodeHeaders15(
@@ -337,22 +351,23 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10:
     header15: Header<H15>
 ): EitherNel<String, Tuple15<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>, List<H10>, List<H11>, List<H12>, List<H13>, List<H14>, List<H15>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        val values10 = decodeHeader(headers, header10).bind()
-        val values11 = decodeHeader(headers, header11).bind()
-        val values12 = decodeHeader(headers, header12).bind()
-        val values13 = decodeHeader(headers, header13).bind()
-        val values14 = decodeHeader(headers, header14).bind()
-        val values15 = decodeHeader(headers, header15).bind()
-        Tuple15(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10, values11, values12, values13, values14, values15)
+        Tuple15(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind(),
+            decodeHeader(headers, header10).bind(),
+            decodeHeader(headers, header11).bind(),
+            decodeHeader(headers, header12).bind(),
+            decodeHeader(headers, header13).bind(),
+            decodeHeader(headers, header14).bind(),
+            decodeHeader(headers, header15).bind()
+        )
     }
 
 fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H, H11: H, H12: H, H13: H, H14: H, H15: H, H16: H> decodeHeaders16(
@@ -375,23 +390,24 @@ fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10:
     header16: Header<H16>
 ): EitherNel<String, Tuple16<List<H>, List<H1>, List<H2>, List<H3>, List<H4>, List<H5>, List<H6>, List<H7>, List<H8>, List<H9>, List<H10>, List<H11>, List<H12>, List<H13>, List<H14>, List<H15>, List<H16>>> =
     either {
-        val values1 = decodeHeader(headers, header1).bind()
-        val values2 = decodeHeader(headers, header2).bind()
-        val values3 = decodeHeader(headers, header3).bind()
-        val values4 = decodeHeader(headers, header4).bind()
-        val values5 = decodeHeader(headers, header5).bind()
-        val values6 = decodeHeader(headers, header6).bind()
-        val values7 = decodeHeader(headers, header7).bind()
-        val values8 = decodeHeader(headers, header8).bind()
-        val values9 = decodeHeader(headers, header9).bind()
-        val values10 = decodeHeader(headers, header10).bind()
-        val values11 = decodeHeader(headers, header11).bind()
-        val values12 = decodeHeader(headers, header12).bind()
-        val values13 = decodeHeader(headers, header13).bind()
-        val values14 = decodeHeader(headers, header14).bind()
-        val values15 = decodeHeader(headers, header15).bind()
-        val values16 = decodeHeader(headers, header16).bind()
-        Tuple16(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10, values11, values12, values13, values14, values15, values16)
+        Tuple16(
+            decodeHeader(headers, header1).bind(),
+            decodeHeader(headers, header2).bind(),
+            decodeHeader(headers, header3).bind(),
+            decodeHeader(headers, header4).bind(),
+            decodeHeader(headers, header5).bind(),
+            decodeHeader(headers, header6).bind(),
+            decodeHeader(headers, header7).bind(),
+            decodeHeader(headers, header8).bind(),
+            decodeHeader(headers, header9).bind(),
+            decodeHeader(headers, header10).bind(),
+            decodeHeader(headers, header11).bind(),
+            decodeHeader(headers, header12).bind(),
+            decodeHeader(headers, header13).bind(),
+            decodeHeader(headers, header14).bind(),
+            decodeHeader(headers, header15).bind(),
+            decodeHeader(headers, header16).bind()
+        )
     }
 
 private fun <H: Any> decodeHeader(
