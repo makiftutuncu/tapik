@@ -10,35 +10,33 @@ import java.net.URI
 import org.springframework.http.HttpMethod as SpringMethod
 import org.springframework.http.MediaType as SpringMediaType
 
-data class RestClientInterpreter(
-    val client: RestClient
-) {
+data class RestClientInterpreter(val client: RestClient) {
     internal fun send(
         method: Method,
         uri: URI,
-        headers: Map<String, List<String>>,
-        contentType: MediaType?,
-        body: ByteArray?,
+        inputHeaders: Map<String, List<String>>,
+        inputBodyContentType: MediaType?,
+        inputBody: ByteArray?,
         outputBodies: List<OutputBody<*>>
     ): ResponseEntity<ByteArray> =
         client
             .method(SpringMethod.valueOf(method.name))
             .uri { it.pathSegment(*uri.path.split("/").toTypedArray()).query(uri.query).build() }
             .headers {
-                headers.forEach { (name, values) -> it[name] = values }
+                inputHeaders.forEach { (name, values) -> it[name] = values }
             }.apply {
-                if (contentType != null) {
-                    contentType(SpringMediaType(contentType.major, contentType.minor))
+                if (inputBodyContentType != null) {
+                    contentType(SpringMediaType(inputBodyContentType.major, inputBodyContentType.minor))
                 }
-                if (body != null) {
-                    body { it.write(body) }
+                if (inputBody != null) {
+                    body { it.write(inputBody) }
                 }
             }
             .retrieve()
             .apply {
                 outputBodies.fold(this) { spec, output ->
                     spec.onStatus(
-                        { output.statusMatcher(Status.of(it.value())) },
+                        { output.statusMatcher(it.toStatus()) },
                         statusHandler(output, method, uri)
                     )
                 }
@@ -48,7 +46,7 @@ data class RestClientInterpreter(
 
     internal fun statusHandler(outputBody: OutputBody<*>, method: Method, uri: URI): RestClient.ResponseSpec.ErrorHandler =
         RestClient.ResponseSpec.ErrorHandler { _, response ->
-            val status = Status.of(response.statusCode.value())
+            val status = response.statusCode.toStatus()
             val mediaType = outputBody.body.mediaType
             val responseContentType = response.headers.contentType
             if (mediaType != null && responseContentType != null && mediaType.toString() !in responseContentType.toString()) {
@@ -63,32 +61,33 @@ data class RestClientInterpreter(
             }
         }
 
-    internal fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler = object: ResponseErrorHandler {
-        override fun hasError(response: ClientHttpResponse): Boolean =
-            true
+    internal fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler =
+        object: ResponseErrorHandler {
+            override fun hasError(response: ClientHttpResponse): Boolean =
+                true
 
-        override fun handleError(
-            url: URI,
-            method: SpringMethod,
-            response: ClientHttpResponse
-        ) {
-            val status = Status.of(response.statusCode.value())
-            val expected = outputBodies.flatMap {
-                when (val matcher = it.statusMatcher) {
-                    is StatusMatcher.Is -> listOf(matcher.status.toString())
-                    is StatusMatcher.AnyOf -> matcher.statuses.map { s -> s.toString() }
-                    is StatusMatcher.Predicate -> listOf(matcher.description)
-                    StatusMatcher.Unmatched -> emptyList()
+            override fun handleError(
+                url: URI,
+                method: SpringMethod,
+                response: ClientHttpResponse
+            ) {
+                val status = response.statusCode.toStatus()
+                val expected = outputBodies.flatMap {
+                    when (val matcher = it.statusMatcher) {
+                        is StatusMatcher.Is -> listOf(matcher.status.toString())
+                        is StatusMatcher.AnyOf -> matcher.statuses.map { s -> s.toString() }
+                        is StatusMatcher.Predicate -> listOf(matcher.description)
+                        StatusMatcher.Unmatched -> emptyList()
+                    }
                 }
+                throw RestClientResponseException(
+                    "Unexpected status code '${status.code}' for request '${"$method $url"}', expecting $expected",
+                    status.code,
+                    status.name,
+                    response.headers,
+                    response.body.readAllBytes(),
+                    response.headers.contentType?.charset
+                )
             }
-            throw RestClientResponseException(
-                "Unexpected status code '${status.code}' for request '${"$method $url"}', expecting $expected",
-                status.code,
-                status.name,
-                response.headers,
-                response.body.readAllBytes(),
-                response.headers.contentType?.charset
-            )
         }
-    }
 }

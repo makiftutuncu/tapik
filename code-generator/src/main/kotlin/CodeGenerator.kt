@@ -5,6 +5,7 @@ import dev.akif.tapik.generators.method.BuildResponseMethodGenerator
 import dev.akif.tapik.generators.method.DecodeHeadersMethodGenerator
 import dev.akif.tapik.generators.method.EncodeHeadersMethodGenerator
 import dev.akif.tapik.generators.method.BuildURIMethodGenerator
+import dev.akif.tapik.generators.method.SendWithRestClientMethodsGenerator
 import dev.akif.tapik.generators.type.ResponseGenerator
 import dev.akif.tapik.generators.type.SelectionsGenerator
 import dev.akif.tapik.generators.type.TupleGenerator
@@ -44,16 +45,17 @@ fun main(args: Array<String>) {
     val limit = requireNotNull((arguments["--limit"] ?: arguments["-l"])?.toIntOrNull()) { "Invalid limit: $arguments" }
     val verbose = "--verbose" in arguments || "-v" in arguments
 
-    val generators = listOf(
-        AliasesGenerator,
-        BuildResponseMethodGenerator,
-        BuildURIMethodGenerator,
-        DecodeHeadersMethodGenerator,
-        EncodeHeadersMethodGenerator,
-        ResponseGenerator,
-        SelectionsGenerator,
-        TupleGenerator
-    )
+    val generators = buildList {
+        add(AliasesGenerator)
+        add(BuildResponseMethodGenerator)
+        add(BuildURIMethodGenerator)
+        add(DecodeHeadersMethodGenerator)
+        add(EncodeHeadersMethodGenerator)
+        add(ResponseGenerator)
+        add(SelectionsGenerator)
+        add(SendWithRestClientMethodsGenerator(parameterIndex = 10, inputHeaderIndex = 10, outputHeaderIndex = 10))
+        add(TupleGenerator)
+    }
 
     generators.filter { it.module == module }.forEach { it.run(limit, verbose) }
 }

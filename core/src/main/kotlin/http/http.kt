@@ -4,6 +4,9 @@ import dev.akif.tapik.Endpoint
 import dev.akif.tapik.codec.StringCodec
 import kotlin.properties.ReadOnlyProperty
 
+fun String.toURIWithParameters(): URIWithParameters<Parameters0> =
+    listOf(this) to Parameters0()
+
 inline fun <reified P : Any> path(
     name: String,
     codec: StringCodec<P>

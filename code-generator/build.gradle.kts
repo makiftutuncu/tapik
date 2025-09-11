@@ -12,9 +12,10 @@ fun generateCode(module: String) = tasks.register<JavaExec>("generate-$module") 
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set(application.mainClass)
     workingDir(rootProject.projectDir)
-    args("--limit", "16", "--module", module)
+    args("--limit", "10", "--module", module)
     dependsOn(tasks.named("classes"))
 }
 
 val core by generateCode("core")
 val types by generateCode("types")
+val springRestClient by generateCode("spring-restclient")

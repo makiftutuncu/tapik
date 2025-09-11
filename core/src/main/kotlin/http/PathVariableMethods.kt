@@ -5,6 +5,9 @@ package dev.akif.tapik.http
 operator fun String.div(segment: String): URIWithParameters<Parameters0> =
     listOf(this, segment) to Parameters0()
 
+operator fun <P: Any> String.div(variable: PathVariable<P>): URIWithParameters<Parameters1<P>> =
+    listOf(this) to Parameters1(variable)
+
 operator fun <P: Parameters> URIWithParameters<P>.div(segment: String): URIWithParameters<P> {
     val (uri, parameters) = this
     return (uri + segment) to parameters

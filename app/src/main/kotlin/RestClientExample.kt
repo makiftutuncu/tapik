@@ -1,18 +1,25 @@
 package dev.akif.app
 
-import dev.akif.tapik.http.MediaType
+import dev.akif.tapik.http.*
 import dev.akif.tapik.spring.restclient.*
 import org.springframework.web.client.RestClient
 
 fun main() {
     val interpreter = RestClientInterpreter(RestClient.create("http://localhost:8080"))
 
+    val testEndpoint by http {
+        put
+            .uri("tests" / path.int("id"))
+            .inputHeader(Header.Accept)
+            .inputBody { stringBody() }
+            .outputHeader(header.ContentType)
+            .outputBody { stringBody() }
+            .outputBody { rawBody() }
+    }
+
 //    val response = with(interpreter) {
-//        Users.create.send(MediaType.Json, CreateUserRequest("Akif", "new"))
+//        testEndpoint.sendWithRestClient(1, MediaType.PlainText, "test")
 //    }
 //
-//    response.select(
-//        { (_, body) -> println("Got: $body") },
-//        { (status, problem) -> println("Error $status: $problem") }
-//    )
+//    println(response)
 }

@@ -2,6 +2,9 @@
 
 package dev.akif.tapik.http
 
+operator fun <Q: Any> String.plus(parameter: QueryParameter<Q>): URIWithParameters<Parameters1<Q>> =
+    listOf(this) to Parameters1(parameter)
+
 @JvmName("addParameter1")
 operator fun <Q1: Any> URIWithParameters<Parameters0>.plus(
     parameter: QueryParameter<Q1>
