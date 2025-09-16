@@ -10,7 +10,9 @@ import java.net.URI
 import org.springframework.http.HttpMethod as SpringMethod
 import org.springframework.http.MediaType as SpringMediaType
 
-data class RestClientInterpreter(val client: RestClient) {
+data class RestClientInterpreter(
+    val client: RestClient
+) {
     internal fun send(
         method: Method,
         uri: URI,
@@ -31,8 +33,7 @@ data class RestClientInterpreter(val client: RestClient) {
                 if (inputBody != null) {
                     body { it.write(inputBody) }
                 }
-            }
-            .retrieve()
+            }.retrieve()
             .apply {
                 outputBodies.fold(this) { spec, output ->
                     spec.onStatus(
@@ -40,16 +41,22 @@ data class RestClientInterpreter(val client: RestClient) {
                         statusHandler(output, method, uri)
                     )
                 }
-            }
-            .onStatus(unmatchedStatusHandler(outputBodies))
+            }.onStatus(unmatchedStatusHandler(outputBodies))
             .toEntity(ByteArray::class.java)
 
-    internal fun statusHandler(outputBody: OutputBody<*>, method: Method, uri: URI): RestClient.ResponseSpec.ErrorHandler =
+    internal fun statusHandler(
+        outputBody: OutputBody<*>,
+        method: Method,
+        uri: URI
+    ): RestClient.ResponseSpec.ErrorHandler =
         RestClient.ResponseSpec.ErrorHandler { _, response ->
             val status = response.statusCode.toStatus()
             val mediaType = outputBody.body.mediaType
             val responseContentType = response.headers.contentType
-            if (mediaType != null && responseContentType != null && mediaType.toString() !in responseContentType.toString()) {
+            if (mediaType != null &&
+                responseContentType != null &&
+                mediaType.toString() !in responseContentType.toString()
+            ) {
                 throw RestClientResponseException(
                     "Unexpected content type '$responseContentType' for request '${"$method $uri"}' and status $status, expecting '$mediaType'",
                     status.code,
@@ -62,9 +69,8 @@ data class RestClientInterpreter(val client: RestClient) {
         }
 
     internal fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler =
-        object: ResponseErrorHandler {
-            override fun hasError(response: ClientHttpResponse): Boolean =
-                true
+        object : ResponseErrorHandler {
+            override fun hasError(response: ClientHttpResponse): Boolean = true
 
             override fun handleError(
                 url: URI,
@@ -72,14 +78,15 @@ data class RestClientInterpreter(val client: RestClient) {
                 response: ClientHttpResponse
             ) {
                 val status = response.statusCode.toStatus()
-                val expected = outputBodies.flatMap {
-                    when (val matcher = it.statusMatcher) {
-                        is StatusMatcher.Is -> listOf(matcher.status.toString())
-                        is StatusMatcher.AnyOf -> matcher.statuses.map { s -> s.toString() }
-                        is StatusMatcher.Predicate -> listOf(matcher.description)
-                        StatusMatcher.Unmatched -> emptyList()
+                val expected =
+                    outputBodies.flatMap {
+                        when (val matcher = it.statusMatcher) {
+                            is StatusMatcher.Is -> listOf(matcher.status.toString())
+                            is StatusMatcher.AnyOf -> matcher.statuses.map { s -> s.toString() }
+                            is StatusMatcher.Predicate -> listOf(matcher.description)
+                            StatusMatcher.Unmatched -> emptyList()
+                        }
                     }
-                }
                 throw RestClientResponseException(
                     "Unexpected status code '${status.code}' for request '${"$method $url"}', expecting $expected",
                     status.code,

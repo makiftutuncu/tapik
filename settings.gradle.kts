@@ -1,6 +1,19 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    plugins {
+        id("dev.akif.tapik.gradle") version "0.1.0"
+    }
+}
+
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositories {
+        google()
         mavenCentral()
     }
 }
@@ -13,6 +26,7 @@ include(":app")
 include(":codec")
 include(":code-generator")
 include(":core")
+include(":gradle-plugin")
 include(":jackson")
 include(":spring-restclient")
 include(":types")

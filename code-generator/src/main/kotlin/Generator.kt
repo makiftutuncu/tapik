@@ -8,8 +8,6 @@ import java.nio.file.StandardOpenOption
 
 interface Generator {
     companion object {
-        const val GENERATED_COMMENT = "// This file is auto-generated. Do not edit manually as your changes will be lost."
-
         val kotlinSourceRoot: List<String> = listOf("src", "main", "kotlin")
     }
 
@@ -23,7 +21,9 @@ interface Generator {
         println("Running $this with limit=$limit and verbose=$verbose...")
 
         val content =
-            """|$GENERATED_COMMENT
+            """|// This file is auto-generated. Do not edit manually as your changes will be lost.
+               |@file:Suppress("ktlint:standard:max-line-length")
+               |
                |package ${packages.joinToString(separator = ".", prefix = "dev.akif.tapik.").removeSuffix(".")}
                |
                |${generate(limit)}""".trimMargin()

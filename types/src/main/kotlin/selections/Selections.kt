@@ -1,11 +1,18 @@
 // This file is auto-generated. Do not edit manually as your changes will be lost.
+@file:Suppress("ktlint:standard:max-line-length")
+
 package dev.akif.tapik.selections
 
 sealed interface Selection
 
-sealed interface Selection2<out T1, out T2>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection2<T, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection2<Nothing, T>
+sealed interface Selection2<out T1, out T2> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection2<T, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection2<Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -17,10 +24,18 @@ sealed interface Selection2<out T1, out T2>: Selection {
         }
 }
 
-sealed interface Selection3<out T1, out T2, out T3>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection3<T, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection3<Nothing, T, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection3<Nothing, Nothing, T>
+sealed interface Selection3<out T1, out T2, out T3> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection3<T, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection3<Nothing, T, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection3<Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -34,11 +49,22 @@ sealed interface Selection3<out T1, out T2, out T3>: Selection {
         }
 }
 
-sealed interface Selection4<out T1, out T2, out T3, out T4>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection4<T, Nothing, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection4<Nothing, T, Nothing, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection4<Nothing, Nothing, T, Nothing>
-    @JvmInline value class Option4<T>(val value: T): Selection4<Nothing, Nothing, Nothing, T>
+sealed interface Selection4<out T1, out T2, out T3, out T4> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection4<T, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection4<Nothing, T, Nothing, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection4<Nothing, Nothing, T, Nothing>
+
+    @JvmInline value class Option4<T>(
+        val value: T
+    ) : Selection4<Nothing, Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -54,12 +80,26 @@ sealed interface Selection4<out T1, out T2, out T3, out T4>: Selection {
         }
 }
 
-sealed interface Selection5<out T1, out T2, out T3, out T4, out T5>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection5<T, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection5<Nothing, T, Nothing, Nothing, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection5<Nothing, Nothing, T, Nothing, Nothing>
-    @JvmInline value class Option4<T>(val value: T): Selection5<Nothing, Nothing, Nothing, T, Nothing>
-    @JvmInline value class Option5<T>(val value: T): Selection5<Nothing, Nothing, Nothing, Nothing, T>
+sealed interface Selection5<out T1, out T2, out T3, out T4, out T5> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection5<T, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection5<Nothing, T, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection5<Nothing, Nothing, T, Nothing, Nothing>
+
+    @JvmInline value class Option4<T>(
+        val value: T
+    ) : Selection5<Nothing, Nothing, Nothing, T, Nothing>
+
+    @JvmInline value class Option5<T>(
+        val value: T
+    ) : Selection5<Nothing, Nothing, Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -77,13 +117,30 @@ sealed interface Selection5<out T1, out T2, out T3, out T4, out T5>: Selection {
         }
 }
 
-sealed interface Selection6<out T1, out T2, out T3, out T4, out T5, out T6>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection6<T, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection6<Nothing, T, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection6<Nothing, Nothing, T, Nothing, Nothing, Nothing>
-    @JvmInline value class Option4<T>(val value: T): Selection6<Nothing, Nothing, Nothing, T, Nothing, Nothing>
-    @JvmInline value class Option5<T>(val value: T): Selection6<Nothing, Nothing, Nothing, Nothing, T, Nothing>
-    @JvmInline value class Option6<T>(val value: T): Selection6<Nothing, Nothing, Nothing, Nothing, Nothing, T>
+sealed interface Selection6<out T1, out T2, out T3, out T4, out T5, out T6> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection6<T, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection6<Nothing, T, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection6<Nothing, Nothing, T, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option4<T>(
+        val value: T
+    ) : Selection6<Nothing, Nothing, Nothing, T, Nothing, Nothing>
+
+    @JvmInline value class Option5<T>(
+        val value: T
+    ) : Selection6<Nothing, Nothing, Nothing, Nothing, T, Nothing>
+
+    @JvmInline value class Option6<T>(
+        val value: T
+    ) : Selection6<Nothing, Nothing, Nothing, Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -103,14 +160,34 @@ sealed interface Selection6<out T1, out T2, out T3, out T4, out T5, out T6>: Sel
         }
 }
 
-sealed interface Selection7<out T1, out T2, out T3, out T4, out T5, out T6, out T7>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection7<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection7<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection7<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option4<T>(val value: T): Selection7<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
-    @JvmInline value class Option5<T>(val value: T): Selection7<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
-    @JvmInline value class Option6<T>(val value: T): Selection7<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
-    @JvmInline value class Option7<T>(val value: T): Selection7<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
+sealed interface Selection7<out T1, out T2, out T3, out T4, out T5, out T6, out T7> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection7<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection7<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection7<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option4<T>(
+        val value: T
+    ) : Selection7<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option5<T>(
+        val value: T
+    ) : Selection7<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
+
+    @JvmInline value class Option6<T>(
+        val value: T
+    ) : Selection7<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
+
+    @JvmInline value class Option7<T>(
+        val value: T
+    ) : Selection7<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -132,15 +209,38 @@ sealed interface Selection7<out T1, out T2, out T3, out T4, out T5, out T6, out 
         }
 }
 
-sealed interface Selection8<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection8<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection8<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection8<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option4<T>(val value: T): Selection8<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option5<T>(val value: T): Selection8<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
-    @JvmInline value class Option6<T>(val value: T): Selection8<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
-    @JvmInline value class Option7<T>(val value: T): Selection8<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
-    @JvmInline value class Option8<T>(val value: T): Selection8<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
+sealed interface Selection8<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection8<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection8<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection8<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option4<T>(
+        val value: T
+    ) : Selection8<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option5<T>(
+        val value: T
+    ) : Selection8<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option6<T>(
+        val value: T
+    ) : Selection8<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
+
+    @JvmInline value class Option7<T>(
+        val value: T
+    ) : Selection8<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
+
+    @JvmInline value class Option8<T>(
+        val value: T
+    ) : Selection8<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -164,16 +264,42 @@ sealed interface Selection8<out T1, out T2, out T3, out T4, out T5, out T6, out 
         }
 }
 
-sealed interface Selection9<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection9<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection9<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection9<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option4<T>(val value: T): Selection9<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option5<T>(val value: T): Selection9<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option6<T>(val value: T): Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
-    @JvmInline value class Option7<T>(val value: T): Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
-    @JvmInline value class Option8<T>(val value: T): Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
-    @JvmInline value class Option9<T>(val value: T): Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
+sealed interface Selection9<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9> : Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection9<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection9<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection9<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option4<T>(
+        val value: T
+    ) : Selection9<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option5<T>(
+        val value: T
+    ) : Selection9<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option6<T>(
+        val value: T
+    ) : Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option7<T>(
+        val value: T
+    ) : Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
+
+    @JvmInline value class Option8<T>(
+        val value: T
+    ) : Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
+
+    @JvmInline value class Option9<T>(
+        val value: T
+    ) : Selection9<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,
@@ -199,17 +325,47 @@ sealed interface Selection9<out T1, out T2, out T3, out T4, out T5, out T6, out 
         }
 }
 
-sealed interface Selection10<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9, out T10>: Selection {
-    @JvmInline value class Option1<T>(val value: T): Selection10<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option2<T>(val value: T): Selection10<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option3<T>(val value: T): Selection10<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option4<T>(val value: T): Selection10<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option5<T>(val value: T): Selection10<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option6<T>(val value: T): Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
-    @JvmInline value class Option7<T>(val value: T): Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
-    @JvmInline value class Option8<T>(val value: T): Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
-    @JvmInline value class Option9<T>(val value: T): Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
-    @JvmInline value class Option10<T>(val value: T): Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
+sealed interface Selection10<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9, out T10> :
+    Selection {
+    @JvmInline value class Option1<T>(
+        val value: T
+    ) : Selection10<T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option2<T>(
+        val value: T
+    ) : Selection10<Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option3<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option4<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option5<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option6<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option7<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing, Nothing>
+
+    @JvmInline value class Option8<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing, Nothing>
+
+    @JvmInline value class Option9<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T, Nothing>
+
+    @JvmInline value class Option10<T>(
+        val value: T
+    ) : Selection10<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, T>
 
     fun <R> select(
         when1: (T1) -> R,

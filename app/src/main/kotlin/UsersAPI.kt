@@ -36,7 +36,10 @@ object Users {
             .outputBody { jsonBody<UserPage>("response") }
     }
 
-    val create by http(description = "Create new user", details = "This endpoint creates a new user with given information.") {
+    val create by http(
+        description = "Create new user",
+        details = "This endpoint creates a new user with given information."
+    ) {
         post
             .uri(base)
             .inputHeader(header.Accept(MediaType.Json, MediaType.PlainText))
@@ -54,14 +57,20 @@ object Users {
             .outputBody(Status.NOT_FOUND) { errorResponse }
     }
 
-    val getStatus by http(description = "Get status of a user", details = "This endpoint gets the status of the user with given id.") {
+    val getStatus by http(
+        description = "Get status of a user",
+        details = "This endpoint gets the status of the user with given id."
+    ) {
         get
             .uri(base / id / "status")
             .outputBody { stringBody() }
             .outputBody(Status.NOT_FOUND) { errorResponse }
     }
 
-    val getAvatar by http(description = "Get avatar of a user", details = "This endpoint gets the avatar of the user with given id.") {
+    val getAvatar by http(
+        description = "Get avatar of a user",
+        details = "This endpoint gets the avatar of the user with given id."
+    ) {
         get
             .uri(base / id / "avatar" + query.int("size"))
             .outputBody {

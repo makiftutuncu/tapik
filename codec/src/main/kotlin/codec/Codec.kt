@@ -75,8 +75,7 @@ inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Tar
 
         override val targetClass: KClass<Target2> = Target2::class
 
-        override fun decode(input: Target2): EitherNel<String, Source> =
-            this@unsafeTransform.decode(from(input))
+        override fun decode(input: Target2): EitherNel<String, Source> = this@unsafeTransform.decode(from(input))
 
         override fun encode(input: Source): Target2 = to(this@unsafeTransform.encode(input))
     }

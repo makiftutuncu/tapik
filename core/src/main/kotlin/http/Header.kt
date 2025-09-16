@@ -3,7 +3,6 @@ package dev.akif.tapik.http
 import dev.akif.tapik.codec.Defaults
 import dev.akif.tapik.codec.StringCodec
 import dev.akif.tapik.codec.StringCodecs
-import dev.akif.tapik.http.StringCodecs as HttpStringCodecs
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.URI
@@ -15,27 +14,27 @@ sealed interface Header<H : Any> {
     val required: Boolean
 
     companion object : Defaults<Header<Unit>, Header<Boolean>, Header<Byte>, Header<Short>, Header<Int>, Header<Long>, Header<Float>, Header<Double>, Header<BigInteger>, Header<BigDecimal>, Header<String>, Header<UUID>> {
-        override fun unit(name: String): Header<Unit> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.unit(name))
+        override fun unit(name: String): Header<Unit> = HeaderInput(name, StringCodecs.unit(name))
 
-        override fun boolean(name: String): Header<Boolean> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.boolean(name))
+        override fun boolean(name: String): Header<Boolean> = HeaderInput(name, StringCodecs.boolean(name))
 
-        override fun byte(name: String): Header<Byte> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.byte(name))
+        override fun byte(name: String): Header<Byte> = HeaderInput(name, StringCodecs.byte(name))
 
-        override fun short(name: String): Header<Short> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.short(name))
+        override fun short(name: String): Header<Short> = HeaderInput(name, StringCodecs.short(name))
 
-        override fun int(name: String): Header<Int> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.int(name))
+        override fun int(name: String): Header<Int> = HeaderInput(name, StringCodecs.int(name))
 
-        override fun long(name: String): Header<Long> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.long(name))
+        override fun long(name: String): Header<Long> = HeaderInput(name, StringCodecs.long(name))
 
-        override fun float(name: String): Header<Float> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.float(name))
+        override fun float(name: String): Header<Float> = HeaderInput(name, StringCodecs.float(name))
 
-        override fun double(name: String): Header<Double> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.double(name))
+        override fun double(name: String): Header<Double> = HeaderInput(name, StringCodecs.double(name))
 
-        override fun bigInteger(name: String): Header<BigInteger> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.bigInteger(name))
+        override fun bigInteger(name: String): Header<BigInteger> = HeaderInput(name, StringCodecs.bigInteger(name))
 
-        override fun bigDecimal(name: String): Header<BigDecimal> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.bigDecimal(name))
+        override fun bigDecimal(name: String): Header<BigDecimal> = HeaderInput(name, StringCodecs.bigDecimal(name))
 
-        override fun string(name: String): Header<String> = HeaderInput(name, dev.akif.tapik.codec.StringCodecs.string(name))
+        override fun string(name: String): Header<String> = HeaderInput(name, StringCodecs.string(name))
 
         override fun uuid(name: String): Header<UUID> = HeaderInput(name, StringCodecs.uuid(name))
 

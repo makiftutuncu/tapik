@@ -1,4 +1,6 @@
 // This file is auto-generated. Do not edit manually as your changes will be lost.
+@file:Suppress("ktlint:standard:max-line-length")
+
 package dev.akif.tapik.spring.restclient
 
 import arrow.core.getOrElse

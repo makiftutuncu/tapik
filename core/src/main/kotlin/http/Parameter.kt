@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:max-line-length")
-
 package dev.akif.tapik.http
 
 import dev.akif.tapik.codec.Defaults
@@ -66,21 +64,29 @@ data class QueryParameter<Q : Any>(
     fun optional(default: Q): QueryParameter<Q> = copy(required = false, default = default)
 
     companion object : Defaults<QueryParameter<Unit>, QueryParameter<Boolean>, QueryParameter<Byte>, QueryParameter<Short>, QueryParameter<Int>, QueryParameter<Long>, QueryParameter<Float>, QueryParameter<Double>, QueryParameter<BigInteger>, QueryParameter<BigDecimal>, QueryParameter<String>, QueryParameter<UUID>> {
-        override fun unit(name: String): QueryParameter<Unit> = QueryParameter(name, StringCodecs.unit(name), required = true, default = null)
+        override fun unit(name: String): QueryParameter<Unit> =
+            QueryParameter(name, StringCodecs.unit(name), required = true, default = null)
 
-        override fun boolean(name: String): QueryParameter<Boolean> = QueryParameter(name, StringCodecs.boolean(name), required = true, default = null)
+        override fun boolean(name: String): QueryParameter<Boolean> =
+            QueryParameter(name, StringCodecs.boolean(name), required = true, default = null)
 
-        override fun byte(name: String): QueryParameter<Byte> = QueryParameter(name, StringCodecs.byte(name), required = true, default = null)
+        override fun byte(name: String): QueryParameter<Byte> =
+            QueryParameter(name, StringCodecs.byte(name), required = true, default = null)
 
-        override fun short(name: String): QueryParameter<Short> = QueryParameter(name, StringCodecs.short(name), required = true, default = null)
+        override fun short(name: String): QueryParameter<Short> =
+            QueryParameter(name, StringCodecs.short(name), required = true, default = null)
 
-        override fun int(name: String): QueryParameter<Int> = QueryParameter(name, StringCodecs.int(name), required = true, default = null)
+        override fun int(name: String): QueryParameter<Int> =
+            QueryParameter(name, StringCodecs.int(name), required = true, default = null)
 
-        override fun long(name: String): QueryParameter<Long> = QueryParameter(name, StringCodecs.long(name), required = true, default = null)
+        override fun long(name: String): QueryParameter<Long> =
+            QueryParameter(name, StringCodecs.long(name), required = true, default = null)
 
-        override fun float(name: String): QueryParameter<Float> = QueryParameter(name, StringCodecs.float(name), required = true, default = null)
+        override fun float(name: String): QueryParameter<Float> =
+            QueryParameter(name, StringCodecs.float(name), required = true, default = null)
 
-        override fun double(name: String): QueryParameter<Double> = QueryParameter(name, StringCodecs.double(name), required = true, default = null)
+        override fun double(name: String): QueryParameter<Double> =
+            QueryParameter(name, StringCodecs.double(name), required = true, default = null)
 
         override fun bigInteger(name: String): QueryParameter<BigInteger> =
             QueryParameter(name, StringCodecs.bigInteger(name), required = true, default = null)
@@ -88,8 +94,10 @@ data class QueryParameter<Q : Any>(
         override fun bigDecimal(name: String): QueryParameter<BigDecimal> =
             QueryParameter(name, StringCodecs.bigDecimal(name), required = true, default = null)
 
-        override fun string(name: String): QueryParameter<String> = QueryParameter(name, StringCodecs.string(name), required = true, default = null)
+        override fun string(name: String): QueryParameter<String> =
+            QueryParameter(name, StringCodecs.string(name), required = true, default = null)
 
-        override fun uuid(name: String): QueryParameter<UUID> = QueryParameter(name, StringCodecs.uuid(name), required = true, default = null)
+        override fun uuid(name: String): QueryParameter<UUID> =
+            QueryParameter(name, StringCodecs.uuid(name), required = true, default = null)
     }
 }

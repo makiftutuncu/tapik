@@ -4,8 +4,7 @@ import dev.akif.tapik.Endpoint
 import dev.akif.tapik.codec.StringCodec
 import kotlin.properties.ReadOnlyProperty
 
-fun String.toURIWithParameters(): URIWithParameters<Parameters0> =
-    listOf(this) to Parameters0()
+fun String.toURIWithParameters(): URIWithParameters<Parameters0> = listOf(this) to Parameters0()
 
 inline fun <reified P : Any> path(
     name: String,
@@ -23,23 +22,31 @@ fun <Q : Any> query(
 
 val query: QueryParameter.Companion = QueryParameter.Companion
 
-inline fun <reified H: Any> header(
+inline fun <reified H : Any> header(
     name: String,
     codec: StringCodec<H>
 ): Header<H> = HeaderInput(name, codec)
 
 val header: Header.Companion = Header.Companion
 
-fun anyStatus(first: Status, vararg rest: Status): StatusMatcher =
-    StatusMatcher.AnyOf(setOf(first, *rest))
+fun anyStatus(
+    first: Status,
+    vararg rest: Status
+): StatusMatcher = StatusMatcher.AnyOf(setOf(first, *rest))
 
-fun matchStatus(description: String, predicate: (Status) -> Boolean): StatusMatcher =
-    StatusMatcher.Predicate(description, predicate)
+fun matchStatus(
+    description: String,
+    predicate: (Status) -> Boolean
+): StatusMatcher = StatusMatcher.Predicate(description, predicate)
 
 val unmatchedStatus: StatusMatcher =
     StatusMatcher.Unmatched
 
-fun <T, P: Parameters, IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies> http(description: String? = null, details: String? = null, builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<P, IH, IB, OH, OB>): ReadOnlyProperty<T, HttpEndpoint<P, IH, IB, OH, OB>> =
+fun <T, P : Parameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> http(
+    description: String? = null,
+    details: String? = null,
+    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<P, IH, IB, OH, OB>
+): ReadOnlyProperty<T, HttpEndpoint<P, IH, IB, OH, OB>> =
     ReadOnlyProperty { _, property ->
         HttpEndpointWithoutMethod(id = property.name, description = description, details = details).builder()
     }
@@ -77,8 +84,8 @@ data class HttpEndpointWithoutURI(
     override val outputHeaders: Headers0 = Headers0()
     override val outputBodies: OutputBodies0 = OutputBodies0()
 
-    fun uri(segment: String): HttpEndpoint<Parameters0, Headers0, EmptyBody, Headers0, OutputBodies0> {
-        return HttpEndpoint(
+    fun uri(segment: String): HttpEndpoint<Parameters0, Headers0, EmptyBody, Headers0, OutputBodies0> =
+        HttpEndpoint(
             id = this.id,
             description = this.description,
             details = this.details,
@@ -90,10 +97,11 @@ data class HttpEndpointWithoutURI(
             outputHeaders = this.outputHeaders,
             outputBodies = OutputBodies0()
         )
-    }
 
-    fun <P : Any> uri(parameter: Parameter<P>): HttpEndpoint<Parameters1<P>, Headers0, EmptyBody, Headers0, OutputBodies0> {
-        return HttpEndpoint(
+    fun <P : Any> uri(
+        parameter: Parameter<P>
+    ): HttpEndpoint<Parameters1<P>, Headers0, EmptyBody, Headers0, OutputBodies0> =
+        HttpEndpoint(
             id = this.id,
             description = this.description,
             details = this.details,
@@ -105,9 +113,10 @@ data class HttpEndpointWithoutURI(
             outputHeaders = this.outputHeaders,
             outputBodies = OutputBodies0()
         )
-    }
 
-    fun <P : Parameters> uri(uriWithParameters: URIWithParameters<P>): HttpEndpoint<P, Headers0, EmptyBody, Headers0, OutputBodies0> {
+    fun <P : Parameters> uri(
+        uriWithParameters: URIWithParameters<P>
+    ): HttpEndpoint<P, Headers0, EmptyBody, Headers0, OutputBodies0> {
         val (uri, parameters) = uriWithParameters
         return HttpEndpoint(
             id = this.id,
@@ -124,7 +133,7 @@ data class HttpEndpointWithoutURI(
     }
 }
 
-data class HttpEndpoint<out P: Parameters, out IH: Headers, out IB: Body<*>, out OH: Headers, out OB: OutputBodies>(
+data class HttpEndpoint<out P : Parameters, out IH : Headers, out IB : Body<*>, out OH : Headers, out OB : OutputBodies>(
     public override val id: String,
     public override val description: String?,
     public override val details: String?,

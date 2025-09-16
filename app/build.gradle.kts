@@ -4,6 +4,7 @@ plugins {
     application
     id("buildsrc.convention.kotlin-jvm")
     alias(libs.plugins.ktlint)
+    id("dev.akif.tapik.gradle")
 }
 
 dependencies {
@@ -22,4 +23,11 @@ application {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.compilerOptions {
     freeCompilerArgs.set(listOf("-Xcontext-parameters"))
+}
+
+tapik {
+    springRestClient {
+        endpointPackages("dev.akif.app")
+        outputPackage.set("dev.akif.app.generated")
+    }
 }

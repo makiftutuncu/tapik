@@ -1,6 +1,6 @@
 package dev.akif.tapik.http
 
-fun <P: Parameters, IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies> HttpEndpoint<P, IH, EmptyBody, OH, OB>.inputBody(
+fun <P : Parameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> HttpEndpoint<P, IH, EmptyBody, OH, OB>.inputBody(
     inputBody: () -> IB
 ): HttpEndpoint<P, IH, IB, OH, OB> =
     HttpEndpoint(
