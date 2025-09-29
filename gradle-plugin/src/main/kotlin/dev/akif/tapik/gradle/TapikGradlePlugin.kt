@@ -8,28 +8,30 @@ class TapikGradlePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val extension = target.extensions.create("tapik", TapikExtension::class.java)
 
-        // Cacheable info task
-        val tapikInfo = target.tasks.register<TapikInfoTask>("tapikInfo") {
-            group = "tapik"
-            description = "Prints Tapik plugin configuration"
-            endpointPackages.set(extension.springRestClient.endpointPackages)
-            outputPackage.set(extension.springRestClient.outputPackage)
-        }
+        val generatedSources = target.layout.buildDirectory.dir("generated/sources/tapik/main/kotlin")
 
-        // Cacheable generate task
         val tapikGenerate = target.tasks.register<TapikGenerateTask>("tapikGenerate") {
             group = "tapik"
-            description = "Generates code using Tapik (spring-restclient)"
+            description = "Generates Tapik outputs"
             endpointPackages.set(extension.springRestClient.endpointPackages)
             outputPackage.set(extension.springRestClient.outputPackage)
-            outputDirectory.set(target.layout.buildDirectory.dir("tapik/generated"))
+            outputDirectory.set(target.layout.buildDirectory.dir("generated"))
             sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
+            generatedSourcesDirectory.set(generatedSources)
         }
 
-        // Ensure generation runs after Kotlin compilation so we can analyze compiled bytecode
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
             target.tasks.named("compileKotlin").configure { finalizedBy(tapikGenerate) }
+            tapikGenerate.configure { dependsOn(target.tasks.named("compileKotlin")) }
+
+            target.extensions.findByName("kotlin")?.let { kotlinExtension ->
+                val sourceSets = kotlinExtension::class.java.getMethod("getSourceSets").invoke(kotlinExtension)
+                val getByName = sourceSets::class.java.getMethod("getByName", String::class.java)
+                val mainSourceSet = getByName.invoke(sourceSets, "main")
+                val kotlin = mainSourceSet::class.java.methods.first { it.name == "getKotlin" }.invoke(mainSourceSet) as org.gradle.api.file.SourceDirectorySet
+                kotlin.srcDir(generatedSources)
+            }
         }
     }
 }

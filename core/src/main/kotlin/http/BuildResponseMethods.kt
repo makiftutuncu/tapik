@@ -3,15 +3,13 @@
 
 package dev.akif.tapik.http
 
-import dev.akif.tapik.selections.*
-
-private fun <B, OB : Body<B>, R : Response<B>, Option> OutputBody<OB>.decode(
-    status: Status,
-    bytes: ByteArray,
-    buildResponse: (B) -> R,
-    constructOption: (R) -> Option
+private fun <B, OB: Body<B>, R: Response<B>, Option> OutputBody<OB>.decode(
+   status: Status,
+   bytes: ByteArray,
+   buildResponse: (B) -> R,
+   constructOption: (R) -> Option
 ): Option =
-    body.codec.decode(bytes).fold(
-        { error("Cannot decode response for status $status as ${body.codec.sourceClass.simpleName}") },
-        { body -> constructOption(buildResponse(body)) }
-    )
+   body.codec.decode(bytes).fold(
+       { error("Cannot decode response for status $status as ${body.codec.sourceClass.simpleName}") },
+       { body -> constructOption(buildResponse(body)) }
+   )

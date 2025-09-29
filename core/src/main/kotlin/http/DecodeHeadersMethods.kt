@@ -9,14 +9,16 @@ import arrow.core.leftNel
 import arrow.core.right
 import dev.akif.tapik.tuples.*
 
-fun <H> decodeHeaders0(): Tuple0<List<H>> = Tuple0()
+fun <H> decodeHeaders0(): Tuple0<List<H>> =
+   Tuple0()
 
-fun <H : Any, H1 : H> decodeHeaders1(
+fun <H: Any, H1: H> decodeHeaders1(
     headers: Map<String, List<String>>,
     header1: Header<H1>
-): EitherNel<String, Tuple1<List<H>, List<H1>>> = decodeHeader(headers, header1).map { Tuple1(it) }
+): EitherNel<String, Tuple1<List<H>, List<H1>>> =
+   decodeHeader(headers, header1).map { Tuple1(it) }
 
-fun <H : Any, H1 : H, H2 : H> decodeHeaders2(
+fun <H: Any, H1: H, H2: H> decodeHeaders2(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>
@@ -28,7 +30,7 @@ fun <H : Any, H1 : H, H2 : H> decodeHeaders2(
         Tuple2(values1, values2)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H> decodeHeaders3(
+fun <H: Any, H1: H, H2: H, H3: H> decodeHeaders3(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -42,7 +44,7 @@ fun <H : Any, H1 : H, H2 : H, H3 : H> decodeHeaders3(
         Tuple3(values1, values2, values3)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H> decodeHeaders4(
+fun <H: Any, H1: H, H2: H, H3: H, H4: H> decodeHeaders4(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -58,7 +60,7 @@ fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H> decodeHeaders4(
         Tuple4(values1, values2, values3, values4)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H> decodeHeaders5(
+fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H> decodeHeaders5(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -76,7 +78,7 @@ fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H> decodeHeaders5(
         Tuple5(values1, values2, values3, values4, values5)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H> decodeHeaders6(
+fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H> decodeHeaders6(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -96,7 +98,7 @@ fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H> decodeHeaders6(
         Tuple6(values1, values2, values3, values4, values5, values6)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H> decodeHeaders7(
+fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H> decodeHeaders7(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -118,7 +120,7 @@ fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H> decodeHead
         Tuple7(values1, values2, values3, values4, values5, values6, values7)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H, H8 : H> decodeHeaders8(
+fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H> decodeHeaders8(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -142,7 +144,7 @@ fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H, H8 : H> de
         Tuple8(values1, values2, values3, values4, values5, values6, values7, values8)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H, H8 : H, H9 : H> decodeHeaders9(
+fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H> decodeHeaders9(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -168,7 +170,7 @@ fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H, H8 : H, H9
         Tuple9(values1, values2, values3, values4, values5, values6, values7, values8, values9)
     }
 
-fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H, H8 : H, H9 : H, H10 : H> decodeHeaders10(
+fun <H: Any, H1: H, H2: H, H3: H, H4: H, H5: H, H6: H, H7: H, H8: H, H9: H, H10: H> decodeHeaders10(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
     header2: Header<H2>,
@@ -196,9 +198,9 @@ fun <H : Any, H1 : H, H2 : H, H3 : H, H4 : H, H5 : H, H6 : H, H7 : H, H8 : H, H9
         Tuple10(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10)
     }
 
-private fun <H : Any> decodeHeader(
-    values: Map<String, List<String>>,
-    header: Header<H>
+private fun <H: Any> decodeHeader(
+   values: Map<String, List<String>>,
+   header: Header<H>
 ): EitherNel<String, List<H>> =
     when (header) {
         is HeaderInput<H> -> {

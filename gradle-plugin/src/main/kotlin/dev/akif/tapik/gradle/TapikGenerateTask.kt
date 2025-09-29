@@ -1,20 +1,24 @@
 package dev.akif.tapik.gradle
 
+import java.io.File
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import java.io.File
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
 
 @CacheableTask
 abstract class TapikGenerateTask : DefaultTask() {
@@ -35,101 +39,160 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val compiledClassesDirectory: DirectoryProperty
 
+    @get:OutputDirectory
+    abstract val generatedSourcesDirectory: DirectoryProperty
+
     @TaskAction
     fun generate() {
-        val outDir = outputDirectory.get().asFile
-        outDir.mkdirs()
-
-        val pkg = outputPackage.orNull ?: ""
-        val pkgs = endpointPackages.orNull ?: emptyList()
-        logger.lifecycle("[tapik] Analyzing HttpEndpoint types in packages: $pkgs")
-
-        // Resolve Kotlin source root from configured property
-        val sourceRoot: File = sourceDirectory.get().asFile
-        if (!sourceRoot.exists()) {
-            logger.lifecycle("[tapik] No Kotlin sources found at ${sourceRoot.absolutePath}")
-            return
-        }
-
-        // Use bytecode analysis to get actual resolved types from compiled classes
-        val bytecodeTypeAnalyzer = BytecodeTypeAnalyzer()
-        val compiledClassesDir = compiledClassesDirectory.get().asFile
-        val resolvedEndpoints = try {
-            if (compiledClassesDir.exists()) {
-                bytecodeTypeAnalyzer.analyzeEndpoints(pkgs, compiledClassesDir, logger)
-            } else {
-                logger.warn("[tapik] No compiled classes found at ${compiledClassesDir.absolutePath}")
-                emptyList()
+        val outDir = outputDirectory.get().asFile.also { it.mkdirs() }
+        val generatedSourcesDir = generatedSourcesDirectory.get().asFile.also {
+            if (it.exists()) {
+                it.deleteRecursively()
             }
-        } catch (e: Exception) {
-            logger.error("[tapik] Bytecode analysis failed", e)
-            emptyList()
+            it.mkdirs()
         }
+        val pkg = outputPackage.orNull ?: ""
+        val pkgs = endpointPackages.orNull?.filter { it.isNotBlank() }?.distinct()?.sorted().orEmpty()
 
-        if (resolvedEndpoints.isEmpty()) {
-            logger.lifecycle("[tapik] No HttpEndpoint properties found in scope")
+        val compiledDir = compiledClassesDirectory.get().asFile
+        if (!compiledDir.exists() || !compiledDir.isDirectory) {
+            logger.warn("[tapik] Compiled classes directory is missing: ${compiledDir.absolutePath}")
             return
         }
 
-        // Filter out synthetic methods and simplify type names
-        val filteredEndpoints = resolvedEndpoints.filter { endpoint ->
-            !endpoint.name.contains("$") && !endpoint.name.startsWith("_") &&
-            !endpoint.name.contains("delegate") && !endpoint.name.contains("lambda")
-        }.map { endpoint ->
-            endpoint.copy(fullType = bytecodeTypeAnalyzer.simplifyTapikTypes(endpoint.fullType))
-        }
+        val endpoints = scanForHttpEndpoints(compiledDir, pkgs)
 
-        logger.lifecycle("[tapik] Resolved ${filteredEndpoints.size} HttpEndpoint properties (filtered from ${resolvedEndpoints.size}):")
-        filteredEndpoints.forEach { endpoint ->
-            val type = if (endpoint.isDelegated) "delegated" else "explicit"
-            logger.lifecycle("[tapik] ${endpoint.name} (${endpoint.packageName}) [$type] -> ${endpoint.fullType}")
-        }
-        writeJsonOutput(filteredEndpoints, outDir, pkg, pkgs, logger)
+        writeJsonOutput(endpoints, outDir, pkg, pkgs, logger)
+        writeGeneratedSources(endpoints, generatedSourcesDir, pkg, pkgs)
+    }
+
+    private fun scanForHttpEndpoints(compiledDir: File, packages: List<String>): List<HttpEndpointDescription> {
+        val packageFilters = packages.map { it.replace('.', '/') }
+        val results = LinkedHashMap<String, HttpEndpointDescription>()
+
+        compiledDir.walkTopDown()
+            .filter { it.isFile && it.extension == "class" }
+            .forEach { classFile ->
+                val relativePath = classFile.relativeTo(compiledDir).path.replace(File.separatorChar, '/')
+                if (packageFilters.isNotEmpty() && packageFilters.none { relativePath.startsWith(it) }) {
+                    return@forEach
+                }
+
+                try {
+                    val classReader = ClassReader(classFile.readBytes())
+                    classReader.accept(ClassScanner(logger) { signature, owner, memberName ->
+                        runCatching {
+                            BytecodeParser.parseHttpEndpoint(signature, owner, memberName)
+                        }.onFailure { error ->
+                            logger.debug("[tapik] Failed to parse signature for $owner#$memberName", error)
+                        }.getOrNull()?.let { description ->
+                            results[description.uniqueKey()] = description
+                        }
+                    }, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
+                } catch (e: Exception) {
+                    logger.warn("[tapik] Failed to analyse class: ${classFile.absolutePath}", e)
+                }
+            }
+
+        return results.values
+            .sortedWith(compareBy<HttpEndpointDescription> { it.packageName }
+                .thenBy { it.file }
+                .thenBy { it.name })
+    }
+
+    private fun HttpEndpointDescription.uniqueKey(): String = buildString {
+        append(packageName)
+        append('/')
+        append(file)
+        append('#')
+        append(name)
     }
 
     private fun writeJsonOutput(
-        endpoints: List<ResolvedEndpointInfo>,
+        endpoints: List<HttpEndpointDescription>,
         outputDir: File,
         outputPackage: String,
         endpointPackages: List<String>,
-        logger: org.gradle.api.logging.Logger
+        logger: Logger
     ) {
-        val report = TapikReport(
+        val report = HttpEndpointsReport(
             outputPackage = outputPackage,
             endpointPackages = endpointPackages,
-            endpoints = endpoints.map { endpoint ->
-                TapikEndpoint(
-                    name = endpoint.name,
-                    packageName = endpoint.packageName,
-                    fullType = endpoint.fullType,
-                    file = endpoint.file,
-                    isDelegated = endpoint.isDelegated
-                )
-            }
+            endpoints = endpoints
         )
 
         val json = Json { prettyPrint = true }
         val jsonOutput = json.encodeToString(report)
 
+        outputDir.mkdirs()
         val outputFile = outputDir.resolve("tapik-endpoints.json")
         outputFile.writeText(jsonOutput)
 
         logger.lifecycle("[tapik] JSON report written to: ${outputFile.absolutePath}")
     }
+
+    private fun writeGeneratedSources(
+        endpoints: List<HttpEndpointDescription>,
+        outputDir: File,
+        outputPackage: String,
+        endpointPackages: List<String>
+    ) {
+        if (endpoints.isEmpty()) {
+            return
+        }
+
+        if (endpointPackages.isNotEmpty()) {
+            SpringRestClientCodeGenerator.generate(
+                endpoints = endpoints,
+                outputPackage = outputPackage,
+                rootDir = outputDir
+            )
+        }
+    }
+
+    private class ClassScanner(
+        private val logger: Logger,
+        private val onEndpointFound: (signature: String, owner: String, name: String) -> Unit
+    ) : ClassVisitor(Opcodes.ASM9) {
+        private var owner: String = ""
+
+        override fun visit(
+            version: Int,
+            access: Int,
+            name: String?,
+            signature: String?,
+            superName: String?,
+            interfaces: Array<out String>?
+        ) {
+            if (name != null) {
+                owner = name
+            }
+            super.visit(version, access, name, signature, superName, interfaces)
+        }
+
+        override fun visitMethod(
+            access: Int,
+            name: String,
+            descriptor: String,
+            signature: String?,
+            exceptions: Array<out String>?
+        ): MethodVisitor {
+            if (signature != null &&
+                name != "<init>" &&
+                name != "<clinit>" &&
+                (name.startsWith("get") || name.startsWith("is")) &&
+                (access and Opcodes.ACC_SYNTHETIC) == 0 &&
+                (access and Opcodes.ACC_BRIDGE) == 0
+            ) {
+                try {
+                    onEndpointFound(signature, owner, name)
+                } catch (e: Exception) {
+                    logger.debug("[tapik] Error while handling $owner#$name", e)
+                }
+            }
+
+            return super.visitMethod(access, name, descriptor, signature, exceptions)
+                ?: object : MethodVisitor(Opcodes.ASM9) {}
+        }
+    }
 }
-
-@Serializable
-data class TapikReport(
-    val outputPackage: String,
-    val endpointPackages: List<String>,
-    val endpoints: List<TapikEndpoint>
-)
-
-@Serializable
-data class TapikEndpoint(
-    val name: String,
-    val packageName: String,
-    val fullType: String,
-    val file: String,
-    val isDelegated: Boolean
-)

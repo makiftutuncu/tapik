@@ -5,7 +5,6 @@ import dev.akif.tapik.generators.method.BuildResponseMethodGenerator
 import dev.akif.tapik.generators.method.DecodeHeadersMethodGenerator
 import dev.akif.tapik.generators.method.EncodeHeadersMethodGenerator
 import dev.akif.tapik.generators.method.BuildURIMethodGenerator
-import dev.akif.tapik.generators.method.SendWithRestClientMethodsGenerator
 import dev.akif.tapik.generators.type.ResponseGenerator
 import dev.akif.tapik.generators.type.SelectionsGenerator
 import dev.akif.tapik.generators.type.TupleGenerator
@@ -53,7 +52,6 @@ fun main(args: Array<String>) {
         add(EncodeHeadersMethodGenerator)
         add(ResponseGenerator)
         add(SelectionsGenerator)
-        add(SendWithRestClientMethodsGenerator(parameterIndex = 10, inputHeaderIndex = 10, outputHeaderIndex = 10))
         add(TupleGenerator)
     }
 

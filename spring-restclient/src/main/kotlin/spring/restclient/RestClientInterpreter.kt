@@ -13,7 +13,7 @@ import org.springframework.http.MediaType as SpringMediaType
 data class RestClientInterpreter(
     val client: RestClient
 ) {
-    internal fun send(
+    fun send(
         method: Method,
         uri: URI,
         inputHeaders: Map<String, List<String>>,
@@ -44,7 +44,7 @@ data class RestClientInterpreter(
             }.onStatus(unmatchedStatusHandler(outputBodies))
             .toEntity(ByteArray::class.java)
 
-    internal fun statusHandler(
+    fun statusHandler(
         outputBody: OutputBody<*>,
         method: Method,
         uri: URI
@@ -68,7 +68,7 @@ data class RestClientInterpreter(
             }
         }
 
-    internal fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler =
+    fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler =
         object : ResponseErrorHandler {
             override fun hasError(response: ClientHttpResponse): Boolean = true
 

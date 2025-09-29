@@ -5,10 +5,10 @@ package dev.akif.tapik.http
 
 import java.net.URI
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> HttpEndpoint<Parameters0, IH, IB, OH, OB>.buildURI(): URI =
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies> HttpEndpoint<Parameters0, IH, IB, OH, OB>.buildURI(): URI =
     build(uri)
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any> HttpEndpoint<Parameters1<P1>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any> HttpEndpoint<Parameters1<P1>, IH, IB, OH, OB>.buildURI(
     p1: P1
 ): URI =
     build(
@@ -16,7 +16,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any> Http
         parameters.item1 to parameters.item1.codec.encode(p1)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any> HttpEndpoint<Parameters2<P1, P2>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any> HttpEndpoint<Parameters2<P1, P2>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2
 ): URI =
@@ -26,7 +26,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item2 to parameters.item2.codec.encode(p2)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any> HttpEndpoint<Parameters3<P1, P2, P3>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any> HttpEndpoint<Parameters3<P1, P2, P3>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3
@@ -38,7 +38,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item3 to parameters.item3.codec.encode(p3)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any> HttpEndpoint<Parameters4<P1, P2, P3, P4>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any, P4: Any> HttpEndpoint<Parameters4<P1, P2, P3, P4>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -52,7 +52,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item4 to parameters.item4.codec.encode(p4)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any> HttpEndpoint<Parameters5<P1, P2, P3, P4, P5>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any, P4: Any, P5: Any> HttpEndpoint<Parameters5<P1, P2, P3, P4, P5>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -68,7 +68,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item5 to parameters.item5.codec.encode(p5)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any> HttpEndpoint<Parameters6<P1, P2, P3, P4, P5, P6>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any, P4: Any, P5: Any, P6: Any> HttpEndpoint<Parameters6<P1, P2, P3, P4, P5, P6>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -86,7 +86,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item6 to parameters.item6.codec.encode(p6)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any> HttpEndpoint<Parameters7<P1, P2, P3, P4, P5, P6, P7>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any, P4: Any, P5: Any, P6: Any, P7: Any> HttpEndpoint<Parameters7<P1, P2, P3, P4, P5, P6, P7>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -106,7 +106,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item7 to parameters.item7.codec.encode(p7)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any> HttpEndpoint<Parameters8<P1, P2, P3, P4, P5, P6, P7, P8>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any, P4: Any, P5: Any, P6: Any, P7: Any, P8: Any> HttpEndpoint<Parameters8<P1, P2, P3, P4, P5, P6, P7, P8>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -128,7 +128,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item8 to parameters.item8.codec.encode(p8)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any, P9 : Any> HttpEndpoint<Parameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any, P4: Any, P5: Any, P6: Any, P7: Any, P8: Any, P9: Any> HttpEndpoint<Parameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -152,7 +152,7 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item9 to parameters.item9.codec.encode(p9)
     )
 
-fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : Any, P8 : Any, P9 : Any, P10 : Any> HttpEndpoint<Parameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>, IH, IB, OH, OB>.buildURI(
+fun <IH: Headers, IB: Body<*>, OH: Headers, OB: OutputBodies, P1: Any, P2: Any, P3: Any, P4: Any, P5: Any, P6: Any, P7: Any, P8: Any, P9: Any, P10: Any> HttpEndpoint<Parameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>, IH, IB, OH, OB>.buildURI(
     p1: P1,
     p2: P2,
     p3: P3,
@@ -178,18 +178,15 @@ fun <IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies, P1 : Any, P2 :
         parameters.item10 to parameters.item10.codec.encode(p10)
     )
 
-private fun build(
-    segments: List<String>,
-    vararg parameters: Pair<Parameter<*>, String>
-): URI {
+private fun build(segments: List<String>, vararg parameters: Pair<Parameter<*>, String>): URI {
     val map = parameters.groupBy({ it.first.position }) { (parameter, value) -> parameter.name to value }
 
     val path =
         map[ParameterPosition.Path]
-            .orEmpty()
-            .fold(segments.joinToString(separator = "/", prefix = "/")) { path, (name, value) ->
-                path.replace("{$name}", value)
-            }
+        .orEmpty()
+        .fold(segments.joinToString(separator = "/", prefix = "/")) { path, (name, value) ->
+            path.replace("{$name}", value)
+        }
 
     val query =
         map[ParameterPosition.Query]

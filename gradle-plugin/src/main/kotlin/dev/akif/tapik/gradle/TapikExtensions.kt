@@ -22,5 +22,3 @@ open class TapikExtension @Inject constructor(private val objects: ObjectFactory
         configure.execute(springRestClient)
     }
 }
-
-

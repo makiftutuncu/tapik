@@ -3,6 +3,7 @@ package dev.akif.tapik.http
 import dev.akif.tapik.codec.Defaults
 import dev.akif.tapik.codec.StringCodec
 import dev.akif.tapik.codec.StringCodecs
+import dev.akif.tapik.http.StringCodecs as HttpStringCodecs
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.URI
