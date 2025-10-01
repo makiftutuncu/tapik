@@ -3,15 +3,17 @@ package dev.akif.tapik.gradle
 import java.io.File
 
 internal object SpringRestClientCodeGenerator {
-    fun generate(endpoints: List<HttpEndpointDescription>, outputPackage: String, rootDir: File) {
+    private const val OUTPUT_PACKAGE = "dev.akif.tapik.spring.restclient"
+
+    fun generate(endpoints: List<HttpEndpointDescription>, rootDir: File) {
         if (endpoints.isEmpty()) return
 
-        val directory = File(rootDir, outputPackage.replace('.', '/')).also { it.mkdirs() }
+        val directory = File(rootDir, OUTPUT_PACKAGE.replace('.', '/')).also { it.mkdirs() }
         val targetFile = File(directory, "GeneratedSpringRestClientExtensions.kt")
 
-        val imports = buildImportSet(endpoints, outputPackage)
+        val imports = buildImportSet(endpoints, OUTPUT_PACKAGE)
         targetFile.writeText(buildString {
-            appendLine("package $outputPackage")
+            appendLine("package $OUTPUT_PACKAGE")
             appendLine()
             imports.forEach { appendLine("import $it") }
             appendLine()
@@ -28,7 +30,9 @@ internal object SpringRestClientCodeGenerator {
         val baseImports = setOf(
             "arrow.core.getOrElse",
             "arrow.core.leftNel",
-            "dev.akif.tapik.spring.restclient.*"
+            "dev.akif.tapik.selections.*",
+            "dev.akif.tapik.http.*",
+            "java.net.URI"
         )
 
         val endpointImports = endpoints

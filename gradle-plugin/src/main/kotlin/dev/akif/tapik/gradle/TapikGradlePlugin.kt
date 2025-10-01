@@ -14,7 +14,6 @@ class TapikGradlePlugin : Plugin<Project> {
             group = "tapik"
             description = "Generates Tapik outputs"
             endpointPackages.set(extension.springRestClient.endpointPackages)
-            outputPackage.set(extension.springRestClient.outputPackage)
             outputDirectory.set(target.layout.buildDirectory.dir("generated"))
             sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
@@ -22,9 +21,6 @@ class TapikGradlePlugin : Plugin<Project> {
         }
 
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
-            target.tasks.named("compileKotlin").configure { finalizedBy(tapikGenerate) }
-            tapikGenerate.configure { dependsOn(target.tasks.named("compileKotlin")) }
-
             target.extensions.findByName("kotlin")?.let { kotlinExtension ->
                 val sourceSets = kotlinExtension::class.java.getMethod("getSourceSets").invoke(kotlinExtension)
                 val getByName = sourceSets::class.java.getMethod("getByName", String::class.java)

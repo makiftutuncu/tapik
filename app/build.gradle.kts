@@ -28,6 +28,11 @@ compileKotlin.compilerOptions {
 tapik {
     springRestClient {
         endpointPackages("dev.akif.app")
-        outputPackage.set("dev.akif.app.generated")
+    }
+}
+
+ktlint {
+    filter {
+        exclude { it.file.path.contains("/generated/") }
     }
 }

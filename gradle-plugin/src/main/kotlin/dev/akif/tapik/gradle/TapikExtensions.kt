@@ -3,12 +3,10 @@ package dev.akif.tapik.gradle
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 open class SpringRestClientExtension @Inject constructor(objects: ObjectFactory) {
     val endpointPackages: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
-    val outputPackage: Property<String> = objects.property(String::class.java).convention("generated")
 
     fun endpointPackages(vararg packages: String) {
         this.endpointPackages.set(packages.toList())

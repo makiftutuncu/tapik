@@ -7,10 +7,10 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -25,9 +25,6 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:Input
     abstract val endpointPackages: ListProperty<String>
 
-    @get:Input
-    abstract val outputPackage: Property<String>
-
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
 
@@ -37,6 +34,7 @@ abstract class TapikGenerateTask : DefaultTask() {
 
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
     abstract val compiledClassesDirectory: DirectoryProperty
 
     @get:OutputDirectory
@@ -51,7 +49,6 @@ abstract class TapikGenerateTask : DefaultTask() {
             }
             it.mkdirs()
         }
-        val pkg = outputPackage.orNull ?: ""
         val pkgs = endpointPackages.orNull?.filter { it.isNotBlank() }?.distinct()?.sorted().orEmpty()
 
         val compiledDir = compiledClassesDirectory.get().asFile
@@ -62,8 +59,8 @@ abstract class TapikGenerateTask : DefaultTask() {
 
         val endpoints = scanForHttpEndpoints(compiledDir, pkgs)
 
-        writeJsonOutput(endpoints, outDir, pkg, pkgs, logger)
-        writeGeneratedSources(endpoints, generatedSourcesDir, pkg, pkgs)
+        writeJsonOutput(endpoints, outDir, pkgs, logger)
+        writeGeneratedSources(endpoints, generatedSourcesDir, pkgs)
     }
 
     private fun scanForHttpEndpoints(compiledDir: File, packages: List<String>): List<HttpEndpointDescription> {
@@ -111,12 +108,10 @@ abstract class TapikGenerateTask : DefaultTask() {
     private fun writeJsonOutput(
         endpoints: List<HttpEndpointDescription>,
         outputDir: File,
-        outputPackage: String,
         endpointPackages: List<String>,
         logger: Logger
     ) {
         val report = HttpEndpointsReport(
-            outputPackage = outputPackage,
             endpointPackages = endpointPackages,
             endpoints = endpoints
         )
@@ -134,7 +129,6 @@ abstract class TapikGenerateTask : DefaultTask() {
     private fun writeGeneratedSources(
         endpoints: List<HttpEndpointDescription>,
         outputDir: File,
-        outputPackage: String,
         endpointPackages: List<String>
     ) {
         if (endpoints.isEmpty()) {
@@ -144,7 +138,6 @@ abstract class TapikGenerateTask : DefaultTask() {
         if (endpointPackages.isNotEmpty()) {
             SpringRestClientCodeGenerator.generate(
                 endpoints = endpoints,
-                outputPackage = outputPackage,
                 rootDir = outputDir
             )
         }
