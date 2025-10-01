@@ -7,6 +7,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -24,6 +25,9 @@ import org.objectweb.asm.Opcodes
 abstract class TapikGenerateTask : DefaultTask() {
     @get:Input
     abstract val endpointPackages: ListProperty<String>
+
+    @get:Input
+    abstract val useContextReceivers: Property<Boolean>
 
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
@@ -138,7 +142,8 @@ abstract class TapikGenerateTask : DefaultTask() {
         if (endpointPackages.isNotEmpty()) {
             SpringRestClientCodeGenerator.generate(
                 endpoints = endpoints,
-                rootDir = outputDir
+                rootDir = outputDir,
+                useContextReceivers = useContextReceivers.getOrElse(true)
             )
         }
     }

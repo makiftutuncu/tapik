@@ -28,6 +28,7 @@ compileKotlin.compilerOptions {
 tapik {
     springRestClient {
         endpointPackages("dev.akif.app")
+        useContextReceivers = false
     }
 }
 

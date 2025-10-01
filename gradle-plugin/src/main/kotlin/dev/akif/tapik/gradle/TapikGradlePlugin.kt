@@ -14,6 +14,7 @@ class TapikGradlePlugin : Plugin<Project> {
             group = "tapik"
             description = "Generates Tapik outputs"
             endpointPackages.set(extension.springRestClient.endpointPackages)
+            useContextReceivers.set(extension.springRestClient.useContextReceivers)
             outputDirectory.set(target.layout.buildDirectory.dir("generated"))
             sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
