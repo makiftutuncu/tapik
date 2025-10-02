@@ -2,7 +2,7 @@ plugins {
 	`kotlin-dsl`
 	`java-gradle-plugin`
 	`maven-publish`
-	kotlin("plugin.serialization") version "2.2.0"
+	kotlin("plugin.serialization") version "2.2.20"
 }
 
 group = "dev.akif.tapik"
@@ -26,14 +26,14 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.20")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.20")
     implementation("org.ow2.asm:asm:9.6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.0")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.2.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.20")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.2.20")
 }
 
 gradlePlugin {
