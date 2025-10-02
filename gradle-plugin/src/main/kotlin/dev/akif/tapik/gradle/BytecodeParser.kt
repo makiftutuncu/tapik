@@ -45,7 +45,8 @@ object BytecodeParser {
         val endpointName = deriveEndpointName(methodName)
 
         val rawType = TypeDescription(
-            name = endpointClass.simpleName,
+            name = null,
+            type = endpointClass.simpleName,
             arguments = listOf(
                 parameters.description,
                 inputHeaders.description,
@@ -115,7 +116,7 @@ object BytecodeParser {
         argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(alias, argumentResults.map { it.description }),
+            description = TypeDescription(name = null, type = alias, arguments = argumentResults.map { it.description }),
             imports = imports
         )
     }
@@ -129,7 +130,7 @@ object BytecodeParser {
         argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(alias, argumentResults.map { it.description }),
+            description = TypeDescription(name = null, type = alias, arguments = argumentResults.map { it.description }),
             imports = imports
         )
     }
@@ -143,7 +144,7 @@ object BytecodeParser {
         argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(alias, argumentResults.map { it.description }),
+            description = TypeDescription(name = null, type = alias, arguments = argumentResults.map { it.description }),
             imports = imports
         )
     }
@@ -182,7 +183,7 @@ object BytecodeParser {
         SignatureType.Star -> null
         is SignatureType.Array -> convertArray(type)
         is SignatureType.Class -> convertClass(type)
-        is SignatureType.TypeVariable -> ConversionResult(TypeDescription(type.name), emptySet())
+        is SignatureType.TypeVariable -> ConversionResult(TypeDescription(name = null, type = type.name, arguments = emptyList()), emptySet())
     }
 
     private fun convertArray(type: SignatureType.Array): ConversionResult? {
@@ -195,7 +196,7 @@ object BytecodeParser {
         }
 
         return ConversionResult(
-            description = TypeDescription("Array", listOf(component.description)),
+            description = TypeDescription(name = null, type = "Array", arguments = listOf(component.description)),
             imports = imports
         )
     }
@@ -211,7 +212,7 @@ object BytecodeParser {
         }
 
         return ConversionResult(
-            description = TypeDescription(type.simpleName, argumentResults.map { it.description }),
+            description = TypeDescription(name = null, type = type.simpleName, arguments = argumentResults.map { it.description }),
             imports = imports
         )
     }

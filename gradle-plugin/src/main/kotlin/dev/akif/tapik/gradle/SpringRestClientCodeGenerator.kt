@@ -128,7 +128,7 @@ internal object SpringRestClientCodeGenerator {
 
         init {
             val args = description.arguments.map { it.displayName() }
-            wrapperType = if (args.isEmpty()) description.name else "${description.name}<${args.joinToString(", ")}>"
+            wrapperType = if (args.isEmpty()) description.type else "${description.type}<${args.joinToString(", ")}>"
             inputs = args.mapIndexed { index, type -> "parameter${index + 1}: $type" }
             argumentList = inputs.joinToString(", ") { it.substringBefore(":") }
         }
@@ -156,7 +156,7 @@ internal object SpringRestClientCodeGenerator {
 
     private class BodyType(description: TypeDescription) {
         val wrapperType: String = description.displayName()
-        private val valueType: String = when (description.name) {
+        private val valueType: String = when (description.type) {
             "EmptyBody" -> "Unit"
             "StringBody" -> "String"
             "RawBody" -> "ByteArray"
@@ -259,12 +259,12 @@ internal object SpringRestClientCodeGenerator {
             }
 
         private class OutputBodyEntry(description: TypeDescription, val index: Int) {
-            val valueType: String = when (description.name) {
-                "JsonBody" -> description.arguments.firstOrNull()?.name ?: "Any"
+            val valueType: String = when (description.type) {
+                "JsonBody" -> description.arguments.firstOrNull()?.type ?: "Any"
                 "StringBody" -> "String"
                 "RawBody" -> "ByteArray"
                 "EmptyBody" -> "Unit"
-                else -> description.arguments.firstOrNull()?.name ?: "Any"
+                else -> description.arguments.firstOrNull()?.type ?: "Any"
             }
 
             val statusMatcher: String = "outputBodies.item$index.statusMatcher(status)"
@@ -274,7 +274,7 @@ internal object SpringRestClientCodeGenerator {
 }
 
 private fun TypeDescription.displayName(): String =
-    if (arguments.isEmpty()) name else "${name}<${arguments.joinToString(", ") { it.displayName() }}>"
+    if (arguments.isEmpty()) type else "$type<${arguments.joinToString(", ") { it.displayName() }}>"
 
 private fun TypeDescription.countSuffix(): Int =
-    name.takeLastWhile { it.isDigit() }.toIntOrNull() ?: arguments.size
+    type.takeLastWhile { it.isDigit() }.toIntOrNull() ?: arguments.size

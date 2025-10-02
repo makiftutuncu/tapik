@@ -4,13 +4,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TypeDescription(
-    val name: String,
-    val arguments: List<TypeDescription> = emptyList()
+    val name: String?,
+    val type: String,
+    val arguments: List<TypeDescription>
 ) {
     override fun toString(): String =
         if (arguments.isEmpty()) {
-            name
+            type
         } else {
-            arguments.joinToString(prefix = "$name<", postfix = ">", separator = ", ")
+            arguments.joinToString(prefix = "$type<", postfix = ">", separator = ", ") { it.toString() }
         }
 }
