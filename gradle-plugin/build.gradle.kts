@@ -31,7 +31,7 @@ dependencies {
     implementation("org.ow2.asm:asm:9.6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.2.0")
 }
