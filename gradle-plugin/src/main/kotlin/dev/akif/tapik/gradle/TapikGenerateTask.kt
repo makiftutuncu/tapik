@@ -25,9 +25,6 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:Input
     abstract val endpointPackages: ListProperty<String>
 
-    @get:Input
-    abstract val useContextReceivers: Property<Boolean>
-
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
 
@@ -65,7 +62,7 @@ abstract class TapikGenerateTask : DefaultTask() {
 
         val endpoints = scanForHttpEndpoints(compiledDir, pkgs)
 
-        writeJsonOutput(endpoints, outDir, pkgs, logger)
+        writeJsonOutput(endpoints, outDir, logger)
         writeGeneratedSources(endpoints, generatedSourcesDir, pkgs)
     }
 
@@ -130,16 +127,10 @@ abstract class TapikGenerateTask : DefaultTask() {
     private fun writeJsonOutput(
         endpoints: List<HttpEndpointDescription>,
         outputDir: File,
-        endpointPackages: List<String>,
         logger: Logger
     ) {
-        val report = HttpEndpointsReport(
-            endpointPackages = endpointPackages,
-            endpoints = endpoints
-        )
-
         val json = Json { prettyPrint = true }
-        val jsonOutput = json.encodeToString(report)
+        val jsonOutput = json.encodeToString(endpoints)
 
         outputDir.mkdirs()
         val outputFile = outputDir.resolve("tapik-endpoints.json")
@@ -160,8 +151,7 @@ abstract class TapikGenerateTask : DefaultTask() {
         if (endpointPackages.isNotEmpty()) {
             SpringRestClientCodeGenerator.generate(
                 endpoints = endpoints,
-                rootDir = outputDir,
-                useContextReceivers = useContextReceivers.getOrElse(true)
+                rootDir = outputDir
             )
         }
     }

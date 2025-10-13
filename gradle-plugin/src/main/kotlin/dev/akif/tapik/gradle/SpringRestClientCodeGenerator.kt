@@ -5,7 +5,7 @@ import java.io.File
 internal object SpringRestClientCodeGenerator {
     private const val OUTPUT_PACKAGE = "dev.akif.tapik.spring.restclient"
 
-    fun generate(endpoints: List<HttpEndpointDescription>, rootDir: File, useContextReceivers: Boolean = true) {
+    fun generate(endpoints: List<HttpEndpointDescription>, rootDir: File) {
         if (endpoints.isEmpty()) return
 
         val directory = File(rootDir, OUTPUT_PACKAGE.replace('.', '/')).also { it.mkdirs() }
@@ -20,7 +20,7 @@ internal object SpringRestClientCodeGenerator {
 
             endpoints.sortedWith(compareBy<HttpEndpointDescription> { it.packageName }.thenBy { it.file }.thenBy { it.name })
                 .forEach { endpoint ->
-                    appendEndpoint(endpoint, useContextReceivers)
+                    appendEndpoint(endpoint)
                     appendLine()
                 }
         })
@@ -42,13 +42,10 @@ internal object SpringRestClientCodeGenerator {
         return (baseImports + endpointImports).toSortedSet()
     }
 
-    private fun StringBuilder.appendEndpoint(endpoint: HttpEndpointDescription, useContextReceivers: Boolean) {
-        val signature = EndpointSignature(endpoint, useContextReceivers)
+    private fun StringBuilder.appendEndpoint(endpoint: HttpEndpointDescription) {
+        val signature = EndpointSignature(endpoint)
 
         appendLine("// Generated from: ${endpoint.packageName}.${endpoint.file}#${endpoint.name}")
-        if (useContextReceivers) {
-            appendLine("context(interpreter: RestClientInterpreter)")
-        }
         append("fun HttpEndpoint<${signature.parametersType}, ${signature.inputHeadersType}, ${signature.inputBodyWrapper}, ${signature.outputHeadersType}, ${signature.outputBodiesWrapper}>.sendWithRestClient(")
         if (signature.inputs.isNotEmpty()) {
             appendLine()
@@ -88,7 +85,7 @@ internal object SpringRestClientCodeGenerator {
         appendLine("}")
     }
 
-    private class EndpointSignature(endpoint: HttpEndpointDescription, useContextReceivers: Boolean) {
+    private class EndpointSignature(endpoint: HttpEndpointDescription) {
         private val parameters = AggregatedType(endpoint.parameters)
         private val inputHeaders = HeadersType(endpoint.inputHeaders, isInput = true)
         private val inputBody = BodyType(endpoint.inputBody)
@@ -102,9 +99,6 @@ internal object SpringRestClientCodeGenerator {
         val outputBodiesWrapper: String = outputBodies.wrapperType
 
         val inputs: List<String> = buildList {
-            if (!useContextReceivers) {
-                add("interpreter: RestClientInterpreter")
-            }
             addAll(parameters.requiredParameterDeclarations)
             addAll(inputHeaders.requiredParameterDeclarations)
             addAll(inputBody.inputs)

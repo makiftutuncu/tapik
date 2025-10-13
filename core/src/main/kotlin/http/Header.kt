@@ -48,7 +48,7 @@ sealed interface Header<H : Any> {
         val Location: Header<URI> = HeaderInput(LOCATION, HttpStringCodecs.uri(LOCATION))
     }
 
-    operator fun invoke(vararg values: H): Header<H> = HeaderValues(name, codec, values.toList())
+    operator fun invoke(first: H, vararg rest: H): Header<H> = HeaderValues(name, codec, listOf(first, *rest))
 }
 
 data class HeaderInput<H : Any>(

@@ -16,19 +16,12 @@ dependencies {
 }
 
 application {
-//    mainClass = "dev.akif.app.MarkdownDocumentExampleKt"
     mainClass = "dev.akif.app.RestClientExampleKt"
-}
-
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.compilerOptions {
-    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
 }
 
 tapik {
     springRestClient {
-        endpointPackages("dev.akif.app")
-        useContextReceivers = false
+        endpointPackages("dev.akif.app.example")
     }
 }
 
