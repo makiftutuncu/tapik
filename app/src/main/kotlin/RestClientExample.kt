@@ -5,11 +5,6 @@ import org.springframework.web.client.RestClient
 
 fun main() {
     val interpreter = RestClientInterpreter(RestClient.create("http://localhost:8080"))
-
-//    val response =
-//        with(interpreter) {
-//            Users.get.sendWithRestClient(id = 1L, Proxied = false)
-//        }
-//
+//    val response = Users.get.sendWithRestClient(interpreter = interpreter, id = 1L, proxied = false)
 //    println(response)
 }

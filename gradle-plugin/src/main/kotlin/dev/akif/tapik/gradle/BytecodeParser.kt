@@ -8,10 +8,11 @@ object BytecodeParser {
     private const val TUPLE_PACKAGE = "dev.akif.tapik.tuples"
     private const val HTTP_PACKAGE = "dev.akif.tapik.http"
 
-    fun parseHttpEndpoint(
+    internal fun parseHttpEndpoint(
         signature: String,
         ownerInternalName: String,
-        methodName: String
+        methodName: String,
+        metadata: EndpointMetadata?
     ): HttpEndpointDescription? {
         val returnSignature = extractReturnSignature(signature) ?: return null
         val rootType = SignatureParser(returnSignature).parseType()
@@ -25,10 +26,10 @@ object BytecodeParser {
             return null
         }
 
-        val parameters = convertParameters(endpointClass.arguments[0]) ?: return null
-        val inputHeaders = convertHeaders(endpointClass.arguments[1]) ?: return null
+        val parameters = convertParameters(endpointClass.arguments[0], metadata?.parameterNames) ?: return null
+        val inputHeaders = convertHeaders(endpointClass.arguments[1], metadata?.inputHeaderNames) ?: return null
         val inputBody = convertGeneral(endpointClass.arguments[2]) ?: return null
-        val outputHeaders = convertHeaders(endpointClass.arguments[3]) ?: return null
+        val outputHeaders = convertHeaders(endpointClass.arguments[3], metadata?.outputHeaderNames) ?: return null
         val outputBodies = convertOutputBodies(endpointClass.arguments[4]) ?: return null
 
         val imports = linkedSetOf<String>()
@@ -83,7 +84,7 @@ object BytecodeParser {
         val afterParams = signature.substring(endOfParams + 1)
         val throwsIndex = afterParams.indexOf('^')
         return if (throwsIndex >= 0) {
-            afterParams.substring(0, throwsIndex)
+            afterParams.take(throwsIndex)
         } else {
             afterParams
         }
@@ -107,30 +108,35 @@ object BytecodeParser {
         return methodName
     }
 
-    private fun convertParameters(type: SignatureType): ConversionResult? {
+    private fun List<ConversionResult>.withNames(names: List<String?>?): List<ConversionResult> =
+        mapIndexed { index, result ->
+            result.withName(names?.getOrNull(index))
+        }
+
+    private fun convertParameters(type: SignatureType, names: List<String?>?): ConversionResult? {
         val tuple = type.asClassType() ?: return convertGeneral(type)
         val alias = tuple.tupleAliasPrefix("Parameters") ?: return convertGeneral(type)
-        val argumentResults = tuple.arguments.drop(1).mapNotNull { extractParameterType(it) }
+        val namedArguments = tuple.arguments.drop(1).mapNotNull { extractParameterType(it) }.withNames(names)
 
         val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
-        argumentResults.forEach { imports += it.imports }
+        namedArguments.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(name = null, type = alias, arguments = argumentResults.map { it.description }),
+            description = TypeDescription(name = null, type = alias, arguments = namedArguments.map { it.description }),
             imports = imports
         )
     }
 
-    private fun convertHeaders(type: SignatureType): ConversionResult? {
+    private fun convertHeaders(type: SignatureType, names: List<String?>?): ConversionResult? {
         val tuple = type.asClassType() ?: return convertGeneral(type)
         val alias = tuple.tupleAliasPrefix("Headers") ?: return convertGeneral(type)
-        val argumentResults = tuple.arguments.drop(1).mapNotNull { extractHeaderType(it) }
+        val namedArguments = tuple.arguments.drop(1).mapNotNull { extractHeaderType(it) }.withNames(names)
 
         val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
-        argumentResults.forEach { imports += it.imports }
+        namedArguments.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(name = null, type = alias, arguments = argumentResults.map { it.description }),
+            description = TypeDescription(name = null, type = alias, arguments = namedArguments.map { it.description }),
             imports = imports
         )
     }
@@ -399,4 +405,13 @@ object BytecodeParser {
         val description: TypeDescription,
         val imports: Set<String>
     )
+
+    private fun ConversionResult.withName(name: String?): ConversionResult {
+        val trimmed = name?.takeIf { it.isNotBlank() }
+        return if (trimmed == null || description.name == trimmed) {
+            this
+        } else {
+            copy(description = description.copy(name = trimmed))
+        }
+    }
 }

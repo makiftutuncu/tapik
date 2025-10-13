@@ -1,5 +1,6 @@
 package dev.akif.tapik.gradle
 
+import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
@@ -19,6 +20,14 @@ class TapikGradlePlugin : Plugin<Project> {
             sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
             generatedSourcesDirectory.set(generatedSources)
+            additionalClassDirectories.set(collectClassDirectories(target))
+        }
+
+        tapikGenerate.configure {
+            val upstreamClasses = target.rootProject.subprojects
+                .filter { it != target }
+                .mapNotNull { it.tasks.findByName("classes") }
+            dependsOn(upstreamClasses)
         }
 
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
@@ -32,3 +41,10 @@ class TapikGradlePlugin : Plugin<Project> {
         }
     }
 }
+
+private fun collectClassDirectories(project: Project): List<String> = buildList {
+    project.rootProject.allprojects.forEach { subproject ->
+        add(subproject.layout.buildDirectory.dir("classes/kotlin/main").get().asFile.absolutePath)
+        add(subproject.layout.buildDirectory.dir("classes/java/main").get().asFile.absolutePath)
+    }
+}.distinct()

@@ -17,9 +17,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.tree.ClassNode
 
 @CacheableTask
 abstract class TapikGenerateTask : DefaultTask() {
@@ -43,6 +42,9 @@ abstract class TapikGenerateTask : DefaultTask() {
 
     @get:OutputDirectory
     abstract val generatedSourcesDirectory: DirectoryProperty
+
+    @get:Input
+    abstract val additionalClassDirectories: ListProperty<String>
 
     @TaskAction
     fun generate() {
@@ -71,6 +73,13 @@ abstract class TapikGenerateTask : DefaultTask() {
         val packageFilters = packages.map { it.replace('.', '/') }
         val results = LinkedHashMap<String, HttpEndpointDescription>()
 
+        val classRepository = ClassNodeRepository(
+            compiledDir,
+            additionalClassDirectories.getOrElse(emptyList()).map(::File),
+            logger
+        )
+        val metadataAnalyzer = EndpointMetadataAnalyzer(logger, classRepository::load)
+
         compiledDir.walkTopDown()
             .filter { it.isFile && it.extension == "class" }
             .forEach { classFile ->
@@ -81,15 +90,24 @@ abstract class TapikGenerateTask : DefaultTask() {
 
                 try {
                     val classReader = ClassReader(classFile.readBytes())
-                    classReader.accept(ClassScanner(logger) { signature, owner, memberName ->
+                    val classNode = ClassNode()
+                    classReader.accept(classNode, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
+                    val metadataByMethod = metadataAnalyzer.analyze(classNode)
+                    classNode.methods.forEach { method ->
+                        val signature = method.signature ?: return@forEach
+                        val methodName = method.name
+                        if (!shouldProcessMethod(method.access, methodName, signature)) {
+                            return@forEach
+                        }
+                        val metadata = resolveMetadata(classNode.name, methodName, method.desc, metadataByMethod)
                         runCatching {
-                            BytecodeParser.parseHttpEndpoint(signature, owner, memberName)
+                            BytecodeParser.parseHttpEndpoint(signature, classNode.name, methodName, metadata)
                         }.onFailure { error ->
-                            logger.debug("[tapik] Failed to parse signature for $owner#$memberName", error)
+                            logger.debug("[tapik] Failed to parse signature for ${classNode.name}#$methodName", error)
                         }.getOrNull()?.let { description ->
                             results[description.uniqueKey()] = description
                         }
-                    }, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
+                    }
                 } catch (e: Exception) {
                     logger.warn("[tapik] Failed to analyse class: ${classFile.absolutePath}", e)
                 }
@@ -148,49 +166,97 @@ abstract class TapikGenerateTask : DefaultTask() {
         }
     }
 
-    private class ClassScanner(
-        private val logger: Logger,
-        private val onEndpointFound: (signature: String, owner: String, name: String) -> Unit
-    ) : ClassVisitor(Opcodes.ASM9) {
-        private var owner: String = ""
+    private fun resolveMetadata(
+        ownerInternalName: String,
+        methodName: String,
+        descriptor: String,
+        metadataByMethod: Map<MethodKey, EndpointMetadata>
+    ): EndpointMetadata? {
+        val directKey = MethodKey(ownerInternalName, methodName, descriptor)
+        metadataByMethod[directKey]?.let { return it }
 
-        override fun visit(
-            version: Int,
-            access: Int,
-            name: String?,
-            signature: String?,
-            superName: String?,
-            interfaces: Array<out String>?
-        ) {
-            if (name != null) {
-                owner = name
+        val propertyName = methodName.toPropertyName() ?: return null
+        val delegatePrefix = "${propertyName}_delegate\$lambda"
+        return metadataByMethod.entries
+            .firstOrNull { (key, _) ->
+                key.ownerInternalName == ownerInternalName && key.name.startsWith(delegatePrefix)
             }
-            super.visit(version, access, name, signature, superName, interfaces)
-        }
+            ?.value
+    }
 
-        override fun visitMethod(
-            access: Int,
-            name: String,
-            descriptor: String,
-            signature: String?,
-            exceptions: Array<out String>?
-        ): MethodVisitor {
-            if (signature != null &&
-                name != "<init>" &&
-                name != "<clinit>" &&
-                (name.startsWith("get") || name.startsWith("is")) &&
-                (access and Opcodes.ACC_SYNTHETIC) == 0 &&
-                (access and Opcodes.ACC_BRIDGE) == 0
-            ) {
-                try {
-                    onEndpointFound(signature, owner, name)
-                } catch (e: Exception) {
-                    logger.debug("[tapik] Error while handling $owner#$name", e)
-                }
+    private fun shouldProcessMethod(access: Int, name: String, signature: String?): Boolean {
+        if (signature == null) {
+            return false
+        }
+        if (name == "<init>" || name == "<clinit>") {
+            return false
+        }
+        if (name.contains("$")) {
+            return false
+        }
+        if ((access and Opcodes.ACC_SYNTHETIC) != 0 || (access and Opcodes.ACC_BRIDGE) != 0) {
+            return false
+        }
+        return true
+    }
+
+    private fun String.toPropertyName(): String? = when {
+        startsWith("get") && length > 3 -> substring(3).replaceFirstChar { it.lowercaseChar() }
+        startsWith("is") && length > 2 -> substring(2).replaceFirstChar { it.lowercaseChar() }
+        else -> null
+    }
+}
+
+private class ClassNodeRepository(
+    private val compiledDir: File,
+    additionalDirs: List<File>,
+    private val logger: Logger
+) {
+    private val cache = mutableMapOf<String, ClassNode?>()
+    private val searchDirectories: List<File> = buildList {
+        add(compiledDir)
+        additionalDirs.filterTo(this) { it != compiledDir }
+    }
+
+    fun load(internalName: String): ClassNode? = cache.getOrPut(internalName) {
+        loadFromFile(internalName) ?: loadFromClasspath(internalName)
+    }
+
+    private fun loadFromFile(internalName: String): ClassNode? {
+        val relativePath = "$internalName.class"
+        searchDirectories.forEach { dir ->
+            val file = File(dir, relativePath)
+            if (file.exists()) {
+                return runCatching {
+                    ClassReader(file.readBytes()).toClassNode()
+                }.onFailure {
+                    logger.debug("[tapik] Failed to read class from file: $file", it)
+                }.getOrNull()
             }
-
-            return super.visitMethod(access, name, descriptor, signature, exceptions)
-                ?: object : MethodVisitor(Opcodes.ASM9) {}
         }
+        return null
+    }
+
+    private fun loadFromClasspath(internalName: String): ClassNode? {
+        val resourceName = "$internalName.class"
+        val loaders = sequenceOf(
+            this::class.java.classLoader,
+            Thread.currentThread().contextClassLoader
+        ).filterNotNull()
+
+        for (loader in loaders) {
+            loader.getResourceAsStream(resourceName)?.use { stream ->
+                return runCatching {
+                    ClassReader(stream.readBytes()).toClassNode()
+                }.onFailure {
+                    logger.debug("[tapik] Failed to read class from classpath: $resourceName", it)
+                }.getOrNull()
+            }
+        }
+        return null
+    }
+
+    private fun ClassReader.toClassNode(): ClassNode = ClassNode().also {
+        accept(it, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
     }
 }

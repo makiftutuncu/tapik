@@ -127,24 +127,35 @@ internal object SpringRestClientCodeGenerator {
         val argumentList: String
 
         init {
-            val args = description.arguments.map { it.displayName() }
-            wrapperType = if (args.isEmpty()) description.type else "${description.type}<${args.joinToString(", ")}>"
-            inputs = args.mapIndexed { index, type -> "parameter${index + 1}: $type" }
-            argumentList = inputs.joinToString(", ") { it.substringBefore(":") }
+            val typeArgs = description.arguments.map { it.displayName() }
+            wrapperType = if (typeArgs.isEmpty()) description.type else "${description.type}<${typeArgs.joinToString(", ")}>"
+
+            val usedNames = mutableSetOf<String>()
+            val entries = description.arguments.mapIndexed { index, arg ->
+                val fallback = "parameter${index + 1}"
+                val baseName = sanitizeIdentifier(arg.name, fallback)
+                val unique = uniqueName(baseName, usedNames)
+                NamedValue(unique, arg.displayName())
+            }
+
+            inputs = entries.map { "${it.name}: ${it.type}" }
+            argumentList = entries.joinToString(", ") { it.name }
         }
     }
 
     private class HeadersType(description: TypeDescription, private val isInput: Boolean) {
-        val count: Int = description.countSuffix()
-        val typeNames: List<String> = description.arguments.map { it.displayName() }
+        private val entries: List<NamedValue>
+
+        val count: Int
+        val typeNames: List<String>
         val wrapperType: String = description.displayName()
 
-        val inputs: List<String> = if (isInput) typeNames.mapIndexed { index, arg -> "inputHeader${index + 1}: $arg" } else emptyList()
-        val argumentList: String = inputs.joinToString(", ") { it.substringBefore(":") }
-        val valueNames: List<String> = List(count) { index -> "outputHeader${index + 1}" }
-        val accessors: List<String> = List(count) { index -> "outputHeaders.item${index + 1}" }
+        val inputs: List<String>
+        val argumentList: String
+        val valueNames: List<String>
+        val accessors: List<String>
         val tupleName: String = "decodedOutputHeaders"
-        val assignments: List<String> = if (count == 0) emptyList() else valueNames.mapIndexed { index, name -> "val $name = $tupleName.item${index + 1}" }
+        val assignments: List<String>
         val encodingCall: String
             get() = if (!isInput || count == 0) {
                 "emptyMap()"
@@ -152,6 +163,24 @@ internal object SpringRestClientCodeGenerator {
                 val args = if (argumentList.isEmpty()) "" else "($argumentList)"
                 "encodeInputHeaders$args"
             }
+
+        init {
+            val usedNames = mutableSetOf<String>()
+            entries = description.arguments.mapIndexed { index, arg ->
+                val fallback = if (isInput) "inputHeader${index + 1}" else "outputHeader${index + 1}"
+                val baseName = sanitizeIdentifier(arg.name, fallback)
+                val unique = uniqueName(baseName, usedNames)
+                NamedValue(unique, arg.displayName())
+            }
+
+            count = entries.size
+            typeNames = entries.map { it.type }
+            inputs = if (isInput) entries.map { "${it.name}: ${it.type}" } else emptyList()
+            argumentList = entries.joinToString(", ") { it.name }
+            valueNames = entries.map { it.name }
+            accessors = List(count) { index -> "outputHeaders.item${index + 1}" }
+            assignments = if (count == 0) emptyList() else entries.mapIndexed { index, entry -> "val ${entry.name} = $tupleName.item${index + 1}" }
+        }
     }
 
     private class BodyType(description: TypeDescription) {
@@ -278,3 +307,50 @@ private fun TypeDescription.displayName(): String =
 
 private fun TypeDescription.countSuffix(): Int =
     type.takeLastWhile { it.isDigit() }.toIntOrNull() ?: arguments.size
+
+private data class NamedValue(val name: String, val type: String)
+
+private fun sanitizeIdentifier(rawName: String?, fallback: String): String {
+    val source = rawName?.trim().takeUnless { it.isNullOrEmpty() } ?: fallback
+    val cleaned = buildString {
+        for (ch in source) {
+            when {
+                ch.isLetterOrDigit() -> append(ch)
+                ch == '_' -> append('_')
+                else -> append('_')
+            }
+        }
+    }.replace(Regex("_+"), "_").trim('_')
+
+    val base = (cleaned.ifBlank { fallback }).replaceFirstChar { it.lowercaseChar() }
+    return base
+}
+
+private fun uniqueName(base: String, used: MutableSet<String>): String {
+    var candidate = base
+    var index = 2
+    while (renderIdentifier(candidate) in used) {
+        candidate = "${base}_$index"
+        index++
+    }
+    val rendered = renderIdentifier(candidate)
+    used += rendered
+    return rendered
+}
+
+private fun renderIdentifier(name: String): String {
+    val keyword = name in KOTLIN_KEYWORDS
+    val identifierPattern = Regex("[A-Za-z_][A-Za-z0-9_]*")
+    return if (!keyword && identifierPattern.matches(name)) {
+        name
+    } else {
+        "`$name`"
+    }
+}
+
+private val KOTLIN_KEYWORDS = setOf(
+    "as", "break", "class", "continue", "do", "else", "false", "for", "fun",
+    "if", "in", "interface", "is", "null", "object", "package", "return",
+    "super", "this", "throw", "true", "try", "typealias", "typeof", "val",
+    "var", "when", "while"
+)
