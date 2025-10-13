@@ -26,10 +26,10 @@ object BytecodeParser {
             return null
         }
 
-        val parameters = convertParameters(endpointClass.arguments[0], metadata?.parameterNames) ?: return null
-        val inputHeaders = convertHeaders(endpointClass.arguments[1], metadata?.inputHeaderNames) ?: return null
+        val parameters = convertParameters(endpointClass.arguments[0], metadata?.parameters) ?: return null
+        val inputHeaders = convertHeaders(endpointClass.arguments[1], metadata?.inputHeaders) ?: return null
         val inputBody = convertGeneral(endpointClass.arguments[2]) ?: return null
-        val outputHeaders = convertHeaders(endpointClass.arguments[3], metadata?.outputHeaderNames) ?: return null
+        val outputHeaders = convertHeaders(endpointClass.arguments[3], metadata?.outputHeaders) ?: return null
         val outputBodies = convertOutputBodies(endpointClass.arguments[4]) ?: return null
 
         val imports = linkedSetOf<String>()
@@ -108,15 +108,19 @@ object BytecodeParser {
         return methodName
     }
 
-    private fun List<ConversionResult>.withNames(names: List<String?>?): List<ConversionResult> =
-        mapIndexed { index, result ->
-            result.withName(names?.getOrNull(index))
-        }
-
-    private fun convertParameters(type: SignatureType, names: List<String?>?): ConversionResult? {
+    private fun convertParameters(type: SignatureType, metadata: List<ParameterMetadata>?): ConversionResult? {
         val tuple = type.asClassType() ?: return convertGeneral(type)
         val alias = tuple.tupleAliasPrefix("Parameters") ?: return convertGeneral(type)
-        val namedArguments = tuple.arguments.drop(1).mapNotNull { extractParameterType(it) }.withNames(names)
+        val argumentResults = tuple.arguments.drop(1).mapNotNull { extractParameterType(it) }
+        val namedArguments = argumentResults.mapIndexed { index, result ->
+            val meta = metadata?.getOrNull(index)
+            result.withMetadata(
+                name = meta?.name,
+                hasKnownValues = null,
+                isRequired = meta?.isRequired,
+                hasDefault = meta?.hasDefault
+            )
+        }
 
         val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
         namedArguments.forEach { imports += it.imports }
@@ -127,10 +131,19 @@ object BytecodeParser {
         )
     }
 
-    private fun convertHeaders(type: SignatureType, names: List<String?>?): ConversionResult? {
+    private fun convertHeaders(type: SignatureType, metadata: List<HeaderMetadata>?): ConversionResult? {
         val tuple = type.asClassType() ?: return convertGeneral(type)
         val alias = tuple.tupleAliasPrefix("Headers") ?: return convertGeneral(type)
-        val namedArguments = tuple.arguments.drop(1).mapNotNull { extractHeaderType(it) }.withNames(names)
+        val argumentResults = tuple.arguments.drop(1).mapNotNull { extractHeaderType(it) }
+        val namedArguments = argumentResults.mapIndexed { index, result ->
+            val meta = metadata?.getOrNull(index)
+            result.withMetadata(
+                name = meta?.name,
+                hasKnownValues = meta?.hasKnownValues,
+                isRequired = null,
+                hasDefault = null
+            )
+        }
 
         val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
         namedArguments.forEach { imports += it.imports }
@@ -406,12 +419,19 @@ object BytecodeParser {
         val imports: Set<String>
     )
 
-    private fun ConversionResult.withName(name: String?): ConversionResult {
+    private fun ConversionResult.withMetadata(
+        name: String?,
+        hasKnownValues: Boolean?,
+        isRequired: Boolean?,
+        hasDefault: Boolean?
+    ): ConversionResult {
         val trimmed = name?.takeIf { it.isNotBlank() }
-        return if (trimmed == null || description.name == trimmed) {
-            this
-        } else {
-            copy(description = description.copy(name = trimmed))
-        }
+        val updated = description.copy(
+            name = trimmed ?: description.name,
+            hasKnownValues = hasKnownValues ?: description.hasKnownValues,
+            required = isRequired ?: description.required,
+            hasDefault = hasDefault ?: description.hasDefault
+        )
+        return copy(description = updated)
     }
 }

@@ -26,10 +26,21 @@ internal data class MethodKey(
     override fun toString(): String = "$ownerInternalName#$name$descriptor"
 }
 
+internal data class ParameterMetadata(
+    val name: String?,
+    val isRequired: Boolean?,
+    val hasDefault: Boolean?
+)
+
+internal data class HeaderMetadata(
+    val name: String?,
+    val hasKnownValues: Boolean
+)
+
 internal data class EndpointMetadata(
-    val parameterNames: List<String?>,
-    val inputHeaderNames: List<String?>,
-    val outputHeaderNames: List<String?>
+    val parameters: List<ParameterMetadata>,
+    val inputHeaders: List<HeaderMetadata>,
+    val outputHeaders: List<HeaderMetadata>
 )
 
 internal class EndpointMetadataAnalyzer(
@@ -77,31 +88,41 @@ internal class EndpointMetadataAnalyzer(
     }
 
     private class EndpointCollector {
-        private val parameterNames = ArrayList<String?>()
-        private val inputHeaderNames = ArrayList<String?>()
-        private val outputHeaderNames = ArrayList<String?>()
+        private val parameters = ArrayList<ParameterMetadata>()
+        private val inputHeaders = ArrayList<HeaderMetadata>()
+        private val outputHeaders = ArrayList<HeaderMetadata>()
 
-        fun addParameter(name: String?) {
-            parameterNames += name
+        fun addParameter(parameter: Value.NamedValue?) {
+            parameters += ParameterMetadata(
+                name = parameter?.name,
+                isRequired = parameter?.isRequired ?: true,
+                hasDefault = parameter?.hasDefault ?: false
+            )
         }
 
-        fun addInputHeader(name: String?) {
-            inputHeaderNames += name
+        fun addInputHeader(header: Value.NamedValue?) {
+            inputHeaders += HeaderMetadata(
+                name = header?.name,
+                hasKnownValues = header?.hasKnownValues == true
+            )
         }
 
-        fun addOutputHeader(name: String?) {
-            outputHeaderNames += name
+        fun addOutputHeader(header: Value.NamedValue?) {
+            outputHeaders += HeaderMetadata(
+                name = header?.name,
+                hasKnownValues = header?.hasKnownValues == true
+            )
         }
 
         fun isNotEmpty(): Boolean =
-            parameterNames.isNotEmpty() ||
-                inputHeaderNames.isNotEmpty() ||
-                outputHeaderNames.isNotEmpty()
+            parameters.isNotEmpty() ||
+                inputHeaders.isNotEmpty() ||
+                outputHeaders.isNotEmpty()
 
         fun toMetadata(): EndpointMetadata = EndpointMetadata(
-            parameterNames = parameterNames.toList(),
-            inputHeaderNames = inputHeaderNames.toList(),
-            outputHeaderNames = outputHeaderNames.toList()
+            parameters = parameters.toList(),
+            inputHeaders = inputHeaders.toList(),
+            outputHeaders = outputHeaders.toList()
         )
     }
 
@@ -132,7 +153,13 @@ internal class EndpointMetadataAnalyzer(
     private sealed interface Value {
         object Unknown : Value
         data class StringValue(val value: String) : Value
-        data class NamedValue(val kind: ValueKind, val name: String?) : Value
+        data class NamedValue(
+            val kind: ValueKind,
+            val name: String?,
+            val hasKnownValues: Boolean = false,
+            val isRequired: Boolean? = null,
+            val hasDefault: Boolean? = null
+        ) : Value
     }
 
     private class InstructionInterpreter(
@@ -313,32 +340,40 @@ internal class EndpointMetadataAnalyzer(
                 node.owner.startsWith(QUERY_PARAMETER_COMPANION) -> buildQueryParameter(args)
                 node.owner.startsWith(PATH_VARIABLE_COMPANION) -> buildPathVariable(args)
                 node.owner.startsWith(HEADER_COMPANION) -> buildHeaderFromCompanion(node, args)
-                node.owner == QUERY_PARAMETER_CLASS && (node.name == "optional" || node.name == "getOptional") ->
-                    receiver.keepKind(ValueKind.PARAMETER)
+                node.owner == QUERY_PARAMETER_CLASS && node.name == "optional" ->
+                    receiver.keepKind(ValueKind.PARAMETER) { value ->
+                        value.copy(isRequired = false, hasDefault = true)
+                    }
+                node.owner == QUERY_PARAMETER_CLASS && node.name == "getOptional" ->
+                    receiver.keepKind(ValueKind.PARAMETER) { value ->
+                        value.copy(isRequired = false, hasDefault = false)
+                    }
                 node.owner == HEADER_CLASS && node.name == "invoke" ->
-                    receiver.keepKind(ValueKind.HEADER)
+                    receiver.keepKind(ValueKind.HEADER) { value ->
+                        value.copy(hasKnownValues = true)
+                    }
                 node.owner == HEADER_INPUT_CLASS && node.name == "<init>" ->
-                    buildHeaderFromConstructor(args)
+                    buildHeaderFromConstructor(args, hasKnownValues = false)
                 node.owner == HEADER_VALUES_CLASS && node.name == "<init>" ->
-                    buildHeaderFromConstructor(args)
+                    buildHeaderFromConstructor(args, hasKnownValues = true)
                 node.owner == QUERY_PARAMETER_CLASS && node.name == "<init>" ->
                     buildQueryParameterFromConstructor(args)
                 node.owner == PATH_VARIABLE_CLASS && node.name == "<init>" ->
                     buildPathVariableFromConstructor(args)
                 node.owner == INPUT_HEADER_METHODS && node.name.startsWith("inputHeader") -> {
-                    collector?.addInputHeader(args.lastOrNull().asNamed(ValueKind.HEADER)?.name)
+                    collector?.addInputHeader(args.lastOrNull().asNamed(ValueKind.HEADER))
                     Value.Unknown
                 }
                 node.owner == OUTPUT_HEADER_METHODS && node.name.startsWith("outputHeader") -> {
-                    collector?.addOutputHeader(args.lastOrNull().asNamed(ValueKind.HEADER)?.name)
+                    collector?.addOutputHeader(args.lastOrNull().asNamed(ValueKind.HEADER))
                     Value.Unknown
                 }
                 node.owner == QUERY_PARAMETER_METHODS && node.name.startsWith("addParameter") -> {
-                    collector?.addParameter(args.lastOrNull().asNamed(ValueKind.PARAMETER)?.name)
+                    collector?.addParameter(args.lastOrNull().asNamed(ValueKind.PARAMETER))
                     Value.Unknown
                 }
                 node.owner == PATH_VARIABLE_METHODS && node.name.startsWith("addVariable") -> {
-                    collector?.addParameter(args.lastOrNull().asNamed(ValueKind.PARAMETER)?.name)
+                    collector?.addParameter(args.lastOrNull().asNamed(ValueKind.PARAMETER))
                     Value.Unknown
                 }
                 else -> Value.Unknown
@@ -354,21 +389,36 @@ internal class EndpointMetadataAnalyzer(
         }
 
         private fun buildQueryParameter(args: List<Value>): Value =
-            Value.NamedValue(ValueKind.PARAMETER, args.firstOrNull().asString())
+            Value.NamedValue(
+                kind = ValueKind.PARAMETER,
+                name = args.firstOrNull().asString(),
+                isRequired = true,
+                hasDefault = false
+            )
 
         private fun buildPathVariable(args: List<Value>): Value =
-            Value.NamedValue(ValueKind.PARAMETER, args.firstOrNull().asString())
+            Value.NamedValue(
+                kind = ValueKind.PARAMETER,
+                name = args.firstOrNull().asString(),
+                isRequired = true,
+                hasDefault = false
+            )
 
         private fun buildHeaderFromCompanion(
             node: MethodInsnNode,
             args: List<Value>
         ): Value {
-            val argName = args.firstOrNull().asString()
-            val name = argName ?: resolveHeaderNameFromCompanion(node.owner, node.name)
-            return Value.NamedValue(ValueKind.HEADER, name)
+            val providedName = args.firstOrNull().asString()
+            val resolved = resolveHeaderFromCompanion(node.owner, node.name)
+            return when {
+                resolved != null && providedName != null -> resolved.copy(name = providedName)
+                resolved != null -> resolved
+                providedName != null -> Value.NamedValue(ValueKind.HEADER, providedName)
+                else -> Value.NamedValue(ValueKind.HEADER, null)
+            }
         }
 
-        private fun resolveHeaderNameFromCompanion(owner: String, methodName: String): String? {
+        private fun resolveHeaderFromCompanion(owner: String, methodName: String): Value.NamedValue? {
             val classNode = classNodeProvider(owner) ?: return null
             val method = classNode.methods.firstOrNull { it.name == methodName } ?: return null
             var current: AbstractInsnNode? = method.instructions?.first
@@ -376,12 +426,12 @@ internal class EndpointMetadataAnalyzer(
                 when (current) {
                     is FieldInsnNode -> if (current.opcode == Opcodes.GETSTATIC) {
                         val fieldRef = FieldRef(current.owner, current.name, current.desc)
-                        registry.lookup(fieldRef)?.name?.let { return it }
-                        externalRegistry.lookup(fieldRef)?.name?.let { return it }
-                        scanHeaderNameFromClinit(classNode, fieldRef.name)?.let { return it }
+                        registry.lookup(fieldRef)?.let { return it }
+                        externalRegistry.lookup(fieldRef)?.let { return it }
+                        scanHeaderFromClinit(classNode, fieldRef.name)?.let { return it }
                     }
                     is LdcInsnNode -> if (current.cst is String) {
-                        return current.cst as String
+                        return Value.NamedValue(ValueKind.HEADER, current.cst as String)
                     }
                 }
                 current = current.next
@@ -389,7 +439,7 @@ internal class EndpointMetadataAnalyzer(
             return null
         }
 
-        private fun scanHeaderNameFromClinit(classNode: ClassNode, fieldName: String): String? {
+        private fun scanHeaderFromClinit(classNode: ClassNode, fieldName: String): Value.NamedValue? {
             val clinit = classNode.methods.firstOrNull { it.name == CLINIT_METHOD_NAME } ?: return null
             var current: AbstractInsnNode? = clinit.instructions?.first
             var lastString: String? = null
@@ -404,7 +454,7 @@ internal class EndpointMetadataAnalyzer(
                         current.name == fieldName &&
                         current.desc == "Ldev/akif/tapik/http/Header;"
                     ) {
-                        return lastString
+                        return Value.NamedValue(ValueKind.HEADER, lastString)
                     }
                 }
                 current = current.next
@@ -412,17 +462,30 @@ internal class EndpointMetadataAnalyzer(
             return null
         }
 
-        private fun buildHeaderFromConstructor(args: List<Value>): Value =
-            Value.NamedValue(ValueKind.HEADER, args.firstOrNull().asString())
+        private fun buildHeaderFromConstructor(args: List<Value>, hasKnownValues: Boolean): Value =
+            Value.NamedValue(ValueKind.HEADER, args.firstOrNull().asString(), hasKnownValues)
 
         private fun buildQueryParameterFromConstructor(args: List<Value>): Value =
-            Value.NamedValue(ValueKind.PARAMETER, args.firstOrNull().asString())
+            Value.NamedValue(
+                kind = ValueKind.PARAMETER,
+                name = args.firstOrNull().asString(),
+                isRequired = true,
+                hasDefault = false
+            )
 
         private fun buildPathVariableFromConstructor(args: List<Value>): Value =
-            Value.NamedValue(ValueKind.PARAMETER, args.firstOrNull().asString())
+            Value.NamedValue(
+                kind = ValueKind.PARAMETER,
+                name = args.firstOrNull().asString(),
+                isRequired = true,
+                hasDefault = false
+            )
 
-        private fun Value?.keepKind(expected: ValueKind): Value =
-            (this as? Value.NamedValue)?.takeIf { it.kind == expected } ?: Value.Unknown
+        private fun Value?.keepKind(
+            expected: ValueKind,
+            transform: (Value.NamedValue) -> Value = { it }
+        ): Value =
+            (this as? Value.NamedValue)?.takeIf { it.kind == expected }?.let(transform) ?: Value.Unknown
 
         private fun Value?.asNamed(expected: ValueKind): Value.NamedValue? {
             val named = this as? Value.NamedValue ?: return null

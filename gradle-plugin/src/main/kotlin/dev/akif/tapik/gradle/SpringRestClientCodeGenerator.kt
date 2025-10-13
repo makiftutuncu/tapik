@@ -11,7 +11,7 @@ internal object SpringRestClientCodeGenerator {
         val directory = File(rootDir, OUTPUT_PACKAGE.replace('.', '/')).also { it.mkdirs() }
         val targetFile = File(directory, "GeneratedSpringRestClientExtensions.kt")
 
-        val imports = buildImportSet(endpoints, OUTPUT_PACKAGE)
+        val imports = buildImportSet(endpoints)
         targetFile.writeText(buildString {
             appendLine("package $OUTPUT_PACKAGE")
             appendLine()
@@ -26,7 +26,7 @@ internal object SpringRestClientCodeGenerator {
         })
     }
 
-    private fun buildImportSet(endpoints: List<HttpEndpointDescription>, currentPackage: String): Set<String> {
+    private fun buildImportSet(endpoints: List<HttpEndpointDescription>): Set<String> {
         val baseImports = setOf(
             "arrow.core.getOrElse",
             "arrow.core.leftNel",
@@ -37,7 +37,7 @@ internal object SpringRestClientCodeGenerator {
 
         val endpointImports = endpoints
             .flatMap(HttpEndpointDescription::imports)
-            .filterNot { it.startsWith(currentPackage) }
+            .filterNot { it.startsWith(OUTPUT_PACKAGE) }
 
         return (baseImports + endpointImports).toSortedSet()
     }
@@ -101,10 +101,15 @@ internal object SpringRestClientCodeGenerator {
         val outputHeadersType: String = outputHeaders.wrapperType
         val outputBodiesWrapper: String = outputBodies.wrapperType
 
-        val inputs: List<String> = if (useContextReceivers) {
-            parameters.inputs + inputHeaders.inputs + inputBody.inputs
-        } else {
-            listOf("interpreter: RestClientInterpreter") + parameters.inputs + inputHeaders.inputs + inputBody.inputs
+        val inputs: List<String> = buildList {
+            if (!useContextReceivers) {
+                add("interpreter: RestClientInterpreter")
+            }
+            addAll(parameters.requiredParameterDeclarations)
+            addAll(inputHeaders.requiredParameterDeclarations)
+            addAll(inputBody.inputs)
+            addAll(parameters.optionalParameterDeclarations)
+            addAll(inputHeaders.optionalParameterDeclarations)
         }
         val uriArguments: String = parameters.argumentList
         val inputHeadersEncoding: String = inputHeaders.encodingCall
@@ -122,8 +127,11 @@ internal object SpringRestClientCodeGenerator {
     }
 
     private class AggregatedType(description: TypeDescription) {
+        private val entries: List<ParameterEntry>
+
         val wrapperType: String
-        val inputs: List<String>
+        val requiredParameterDeclarations: List<String>
+        val optionalParameterDeclarations: List<String>
         val argumentList: String
 
         init {
@@ -131,26 +139,57 @@ internal object SpringRestClientCodeGenerator {
             wrapperType = if (typeArgs.isEmpty()) description.type else "${description.type}<${typeArgs.joinToString(", ")}>"
 
             val usedNames = mutableSetOf<String>()
-            val entries = description.arguments.mapIndexed { index, arg ->
+            entries = description.arguments.mapIndexed { index, arg ->
                 val fallback = "parameter${index + 1}"
                 val baseName = sanitizeIdentifier(arg.name, fallback)
                 val unique = uniqueName(baseName, usedNames)
-                NamedValue(unique, arg.displayName())
+                val namedValue = NamedValue(unique, arg.displayName())
+                ParameterEntry(namedValue, arg, index + 1)
             }
 
-            inputs = entries.map { "${it.name}: ${it.type}" }
+            val required = entries.filterNot { it.hasDefault }
+            val optional = entries.filter { it.hasDefault }
+
+            requiredParameterDeclarations = required.map { it.declaration }
+            optionalParameterDeclarations = optional.map { it.declaration }
             argumentList = entries.joinToString(", ") { it.name }
+        }
+
+        private class ParameterEntry(
+            namedValue: NamedValue,
+            typeDescription: TypeDescription,
+            val tupleIndex: Int
+        ) {
+            val hasDefault: Boolean = typeDescription.hasDefault == true
+            val name: String = namedValue.name
+            val type: String = namedValue.type
+
+            private val errorName: String =
+                (typeDescription.name ?: namedValue.name)
+                    .trim('`')
+                    .ifBlank { "parameter$tupleIndex" }
+
+            val declaration: String =
+                if (hasDefault) {
+                    """$name: $type = requireNotNull((this.parameters.item$tupleIndex as QueryParameter<$type>).default) { "Default value missing for query parameter $errorName" }"""
+                } else {
+                    "$name: $type"
+                }
         }
     }
 
-    private class HeadersType(description: TypeDescription, private val isInput: Boolean) {
-        private val entries: List<NamedValue>
+    private class HeadersType(
+        description: TypeDescription,
+        private val isInput: Boolean
+    ) {
+        private val parameters: List<HeaderParameter>
 
         val count: Int
         val typeNames: List<String>
         val wrapperType: String = description.displayName()
 
-        val inputs: List<String>
+        val requiredParameterDeclarations: List<String>
+        val optionalParameterDeclarations: List<String>
         val argumentList: String
         val valueNames: List<String>
         val accessors: List<String>
@@ -166,20 +205,47 @@ internal object SpringRestClientCodeGenerator {
 
         init {
             val usedNames = mutableSetOf<String>()
-            entries = description.arguments.mapIndexed { index, arg ->
+            parameters = description.arguments.mapIndexed { index, arg ->
                 val fallback = if (isInput) "inputHeader${index + 1}" else "outputHeader${index + 1}"
                 val baseName = sanitizeIdentifier(arg.name, fallback)
                 val unique = uniqueName(baseName, usedNames)
-                NamedValue(unique, arg.displayName())
+                val namedValue = NamedValue(unique, arg.displayName())
+                val hasKnownValues = isInput && arg.hasKnownValues == true
+                HeaderParameter(namedValue, index + 1, hasKnownValues)
+            }
+            count = parameters.size
+            typeNames = parameters.map { it.type }
+            argumentList = parameters.joinToString(", ") { it.name }
+            valueNames = parameters.map { it.name }
+            accessors = List(count) { index -> "outputHeaders.item${index + 1}" }
+            assignments = if (count == 0) {
+                emptyList()
+            } else {
+                parameters.mapIndexed { index, entry -> "val ${entry.name} = $tupleName.item${index + 1}" }
             }
 
-            count = entries.size
-            typeNames = entries.map { it.type }
-            inputs = if (isInput) entries.map { "${it.name}: ${it.type}" } else emptyList()
-            argumentList = entries.joinToString(", ") { it.name }
-            valueNames = entries.map { it.name }
-            accessors = List(count) { index -> "outputHeaders.item${index + 1}" }
-            assignments = if (count == 0) emptyList() else entries.mapIndexed { index, entry -> "val ${entry.name} = $tupleName.item${index + 1}" }
+            if (isInput) {
+                requiredParameterDeclarations = parameters
+                    .filterNot { it.hasKnownValues }
+                    .map { "${it.name}: ${it.type}" }
+                optionalParameterDeclarations = parameters
+                    .filter { it.hasKnownValues }
+                    .map { "${it.name}: ${it.type} = ${it.defaultExpression}" }
+            } else {
+                requiredParameterDeclarations = emptyList()
+                optionalParameterDeclarations = emptyList()
+            }
+        }
+
+        private class HeaderParameter(
+            namedValue: NamedValue,
+            tupleIndex: Int,
+            val hasKnownValues: Boolean
+        ) {
+            val name: String = namedValue.name
+            val type: String = namedValue.type
+            val defaultExpression: String =
+                "(this.inputHeaders.item$tupleIndex as HeaderValues<$type>).values.first()"
         }
     }
 
@@ -280,12 +346,6 @@ internal object SpringRestClientCodeGenerator {
                 append("    return response.getOrElse { error(it.joinToString(\": \") ) }")
             }
         }
-
-        private fun headerAlias(count: Int): String =
-            when (count) {
-                0 -> "Headers0"
-                else -> "Headers$count"
-            }
 
         private class OutputBodyEntry(description: TypeDescription, val index: Int) {
             val valueType: String = when (description.type) {
