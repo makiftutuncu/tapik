@@ -28,7 +28,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
-    implementation("org.ow2.asm:asm:9.6")
+    implementation("org.ow2.asm:asm:9.9")
     implementation("org.ow2.asm:asm-tree:9.6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
