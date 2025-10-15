@@ -21,7 +21,7 @@ application {
 
 tapik {
     springRestClient {
-        endpointPackages("dev.akif.app.example")
+        endpointPackages("dev.akif.app", "dev.akif.app.example")
     }
 }
 

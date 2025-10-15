@@ -4,6 +4,11 @@ import java.io.File
 
 internal object SpringRestClientCodeGenerator {
     private const val OUTPUT_PACKAGE = "dev.akif.tapik.spring.restclient"
+    private val KOTLIN_COLLECTION_OVERRIDES = mapOf(
+        "java.util.Map" to "kotlin.collections.Map",
+        "java.util.List" to "kotlin.collections.List",
+        "java.util.Set" to "kotlin.collections.Set"
+    )
 
     fun generate(endpoints: List<HttpEndpointDescription>, rootDir: File) {
         if (endpoints.isEmpty()) return
@@ -37,6 +42,7 @@ internal object SpringRestClientCodeGenerator {
 
         val endpointImports = endpoints
             .flatMap(HttpEndpointDescription::imports)
+            .map { KOTLIN_COLLECTION_OVERRIDES[it] ?: it }
             .filterNot { it.startsWith(OUTPUT_PACKAGE) }
 
         return (baseImports + endpointImports).toSortedSet()
@@ -99,6 +105,7 @@ internal object SpringRestClientCodeGenerator {
         val outputBodiesWrapper: String = outputBodies.wrapperType
 
         val inputs: List<String> = buildList {
+            add("interpreter: RestClientInterpreter")
             addAll(parameters.requiredParameterDeclarations)
             addAll(inputHeaders.requiredParameterDeclarations)
             addAll(inputBody.inputs)
@@ -343,11 +350,11 @@ internal object SpringRestClientCodeGenerator {
 
         private class OutputBodyEntry(description: TypeDescription, val index: Int) {
             val valueType: String = when (description.type) {
-                "JsonBody" -> description.arguments.firstOrNull()?.type ?: "Any"
+                "JsonBody" -> description.arguments.firstOrNull()?.displayName() ?: "Any"
                 "StringBody" -> "String"
                 "RawBody" -> "ByteArray"
                 "EmptyBody" -> "Unit"
-                else -> description.arguments.firstOrNull()?.type ?: "Any"
+                else -> description.arguments.firstOrNull()?.displayName() ?: "Any"
             }
 
             val statusMatcher: String = "outputBodies.item$index.statusMatcher(status)"
@@ -375,9 +382,20 @@ private fun sanitizeIdentifier(rawName: String?, fallback: String): String {
             }
         }
     }.replace(Regex("_+"), "_").trim('_')
+    val components = cleaned.split('_').mapNotNull { part ->
+        part.takeIf { it.isNotBlank() }
+    }
+    val camel = if (components.isEmpty()) {
+        fallback
+    } else {
+        components.mapIndexed { index, part ->
+            val lower = part.lowercase()
+            if (index == 0) lower else lower.replaceFirstChar { it.uppercaseChar() }
+        }.joinToString("")
+    }
 
-    val base = (cleaned.ifBlank { fallback }).replaceFirstChar { it.lowercaseChar() }
-    return base
+    val base = camel.ifBlank { fallback }
+    return base.replaceFirstChar { it.lowercaseChar() }
 }
 
 private fun uniqueName(base: String, used: MutableSet<String>): String {

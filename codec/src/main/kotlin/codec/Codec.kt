@@ -66,22 +66,36 @@ interface Codec<Source : Any, Target : Any> :
     }
 }
 
-inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Target>.unsafeTransform(
+inline fun <Source : Any, Target : Any, reified Source2 : Any> Codec<Source, Target>.unsafeTransformSource(
+    crossinline from: (Source) -> Source2,
+    crossinline to: (Source2) -> Source
+): Codec<Source2, Target> =
+    object : Codec<Source2, Target> {
+        override val sourceClass: KClass<Source2> = Source2::class
+
+        override val targetClass: KClass<Target> = this@unsafeTransformSource.targetClass
+
+        override fun decode(input: Target): EitherNel<String, Source2> = this@unsafeTransformSource.decode(input).map { from(it) }
+
+        override fun encode(input: Source2): Target = this@unsafeTransformSource.encode(to(input))
+    }
+
+inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Target>.unsafeTransformTarget(
     crossinline from: (Target2) -> Target,
     crossinline to: (Target) -> Target2
 ): Codec<Source, Target2> =
     object : Codec<Source, Target2> {
-        override val sourceClass: KClass<Source> = this@unsafeTransform.sourceClass
+        override val sourceClass: KClass<Source> = this@unsafeTransformTarget.sourceClass
 
         override val targetClass: KClass<Target2> = Target2::class
 
-        override fun decode(input: Target2): EitherNel<String, Source> = this@unsafeTransform.decode(from(input))
+        override fun decode(input: Target2): EitherNel<String, Source> = this@unsafeTransformTarget.decode(from(input))
 
-        override fun encode(input: Source): Target2 = to(this@unsafeTransform.encode(input))
+        override fun encode(input: Source): Target2 = to(this@unsafeTransformTarget.encode(input))
     }
 
 fun <T : Any> StringCodec<T>.toByteArrayCodec(): ByteArrayCodec<T> =
-    unsafeTransform(
+    unsafeTransformTarget(
         from = { String(it) },
         to = { it.toByteArray() }
     )

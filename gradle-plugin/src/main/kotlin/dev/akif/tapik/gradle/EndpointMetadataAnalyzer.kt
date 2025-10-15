@@ -100,6 +100,13 @@ internal class EndpointMetadataAnalyzer(
             )
         }
 
+        fun addParametersIfEmpty(values: List<Value.NamedValue?>) {
+            if (values.isEmpty() || parameters.isNotEmpty()) {
+                return
+            }
+            values.forEach { addParameter(it) }
+        }
+
         fun addInputHeader(header: Value.NamedValue?) {
             inputHeaders += HeaderMetadata(
                 name = header?.name,
@@ -107,11 +114,25 @@ internal class EndpointMetadataAnalyzer(
             )
         }
 
+        fun addInputHeadersIfEmpty(values: List<Value.NamedValue?>) {
+            if (values.isEmpty() || inputHeaders.isNotEmpty()) {
+                return
+            }
+            values.forEach { addInputHeader(it) }
+        }
+
         fun addOutputHeader(header: Value.NamedValue?) {
             outputHeaders += HeaderMetadata(
                 name = header?.name,
                 hasKnownValues = header?.hasKnownValues == true
             )
+        }
+
+        fun addOutputHeadersIfEmpty(values: List<Value.NamedValue?>) {
+            if (values.isEmpty() || outputHeaders.isNotEmpty()) {
+                return
+            }
+            values.forEach { addOutputHeader(it) }
         }
 
         fun isNotEmpty(): Boolean =
@@ -127,15 +148,15 @@ internal class EndpointMetadataAnalyzer(
     }
 
     private class NameRegistry {
-        private val fieldValues = HashMap<FieldRef, Value.NamedValue>()
+        private val fieldValues = HashMap<FieldRef, Value>()
 
-        fun register(fieldRef: FieldRef, value: Value.NamedValue) {
+        fun register(fieldRef: FieldRef, value: Value) {
             fieldValues[fieldRef] = value
         }
 
-        fun lookup(fieldRef: FieldRef): Value.NamedValue? = fieldValues[fieldRef]
+        fun lookup(fieldRef: FieldRef): Value? = fieldValues[fieldRef]
 
-        fun entries(): Map<FieldRef, Value.NamedValue> = fieldValues.toMap()
+        fun entries(): Map<FieldRef, Value> = fieldValues.toMap()
     }
 
     private data class FieldRef(
@@ -152,6 +173,8 @@ internal class EndpointMetadataAnalyzer(
 
     private sealed interface Value {
         object Unknown : Value
+        object NullValue : Value
+        data class BooleanValue(val value: Boolean) : Value
         data class StringValue(val value: String) : Value
         data class NamedValue(
             val kind: ValueKind,
@@ -159,6 +182,15 @@ internal class EndpointMetadataAnalyzer(
             val hasKnownValues: Boolean = false,
             val isRequired: Boolean? = null,
             val hasDefault: Boolean? = null
+        ) : Value
+        data class NamedGroup(
+            val kind: ValueKind,
+            val values: List<NamedValue?>
+        ) : Value
+        data class EndpointValue(
+            val parameters: List<NamedValue?>,
+            val inputHeaders: List<NamedValue?>,
+            val outputHeaders: List<NamedValue?>
         ) : Value
     }
 
@@ -209,7 +241,9 @@ internal class EndpointMetadataAnalyzer(
 
         private fun handleInsn(node: InsnNode) {
             when (node.opcode) {
-                Opcodes.ACONST_NULL -> stack += Value.Unknown
+                Opcodes.ACONST_NULL -> stack += Value.NullValue
+                Opcodes.ICONST_0 -> stack += Value.BooleanValue(false)
+                Opcodes.ICONST_1 -> stack += Value.BooleanValue(true)
                 Opcodes.ARETURN,
                 Opcodes.ATHROW -> popNullable()
                 Opcodes.POP -> popNullable()
@@ -306,14 +340,27 @@ internal class EndpointMetadataAnalyzer(
             val fieldRef = FieldRef(node.owner, node.name, node.desc)
             when (node.opcode) {
                 Opcodes.GETSTATIC -> {
-                    val named = registry.lookup(fieldRef) ?: externalRegistry.lookup(fieldRef)
-                    stack += named ?: Value.Unknown
+                    val stored = registry.lookup(fieldRef) ?: externalRegistry.lookup(fieldRef)
+                    when (stored) {
+                        is Value.EndpointValue -> {
+                            collector?.addParametersIfEmpty(stored.parameters)
+                            collector?.addInputHeadersIfEmpty(stored.inputHeaders)
+                            collector?.addOutputHeadersIfEmpty(stored.outputHeaders)
+                            stack += stored
+                        }
+                        null -> stack += Value.Unknown
+                        else -> stack += stored
+                    }
                 }
                 Opcodes.PUTSTATIC -> {
                     val value = pop()
-                    val named = value as? Value.NamedValue
-                    if (named != null && named.kind != ValueKind.OTHER) {
-                        registry.register(fieldRef, named)
+                    when (value) {
+                        is Value.NamedValue -> if (value.kind != ValueKind.OTHER) {
+                            registry.register(fieldRef, value)
+                        }
+                        is Value.NamedGroup -> registry.register(fieldRef, value)
+                        is Value.EndpointValue -> registry.register(fieldRef, value)
+                        else -> Unit
                     }
                 }
                 Opcodes.GETFIELD -> {
@@ -329,14 +376,18 @@ internal class EndpointMetadataAnalyzer(
 
         private fun handleMethodInsn(node: MethodInsnNode) {
             val argTypes = Type.getArgumentTypes(node.desc)
-            val args = ArrayList<Value>(argTypes.size)
+            val rawArgs = ArrayList<Value>(argTypes.size)
             repeat(argTypes.size) {
-                args += pop()
+                rawArgs += pop()
             }
-            args.reverse()
+            val args = rawArgs.asReversed()
             val receiver = if (node.opcode != Opcodes.INVOKESTATIC) pop() else null
 
             val produced: Value? = when {
+                node.owner.startsWith(TUPLE_CLASS_PREFIX) && node.name == "<init>" ->
+                    buildTupleFromConstructor(args)
+                node.owner == HTTP_ENDPOINT_CLASS && node.name == "<init>" ->
+                    applyHttpEndpointMetadata(argTypes, args)
                 node.owner.startsWith(QUERY_PARAMETER_COMPANION) -> buildQueryParameter(args)
                 node.owner.startsWith(PATH_VARIABLE_COMPANION) -> buildPathVariable(args)
                 node.owner.startsWith(HEADER_COMPANION) -> buildHeaderFromCompanion(node, args)
@@ -382,7 +433,9 @@ internal class EndpointMetadataAnalyzer(
             if (produced != null && !node.desc.endsWith(")V")) {
                 stack += produced
             } else if (produced != null && node.desc.endsWith(")V")) {
-                // void return already consumed
+                if (stack.isNotEmpty()) {
+                    stack[stack.lastIndex] = produced
+                }
             } else if (!node.desc.endsWith(")V")) {
                 stack += Value.Unknown
             }
@@ -426,8 +479,8 @@ internal class EndpointMetadataAnalyzer(
                 when (current) {
                     is FieldInsnNode -> if (current.opcode == Opcodes.GETSTATIC) {
                         val fieldRef = FieldRef(current.owner, current.name, current.desc)
-                        registry.lookup(fieldRef)?.let { return it }
-                        externalRegistry.lookup(fieldRef)?.let { return it }
+                        registry.lookup(fieldRef).asNamed(ValueKind.HEADER)?.let { return it }
+                        externalRegistry.lookup(fieldRef).asNamed(ValueKind.HEADER)?.let { return it }
                         scanHeaderFromClinit(classNode, fieldRef.name)?.let { return it }
                     }
                     is LdcInsnNode -> if (current.cst is String) {
@@ -465,13 +518,22 @@ internal class EndpointMetadataAnalyzer(
         private fun buildHeaderFromConstructor(args: List<Value>, hasKnownValues: Boolean): Value =
             Value.NamedValue(ValueKind.HEADER, args.firstOrNull().asString(), hasKnownValues)
 
-        private fun buildQueryParameterFromConstructor(args: List<Value>): Value =
-            Value.NamedValue(
+        private fun buildQueryParameterFromConstructor(args: List<Value>): Value {
+            val name = args.firstOrNull().asString()
+            val required = args.getOrNull(2).asBoolean()
+            val hasDefault: Boolean? = when (val defaultArg = args.getOrNull(3)) {
+                null -> false
+                is Value.NullValue -> false
+                is Value.Unknown -> null
+                else -> true
+            }
+            return Value.NamedValue(
                 kind = ValueKind.PARAMETER,
-                name = args.firstOrNull().asString(),
-                isRequired = true,
-                hasDefault = false
+                name = name,
+                isRequired = required ?: true,
+                hasDefault = hasDefault
             )
+        }
 
         private fun buildPathVariableFromConstructor(args: List<Value>): Value =
             Value.NamedValue(
@@ -480,6 +542,55 @@ internal class EndpointMetadataAnalyzer(
                 isRequired = true,
                 hasDefault = false
             )
+
+        private fun buildTupleFromConstructor(args: List<Value>): Value {
+            val parameterValues = args.map { it.asNamed(ValueKind.PARAMETER) }
+            if (parameterValues.any { it != null }) {
+                return Value.NamedGroup(ValueKind.PARAMETER, parameterValues)
+            }
+            val headerValues = args.map { it.asNamed(ValueKind.HEADER) }
+            if (headerValues.any { it != null }) {
+                return Value.NamedGroup(ValueKind.HEADER, headerValues)
+            }
+            return Value.Unknown
+        }
+
+        private fun applyHttpEndpointMetadata(argTypes: Array<Type>, args: List<Value>): Value {
+            var parameterGroup: Value.NamedGroup? = null
+            var inputHeaderGroup: Value.NamedGroup? = null
+            var outputHeaderGroup: Value.NamedGroup? = null
+            val bodyIndex = argTypes.indexOfFirst { it.className == HTTP_BODY_CLASS }
+
+            argTypes.zip(args).forEachIndexed { index, (_, value) ->
+                if (parameterGroup == null) {
+                    parameterGroup = value.asGroup(ValueKind.PARAMETER) ?: parameterGroup
+                }
+                val headerGroup = value.asGroup(ValueKind.HEADER)
+                if (headerGroup != null) {
+                    if (bodyIndex >= 0 && index < bodyIndex && inputHeaderGroup == null) {
+                        inputHeaderGroup = headerGroup
+                    } else {
+                        outputHeaderGroup = headerGroup
+                    }
+                }
+            }
+
+            parameterGroup?.let { group ->
+                collector?.addParametersIfEmpty(group.values)
+            }
+            inputHeaderGroup?.let { group ->
+                collector?.addInputHeadersIfEmpty(group.values)
+            }
+            outputHeaderGroup?.let { group ->
+                collector?.addOutputHeadersIfEmpty(group.values)
+            }
+
+            return Value.EndpointValue(
+                parameters = parameterGroup?.values.orEmpty(),
+                inputHeaders = inputHeaderGroup?.values.orEmpty(),
+                outputHeaders = outputHeaderGroup?.values.orEmpty()
+            )
+        }
 
         private fun Value?.keepKind(
             expected: ValueKind,
@@ -492,7 +603,14 @@ internal class EndpointMetadataAnalyzer(
             return if (named.kind == expected) named else null
         }
 
+        private fun Value?.asGroup(expected: ValueKind): Value.NamedGroup? {
+            val group = this as? Value.NamedGroup ?: return null
+            return if (group.kind == expected) group else null
+        }
+
         private fun Value?.asString(): String? = (this as? Value.StringValue)?.value
+
+        private fun Value?.asBoolean(): Boolean? = (this as? Value.BooleanValue)?.value
 
         private fun handleLdc(node: LdcInsnNode) {
             val constant = node.cst
@@ -522,14 +640,17 @@ internal class EndpointMetadataAnalyzer(
             private const val OUTPUT_HEADER_METHODS = "dev/akif/tapik/http/OutputHeaderMethodsKt"
             private const val QUERY_PARAMETER_METHODS = "dev/akif/tapik/http/QueryParameterMethodsKt"
             private const val PATH_VARIABLE_METHODS = "dev/akif/tapik/http/PathVariableMethodsKt"
+            private const val HTTP_ENDPOINT_CLASS = "dev/akif/tapik/http/HttpEndpoint"
+            private const val TUPLE_CLASS_PREFIX = "dev/akif/tapik/tuples/Tuple"
+            private const val HTTP_BODY_CLASS = "dev.akif.tapik.http.Body"
         }
     }
 
     private inner class ExternalFieldRegistry {
-        private val cache = HashMap<FieldRef, Value.NamedValue?>()
+        private val cache = HashMap<FieldRef, Value>()
         private val processedOwners = HashSet<String>()
 
-        fun lookup(fieldRef: FieldRef): Value.NamedValue? {
+        fun lookup(fieldRef: FieldRef): Value? {
             cache[fieldRef]?.let { return it }
             if (processedOwners.add(fieldRef.ownerInternalName)) {
                 load(fieldRef.ownerInternalName)

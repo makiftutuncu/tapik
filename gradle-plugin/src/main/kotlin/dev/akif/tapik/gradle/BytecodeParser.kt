@@ -7,6 +7,19 @@ object BytecodeParser {
     private const val OUTPUT_BODY_FQCN = "dev.akif.tapik.http.OutputBody"
     private const val TUPLE_PACKAGE = "dev.akif.tapik.tuples"
     private const val HTTP_PACKAGE = "dev.akif.tapik.http"
+    private val JAVA_TO_KOTLIN_TYPES = mapOf(
+        "java.lang.Boolean" to "Boolean",
+        "java.lang.Byte" to "Byte",
+        "java.lang.Short" to "Short",
+        "java.lang.Integer" to "Int",
+        "java.lang.Long" to "Long",
+        "java.lang.Float" to "Float",
+        "java.lang.Double" to "Double",
+        "java.lang.Character" to "Char",
+        "java.lang.String" to "String",
+        "java.lang.Object" to "Any",
+        "java.lang.Void" to "Unit"
+    )
 
     internal fun parseHttpEndpoint(
         signature: String,
@@ -226,12 +239,17 @@ object BytecodeParser {
         argumentResults.forEach { imports += it.imports }
 
         val fqcn = type.importName()
-        if (shouldImport(fqcn)) {
+        val replacement = JAVA_TO_KOTLIN_TYPES[fqcn]
+        if (replacement == null && shouldImport(fqcn)) {
             imports += fqcn
         }
 
         return ConversionResult(
-            description = TypeDescription(name = null, type = type.simpleName, arguments = argumentResults.map { it.description }),
+            description = TypeDescription(
+                name = null,
+                type = replacement ?: type.simpleName,
+                arguments = argumentResults.map { it.description }
+            ),
             imports = imports
         )
     }
