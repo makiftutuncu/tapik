@@ -10,9 +10,11 @@ import dev.akif.tapik.gradle.metadata.QueryParameterMetadata
 import dev.akif.tapik.gradle.metadata.TypeMetadata
 import java.io.File
 
-internal object SpringRestClientClientGenerator {
-    private const val OUTPUT_PACKAGE = "dev.akif.tapik.spring.restclient"
-    private const val OUTPUT_FILE_NAME = "GeneratedSpringRestClientClients.kt"
+internal object RestClientBasedClientGenerator {
+    private const val BASE_PACKAGE = "dev.akif.tapik.spring.restclient"
+    private const val BASE_INTERFACE_NAME = "RestClientBasedClient"
+    private const val HTTP_PACKAGE_PREFIX = "dev.akif.tapik.http."
+    private const val HTTP_PACKAGE_ROOT = "dev.akif.tapik.http"
     private val KOTLIN_COLLECTION_OVERRIDES = mapOf(
         "java.util.Map" to "kotlin.collections.Map",
         "java.util.List" to "kotlin.collections.List",
@@ -22,88 +24,105 @@ internal object SpringRestClientClientGenerator {
     fun generate(endpoints: List<HttpEndpointMetadata>, rootDir: File) {
         if (endpoints.isEmpty()) return
 
-        val directory = File(rootDir, OUTPUT_PACKAGE.replace('.', '/')).also { it.mkdirs() }
-        val targetFile = File(directory, OUTPUT_FILE_NAME)
+        endpoints
+            .groupBy { it.packageName }
+            .filterKeys { it.isNotBlank() }
+            .toSortedMap()
+            .forEach { (packageName, packageEndpoints) ->
+                val packageDirectory = File(rootDir, packageName.replace('.', '/')).also { it.mkdirs() }
+                packageEndpoints
+                    .groupBy { it.sourceFile }
+                    .toSortedMap()
+                    .forEach { (sourceFile, groupedEndpoints) ->
+                        val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
+                        val signatures = sortedEndpoints.map(::EndpointSignature)
+                        val imports = buildImportsFor(packageName, signatures, sortedEndpoints)
+                        val interfaceName = "${sourceFile}Client"
+                        val targetFile = File(packageDirectory, "$interfaceName.kt")
+                        targetFile.writeText(
+                            buildInterfaceContent(
+                                packageName = packageName,
+                                interfaceName = interfaceName,
+                                sourceFile = sourceFile,
+                                imports = imports,
+                                signatures = signatures
+                            )
+                        )
+                    }
+            }
+    }
 
-        val imports = buildImportSet(endpoints)
-        val groupedEndpoints = endpoints
-            .groupBy { it.packageName to it.sourceFile }
-            .toSortedMap(compareBy<Pair<String, String>> { it.first }.thenBy { it.second })
-
-        targetFile.writeText(buildString {
-            appendLine("package $OUTPUT_PACKAGE")
+    private fun buildInterfaceContent(
+        packageName: String,
+        interfaceName: String,
+        sourceFile: String,
+        imports: List<String>,
+        signatures: List<EndpointSignature>
+    ): String =
+        buildString {
+            appendLine("package $packageName")
             appendLine()
             imports.forEach { appendLine("import $it") }
-            appendLine()
-
-            groupedEndpoints.entries.forEachIndexed { index, (key, grouped) ->
-                val (_, sourceFile) = key
-                appendClientClass("${sourceFile}Client", grouped.sortedBy { it.id })
-                if (index != groupedEndpoints.size - 1) {
+            if (imports.isNotEmpty()) {
+                appendLine()
+            }
+            appendLine("// Generated from: $packageName.$sourceFile")
+            appendLine("interface $interfaceName : $BASE_INTERFACE_NAME {")
+            signatures.forEachIndexed { index, signature ->
+                appendEndpoint(signature)
+                if (index != signatures.lastIndex) {
                     appendLine()
                 }
             }
-        })
-    }
+            appendLine("}")
+        }
 
-    private fun buildImportSet(endpoints: List<HttpEndpointMetadata>): Set<String> {
-        val baseImports = setOf(
+    private fun buildImportsFor(
+        packageName: String,
+        signatures: List<EndpointSignature>,
+        endpoints: List<HttpEndpointMetadata>
+    ): List<String> {
+        val imports = mutableSetOf(
             "arrow.core.getOrElse",
             "arrow.core.leftNel",
-            "dev.akif.tapik.selections.*",
             "dev.akif.tapik.http.*",
-            "java.net.URI",
-            "org.springframework.web.client.RestClient"
+            "$BASE_PACKAGE.*"
         )
 
         val typeImports = endpoints
             .flatMap(HttpEndpointMetadata::imports)
             .map { KOTLIN_COLLECTION_OVERRIDES[it] ?: it }
-
-        val endpointImports = endpoints
-            .mapNotNull {
-                when {
-                    it.packageName.isBlank() -> null
-                    else -> "${it.packageName}.${it.sourceFile}"
-                }
+            .filterNot { import ->
+                import.startsWith(HTTP_PACKAGE_PREFIX) ||
+                    import.startsWith("$BASE_PACKAGE.") ||
+                    import == BASE_PACKAGE ||
+                    import == HTTP_PACKAGE_ROOT ||
+                    import.substringBeforeLast('.', "") == packageName
             }
 
-        return (baseImports + typeImports + endpointImports)
-            .filterNot { it.startsWith(OUTPUT_PACKAGE) }
-            .toSortedSet()
-    }
-
-    private fun StringBuilder.appendClientClass(
-        className: String,
-        endpoints: List<HttpEndpointMetadata>
-    ) {
-        appendLine("class $className(")
-        appendLine("    private val restClient: RestClient")
-        appendLine(") {")
-        appendLine("    private val interpreter = RestClientInterpreter(restClient)")
-        appendLine()
-
-        val signatures = endpoints.map { EndpointSignature(it) }
-
-        signatures.forEach {
-            appendLine("    private val ${it.endpointPropertyName} = ${it.endpointRef}")
-        }
-        appendLine()
-
-        signatures.forEachIndexed { index, signature ->
-            appendEndpoint(signature)
-            if (index != endpoints.lastIndex) {
-                appendLine()
-            }
+        imports += typeImports.filterNot {
+            it.startsWith("kotlin.collections.")
         }
 
-        appendLine("}")
+        if (signatures.any { it.usesSelections }) {
+            imports += "dev.akif.tapik.selections.*"
+        }
+
+        return imports.toSortedSet().toList()
     }
 
     private fun StringBuilder.appendEndpoint(signature: EndpointSignature) {
-        val endpoint = signature.metadata
-
-        appendLine("    // Generated from: ${endpoint.packageName}.${endpoint.sourceFile}#${endpoint.id}")
+        val hasSummary = signature.summaryLines.isNotEmpty()
+        val hasDetails = signature.detailLines.isNotEmpty()
+        if (hasSummary || hasDetails) {
+            appendLine("    /**")
+            signature.summaryLines.forEach { appendLine("     * ${it.escapeForKdoc()}") }
+            if (hasSummary && hasDetails) {
+                appendLine("     *")
+            }
+            signature.detailLines.forEach { appendLine("     * ${it.escapeForKdoc()}") }
+            appendLine("     */")
+        }
         append("    fun ${signature.methodName}(")
         if (signature.inputs.isNotEmpty()) {
             appendLine()
@@ -113,14 +132,14 @@ internal object SpringRestClientClientGenerator {
             append(")")
         }
         appendLine(": ${signature.returnType} {")
-        appendLine("        val endpoint = ${signature.endpointPropertyName}")
+        val endpointExpr = signature.endpointExpression
         appendLine("        val responseEntity = interpreter.send(")
-        appendLine("            method = endpoint.method,")
-        appendLine("            uri = endpoint.buildURI(${signature.uriArguments}),")
+        appendLine("            method = $endpointExpr.method,")
+        appendLine("            uri = $endpointExpr.buildURI(${signature.uriArguments}),")
         appendLine("            inputHeaders = ${signature.inputHeadersEncoding},")
-        appendLine("            inputBodyContentType = endpoint.inputBody.mediaType,")
+        appendLine("            inputBodyContentType = $endpointExpr.inputBody.mediaType,")
         appendLine("            inputBody = ${signature.encodeBodyCall},")
-        appendLine("            outputBodies = endpoint.outputBodies.toList()")
+        appendLine("            outputBodies = $endpointExpr.outputBodies.toList()")
         appendLine("        )")
         appendLine()
         appendLine("        val status = responseEntity.statusCode.toStatus()")
@@ -153,16 +172,22 @@ internal object SpringRestClientClientGenerator {
         val metadata: HttpEndpointMetadata = endpoint
         private val endpointObject: String = endpoint.sourceFile
         private val endpointProperty: String = renderIdentifier(endpoint.propertyName)
-        val endpointRef: String = "$endpointObject.$endpointProperty"
+        val endpointExpression: String =
+            if (endpointObject.endsWith("Kt")) {
+                endpointProperty
+            } else {
+                "$endpointObject.$endpointProperty"
+            }
         val methodName: String = renderIdentifier(endpoint.id)
-        val endpointPropertyName: String = renderIdentifier("${endpoint.id}Endpoint")
-        private val endpointAccessor: String = "endpoint"
 
-        private val parameters = ParameterGroup(endpoint.parameters, endpointAccessor, endpointPropertyName)
-        private val inputHeaders = InputHeadersGroup(endpoint.inputHeaders, endpointAccessor, endpointPropertyName)
-        private val inputBody = InputBodyGroup(endpoint.inputBody, endpointAccessor)
-        private val outputHeaders = OutputHeadersGroup(endpoint.outputHeaders, endpointAccessor)
-        private val outputBodies = OutputBodiesGroup(endpoint.outputBodies, endpointAccessor)
+        val summaryLines: List<String> = linesForDocumentation(endpoint.description)
+        val detailLines: List<String> = linesForDocumentation(endpoint.details)
+
+        private val parameters = ParameterGroup(endpoint.parameters, endpointExpression)
+        private val inputHeaders = InputHeadersGroup(endpoint.inputHeaders, endpointExpression)
+        private val inputBody = InputBodyGroup(endpoint.inputBody, endpointExpression)
+        private val outputHeaders = OutputHeadersGroup(endpoint.outputHeaders, endpointExpression)
+        private val outputBodies = OutputBodiesGroup(endpoint.outputBodies, endpointExpression)
 
         val inputs: List<String> = buildList {
             addAll(parameters.requiredDeclarations)
@@ -171,6 +196,7 @@ internal object SpringRestClientClientGenerator {
             addAll(parameters.optionalDeclarations)
             addAll(inputHeaders.optionalDeclarations)
         }
+
         val uriArguments: String = parameters.argumentList
         val inputHeadersEncoding: String = inputHeaders.encodingCall
         val encodeBodyCall: String = inputBody.encodeCall
@@ -184,11 +210,11 @@ internal object SpringRestClientClientGenerator {
 
         val returnType: String = outputBodies.returnType(outputHeaderTypeNames)
         val responseConstruction: String = outputBodies.responseConstruction(outputHeaderValueNames, outputHeaderTypeNames)
+        val usesSelections: Boolean = outputBodies.usesSelections
     }
 
     private class ParameterGroup(
         parameters: List<ParameterMetadata>,
-        private val endpointAccessor: String,
         private val endpointRef: String
     ) {
         private data class Entry(
@@ -227,8 +253,7 @@ internal object SpringRestClientClientGenerator {
                     is QueryParameterMetadata -> {
                         val hasDefault = parameter.default != null
                         val declaration = if (hasDefault) {
-                            val errorName = parameter.name.ifBlank { fallback }
-                            """$name: $type = requireNotNull(($endpointRef.parameters.item${index + 1} as QueryParameter<$type>).default) { "Default value missing for query parameter $errorName" }"""
+                            "$name: $type = $endpointRef.parameters.item${index + 1}.asQueryParameter<$type>().getDefaultOrFail()"
                         } else {
                             "$name: $type"
                         }
@@ -250,8 +275,7 @@ internal object SpringRestClientClientGenerator {
 
     private class InputHeadersGroup(
         headers: List<HeaderMetadata>,
-        private val endpointAccessor: String,
-        private val endpointRef: String
+        private val endpointExpression: String
     ) {
         private data class Entry(
             val name: String,
@@ -265,13 +289,13 @@ internal object SpringRestClientClientGenerator {
         val count: Int
         val requiredDeclarations: List<String>
         val optionalDeclarations: List<String>
-        val argumentList: String
+        private val argumentList: String
         val encodingCall: String
             get() = if (count == 0) {
                 "emptyMap()"
             } else {
                 val suffix = if (argumentList.isEmpty()) "()" else "($argumentList)"
-                "${endpointAccessor}.encodeInputHeaders$suffix"
+                "$endpointExpression.encodeInputHeaders$suffix"
             }
 
         init {
@@ -284,7 +308,7 @@ internal object SpringRestClientClientGenerator {
                 val hasDefault = !header.required
                 val declaration =
                     if (hasDefault) {
-                        "$name: $type = ($endpointRef.inputHeaders.item${index + 1} as HeaderValues<$type>).values.first()"
+                        "$name: $type = $endpointExpression.inputHeaders.item${index + 1}.asHeaderValues<$type>().getFirstValueOrFail()"
                     } else {
                         "$name: $type"
                     }
@@ -302,9 +326,45 @@ internal object SpringRestClientClientGenerator {
         }
     }
 
+    private class InputBodyGroup(
+        body: BodyMetadata?,
+        private val endpointExpression: String
+    ) {
+        val inputs: List<String>
+        val encodeCall: String
+
+        init {
+            val typeName = body?.type?.simpleName() ?: "EmptyBody"
+            when (typeName) {
+                "EmptyBody" -> {
+                    inputs = emptyList()
+                    encodeCall = "ByteArray(0)"
+                }
+                "RawBody" -> {
+                    inputs = listOf("inputBody: ByteArray")
+                    encodeCall = "inputBody"
+                }
+                "StringBody" -> {
+                    inputs = listOf("inputBody: String")
+                    encodeCall = "$endpointExpression.inputBody.codec.encode(inputBody)"
+                }
+                "JsonBody" -> {
+                    val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
+                    inputs = listOf("inputBody: $valueType")
+                    encodeCall = "$endpointExpression.inputBody.codec.encode(inputBody)"
+                }
+                else -> {
+                    val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
+                    inputs = listOf("inputBody: $valueType")
+                    encodeCall = "$endpointExpression.inputBody.codec.encode(inputBody)"
+                }
+            }
+        }
+    }
+
     private class OutputHeadersGroup(
         headers: List<HeaderMetadata>,
-        endpointAccessor: String
+        endpointExpression: String
     ) {
         data class HeaderEntry(
             val name: String,
@@ -334,61 +394,28 @@ internal object SpringRestClientClientGenerator {
             count = entries.size
             valueNames = entries.map { it.name }
             typeNames = entries.map { it.type }
-            accessors = List(count) { index -> "${endpointAccessor}.outputHeaders.item${index + 1}" }
+            accessors = List(count) { index -> "$endpointExpression.outputHeaders.item${index + 1}" }
             assignments = valueNames.mapIndexed { index, name -> "val $name = $tupleName.item${index + 1}" }
-        }
-    }
-
-    private class InputBodyGroup(
-        body: BodyMetadata?,
-        private val endpointAccessor: String
-    ) {
-        val inputs: List<String>
-        val encodeCall: String
-
-        init {
-            val typeName = body?.type?.simpleName() ?: "EmptyBody"
-            when (typeName) {
-                "EmptyBody" -> {
-                    inputs = emptyList()
-                    encodeCall = "ByteArray(0)"
-                }
-                "RawBody" -> {
-                    inputs = listOf("inputBody: ByteArray")
-                    encodeCall = "inputBody"
-                }
-                "StringBody" -> {
-                    inputs = listOf("inputBody: String")
-                    encodeCall = "${endpointAccessor}.inputBody.codec.encode(inputBody)"
-                }
-                "JsonBody" -> {
-                    val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
-                    inputs = listOf("inputBody: $valueType")
-                    encodeCall = "${endpointAccessor}.inputBody.codec.encode(inputBody)"
-                }
-                else -> {
-                    val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
-                    inputs = listOf("inputBody: $valueType")
-                    encodeCall = "${endpointAccessor}.inputBody.codec.encode(inputBody)"
-                }
-            }
         }
     }
 
     private class OutputBodiesGroup(
         outputBodies: List<OutputBodyMetadata>,
-        private val endpointAccessor: String
+        private val endpointExpression: String
     ) {
         private val bodies: List<BodyEntry>
+
+        val usesSelections: Boolean
 
         init {
             bodies = outputBodies.mapIndexed { index, metadata ->
                 BodyEntry(
                     metadata = metadata,
                     index = index + 1,
-                    endpointAccessor = endpointAccessor
+                    endpointExpression = endpointExpression
                 )
             }
+            usesSelections = bodies.size > 1
         }
 
         fun returnType(headerTypes: List<String>): String = when {
@@ -471,7 +498,7 @@ internal object SpringRestClientClientGenerator {
         private class BodyEntry(
             metadata: OutputBodyMetadata,
             val index: Int,
-            endpointAccessor: String
+            endpointExpression: String
         ) {
             val valueType: String = when (metadata.body.type.simpleName()) {
                 "JsonBody" -> metadata.body.type.arguments.firstOrNull()?.render() ?: "Any"
@@ -481,8 +508,8 @@ internal object SpringRestClientClientGenerator {
                 else -> metadata.body.type.arguments.firstOrNull()?.render() ?: "Any"
             }
 
-            val statusMatcher: String = "${endpointAccessor}.outputBodies.item$index.statusMatcher(status)"
-            val decoder: String = "${endpointAccessor}.outputBodies.item$index.body.codec.decode(bodyBytes)"
+            val statusMatcher: String = "$endpointExpression.outputBodies.item$index.statusMatcher(status)"
+            val decoder: String = "$endpointExpression.outputBodies.item$index.body.codec.decode(bodyBytes)"
         }
     }
 }
@@ -548,6 +575,16 @@ private fun renderIdentifier(name: String): String {
         "`$name`"
     }
 }
+
+private fun linesForDocumentation(text: String?): List<String> =
+    text
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?.lines()
+        ?.map { it.trim() }
+        ?: emptyList()
+
+private fun String.escapeForKdoc(): String = replace("*/", "* /")
 
 private val KOTLIN_KEYWORDS = setOf(
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun",

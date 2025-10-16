@@ -163,7 +163,7 @@ abstract class TapikGenerateTask : DefaultTask() {
         }
 
         if (endpointPackages.isNotEmpty()) {
-            SpringRestClientClientGenerator.generate(
+            RestClientBasedClientGenerator.generate(
                 endpoints = endpoints,
                 rootDir = outputDir
             )
