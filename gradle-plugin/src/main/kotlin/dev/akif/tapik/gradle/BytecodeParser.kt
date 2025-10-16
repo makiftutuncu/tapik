@@ -1,5 +1,7 @@
 package dev.akif.tapik.gradle
 
+import dev.akif.tapik.gradle.metadata.TypeMetadata
+
 object BytecodeParser {
     private const val HTTP_ENDPOINT_FQCN = "dev.akif.tapik.http.HttpEndpoint"
     private const val PARAMETER_FQCN = "dev.akif.tapik.http.Parameter"
@@ -24,9 +26,8 @@ object BytecodeParser {
     internal fun parseHttpEndpoint(
         signature: String,
         ownerInternalName: String,
-        methodName: String,
-        metadata: EndpointMetadata?
-    ): HttpEndpointDescription? {
+        methodName: String
+    ): HttpEndpointSignature? {
         val returnSignature = extractReturnSignature(signature) ?: return null
         val rootType = SignatureParser(returnSignature).parseType()
         val endpointClass = rootType.asClassType() ?: return null
@@ -39,10 +40,10 @@ object BytecodeParser {
             return null
         }
 
-        val parameters = convertParameters(endpointClass.arguments[0], metadata?.parameters) ?: return null
-        val inputHeaders = convertHeaders(endpointClass.arguments[1], metadata?.inputHeaders) ?: return null
+        val parameters = convertParameters(endpointClass.arguments[0]) ?: return null
+        val inputHeaders = convertHeaders(endpointClass.arguments[1]) ?: return null
         val inputBody = convertGeneral(endpointClass.arguments[2]) ?: return null
-        val outputHeaders = convertHeaders(endpointClass.arguments[3], metadata?.outputHeaders) ?: return null
+        val outputHeaders = convertHeaders(endpointClass.arguments[3]) ?: return null
         val outputBodies = convertOutputBodies(endpointClass.arguments[4]) ?: return null
 
         val imports = linkedSetOf<String>()
@@ -58,29 +59,30 @@ object BytecodeParser {
         val fileName = ownerClassName.substringAfterLast('.').substringAfterLast('$')
         val endpointName = deriveEndpointName(methodName)
 
-        val rawType = TypeDescription(
-            name = null,
-            type = endpointClass.simpleName,
+        val rawType = TypeMetadata(
+            name = endpointClass.simpleName,
             arguments = listOf(
-                parameters.description,
-                inputHeaders.description,
-                inputBody.description,
-                outputHeaders.description,
-                outputBodies.description
+                parameters.type,
+                inputHeaders.type,
+                inputBody.type,
+                outputHeaders.type,
+                outputBodies.type
             )
         )
 
-        return HttpEndpointDescription(
+        return HttpEndpointSignature(
             name = endpointName,
             packageName = packageName,
             file = fileName,
-            parameters = parameters.description,
-            inputHeaders = inputHeaders.description,
-            inputBody = inputBody.description,
-            outputHeaders = outputHeaders.description,
-            outputBodies = outputBodies.description,
+            parameters = parameters.type,
+            inputHeaders = inputHeaders.type,
+            inputBody = inputBody.type,
+            outputHeaders = outputHeaders.type,
+            outputBodies = outputBodies.type,
             imports = imports.sorted(),
-            rawType = rawType.toString()
+            rawType = rawType.toString(),
+            ownerInternalName = ownerInternalName,
+            methodName = methodName
         )
     }
 
@@ -121,48 +123,36 @@ object BytecodeParser {
         return methodName
     }
 
-    private fun convertParameters(type: SignatureType, metadata: List<ParameterMetadata>?): ConversionResult? {
+    private fun convertParameters(type: SignatureType): ConversionResult? {
         val tuple = type.asClassType() ?: return convertGeneral(type)
         val alias = tuple.tupleAliasPrefix("Parameters") ?: return convertGeneral(type)
         val argumentResults = tuple.arguments.drop(1).mapNotNull { extractParameterType(it) }
-        val namedArguments = argumentResults.mapIndexed { index, result ->
-            val meta = metadata?.getOrNull(index)
-            result.withMetadata(
-                name = meta?.name,
-                hasKnownValues = null,
-                isRequired = meta?.isRequired,
-                hasDefault = meta?.hasDefault
-            )
-        }
 
         val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
-        namedArguments.forEach { imports += it.imports }
+        argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(name = null, type = alias, arguments = namedArguments.map { it.description }),
+            type = TypeMetadata(
+                name = alias,
+                arguments = argumentResults.map { it.type }
+            ),
             imports = imports
         )
     }
 
-    private fun convertHeaders(type: SignatureType, metadata: List<HeaderMetadata>?): ConversionResult? {
+    private fun convertHeaders(type: SignatureType): ConversionResult? {
         val tuple = type.asClassType() ?: return convertGeneral(type)
         val alias = tuple.tupleAliasPrefix("Headers") ?: return convertGeneral(type)
         val argumentResults = tuple.arguments.drop(1).mapNotNull { extractHeaderType(it) }
-        val namedArguments = argumentResults.mapIndexed { index, result ->
-            val meta = metadata?.getOrNull(index)
-            result.withMetadata(
-                name = meta?.name,
-                hasKnownValues = meta?.hasKnownValues,
-                isRequired = null,
-                hasDefault = null
-            )
-        }
 
         val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
-        namedArguments.forEach { imports += it.imports }
+        argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(name = null, type = alias, arguments = namedArguments.map { it.description }),
+            type = TypeMetadata(
+                name = alias,
+                arguments = argumentResults.map { it.type }
+            ),
             imports = imports
         )
     }
@@ -176,7 +166,10 @@ object BytecodeParser {
         argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
-            description = TypeDescription(name = null, type = alias, arguments = argumentResults.map { it.description }),
+            type = TypeMetadata(
+                name = alias,
+                arguments = argumentResults.map { it.type }
+            ),
             imports = imports
         )
     }
@@ -215,7 +208,7 @@ object BytecodeParser {
         SignatureType.Star -> null
         is SignatureType.Array -> convertArray(type)
         is SignatureType.Class -> convertClass(type)
-        is SignatureType.TypeVariable -> ConversionResult(TypeDescription(name = null, type = type.name, arguments = emptyList()), emptySet())
+        is SignatureType.TypeVariable -> ConversionResult(TypeMetadata(name = type.name, arguments = emptyList()), emptySet())
     }
 
     private fun convertArray(type: SignatureType.Array): ConversionResult? {
@@ -228,7 +221,7 @@ object BytecodeParser {
         }
 
         return ConversionResult(
-            description = TypeDescription(name = null, type = "Array", arguments = listOf(component.description)),
+            type = TypeMetadata(name = "Array", arguments = listOf(component.type)),
             imports = imports
         )
     }
@@ -245,10 +238,9 @@ object BytecodeParser {
         }
 
         return ConversionResult(
-            description = TypeDescription(
-                name = null,
-                type = replacement ?: type.simpleName,
-                arguments = argumentResults.map { it.description }
+            type = TypeMetadata(
+                name = replacement ?: type.simpleName,
+                arguments = argumentResults.map { it.type }
             ),
             imports = imports
         )
@@ -433,23 +425,7 @@ object BytecodeParser {
     }
 
     private data class ConversionResult(
-        val description: TypeDescription,
+        val type: TypeMetadata,
         val imports: Set<String>
     )
-
-    private fun ConversionResult.withMetadata(
-        name: String?,
-        hasKnownValues: Boolean?,
-        isRequired: Boolean?,
-        hasDefault: Boolean?
-    ): ConversionResult {
-        val trimmed = name?.takeIf { it.isNotBlank() }
-        val updated = description.copy(
-            name = trimmed ?: description.name,
-            hasKnownValues = hasKnownValues ?: description.hasKnownValues,
-            required = isRequired ?: description.required,
-            hasDefault = hasDefault ?: description.hasDefault
-        )
-        return copy(description = updated)
-    }
 }

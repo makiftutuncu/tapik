@@ -12,7 +12,3 @@ dependencies {
     implementation(libs.arrowCore)
     testImplementation(kotlin("test"))
 }
-
-tasks.named<KotlinCompile>("compileKotlin") {
-    dependsOn(":code-generator:generate-core")
-}

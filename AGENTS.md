@@ -3,7 +3,7 @@
 ## Project Structure & Module Organization
 - tapik’s Kotlin library lives in `core`, `codec`, `jackson`, and `types`, with `spring-restclient` shipping the first integration that consumes those endpoint definitions; future integrations should follow the same module layout.
 - `app` is a sandbox of runnable examples for manual verification—it is not part of the published artifacts but is useful for demonstrating endpoint definitions and consuming the plugin after a local publish.
-- `code-generator` holds internal generators that emit tapik’s own sources, while `gradle-plugin` ships the user-facing plugin that currently generates Spring RestClient code and will host additional client/server generators as new use-cases appear.
+- `gradle-plugin` ships the user-facing plugin that currently generates Spring RestClient code and will host additional client/server generators as new use-cases appear.
 - Each module keeps Kotlin sources in `src/main/kotlin` and tests in `src/test/kotlin`; shared build conventions sit in `buildSrc/kotlin-jvm.gradle.kts`, and dependency versions live in `gradle/libs.versions.toml` with toolchain defaults in `gradle.properties`.
 
 ## Build, Test, and Development Commands

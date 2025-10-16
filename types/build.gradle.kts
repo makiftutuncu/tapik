@@ -8,7 +8,3 @@ plugins {
 dependencies {
     testImplementation(kotlin("test"))
 }
-
-tasks.named<KotlinCompile>("compileKotlin") {
-    dependsOn(":code-generator:generate-types")
-}

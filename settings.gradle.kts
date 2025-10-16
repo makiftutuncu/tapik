@@ -24,7 +24,6 @@ plugins {
 
 include(":app")
 include(":codec")
-include(":code-generator")
 include(":core")
 include(":gradle-plugin")
 include(":jackson")

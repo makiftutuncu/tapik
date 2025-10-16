@@ -20,6 +20,7 @@ class TapikGradlePlugin : Plugin<Project> {
             compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
             generatedSourcesDirectory.set(generatedSources)
             additionalClassDirectories.set(collectClassDirectories(target))
+            runtimeClasspath.from(target.configurations.getByName("runtimeClasspath"))
         }
 
         tapikGenerate.configure {
@@ -27,6 +28,7 @@ class TapikGradlePlugin : Plugin<Project> {
                 .filter { it != target }
                 .mapNotNull { it.tasks.findByName("classes") }
             dependsOn(upstreamClasses)
+            dependsOn(target.tasks.named("classes"))
         }
 
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
