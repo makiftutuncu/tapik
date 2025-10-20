@@ -7,7 +7,7 @@ spring = "6.2.10"
 mockk = "1.13.12"
 wiremock = "3.0.1"
 junit = "5.11.0"
-kotlinxSerialization = "1.6.3"
+kotlinxSerialization = "1.9.0"
 asm = "9.6"
 
 [libraries]
