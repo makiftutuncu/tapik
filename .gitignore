@@ -4,6 +4,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+# Local sandbox (not part of artifacts)
+playground/
+TODO.md
+
 ### IntelliJ IDEA ###
 .idea
 *.iws

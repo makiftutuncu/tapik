@@ -22,11 +22,14 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-include(":app")
 include(":codec")
 include(":core")
 include(":gradle-plugin")
 include(":jackson")
 include(":spring-restclient")
+
+if (file("playground").exists()) {
+    include(":playground")
+}
 
 rootProject.name = "tapik"
