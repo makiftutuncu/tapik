@@ -11,6 +11,9 @@ import dev.akif.tapik.http.Status
 import dev.akif.tapik.http.StatusMatcher
 import dev.akif.tapik.http.stringBody
 import dev.akif.tapik.jackson.jsonBody
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientResponseException
 import java.net.URI
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -18,9 +21,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClientResponseException
 
 class RestClientInterpreterTest {
     private lateinit var server: WireMockServer
@@ -129,6 +129,9 @@ class RestClientInterpreterTest {
                 )
             }
 
-        assertTrue(exception.message!!.contains("expecting [OK, CREATED, NO_CONTENT, status >= 500]"), exception.message)
+        assertTrue(
+            exception.message!!.contains("expecting [OK, CREATED, NO_CONTENT, status >= 500]"),
+            exception.message
+        )
     }
 }

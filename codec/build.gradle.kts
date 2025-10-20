@@ -5,6 +5,5 @@ plugins {
 
 dependencies {
     implementation(libs.arrowCore)
-    testImplementation(kotlin("test"))
-    testImplementation(libs.junitParams)
+    testImplementation(libs.bundles.testCommon)
 }

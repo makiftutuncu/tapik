@@ -1,9 +1,9 @@
 package dev.akif.tapik.spring.restclient
 
 import dev.akif.tapik.http.Status
+import org.springframework.http.HttpStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.springframework.http.HttpStatus
 
 class StatusCodeMappingTest {
     @Test

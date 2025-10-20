@@ -34,7 +34,8 @@ class QueryParameterTest {
         val parameter = QueryParameter.uuid("id")
 
         val uuid =
-            parameter.codec.decode("123e4567-e89b-12d3-a456-426614174000")
+            parameter.codec
+                .decode("123e4567-e89b-12d3-a456-426614174000")
                 .getOrElse { fail("Failed to decode UUID for default: $it") }
         val optional = parameter.optional(uuid)
 

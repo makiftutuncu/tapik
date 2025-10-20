@@ -21,7 +21,7 @@ dependencies {
     api(project(":jackson"))
     implementation(libs.arrowCore)
     implementation(libs.springWeb)
-    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.testCommon)
     testImplementation(libs.mockk)
     integrationTestImplementation(libs.wiremock)
 }

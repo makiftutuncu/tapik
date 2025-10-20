@@ -7,5 +7,5 @@ dependencies {
     api(project(":core"))
     implementation(libs.arrowCore)
     implementation(libs.jacksonKotlin)
-    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.testCommon)
 }

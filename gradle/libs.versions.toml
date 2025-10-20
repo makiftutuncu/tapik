@@ -7,6 +7,8 @@ spring = "6.2.10"
 mockk = "1.13.12"
 wiremock = "3.0.1"
 junit = "5.11.0"
+kotlinxSerialization = "1.6.3"
+asm = "9.6"
 
 [libraries]
 arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
@@ -15,9 +17,18 @@ kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", ver
 springWeb = { module = "org.springframework:spring-web", version.ref = "spring" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 wiremock = { module = "org.wiremock:wiremock-standalone", version.ref = "wiremock" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlinStdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinTestJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+kotlinSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+asmTree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 
 [bundles]
+testCommon = ["junitJupiter", "junitParams", "kotlinTest", "kotlinTestJunit5"]
 
 [plugins]
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

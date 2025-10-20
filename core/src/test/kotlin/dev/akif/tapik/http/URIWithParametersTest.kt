@@ -13,11 +13,12 @@ class URIWithParametersTest {
 
         val base = URIWithParameters0(listOf("users"))
 
-        val uri = (base / userId / "posts" + page + pageSize).toURI(
-            UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
-            2,
-            3
-        )
+        val uri =
+            (base / userId / "posts" + page + pageSize).toURI(
+                UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
+                2,
+                3
+            )
 
         assertEquals("/users/123e4567-e89b-12d3-a456-426614174000/posts?page=2&pageSize=3", uri.toString())
     }
