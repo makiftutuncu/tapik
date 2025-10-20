@@ -14,4 +14,4 @@ inline fun <reified T : Any> jacksonCodec(
 inline fun <reified T : Any> jsonBody(
     name: String,
     mapper: ObjectMapper? = null
-): JsonBody<T> = jsonBody(jacksonCodec<T>(name, mapper))
+): JsonBody<T> = JsonBody(jacksonCodec<T>(name, mapper))

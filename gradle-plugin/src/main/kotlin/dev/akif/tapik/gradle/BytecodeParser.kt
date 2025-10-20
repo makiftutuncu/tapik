@@ -4,11 +4,10 @@ import dev.akif.tapik.gradle.metadata.TypeMetadata
 
 object BytecodeParser {
     private const val HTTP_ENDPOINT_FQCN = "dev.akif.tapik.http.HttpEndpoint"
-    private const val PARAMETER_FQCN = "dev.akif.tapik.http.Parameter"
-    private const val HEADER_FQCN = "dev.akif.tapik.http.Header"
-    private const val OUTPUT_BODY_FQCN = "dev.akif.tapik.http.OutputBody"
-    private const val TUPLE_PACKAGE = "dev.akif.tapik.tuples"
     private const val HTTP_PACKAGE = "dev.akif.tapik.http"
+    private const val URI_WITH_PARAMETERS_PREFIX = "$HTTP_PACKAGE.URIWithParameters"
+    private const val HEADERS_PREFIX = "$HTTP_PACKAGE.Headers"
+    private const val OUTPUT_BODIES_PREFIX = "$HTTP_PACKAGE.OutputBodies"
     private val JAVA_TO_KOTLIN_TYPES = mapOf(
         "java.lang.Boolean" to "Boolean",
         "java.lang.Byte" to "Byte",
@@ -40,7 +39,7 @@ object BytecodeParser {
             return null
         }
 
-        val parameters = convertParameters(endpointClass.arguments[0]) ?: return null
+        val uriWithParameters = convertParameters(endpointClass.arguments[0]) ?: return null
         val inputHeaders = convertHeaders(endpointClass.arguments[1]) ?: return null
         val inputBody = convertGeneral(endpointClass.arguments[2]) ?: return null
         val outputHeaders = convertHeaders(endpointClass.arguments[3]) ?: return null
@@ -48,7 +47,7 @@ object BytecodeParser {
 
         val imports = linkedSetOf<String>()
         imports += HTTP_ENDPOINT_FQCN
-        imports += parameters.imports
+        imports += uriWithParameters.imports
         imports += inputHeaders.imports
         imports += inputBody.imports
         imports += outputHeaders.imports
@@ -62,7 +61,7 @@ object BytecodeParser {
         val rawType = TypeMetadata(
             name = endpointClass.simpleName,
             arguments = listOf(
-                parameters.type,
+                uriWithParameters.type,
                 inputHeaders.type,
                 inputBody.type,
                 outputHeaders.type,
@@ -74,7 +73,7 @@ object BytecodeParser {
             name = endpointName,
             packageName = packageName,
             file = fileName,
-            parameters = parameters.type,
+            uriWithParameters = uriWithParameters.type,
             inputHeaders = inputHeaders.type,
             inputBody = inputBody.type,
             outputHeaders = outputHeaders.type,
@@ -124,16 +123,22 @@ object BytecodeParser {
     }
 
     private fun convertParameters(type: SignatureType): ConversionResult? {
-        val tuple = type.asClassType() ?: return convertGeneral(type)
-        val alias = tuple.tupleAliasPrefix("Parameters") ?: return convertGeneral(type)
-        val argumentResults = tuple.arguments.drop(1).mapNotNull { extractParameterType(it) }
+        val classType = type.asClassType() ?: return convertGeneral(type)
+        if (!classType.name.startsWith(URI_WITH_PARAMETERS_PREFIX)) {
+            return convertGeneral(type)
+        }
 
-        val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
+        val argumentResults = classType.arguments.mapNotNull { convertGeneral(it) }
+        val imports = linkedSetOf<String>()
+        val classImport = classType.importName()
+        if (shouldImport(classImport)) {
+            imports += classImport
+        }
         argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
             type = TypeMetadata(
-                name = alias,
+                name = classType.simpleName,
                 arguments = argumentResults.map { it.type }
             ),
             imports = imports
@@ -141,16 +146,22 @@ object BytecodeParser {
     }
 
     private fun convertHeaders(type: SignatureType): ConversionResult? {
-        val tuple = type.asClassType() ?: return convertGeneral(type)
-        val alias = tuple.tupleAliasPrefix("Headers") ?: return convertGeneral(type)
-        val argumentResults = tuple.arguments.drop(1).mapNotNull { extractHeaderType(it) }
+        val classType = type.asClassType() ?: return convertGeneral(type)
+        if (!classType.name.startsWith(HEADERS_PREFIX)) {
+            return convertGeneral(type)
+        }
 
-        val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
+        val argumentResults = classType.arguments.mapNotNull { convertGeneral(it) }
+        val imports = linkedSetOf<String>()
+        val classImport = classType.importName()
+        if (shouldImport(classImport)) {
+            imports += classImport
+        }
         argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
             type = TypeMetadata(
-                name = alias,
+                name = classType.simpleName,
                 arguments = argumentResults.map { it.type }
             ),
             imports = imports
@@ -158,50 +169,26 @@ object BytecodeParser {
     }
 
     private fun convertOutputBodies(type: SignatureType): ConversionResult? {
-        val tuple = type.asClassType() ?: return convertGeneral(type)
-        val alias = tuple.tupleAliasPrefix("OutputBodies") ?: return convertGeneral(type)
-        val argumentResults = tuple.arguments.drop(1).mapNotNull { extractOutputBodyType(it) }
+        val classType = type.asClassType() ?: return convertGeneral(type)
+        if (!classType.name.startsWith(OUTPUT_BODIES_PREFIX)) {
+            return convertGeneral(type)
+        }
 
-        val imports = linkedSetOf("$HTTP_PACKAGE.$alias")
+        val argumentResults = classType.arguments.mapNotNull { convertGeneral(it) }
+        val imports = linkedSetOf<String>()
+        val classImport = classType.importName()
+        if (shouldImport(classImport)) {
+            imports += classImport
+        }
         argumentResults.forEach { imports += it.imports }
 
         return ConversionResult(
             type = TypeMetadata(
-                name = alias,
+                name = classType.simpleName,
                 arguments = argumentResults.map { it.type }
             ),
             imports = imports
         )
-    }
-
-    private fun extractParameterType(type: SignatureType): ConversionResult? {
-        val classType = type.asClassType() ?: return convertGeneral(type)
-        if (!classType.matches(PARAMETER_FQCN)) {
-            return convertGeneral(type)
-        }
-
-        val argument = classType.arguments.firstOrNull() ?: return null
-        return convertGeneral(argument)
-    }
-
-    private fun extractHeaderType(type: SignatureType): ConversionResult? {
-        val classType = type.asClassType() ?: return convertGeneral(type)
-        if (!classType.matches(HEADER_FQCN)) {
-            return convertGeneral(type)
-        }
-
-        val argument = classType.arguments.firstOrNull() ?: return null
-        return convertGeneral(argument)
-    }
-
-    private fun extractOutputBodyType(type: SignatureType): ConversionResult? {
-        val classType = type.asClassType() ?: return convertGeneral(type)
-        if (!classType.matches(OUTPUT_BODY_FQCN)) {
-            return convertGeneral(type)
-        }
-
-        val argument = classType.arguments.firstOrNull() ?: return null
-        return convertGeneral(argument)
     }
 
     private fun convertGeneral(type: SignatureType): ConversionResult? = when (type) {
@@ -265,24 +252,6 @@ object BytecodeParser {
     private fun SignatureType.asClassType(): SignatureType.Class? = this as? SignatureType.Class
 
     private fun SignatureType.Class.matches(expected: String): Boolean = name == expected
-
-    private fun SignatureType.Class.tupleAliasPrefix(prefix: String): String? {
-        if (!name.startsWith(TUPLE_PACKAGE)) {
-            return null
-        }
-
-        val suffix = name.substringAfterLast('.')
-        if (!suffix.startsWith("Tuple")) {
-            return null
-        }
-
-        val count = suffix.removePrefix("Tuple")
-        if (count.isEmpty()) {
-            return null
-        }
-
-        return "$prefix$count"
-    }
 
     private val SignatureType.Class.simpleName: String
         get() = name.substringAfterLast('.').replace('$', '.')

@@ -1,4 +1,4 @@
-package dev.akif.tapik.client
+package dev.akif.tapik
 
 import dev.akif.tapik.http.HeaderValues
 import dev.akif.tapik.http.QueryParameter

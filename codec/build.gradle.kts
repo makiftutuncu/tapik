@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":types"))
     implementation(libs.arrowCore)
     testImplementation(kotlin("test"))
 }

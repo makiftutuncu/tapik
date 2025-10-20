@@ -1,6 +1,6 @@
 package dev.akif.tapik.spring.restclient
 
-import dev.akif.tapik.client.Client
+import dev.akif.tapik.Client
 import org.springframework.web.client.RestClient
 
 interface RestClientBasedClient : Client {

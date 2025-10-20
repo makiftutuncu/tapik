@@ -26,7 +26,6 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":types"))
     implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
     implementation("org.ow2.asm:asm:9.6")

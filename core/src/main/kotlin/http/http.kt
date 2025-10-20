@@ -1,10 +1,12 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package dev.akif.tapik.http
 
 import dev.akif.tapik.Endpoint
 import dev.akif.tapik.codec.StringCodec
 import kotlin.properties.ReadOnlyProperty
 
-fun String.toURIWithParameters(): URIWithParameters<Parameters0> = listOf(this) to Parameters0()
+val root: URIWithParameters0 = URIWithParameters0(emptyList())
 
 inline fun <reified P : Any> path(
     name: String,
@@ -42,11 +44,11 @@ fun matchStatus(
 val unmatchedStatus: StatusMatcher =
     StatusMatcher.Unmatched
 
-fun <T, P : Parameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> http(
+fun <T, U : URIWithParameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> http(
     description: String? = null,
     details: String? = null,
-    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<P, IH, IB, OH, OB>
-): ReadOnlyProperty<T, HttpEndpoint<P, IH, IB, OH, OB>> =
+    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<U, IH, IB, OH, OB>
+): ReadOnlyProperty<T, HttpEndpoint<U, IH, IB, OH, OB>> =
     ReadOnlyProperty { _, property ->
         HttpEndpointWithoutMethod(id = property.name, description = description, details = details).builder()
     }
@@ -55,12 +57,12 @@ data class HttpEndpointWithoutMethod(
     override val id: String,
     override val description: String?,
     override val details: String?
-) : Endpoint<Parameters0, Headers0, EmptyBody, Headers0, OutputBodies0>() {
-    override val parameters: Parameters0 = Parameters0()
-    override val inputHeaders: Headers0 = Headers0()
+) : Endpoint<URIWithParameters0, Headers0, EmptyBody, Headers0, OutputBodies0>() {
+    override val uriWithParameters: URIWithParameters0 = root
+    override val inputHeaders: Headers0 = Headers0
     override val inputBody: EmptyBody = EmptyBody
-    override val outputHeaders: Headers0 = Headers0()
-    override val outputBodies: OutputBodies0 = OutputBodies0()
+    override val outputHeaders: Headers0 = Headers0
+    override val outputBodies: OutputBodies0 = OutputBodies0
 
     val get: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.GET)
     val head: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.HEAD)
@@ -77,71 +79,39 @@ data class HttpEndpointWithoutURI(
     override val description: String?,
     override val details: String?,
     private val method: Method
-) : Endpoint<Parameters0, Headers0, EmptyBody, Headers0, OutputBodies0>() {
-    override val parameters: Parameters0 = Parameters0()
-    override val inputHeaders: Headers0 = Headers0()
+) : Endpoint<URIWithParameters0, Headers0, EmptyBody, Headers0, OutputBodies0>() {
+    override val uriWithParameters: URIWithParameters0 = root
+    override val inputHeaders: Headers0 = Headers0
     override val inputBody: EmptyBody = EmptyBody
-    override val outputHeaders: Headers0 = Headers0()
-    override val outputBodies: OutputBodies0 = OutputBodies0()
+    override val outputHeaders: Headers0 = Headers0
+    override val outputBodies: OutputBodies0 = OutputBodies0
 
-    fun uri(segment: String): HttpEndpoint<Parameters0, Headers0, EmptyBody, Headers0, OutputBodies0> =
+    fun <U : URIWithParameters> uri(
+        uriWithParameters: U
+    ): HttpEndpoint<U, Headers0, EmptyBody, Headers0, OutputBodies0> =
         HttpEndpoint(
             id = this.id,
             description = this.description,
             details = this.details,
             method = this.method,
-            uri = listOf(segment),
-            parameters = this.parameters,
+            uriWithParameters = uriWithParameters,
             inputHeaders = this.inputHeaders,
             inputBody = EmptyBody,
             outputHeaders = this.outputHeaders,
-            outputBodies = OutputBodies0()
+            outputBodies = OutputBodies0
         )
-
-    fun <P : Any> uri(
-        parameter: Parameter<P>
-    ): HttpEndpoint<Parameters1<P>, Headers0, EmptyBody, Headers0, OutputBodies0> =
-        HttpEndpoint(
-            id = this.id,
-            description = this.description,
-            details = this.details,
-            method = this.method,
-            uri = emptyList(),
-            parameters = Parameters1(parameter),
-            inputHeaders = this.inputHeaders,
-            inputBody = EmptyBody,
-            outputHeaders = this.outputHeaders,
-            outputBodies = OutputBodies0()
-        )
-
-    fun <P : Parameters> uri(
-        uriWithParameters: URIWithParameters<P>
-    ): HttpEndpoint<P, Headers0, EmptyBody, Headers0, OutputBodies0> {
-        val (uri, parameters) = uriWithParameters
-        return HttpEndpoint(
-            id = this.id,
-            description = this.description,
-            details = this.details,
-            method = this.method,
-            uri = uri,
-            parameters = parameters,
-            inputHeaders = this.inputHeaders,
-            inputBody = EmptyBody,
-            outputHeaders = this.outputHeaders,
-            outputBodies = OutputBodies0()
-        )
-    }
 }
 
-data class HttpEndpoint<out P : Parameters, out IH : Headers, out IB : Body<*>, out OH : Headers, out OB : OutputBodies>(
+data class HttpEndpoint<out U : URIWithParameters, out IH : Headers, out IB : Body<*>, out OH : Headers, out OB : OutputBodies>(
     public override val id: String,
     public override val description: String?,
     public override val details: String?,
     val method: Method,
-    val uri: List<String>,
-    public override val parameters: P,
+    public override val uriWithParameters: U,
     public override val inputHeaders: IH,
     public override val inputBody: IB,
     public override val outputHeaders: OH,
     public override val outputBodies: OB
-) : Endpoint<P, IH, IB, OH, OB>()
+) : Endpoint<U, IH, IB, OH, OB>()
+
+typealias AnyHttpEndpoint = HttpEndpoint<URIWithParameters, Headers, Body<*>, Headers, OutputBodies>

@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id("buildsrc.convention.kotlin-jvm")
     alias(libs.plugins.ktlint)

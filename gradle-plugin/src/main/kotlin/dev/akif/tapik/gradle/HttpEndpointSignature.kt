@@ -6,7 +6,7 @@ data class HttpEndpointSignature(
     val name: String,
     val packageName: String,
     val file: String,
-    val parameters: TypeMetadata,
+    val uriWithParameters: TypeMetadata,
     val inputHeaders: TypeMetadata,
     val inputBody: TypeMetadata,
     val outputHeaders: TypeMetadata,

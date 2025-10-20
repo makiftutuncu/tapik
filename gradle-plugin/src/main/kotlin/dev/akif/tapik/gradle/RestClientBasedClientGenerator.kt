@@ -36,7 +36,7 @@ internal object RestClientBasedClientGenerator {
                     .forEach { (sourceFile, groupedEndpoints) ->
                         val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
                         val signatures = sortedEndpoints.map(::EndpointSignature)
-                        val imports = buildImportsFor(packageName, signatures, sortedEndpoints)
+                        val imports = buildImportsFor(packageName, sortedEndpoints)
                         val interfaceName = "${sourceFile}Client"
                         val targetFile = File(packageDirectory, "$interfaceName.kt")
                         targetFile.writeText(
@@ -79,12 +79,12 @@ internal object RestClientBasedClientGenerator {
 
     private fun buildImportsFor(
         packageName: String,
-        signatures: List<EndpointSignature>,
         endpoints: List<HttpEndpointMetadata>
     ): List<String> {
         val imports = mutableSetOf(
             "arrow.core.getOrElse",
             "arrow.core.leftNel",
+            "dev.akif.tapik.*",
             "dev.akif.tapik.http.*",
             "$BASE_PACKAGE.*"
         )
@@ -102,10 +102,6 @@ internal object RestClientBasedClientGenerator {
 
         imports += typeImports.filterNot {
             it.startsWith("kotlin.collections.")
-        }
-
-        if (signatures.any { it.usesSelections }) {
-            imports += "dev.akif.tapik.selections.*"
         }
 
         return imports.toSortedSet().toList()
@@ -135,7 +131,7 @@ internal object RestClientBasedClientGenerator {
         val endpointExpr = signature.endpointExpression
         appendLine("        val responseEntity = interpreter.send(")
         appendLine("            method = $endpointExpr.method,")
-        appendLine("            uri = $endpointExpr.buildURI(${signature.uriArguments}),")
+        appendLine("            uri = $endpointExpr.uriWithParameters.toURI(${signature.uriArguments}),")
         appendLine("            inputHeaders = ${signature.inputHeadersEncoding},")
         appendLine("            inputBodyContentType = $endpointExpr.inputBody.mediaType,")
         appendLine("            inputBody = ${signature.encodeBodyCall},")
@@ -169,7 +165,6 @@ internal object RestClientBasedClientGenerator {
     private class EndpointSignature(
         endpoint: HttpEndpointMetadata
     ) {
-        val metadata: HttpEndpointMetadata = endpoint
         private val endpointObject: String = endpoint.sourceFile
         private val endpointProperty: String = renderIdentifier(endpoint.propertyName)
         val endpointExpression: String =
@@ -210,7 +205,6 @@ internal object RestClientBasedClientGenerator {
 
         val returnType: String = outputBodies.returnType(outputHeaderTypeNames)
         val responseConstruction: String = outputBodies.responseConstruction(outputHeaderValueNames, outputHeaderTypeNames)
-        val usesSelections: Boolean = outputBodies.usesSelections
     }
 
     private class ParameterGroup(
@@ -252,8 +246,9 @@ internal object RestClientBasedClientGenerator {
                     )
                     is QueryParameterMetadata -> {
                         val hasDefault = parameter.default != null
+                        val parameterAccessor = "$endpointRef.uriWithParameters.parameters.item${index + 1}"
                         val declaration = if (hasDefault) {
-                            "$name: $type = $endpointRef.parameters.item${index + 1}.asQueryParameter<$type>().getDefaultOrFail()"
+                            "$name: $type = $parameterAccessor.asQueryParameter<$type>().getDefaultOrFail()"
                         } else {
                             "$name: $type"
                         }
@@ -403,42 +398,35 @@ internal object RestClientBasedClientGenerator {
         outputBodies: List<OutputBodyMetadata>,
         private val endpointExpression: String
     ) {
-        private val bodies: List<BodyEntry>
-
-        val usesSelections: Boolean
-
-        init {
-            bodies = outputBodies.mapIndexed { index, metadata ->
-                BodyEntry(
-                    metadata = metadata,
-                    index = index + 1,
-                    endpointExpression = endpointExpression
-                )
-            }
-            usesSelections = bodies.size > 1
+        private val bodies: List<BodyEntry> = outputBodies.mapIndexed { index, metadata ->
+            BodyEntry(
+                metadata = metadata,
+                index = index + 1,
+                endpointExpression = endpointExpression
+            )
         }
 
         fun returnType(headerTypes: List<String>): String = when {
-            bodies.isEmpty() && headerTypes.isEmpty() -> "ResponseWithoutBodyWithHeaders0"
-            bodies.isEmpty() -> "ResponseWithoutBodyWithHeaders${headerTypes.size}<${headerTypes.joinToString(", ")}>"
-            bodies.size == 1 && headerTypes.isEmpty() -> "ResponseWithHeaders0<${bodies.first().valueType}>"
-            bodies.size == 1 -> "ResponseWithHeaders${headerTypes.size}<${bodies.first().valueType}, ${headerTypes.joinToString(", ")}>"
+            bodies.isEmpty() && headerTypes.isEmpty() -> "ResponseWithoutBody0"
+            bodies.isEmpty() -> "ResponseWithoutBody${headerTypes.size}<${headerTypes.joinToString(", ")}>"
+            bodies.size == 1 && headerTypes.isEmpty() -> "Response0<${bodies.first().valueType}>"
+            bodies.size == 1 -> "Response${headerTypes.size}<${bodies.first().valueType}, ${headerTypes.joinToString(", ")}>"
             else -> {
                 val options = bodies.joinToString(", ") { body ->
                     if (headerTypes.isEmpty()) {
-                        "ResponseWithHeaders0<${body.valueType}>"
+                        "Response0<${body.valueType}>"
                     } else {
-                        "ResponseWithHeaders${headerTypes.size}<${body.valueType}, ${headerTypes.joinToString(", ")}>"
+                        "Response${headerTypes.size}<${body.valueType}, ${headerTypes.joinToString(", ")}>"
                     }
                 }
-                "Selection${bodies.size}<$options>"
+                "OneOf${bodies.size}<$options>"
             }
         }
 
         fun responseConstruction(headerValues: List<String>, headerTypes: List<String>): String = when {
-            bodies.isEmpty() && headerValues.isEmpty() -> "        return ResponseWithoutBodyWithHeaders0(status)"
+            bodies.isEmpty() && headerValues.isEmpty() -> "        return ResponseWithoutBody0(status)"
             bodies.isEmpty() -> buildString {
-                appendLine("        return ResponseWithoutBodyWithHeaders${headerTypes.size}(")
+                appendLine("        return ResponseWithoutBody${headerTypes.size}(")
                 appendLine("            status,")
                 headerValues.forEachIndexed { index, value ->
                     val suffix = if (index == headerValues.lastIndex) "" else ","
@@ -451,9 +439,9 @@ internal object RestClientBasedClientGenerator {
                 appendLine("        val decoded = ${bodies.first().decoder}")
                 appendLine("            .map { decodedBody ->")
                 if (headerValues.isEmpty()) {
-                    appendLine("                ResponseWithHeaders0(status, decodedBody)")
+                    appendLine("                Response0(status, decodedBody)")
                 } else {
-                    appendLine("                ResponseWithHeaders${headerTypes.size}(")
+                    appendLine("                Response${headerTypes.size}(")
                     appendLine("                    status,")
                     appendLine("                    decodedBody,")
                     headerValues.forEachIndexed { index, value ->
@@ -471,12 +459,12 @@ internal object RestClientBasedClientGenerator {
                 bodies.forEach { body ->
                     appendLine("            ${body.statusMatcher} -> ${body.decoder}.map { decodedBody ->")
                     if (headerValues.isEmpty()) {
-                        appendLine("                Selection${bodies.size}.Option${body.index}(")
-                        appendLine("                    ResponseWithHeaders0(status, decodedBody)")
+                        appendLine("                OneOf${bodies.size}.Option${body.index}(")
+                        appendLine("                    Response0(status, decodedBody)")
                         appendLine("                )")
                     } else {
-                        appendLine("                Selection${bodies.size}.Option${body.index}(")
-                        appendLine("                    ResponseWithHeaders${headerTypes.size}(")
+                        appendLine("                OneOf${bodies.size}.Option${body.index}(")
+                        appendLine("                    Response${headerTypes.size}(")
                         appendLine("                        status,")
                         appendLine("                        decodedBody,")
                         headerValues.forEachIndexed { index, value ->
@@ -529,7 +517,7 @@ private fun TypeMetadata.simpleName(): String = name.substringAfterLast('.')
 
 private fun sanitizeIdentifier(rawName: String?, fallback: String): String {
     val source = rawName?.trim().takeUnless { it.isNullOrEmpty() } ?: fallback
-    val cleaned = buildString {
+    var cleaned = buildString {
         for (ch in source) {
             when {
                 ch.isLetterOrDigit() -> append(ch)
@@ -538,20 +526,16 @@ private fun sanitizeIdentifier(rawName: String?, fallback: String): String {
             }
         }
     }.replace(Regex("_+"), "_").trim('_')
-    val components = cleaned.split('_').mapNotNull { part ->
-        part.takeIf { it.isNotBlank() }
-    }
-    val camel = if (components.isEmpty()) {
-        fallback
-    } else {
-        components.mapIndexed { index, part ->
-            val lower = part.lowercase()
-            if (index == 0) lower else lower.replaceFirstChar { it.uppercaseChar() }
-        }.joinToString("")
+
+    if (cleaned.isEmpty()) {
+        cleaned = fallback
     }
 
-    val base = camel.ifBlank { fallback }
-    return base.replaceFirstChar { it.lowercaseChar() }
+    if (cleaned.firstOrNull()?.let { it.isLetter() || it == '_' } != true) {
+        cleaned = "_$cleaned"
+    }
+
+    return cleaned
 }
 
 private fun uniqueName(base: String, used: MutableSet<String>): String {

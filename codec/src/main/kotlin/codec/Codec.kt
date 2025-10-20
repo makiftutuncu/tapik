@@ -3,7 +3,6 @@ package dev.akif.tapik.codec
 import arrow.core.EitherNel
 import arrow.core.leftNel
 import arrow.core.right
-import dev.akif.tapik.tuples.*
 import kotlin.reflect.KClass
 
 interface Codec<Source : Any, Target : Any> :
@@ -11,10 +10,6 @@ interface Codec<Source : Any, Target : Any> :
     Encoder<Source, Target> {
     val sourceClass: KClass<Source>
     val targetClass: KClass<Target>
-
-    operator fun <Source2 : Any, Target2 : Any> plus(
-        that: Codec<Source2, Target2>
-    ): Tuple2<Codec<*, *>, Codec<Source, Target>, Codec<Source2, Target2>> = Tuple2(this, that)
 
     companion object {
         inline fun <reified T : Any> identity(name: String): Codec<T, T> =
@@ -75,7 +70,10 @@ inline fun <Source : Any, Target : Any, reified Source2 : Any> Codec<Source, Tar
 
         override val targetClass: KClass<Target> = this@unsafeTransformSource.targetClass
 
-        override fun decode(input: Target): EitherNel<String, Source2> = this@unsafeTransformSource.decode(input).map { from(it) }
+        override fun decode(input: Target): EitherNel<String, Source2> =
+            this@unsafeTransformSource.decode(input).map {
+                from(it)
+            }
 
         override fun encode(input: Source2): Target = this@unsafeTransformSource.encode(to(input))
     }

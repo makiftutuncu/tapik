@@ -12,6 +12,7 @@
 - `./gradlew :gradle-plugin:publishToMavenLocal` installs the tapik Gradle plugin locally so the `app` sandbox can exercise plugin tasks against new changes.
 - `./gradlew :app:run` runs the sample REST client in `app/src/main/kotlin/RestClientExample.kt` for manual testing of endpoint definitions.
 - `./gradlew ktlintCheck` enforces formatting; apply fixes with `./gradlew ktlintFormat` before committing.
+- Always apply formatting via `./gradlew ktlintFormat`; avoid manual whitespace-only edits.
 
 ## Coding Style & Naming Conventions
 - Kotlin sources follow the official style with 4-space indentation and LF endings (`.editorconfig` enforces 120-character lines, UTF-8, and trailing newline).

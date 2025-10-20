@@ -1,5 +1,6 @@
 package dev.akif.app
 
+import dev.akif.tapik.*
 import dev.akif.tapik.codec.Codec
 import dev.akif.tapik.http.*
 
@@ -14,12 +15,12 @@ class MarkdownDocumentationInterpreter(
     fun generate(): String = api.joinToString("\n\n---\n\n") { it.document() }.trim()
 
     private fun AnyHttpEndpoint.document(): String {
-        val parameterList = parameters.toList()
+        val parameterList = uriWithParameters.parameters.toList<Parameter<*>>()
         return listOfNotNull(
             h2(description ?: id),
             description?.let { "Operation id: ${mono(id)}" },
             details,
-            mono("$method ${uri.joinToString(separator = "/", prefix = "/")}"),
+            mono("$method ${uriWithParameters.uri.joinToString(separator = "/", prefix = "/")}"),
             documentParameters(parameterList),
             documentHeaders("Input", inputHeaders.toList()),
             documentInput(inputBody),

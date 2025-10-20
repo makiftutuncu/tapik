@@ -1,26 +1,12 @@
 package dev.akif.tapik.gradle
 
-import dev.akif.tapik.gradle.metadata.BodyMetadata
-import dev.akif.tapik.gradle.metadata.HeaderMetadata
-import dev.akif.tapik.gradle.metadata.HttpEndpointMetadata
-import dev.akif.tapik.gradle.metadata.OutputBodyMetadata
-import dev.akif.tapik.gradle.metadata.PathVariableMetadata
-import dev.akif.tapik.gradle.metadata.QueryParameterMetadata
-import dev.akif.tapik.gradle.metadata.TypeMetadata
-import dev.akif.tapik.http.Body
-import dev.akif.tapik.http.EmptyBody
-import dev.akif.tapik.http.Header
-import dev.akif.tapik.http.HeaderValues
-import dev.akif.tapik.http.HttpEndpoint
-import dev.akif.tapik.http.OutputBody
-import dev.akif.tapik.http.Parameter
-import dev.akif.tapik.http.ParameterPosition
-import dev.akif.tapik.http.QueryParameter
-import dev.akif.tapik.http.StatusMatcher
-import dev.akif.tapik.tuples.Tuple
+import dev.akif.tapik.*
+import dev.akif.tapik.gradle.metadata.*
+import dev.akif.tapik.http.*
 import java.io.File
 import java.lang.reflect.Modifier
 import java.net.URLClassLoader
+import java.util.Locale
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -147,7 +133,7 @@ abstract class TapikGenerateTask : DefaultTask() {
         outputDir.mkdirs()
         val outputFile = outputDir.resolve("tapik-endpoints.txt")
         outputFile.writeText(
-            endpoints.joinToString(separator = System.lineSeparator()) { it.summaryLine() }
+            endpoints.joinToString(separator = System.lineSeparator()) { it.toString() }
         )
 
         logger.lifecycle("[tapik] Endpoint summary written to: ${outputFile.absolutePath}")
@@ -181,16 +167,11 @@ abstract class TapikGenerateTask : DefaultTask() {
             return emptyList()
         }
 
-        val classpathEntries = buildList<File> {
+        val classpathEntries = buildList {
             add(compiledDir)
             additionalDirectories.forEach { add(File(it)) }
             runtimeClasspath.forEach { add(it) }
         }.filter { it.exists() }
-
-        if (classpathEntries.isEmpty()) {
-            logger.warn("[tapik] Classpath is empty; generated clients may be incomplete.")
-            return emptyList()
-        }
 
         if (classpathEntries.isEmpty()) {
             logger.warn("[tapik] No classpath entries available to reflect endpoints; generated clients will be empty.")
@@ -261,23 +242,23 @@ abstract class TapikGenerateTask : DefaultTask() {
         endpoint: HttpEndpoint<*, *, *, *, *>
     ): HttpEndpointMetadata {
         val parametersMetadata = buildParametersMetadata(
-            parameterTypes = parameters.arguments,
-            parameterObjects = endpoint.parameters.extractTupleItems()
+            parameterTypes = uriWithParameters.arguments,
+            parameterObjects = endpoint.uriWithParameters.extractParameters()
         )
         val inputHeadersMetadata = buildHeaderMetadata(
             headerTypes = inputHeaders.arguments,
-            headerObjects = endpoint.inputHeaders.extractTupleItems()
+            headerObjects = endpoint.inputHeaders.toList()
         )
         val inputBodyMetadata = endpoint.inputBody
             .takeUnless { it === EmptyBody }
             ?.let { createBodyMetadata(inputBody, it) }
         val outputHeadersMetadata = buildHeaderMetadata(
             headerTypes = outputHeaders.arguments,
-            headerObjects = endpoint.outputHeaders.extractTupleItems()
+            headerObjects = endpoint.outputHeaders.toList()
         )
         val outputBodyMetadata = buildOutputBodiesMetadata(
             bodyTypes = outputBodies.arguments,
-            outputBodies = endpoint.outputBodies.extractTupleItems()
+            outputBodies = endpoint.outputBodies.toList()
         )
 
         return HttpEndpointMetadata(
@@ -286,7 +267,7 @@ abstract class TapikGenerateTask : DefaultTask() {
             description = endpoint.description,
             details = endpoint.details,
             method = endpoint.method.name,
-            uri = endpoint.uri,
+            uri = endpoint.uriWithParameters.toUriSegments(),
             parameters = parametersMetadata,
             inputHeaders = inputHeadersMetadata,
             inputBody = inputBodyMetadata,
@@ -391,9 +372,38 @@ abstract class TapikGenerateTask : DefaultTask() {
             arguments = emptyList()
         )
 
+    private fun Any?.extractParameters(): List<Parameter<*>> =
+        this
+            .invokeNoArg("getParameters")
+            .extractTupleItems()
+
+    private fun Any?.toUriSegments(): List<String> =
+        this
+            .invokeNoArg("getUri")
+            ?.let { segments ->
+                if (segments is Collection<*>) {
+                    segments.filterIsInstance<String>()
+                } else {
+                    emptyList()
+                }
+            }.orEmpty()
+
+    private fun Any?.invokeNoArg(methodName: String): Any? =
+        runCatching {
+            this?.javaClass
+                ?.methods
+                ?.firstOrNull { it.name == methodName && it.parameterCount == 0 }
+                ?.apply { isAccessible = true }
+                ?.invoke(this)
+        }.getOrNull()
+
     @Suppress("UNCHECKED_CAST")
-    private fun <T> Any?.extractTupleItems(): List<T> =
-        (this as? Tuple<*>)?.toList()?.map { it as T }.orEmpty()
+    private fun Any?.extractTupleItems(): List<Parameter<*>> =
+        (this as? Tuple)
+            ?.toList<Any?>()
+            ?.map { it as? Parameter<*> }
+            ?.filterNotNull()
+            .orEmpty()
 
     private fun shouldProcessMethod(access: Int, name: String, signature: String?): Boolean {
         if (signature == null) {

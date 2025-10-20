@@ -74,7 +74,7 @@ object Users {
         get
             .uri(base / id / "avatar" + query.int("size"))
             .outputBody {
-                rawBody(MediaType.Custom("image", "png"))
+                rawBody(mediaType = MediaType.Custom("image", "png"))
             }
     }
 

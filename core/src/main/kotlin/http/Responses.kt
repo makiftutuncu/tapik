@@ -1,52 +1,49 @@
-// This file is auto-generated. Do not edit manually as your changes will be lost.
-@file:Suppress("ktlint:standard:max-line-length")
-
 package dev.akif.tapik.http
 
 sealed interface Response<out B> {
     val status: Status
 }
 
-data class ResponseWithoutBodyWithHeaders0(
+data class ResponseWithoutBody0(
     override val status: Status
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders1<H1>(
+data class ResponseWithoutBody1<H1>(
     override val status: Status,
     val header1: List<H1>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders2<H1, H2>(
+data class ResponseWithoutBody2<H1, H2>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders3<H1, H2, H3>(
+data class ResponseWithoutBody3<H1, H2, H3>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
     val header3: List<H3>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders4<H1, H2, H3, H4>(
+data class ResponseWithoutBody4<H1, H2, H3, H4>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
     val header3: List<H3>,
     val header4: List<H4>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders5<H1, H2, H3, H4, H5>(
+data class ResponseWithoutBody5<H1, H2, H3, H4, H5>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
     val header3: List<H3>,
     val header4: List<H4>,
     val header5: List<H5>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders6<H1, H2, H3, H4, H5, H6>(
+data class ResponseWithoutBody6<H1, H2, H3, H4, H5, H6>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
@@ -54,9 +51,9 @@ data class ResponseWithoutBodyWithHeaders6<H1, H2, H3, H4, H5, H6>(
     val header4: List<H4>,
     val header5: List<H5>,
     val header6: List<H6>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders7<H1, H2, H3, H4, H5, H6, H7>(
+data class ResponseWithoutBody7<H1, H2, H3, H4, H5, H6, H7>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
@@ -65,9 +62,9 @@ data class ResponseWithoutBodyWithHeaders7<H1, H2, H3, H4, H5, H6, H7>(
     val header5: List<H5>,
     val header6: List<H6>,
     val header7: List<H7>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders8<H1, H2, H3, H4, H5, H6, H7, H8>(
+data class ResponseWithoutBody8<H1, H2, H3, H4, H5, H6, H7, H8>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
@@ -77,9 +74,9 @@ data class ResponseWithoutBodyWithHeaders8<H1, H2, H3, H4, H5, H6, H7, H8>(
     val header6: List<H6>,
     val header7: List<H7>,
     val header8: List<H8>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders9<H1, H2, H3, H4, H5, H6, H7, H8, H9>(
+data class ResponseWithoutBody9<H1, H2, H3, H4, H5, H6, H7, H8, H9>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
@@ -90,9 +87,9 @@ data class ResponseWithoutBodyWithHeaders9<H1, H2, H3, H4, H5, H6, H7, H8, H9>(
     val header7: List<H7>,
     val header8: List<H8>,
     val header9: List<H9>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithoutBodyWithHeaders10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>(
+data class ResponseWithoutBody10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>(
     override val status: Status,
     val header1: List<H1>,
     val header2: List<H2>,
@@ -104,44 +101,44 @@ data class ResponseWithoutBodyWithHeaders10<H1, H2, H3, H4, H5, H6, H7, H8, H9, 
     val header8: List<H8>,
     val header9: List<H9>,
     val header10: List<H10>
-): Response<Nothing>
+) : Response<Nothing>
 
-data class ResponseWithHeaders0<B>(
+data class Response0<B>(
     override val status: Status,
     val body: B
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders1<B, H1>(
+data class Response1<B, H1>(
     override val status: Status,
     val body: B,
     val header1: List<H1>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders2<B, H1, H2>(
+data class Response2<B, H1, H2>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
     val header2: List<H2>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders3<B, H1, H2, H3>(
+data class Response3<B, H1, H2, H3>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
     val header2: List<H2>,
     val header3: List<H3>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders4<B, H1, H2, H3, H4>(
+data class Response4<B, H1, H2, H3, H4>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
     val header2: List<H2>,
     val header3: List<H3>,
     val header4: List<H4>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders5<B, H1, H2, H3, H4, H5>(
+data class Response5<B, H1, H2, H3, H4, H5>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
@@ -149,9 +146,9 @@ data class ResponseWithHeaders5<B, H1, H2, H3, H4, H5>(
     val header3: List<H3>,
     val header4: List<H4>,
     val header5: List<H5>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders6<B, H1, H2, H3, H4, H5, H6>(
+data class Response6<B, H1, H2, H3, H4, H5, H6>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
@@ -160,9 +157,9 @@ data class ResponseWithHeaders6<B, H1, H2, H3, H4, H5, H6>(
     val header4: List<H4>,
     val header5: List<H5>,
     val header6: List<H6>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders7<B, H1, H2, H3, H4, H5, H6, H7>(
+data class Response7<B, H1, H2, H3, H4, H5, H6, H7>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
@@ -172,9 +169,9 @@ data class ResponseWithHeaders7<B, H1, H2, H3, H4, H5, H6, H7>(
     val header5: List<H5>,
     val header6: List<H6>,
     val header7: List<H7>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders8<B, H1, H2, H3, H4, H5, H6, H7, H8>(
+data class Response8<B, H1, H2, H3, H4, H5, H6, H7, H8>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
@@ -185,9 +182,9 @@ data class ResponseWithHeaders8<B, H1, H2, H3, H4, H5, H6, H7, H8>(
     val header6: List<H6>,
     val header7: List<H7>,
     val header8: List<H8>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders9<B, H1, H2, H3, H4, H5, H6, H7, H8, H9>(
+data class Response9<B, H1, H2, H3, H4, H5, H6, H7, H8, H9>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
@@ -199,9 +196,9 @@ data class ResponseWithHeaders9<B, H1, H2, H3, H4, H5, H6, H7, H8, H9>(
     val header7: List<H7>,
     val header8: List<H8>,
     val header9: List<H9>
-): Response<B>
+) : Response<B>
 
-data class ResponseWithHeaders10<B, H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>(
+data class Response10<B, H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>(
     override val status: Status,
     val body: B,
     val header1: List<H1>,
@@ -214,4 +211,4 @@ data class ResponseWithHeaders10<B, H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>(
     val header8: List<H8>,
     val header9: List<H9>,
     val header10: List<H10>
-): Response<B>
+) : Response<B>

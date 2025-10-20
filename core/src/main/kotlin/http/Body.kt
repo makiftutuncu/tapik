@@ -35,12 +35,16 @@ data class JsonBody<T : Any>(
     override val mediaType: MediaType = MediaType.Json
 }
 
-fun stringBody(codec: ByteArrayCodec<String> = StringCodecs.string("string").toByteArrayCodec()): StringBody =
-    StringBody(codec)
+fun stringBody(name: String = "string"): StringBody = stringBody(StringCodecs.string(name).toByteArrayCodec())
+
+fun stringBody(codec: ByteArrayCodec<String>): StringBody = StringBody(codec)
 
 fun rawBody(
-    mediaType: MediaType? = null,
-    codec: ByteArrayCodec<ByteArray> = ByteArrayCodec.identity("bytes")
-): RawBody = RawBody(mediaType, codec)
+    name: String = "bytes",
+    mediaType: MediaType? = null
+): RawBody = rawBody(ByteArrayCodec.identity(name), mediaType)
 
-inline fun <reified T : Any> jsonBody(codec: ByteArrayCodec<T>): JsonBody<T> = JsonBody(codec)
+fun rawBody(
+    codec: ByteArrayCodec<ByteArray>,
+    mediaType: MediaType? = null
+): RawBody = RawBody(mediaType, codec)

@@ -1,13 +1,15 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package dev.akif.tapik.http
 
 import dev.akif.tapik.codec.Defaults
 import dev.akif.tapik.codec.StringCodec
 import dev.akif.tapik.codec.StringCodecs
-import dev.akif.tapik.http.StringCodecs as HttpStringCodecs
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.URI
 import java.util.UUID
+import dev.akif.tapik.http.StringCodecs as HttpStringCodecs
 
 sealed interface Header<H : Any> {
     val name: String
@@ -48,7 +50,10 @@ sealed interface Header<H : Any> {
         val Location: Header<URI> = HeaderInput(LOCATION, HttpStringCodecs.uri(LOCATION))
     }
 
-    operator fun invoke(first: H, vararg rest: H): Header<H> = HeaderValues(name, codec, listOf(first, *rest))
+    operator fun invoke(
+        first: H,
+        vararg rest: H
+    ): Header<H> = HeaderValues(name, codec, listOf(first, *rest))
 }
 
 data class HeaderInput<H : Any>(

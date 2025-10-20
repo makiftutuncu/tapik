@@ -1,15 +1,16 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package dev.akif.tapik.http
 
-fun <P : Parameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> HttpEndpoint<P, IH, EmptyBody, OH, OB>.inputBody(
+fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> HttpEndpoint<U, IH, EmptyBody, OH, OB>.inputBody(
     inputBody: () -> IB
-): HttpEndpoint<P, IH, IB, OH, OB> =
+): HttpEndpoint<U, IH, IB, OH, OB> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uri = this.uri,
-        parameters = this.parameters,
+        uriWithParameters = this.uriWithParameters,
         inputHeaders = this.inputHeaders,
         inputBody = inputBody(),
         outputHeaders = this.outputHeaders,

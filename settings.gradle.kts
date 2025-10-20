@@ -28,6 +28,5 @@ include(":core")
 include(":gradle-plugin")
 include(":jackson")
 include(":spring-restclient")
-include(":types")
 
 rootProject.name = "tapik"

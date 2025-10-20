@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package dev.akif.tapik.http
 
 import dev.akif.tapik.codec.Defaults
