@@ -206,11 +206,13 @@ private fun <H : Any> decodeHeader(
                 "Required header '${header.name}' is missing".leftNel()
             } else {
                 val initial: EitherNel<String, List<H>> = emptyList<H>().right()
-                values.orEmpty().fold(initial) { results, value ->
-                    header.codec.decode(value).fold(
-                        { errors -> results.mapLeft { it + errors } },
-                        { h -> results.map { it + h } }
-                    )
+                values.orEmpty().fold(initial) { acc, raw ->
+                    zipOrAccumulate(
+                        acc,
+                        header.codec.decode(raw)
+                    ) { decodedValues, decoded ->
+                        decodedValues + decoded
+                    }
                 }
             }
         }
