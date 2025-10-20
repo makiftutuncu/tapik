@@ -17,7 +17,7 @@
 ## Coding Style & Naming Conventions
 - Kotlin sources follow the official style with 4-space indentation and LF endings (`.editorconfig` enforces 120-character lines, UTF-8, and trailing newline).
 - Keep packages under `dev.akif.<module>`; classes and interfaces use PascalCase, functions and properties use camelCase, and constants prefer UPPER_SNAKE.
-- Avoid wildcard imports unless justified; keep generated files under `/build` or `/generated` out of version control.
+- Avoid wildcard imports unless justified, though wildcard imports for `dev.akif.tapik` packages and other tapik modules are acceptable when they improve clarity; keep generated files under `/build` or `/generated` out of version control.
 
 ## Testing Guidelines
 - Default to `kotlin("test")` (JUnit 5 on the Gradle plugin) for unit coverage; place specs beside the code under `src/test/kotlin`.
