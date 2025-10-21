@@ -37,14 +37,17 @@ class TapikGenerateTaskTest {
 
         task.generate()
 
+        println(outputDir)
+
         val summaryFile = File(outputDir, "tapik-endpoints.txt")
-        assertTrue(summaryFile.exists(), "Expected endpoint summary file, files: ${temporaryDir.toFile().list().toList()}")
+        assertTrue(summaryFile.exists(), "Expected endpoint summary file, files: ${File(summaryFile.parent).list().toList()}")
         val summaryLines = summaryFile.readText().lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
         assertTrue(summaryLines.any { "user" in it && "GET" in it }, "Summary should list generated endpoint")
 
+        println(generatedDir)
         val generatedInterface =
             File(generatedDir, "dev/akif/tapik/gradle/fixtures/SampleEndpointsClient.kt")
-        assertTrue(generatedInterface.exists(), "Generated client interface should exist, files: ${temporaryDir.toFile().list().toList()}")
+        assertTrue(generatedInterface.exists(), "Generated client interface should exist, files: ${File(generatedInterface.parent).list().toList()}")
         val interfaceContent = generatedInterface.readText()
         assertTrue(interfaceContent.contains("interface SampleEndpointsClient"), "Interface declaration missing")
         assertTrue(interfaceContent.contains("fun user("), "Generated method for endpoint missing")

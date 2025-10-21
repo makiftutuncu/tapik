@@ -26,6 +26,8 @@ class RestClientBasedClientGeneratorTest {
     fun `generate writes documented client interface`() {
         val rootDir = tempDir.toFile()
 
+        println(rootDir)
+
         RestClientBasedClientGenerator.generate(
             endpoints = listOf(sampleMetadata()),
             rootDir = rootDir
@@ -33,7 +35,7 @@ class RestClientBasedClientGeneratorTest {
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/UserEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file, files: ${tempDir.toFile().list().toList()}")
+        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list().toList()}")
 
         val content = generated.readText().trim()
         val expected =
@@ -103,6 +105,7 @@ class RestClientBasedClientGeneratorTest {
     @Test
     fun `generate sanitizes conflicting identifiers`() {
         val rootDir = tempDir.toFile()
+        println(rootDir)
 
         RestClientBasedClientGenerator.generate(
             endpoints = listOf(metadataWithChallengingNames()),
@@ -111,7 +114,7 @@ class RestClientBasedClientGeneratorTest {
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/WildEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file, files: ${tempDir.toFile().list().toList()}")
+        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list().toList()}")
 
         val content = generated.readText()
         assertTrue(content.contains("fun `wild endpoint`("))
