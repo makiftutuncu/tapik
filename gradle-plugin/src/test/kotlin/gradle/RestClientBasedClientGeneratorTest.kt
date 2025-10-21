@@ -33,7 +33,7 @@ class RestClientBasedClientGeneratorTest {
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/UserEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file")
+        assertTrue(generated.exists(), "Expected generated interface file, files: ${tempDir.toFile().list().toList()}")
 
         val content = generated.readText().trim()
         val expected =
@@ -111,7 +111,7 @@ class RestClientBasedClientGeneratorTest {
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/WildEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file")
+        assertTrue(generated.exists(), "Expected generated interface file, files: ${tempDir.toFile().list().toList()}")
 
         val content = generated.readText()
         assertTrue(content.contains("fun `wild endpoint`("))
