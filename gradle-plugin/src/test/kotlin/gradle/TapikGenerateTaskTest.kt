@@ -7,11 +7,15 @@ import kotlin.io.path.createDirectories
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.jupiter.api.io.CleanupMode
 import org.junit.jupiter.api.io.TempDir
 
 class TapikGenerateTaskTest {
-    @TempDir
-    lateinit var temporaryDir: Path
+    companion object {
+        @JvmStatic
+        @TempDir(cleanup = CleanupMode.ALWAYS)
+        lateinit var temporaryDir: Path
+    }
 
     @Test
     fun `generate produces endpoint summary and client sources`() {

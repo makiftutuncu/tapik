@@ -7,6 +7,7 @@ import dev.akif.tapik.gradle.metadata.OutputBodyMetadata
 import dev.akif.tapik.gradle.metadata.PathVariableMetadata
 import dev.akif.tapik.gradle.metadata.QueryParameterMetadata
 import dev.akif.tapik.gradle.metadata.TypeMetadata
+import org.junit.jupiter.api.io.CleanupMode
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
@@ -15,8 +16,11 @@ import kotlin.test.assertTrue
 import org.junit.jupiter.api.io.TempDir
 
 class RestClientBasedClientGeneratorTest {
-    @TempDir
-    lateinit var tempDir: Path
+    companion object {
+        @JvmStatic
+        @TempDir(cleanup = CleanupMode.ALWAYS)
+        lateinit var tempDir: Path
+    }
 
     @Test
     fun `generate writes documented client interface`() {
