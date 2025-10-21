@@ -7,6 +7,9 @@ import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
 
+/**
+ * Inspects bytecode or reflective type information to extract Tapik HTTP endpoint signatures.
+ */
 object BytecodeParser {
     private const val HTTP_ENDPOINT_FQCN = "dev.akif.tapik.http.HttpEndpoint"
     private const val HTTP_PACKAGE = "dev.akif.tapik.http"

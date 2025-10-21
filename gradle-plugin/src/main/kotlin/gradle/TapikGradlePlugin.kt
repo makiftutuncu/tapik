@@ -4,7 +4,15 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
 
+/**
+ * Registers Tapik-specific Gradle tasks and DSL extensions for client generation.
+ */
 class TapikGradlePlugin : Plugin<Project> {
+    /**
+     * Installs the Tapik Gradle extension and wires the generation task into the project.
+     *
+     * @param target Gradle project receiving the plugin.
+     */
     override fun apply(target: Project) {
         val extension = target.extensions.create("tapik", TapikExtension::class.java)
 
@@ -42,6 +50,13 @@ class TapikGradlePlugin : Plugin<Project> {
     }
 }
 
+/**
+ * Collects class directories from the current project and its siblings so endpoint scanning can
+ * resolve cross-project dependencies.
+ *
+ * @param project project requesting classpath augmentation.
+ * @return distinct list of absolute class directory paths.
+ */
 private fun collectClassDirectories(project: Project): List<String> = buildList {
     project.rootProject.allprojects.forEach { subproject ->
         add(subproject.layout.buildDirectory.dir("classes/kotlin/main").get().asFile.absolutePath)

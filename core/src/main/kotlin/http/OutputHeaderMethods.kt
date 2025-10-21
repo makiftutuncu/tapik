@@ -7,7 +7,7 @@ package dev.akif.tapik.http
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers0.plus
  */
 @JvmName("outputHeader0")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any> HttpEndpoint<U, IH, IB, Headers0, OB>.outputHeader(
@@ -30,7 +30,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers1.plus
  */
 @JvmName("outputHeader1")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any> HttpEndpoint<U, IH, IB, Headers1<H1>, OB>.outputHeader(
@@ -53,7 +53,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers2.plus
  */
 @JvmName("outputHeader2")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any> HttpEndpoint<U, IH, IB, Headers2<H1, H2>, OB>.outputHeader(
@@ -76,7 +76,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers3.plus
  */
 @JvmName("outputHeader3")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any> HttpEndpoint<U, IH, IB, Headers3<H1, H2, H3>, OB>.outputHeader(
@@ -99,7 +99,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers4.plus
  */
 @JvmName("outputHeader4")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> HttpEndpoint<U, IH, IB, Headers4<H1, H2, H3, H4>, OB>.outputHeader(
@@ -122,7 +122,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers5.plus
  */
 @JvmName("outputHeader5")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> HttpEndpoint<U, IH, IB, Headers5<H1, H2, H3, H4, H5>, OB>.outputHeader(
@@ -145,7 +145,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers6.plus
  */
 @JvmName("outputHeader6")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> HttpEndpoint<U, IH, IB, Headers6<H1, H2, H3, H4, H5, H6>, OB>.outputHeader(
@@ -168,7 +168,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers7.plus
  */
 @JvmName("outputHeader7")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any> HttpEndpoint<U, IH, IB, Headers7<H1, H2, H3, H4, H5, H6, H7>, OB>.outputHeader(
@@ -191,7 +191,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers8.plus
  */
 @JvmName("outputHeader8")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any> HttpEndpoint<U, IH, IB, Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, OB>.outputHeader(
@@ -214,7 +214,7 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : 
  *
  * @param header header definition to append to the current tuple.
  * @return endpoint instance updated with the additional header.
- * @see Headers.plus
+ * @see Headers9.plus
  */
 @JvmName("outputHeader9")
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any, H10 : Any> HttpEndpoint<U, IH, IB, Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, OB>.outputHeader(

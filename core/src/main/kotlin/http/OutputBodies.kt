@@ -6,6 +6,11 @@ import dev.akif.tapik.*
 
 /** Tuple-like container describing output body variants for an endpoint. */
 sealed interface OutputBodies {
+    /**
+     * Lists the output bodies captured in declaration order.
+     *
+     * @return immutable view of the registered output body definitions.
+     */
     fun toList(): List<OutputBody<*>>
 }
 
@@ -181,6 +186,13 @@ data class OutputBodies8<OB1 : Body<*>, OB2 : Body<*>, OB3 : Body<*>, OB4 : Body
     override val item8: OutputBody<OB8>
 ) : OutputBodies,
     AllOf8<OutputBody<OB1>, OutputBody<OB2>, OutputBody<OB3>, OutputBody<OB4>, OutputBody<OB5>, OutputBody<OB6>, OutputBody<OB7>, OutputBody<OB8>> {
+    /**
+     * Appends an additional output body definition to this tuple.
+     *
+     * @param item9 output body to append.
+     * @return tuple extended with the supplied output body.
+     * @see OutputBodies.toList
+     */
     operator fun <OB9 : Body<*>> plus(
         item9: OutputBody<OB9>
     ): OutputBodies9<OB1, OB2, OB3, OB4, OB5, OB6, OB7, OB8, OB9> =
@@ -202,6 +214,13 @@ data class OutputBodies9<OB1 : Body<*>, OB2 : Body<*>, OB3 : Body<*>, OB4 : Body
     override val item9: OutputBody<OB9>
 ) : OutputBodies,
     AllOf9<OutputBody<OB1>, OutputBody<OB2>, OutputBody<OB3>, OutputBody<OB4>, OutputBody<OB5>, OutputBody<OB6>, OutputBody<OB7>, OutputBody<OB8>, OutputBody<OB9>> {
+    /**
+     * Appends an additional output body definition to this tuple.
+     *
+     * @param item10 output body to append.
+     * @return tuple extended with the supplied output body.
+     * @see OutputBodies.toList
+     */
     operator fun <OB10 : Body<*>> plus(
         item10: OutputBody<OB10>
     ): OutputBodies10<OB1, OB2, OB3, OB4, OB5, OB6, OB7, OB8, OB9, OB10> =

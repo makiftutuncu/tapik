@@ -24,6 +24,7 @@ interface Codec<Source : Any, Target : Any> :
     val sourceClass: KClass<Source>
     val targetClass: KClass<Target>
 
+    /** Factory helpers for constructing common [Codec] variants. */
     companion object {
         /**
          * Builds a codec that forwards values without transforming them.

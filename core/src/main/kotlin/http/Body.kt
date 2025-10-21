@@ -22,7 +22,7 @@ sealed interface Body<T : Any> {
      * @param value instance to be encoded.
      * @return encoded bytes or `null` when the body intentionally carries no content.
      * @throws IllegalArgumentException when the codec refuses to encode [value].
-     * @see ByteArrayCodec.encode
+     * @see Codec.encode
      */
     fun bytes(value: T): ByteArray? = codec.encode(value)
 }

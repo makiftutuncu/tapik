@@ -22,6 +22,7 @@ inline fun <reified P : Any> path(
     codec: StringCodec<P>
 ): PathVariable<P> = PathVariable(name, codec)
 
+/** Shorthand accessor to factory helpers for path parameters. */
 val path: PathVariable.Companion = PathVariable.Companion
 
 /**
@@ -41,6 +42,7 @@ fun <Q : Any> query(
     default: Q?
 ): QueryParameter<Q> = QueryParameter(name, codec, required, default)
 
+/** Shorthand accessor to factory helpers for query parameters. */
 val query: QueryParameter.Companion = QueryParameter.Companion
 
 /**
@@ -56,6 +58,7 @@ inline fun <reified H : Any> header(
     codec: StringCodec<H>
 ): Header<H> = HeaderInput(name, codec)
 
+/** Shorthand accessor to factory helpers for headers. */
 val header: Header.Companion = Header.Companion
 
 /**

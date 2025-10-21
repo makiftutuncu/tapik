@@ -4,7 +4,9 @@ package dev.akif.tapik.http
 
 /** Associates a [StatusMatcher] with an output [Body] definition. */
 data class OutputBody<B : Body<*>>(
+    /** Status matching logic that selects this output body. */
     val statusMatcher: StatusMatcher,
+    /** Body definition emitted when [statusMatcher] is satisfied. */
     val body: B
 )
 

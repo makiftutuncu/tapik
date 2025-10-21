@@ -26,33 +26,46 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 
+/**
+ * Gradle task that scans compiled classes for Tapik endpoints and generates supporting artefacts.
+ */
 @CacheableTask
 abstract class TapikGenerateTask : DefaultTask() {
+    /** Packages that will be scanned for compiled `HttpEndpoint` declarations. */
     @get:Input
     abstract val endpointPackages: ListProperty<String>
 
+    /** Directory containing the textual endpoint summary output. */
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
 
+    /** Source directory containing the Kotlin declarations that define Tapik endpoints. */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sourceDirectory: DirectoryProperty
 
+    /** Directory holding compiled classes associated with the project under analysis. */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     abstract val compiledClassesDirectory: DirectoryProperty
 
+    /** Directory where generated client source files are written. */
     @get:OutputDirectory
     abstract val generatedSourcesDirectory: DirectoryProperty
 
+    /** Additional class directories (for example, from other projects) to include on the analysis classpath. */
     @get:Input
     abstract val additionalClassDirectories: ListProperty<String>
 
+    /** Runtime classpath used when analysing endpoint bytecode via reflection fallback. */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
     abstract val runtimeClasspath: ConfigurableFileCollection
 
+    /**
+     * Executes endpoint discovery and generates Tapik metadata and client sources.
+     */
     @TaskAction
     fun generate() {
         val outDir = outputDirectory.get().asFile.also { it.mkdirs() }

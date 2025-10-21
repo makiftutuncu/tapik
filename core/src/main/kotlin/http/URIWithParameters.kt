@@ -35,6 +35,7 @@ sealed interface URIWithParameters {
     val uri: List<String>
     val parameters: Tuple
 
+    /** Helpers for rendering URI templates. */
     companion object {
         /**
          * Renders the URI template using the provided [segments] and encoded parameter values.

@@ -76,6 +76,7 @@ enum class Status(
     NOT_EXTENDED(510),
     NETWORK_AUTHENTICATION_REQUIRED(511);
 
+    /** Helpers for resolving [Status] instances. */
     companion object {
         private val codesToStatuses = entries.associateBy { it.code }
 

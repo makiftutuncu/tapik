@@ -13,6 +13,7 @@ sealed class MediaType(
     open val major: String,
     open val minor: String
 ) {
+    /** Factory helpers for [MediaType] instances. */
     companion object {
         /**
          * Builds a [MediaType] for the given [major]/[minor] pair, reusing predefined instances when possible.
@@ -43,15 +44,30 @@ sealed class MediaType(
             }
     }
 
+    /**
+     * Produces the canonical string representation in the form `major/minor`.
+     *
+     * @return serialized media type.
+     */
     override fun toString(): String = "$major/$minor"
 
     /** Plain text media type alias for `text/plain`. */
     data object PlainText : MediaType("text", "plain") {
+        /**
+         * Returns the canonical `text/plain` representation.
+         *
+         * @return literal `text/plain`.
+         */
         override fun toString(): String = super.toString()
     }
 
     /** JSON media type alias for `application/json`. */
     data object Json : MediaType("application", "json") {
+        /**
+         * Returns the canonical `application/json` representation.
+         *
+         * @return literal `application/json`.
+         */
         override fun toString(): String = super.toString()
     }
 
@@ -64,6 +80,11 @@ sealed class MediaType(
         override val major: String,
         override val minor: String
     ) : MediaType(major, minor) {
+        /**
+         * Returns the canonical custom media type representation.
+         *
+         * @return literal `major/minor`.
+         */
         override fun toString(): String = super.toString()
     }
 }
