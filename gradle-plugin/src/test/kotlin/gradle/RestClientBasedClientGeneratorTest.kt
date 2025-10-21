@@ -120,7 +120,7 @@ class RestClientBasedClientGeneratorTest {
         assertTrue(content.contains("fun `wild endpoint`("))
         assertTrue(content.contains("_1st_id: Int"))
         assertTrue(content.contains("`class`: String"))
-        assertTrue(content.contains("wildEndpoints.wild.encodeInputHeaders(X_Trace_Id, X_Trace_Id_2)"))
+        assertTrue(content.contains("WildEndpoints.wild.encodeInputHeaders(X_Trace_Id, X_Trace_Id_2)"))
     }
 
     private fun sampleMetadata(): HttpEndpointMetadata =
@@ -232,7 +232,7 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "wildEndpoints",
+            sourceFile = "WildEndpoints",
             imports =
                 listOf(
                     "kotlin.String",
