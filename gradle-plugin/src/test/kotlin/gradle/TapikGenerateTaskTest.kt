@@ -16,7 +16,7 @@ class TapikGenerateTaskTest {
     @Test
     fun `generate produces endpoint summary and client sources`() {
         val project = ProjectBuilder.builder().withName("tapik-plugin-test").build()
-        val task = project.tasks.create("tapikGenerateUnderTest", TapikGenerateTask::class.java)
+        val task = project.tasks.register("tapikGenerateUnderTest", TapikGenerateTask::class.java).get()
 
         val compiledDir = File(SampleEndpoints::class.java.protectionDomain.codeSource.location.toURI())
         val outputDir = temporaryDir.resolve("out").createDirectories().toFile()
