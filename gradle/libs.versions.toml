@@ -6,7 +6,7 @@ ktlint = "13.1.0"
 spring = "6.2.12"
 mockk = "1.14.6"
 wiremock = "3.13.1"
-junit = "5.11.0"
+junit = "6.0.0"
 asm = "9.9"
 dokka = "2.1.0"
 
