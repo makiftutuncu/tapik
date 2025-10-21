@@ -26,8 +26,6 @@ class RestClientBasedClientGeneratorTest {
     fun `generate writes documented client interface`() {
         val rootDir = tempDir.toFile()
 
-        println(rootDir)
-
         RestClientBasedClientGenerator.generate(
             endpoints = listOf(sampleMetadata()),
             rootDir = rootDir
@@ -105,7 +103,6 @@ class RestClientBasedClientGeneratorTest {
     @Test
     fun `generate sanitizes conflicting identifiers`() {
         val rootDir = tempDir.toFile()
-        println(rootDir)
 
         RestClientBasedClientGenerator.generate(
             endpoints = listOf(metadataWithChallengingNames()),
