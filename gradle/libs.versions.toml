@@ -9,6 +9,7 @@ wiremock = "3.0.1"
 junit = "5.11.0"
 kotlinxSerialization = "1.6.3"
 asm = "9.6"
+dokka = "2.1.0"
 
 [libraries]
 arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
@@ -32,3 +33,4 @@ testCommon = ["junitJupiter", "junitParams", "kotlinTest", "kotlinTestJunit5"]
 
 [plugins]
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }

@@ -2,6 +2,7 @@ plugins {
 	`kotlin-dsl`
 	`java-gradle-plugin`
 	`maven-publish`
+	alias(libs.plugins.dokka)
 	kotlin("plugin.serialization") version "2.2.0"
 }
 

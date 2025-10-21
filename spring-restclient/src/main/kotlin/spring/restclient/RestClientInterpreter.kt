@@ -1,6 +1,9 @@
 package dev.akif.tapik.spring.restclient
 
-import dev.akif.tapik.http.*
+import dev.akif.tapik.http.MediaType
+import dev.akif.tapik.http.Method
+import dev.akif.tapik.http.OutputBody
+import dev.akif.tapik.http.StatusMatcher
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.web.client.ResponseErrorHandler
@@ -10,9 +13,27 @@ import java.net.URI
 import org.springframework.http.HttpMethod as SpringMethod
 import org.springframework.http.MediaType as SpringMediaType
 
+/**
+ * Executes Tapik endpoints using a Spring [RestClient] while enforcing status and content-type checks.
+ *
+ * @property client underlying [RestClient] instance.
+ */
 data class RestClientInterpreter(
     val client: RestClient
 ) {
+    /**
+     * Sends a request to the configured [client] and validates the response against the expected [outputBodies].
+     *
+     * @param method HTTP method to invoke.
+     * @param uri fully resolved request URI.
+     * @param inputHeaders header values to send with the request.
+     * @param inputBodyContentType optional request body media type.
+     * @param inputBody optional request body payload.
+     * @param outputBodies collection of expected output body definitions for status matching.
+     * @return the received [ResponseEntity].
+     * @throws RestClientResponseException when the response does not satisfy status or content-type expectations.
+     * @see RestClient
+     */
     fun send(
         method: Method,
         uri: URI,
@@ -44,6 +65,14 @@ data class RestClientInterpreter(
             }.onStatus(unmatchedStatusHandler(outputBodies))
             .toEntity(ByteArray::class.java)
 
+    /**
+     * Produces an error handler that verifies the response content type for [outputBody].
+     *
+     * @param outputBody body definition that produced the handler.
+     * @param method HTTP method used for the request.
+     * @param uri request URI.
+     * @return an error handler that raises [RestClientResponseException] with detailed diagnostics.
+     */
     fun statusHandler(
         outputBody: OutputBody<*>,
         method: Method,
@@ -68,6 +97,12 @@ data class RestClientInterpreter(
             }
         }
 
+    /**
+     * Produces a [ResponseErrorHandler] for statuses not matched by any declared [outputBodies].
+     *
+     * @param outputBodies collection of expected output body definitions.
+     * @return handler that throws [RestClientResponseException] for unmatched responses.
+     */
     fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler =
         object : ResponseErrorHandler {
             override fun hasError(response: ClientHttpResponse): Boolean = true

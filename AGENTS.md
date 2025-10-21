@@ -16,7 +16,8 @@
 
 ## Coding Style & Naming Conventions
 - Kotlin sources follow the official style with 4-space indentation and LF endings (`.editorconfig` enforces 120-character lines, UTF-8, and trailing newline).
-- Keep packages under `dev.akif.<module>`; classes and interfaces use PascalCase, functions and properties use camelCase, and constants prefer UPPER_SNAKE.
+- Keep packages under `dev.akif.tapik.<module>`; classes and interfaces use PascalCase, functions and properties use camelCase, and constants prefer UPPER_SNAKE.
+- The folders for the packages must start after `dev/akif/tapik` meaning the base package folders must be avoided for a more flat folder structure. For example a `dev.akif.tapik.test.Test` class must be in `test/Test.kt` file.
 - Avoid wildcard imports unless justified, though wildcard imports for `dev.akif.tapik` packages and other tapik modules are acceptable when they improve clarity; keep generated files under `/build` or `/generated` out of version control.
 
 ## Testing Guidelines
@@ -28,6 +29,13 @@
 ## Dependency Management
 - All module dependencies must be declared via catalog references in `gradle/libs.versions.toml`; avoid hard-coded coordinates in build scripts.
 - Reuse catalog bundles (e.g., `libs.bundles.testCommon`) for shared test stacks to guarantee consistent versions across modules.
+
+## Documentation
+- Dokka must use the latest released version without local patches or custom workarounds.
+- Apply a single shared Dokka configuration from the root build; modules should not duplicate task configuration.
+- KDoc is mandatory for every public API and must include type parameter, parameter, property, return value, throws, and reference tags where applicable.
+- Dokka builds should fail on undocumented symbols and publish source links back to `https://github.com/makiftutuncu/tapik`.
+- Generated documentation must include the footer `© {currentYear} Mehmet Akif Tütüncü`.
 
 ## Commit & Pull Request Guidelines
 - Follow the existing Git history: short, imperative commit subjects (e.g., “Add name to type definitions”) without trailing punctuation.

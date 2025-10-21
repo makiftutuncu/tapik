@@ -2,6 +2,7 @@
 
 package dev.akif.tapik.http
 
+/** Replaces the empty input body with a concrete [inputBody] definition. */
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> HttpEndpoint<U, IH, EmptyBody, OH, OB>.inputBody(
     inputBody: () -> IB
 ): HttpEndpoint<U, IH, IB, OH, OB> =

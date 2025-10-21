@@ -9,6 +9,13 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.UUID
 
+/**
+ * Collection of default string-based codecs for primitive types.
+ *
+ * Each factory delegates to helpers from [Codec] to ensure consistent error handling across transports.
+ *
+ * @see Defaults
+ */
 object StringCodecs : Defaults<StringCodec<Unit>, StringCodec<Boolean>, StringCodec<Byte>, StringCodec<Short>, StringCodec<Int>, StringCodec<Long>, StringCodec<Float>, StringCodec<Double>, StringCodec<BigInteger>, StringCodec<BigDecimal>, StringCodec<String>, StringCodec<UUID>> {
     override fun unit(name: String): StringCodec<Unit> = nullable(name, { "" }) { }
 

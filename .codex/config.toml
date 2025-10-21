@@ -1,0 +1,6 @@
+sandbox = "workspace-write"
+ask-for-approval = "untrusted"
+features.unified_exec = true
+features.streamable_shell = true
+features.plan_tool = true
+features.web_search_request = true

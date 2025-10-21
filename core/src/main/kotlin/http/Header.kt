@@ -11,6 +11,7 @@ import java.net.URI
 import java.util.UUID
 import dev.akif.tapik.http.StringCodecs as HttpStringCodecs
 
+/** Describes an HTTP header definition used by Tapik endpoints. */
 sealed interface Header<H : Any> {
     val name: String
     val codec: StringCodec<H>
@@ -45,17 +46,33 @@ sealed interface Header<H : Any> {
         const val CONTENT_TYPE = "Content-Type"
         const val LOCATION = "Location"
 
+        /** Predefined header definition for `Accept`. */
         val Accept: Header<MediaType> = HeaderInput(ACCEPT, HttpStringCodecs.mediaType(ACCEPT))
+
+        /** Predefined header definition for `Content-Type`. */
         val ContentType: Header<MediaType> = HeaderInput(CONTENT_TYPE, HttpStringCodecs.mediaType(CONTENT_TYPE))
+
+        /** Predefined header definition for `Location`. */
         val Location: Header<URI> = HeaderInput(LOCATION, HttpStringCodecs.uri(LOCATION))
     }
 
+    /**
+     * Creates a [HeaderValues] instance using the provided values, marking the header as optional.
+     *
+     * @param first mandatory first header value.
+     * @param rest optional additional values that will be appended in the given order.
+     * @return a [HeaderValues] instance capturing the supplied values.
+     * @see HeaderValues
+     */
     operator fun invoke(
         first: H,
         vararg rest: H
     ): Header<H> = HeaderValues(name, codec, listOf(first, *rest))
 }
 
+/** Required header definition backed by a [StringCodec].
+ * @property codec codec used to encode and decode header values.
+ */
 data class HeaderInput<H : Any>(
     override val name: String,
     override val codec: StringCodec<H>
@@ -63,6 +80,9 @@ data class HeaderInput<H : Any>(
     override val required: Boolean = true
 }
 
+/** Optional header definition populated with explicit [values].
+ * @property values concrete header values that will be sent on the wire.
+ */
 data class HeaderValues<H : Any>(
     override val name: String,
     override val codec: StringCodec<H>,

@@ -9,6 +9,14 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.UUID
 
+/**
+ * Describes an HTTP parameter that participates in an endpoint URI.
+ *
+ * @property name canonical parameter name.
+ * @property codec codec used to encode and decode parameter values.
+ * @property position declares whether the parameter belongs to the path or query section.
+ * @property required indicates whether a value must be supplied by the caller.
+ */
 sealed interface Parameter<T : Any> {
     val name: String
     val codec: StringCodec<T>
@@ -16,6 +24,10 @@ sealed interface Parameter<T : Any> {
     val required: Boolean
 }
 
+/** Required path parameter definition.
+ * @property name canonical parameter name embedded in the URI template.
+ * @property codec codec used to encode and decode path values.
+ */
 data class PathVariable<P : Any>(
     override val name: String,
     override val codec: StringCodec<P>
@@ -52,6 +64,9 @@ data class PathVariable<P : Any>(
     }
 }
 
+/** Query parameter definition with optional default values.
+ * @property default optional fallback when the caller omits the query parameter.
+ */
 data class QueryParameter<Q : Any>(
     override val name: String,
     override val codec: StringCodec<Q>,
@@ -60,9 +75,21 @@ data class QueryParameter<Q : Any>(
 ) : Parameter<Q> {
     override val position: ParameterPosition = ParameterPosition.Query
 
+    /**
+     * Returns an optional version of this parameter with no default value.
+     *
+     * @return a copy of the parameter marked as optional with its default cleared.
+     */
     val optional: QueryParameter<Q>
         get() = copy(required = false, default = null)
 
+    /**
+     * Returns an optional version of this parameter with the supplied [default] value.
+     *
+     * @param default default value used when the caller omits the parameter.
+     * @return a copy of the parameter marked as optional with the provided default.
+     * @see optional
+     */
     fun optional(default: Q): QueryParameter<Q> = copy(required = false, default = default)
 
     companion object : Defaults<QueryParameter<Unit>, QueryParameter<Boolean>, QueryParameter<Byte>, QueryParameter<Short>, QueryParameter<Int>, QueryParameter<Long>, QueryParameter<Float>, QueryParameter<Double>, QueryParameter<BigInteger>, QueryParameter<BigDecimal>, QueryParameter<String>, QueryParameter<UUID>> {
