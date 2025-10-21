@@ -1,8 +1,5 @@
 package dev.akif.tapik.gradle.metadata
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class TypeMetadata(
     val name: String,
     val nullable: Boolean? = false,
@@ -16,16 +13,13 @@ data class TypeMetadata(
         }
 }
 
-@Serializable
 sealed interface ParameterMetadata
 
-@Serializable
 data class PathVariableMetadata(
     val name: String,
     val type: TypeMetadata
 ) : ParameterMetadata
 
-@Serializable
 data class QueryParameterMetadata(
     val name: String,
     val type: TypeMetadata,
@@ -33,7 +27,6 @@ data class QueryParameterMetadata(
     val default: String? = null
 ) : ParameterMetadata
 
-@Serializable
 data class HeaderMetadata(
     val name: String,
     val type: TypeMetadata,
@@ -41,20 +34,17 @@ data class HeaderMetadata(
     val values: List<String> = emptyList()
 )
 
-@Serializable
 data class BodyMetadata(
     val type: TypeMetadata,
     val name: String? = null,
     val mediaType: String? = null
 )
 
-@Serializable
 data class OutputBodyMetadata(
     val description: String,
     val body: BodyMetadata
 )
 
-@Serializable
 data class HttpEndpointMetadata(
     val id: String,
     val propertyName: String,

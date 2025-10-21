@@ -7,8 +7,7 @@ spring = "6.2.10"
 mockk = "1.13.12"
 wiremock = "3.0.1"
 junit = "5.11.0"
-kotlinxSerialization = "1.6.3"
-asm = "9.6"
+asm = "9.7.1"
 dokka = "2.1.0"
 
 [libraries]
@@ -24,7 +23,6 @@ kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embe
 kotlinStdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinTestJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
-kotlinSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asmTree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 
@@ -34,3 +32,4 @@ testCommon = ["junitJupiter", "junitParams", "kotlinTest", "kotlinTestJunit5"]
 [plugins]
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

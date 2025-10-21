@@ -3,7 +3,6 @@ plugins {
 	`java-gradle-plugin`
 	`maven-publish`
 	alias(libs.plugins.dokka)
-	kotlin("plugin.serialization") version "2.2.0"
 }
 
 group = "dev.akif.tapik"
@@ -12,8 +11,10 @@ repositories {
 	mavenCentral()
 }
 
+val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
+
 kotlin {
-	jvmToolchain(21)
+	jvmToolchain(javaVersion)
 }
 
 tasks.test {
@@ -31,8 +32,6 @@ dependencies {
     implementation(libs.kotlinStdlib)
     implementation(libs.asm)
     implementation(libs.asmTree)
-    implementation(libs.kotlinSerializationJson)
-
     testImplementation(gradleTestKit())
     testImplementation(libs.bundles.testCommon)
 }

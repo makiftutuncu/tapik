@@ -6,6 +6,8 @@ import org.jetbrains.dokka.gradle.tasks.DokkaGenerateModuleTask
 import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 import org.jetbrains.dokka.gradle.tasks.DokkaGenerateTask
 
+val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
+
 plugins {
     alias(libs.plugins.dokka)
 }
@@ -48,7 +50,7 @@ subprojects {
                     .let { if (it.isBlank()) "" else "$it/" }
 
             generator.dokkaSourceSets.configureEach {
-                jdkVersion.set(21)
+                jdkVersion.set(javaVersion)
                 reportUndocumented.set(true)
                 documentedVisibilities.set(
                     setOf(VisibilityModifier.Public, VisibilityModifier.Protected)

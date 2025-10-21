@@ -1,6 +1,11 @@
 package dev.akif.tapik.gradle
 
 import dev.akif.tapik.gradle.metadata.TypeMetadata
+import java.lang.reflect.GenericArrayType
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.lang.reflect.TypeVariable
+import java.lang.reflect.WildcardType
 
 object BytecodeParser {
     private const val HTTP_ENDPOINT_FQCN = "dev.akif.tapik.http.HttpEndpoint"
@@ -30,7 +35,24 @@ object BytecodeParser {
         val returnSignature = extractReturnSignature(signature) ?: return null
         val rootType = SignatureParser(returnSignature).parseType()
         val endpointClass = rootType.asClassType() ?: return null
+        return buildEndpointSignature(endpointClass, ownerInternalName, methodName)
+    }
 
+    internal fun parseHttpEndpoint(
+        returnType: Type,
+        ownerInternalName: String,
+        methodName: String
+    ): HttpEndpointSignature? {
+        val rootType = returnType.toSignatureType() ?: return null
+        val endpointClass = rootType.asClassType() ?: return null
+        return buildEndpointSignature(endpointClass, ownerInternalName, methodName)
+    }
+
+    private fun buildEndpointSignature(
+        endpointClass: SignatureType.Class,
+        ownerInternalName: String,
+        methodName: String
+    ): HttpEndpointSignature? {
         if (!endpointClass.matches(HTTP_ENDPOINT_FQCN)) {
             return null
         }
@@ -257,6 +279,33 @@ object BytecodeParser {
         get() = name.substringAfterLast('.').replace('$', '.')
 
     private fun SignatureType.Class.importName(): String = name.replace('$', '.')
+
+    private fun Type.toSignatureType(): SignatureType? = when (this) {
+        is Class<*> -> {
+            if (isArray) {
+                componentType?.toSignatureType()?.let { SignatureType.Array(it) }
+            } else {
+                SignatureType.Class(name, emptyList())
+            }
+        }
+        is ParameterizedType -> {
+            val raw = rawType as? Class<*> ?: return null
+            val arguments = actualTypeArguments.mapNotNull { it.toSignatureType() }
+            SignatureType.Class(raw.name, arguments)
+        }
+        is GenericArrayType -> genericComponentType?.toSignatureType()?.let { SignatureType.Array(it) }
+        is TypeVariable<*> -> SignatureType.TypeVariable(name)
+        is WildcardType -> {
+            val lower = lowerBounds.firstOrNull()
+            val upper = upperBounds.firstOrNull()
+            when {
+                lower != null -> lower.toSignatureType()?.withVariance(Variance.IN)
+                upper != null && upper != Any::class.java -> upper.toSignatureType()?.withVariance(Variance.OUT)
+                else -> SignatureType.Star
+            }
+        }
+        else -> null
+    }
 
     private class SignatureParser(private val signature: String) {
         private var index = 0

@@ -38,6 +38,30 @@ class BytecodeParserTest {
         signature.outputBodies.assertType("OutputBodies2", listOf("StringBody", "StringBody"))
     }
 
+    @Test
+    fun `parseHttpEndpoint extracts metadata from reflection return type`() {
+        val owner = SampleEndpoints::class.java
+        val method = owner.getDeclaredMethod("getUser")
+
+        val signature =
+            BytecodeParser.parseHttpEndpoint(
+                returnType = method.genericReturnType,
+                ownerInternalName = owner.name.replace('.', '/'),
+                methodName = method.name
+            )
+
+        assertNotNull(signature)
+        assertEquals("user", signature.name)
+        assertEquals("dev.akif.tapik.gradle.fixtures", signature.packageName)
+        assertEquals("SampleEndpoints", signature.file)
+        assertEquals("dev/akif/tapik/gradle/fixtures/SampleEndpoints", signature.ownerInternalName)
+        assertEquals("getUser", signature.methodName)
+
+        signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
+        signature.inputHeaders.assertType("Headers1", listOf("String"))
+        signature.outputBodies.assertType("OutputBodies2", listOf("StringBody", "StringBody"))
+    }
+
     private fun readClassBytes(clazz: Class<*>): ByteArray {
         val resourcePath = clazz.name.replace('.', '/') + ".class"
         return clazz.classLoader.getResourceAsStream(resourcePath)?.use { it.readAllBytes() }

@@ -4,6 +4,7 @@ import dev.akif.tapik.*
 import dev.akif.tapik.gradle.metadata.*
 import dev.akif.tapik.http.*
 import java.io.File
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.net.URLClassLoader
 import java.util.Locale
@@ -69,13 +70,25 @@ abstract class TapikGenerateTask : DefaultTask() {
             return
         }
 
-        val signatures = scanForHttpEndpoints(compiledDir, pkgs)
+        val classpathEntries = buildClasspathEntries(
+            compiledDir = compiledDir,
+            additionalDirectories = additionalClassDirectories.getOrElse(emptyList()),
+            runtimeClasspath = runtimeClasspath.files
+        )
+        if (classpathEntries.isEmpty()) {
+            logger.warn("[tapik] No classpath entries available; generated clients will be empty.")
+            return
+        }
+
+        val urls = classpathEntries.map { it.toURI().toURL() }.toTypedArray()
+
+        val signatures = URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
+            scanForHttpEndpoints(compiledDir, pkgs, classLoader)
+        }
 
         val metadata = buildHttpEndpointMetadata(
             signatures = signatures,
-            compiledDir = compiledDir,
-            additionalDirectories = additionalClassDirectories.getOrElse(emptyList()),
-            runtimeClasspath = runtimeClasspath.files,
+            classpathEntries = classpathEntries,
             logger = logger
         )
 
@@ -83,7 +96,11 @@ abstract class TapikGenerateTask : DefaultTask() {
         writeGeneratedSources(metadata, generatedSourcesDir, pkgs)
     }
 
-    private fun scanForHttpEndpoints(compiledDir: File, packages: List<String>): List<HttpEndpointSignature> {
+    private fun scanForHttpEndpoints(
+        compiledDir: File,
+        packages: List<String>,
+        classLoader: URLClassLoader
+    ): List<HttpEndpointSignature> {
         val packageFilters = packages.map { it.replace('.', '/') }
         val results = LinkedHashMap<String, HttpEndpointSignature>()
 
@@ -91,6 +108,9 @@ abstract class TapikGenerateTask : DefaultTask() {
             .filter { it.isFile && it.extension == "class" }
             .forEach { classFile ->
                 val relativePath = classFile.relativeTo(compiledDir).path.replace(File.separatorChar, '/')
+                if (relativePath.startsWith("META-INF/")) {
+                    return@forEach
+                }
                 if (packageFilters.isNotEmpty() && packageFilters.none { relativePath.startsWith(it) }) {
                     return@forEach
                 }
@@ -99,20 +119,12 @@ abstract class TapikGenerateTask : DefaultTask() {
                     val classReader = ClassReader(classFile.readBytes())
                     val classNode = ClassNode()
                     classReader.accept(classNode, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
-                    classNode.methods.forEach { method ->
-                        val signature = method.signature ?: return@forEach
-                        val methodName = method.name
-                        if (!shouldProcessMethod(method.access, methodName, signature)) {
-                            return@forEach
-                        }
-                        runCatching {
-                            BytecodeParser.parseHttpEndpoint(signature, classNode.name, methodName)
-                        }.onFailure { error ->
-                            logger.debug("[tapik] Failed to parse signature for ${classNode.name}#$methodName", error)
-                        }.getOrNull()?.let { signatureResult ->
-                            logger.lifecycle("[tapik] discovered endpoint ${signatureResult.packageName}.${signatureResult.file}#${signatureResult.name}")
-                            results[signatureResult.uniqueKey] = signatureResult
-                        }
+                    processClassNode(classNode, results)
+                } catch (e: IllegalArgumentException) {
+                    if (e.message?.contains("Unsupported class file major version") == true) {
+                        parseClassWithReflection(relativePath, classLoader, results)
+                    } else {
+                        logger.warn("[tapik] Failed to analyse class: ${classFile.absolutePath}", e)
                     }
                 } catch (e: Exception) {
                     logger.warn("[tapik] Failed to analyse class: ${classFile.absolutePath}", e)
@@ -123,6 +135,55 @@ abstract class TapikGenerateTask : DefaultTask() {
             .sortedWith(compareBy<HttpEndpointSignature> { it.packageName }
                 .thenBy { it.file }
                 .thenBy { it.name })
+    }
+
+    private fun processClassNode(
+        classNode: ClassNode,
+        results: MutableMap<String, HttpEndpointSignature>
+    ) {
+        classNode.methods.forEach { method ->
+            val signature = method.signature ?: return@forEach
+            if (!shouldProcessMethod(method.access, method.name, signature)) {
+                return@forEach
+            }
+            runCatching {
+                BytecodeParser.parseHttpEndpoint(signature, classNode.name, method.name)
+            }.onFailure { error ->
+                logger.debug("[tapik] Failed to parse signature for ${classNode.name}#${method.name}", error)
+            }.getOrNull()?.let { signatureResult ->
+                logger.lifecycle("[tapik] discovered endpoint ${signatureResult.packageName}.${signatureResult.file}#${signatureResult.name}")
+                results[signatureResult.uniqueKey] = signatureResult
+            }
+        }
+    }
+
+    private fun parseClassWithReflection(
+        relativePath: String,
+        classLoader: URLClassLoader,
+        results: MutableMap<String, HttpEndpointSignature>
+    ) {
+        val ownerInternalName = relativePath.removeSuffix(".class")
+        val className = ownerInternalName.replace('/', '.')
+
+        val clazz = runCatching { classLoader.loadClass(className) }
+            .onFailure { error ->
+                logger.warn("[tapik] Failed to load class $className for reflection analysis", error)
+            }
+            .getOrNull()
+            ?: return
+
+        clazz.declaredMethods
+            .filter { shouldProcessMethod(it) }
+            .forEach { method ->
+                runCatching {
+                    BytecodeParser.parseHttpEndpoint(method.genericReturnType, ownerInternalName, method.name)
+                }.onFailure { error ->
+                    logger.debug("[tapik] Failed to parse signature for $className#${method.name} via reflection", error)
+                }.getOrNull()?.let { signatureResult ->
+                    logger.lifecycle("[tapik] discovered endpoint ${signatureResult.packageName}.${signatureResult.file}#${signatureResult.name}")
+                    results[signatureResult.uniqueKey] = signatureResult
+                }
+            }
     }
 
     private fun writeJsonOutput(
@@ -158,27 +219,21 @@ abstract class TapikGenerateTask : DefaultTask() {
 
     private fun buildHttpEndpointMetadata(
         signatures: List<HttpEndpointSignature>,
-        compiledDir: File,
-        additionalDirectories: List<String>,
-        runtimeClasspath: Set<File>,
+        classpathEntries: List<File>,
         logger: Logger
     ): List<HttpEndpointMetadata> {
         if (signatures.isEmpty()) {
             return emptyList()
         }
 
-        val classpathEntries = buildList {
-            add(compiledDir)
-            additionalDirectories.forEach { add(File(it)) }
-            runtimeClasspath.forEach { add(it) }
-        }.filter { it.exists() }
+        val existingEntries = classpathEntries.filter { it.exists() }
 
-        if (classpathEntries.isEmpty()) {
+        if (existingEntries.isEmpty()) {
             logger.warn("[tapik] No classpath entries available to reflect endpoints; generated clients will be empty.")
             return emptyList()
         }
 
-        val urls = classpathEntries.map { it.toURI().toURL() }.toTypedArray()
+        val urls = existingEntries.map { it.toURI().toURL() }.toTypedArray()
 
         URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
             return signatures.mapNotNull { signature ->
@@ -237,6 +292,32 @@ abstract class TapikGenerateTask : DefaultTask() {
             }
             "get$capitalized"
         }
+
+    private fun buildClasspathEntries(
+        compiledDir: File,
+        additionalDirectories: List<String>,
+        runtimeClasspath: Set<File>
+    ): List<File> = buildList {
+        add(compiledDir)
+        additionalDirectories.forEach { add(File(it)) }
+        runtimeClasspath.forEach { add(it) }
+    }
+
+    private fun shouldProcessMethod(method: Method): Boolean {
+        if (method.name == "<init>" || method.name == "<clinit>") {
+            return false
+        }
+        if (method.name.contains("$")) {
+            return false
+        }
+        if (method.isSynthetic || method.isBridge) {
+            return false
+        }
+        if (method.parameterCount != 0) {
+            return false
+        }
+        return true
+    }
 
     private fun HttpEndpointSignature.toMetadata(
         endpoint: HttpEndpoint<*, *, *, *, *>

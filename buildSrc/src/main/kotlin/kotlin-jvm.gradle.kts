@@ -7,7 +7,8 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(21)
+    val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
+    jvmToolchain(javaVersion)
 }
 
 tasks.withType<Test>().configureEach {
