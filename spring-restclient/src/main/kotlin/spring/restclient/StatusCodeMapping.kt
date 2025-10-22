@@ -1,6 +1,6 @@
 package dev.akif.tapik.spring.restclient
 
-import dev.akif.tapik.http.Status
+import dev.akif.tapik.Status
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 

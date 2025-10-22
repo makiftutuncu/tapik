@@ -2,7 +2,7 @@ package dev.akif.tapik.jackson
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import dev.akif.tapik.http.*
+import dev.akif.tapik.*
 
 /** Default [ObjectMapper] configured with Jackson Kotlin module support. */
 val defaultObjectMapper: ObjectMapper = jacksonObjectMapper()

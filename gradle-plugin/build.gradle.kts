@@ -5,8 +5,6 @@ plugins {
 	alias(libs.plugins.dokka)
 }
 
-group = "dev.akif.tapik"
-
 repositories {
 	mavenCentral()
 }

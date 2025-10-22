@@ -43,7 +43,6 @@ class RestClientBasedClientGeneratorTest {
             import arrow.core.getOrElse
             import arrow.core.leftNel
             import dev.akif.tapik.*
-            import dev.akif.tapik.http.*
             import dev.akif.tapik.spring.restclient.*
             import java.net.URI
             import java.util.UUID
@@ -166,7 +165,7 @@ class RestClientBasedClientGeneratorTest {
                         description = "OK",
                         body =
                             BodyMetadata(
-                                type = TypeMetadata("dev.akif.tapik.http.StringBody"),
+                                type = TypeMetadata("dev.akif.tapik.StringBody"),
                                 name = null,
                                 mediaType = "text/plain"
                             )
@@ -178,7 +177,7 @@ class RestClientBasedClientGeneratorTest {
                 listOf(
                     "java.util.UUID",
                     "java.net.URI",
-                    "dev.akif.tapik.http.StringBody"
+                    "dev.akif.tapik.StringBody"
                 ),
             rawType = "HttpEndpoint"
         )
@@ -211,7 +210,7 @@ class RestClientBasedClientGeneratorTest {
                 ),
             inputBody =
                 BodyMetadata(
-                    type = TypeMetadata("dev.akif.tapik.http.StringBody"),
+                    type = TypeMetadata("dev.akif.tapik.StringBody"),
                     name = null,
                     mediaType = "text/plain"
                 ),
@@ -222,7 +221,7 @@ class RestClientBasedClientGeneratorTest {
                         description = "Created",
                         body =
                             BodyMetadata(
-                                type = TypeMetadata("dev.akif.tapik.http.StringBody"),
+                                type = TypeMetadata("dev.akif.tapik.StringBody"),
                                 name = null,
                                 mediaType = "text/plain"
                             )
@@ -234,7 +233,7 @@ class RestClientBasedClientGeneratorTest {
                 listOf(
                     "kotlin.String",
                     "kotlin.Int",
-                    "dev.akif.tapik.http.StringBody"
+                    "dev.akif.tapik.StringBody"
                 ),
             rawType = "HttpEndpoint"
         )

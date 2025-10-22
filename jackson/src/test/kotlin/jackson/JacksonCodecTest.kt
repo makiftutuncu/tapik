@@ -1,7 +1,7 @@
 package dev.akif.tapik.jackson
 
 import arrow.core.getOrElse
-import dev.akif.tapik.http.MediaType
+import dev.akif.tapik.MediaType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
