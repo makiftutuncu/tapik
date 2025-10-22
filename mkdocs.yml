@@ -1,0 +1,51 @@
+site_name: Tapik
+site_description: Typed APIs in Kotlin
+site_url: https://tapik.akif.dev
+repo_url: https://github.com/makiftutuncu/tapik
+repo_name: makiftutuncu/tapik
+docs_dir: docs
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - navigation.tracking
+    - content.code.copy
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/makiftutuncu
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/makiftutuncu
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - codehilite
+  - footnotes
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+
+# Show “Edit this page” buttons that point to docs/ paths on main
+edit_uri: edit/main/docs/
