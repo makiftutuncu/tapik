@@ -44,6 +44,13 @@ gradle.projectsEvaluated {
     }
 }
 
+val publishable = setOf(
+    ":codec",
+    ":core",
+    ":jackson",
+    ":spring-restclient"
+)
+
 subprojects {
     pluginManager.withPlugin("org.jetbrains.dokka") {
         val moduleTask = tasks.named<DokkaGenerateModuleTask>("dokkaGenerateModuleHtml")
@@ -96,6 +103,29 @@ subprojects {
                 failOnWarning.set(true)
                 suppressObviousFunctions.set(true)
                 suppressInheritedMembers.set(true)
+            }
+        }
+    }
+
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        if (path in publishable) {
+            pluginManager.apply("java-library")
+            pluginManager.apply("maven-publish")
+            extensions.configure<JavaPluginExtension> {
+                withSourcesJar()
+                withJavadocJar()
+            }
+            extensions.configure<PublishingExtension> {
+                publications {
+                    create<MavenPublication>("mavenJava") {
+                        from(components["java"])
+                        artifactId = project.name
+                        pom {
+                            name.set(project.name)
+                            url.set("https://github.com/makiftutuncu/tapik")
+                        }
+                    }
+                }
             }
         }
     }

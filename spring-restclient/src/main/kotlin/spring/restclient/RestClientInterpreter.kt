@@ -1,9 +1,9 @@
 package dev.akif.tapik.spring.restclient
 
-import dev.akif.tapik.http.MediaType
-import dev.akif.tapik.http.Method
-import dev.akif.tapik.http.OutputBody
-import dev.akif.tapik.http.StatusMatcher
+import dev.akif.tapik.MediaType
+import dev.akif.tapik.Method
+import dev.akif.tapik.OutputBody
+import dev.akif.tapik.StatusMatcher
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.web.client.ResponseErrorHandler

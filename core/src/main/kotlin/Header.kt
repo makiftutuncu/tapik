@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 import dev.akif.tapik.codec.Defaults
 import dev.akif.tapik.codec.StringCodec
@@ -9,7 +9,6 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.URI
 import java.util.UUID
-import dev.akif.tapik.http.StringCodecs as HttpStringCodecs
 
 /** Describes an HTTP header definition used by Tapik endpoints. */
 sealed interface Header<H : Any> {

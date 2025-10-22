@@ -1,12 +1,11 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 import arrow.core.Either.Companion.zipOrAccumulate
 import arrow.core.EitherNel
 import arrow.core.leftNel
 import arrow.core.right
-import dev.akif.tapik.*
 
 /** Returns an empty header tuple when no headers are expected. */
 fun decodeHeaders0(): Tuple0 = Tuple0

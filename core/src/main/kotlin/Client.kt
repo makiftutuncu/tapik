@@ -1,8 +1,5 @@
 package dev.akif.tapik
 
-import dev.akif.tapik.http.HeaderValues
-import dev.akif.tapik.http.QueryParameter
-
 /**
  * Marker interface that provides helper extensions common to generated clients.
  *

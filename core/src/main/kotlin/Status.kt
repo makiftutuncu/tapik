@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /** Enumerates the known HTTP status codes as defined by RFC 9110 and the IANA registry.
  * @property code numeric HTTP status code backing the enum entry.

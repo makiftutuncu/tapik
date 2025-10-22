@@ -43,8 +43,4 @@ include(":gradle-plugin")
 include(":jackson")
 include(":spring-restclient")
 
-if (file("playground").exists()) {
-    include(":playground")
-}
-
 rootProject.name = "tapik"

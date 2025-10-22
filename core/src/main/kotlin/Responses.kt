@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /**
  * Describes a decoded HTTP response together with its status code.

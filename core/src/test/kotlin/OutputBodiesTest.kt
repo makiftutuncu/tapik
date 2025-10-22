@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

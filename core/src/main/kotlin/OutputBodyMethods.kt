@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /** Associates a [StatusMatcher] with an output [Body] definition. */
 data class OutputBody<B : Body<*>>(

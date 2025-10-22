@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /**
  * Adds the first input header definition to the endpoint.

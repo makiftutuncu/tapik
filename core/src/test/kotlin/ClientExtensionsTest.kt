@@ -1,8 +1,6 @@
 package dev.akif.tapik
 
 import dev.akif.tapik.codec.StringCodecs
-import dev.akif.tapik.http.HeaderValues
-import dev.akif.tapik.http.QueryParameter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

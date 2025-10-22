@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /** Replaces the empty input body with a concrete [inputBody] definition. */
 fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> HttpEndpoint<U, IH, EmptyBody, OH, OB>.inputBody(

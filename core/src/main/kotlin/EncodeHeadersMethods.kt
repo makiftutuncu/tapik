@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /** Returns an empty map when the endpoint does not expect input headers. */
 fun HttpEndpoint<*, Headers0, *, *, *>.encodeInputHeaders(): Map<String, List<String>> = emptyMap()

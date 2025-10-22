@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /**
  * Represents an HTTP media type with helpers for common Tapik defaults.

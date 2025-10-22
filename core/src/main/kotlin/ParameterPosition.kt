@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /** Location of a parameter within an HTTP request. */
 enum class ParameterPosition {

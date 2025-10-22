@@ -2,12 +2,10 @@ package dev.akif.tapik.gradle
 
 import dev.akif.tapik.*
 import dev.akif.tapik.gradle.metadata.*
-import dev.akif.tapik.http.*
 import java.io.File
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.net.URLClassLoader
-import java.util.Locale
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty

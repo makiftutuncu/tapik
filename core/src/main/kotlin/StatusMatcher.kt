@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 /**
  * Strategy for determining whether an HTTP status matches an output body definition.

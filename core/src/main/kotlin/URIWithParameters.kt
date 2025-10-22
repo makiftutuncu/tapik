@@ -1,9 +1,8 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
+package dev.akif.tapik
 
-import dev.akif.tapik.*
-import dev.akif.tapik.http.URIWithParameters.Companion.toURI
+import dev.akif.tapik.URIWithParameters.Companion.toURI
 import java.net.URI
 
 /**

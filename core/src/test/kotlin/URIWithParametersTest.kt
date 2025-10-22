@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 import java.util.UUID
 import kotlin.test.Test

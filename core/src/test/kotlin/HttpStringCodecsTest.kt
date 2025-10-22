@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 import arrow.core.getOrElse
 import org.junit.jupiter.params.ParameterizedTest
@@ -17,7 +17,7 @@ class HttpStringCodecsTest {
         input: String,
         expected: MediaType
     ) {
-        val codec = StringCodecs.mediaType("contentType")
+        val codec = HttpStringCodecs.mediaType("contentType")
 
         val decoded = codec.decode(input).getOrElse { fail("Failed to decode media type $input: $it") }
         assertEquals(expected, decoded)
@@ -26,7 +26,7 @@ class HttpStringCodecsTest {
     @ParameterizedTest
     @MethodSource("invalidMediaTypes")
     fun `mediaType codec fails with descriptive error`(input: String) {
-        val codec = StringCodecs.mediaType("contentType")
+        val codec = HttpStringCodecs.mediaType("contentType")
 
         val errors =
             codec
@@ -42,7 +42,7 @@ class HttpStringCodecsTest {
     @ParameterizedTest
     @MethodSource("uriInputs")
     fun `uri codec round trips`(value: String) {
-        val codec = StringCodecs.uri("location")
+        val codec = HttpStringCodecs.uri("location")
 
         val decoded = codec.decode(value).getOrElse { fail("Failed to decode URI $value: $it") }
         assertEquals(URI.create(value), decoded)

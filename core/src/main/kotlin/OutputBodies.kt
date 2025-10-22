@@ -1,8 +1,6 @@
 @file:Suppress("ktlint:standard:max-line-length")
 
-package dev.akif.tapik.http
-
-import dev.akif.tapik.*
+package dev.akif.tapik
 
 /** Tuple-like container describing output body variants for an endpoint. */
 sealed interface OutputBodies {

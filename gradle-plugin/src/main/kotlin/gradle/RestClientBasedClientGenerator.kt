@@ -11,10 +11,10 @@ import dev.akif.tapik.gradle.metadata.TypeMetadata
 import java.io.File
 
 internal object RestClientBasedClientGenerator {
-    private const val BASE_PACKAGE = "dev.akif.tapik.spring.restclient"
+    private const val TAPIK_PACKAGE = "dev.akif.tapik"
+    private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
     private const val BASE_INTERFACE_NAME = "RestClientBasedClient"
-    private const val HTTP_PACKAGE_PREFIX = "dev.akif.tapik.http."
-    private const val HTTP_PACKAGE_ROOT = "dev.akif.tapik.http"
+    private const val HTTP_PACKAGE_PREFIX = "$TAPIK_PACKAGE."
     private val KOTLIN_COLLECTION_OVERRIDES = mapOf(
         "java.util.Map" to "kotlin.collections.Map",
         "java.util.List" to "kotlin.collections.List",
@@ -85,7 +85,6 @@ internal object RestClientBasedClientGenerator {
             "arrow.core.getOrElse",
             "arrow.core.leftNel",
             "dev.akif.tapik.*",
-            "dev.akif.tapik.http.*",
             "$BASE_PACKAGE.*"
         )
 
@@ -96,7 +95,7 @@ internal object RestClientBasedClientGenerator {
                 import.startsWith(HTTP_PACKAGE_PREFIX) ||
                     import.startsWith("$BASE_PACKAGE.") ||
                     import == BASE_PACKAGE ||
-                    import == HTTP_PACKAGE_ROOT ||
+                    import == TAPIK_PACKAGE ||
                     import.substringBeforeLast('.', "") == packageName
             }
 

@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 import dev.akif.tapik.codec.*
 import dev.akif.tapik.codec.StringCodecs

@@ -1,4 +1,4 @@
-package dev.akif.tapik.http
+package dev.akif.tapik
 
 import arrow.core.getOrElse
 import kotlin.test.Test

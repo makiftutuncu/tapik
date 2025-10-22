@@ -11,11 +11,11 @@ import java.lang.reflect.WildcardType
  * Inspects bytecode or reflective type information to extract Tapik HTTP endpoint signatures.
  */
 object BytecodeParser {
-    private const val HTTP_ENDPOINT_FQCN = "dev.akif.tapik.http.HttpEndpoint"
-    private const val HTTP_PACKAGE = "dev.akif.tapik.http"
-    private const val URI_WITH_PARAMETERS_PREFIX = "$HTTP_PACKAGE.URIWithParameters"
-    private const val HEADERS_PREFIX = "$HTTP_PACKAGE.Headers"
-    private const val OUTPUT_BODIES_PREFIX = "$HTTP_PACKAGE.OutputBodies"
+    private const val TAPIK_PACKAGE = "dev.akif.tapik"
+    private const val HTTP_ENDPOINT_FQCN = "$TAPIK_PACKAGE.HttpEndpoint"
+    private const val URI_WITH_PARAMETERS_PREFIX = "$TAPIK_PACKAGE.URIWithParameters"
+    private const val HEADERS_PREFIX = "$TAPIK_PACKAGE.Headers"
+    private const val OUTPUT_BODIES_PREFIX = "$TAPIK_PACKAGE.OutputBodies"
     private val JAVA_TO_KOTLIN_TYPES = mapOf(
         "java.lang.Boolean" to "Boolean",
         "java.lang.Byte" to "Byte",

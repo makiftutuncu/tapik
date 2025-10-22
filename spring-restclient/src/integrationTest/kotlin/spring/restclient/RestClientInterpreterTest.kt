@@ -5,12 +5,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import dev.akif.tapik.http.Method
-import dev.akif.tapik.http.OutputBody
-import dev.akif.tapik.http.Status
-import dev.akif.tapik.http.StatusMatcher
-import dev.akif.tapik.http.stringBody
+import dev.akif.tapik.Method
+import dev.akif.tapik.OutputBody
+import dev.akif.tapik.Status
+import dev.akif.tapik.StatusMatcher
 import dev.akif.tapik.jackson.jsonBody
+import dev.akif.tapik.stringBody
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
