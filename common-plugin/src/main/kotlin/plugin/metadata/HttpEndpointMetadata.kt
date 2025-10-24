@@ -1,4 +1,4 @@
-package dev.akif.tapik.gradle.metadata
+package dev.akif.tapik.plugin.metadata
 
 /**
  * Describes a Kotlin type used while rendering generated clients.

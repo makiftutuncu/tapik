@@ -1,4 +1,4 @@
-package dev.akif.tapik.gradle
+package dev.akif.tapik.plugin.gradle
 
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
@@ -28,7 +28,7 @@ open class SpringRestClientExtension @Inject constructor(objects: ObjectFactory)
  *
  * @property springRestClient nested extension that configures Spring RestClient code generation.
  */
-open class TapikExtension @Inject constructor(private val objects: ObjectFactory) {
+open class TapikExtension @Inject constructor(objects: ObjectFactory) {
     val springRestClient: SpringRestClientExtension = objects.newInstance(SpringRestClientExtension::class.java)
 
     /**

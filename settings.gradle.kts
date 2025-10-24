@@ -7,7 +7,7 @@ pluginManagement {
         mavenCentral()
     }
     plugins {
-        id("dev.akif.tapik.gradle") version "0.1.0"
+        id("dev.akif.tapik.plugin.gradle") version "0.1.0"
         id("org.jetbrains.kotlin.jvm") version kotlinVersion
         id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion
     }
@@ -41,6 +41,7 @@ include(":codec")
 include(":core")
 include(":gradle-plugin")
 include(":jackson")
+include(":common-plugin")
 include(":spring-restclient")
 
 rootProject.name = "tapik"

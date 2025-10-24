@@ -1,12 +1,6 @@
-package dev.akif.tapik.gradle
+package dev.akif.tapik.plugin
 
-import dev.akif.tapik.gradle.metadata.BodyMetadata
-import dev.akif.tapik.gradle.metadata.HeaderMetadata
-import dev.akif.tapik.gradle.metadata.HttpEndpointMetadata
-import dev.akif.tapik.gradle.metadata.OutputBodyMetadata
-import dev.akif.tapik.gradle.metadata.PathVariableMetadata
-import dev.akif.tapik.gradle.metadata.QueryParameterMetadata
-import dev.akif.tapik.gradle.metadata.TypeMetadata
+import dev.akif.tapik.plugin.metadata.*
 import org.junit.jupiter.api.io.CleanupMode
 import java.io.File
 import java.nio.file.Path
@@ -33,7 +27,7 @@ class RestClientBasedClientGeneratorTest {
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/UserEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list().toList()}")
+        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}")
 
         val content = generated.readText().trim()
         val expected =
@@ -110,7 +104,7 @@ class RestClientBasedClientGeneratorTest {
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/WildEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list().toList()}")
+        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}")
 
         val content = generated.readText()
         assertTrue(content.contains("fun `wild endpoint`("))
