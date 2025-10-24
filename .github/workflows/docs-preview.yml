@@ -20,7 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements-docs.txt ]; then pip install -r requirements-docs.txt; else pip install mkdocs mkdocs-material; fi
       - run: mkdocs build --site-dir site
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: docs-preview
           path: site
