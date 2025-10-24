@@ -1,4 +1,4 @@
-package dev.akif.tapik.gradle.fixtures
+package dev.akif.tapik.plugin.fixtures
 
 import dev.akif.tapik.*
 

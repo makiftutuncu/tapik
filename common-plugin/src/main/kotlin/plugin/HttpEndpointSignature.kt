@@ -1,6 +1,6 @@
-package dev.akif.tapik.gradle
+package dev.akif.tapik.plugin
 
-import dev.akif.tapik.gradle.metadata.TypeMetadata
+import dev.akif.tapik.plugin.metadata.TypeMetadata
 
 /**
  * Captures the essential metadata derived from inspecting a Tapik HTTP endpoint declaration.

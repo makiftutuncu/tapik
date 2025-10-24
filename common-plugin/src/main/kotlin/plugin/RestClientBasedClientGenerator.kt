@@ -1,16 +1,12 @@
-package dev.akif.tapik.gradle
+package dev.akif.tapik.plugin
 
-import dev.akif.tapik.gradle.metadata.BodyMetadata
-import dev.akif.tapik.gradle.metadata.HeaderMetadata
-import dev.akif.tapik.gradle.metadata.HttpEndpointMetadata
-import dev.akif.tapik.gradle.metadata.OutputBodyMetadata
-import dev.akif.tapik.gradle.metadata.ParameterMetadata
-import dev.akif.tapik.gradle.metadata.PathVariableMetadata
-import dev.akif.tapik.gradle.metadata.QueryParameterMetadata
-import dev.akif.tapik.gradle.metadata.TypeMetadata
+import dev.akif.tapik.plugin.metadata.*
 import java.io.File
 
-internal object RestClientBasedClientGenerator {
+/**
+ * A generator that creates Spring RestClient-based clients from tapik endpoint definitions.
+ */
+object RestClientBasedClientGenerator {
     private const val TAPIK_PACKAGE = "dev.akif.tapik"
     private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
     private const val BASE_INTERFACE_NAME = "RestClientBasedClient"
@@ -21,6 +17,12 @@ internal object RestClientBasedClientGenerator {
         "java.util.Set" to "kotlin.collections.Set"
     )
 
+    /**
+     * Generates client code for the given endpoints and writes them to the given root directory.
+     *
+     * @param endpoints The endpoints to generate clients for.
+     * @param rootDir The root directory to write the generated code to.
+     */
     fun generate(endpoints: List<HttpEndpointMetadata>, rootDir: File) {
         if (endpoints.isEmpty()) return
 

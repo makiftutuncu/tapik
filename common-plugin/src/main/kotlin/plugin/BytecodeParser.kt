@@ -1,6 +1,6 @@
-package dev.akif.tapik.gradle
+package dev.akif.tapik.plugin
 
-import dev.akif.tapik.gradle.metadata.TypeMetadata
+import dev.akif.tapik.plugin.metadata.TypeMetadata
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type

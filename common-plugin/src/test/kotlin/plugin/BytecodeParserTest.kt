@@ -1,7 +1,7 @@
-package dev.akif.tapik.gradle
+package dev.akif.tapik.plugin
 
-import dev.akif.tapik.gradle.fixtures.SampleEndpoints
-import dev.akif.tapik.gradle.metadata.TypeMetadata
+import dev.akif.tapik.plugin.fixtures.SampleEndpoints
+import dev.akif.tapik.plugin.metadata.TypeMetadata
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -28,9 +28,9 @@ class BytecodeParserTest {
 
         assertNotNull(signature)
         assertEquals("user", signature.name)
-        assertEquals("dev.akif.tapik.gradle.fixtures", signature.packageName)
+        assertEquals("dev.akif.tapik.plugin.fixtures", signature.packageName)
         assertEquals("SampleEndpoints", signature.file)
-        assertEquals("dev/akif/tapik/gradle/fixtures/SampleEndpoints", signature.ownerInternalName)
+        assertEquals("dev/akif/tapik/plugin/fixtures/SampleEndpoints", signature.ownerInternalName)
         assertEquals("getUser", signature.methodName)
 
         signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
@@ -52,9 +52,9 @@ class BytecodeParserTest {
 
         assertNotNull(signature)
         assertEquals("user", signature.name)
-        assertEquals("dev.akif.tapik.gradle.fixtures", signature.packageName)
+        assertEquals("dev.akif.tapik.plugin.fixtures", signature.packageName)
         assertEquals("SampleEndpoints", signature.file)
-        assertEquals("dev/akif/tapik/gradle/fixtures/SampleEndpoints", signature.ownerInternalName)
+        assertEquals("dev/akif/tapik/plugin/fixtures/SampleEndpoints", signature.ownerInternalName)
         assertEquals("getUser", signature.methodName)
 
         signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))

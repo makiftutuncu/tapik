@@ -1,4 +1,4 @@
-package dev.akif.tapik.gradle
+package dev.akif.tapik.plugin.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
