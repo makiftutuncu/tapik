@@ -24,8 +24,6 @@ object RestClientBasedClientGenerator {
      * @param rootDir The root directory to write the generated code to.
      */
     fun generate(endpoints: List<HttpEndpointMetadata>, rootDir: File) {
-        if (endpoints.isEmpty()) return
-
         endpoints
             .groupBy { it.packageName }
             .filterKeys { it.isNotBlank() }
