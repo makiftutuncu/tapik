@@ -17,11 +17,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":core"))
     implementation(libs.kotlinStdlib)

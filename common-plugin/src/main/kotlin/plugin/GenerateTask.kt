@@ -29,7 +29,7 @@ class GenerateTask(
      * Generates client code from tapik endpoint definitions.
      */
     fun generate() {
-        val reportOutputDirectory = config.outputDirectory.also { it.mkdirs() }
+        val generationOutputDirectory = config.outputDirectory.also { it.mkdirs() }
         val generatedSourcesDir = config.generatedSourcesDirectory.also {
             if (it.exists()) {
                 it.deleteRecursively()
@@ -58,9 +58,11 @@ class GenerateTask(
             }
         }
 
-        writeReport(endpoints, reportOutputDirectory)
+        writeReport(endpoints, generationOutputDirectory)
 
         RestClientBasedClientGenerator.generate(endpoints, generatedSourcesDir)
+
+        MarkdownDocumentationGenerator.generate(endpoints, generationOutputDirectory)
     }
 
     private fun writeReport(
@@ -280,10 +282,10 @@ class GenerateTask(
         }
 
     private fun describeStatusMatcher(matcher: StatusMatcher): String = when (matcher) {
-        is StatusMatcher.Is -> matcher.status.toString()
-        is StatusMatcher.AnyOf -> matcher.statuses.joinToString(", ") { it.toString() }
+        is StatusMatcher.Is -> matcher.status.let { "${it.code} ${it.name}" }
+        is StatusMatcher.AnyOf -> matcher.statuses.joinToString(prefix = "One of [", separator = ", ", postfix = "]") { "${it.code} ${it.name}" }
         is StatusMatcher.Predicate -> matcher.description
-        StatusMatcher.Unmatched -> "unmatched"
+        StatusMatcher.Unmatched -> "Unmatched"
     }
 
     private fun createBodyMetadata(

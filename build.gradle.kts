@@ -46,6 +46,7 @@ gradle.projectsEvaluated {
 
 val publishable = setOf(
     ":codec",
+    ":common-plugin",
     ":core",
     ":jackson",
     ":spring-restclient"
