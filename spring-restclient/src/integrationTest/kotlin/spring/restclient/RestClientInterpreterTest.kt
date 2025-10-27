@@ -5,8 +5,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import dev.akif.tapik.Headers0
 import dev.akif.tapik.Method
-import dev.akif.tapik.OutputBody
+import dev.akif.tapik.Output
 import dev.akif.tapik.Status
 import dev.akif.tapik.StatusMatcher
 import dev.akif.tapik.jackson.jsonBody
@@ -53,7 +54,7 @@ class RestClientInterpreterTest {
                 )
         )
 
-        val outputBodies = listOf(OutputBody(StatusMatcher.Is(Status.OK), jsonBody<Map<String, Any?>>("user")))
+        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), Headers0, jsonBody<Map<String, Any?>>("user")))
 
         val response =
             interpreter.send(
@@ -62,7 +63,7 @@ class RestClientInterpreterTest {
                 inputHeaders = emptyMap(),
                 inputBodyContentType = null,
                 inputBody = null,
-                outputBodies = outputBodies
+                outputs = outputs
             )
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -81,7 +82,7 @@ class RestClientInterpreterTest {
                 )
         )
 
-        val outputBodies = listOf(OutputBody(StatusMatcher.Is(Status.OK), jsonBody<Map<String, Any?>>("user")))
+        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), Headers0, jsonBody<Map<String, Any?>>("user")))
 
         val exception =
             assertFailsWith<RestClientResponseException> {
@@ -91,7 +92,7 @@ class RestClientInterpreterTest {
                     inputHeaders = emptyMap(),
                     inputBodyContentType = null,
                     inputBody = null,
-                    outputBodies = outputBodies
+                    outputs = outputs
                 )
             }
 
@@ -110,11 +111,11 @@ class RestClientInterpreterTest {
                 )
         )
 
-        val outputBodies =
+        val outputs =
             listOf(
-                OutputBody(StatusMatcher.Is(Status.OK), stringBody()),
-                OutputBody(StatusMatcher.AnyOf(setOf(Status.CREATED, Status.NO_CONTENT)), stringBody()),
-                OutputBody(StatusMatcher.Predicate("status >= 500") { it.code >= 500 }, stringBody())
+                Output(StatusMatcher.Is(Status.OK), Headers0, stringBody()),
+                Output(StatusMatcher.AnyOf(setOf(Status.CREATED, Status.NO_CONTENT)), Headers0, stringBody()),
+                Output(StatusMatcher.Predicate("status >= 500") { it.code >= 500 }, Headers0, stringBody())
             )
 
         val exception =
@@ -125,7 +126,7 @@ class RestClientInterpreterTest {
                     inputHeaders = emptyMap(),
                     inputBodyContentType = null,
                     inputBody = null,
-                    outputBodies = outputBodies
+                    outputs = outputs
                 )
             }
 

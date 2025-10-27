@@ -7,8 +7,9 @@ object SampleEndpoints {
         get
             .uri("api" / "users" / path.uuid("userId") + query.int("page").optional(1))
             .inputHeader(header.string("X-Request-ID"))
-            .outputHeader(Header.Location)
-            .outputBody { stringBody() }
-            .outputBody(Status.NOT_FOUND) { stringBody() }
+            .output(
+                headers = { Headers1(Header.Location) }
+            ) { stringBody() }
+            .output(Status.NOT_FOUND) { stringBody() }
     }
 }

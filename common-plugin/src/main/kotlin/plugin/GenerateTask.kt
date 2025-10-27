@@ -166,7 +166,7 @@ class GenerateTask(
     private fun resolveEndpoint(
         signature: HttpEndpointSignature,
         classLoader: ClassLoader
-    ): HttpEndpoint<*, *, *, *, *>? {
+    ): HttpEndpoint<*, *, *, *>? {
         val className = signature.ownerInternalName
             ?.replace('/', '.')
             ?: listOfNotNull(signature.packageName.takeIf { it.isNotBlank() }, signature.file)
@@ -184,7 +184,7 @@ class GenerateTask(
                 resolveOwnerInstance(clazz)
             }
             method.isAccessible = true
-            method.invoke(instance) as? HttpEndpoint<*, *, *, *, *>
+            method.invoke(instance) as? HttpEndpoint<*, *, *, *>
                 ?: throw IllegalStateException("Resolved member $className#$getterName does not return HttpEndpoint")
         }.onFailure { error ->
             logWarn("[tapik] Failed to resolve endpoint ${signature.packageName}.${signature.file}#${signature.name}", error)
@@ -209,7 +209,7 @@ class GenerateTask(
         }
 
     private fun HttpEndpointSignature.toMetadata(
-        endpoint: HttpEndpoint<*, *, *, *, *>
+        endpoint: HttpEndpoint<*, *, *, *>
     ): HttpEndpointMetadata =
         HttpEndpointMetadata(
             id = endpoint.id,
@@ -224,8 +224,7 @@ class GenerateTask(
             inputBody = endpoint.inputBody
                 .takeUnless { it === EmptyBody }
                 ?.let { createBodyMetadata(inputBody, it) },
-            outputHeaders = endpoint.outputHeaders.toList().buildHeaderMetadata(outputHeaders.arguments),
-            outputBodies = endpoint.outputBodies.toList().buildOutputBodiesMetadata(outputBodies.arguments),
+            outputs = endpoint.outputs.toList().buildOutputsMetadata(outputs.arguments),
             packageName = packageName,
             sourceFile = file,
             imports = imports,
@@ -271,12 +270,17 @@ class GenerateTask(
             )
         }
 
-    private fun List<OutputBody<*>>.buildOutputBodiesMetadata(bodyTypes: List<TypeMetadata>): List<OutputBodyMetadata> =
+    private fun List<Output<*, *>>.buildOutputsMetadata(outputTypes: List<TypeMetadata>): List<OutputMetadata> =
         mapIndexed { index, output ->
-            val typeMetadata = bodyTypes.getOrNull(index)
-            val bodyMetadata = createBodyMetadata(typeMetadata, output.body)
-            OutputBodyMetadata(
+            val declaredType = outputTypes.getOrNull(index)
+            val headerType = declaredType?.arguments?.getOrNull(0)
+            val bodyType = declaredType?.arguments?.getOrNull(1)
+            val headerValueTypes = headerType?.arguments ?: emptyList()
+            val headers = output.headers.toList().buildHeaderMetadata(headerValueTypes)
+            val bodyMetadata = createBodyMetadata(bodyType, output.body)
+            OutputMetadata(
                 description = describeStatusMatcher(output.statusMatcher),
+                headers = headers,
                 body = bodyMetadata
             )
         }

@@ -103,11 +103,11 @@ val unmatchedStatus: StatusMatcher =
  * @return property delegate that records endpoint metadata using the owning property name.
  * @see HttpEndpoint
  */
-fun <T, U : URIWithParameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> http(
+fun <T, U : URIWithParameters, IH : Headers, IB : Body<*>, OB : Outputs> http(
     description: String? = null,
     details: String? = null,
-    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<U, IH, IB, OH, OB>
-): ReadOnlyProperty<T, HttpEndpoint<U, IH, IB, OH, OB>> =
+    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<U, IH, IB, OB>
+): ReadOnlyProperty<T, HttpEndpoint<U, IH, IB, OB>> =
     ReadOnlyProperty { _, property ->
         HttpEndpointWithoutMethod(id = property.name, description = description, details = details).builder()
     }
@@ -121,12 +121,11 @@ data class HttpEndpointWithoutMethod(
     override val id: String,
     override val description: String?,
     override val details: String?
-) : Endpoint<URIWithParameters0, Headers0, EmptyBody, Headers0, OutputBodies0>() {
+) : Endpoint<URIWithParameters0, Headers0, EmptyBody, Outputs0>() {
     override val uriWithParameters: URIWithParameters0 = root
     override val inputHeaders: Headers0 = Headers0
     override val inputBody: EmptyBody = EmptyBody
-    override val outputHeaders: Headers0 = Headers0
-    override val outputBodies: OutputBodies0 = OutputBodies0
+    override val outputs: Outputs0 = Outputs0
 
     /** Builder for a GET endpoint with this metadata retained. */
     val get: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.GET)
@@ -161,12 +160,11 @@ data class HttpEndpointWithoutURI(
     override val description: String?,
     override val details: String?,
     private val method: Method
-) : Endpoint<URIWithParameters0, Headers0, EmptyBody, Headers0, OutputBodies0>() {
+) : Endpoint<URIWithParameters0, Headers0, EmptyBody, Outputs0>() {
     override val uriWithParameters: URIWithParameters0 = root
     override val inputHeaders: Headers0 = Headers0
     override val inputBody: EmptyBody = EmptyBody
-    override val outputHeaders: Headers0 = Headers0
-    override val outputBodies: OutputBodies0 = OutputBodies0
+    override val outputs: Outputs0 = Outputs0
 
     /**
      * Finalises the endpoint by supplying concrete [uriWithParameters].
@@ -176,7 +174,7 @@ data class HttpEndpointWithoutURI(
      */
     fun <U : URIWithParameters> uri(
         uriWithParameters: U
-    ): HttpEndpoint<U, Headers0, EmptyBody, Headers0, OutputBodies0> =
+    ): HttpEndpoint<U, Headers0, EmptyBody, Outputs0> =
         HttpEndpoint(
             id = this.id,
             description = this.description,
@@ -185,8 +183,7 @@ data class HttpEndpointWithoutURI(
             uriWithParameters = uriWithParameters,
             inputHeaders = this.inputHeaders,
             inputBody = EmptyBody,
-            outputHeaders = this.outputHeaders,
-            outputBodies = OutputBodies0
+            outputs = Outputs0
         )
 }
 
@@ -195,10 +192,9 @@ data class HttpEndpointWithoutURI(
  * @property uriWithParameters URI template and captured parameters.
  * @property inputHeaders headers expected from the caller.
  * @property inputBody body definition expected from the caller.
- * @property outputHeaders headers returned to the caller.
- * @property outputBodies candidate response bodies matched by status.
+ * @property outputs candidate response bodies matched by status.
  */
-data class HttpEndpoint<out U : URIWithParameters, out IH : Headers, out IB : Body<*>, out OH : Headers, out OB : OutputBodies>(
+data class HttpEndpoint<out U : URIWithParameters, out IH : Headers, out IB : Body<*>, out OB : Outputs>(
     public override val id: String,
     public override val description: String?,
     public override val details: String?,
@@ -206,9 +202,8 @@ data class HttpEndpoint<out U : URIWithParameters, out IH : Headers, out IB : Bo
     public override val uriWithParameters: U,
     public override val inputHeaders: IH,
     public override val inputBody: IB,
-    public override val outputHeaders: OH,
-    public override val outputBodies: OB
-) : Endpoint<U, IH, IB, OH, OB>()
+    public override val outputs: OB
+) : Endpoint<U, IH, IB, OB>()
 
 /** Convenient alias for referring to endpoints without caring about their generic types. */
-typealias AnyHttpEndpoint = HttpEndpoint<URIWithParameters, Headers, Body<*>, Headers, OutputBodies>
+typealias AnyHttpEndpoint = HttpEndpoint<URIWithParameters, Headers, Body<*>, Outputs>

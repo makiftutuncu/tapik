@@ -1,7 +1,7 @@
 package dev.akif.tapik
 
 /**
- * Strategy for determining whether an HTTP status matches an output body definition.
+ * Strategy for determining whether an HTTP status matches an output definition.
  */
 sealed interface StatusMatcher : (Status) -> Boolean {
     /** Matches a single [status] exactly. */

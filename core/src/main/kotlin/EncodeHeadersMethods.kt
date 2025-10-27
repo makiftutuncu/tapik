@@ -3,7 +3,7 @@
 package dev.akif.tapik
 
 /** Returns an empty map when the endpoint does not expect input headers. */
-fun HttpEndpoint<*, Headers0, *, *, *>.encodeInputHeaders(): Map<String, List<String>> = emptyMap()
+fun HttpEndpoint<*, Headers0, *, *>.encodeInputHeaders(): Map<String, List<String>> = emptyMap()
 
 /**
  * Encodes input headers for an endpoint expecting one header definition.
@@ -12,7 +12,7 @@ fun HttpEndpoint<*, Headers0, *, *, *>.encodeInputHeaders(): Map<String, List<St
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any> HttpEndpoint<*, Headers1<H1>, *, *, *>.encodeInputHeaders(h1: H1): Map<String, List<String>> =
+fun <H1 : Any> HttpEndpoint<*, Headers1<H1>, *, *>.encodeInputHeaders(h1: H1): Map<String, List<String>> =
     build(
         encodeHeader(inputHeaders.item1 to h1)
     )
@@ -25,7 +25,7 @@ fun <H1 : Any> HttpEndpoint<*, Headers1<H1>, *, *, *>.encodeInputHeaders(h1: H1)
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any> HttpEndpoint<*, Headers2<H1, H2>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any> HttpEndpoint<*, Headers2<H1, H2>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2
 ): Map<String, List<String>> =
@@ -43,7 +43,7 @@ fun <H1 : Any, H2 : Any> HttpEndpoint<*, Headers2<H1, H2>, *, *, *>.encodeInputH
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any> HttpEndpoint<*, Headers3<H1, H2, H3>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any> HttpEndpoint<*, Headers3<H1, H2, H3>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3
@@ -64,7 +64,7 @@ fun <H1 : Any, H2 : Any, H3 : Any> HttpEndpoint<*, Headers3<H1, H2, H3>, *, *, *
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> HttpEndpoint<*, Headers4<H1, H2, H3, H4>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> HttpEndpoint<*, Headers4<H1, H2, H3, H4>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -88,7 +88,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> HttpEndpoint<*, Headers4<H1, H2, H3
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> HttpEndpoint<*, Headers5<H1, H2, H3, H4, H5>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> HttpEndpoint<*, Headers5<H1, H2, H3, H4, H5>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -115,7 +115,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> HttpEndpoint<*, Headers5<
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> HttpEndpoint<*, Headers6<H1, H2, H3, H4, H5, H6>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> HttpEndpoint<*, Headers6<H1, H2, H3, H4, H5, H6>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -145,7 +145,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> HttpEndpoint<*,
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> HttpEndpoint<*, Headers7<H1, H2, H3, H4, H5, H6, H7>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> HttpEndpoint<*, Headers7<H1, H2, H3, H4, H5, H6, H7>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -178,7 +178,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> HttpE
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any> HttpEndpoint<*, Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any> HttpEndpoint<*, Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -214,7 +214,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any> HttpEndpoint<*, Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any> HttpEndpoint<*, Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -253,7 +253,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any, H10 : Any> HttpEndpoint<*, Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, *, *, *>.encodeInputHeaders(
+fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any, H10 : Any> HttpEndpoint<*, Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, *, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -278,43 +278,40 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         encodeHeader(inputHeaders.item10 to h10)
     )
 
-/** Returns an empty map when the endpoint does not emit output headers. */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies> HttpEndpoint<*, IH, IB, Headers0, OB>.encodeOutputHeaders(): Map<String, List<String>> =
-    emptyMap()
+/** Returns an empty map when the output does not emit headers. */
+fun <B : Body<*>> Output<Headers0, B>.encodeHeaders(): Map<String, List<String>> = emptyMap()
 
 /**
- * Encodes output headers for an endpoint producing one header definition.
+ * Encodes output headers for an output definition producing one header.
  *
  * @param h1 value for the first header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any> HttpEndpoint<*, IH, IB, Headers1<H1>, OB>.encodeOutputHeaders(
-    h1: H1
-): Map<String, List<String>> =
+fun <B : Body<*>, H1 : Any> Output<Headers1<H1>, B>.encodeHeaders(h1: H1): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1)
+        encodeHeader(headers.item1 to h1)
     )
 
 /**
- * Encodes output headers for an endpoint producing 2 header definitions.
+ * Encodes output headers for an output definition producing two headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any> HttpEndpoint<*, IH, IB, Headers2<H1, H2>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any> Output<Headers2<H1, H2>, B>.encodeHeaders(
     h1: H1,
     h2: H2
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2)
     )
 
 /**
- * Encodes output headers for an endpoint producing 3 header definitions.
+ * Encodes output headers for an output definition producing three headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
@@ -322,52 +319,52 @@ fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any> HttpEndp
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any> HttpEndpoint<*, IH, IB, Headers3<H1, H2, H3>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any> Output<Headers3<H1, H2, H3>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3)
     )
 
 /**
- * Encodes output headers for an endpoint producing 4 header definitions.
+ * Encodes output headers for an output definition producing four headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @param h3 value for the third header.
- * @param h4 value for the 4th header.
+ * @param h4 value for the fourth header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any> HttpEndpoint<*, IH, IB, Headers4<H1, H2, H3, H4>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any, H4 : Any> Output<Headers4<H1, H2, H3, H4>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
     h4: H4
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3),
-        encodeHeader(outputHeaders.item4 to h4)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3),
+        encodeHeader(headers.item4 to h4)
     )
 
 /**
- * Encodes output headers for an endpoint producing 5 header definitions.
+ * Encodes output headers for an output definition producing five headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
+ * @param h4 value for the fourth header.
+ * @param h5 value for the fifth header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> HttpEndpoint<*, IH, IB, Headers5<H1, H2, H3, H4, H5>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> Output<Headers5<H1, H2, H3, H4, H5>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -375,26 +372,26 @@ fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any
     h5: H5
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3),
-        encodeHeader(outputHeaders.item4 to h4),
-        encodeHeader(outputHeaders.item5 to h5)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3),
+        encodeHeader(headers.item4 to h4),
+        encodeHeader(headers.item5 to h5)
     )
 
 /**
- * Encodes output headers for an endpoint producing 6 header definitions.
+ * Encodes output headers for an output definition producing six headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
+ * @param h4 value for the fourth header.
+ * @param h5 value for the fifth header.
+ * @param h6 value for the sixth header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> HttpEndpoint<*, IH, IB, Headers6<H1, H2, H3, H4, H5, H6>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> Output<Headers6<H1, H2, H3, H4, H5, H6>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -403,28 +400,28 @@ fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any
     h6: H6
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3),
-        encodeHeader(outputHeaders.item4 to h4),
-        encodeHeader(outputHeaders.item5 to h5),
-        encodeHeader(outputHeaders.item6 to h6)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3),
+        encodeHeader(headers.item4 to h4),
+        encodeHeader(headers.item5 to h5),
+        encodeHeader(headers.item6 to h6)
     )
 
 /**
- * Encodes output headers for an endpoint producing 7 header definitions.
+ * Encodes output headers for an output definition producing seven headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
+ * @param h4 value for the fourth header.
+ * @param h5 value for the fifth header.
+ * @param h6 value for the sixth header.
+ * @param h7 value for the seventh header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> HttpEndpoint<*, IH, IB, Headers7<H1, H2, H3, H4, H5, H6, H7>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> Output<Headers7<H1, H2, H3, H4, H5, H6, H7>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -434,30 +431,30 @@ fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any
     h7: H7
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3),
-        encodeHeader(outputHeaders.item4 to h4),
-        encodeHeader(outputHeaders.item5 to h5),
-        encodeHeader(outputHeaders.item6 to h6),
-        encodeHeader(outputHeaders.item7 to h7)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3),
+        encodeHeader(headers.item4 to h4),
+        encodeHeader(headers.item5 to h5),
+        encodeHeader(headers.item6 to h6),
+        encodeHeader(headers.item7 to h7)
     )
 
 /**
- * Encodes output headers for an endpoint producing 8 header definitions.
+ * Encodes output headers for an output definition producing eight headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
- * @param h8 value for the 8th header.
+ * @param h4 value for the fourth header.
+ * @param h5 value for the fifth header.
+ * @param h6 value for the sixth header.
+ * @param h7 value for the seventh header.
+ * @param h8 value for the eighth header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any> HttpEndpoint<*, IH, IB, Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any> Output<Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -468,32 +465,32 @@ fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any
     h8: H8
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3),
-        encodeHeader(outputHeaders.item4 to h4),
-        encodeHeader(outputHeaders.item5 to h5),
-        encodeHeader(outputHeaders.item6 to h6),
-        encodeHeader(outputHeaders.item7 to h7),
-        encodeHeader(outputHeaders.item8 to h8)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3),
+        encodeHeader(headers.item4 to h4),
+        encodeHeader(headers.item5 to h5),
+        encodeHeader(headers.item6 to h6),
+        encodeHeader(headers.item7 to h7),
+        encodeHeader(headers.item8 to h8)
     )
 
 /**
- * Encodes output headers for an endpoint producing 9 header definitions.
+ * Encodes output headers for an output definition producing nine headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
- * @param h8 value for the 8th header.
- * @param h9 value for the 9th header.
+ * @param h4 value for the fourth header.
+ * @param h5 value for the fifth header.
+ * @param h6 value for the sixth header.
+ * @param h7 value for the seventh header.
+ * @param h8 value for the eighth header.
+ * @param h9 value for the ninth header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any> HttpEndpoint<*, IH, IB, Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any> Output<Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -505,34 +502,34 @@ fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any
     h9: H9
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3),
-        encodeHeader(outputHeaders.item4 to h4),
-        encodeHeader(outputHeaders.item5 to h5),
-        encodeHeader(outputHeaders.item6 to h6),
-        encodeHeader(outputHeaders.item7 to h7),
-        encodeHeader(outputHeaders.item8 to h8),
-        encodeHeader(outputHeaders.item9 to h9)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3),
+        encodeHeader(headers.item4 to h4),
+        encodeHeader(headers.item5 to h5),
+        encodeHeader(headers.item6 to h6),
+        encodeHeader(headers.item7 to h7),
+        encodeHeader(headers.item8 to h8),
+        encodeHeader(headers.item9 to h9)
     )
 
 /**
- * Encodes output headers for an endpoint producing 10 header definitions.
+ * Encodes output headers for an output definition producing ten headers.
  *
  * @param h1 value for the first header.
  * @param h2 value for the second header.
  * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
- * @param h8 value for the 8th header.
- * @param h9 value for the 9th header.
- * @param h10 value for the 10th header.
+ * @param h4 value for the fourth header.
+ * @param h5 value for the fifth header.
+ * @param h6 value for the sixth header.
+ * @param h7 value for the seventh header.
+ * @param h8 value for the eighth header.
+ * @param h9 value for the ninth header.
+ * @param h10 value for the tenth header.
  * @return map of header names to their encoded values.
  * @see encodeHeader
  */
-fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any, H10 : Any> HttpEndpoint<*, IH, IB, Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, OB>.encodeOutputHeaders(
+fun <B : Body<*>, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any, H10 : Any> Output<Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, B>.encodeHeaders(
     h1: H1,
     h2: H2,
     h3: H3,
@@ -545,16 +542,16 @@ fun <IH : Headers, IB : Body<*>, OB : OutputBodies, H1 : Any, H2 : Any, H3 : Any
     h10: H10
 ): Map<String, List<String>> =
     build(
-        encodeHeader(outputHeaders.item1 to h1),
-        encodeHeader(outputHeaders.item2 to h2),
-        encodeHeader(outputHeaders.item3 to h3),
-        encodeHeader(outputHeaders.item4 to h4),
-        encodeHeader(outputHeaders.item5 to h5),
-        encodeHeader(outputHeaders.item6 to h6),
-        encodeHeader(outputHeaders.item7 to h7),
-        encodeHeader(outputHeaders.item8 to h8),
-        encodeHeader(outputHeaders.item9 to h9),
-        encodeHeader(outputHeaders.item10 to h10)
+        encodeHeader(headers.item1 to h1),
+        encodeHeader(headers.item2 to h2),
+        encodeHeader(headers.item3 to h3),
+        encodeHeader(headers.item4 to h4),
+        encodeHeader(headers.item5 to h5),
+        encodeHeader(headers.item6 to h6),
+        encodeHeader(headers.item7 to h7),
+        encodeHeader(headers.item8 to h8),
+        encodeHeader(headers.item9 to h9),
+        encodeHeader(headers.item10 to h10)
     )
 
 /** Groups encoded header name/value [pairs] by header name to match HTTP expectations. */

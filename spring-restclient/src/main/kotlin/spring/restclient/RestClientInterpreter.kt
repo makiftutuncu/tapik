@@ -2,7 +2,7 @@ package dev.akif.tapik.spring.restclient
 
 import dev.akif.tapik.MediaType
 import dev.akif.tapik.Method
-import dev.akif.tapik.OutputBody
+import dev.akif.tapik.Output
 import dev.akif.tapik.StatusMatcher
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.ClientHttpResponse
@@ -22,14 +22,14 @@ data class RestClientInterpreter(
     val client: RestClient
 ) {
     /**
-     * Sends a request to the configured [client] and validates the response against the expected [outputBodies].
+     * Sends a request to the configured [client] and validates the response against the expected [outputs].
      *
      * @param method HTTP method to invoke.
      * @param uri fully resolved request URI.
      * @param inputHeaders header values to send with the request.
      * @param inputBodyContentType optional request body media type.
      * @param inputBody optional request body payload.
-     * @param outputBodies collection of expected output body definitions for status matching.
+     * @param outputs collection of expected output definitions for status matching.
      * @return the received [ResponseEntity].
      * @throws RestClientResponseException when the response does not satisfy status or content-type expectations.
      * @see RestClient
@@ -40,7 +40,7 @@ data class RestClientInterpreter(
         inputHeaders: Map<String, List<String>>,
         inputBodyContentType: MediaType?,
         inputBody: ByteArray?,
-        outputBodies: List<OutputBody<*>>
+        outputs: List<Output<*, *>>
     ): ResponseEntity<ByteArray> =
         client
             .method(SpringMethod.valueOf(method.name))
@@ -56,31 +56,31 @@ data class RestClientInterpreter(
                 }
             }.retrieve()
             .apply {
-                outputBodies.fold(this) { spec, output ->
+                outputs.fold(this) { spec, output ->
                     spec.onStatus(
                         { output.statusMatcher(it.toStatus()) },
                         statusHandler(output, method, uri)
                     )
                 }
-            }.onStatus(unmatchedStatusHandler(outputBodies))
+            }.onStatus(unmatchedStatusHandler(outputs))
             .toEntity(ByteArray::class.java)
 
     /**
-     * Produces an error handler that verifies the response content type for [outputBody].
+     * Produces an error handler that verifies the response content type for [output].
      *
-     * @param outputBody body definition that produced the handler.
+     * @param output definition that produced the handler.
      * @param method HTTP method used for the request.
      * @param uri request URI.
      * @return an error handler that raises [RestClientResponseException] with detailed diagnostics.
      */
     fun statusHandler(
-        outputBody: OutputBody<*>,
+        output: Output<*, *>,
         method: Method,
         uri: URI
     ): RestClient.ResponseSpec.ErrorHandler =
         RestClient.ResponseSpec.ErrorHandler { _, response ->
             val status = response.statusCode.toStatus()
-            val mediaType = outputBody.body.mediaType
+            val mediaType = output.body.mediaType
             val responseContentType = response.headers.contentType
             if (mediaType != null &&
                 responseContentType != null &&
@@ -98,12 +98,12 @@ data class RestClientInterpreter(
         }
 
     /**
-     * Produces a [ResponseErrorHandler] for statuses not matched by any declared [outputBodies].
+     * Produces a [ResponseErrorHandler] for statuses not matched by any declared [outputs].
      *
-     * @param outputBodies collection of expected output body definitions.
+     * @param outputs collection of expected output definitions.
      * @return handler that throws [RestClientResponseException] for unmatched responses.
      */
-    fun unmatchedStatusHandler(outputBodies: List<OutputBody<*>>): ResponseErrorHandler =
+    fun unmatchedStatusHandler(outputs: List<Output<*, *>>): ResponseErrorHandler =
         object : ResponseErrorHandler {
             override fun hasError(response: ClientHttpResponse): Boolean = true
 
@@ -114,7 +114,7 @@ data class RestClientInterpreter(
             ) {
                 val status = response.statusCode.toStatus()
                 val expected =
-                    outputBodies.flatMap {
+                    outputs.flatMap {
                         when (val matcher = it.statusMatcher) {
                             is StatusMatcher.Is -> listOf(matcher.status.toString())
                             is StatusMatcher.AnyOf -> matcher.statuses.map { s -> s.toString() }

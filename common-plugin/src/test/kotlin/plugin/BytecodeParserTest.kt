@@ -35,7 +35,11 @@ class BytecodeParserTest {
 
         signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
         signature.inputHeaders.assertType("Headers1", listOf("String"))
-        signature.outputBodies.assertType("OutputBodies2", listOf("StringBody", "StringBody"))
+        signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
+        val firstOutput = signature.outputs.arguments[0]
+        val secondOutput = signature.outputs.arguments[1]
+        firstOutput.assertType("Output", listOf("Headers1", "StringBody"))
+        secondOutput.assertType("Output", listOf("Headers0", "StringBody"))
     }
 
     @Test
@@ -59,7 +63,11 @@ class BytecodeParserTest {
 
         signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
         signature.inputHeaders.assertType("Headers1", listOf("String"))
-        signature.outputBodies.assertType("OutputBodies2", listOf("StringBody", "StringBody"))
+        signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
+        val reflectedFirstOutput = signature.outputs.arguments[0]
+        val reflectedSecondOutput = signature.outputs.arguments[1]
+        reflectedFirstOutput.assertType("Output", listOf("Headers1", "StringBody"))
+        reflectedSecondOutput.assertType("Output", listOf("Headers0", "StringBody"))
     }
 
     private fun readClassBytes(clazz: Class<*>): ByteArray {

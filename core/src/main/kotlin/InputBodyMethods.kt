@@ -3,9 +3,9 @@
 package dev.akif.tapik
 
 /** Replaces the empty input body with a concrete [inputBody] definition. */
-fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OH : Headers, OB : OutputBodies> HttpEndpoint<U, IH, EmptyBody, OH, OB>.inputBody(
+fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OB : Outputs> HttpEndpoint<U, IH, EmptyBody, OB>.inputBody(
     inputBody: () -> IB
-): HttpEndpoint<U, IH, IB, OH, OB> =
+): HttpEndpoint<U, IH, IB, OB> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
@@ -14,6 +14,5 @@ fun <U : URIWithParameters, IH : Headers, IB : Body<*>, OH : Headers, OB : Outpu
         uriWithParameters = this.uriWithParameters,
         inputHeaders = this.inputHeaders,
         inputBody = inputBody(),
-        outputHeaders = this.outputHeaders,
-        outputBodies = this.outputBodies
+        outputs = this.outputs
     )

@@ -32,63 +32,57 @@ class RestClientBasedClientGeneratorTest {
         val content = generated.readText().trim()
         val expected =
             """
-            package dev.akif.tapik.clients
-
-            import arrow.core.getOrElse
-            import arrow.core.leftNel
-            import dev.akif.tapik.*
-            import dev.akif.tapik.spring.restclient.*
-            import java.net.URI
-            import java.util.UUID
-
-            // Generated from: dev.akif.tapik.clients.UserEndpoints
-            interface UserEndpointsClient : RestClientBasedClient {
-                /**
-                 * Get user by id.
-                 *
-                 * Detailed documentation for the endpoint.
-                 */
-                fun user(
-                    userId: UUID,
-                    X_Request_ID: String,
-                    page: Int = UserEndpoints.user.uriWithParameters.parameters.item2.asQueryParameter<Int>().getDefaultOrFail()
-                ): Response1<String, URI> {
-                    val responseEntity = interpreter.send(
-                        method = UserEndpoints.user.method,
-                        uri = UserEndpoints.user.uriWithParameters.toURI(userId, page),
-                        inputHeaders = UserEndpoints.user.encodeInputHeaders(X_Request_ID),
-                        inputBodyContentType = UserEndpoints.user.inputBody.mediaType,
-                        inputBody = ByteArray(0),
-                        outputBodies = UserEndpoints.user.outputBodies.toList()
-                    )
-
-                    val status = responseEntity.statusCode.toStatus()
-
-                    val headers = responseEntity.headers
-                        .mapValues { entry -> entry.value.map { it.orEmpty() } }
-
-                    val decodedOutputHeaders = decodeHeaders1(
-                        headers,
-                        UserEndpoints.user.outputHeaders.item1
-                    ).getOrElse {
-                        error("Cannot decode headers: " + it.joinToString(": ") )
-                    }
-                    val Location = decodedOutputHeaders.item1
-
-                    val bodyBytes = responseEntity.body ?: ByteArray(0)
-                    val decoded = UserEndpoints.user.outputBodies.item1.body.codec.decode(bodyBytes)
-                        .map { decodedBody ->
-                            Response1(
-                                status,
-                                decodedBody,
-                                Location
-                            )
-                        }
-                    return decoded.getOrElse { error(it.joinToString(": ") ) }
-
-                }
-            }
-            """.trimIndent()
+            |package dev.akif.tapik.clients
+            |
+            |import arrow.core.getOrElse
+            |import dev.akif.tapik.*
+            |import dev.akif.tapik.spring.restclient.*
+            |import java.net.URI
+            |import java.util.UUID
+            |
+            |// Generated from: dev.akif.tapik.clients.UserEndpoints
+            |interface UserEndpointsClient : RestClientBasedClient {
+            |    /**
+            |     * Get user by id.
+            |     *
+            |     * Detailed documentation for the endpoint.
+            |     */
+            |    fun user(
+            |        userId: UUID,
+            |        X_Request_ID: String,
+            |        page: Int = UserEndpoints.user.uriWithParameters.parameters.item2.asQueryParameter<Int>().getDefaultOrFail()
+            |    ): Response1<String, URI> {
+            |        val responseEntity = interpreter.send(
+            |            method = UserEndpoints.user.method,
+            |            uri = UserEndpoints.user.uriWithParameters.toURI(userId, page),
+            |            inputHeaders = UserEndpoints.user.encodeInputHeaders(X_Request_ID),
+            |            inputBodyContentType = UserEndpoints.user.inputBody.mediaType,
+            |            inputBody = ByteArray(0),
+            |            outputs = UserEndpoints.user.outputs.toList()
+            |        )
+            |
+            |        val status = responseEntity.statusCode.toStatus()
+            |
+            |        val headers = responseEntity.headers
+            |            .mapValues { entry -> entry.value.map { it.orEmpty() } }
+            |
+            |        val bodyBytes = responseEntity.body ?: ByteArray(0)
+            |
+            |        val decodedOutput1Headers = decodeHeaders1(
+            |            headers,
+            |            UserEndpoints.user.outputs.item1.headers.item1
+            |        ).getOrElse {
+            |            error("Cannot decode headers: " + it.joinToString(": ") )
+            |        }
+            |        val Location = decodedOutput1Headers.item1
+            |
+            |        val decodedBody = UserEndpoints.user.outputs.item1.body.codec.decode(bodyBytes)
+            |            .getOrElse { error(it.joinToString(": ") ) }
+            |
+            |        return Response1(status, decodedBody, Location)
+            |    }
+            |}
+            """.trimMargin()
 
         assertEquals(expected, content)
     }
@@ -144,19 +138,19 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             inputBody = null,
-            outputHeaders =
+            outputs =
                 listOf(
-                    HeaderMetadata(
-                        name = "Location",
-                        type = TypeMetadata("java.net.URI"),
-                        required = false,
-                        values = emptyList()
-                    )
-                ),
-            outputBodies =
-                listOf(
-                    OutputBodyMetadata(
+                    OutputMetadata(
                         description = "OK",
+                        headers =
+                            listOf(
+                                HeaderMetadata(
+                                    name = "Location",
+                                    type = TypeMetadata("java.net.URI"),
+                                    required = false,
+                                    values = emptyList()
+                                )
+                            ),
                         body =
                             BodyMetadata(
                                 type = TypeMetadata("dev.akif.tapik.StringBody"),
@@ -208,11 +202,11 @@ class RestClientBasedClientGeneratorTest {
                     name = null,
                     mediaType = "text/plain"
                 ),
-            outputHeaders = emptyList(),
-            outputBodies =
+            outputs =
                 listOf(
-                    OutputBodyMetadata(
+                    OutputMetadata(
                         description = "Created",
+                        headers = emptyList(),
                         body =
                             BodyMetadata(
                                 type = TypeMetadata("dev.akif.tapik.StringBody"),

@@ -83,7 +83,6 @@ object RestClientBasedClientGenerator {
     ): List<String> {
         val imports = mutableSetOf(
             "arrow.core.getOrElse",
-            "arrow.core.leftNel",
             "dev.akif.tapik.*",
             "$BASE_PACKAGE.*"
         )
@@ -134,26 +133,20 @@ object RestClientBasedClientGenerator {
         appendLine("            inputHeaders = ${signature.inputHeadersEncoding},")
         appendLine("            inputBodyContentType = $endpointExpr.inputBody.mediaType,")
         appendLine("            inputBody = ${signature.encodeBodyCall},")
-        appendLine("            outputBodies = $endpointExpr.outputBodies.toList()")
+        appendLine("            outputs = $endpointExpr.outputs.toList()")
         appendLine("        )")
         appendLine()
         appendLine("        val status = responseEntity.statusCode.toStatus()")
 
-        if (signature.outputHeaderCount > 0) {
+        if (signature.needsHeadersMap) {
             appendLine()
             appendLine("        val headers = responseEntity.headers")
             appendLine("            .mapValues { entry -> entry.value.map { it.orEmpty() } }")
+        }
+
+        if (signature.needsBodyBytes) {
             appendLine()
-            appendLine("        val ${signature.outputHeaderTupleName} = decodeHeaders${signature.outputHeaderCount}(")
-            appendLine("            headers,")
-            signature.outputHeaderAccessors.forEachIndexed { index, accessor ->
-                val suffix = if (index == signature.outputHeaderAccessors.lastIndex) "" else ","
-                appendLine("            $accessor$suffix")
-            }
-            appendLine("        ).getOrElse {")
-            appendLine("            error(\"Cannot decode headers: \" + it.joinToString(\": \") )")
-            appendLine("        }")
-            signature.outputHeaderAssignments.forEach { appendLine("        $it") }
+            appendLine("        val bodyBytes = responseEntity.body ?: ByteArray(0)")
         }
 
         appendLine()
@@ -180,8 +173,7 @@ object RestClientBasedClientGenerator {
         private val parameters = ParameterGroup(endpoint.parameters, endpointExpression)
         private val inputHeaders = InputHeadersGroup(endpoint.inputHeaders, endpointExpression)
         private val inputBody = InputBodyGroup(endpoint.inputBody, endpointExpression)
-        private val outputHeaders = OutputHeadersGroup(endpoint.outputHeaders, endpointExpression)
-        private val outputBodies = OutputBodiesGroup(endpoint.outputBodies, endpointExpression)
+        private val outputs = OutputsGroup(endpoint.outputs, endpointExpression)
 
         val inputs: List<String> = buildList {
             addAll(parameters.requiredDeclarations)
@@ -194,16 +186,10 @@ object RestClientBasedClientGenerator {
         val uriArguments: String = parameters.argumentList
         val inputHeadersEncoding: String = inputHeaders.encodingCall
         val encodeBodyCall: String = inputBody.encodeCall
-
-        val outputHeaderCount: Int = outputHeaders.count
-        val outputHeaderTupleName: String = outputHeaders.tupleName
-        val outputHeaderAccessors: List<String> = outputHeaders.accessors
-        val outputHeaderAssignments: List<String> = outputHeaders.assignments
-        val outputHeaderValueNames: List<String> = outputHeaders.valueNames
-        val outputHeaderTypeNames: List<String> = outputHeaders.typeNames
-
-        val returnType: String = outputBodies.returnType(outputHeaderTypeNames)
-        val responseConstruction: String = outputBodies.responseConstruction(outputHeaderValueNames, outputHeaderTypeNames)
+        val needsHeadersMap: Boolean = outputs.requiresHeaders
+        val needsBodyBytes: Boolean = outputs.requiresBodyBytes
+        val returnType: String = outputs.returnType
+        val responseConstruction: String = outputs.responseConstruction
     }
 
     private class ParameterGroup(
@@ -356,149 +342,180 @@ object RestClientBasedClientGenerator {
         }
     }
 
-    private class OutputHeadersGroup(
-        headers: List<HeaderMetadata>,
-        endpointExpression: String
-    ) {
-        data class HeaderEntry(
-            val name: String,
-            val type: String
-        )
-
-        private val entries: List<HeaderEntry>
-
-        val count: Int
-        val tupleName: String = "decodedOutputHeaders"
-        val valueNames: List<String>
-        val typeNames: List<String>
-        val accessors: List<String>
-        val assignments: List<String>
-
-        init {
-            val usedNames = mutableSetOf<String>()
-            entries = headers.mapIndexed { index, header ->
-                val fallback = "outputHeader${index + 1}"
-                val baseName = sanitizeIdentifier(header.name, fallback)
-                val name = uniqueName(baseName, usedNames)
-                HeaderEntry(
-                    name = name,
-                    type = header.type.render()
-                )
-            }
-            count = entries.size
-            valueNames = entries.map { it.name }
-            typeNames = entries.map { it.type }
-            accessors = List(count) { index -> "$endpointExpression.outputHeaders.item${index + 1}" }
-            assignments = valueNames.mapIndexed { index, name -> "val $name = $tupleName.item${index + 1}" }
-        }
-    }
-
-    private class OutputBodiesGroup(
-        outputBodies: List<OutputBodyMetadata>,
+    private class OutputsGroup(
+        outputs: List<OutputMetadata>,
         private val endpointExpression: String
     ) {
-        private val bodies: List<BodyEntry> = outputBodies.mapIndexed { index, metadata ->
-            BodyEntry(
-                metadata = metadata,
-                index = index + 1,
-                endpointExpression = endpointExpression
-            )
+        private val options: List<OutputOption> = outputs.mapIndexed { index, metadata ->
+            OutputOption(metadata = metadata, index = index + 1, endpointExpression = endpointExpression)
         }
 
-        fun returnType(headerTypes: List<String>): String = when {
-            bodies.isEmpty() && headerTypes.isEmpty() -> "ResponseWithoutBody0"
-            bodies.isEmpty() -> "ResponseWithoutBody${headerTypes.size}<${headerTypes.joinToString(", ")}>"
-            bodies.size == 1 && headerTypes.isEmpty() -> "Response0<${bodies.first().valueType}>"
-            bodies.size == 1 -> "Response${headerTypes.size}<${bodies.first().valueType}, ${headerTypes.joinToString(", ")}>"
+        val requiresHeaders: Boolean = options.any(OutputOption::needsHeaders)
+        val requiresBodyBytes: Boolean = options.any(OutputOption::needsBodyBytes)
+
+        val returnType: String = when {
+            options.isEmpty() -> "ResponseWithoutBody0"
+            options.size == 1 -> options.first().responseType
             else -> {
-                val options = bodies.joinToString(", ") { body ->
-                    if (headerTypes.isEmpty()) {
-                        "Response0<${body.valueType}>"
-                    } else {
-                        "Response${headerTypes.size}<${body.valueType}, ${headerTypes.joinToString(", ")}>"
-                    }
-                }
-                "OneOf${bodies.size}<$options>"
+                val optionTypes = options.joinToString(", ") { it.responseType }
+                "OneOf${options.size}<$optionTypes>"
             }
         }
 
-        fun responseConstruction(headerValues: List<String>, headerTypes: List<String>): String = when {
-            bodies.isEmpty() && headerValues.isEmpty() -> "        return ResponseWithoutBody0(status)"
-            bodies.isEmpty() -> buildString {
-                appendLine("        return ResponseWithoutBody${headerTypes.size}(")
-                appendLine("            status,")
-                headerValues.forEachIndexed { index, value ->
-                    val suffix = if (index == headerValues.lastIndex) "" else ","
-                    appendLine("            $value$suffix")
-                }
-                append("        )")
-            }
-            bodies.size == 1 -> buildString {
-                appendLine("        val bodyBytes = responseEntity.body ?: ByteArray(0)")
-                appendLine("        val decoded = ${bodies.first().decoder}")
-                appendLine("            .map { decodedBody ->")
-                if (headerValues.isEmpty()) {
-                    appendLine("                Response0(status, decodedBody)")
-                } else {
-                    appendLine("                Response${headerTypes.size}(")
-                    appendLine("                    status,")
-                    appendLine("                    decodedBody,")
-                    headerValues.forEachIndexed { index, value ->
-                        val suffix = if (index == headerValues.lastIndex) "" else ","
-                        appendLine("                    $value$suffix")
+        val responseConstruction: String = when {
+            options.isEmpty() -> "        return ResponseWithoutBody0(status)"
+            options.size == 1 -> buildSingle(options.first())
+            else -> buildMultiple()
+        }
+
+        private fun buildSingle(option: OutputOption): String {
+            return buildString {
+                if (option.needsHeaders) {
+                    appendLine(option.buildHeaderDecodingBlock("        "))
+                    if (option.needsBodyBytes) {
+                        appendLine()
                     }
-                    appendLine("                )")
                 }
-                appendLine("            }")
-                appendLine("        return decoded.getOrElse { error(it.joinToString(\": \") ) }")
+                if (option.needsBodyBytes) {
+                    appendLine(option.buildBodyDecodingBlock("        "))
+                    appendLine()
+                }
+                append("        return ${option.responseExpression(false)}")
             }
-            else -> buildString {
-                appendLine("        val bodyBytes = responseEntity.body ?: ByteArray(0)")
+        }
+
+        private fun buildMultiple(): String {
+            return buildString {
                 appendLine("        val response = when {")
-                bodies.forEach { body ->
-                    appendLine("            ${body.statusMatcher} -> ${body.decoder}.map { decodedBody ->")
-                    if (headerValues.isEmpty()) {
-                        appendLine("                OneOf${bodies.size}.Option${body.index}(")
-                        appendLine("                    Response0(status, decodedBody)")
-                        appendLine("                )")
-                    } else {
-                        appendLine("                OneOf${bodies.size}.Option${body.index}(")
-                        appendLine("                    Response${headerTypes.size}(")
-                        appendLine("                        status,")
-                        appendLine("                        decodedBody,")
-                        headerValues.forEachIndexed { index, value ->
-                            val suffix = if (index == headerValues.lastIndex) "" else ","
-                            appendLine("                        $value$suffix")
-                        }
-                        appendLine("                    )")
-                        appendLine("                )")
-                    }
+                options.forEach { option ->
+                    appendLine("            ${option.statusCondition} -> {")
+                    val innerBlocks = buildList {
+                        if (option.needsHeaders) add(option.buildHeaderDecodingBlock("                "))
+                        if (option.needsBodyBytes) add(option.buildBodyDecodingBlock("                "))
+                        add("                ${option.responseExpression(true)}")
+                    }.filter { it.isNotBlank() }
+                    appendLine(innerBlocks.joinToString(separator = "\n\n"))
                     appendLine("            }")
                 }
-                appendLine("            else -> \"Response output did not match\".leftNel()")
+                appendLine("            else -> error(\"Response output did not match\")")
                 appendLine("        }")
                 appendLine()
-                append("        return response.getOrElse { error(it.joinToString(\": \") ) }")
+                append("        return response")
             }
         }
 
-        private class BodyEntry(
-            metadata: OutputBodyMetadata,
+        private inner class OutputOption(
+            private val metadata: OutputMetadata,
             val index: Int,
-            endpointExpression: String
+            private val endpointExpression: String
         ) {
-            val valueType: String = when (metadata.body.type.simpleName()) {
-                "JsonBody" -> metadata.body.type.arguments.firstOrNull()?.render() ?: "Any"
-                "StringBody" -> "String"
-                "RawBody" -> "ByteArray"
-                "EmptyBody" -> "Unit"
-                else -> metadata.body.type.arguments.firstOrNull()?.render() ?: "Any"
+            val needsHeaders: Boolean = metadata.headers.isNotEmpty()
+            val needsBodyBytes: Boolean = metadata.body.type.simpleName() != "EmptyBody"
+
+            private val headerTypes: List<String> = metadata.headers.map { it.type.render() }
+            private val headerVarNames: List<String>
+            private val headerAccessors: List<String> =
+                List(metadata.headers.size) { idx -> "$endpointExpression.outputs.item$index.headers.item${idx + 1}" }
+            private val headerTupleName: String = "decodedOutput${index}Headers"
+            val statusCondition: String = "$endpointExpression.outputs.item$index.statusMatcher(status)"
+
+            private val bodyType: String = metadata.body.type.determineBodyValueType()
+            private val hasBody: Boolean = needsBodyBytes
+            private val bodyDecoderExpr: String = "$endpointExpression.outputs.item$index.body.codec.decode(bodyBytes)"
+
+            val responseType: String
+
+            init {
+                val usedNames = mutableSetOf<String>()
+                headerVarNames = metadata.headers.mapIndexed { idx, header ->
+                    uniqueName(sanitizeIdentifier(header.name, "output${index}Header${idx + 1}"), usedNames)
+                }
+                responseType = computeResponseType()
             }
 
-            val statusMatcher: String = "$endpointExpression.outputBodies.item$index.statusMatcher(status)"
-            val decoder: String = "$endpointExpression.outputBodies.item$index.body.codec.decode(bodyBytes)"
+            private fun computeResponseType(): String =
+                if (hasBody) {
+                    if (headerTypes.isEmpty()) {
+                        "Response0<$bodyType>"
+                    } else {
+                        "Response${headerTypes.size}<$bodyType, ${headerTypes.joinToString(", ")}>"
+                    }
+                } else {
+                    if (headerTypes.isEmpty()) {
+                        "ResponseWithoutBody0"
+                    } else {
+                        "ResponseWithoutBody${headerTypes.size}<${headerTypes.joinToString(", ")}>"
+                    }
+                }
+
+            private fun responseInstance(): String {
+                val headerArgs = if (headerVarNames.isEmpty()) "" else headerVarNames.joinToString(prefix = ", ")
+                return if (hasBody) {
+                    if (headerVarNames.isEmpty()) {
+                        "Response0(status, decodedBody)"
+                    } else {
+                        "Response${headerVarNames.size}(status, decodedBody$headerArgs)"
+                    }
+                } else {
+                    if (headerVarNames.isEmpty()) {
+                        "ResponseWithoutBody0(status)"
+                    } else {
+                        "ResponseWithoutBody${headerVarNames.size}(status$headerArgs)"
+                    }
+                }
+            }
+
+            fun buildHeaderDecodingBlock(indent: String): String {
+                if (!needsHeaders) {
+                    return ""
+                }
+                return buildString {
+                    appendLine("${indent}val $headerTupleName = decodeHeaders${headerVarNames.size}(")
+                    appendLine("${indent}    headers${if (headerAccessors.isEmpty()) "" else ","}")
+                    headerAccessors.forEachIndexed { idx, accessor ->
+                        val suffix = if (idx == headerAccessors.lastIndex) "" else ","
+                        appendLine("${indent}    $accessor$suffix")
+                    }
+                    appendLine("${indent}).getOrElse {")
+                    appendLine("${indent}    error(\"Cannot decode headers: \" + it.joinToString(\": \") )")
+                    appendLine("${indent}}")
+                    headerVarNames.forEachIndexed { idx, name ->
+                        appendLine("${indent}val $name = $headerTupleName.item${idx + 1}")
+                    }
+                }.trimEnd()
+            }
+
+            fun buildBodyDecodingBlock(indent: String): String {
+                if (!hasBody) {
+                    return ""
+                }
+                return buildString {
+                    appendLine("${indent}val decodedBody = $bodyDecoderExpr")
+                    appendLine("${indent}    .getOrElse { error(it.joinToString(\": \") ) }")
+                }.trimEnd()
+            }
+
+            fun responseExpression(wrapInOneOf: Boolean): String {
+                val instance = responseInstance()
+                return if (wrapInOneOf) {
+                    "OneOf${options.size}.Option$index($instance)"
+                } else {
+                    instance
+                }
+            }
         }
     }
+
+    private fun TypeMetadata.determineBodyValueType(): String =
+        when (simpleName()) {
+            "JsonBody" -> arguments.firstOrNull()?.render() ?: "Any"
+            "StringBody" -> "String"
+            "RawBody" -> "ByteArray"
+            "EmptyBody" -> "Unit"
+            else -> arguments.firstOrNull()?.render() ?: "Any"
+        }
+
+
 }
 
 private fun TypeMetadata.render(): String {

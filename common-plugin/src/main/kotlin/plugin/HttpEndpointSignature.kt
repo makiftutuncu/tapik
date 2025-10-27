@@ -11,8 +11,7 @@ import dev.akif.tapik.plugin.metadata.TypeMetadata
  * @property uriWithParameters type describing the URI template and captured parameters.
  * @property inputHeaders tuple type describing the required input headers.
  * @property inputBody body type consumed by the endpoint.
- * @property outputHeaders tuple type describing the output headers returned by the endpoint.
- * @property outputBodies tuple type describing candidate response bodies.
+ * @property outputs tuple type describing candidate response branches; individual entries are `Output`.
  * @property imports fully-qualified types that must be imported when generating clients.
  * @property rawType string representation of the full endpoint type.
  * @property ownerInternalName internal JVM name of the class or file that hosts the endpoint.
@@ -25,8 +24,7 @@ data class HttpEndpointSignature(
     val uriWithParameters: TypeMetadata,
     val inputHeaders: TypeMetadata,
     val inputBody: TypeMetadata,
-    val outputHeaders: TypeMetadata,
-    val outputBodies: TypeMetadata,
+    val outputs: TypeMetadata,
     val imports: List<String>,
     val rawType: String,
     val ownerInternalName: String,
@@ -39,7 +37,7 @@ data class HttpEndpointSignature(
         buildString {
             append(packageName)
             append('/')
-            append(file)
+        append(file)
             append('#')
             append(name)
         }

@@ -45,8 +45,7 @@ object MarkdownDocumentationGenerator {
             documentParameters(parameters),
             documentHeaders("Input", inputHeaders),
             documentInput(inputBody),
-            documentHeaders("Output", outputHeaders),
-            documentOutputs(outputBodies)
+            documentOutputs(outputs)
         ).joinToString("\n\n")
 
     private fun documentParameters(parameters: List<ParameterMetadata>): String? {
@@ -120,16 +119,34 @@ object MarkdownDocumentationGenerator {
         $MARGIN${documentBodyMetadata(input)}""".trimMargin(MARGIN)
         }
 
-    private fun documentOutputs(outputBodies: List<OutputBodyMetadata>): String? =
-        if (outputBodies.isEmpty()) {
+    private fun documentOutputs(outputs: List<OutputMetadata>): String? =
+        if (outputs.isEmpty()) {
             null
         } else {
-            val headers = listOf("Description", "Body")
+            val headers = listOf("Description", "Headers", "Body")
             val rows =
-                outputBodies.map {
+                outputs.map { output ->
+                    val headerSummary =
+                        if (output.headers.isEmpty()) {
+                            "-"
+                        } else {
+                            output.headers.joinToString(separator = "<br>") { header ->
+                                val values = inlineList(header.values) { mono(it) }
+                                buildString {
+                                    append(mono(header.name))
+                                    append(": ")
+                                    append(header.type)
+                                    if (values.isNotEmpty()) {
+                                        append(" = ")
+                                        append(values)
+                                    }
+                                }
+                            }
+                        }
                     listOf(
-                        it.description,
-                        documentBodyMetadata(it.body)
+                        output.description,
+                        headerSummary,
+                        documentBodyMetadata(output.body)
                     )
                 }
             """${h3("Outputs")}

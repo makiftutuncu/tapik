@@ -83,13 +83,15 @@ data class BodyMetadata(
 )
 
 /**
- * Metadata describing a single output body alternative.
+ * Metadata describing a single output alternative including headers and body.
  *
  * @property description human-readable summary of the response branch.
+ * @property headers headers returned when this branch is selected.
  * @property body type and serialization metadata for the payload.
  */
-data class OutputBodyMetadata(
+data class OutputMetadata(
     val description: String,
+    val headers: List<HeaderMetadata>,
     val body: BodyMetadata
 )
 
@@ -105,8 +107,7 @@ data class OutputBodyMetadata(
  * @property parameters parameters captured by the endpoint.
  * @property inputHeaders headers expected from the caller.
  * @property inputBody optional body consumed from the caller.
- * @property outputHeaders headers returned to the caller.
- * @property outputBodies possible response bodies together with their descriptions.
+ * @property outputs possible response alternatives together with their headers and bodies.
  * @property packageName package containing the endpoint declaration.
  * @property sourceFile Kotlin file hosting the endpoint declaration.
  * @property imports fully-qualified imports required when generating clients.
@@ -122,8 +123,7 @@ data class HttpEndpointMetadata(
     val parameters: List<ParameterMetadata>,
     val inputHeaders: List<HeaderMetadata>,
     val inputBody: BodyMetadata?,
-    val outputHeaders: List<HeaderMetadata>,
-    val outputBodies: List<OutputBodyMetadata>,
+    val outputs: List<OutputMetadata>,
     val packageName: String,
     val sourceFile: String,
     val imports: List<String>,

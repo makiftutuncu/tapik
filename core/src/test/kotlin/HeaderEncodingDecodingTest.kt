@@ -21,8 +21,7 @@ class HeaderEncodingDecodingTest {
                 uriWithParameters = root,
                 inputHeaders = Headers1(inputHeader),
                 inputBody = EmptyBody,
-                outputHeaders = Headers0,
-                outputBodies = OutputBodies0
+                outputs = Outputs0
             )
 
         val encoded = endpoint.encodeInputHeaders("abc123")
@@ -41,11 +40,15 @@ class HeaderEncodingDecodingTest {
                 uriWithParameters = root / "items",
                 inputHeaders = Headers0,
                 inputBody = EmptyBody,
-                outputHeaders = Headers1(outputHeader),
-                outputBodies = OutputBodies0
-            )
+                outputs = Outputs0
+            ).output(
+                status = Status.OK,
+                headers = { Headers1(outputHeader) }
+            ) {
+                stringBody()
+            }
 
-        val encoded = endpoint.encodeOutputHeaders(5)
+        val encoded = endpoint.outputs.item1.encodeHeaders(5)
 
         assertEquals(mapOf("X-Count" to listOf("5")), encoded)
     }

@@ -29,17 +29,20 @@ class HttpEndpointTest {
             base
                 .inputHeader(inputHeader)
                 .inputBody { stringBody() }
-                .outputHeader(outputHeader)
-                .outputBody(Status.CREATED) { rawBody(mediaType = MediaType.Json) }
+                .output(
+                    status = Status.CREATED,
+                    headers = { Headers1(outputHeader) }
+                ) { rawBody(mediaType = MediaType.Json) }
 
         assertEquals(Method.POST, endpoint.method)
         assertEquals(listOf("items"), endpoint.uriWithParameters.uri)
         assertEquals(listOf(inputHeader), endpoint.inputHeaders.toList())
         assertIs<StringBody>(endpoint.inputBody)
-        assertEquals(listOf(outputHeader), endpoint.outputHeaders.toList())
-        val bodies = endpoint.outputBodies.toList()
+        val bodies = endpoint.outputs.toList()
         assertEquals(1, bodies.size)
-        assertTrue(bodies.first().statusMatcher(Status.CREATED))
-        assertEquals(MediaType.Json, (bodies.first().body as RawBody).mediaType)
+        val output = bodies.first()
+        assertTrue(output.statusMatcher(Status.CREATED))
+        assertEquals(listOf(outputHeader), output.headers.toList())
+        assertEquals(MediaType.Json, (output.body as RawBody).mediaType)
     }
 }
