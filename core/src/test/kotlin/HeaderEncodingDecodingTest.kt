@@ -19,12 +19,11 @@ class HeaderEncodingDecodingTest {
                 details = null,
                 method = Method.GET,
                 uriWithParameters = root,
-                inputHeaders = Headers1(inputHeader),
-                inputBody = EmptyBody,
+                input = Input(Headers1(inputHeader), EmptyBody),
                 outputs = Outputs0
             )
 
-        val encoded = endpoint.encodeInputHeaders("abc123")
+        val encoded = endpoint.input.encodeInputHeaders("abc123")
 
         assertEquals(mapOf("X-Request-Id" to listOf("abc123")), encoded)
     }
@@ -38,8 +37,7 @@ class HeaderEncodingDecodingTest {
                 details = null,
                 method = Method.POST,
                 uriWithParameters = root / "items",
-                inputHeaders = Headers0,
-                inputBody = EmptyBody,
+                input = Input(Headers0, EmptyBody),
                 outputs = Outputs0
             ).output(
                 status = Status.OK,

@@ -166,7 +166,7 @@ class GenerateTask(
     private fun resolveEndpoint(
         signature: HttpEndpointSignature,
         classLoader: ClassLoader
-    ): HttpEndpoint<*, *, *, *>? {
+    ): HttpEndpoint<*, *, *>? {
         val className = signature.ownerInternalName
             ?.replace('/', '.')
             ?: listOfNotNull(signature.packageName.takeIf { it.isNotBlank() }, signature.file)
@@ -184,7 +184,7 @@ class GenerateTask(
                 resolveOwnerInstance(clazz)
             }
             method.isAccessible = true
-            method.invoke(instance) as? HttpEndpoint<*, *, *, *>
+            method.invoke(instance) as? HttpEndpoint<*, *, *>
                 ?: throw IllegalStateException("Resolved member $className#$getterName does not return HttpEndpoint")
         }.onFailure { error ->
             logWarn("[tapik] Failed to resolve endpoint ${signature.packageName}.${signature.file}#${signature.name}", error)
@@ -209,7 +209,7 @@ class GenerateTask(
         }
 
     private fun HttpEndpointSignature.toMetadata(
-        endpoint: HttpEndpoint<*, *, *, *>
+        endpoint: HttpEndpoint<*, *, *>
     ): HttpEndpointMetadata =
         HttpEndpointMetadata(
             id = endpoint.id,
@@ -220,8 +220,8 @@ class GenerateTask(
             uri = endpoint.uriWithParameters.toUriSegments(),
             parameters = endpoint.uriWithParameters.extractParameters()
                 .buildParametersMetadata(uriWithParameters.arguments),
-            inputHeaders = endpoint.inputHeaders.toList().buildHeaderMetadata(inputHeaders.arguments),
-            inputBody = endpoint.inputBody
+            inputHeaders = endpoint.input.headers.toList().buildHeaderMetadata(inputHeaders.arguments),
+            inputBody = endpoint.input.body
                 .takeUnless { it === EmptyBody }
                 ?.let { createBodyMetadata(inputBody, it) },
             outputs = endpoint.outputs.toList().buildOutputsMetadata(outputs.arguments),

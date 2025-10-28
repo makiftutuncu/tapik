@@ -2,12 +2,12 @@
 
 package dev.akif.tapik
 
-/** Tuple-like container describing output variants for an endpoint. */
+/** Tuple-like container describing response variants pairing status matchers with headers and body definitions. */
 sealed interface Outputs {
     /**
-     * Lists the outputs captured in declaration order.
+     * Lists the response definitions captured in declaration order.
      *
-     * @return immutable view of the registered output definitions.
+     * @return immutable view of the registered response definitions.
      */
     fun toList(): List<Output<*, *>>
 }
@@ -56,8 +56,7 @@ data class Outputs2<O1 : Output<*, *>, O2 : Output<*, *>>(
      * @return tuple extended with the supplied output.
      * @see Outputs.toList
      */
-    operator fun <O3 : Output<*, *>> plus(item3: O3): Outputs3<O1, O2, O3> =
-        Outputs3(item1, item2, item3)
+    operator fun <O3 : Output<*, *>> plus(item3: O3): Outputs3<O1, O2, O3> = Outputs3(item1, item2, item3)
 
     override fun toList(): List<Output<*, *>> = listOf(item1, item2)
 }
@@ -76,8 +75,7 @@ data class Outputs3<O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>>(
      * @return tuple extended with the supplied output.
      * @see Outputs.toList
      */
-    operator fun <O4 : Output<*, *>> plus(item4: O4): Outputs4<O1, O2, O3, O4> =
-        Outputs4(item1, item2, item3, item4)
+    operator fun <O4 : Output<*, *>> plus(item4: O4): Outputs4<O1, O2, O3, O4> = Outputs4(item1, item2, item3, item4)
 
     override fun toList(): List<Output<*, *>> = listOf(item1, item2, item3)
 }
@@ -191,9 +189,7 @@ data class Outputs8<O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 
      * @return tuple extended with the supplied output.
      * @see Outputs.toList
      */
-    operator fun <O9 : Output<*, *>> plus(
-        item9: O9
-    ): Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, O9> =
+    operator fun <O9 : Output<*, *>> plus(item9: O9): Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, O9> =
         Outputs9(item1, item2, item3, item4, item5, item6, item7, item8, item9)
 
     override fun toList(): List<Output<*, *>> = listOf(item1, item2, item3, item4, item5, item6, item7, item8)
@@ -219,9 +215,7 @@ data class Outputs9<O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 
      * @return tuple extended with the supplied output.
      * @see Outputs.toList
      */
-    operator fun <O10 : Output<*, *>> plus(
-        item10: O10
-    ): Outputs10<O1, O2, O3, O4, O5, O6, O7, O8, O9, O10> =
+    operator fun <O10 : Output<*, *>> plus(item10: O10): Outputs10<O1, O2, O3, O4, O5, O6, O7, O8, O9, O10> =
         Outputs10(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10)
 
     override fun toList(): List<Output<*, *>> = listOf(item1, item2, item3, item4, item5, item6, item7, item8, item9)

@@ -55,8 +55,8 @@ class RestClientBasedClientGeneratorTest {
             |        val responseEntity = interpreter.send(
             |            method = UserEndpoints.user.method,
             |            uri = UserEndpoints.user.uriWithParameters.toURI(userId, page),
-            |            inputHeaders = UserEndpoints.user.encodeInputHeaders(X_Request_ID),
-            |            inputBodyContentType = UserEndpoints.user.inputBody.mediaType,
+            |            inputHeaders = UserEndpoints.user.input.encodeInputHeaders(X_Request_ID),
+|            inputBodyContentType = UserEndpoints.user.input.body.mediaType,
             |            inputBody = ByteArray(0),
             |            outputs = UserEndpoints.user.outputs.toList()
             |        )
@@ -104,7 +104,7 @@ class RestClientBasedClientGeneratorTest {
         assertTrue(content.contains("fun `wild endpoint`("))
         assertTrue(content.contains("_1st_id: Int"))
         assertTrue(content.contains("`class`: String"))
-        assertTrue(content.contains("WildEndpoints.wild.encodeInputHeaders(X_Trace_Id, X_Trace_Id_2)"))
+        assertTrue(content.contains("WildEndpoints.wild.input.encodeInputHeaders(X_Trace_Id, X_Trace_Id_2)"))
     }
 
     private fun sampleMetadata(): HttpEndpointMetadata =

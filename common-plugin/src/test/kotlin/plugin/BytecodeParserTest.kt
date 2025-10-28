@@ -35,6 +35,7 @@ class BytecodeParserTest {
 
         signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
         signature.inputHeaders.assertType("Headers1", listOf("String"))
+        signature.inputBody.assertType("EmptyBody", emptyList())
         signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
         val firstOutput = signature.outputs.arguments[0]
         val secondOutput = signature.outputs.arguments[1]
@@ -63,6 +64,7 @@ class BytecodeParserTest {
 
         signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
         signature.inputHeaders.assertType("Headers1", listOf("String"))
+        signature.inputBody.assertType("EmptyBody", emptyList())
         signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
         val reflectedFirstOutput = signature.outputs.arguments[0]
         val reflectedSecondOutput = signature.outputs.arguments[1]

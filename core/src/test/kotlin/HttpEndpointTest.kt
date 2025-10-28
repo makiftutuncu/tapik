@@ -27,8 +27,7 @@ class HttpEndpointTest {
 
         val endpoint =
             base
-                .inputHeader(inputHeader)
-                .inputBody { stringBody() }
+                .input(inputHeader) { stringBody() }
                 .output(
                     status = Status.CREATED,
                     headers = { Headers1(outputHeader) }
@@ -36,8 +35,8 @@ class HttpEndpointTest {
 
         assertEquals(Method.POST, endpoint.method)
         assertEquals(listOf("items"), endpoint.uriWithParameters.uri)
-        assertEquals(listOf(inputHeader), endpoint.inputHeaders.toList())
-        assertIs<StringBody>(endpoint.inputBody)
+        assertEquals(listOf(inputHeader), endpoint.input.headers.toList())
+        assertIs<StringBody>(endpoint.input.body)
         val bodies = endpoint.outputs.toList()
         assertEquals(1, bodies.size)
         val output = bodies.first()

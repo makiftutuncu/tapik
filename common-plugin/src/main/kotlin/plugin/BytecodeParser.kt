@@ -14,6 +14,7 @@ object BytecodeParser {
     private const val TAPIK_PACKAGE = "dev.akif.tapik"
     private const val HTTP_ENDPOINT_FQCN = "$TAPIK_PACKAGE.HttpEndpoint"
     private const val URI_WITH_PARAMETERS_PREFIX = "$TAPIK_PACKAGE.URIWithParameters"
+    private const val INPUT_FQCN = "$TAPIK_PACKAGE.Input"
     private const val HEADERS_PREFIX = "$TAPIK_PACKAGE.Headers"
     private const val OUTPUTS_PREFIX = "$TAPIK_PACKAGE.Outputs"
     private val JAVA_TO_KOTLIN_TYPES = mapOf(
@@ -60,20 +61,18 @@ object BytecodeParser {
             return null
         }
 
-        if (endpointClass.arguments.size != 4) {
+        if (endpointClass.arguments.size != 3) {
             return null
         }
 
         val uriWithParameters = convertParameters(endpointClass.arguments[0]) ?: return null
-        val inputHeaders = convertHeaders(endpointClass.arguments[1]) ?: return null
-        val inputBody = convertGeneral(endpointClass.arguments[2]) ?: return null
-        val outputs = convertOutputs(endpointClass.arguments[3]) ?: return null
+        val input = convertInput(endpointClass.arguments[1]) ?: return null
+        val outputs = convertOutputs(endpointClass.arguments[2]) ?: return null
 
         val imports = linkedSetOf<String>()
         imports += HTTP_ENDPOINT_FQCN
         imports += uriWithParameters.imports
-        imports += inputHeaders.imports
-        imports += inputBody.imports
+        imports += input.imports
         imports += outputs.imports
 
         val ownerClassName = ownerInternalName.replace('/', '.')
@@ -85,8 +84,7 @@ object BytecodeParser {
             name = endpointClass.simpleName,
             arguments = listOf(
                 uriWithParameters.type,
-                inputHeaders.type,
-                inputBody.type,
+                input.type,
                 outputs.type
             )
         )
@@ -96,8 +94,8 @@ object BytecodeParser {
             packageName = packageName,
             file = fileName,
             uriWithParameters = uriWithParameters.type,
-            inputHeaders = inputHeaders.type,
-            inputBody = inputBody.type,
+            inputHeaders = input.headers.type,
+            inputBody = input.body.type,
             outputs = outputs.type,
             imports = imports.sorted(),
             rawType = rawType.toString(),
@@ -185,6 +183,33 @@ object BytecodeParser {
                 name = classType.simpleName,
                 arguments = argumentResults.map { it.type }
             ),
+            imports = imports
+        )
+    }
+
+    private fun convertInput(type: SignatureType): InputConversionResult? {
+        val classType = type.asClassType() ?: return null
+        if (!classType.matches(INPUT_FQCN) || classType.arguments.size != 2) {
+            return null
+        }
+
+        val headers = convertHeaders(classType.arguments[0]) ?: return null
+        val body = convertGeneral(classType.arguments[1]) ?: return null
+        val imports = linkedSetOf<String>()
+        val classImport = classType.importName()
+        if (shouldImport(classImport)) {
+            imports += classImport
+        }
+        imports += headers.imports
+        imports += body.imports
+
+        return InputConversionResult(
+            type = TypeMetadata(
+                name = classType.simpleName,
+                arguments = listOf(headers.type, body.type)
+            ),
+            headers = headers,
+            body = body,
             imports = imports
         )
     }
@@ -443,6 +468,13 @@ object BytecodeParser {
 
     private data class ConversionResult(
         val type: TypeMetadata,
+        val imports: Set<String>
+    )
+
+    private data class InputConversionResult(
+        val type: TypeMetadata,
+        val headers: ConversionResult,
+        val body: ConversionResult,
         val imports: Set<String>
     )
 }

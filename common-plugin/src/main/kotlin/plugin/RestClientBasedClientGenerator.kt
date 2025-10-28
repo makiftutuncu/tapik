@@ -131,7 +131,7 @@ object RestClientBasedClientGenerator {
         appendLine("            method = $endpointExpr.method,")
         appendLine("            uri = $endpointExpr.uriWithParameters.toURI(${signature.uriArguments}),")
         appendLine("            inputHeaders = ${signature.inputHeadersEncoding},")
-        appendLine("            inputBodyContentType = $endpointExpr.inputBody.mediaType,")
+        appendLine("            inputBodyContentType = $endpointExpr.input.body.mediaType,")
         appendLine("            inputBody = ${signature.encodeBodyCall},")
         appendLine("            outputs = $endpointExpr.outputs.toList()")
         appendLine("        )")
@@ -275,7 +275,7 @@ object RestClientBasedClientGenerator {
                 "emptyMap()"
             } else {
                 val suffix = if (argumentList.isEmpty()) "()" else "($argumentList)"
-                "$endpointExpression.encodeInputHeaders$suffix"
+                "$endpointExpression.input.encodeInputHeaders$suffix"
             }
 
         init {
@@ -288,7 +288,7 @@ object RestClientBasedClientGenerator {
                 val hasDefault = !header.required
                 val declaration =
                     if (hasDefault) {
-                        "$name: $type = $endpointExpression.inputHeaders.item${index + 1}.asHeaderValues<$type>().getFirstValueOrFail()"
+                        "$name: $type = $endpointExpression.input.headers.item${index + 1}.asHeaderValues<$type>().getFirstValueOrFail()"
                     } else {
                         "$name: $type"
                     }
@@ -326,17 +326,17 @@ object RestClientBasedClientGenerator {
                 }
                 "StringBody" -> {
                     inputs = listOf("inputBody: String")
-                    encodeCall = "$endpointExpression.inputBody.codec.encode(inputBody)"
+                    encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
                 "JsonBody" -> {
                     val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
                     inputs = listOf("inputBody: $valueType")
-                    encodeCall = "$endpointExpression.inputBody.codec.encode(inputBody)"
+                    encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
                 else -> {
                     val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
                     inputs = listOf("inputBody: $valueType")
-                    encodeCall = "$endpointExpression.inputBody.codec.encode(inputBody)"
+                    encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
             }
         }
