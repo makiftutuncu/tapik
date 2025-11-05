@@ -103,10 +103,9 @@ data class OutputMetadata(
  * @property description optional short summary of the endpoint.
  * @property details optional long-form documentation.
  * @property method HTTP method handled by the endpoint.
- * @property uri ordered list of uri segments and placeholders.
+ * @property path ordered list of path segments and placeholders.
  * @property parameters parameters captured by the endpoint.
- * @property inputHeaders headers expected from the caller.
- * @property inputBody optional body consumed from the caller.
+ * @property input input definition describing headers and body expected from the caller.
  * @property outputs possible response alternatives together with their headers and bodies.
  * @property packageName package containing the endpoint declaration.
  * @property sourceFile Kotlin file hosting the endpoint declaration.
@@ -119,13 +118,23 @@ data class HttpEndpointMetadata(
     val description: String?,
     val details: String?,
     val method: String,
-    val uri: List<String>,
+    val path: List<String>,
     val parameters: List<ParameterMetadata>,
-    val inputHeaders: List<HeaderMetadata>,
-    val inputBody: BodyMetadata?,
+    val input: InputMetadata,
     val outputs: List<OutputMetadata>,
     val packageName: String,
     val sourceFile: String,
     val imports: List<String>,
     val rawType: String
+)
+
+/**
+ * Aggregated metadata describing HTTP input expectations.
+ *
+ * @property headers header definitions expected from the caller.
+ * @property body optional request body definition.
+ */
+data class InputMetadata(
+    val headers: List<HeaderMetadata>,
+    val body: BodyMetadata?
 )

@@ -48,13 +48,13 @@ class RestClientBasedClientGeneratorTest {
             |     * Detailed documentation for the endpoint.
             |     */
             |    fun user(
-            |        userId: UUID,
-            |        X_Request_ID: String,
-            |        page: Int = UserEndpoints.user.uriWithParameters.parameters.item2.asQueryParameter<Int>().getDefaultOrFail()
+|        userId: UUID,
+|        X_Request_ID: String,
+|        page: Int = UserEndpoints.user.parameters.item2.asQueryParameter<Int>().getDefaultOrFail()
             |    ): Response1<String, URI> {
             |        val responseEntity = interpreter.send(
-            |            method = UserEndpoints.user.method,
-            |            uri = UserEndpoints.user.uriWithParameters.toURI(userId, page),
+|            method = UserEndpoints.user.method,
+|            uri = UserEndpoints.user.toURI(userId, page),
             |            inputHeaders = UserEndpoints.user.input.encodeInputHeaders(X_Request_ID),
 |            inputBodyContentType = UserEndpoints.user.input.body.mediaType,
             |            inputBody = ByteArray(0),
@@ -74,7 +74,7 @@ class RestClientBasedClientGeneratorTest {
             |        ).getOrElse {
             |            error("Cannot decode headers: " + it.joinToString(": ") )
             |        }
-            |        val Location = decodedOutput1Headers.item1
+            |        val Location = decodedOutput1Headers.item1.values
             |
             |        val decodedBody = UserEndpoints.user.outputs.item1.body.codec.decode(bodyBytes)
             |            .getOrElse { error(it.joinToString(": ") ) }
@@ -114,7 +114,7 @@ class RestClientBasedClientGeneratorTest {
             description = "Get user by id.",
             details = "Detailed documentation for the endpoint.",
             method = "GET",
-            uri = listOf("api", "users", "{userId}"),
+            path = listOf("api", "users", "{userId}"),
             parameters =
                 listOf(
                     PathVariableMetadata(
@@ -128,16 +128,19 @@ class RestClientBasedClientGeneratorTest {
                         default = "1"
                     )
                 ),
-            inputHeaders =
-                listOf(
-                    HeaderMetadata(
-                        name = "X-Request-ID",
-                        type = TypeMetadata("kotlin.String"),
-                        required = true,
-                        values = emptyList()
-                    )
+            input =
+                InputMetadata(
+                    headers =
+                        listOf(
+                            HeaderMetadata(
+                                name = "X-Request-ID",
+                                type = TypeMetadata("kotlin.String"),
+                                required = true,
+                                values = emptyList()
+                            )
+                        ),
+                    body = null
                 ),
-            inputBody = null,
             outputs =
                 listOf(
                     OutputMetadata(
@@ -177,7 +180,7 @@ class RestClientBasedClientGeneratorTest {
             description = "Uses challenging identifiers.",
             details = null,
             method = "POST",
-            uri = listOf("api", "v1", "{1st-id}"),
+            path = listOf("api", "v1", "{1st-id}"),
             parameters =
                 listOf(
                     PathVariableMetadata(
@@ -191,16 +194,19 @@ class RestClientBasedClientGeneratorTest {
                         default = null
                     )
                 ),
-            inputHeaders =
-                listOf(
-                    HeaderMetadata("X-Trace-Id", TypeMetadata("kotlin.String"), required = true, values = emptyList()),
-                    HeaderMetadata("X Trace Id", TypeMetadata("kotlin.String"), required = false, values = emptyList())
-                ),
-            inputBody =
-                BodyMetadata(
-                    type = TypeMetadata("dev.akif.tapik.StringBody"),
-                    name = null,
-                    mediaType = "text/plain"
+            input =
+                InputMetadata(
+                    headers =
+                        listOf(
+                            HeaderMetadata("X-Trace-Id", TypeMetadata("kotlin.String"), required = true, values = emptyList()),
+                            HeaderMetadata("X Trace Id", TypeMetadata("kotlin.String"), required = false, values = emptyList())
+                        ),
+                    body =
+                        BodyMetadata(
+                            type = TypeMetadata("dev.akif.tapik.StringBody"),
+                            name = null,
+                            mediaType = "text/plain"
+                        )
                 ),
             outputs =
                 listOf(

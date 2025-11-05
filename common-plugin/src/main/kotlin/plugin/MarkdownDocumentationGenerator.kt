@@ -40,11 +40,11 @@ object MarkdownDocumentationGenerator {
     private fun HttpEndpointMetadata.document(): String =
         listOfNotNull(
             h2("${mono(id)}${description?.let { ": $it" }.orEmpty()}"),
-            mono("$method ${uri.joinToString(separator = "/", prefix = "/")}"),
+            mono("$method ${path.joinToString(separator = "/", prefix = "/")}"),
             details,
             documentParameters(parameters),
-            documentHeaders("Input", inputHeaders),
-            documentInput(inputBody),
+            documentHeaders("Input", input.headers),
+            documentInput(input.body),
             documentOutputs(outputs)
         ).joinToString("\n\n")
 

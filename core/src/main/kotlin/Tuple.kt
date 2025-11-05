@@ -1,236 +1,299 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package dev.akif.tapik
 
 /**
- * Marker hierarchy representing heterogeneous tuples backed by strongly-typed fields.
+ * Marker hierarchy for reusable heterogeneous tuples backed by a shared super type.
  *
- * The DSL constructs endpoint inputs and outputs through these tuples so that generators can
- * easily reason about arity and element types.
+ * @param Super common super type for all tuple elements.
  */
-sealed interface Tuple
+sealed interface Tuple<out Super> : Listable<Super> {
+    /**
+     * Factory helpers for constructing tuples with arities from zero to ten.
+     */
+    companion object {
+        /**
+         * Creates an empty tuple.
+         *
+         * @return zero-arity tuple instance.
+         */
+        operator fun invoke(): Tuple0 = Tuple0
 
-/**
- * Flattens the tuple into a list containing values assignable to [T].
- *
- * This helper performs runtime checks to guard against extracting the wrong tuple arity.
- *
- * @param T expected element type when expanding the tuple.
- * @return a list containing all items that are assignable to [T] in their original order.
- * @throws AssertionError when the number of extracted elements does not match the tuple arity.
- * @see Tuple
- */
-inline fun <reified T> Tuple.toList(): List<T> =
-    when (this) {
-        Tuple0 -> emptyList()
-        is Tuple1<*> ->
-            this.toList<T>().also {
-                assert(it.size == 1) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple1" }
-            }
-        is Tuple2<*, *> ->
-            this.toList<T>().also {
-                assert(it.size == 2) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple2" }
-            }
-        is Tuple3<*, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 3) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple3" }
-            }
-        is Tuple4<*, *, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 4) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple4" }
-            }
-        is Tuple5<*, *, *, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 5) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple5" }
-            }
-        is Tuple6<*, *, *, *, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 6) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple6" }
-            }
-        is Tuple7<*, *, *, *, *, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 7) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple7" }
-            }
-        is Tuple8<*, *, *, *, *, *, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 8) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple8" }
-            }
-        is Tuple9<*, *, *, *, *, *, *, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 9) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple9" }
-            }
-        is Tuple10<*, *, *, *, *, *, *, *, *, *> ->
-            this.toList<T>().also {
-                assert(it.size == 10) { "Found ${it.size} items of type ${T::class.qualifiedName} in a Tuple10" }
-            }
+        /**
+         * Creates a tuple with one element.
+         *
+         * @param item1 first element.
+         * @return tuple containing the supplied element.
+         */
+        operator fun <Super, T1 : Super> invoke(item1: T1): Tuple1<Super, T1> = Tuple1(item1)
+
+        /**
+         * Creates a tuple with two elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super> invoke(
+            item1: T1,
+            item2: T2
+        ): Tuple2<Super, T1, T2> = Tuple2(item1, item2)
+
+        /**
+         * Creates a tuple with three elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super, T3 : Super> invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3
+        ): Tuple3<Super, T1, T2, T3> = Tuple3(item1, item2, item3)
+
+        /**
+         * Creates a tuple with four elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @param item4 fourth element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super> invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3,
+            item4: T4
+        ): Tuple4<Super, T1, T2, T3, T4> = Tuple4(item1, item2, item3, item4)
+
+        /**
+         * Creates a tuple with five elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @param item4 fourth element.
+         * @param item5 fifth element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super> invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3,
+            item4: T4,
+            item5: T5
+        ): Tuple5<Super, T1, T2, T3, T4, T5> = Tuple5(item1, item2, item3, item4, item5)
+
+        /**
+         * Creates a tuple with six elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @param item4 fourth element.
+         * @param item5 fifth element.
+         * @param item6 sixth element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super> invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3,
+            item4: T4,
+            item5: T5,
+            item6: T6
+        ): Tuple6<Super, T1, T2, T3, T4, T5, T6> = Tuple6(item1, item2, item3, item4, item5, item6)
+
+        /**
+         * Creates a tuple with seven elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @param item4 fourth element.
+         * @param item5 fifth element.
+         * @param item6 sixth element.
+         * @param item7 seventh element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super> invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3,
+            item4: T4,
+            item5: T5,
+            item6: T6,
+            item7: T7
+        ): Tuple7<Super, T1, T2, T3, T4, T5, T6, T7> = Tuple7(item1, item2, item3, item4, item5, item6, item7)
+
+        /**
+         * Creates a tuple with eight elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @param item4 fourth element.
+         * @param item5 fifth element.
+         * @param item6 sixth element.
+         * @param item7 seventh element.
+         * @param item8 eighth element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super> invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3,
+            item4: T4,
+            item5: T5,
+            item6: T6,
+            item7: T7,
+            item8: T8
+        ): Tuple8<Super, T1, T2, T3, T4, T5, T6, T7, T8> =
+            Tuple8(item1, item2, item3, item4, item5, item6, item7, item8)
+
+        /**
+         * Creates a tuple with nine elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @param item4 fourth element.
+         * @param item5 fifth element.
+         * @param item6 sixth element.
+         * @param item7 seventh element.
+         * @param item8 eighth element.
+         * @param item9 ninth element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super, T9 : Super> invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3,
+            item4: T4,
+            item5: T5,
+            item6: T6,
+            item7: T7,
+            item8: T8,
+            item9: T9
+        ): Tuple9<Super, T1, T2, T3, T4, T5, T6, T7, T8, T9> =
+            Tuple9(item1, item2, item3, item4, item5, item6, item7, item8, item9)
+
+        /**
+         * Creates a tuple with ten elements.
+         *
+         * @param item1 first element.
+         * @param item2 second element.
+         * @param item3 third element.
+         * @param item4 fourth element.
+         * @param item5 fifth element.
+         * @param item6 sixth element.
+         * @param item7 seventh element.
+         * @param item8 eighth element.
+         * @param item9 ninth element.
+         * @param item10 tenth element.
+         * @return tuple containing the supplied elements.
+         */
+        operator fun <
+            Super,
+            T1 : Super,
+            T2 : Super,
+            T3 : Super,
+            T4 : Super,
+            T5 : Super,
+            T6 : Super,
+            T7 : Super,
+            T8 : Super,
+            T9 : Super,
+            T10 : Super
+        > invoke(
+            item1: T1,
+            item2: T2,
+            item3: T3,
+            item4: T4,
+            item5: T5,
+            item6: T6,
+            item7: T7,
+            item8: T8,
+            item9: T9,
+            item10: T10
+        ): Tuple10<Super, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> =
+            Tuple10(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10)
     }
-
-/** Zero-arity tuple. */
-data object Tuple0 : Tuple, AllOf0 {
-    /**
-     * Creates a [Tuple1] by appending [item1] to the empty tuple.
-     *
-     * @param item1 value to become the first element.
-     * @return a tuple containing a single value.
-     * @see Tuple1
-     */
-    operator fun <T1> plus(item1: T1): Tuple1<T1> = Tuple1(item1)
 }
 
-/** Tuple containing a single [item1]. */
-data class Tuple1<T1>(
+/** Zero-arity tuple with no elements. */
+data object Tuple0 : Tuple<Nothing>, AllOf0 {
+    override fun toList(): List<Nothing> = emptyList()
+}
+
+/** Tuple carrying a single element [item1]. */
+data class Tuple1<Super, T1 : Super>(
     override val item1: T1
-) : Tuple,
+) : Tuple<Super>,
     AllOf1<T1> {
-    /**
-     * Creates a [Tuple2] by appending [item2].
-     *
-     * @param item2 value to become the second element.
-     * @return a tuple containing two values.
-     * @see Tuple2
-     */
-    operator fun <T2> plus(item2: T2): Tuple2<T1, T2> = Tuple2(item1, item2)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return the single element of the tuple if it is assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> = listOf(item1).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1)
 }
 
-/** Tuple containing [item1] and [item2]. */
-data class Tuple2<T1, T2>(
+/** Tuple carrying elements [item1] and [item2]. */
+data class Tuple2<Super, T1 : Super, T2 : Super>(
     override val item1: T1,
     override val item2: T2
-) : Tuple,
+) : Tuple<Super>,
     AllOf2<T1, T2> {
-    /**
-     * Creates a [Tuple3] by appending [item3].
-     *
-     * @param item3 value to become the third element.
-     * @return a tuple containing three values.
-     * @see Tuple3
-     */
-    operator fun <T3> plus(item3: T3): Tuple3<T1, T2, T3> = Tuple3(item1, item2, item3)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> = listOf(item1, item2).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2)
 }
 
-/** Tuple containing [item1], [item2], and [item3]. */
-data class Tuple3<T1, T2, T3>(
+/** Tuple carrying elements [item1], [item2], and [item3]. */
+data class Tuple3<Super, T1 : Super, T2 : Super, T3 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3
-) : Tuple,
+) : Tuple<Super>,
     AllOf3<T1, T2, T3> {
-    /**
-     * Creates a [Tuple4] by appending [item4].
-     *
-     * @param item4 value to become the fourth element.
-     * @return a tuple containing four values.
-     * @see Tuple4
-     */
-    operator fun <T4> plus(item4: T4): Tuple4<T1, T2, T3, T4> = Tuple4(item1, item2, item3, item4)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> = listOf(item1, item2, item3).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3)
 }
 
-/** Tuple containing [item1] through [item4]. */
-data class Tuple4<T1, T2, T3, T4>(
+/** Tuple carrying elements [item1] through [item4]. */
+data class Tuple4<Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3,
     override val item4: T4
-) : Tuple,
+) : Tuple<Super>,
     AllOf4<T1, T2, T3, T4> {
-    /**
-     * Creates a [Tuple5] by appending [item5].
-     *
-     * @param item5 value to become the fifth element.
-     * @return a tuple containing five values.
-     * @see Tuple5
-     */
-    operator fun <T5> plus(item5: T5): Tuple5<T1, T2, T3, T4, T5> = Tuple5(item1, item2, item3, item4, item5)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> = listOf(item1, item2, item3, item4).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3, item4)
 }
 
-/** Tuple containing [item1] through [item5]. */
-data class Tuple5<T1, T2, T3, T4, T5>(
+/** Tuple carrying elements [item1] through [item5]. */
+data class Tuple5<Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3,
     override val item4: T4,
     override val item5: T5
-) : Tuple,
+) : Tuple<Super>,
     AllOf5<T1, T2, T3, T4, T5> {
-    /**
-     * Creates a [Tuple6] by appending [item6].
-     *
-     * @param item6 value to become the sixth element.
-     * @return a tuple containing six values.
-     * @see Tuple6
-     */
-    operator fun <T6> plus(item6: T6): Tuple6<T1, T2, T3, T4, T5, T6> = Tuple6(item1, item2, item3, item4, item5, item6)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> = listOf(item1, item2, item3, item4, item5).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3, item4, item5)
 }
 
-/** Tuple containing [item1] through [item6]. */
-data class Tuple6<T1, T2, T3, T4, T5, T6>(
+/** Tuple carrying elements [item1] through [item6]. */
+data class Tuple6<Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3,
     override val item4: T4,
     override val item5: T5,
     override val item6: T6
-) : Tuple,
+) : Tuple<Super>,
     AllOf6<T1, T2, T3, T4, T5, T6> {
-    /**
-     * Creates a [Tuple7] by appending [item7].
-     *
-     * @param item7 value to become the seventh element.
-     * @return a tuple containing seven values.
-     * @see Tuple7
-     */
-    operator fun <T7> plus(item7: T7): Tuple7<T1, T2, T3, T4, T5, T6, T7> =
-        Tuple7(item1, item2, item3, item4, item5, item6, item7)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> = listOf(item1, item2, item3, item4, item5, item6).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3, item4, item5, item6)
 }
 
-/** Tuple containing [item1] through [item7]. */
-data class Tuple7<T1, T2, T3, T4, T5, T6, T7>(
+/** Tuple carrying elements [item1] through [item7]. */
+data class Tuple7<Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3,
@@ -238,30 +301,13 @@ data class Tuple7<T1, T2, T3, T4, T5, T6, T7>(
     override val item5: T5,
     override val item6: T6,
     override val item7: T7
-) : Tuple,
+) : Tuple<Super>,
     AllOf7<T1, T2, T3, T4, T5, T6, T7> {
-    /**
-     * Creates a [Tuple8] by appending [item8].
-     *
-     * @param item8 value to become the eighth element.
-     * @return a tuple containing eight values.
-     * @see Tuple8
-     */
-    operator fun <T8> plus(item8: T8): Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> =
-        Tuple8(item1, item2, item3, item4, item5, item6, item7, item8)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> =
-        listOf(item1, item2, item3, item4, item5, item6, item7).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3, item4, item5, item6, item7)
 }
 
-/** Tuple containing [item1] through [item8]. */
-data class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>(
+/** Tuple carrying elements [item1] through [item8]. */
+data class Tuple8<Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3,
@@ -270,30 +316,13 @@ data class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>(
     override val item6: T6,
     override val item7: T7,
     override val item8: T8
-) : Tuple,
+) : Tuple<Super>,
     AllOf8<T1, T2, T3, T4, T5, T6, T7, T8> {
-    /**
-     * Creates a [Tuple9] by appending [item9].
-     *
-     * @param item9 value to become the ninth element.
-     * @return a tuple containing nine values.
-     * @see Tuple9
-     */
-    operator fun <T9> plus(item9: T9): Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> =
-        Tuple9(item1, item2, item3, item4, item5, item6, item7, item8, item9)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> =
-        listOf(item1, item2, item3, item4, item5, item6, item7, item8).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3, item4, item5, item6, item7, item8)
 }
 
-/** Tuple containing [item1] through [item9]. */
-data class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+/** Tuple carrying elements [item1] through [item9]. */
+data class Tuple9<Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super, T9 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3,
@@ -303,30 +332,13 @@ data class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
     override val item7: T7,
     override val item8: T8,
     override val item9: T9
-) : Tuple,
+) : Tuple<Super>,
     AllOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> {
-    /**
-     * Creates a [Tuple10] by appending [item10].
-     *
-     * @param item10 value to become the tenth element.
-     * @return a tuple containing ten values.
-     * @see Tuple10
-     */
-    operator fun <T10> plus(item10: T10): Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> =
-        Tuple10(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10)
-
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> =
-        listOf(item1, item2, item3, item4, item5, item6, item7, item8, item9).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3, item4, item5, item6, item7, item8, item9)
 }
 
-/** Tuple containing [item1] through [item10]. */
-data class Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+/** Tuple carrying elements [item1] through [item10]. */
+data class Tuple10<Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super, T9 : Super, T10 : Super>(
     override val item1: T1,
     override val item2: T2,
     override val item3: T3,
@@ -337,14 +349,104 @@ data class Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
     override val item8: T8,
     override val item9: T9,
     override val item10: T10
-) : Tuple,
+) : Tuple<Super>,
     AllOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> {
-    /**
-     * Lists the items that are assignable to [T].
-     *
-     * @param T expected element type when expanding the tuple.
-     * @return elements assignable to [T].
-     */
-    inline fun <reified T> toList(): List<T> =
-        listOf(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10).filterIsInstance<T>()
+    override fun toList(): List<Super> = listOf(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10)
 }
+
+/**
+ * Appends [item1] to this tuple.
+ *
+ * @param item1 element to append.
+ * @return tuple containing one element.
+ */
+operator fun <Super, T1 : Super> Tuple0.plus(item1: T1): Tuple1<Super, T1> = Tuple1(item1)
+
+/**
+ * Appends [item2] to this tuple.
+ *
+ * @param item2 element to append.
+ * @return tuple containing two elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super> Tuple1<*, T1>.plus(item2: T2): Tuple2<Super, T1, T2> = Tuple2(item1, item2)
+
+/**
+ * Appends [item3] to this tuple.
+ *
+ * @param item3 element to append.
+ * @return tuple containing three elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super> Tuple2<*, T1, T2>.plus(item3: T3): Tuple3<Super, T1, T2, T3> =
+    Tuple3(item1, item2, item3)
+
+/**
+ * Appends [item4] to this tuple.
+ *
+ * @param item4 element to append.
+ * @return tuple containing four elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super> Tuple3<*, T1, T2, T3>.plus(
+    item4: T4
+): Tuple4<Super, T1, T2, T3, T4> = Tuple4(item1, item2, item3, item4)
+
+/**
+ * Appends [item5] to this tuple.
+ *
+ * @param item5 element to append.
+ * @return tuple containing five elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super> Tuple4<*, T1, T2, T3, T4>.plus(
+    item5: T5
+): Tuple5<Super, T1, T2, T3, T4, T5> = Tuple5(item1, item2, item3, item4, item5)
+
+/**
+ * Appends [item6] to this tuple.
+ *
+ * @param item6 element to append.
+ * @return tuple containing six elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super> Tuple5<*, T1, T2, T3, T4, T5>.plus(
+    item6: T6
+): Tuple6<Super, T1, T2, T3, T4, T5, T6> = Tuple6(item1, item2, item3, item4, item5, item6)
+
+/**
+ * Appends [item7] to this tuple.
+ *
+ * @param item7 element to append.
+ * @return tuple containing seven elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super> Tuple6<*, T1, T2, T3, T4, T5, T6>.plus(
+    item7: T7
+): Tuple7<Super, T1, T2, T3, T4, T5, T6, T7> = Tuple7(item1, item2, item3, item4, item5, item6, item7)
+
+/**
+ * Appends [item8] to this tuple.
+ *
+ * @param item8 element to append.
+ * @return tuple containing eight elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super> Tuple7<*, T1, T2, T3, T4, T5, T6, T7>.plus(
+    item8: T8
+): Tuple8<Super, T1, T2, T3, T4, T5, T6, T7, T8> = Tuple8(item1, item2, item3, item4, item5, item6, item7, item8)
+
+/**
+ * Appends [item9] to this tuple.
+ *
+ * @param item9 element to append.
+ * @return tuple containing nine elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super, T9 : Super> Tuple8<*, T1, T2, T3, T4, T5, T6, T7, T8>.plus(
+    item9: T9
+): Tuple9<Super, T1, T2, T3, T4, T5, T6, T7, T8, T9> =
+    Tuple9(item1, item2, item3, item4, item5, item6, item7, item8, item9)
+
+/**
+ * Appends [item10] to this tuple.
+ *
+ * @param item10 element to append.
+ * @return tuple containing ten elements.
+ */
+operator fun <Super, T1 : Super, T2 : Super, T3 : Super, T4 : Super, T5 : Super, T6 : Super, T7 : Super, T8 : Super, T9 : Super, T10 : Super> Tuple9<*, T1, T2, T3, T4, T5, T6, T7, T8, T9>.plus(
+    item10: T10
+): Tuple10<Super, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> =
+    Tuple10(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10)

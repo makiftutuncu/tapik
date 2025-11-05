@@ -8,15 +8,16 @@ package dev.akif.tapik
  * @param body supplier producing the new body definition.
  */
 @JvmName("inputBody")
-fun <U : URIWithParameters, O : Outputs, B : Body<*>> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+fun <P : Parameters, O : Outputs, B : Body<*>> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     body: () -> B
-): HttpEndpoint<U, Input<Headers0, B>, O> =
+): HttpEndpoint<P, Input<Headers0, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(this.input.headers, body()),
         outputs = this.outputs
     )
@@ -27,15 +28,16 @@ fun <U : URIWithParameters, O : Outputs, B : Body<*>> HttpEndpoint<U, Input<Head
  * @param h1 header definition to include.
  */
 @JvmName("inputHeaders1")
-fun <U : URIWithParameters, O : Outputs, H1 : Any> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+fun <P : Parameters, O : Outputs, H1 : Any> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>
-): HttpEndpoint<U, Input<Headers1<H1>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers1<H1>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers1(h1), this.input.body),
         outputs = this.outputs
     )
@@ -47,16 +49,17 @@ fun <U : URIWithParameters, O : Outputs, H1 : Any> HttpEndpoint<U, Input<Headers
  * @param h2 second header definition.
  */
 @JvmName("inputHeaders2")
-fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+fun <P : Parameters, O : Outputs, H1 : Any, H2 : Any> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>
-): HttpEndpoint<U, Input<Headers2<H1, H2>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers2<H1, H2>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers2(h1, h2), this.input.body),
         outputs = this.outputs
     )
@@ -69,17 +72,18 @@ fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any> HttpEndpoint<U, Inp
  * @param h3 third header definition.
  */
 @JvmName("inputHeaders3")
-fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+fun <P : Parameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>
-): HttpEndpoint<U, Input<Headers3<H1, H2, H3>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers3<H1, H2, H3>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers3(h1, h2, h3), this.input.body),
         outputs = this.outputs
     )
@@ -93,18 +97,19 @@ fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any> HttpEndpo
  * @param h4 fourth header definition.
  */
 @JvmName("inputHeaders4")
-fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any, H4 : Any> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+fun <P : Parameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any, H4 : Any> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
     h4: Header<H4>
-): HttpEndpoint<U, Input<Headers4<H1, H2, H3, H4>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers4<H1, H2, H3, H4>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers4(h1, h2, h3, h4), this.input.body),
         outputs = this.outputs
     )
@@ -119,19 +124,20 @@ fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any, H4 : Any>
  * @param h5 fifth header definition.
  */
 @JvmName("inputHeaders5")
-fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+fun <P : Parameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
     h4: Header<H4>,
     h5: Header<H5>
-): HttpEndpoint<U, Input<Headers5<H1, H2, H3, H4, H5>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers5<H1, H2, H3, H4, H5>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers5(h1, h2, h3, h4, h5), this.input.body),
         outputs = this.outputs
     )
@@ -148,7 +154,7 @@ fun <U : URIWithParameters, O : Outputs, H1 : Any, H2 : Any, H3 : Any, H4 : Any,
  */
 @JvmName("inputHeaders6")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -156,20 +162,21 @@ fun <
     H4 : Any,
     H5 : Any,
     H6 : Any
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
     h4: Header<H4>,
     h5: Header<H5>,
     h6: Header<H6>
-): HttpEndpoint<U, Input<Headers6<H1, H2, H3, H4, H5, H6>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers6<H1, H2, H3, H4, H5, H6>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers6(h1, h2, h3, h4, h5, h6), this.input.body),
         outputs = this.outputs
     )
@@ -187,7 +194,7 @@ fun <
  */
 @JvmName("inputHeaders7")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -196,7 +203,7 @@ fun <
     H5 : Any,
     H6 : Any,
     H7 : Any
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -204,13 +211,14 @@ fun <
     h5: Header<H5>,
     h6: Header<H6>,
     h7: Header<H7>
-): HttpEndpoint<U, Input<Headers7<H1, H2, H3, H4, H5, H6, H7>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers7<H1, H2, H3, H4, H5, H6, H7>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers7(h1, h2, h3, h4, h5, h6, h7), this.input.body),
         outputs = this.outputs
     )
@@ -229,7 +237,7 @@ fun <
  */
 @JvmName("inputHeaders8")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -239,7 +247,7 @@ fun <
     H6 : Any,
     H7 : Any,
     H8 : Any
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -248,13 +256,14 @@ fun <
     h6: Header<H6>,
     h7: Header<H7>,
     h8: Header<H8>
-): HttpEndpoint<U, Input<Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers8(h1, h2, h3, h4, h5, h6, h7, h8), this.input.body),
         outputs = this.outputs
     )
@@ -274,7 +283,7 @@ fun <
  */
 @JvmName("inputHeaders9")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -285,7 +294,7 @@ fun <
     H7 : Any,
     H8 : Any,
     H9 : Any
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -295,13 +304,14 @@ fun <
     h7: Header<H7>,
     h8: Header<H8>,
     h9: Header<H9>
-): HttpEndpoint<U, Input<Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers9(h1, h2, h3, h4, h5, h6, h7, h8, h9), this.input.body),
         outputs = this.outputs
     )
@@ -322,7 +332,7 @@ fun <
  */
 @JvmName("inputHeaders10")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -334,7 +344,7 @@ fun <
     H8 : Any,
     H9 : Any,
     H10 : Any
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -345,13 +355,14 @@ fun <
     h8: Header<H8>,
     h9: Header<H9>,
     h10: Header<H10>
-): HttpEndpoint<U, Input<Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, EmptyBody>, O> =
+): HttpEndpoint<P, Input<Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, EmptyBody>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers10(h1, h2, h3, h4, h5, h6, h7, h8, h9, h10), this.input.body),
         outputs = this.outputs
     )
@@ -364,20 +375,21 @@ fun <
  */
 @JvmName("inputHeadersBody1")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers1<H1>, B>, O> =
+): HttpEndpoint<P, Input<Headers1<H1>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers1(h1), body()),
         outputs = this.outputs
     )
@@ -390,22 +402,23 @@ fun <
  */
 @JvmName("inputHeadersBody2")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers2<H1, H2>, B>, O> =
+): HttpEndpoint<P, Input<Headers2<H1, H2>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers2(h1, h2), body()),
         outputs = this.outputs
     )
@@ -419,24 +432,25 @@ fun <
  */
 @JvmName("inputHeadersBody3")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
     H3 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers3<H1, H2, H3>, B>, O> =
+): HttpEndpoint<P, Input<Headers3<H1, H2, H3>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers3(h1, h2, h3), body()),
         outputs = this.outputs
     )
@@ -451,26 +465,27 @@ fun <
  */
 @JvmName("inputHeadersBody4")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
     H3 : Any,
     H4 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
     h4: Header<H4>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers4<H1, H2, H3, H4>, B>, O> =
+): HttpEndpoint<P, Input<Headers4<H1, H2, H3, H4>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers4(h1, h2, h3, h4), body()),
         outputs = this.outputs
     )
@@ -486,7 +501,7 @@ fun <
  */
 @JvmName("inputHeadersBody5")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -494,20 +509,21 @@ fun <
     H4 : Any,
     H5 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
     h4: Header<H4>,
     h5: Header<H5>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers5<H1, H2, H3, H4, H5>, B>, O> =
+): HttpEndpoint<P, Input<Headers5<H1, H2, H3, H4, H5>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers5(h1, h2, h3, h4, h5), body()),
         outputs = this.outputs
     )
@@ -524,7 +540,7 @@ fun <
  */
 @JvmName("inputHeadersBody6")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -533,7 +549,7 @@ fun <
     H5 : Any,
     H6 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -541,13 +557,14 @@ fun <
     h5: Header<H5>,
     h6: Header<H6>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers6<H1, H2, H3, H4, H5, H6>, B>, O> =
+): HttpEndpoint<P, Input<Headers6<H1, H2, H3, H4, H5, H6>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers6(h1, h2, h3, h4, h5, h6), body()),
         outputs = this.outputs
     )
@@ -565,7 +582,7 @@ fun <
  */
 @JvmName("inputHeadersBody7")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -575,7 +592,7 @@ fun <
     H6 : Any,
     H7 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -584,13 +601,14 @@ fun <
     h6: Header<H6>,
     h7: Header<H7>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers7<H1, H2, H3, H4, H5, H6, H7>, B>, O> =
+): HttpEndpoint<P, Input<Headers7<H1, H2, H3, H4, H5, H6, H7>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers7(h1, h2, h3, h4, h5, h6, h7), body()),
         outputs = this.outputs
     )
@@ -609,7 +627,7 @@ fun <
  */
 @JvmName("inputHeadersBody8")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -620,7 +638,7 @@ fun <
     H7 : Any,
     H8 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -630,13 +648,14 @@ fun <
     h7: Header<H7>,
     h8: Header<H8>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, B>, O> =
+): HttpEndpoint<P, Input<Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers8(h1, h2, h3, h4, h5, h6, h7, h8), body()),
         outputs = this.outputs
     )
@@ -656,7 +675,7 @@ fun <
  */
 @JvmName("inputHeadersBody9")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -668,7 +687,7 @@ fun <
     H8 : Any,
     H9 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -679,13 +698,14 @@ fun <
     h8: Header<H8>,
     h9: Header<H9>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, B>, O> =
+): HttpEndpoint<P, Input<Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers9(h1, h2, h3, h4, h5, h6, h7, h8, h9), body()),
         outputs = this.outputs
     )
@@ -706,7 +726,7 @@ fun <
  */
 @JvmName("inputHeadersBody10")
 fun <
-    U : URIWithParameters,
+    P : Parameters,
     O : Outputs,
     H1 : Any,
     H2 : Any,
@@ -719,7 +739,7 @@ fun <
     H9 : Any,
     H10 : Any,
     B : Body<*>
-> HttpEndpoint<U, Input<Headers0, EmptyBody>, O>.input(
+> HttpEndpoint<P, Input<Headers0, EmptyBody>, O>.input(
     h1: Header<H1>,
     h2: Header<H2>,
     h3: Header<H3>,
@@ -731,13 +751,14 @@ fun <
     h9: Header<H9>,
     h10: Header<H10>,
     body: () -> B
-): HttpEndpoint<U, Input<Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, B>, O> =
+): HttpEndpoint<P, Input<Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, B>, O> =
     HttpEndpoint(
         id = this.id,
         description = this.description,
         details = this.details,
         method = this.method,
-        uriWithParameters = this.uriWithParameters,
+        path = this.path,
+        parameters = this.parameters,
         input = Input(Headers10(h1, h2, h3, h4, h5, h6, h7, h8, h9, h10), body()),
         outputs = this.outputs
     )

@@ -129,7 +129,7 @@ object RestClientBasedClientGenerator {
         val endpointExpr = signature.endpointExpression
         appendLine("        val responseEntity = interpreter.send(")
         appendLine("            method = $endpointExpr.method,")
-        appendLine("            uri = $endpointExpr.uriWithParameters.toURI(${signature.uriArguments}),")
+        appendLine("            uri = $endpointExpr.toURI(${signature.uriArguments}),")
         appendLine("            inputHeaders = ${signature.inputHeadersEncoding},")
         appendLine("            inputBodyContentType = $endpointExpr.input.body.mediaType,")
         appendLine("            inputBody = ${signature.encodeBodyCall},")
@@ -171,8 +171,8 @@ object RestClientBasedClientGenerator {
         val detailLines: List<String> = linesForDocumentation(endpoint.details)
 
         private val parameters = ParameterGroup(endpoint.parameters, endpointExpression)
-        private val inputHeaders = InputHeadersGroup(endpoint.inputHeaders, endpointExpression)
-        private val inputBody = InputBodyGroup(endpoint.inputBody, endpointExpression)
+        private val inputHeaders = InputHeadersGroup(endpoint.input.headers, endpointExpression)
+        private val inputBody = InputBodyGroup(endpoint.input.body, endpointExpression)
         private val outputs = OutputsGroup(endpoint.outputs, endpointExpression)
 
         val inputs: List<String> = buildList {
@@ -231,7 +231,7 @@ object RestClientBasedClientGenerator {
                     )
                     is QueryParameterMetadata -> {
                         val hasDefault = parameter.default != null
-                        val parameterAccessor = "$endpointRef.uriWithParameters.parameters.item${index + 1}"
+                        val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
                         val declaration = if (hasDefault) {
                             "$name: $type = $parameterAccessor.asQueryParameter<$type>().getDefaultOrFail()"
                         } else {
@@ -416,7 +416,7 @@ object RestClientBasedClientGenerator {
             private val headerVarNames: List<String>
             private val headerAccessors: List<String> =
                 List(metadata.headers.size) { idx -> "$endpointExpression.outputs.item$index.headers.item${idx + 1}" }
-            private val headerTupleName: String = "decodedOutput${index}Headers"
+            private val headerParametersName: String = "decodedOutput${index}Headers"
             val statusCondition: String = "$endpointExpression.outputs.item$index.statusMatcher(status)"
 
             private val bodyType: String = metadata.body.type.determineBodyValueType()
@@ -470,7 +470,7 @@ object RestClientBasedClientGenerator {
                     return ""
                 }
                 return buildString {
-                    appendLine("${indent}val $headerTupleName = decodeHeaders${headerVarNames.size}(")
+                    appendLine("${indent}val $headerParametersName = decodeHeaders${headerVarNames.size}(")
                     appendLine("${indent}    headers${if (headerAccessors.isEmpty()) "" else ","}")
                     headerAccessors.forEachIndexed { idx, accessor ->
                         val suffix = if (idx == headerAccessors.lastIndex) "" else ","
@@ -480,7 +480,7 @@ object RestClientBasedClientGenerator {
                     appendLine("${indent}    error(\"Cannot decode headers: \" + it.joinToString(\": \") )")
                     appendLine("${indent}}")
                     headerVarNames.forEachIndexed { idx, name ->
-                        appendLine("${indent}val $name = $headerTupleName.item${idx + 1}")
+                        appendLine("${indent}val $name = $headerParametersName.item${idx + 1}.values")
                     }
                 }.trimEnd()
             }

@@ -2,12 +2,11 @@
 
 package dev.akif.tapik
 
-import dev.akif.tapik.Endpoint
 import dev.akif.tapik.codec.StringCodec
 import kotlin.properties.ReadOnlyProperty
 
 /** Root URI used as the starting point for building endpoint paths. */
-val root: URIWithParameters0 = URIWithParameters0(emptyList())
+val root: URIWithParameters0 = emptyList<String>() to Parameters0
 
 /**
  * Creates a path parameter with the given [name] and [codec].
@@ -103,11 +102,11 @@ val unmatchedStatus: StatusMatcher =
  * @return property delegate that records endpoint metadata using the owning property name.
  * @see HttpEndpoint
  */
-fun <T, U : URIWithParameters, I : Input<*, *>, O : Outputs> http(
+fun <T, P : Parameters, I : Input<*, *>, O : Outputs> http(
     description: String? = null,
     details: String? = null,
-    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<U, I, O>
-): ReadOnlyProperty<T, HttpEndpoint<U, I, O>> =
+    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<P, I, O>
+): ReadOnlyProperty<T, HttpEndpoint<P, I, O>> =
     ReadOnlyProperty { _, property ->
         HttpEndpointWithoutMethod(id = property.name, description = description, details = details).builder()
     }
@@ -121,8 +120,9 @@ data class HttpEndpointWithoutMethod(
     override val id: String,
     override val description: String?,
     override val details: String?
-) : Endpoint<URIWithParameters0, Input<Headers0, EmptyBody>, Outputs0>() {
-    override val uriWithParameters: URIWithParameters0 = root
+) : Endpoint<Parameters0, Input<Headers0, EmptyBody>, Outputs0>() {
+    override val path: List<String> = root.first
+    override val parameters: Parameters0 = root.second
     override val input: Input<Headers0, EmptyBody> = Input(Headers0, EmptyBody)
     override val outputs: Outputs0 = Outputs0
 
@@ -159,24 +159,28 @@ data class HttpEndpointWithoutURI(
     override val description: String?,
     override val details: String?,
     private val method: Method
-) : Endpoint<URIWithParameters0, Input<Headers0, EmptyBody>, Outputs0>() {
-    override val uriWithParameters: URIWithParameters0 = root
+) : Endpoint<Parameters0, Input<Headers0, EmptyBody>, Outputs0>() {
+    override val path: List<String> = root.first
+    override val parameters: Parameters0 = root.second
     override val input: Input<Headers0, EmptyBody> = Input(Headers0, EmptyBody)
     override val outputs: Outputs0 = Outputs0
 
     /**
-     * Finalises the endpoint by supplying concrete [uriWithParameters].
+     * Finalises the endpoint by supplying concrete [path] together with [parameters].
      *
      * @param uriWithParameters URI template together with captured parameters.
      * @return fully-configured [HttpEndpoint] ready for header/body configuration.
      */
-    fun <U : URIWithParameters> uri(uriWithParameters: U): HttpEndpoint<U, Input<Headers0, EmptyBody>, Outputs0> =
+    fun <P : Parameters> uri(
+        uriWithParameters: URIWithParameters<P>
+    ): HttpEndpoint<P, Input<Headers0, EmptyBody>, Outputs0> =
         HttpEndpoint(
             id = this.id,
             description = this.description,
             details = this.details,
             method = this.method,
-            uriWithParameters = uriWithParameters,
+            path = uriWithParameters.first,
+            parameters = uriWithParameters.second,
             input = this.input,
             outputs = Outputs0
         )
@@ -184,20 +188,18 @@ data class HttpEndpointWithoutURI(
 
 /** Fully-configured HTTP endpoint ready for code generation.
  * @property method HTTP verb associated with the endpoint.
- * @property uriWithParameters URI template and captured parameters.
- * @property input request definition including headers and body.
+ * @property path ordered path segments that form the template.
+ * @property parameters tuple capturing referenced path and query parameters.
  * @property input request definition including headers and body.
  * @property outputs candidate response definitions matched by status.
  */
-data class HttpEndpoint<out U : URIWithParameters, out I : Input<*, *>, out O : Outputs>(
+data class HttpEndpoint<out P : Parameters, out I : Input<*, *>, out O : Outputs>(
     public override val id: String,
     public override val description: String?,
     public override val details: String?,
     val method: Method,
-    public override val uriWithParameters: U,
+    public override val path: List<String>,
+    public override val parameters: P,
     public override val input: I,
     public override val outputs: O
-) : Endpoint<U, I, O>()
-
-/** Convenient alias for referring to endpoints without caring about their generic types. */
-typealias AnyHttpEndpoint = HttpEndpoint<URIWithParameters, Input<*, *>, Outputs>
+) : Endpoint<P, I, O>()

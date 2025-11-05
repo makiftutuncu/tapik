@@ -18,7 +18,8 @@ class HeaderEncodingDecodingTest {
                 description = null,
                 details = null,
                 method = Method.GET,
-                uriWithParameters = root,
+                path = root.first,
+                parameters = root.second,
                 input = Input(Headers1(inputHeader), EmptyBody),
                 outputs = Outputs0
             )
@@ -31,19 +32,22 @@ class HeaderEncodingDecodingTest {
     @Test
     fun `encode output headers reuses codecs`() {
         val endpoint =
-            HttpEndpoint(
-                id = "test",
-                description = null,
-                details = null,
-                method = Method.POST,
-                uriWithParameters = root / "items",
-                input = Input(Headers0, EmptyBody),
-                outputs = Outputs0
-            ).output(
-                status = Status.OK,
-                headers = { Headers1(outputHeader) }
-            ) {
-                stringBody()
+            (root / "items").let { uriWithParameters ->
+                HttpEndpoint(
+                    id = "test",
+                    description = null,
+                    details = null,
+                    method = Method.POST,
+                    path = uriWithParameters.first,
+                    parameters = uriWithParameters.second,
+                    input = Input(Headers0, EmptyBody),
+                    outputs = Outputs0
+                ).output(
+                    status = Status.OK,
+                    headers = { Headers1(outputHeader) }
+                ) {
+                    stringBody()
+                }
             }
 
         val encoded = endpoint.outputs.item1.encodeHeaders(5)
@@ -64,8 +68,8 @@ class HeaderEncodingDecodingTest {
                 fail("Decoding failed: $errors")
             }
 
-        assertEquals(listOf(1, 2), decoded.item1)
-        assertEquals(listOf("req-1"), decoded.item2)
+        assertEquals(listOf(1, 2), (decoded.item1 as HeaderValues<Int>).values)
+        assertEquals(listOf("req-1"), (decoded.item2 as HeaderValues<String>).values)
     }
 
     @Test

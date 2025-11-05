@@ -33,9 +33,13 @@ class BytecodeParserTest {
         assertEquals("dev/akif/tapik/plugin/fixtures/SampleEndpoints", signature.ownerInternalName)
         assertEquals("getUser", signature.methodName)
 
-        signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
-        signature.inputHeaders.assertType("Headers1", listOf("String"))
-        signature.inputBody.assertType("EmptyBody", emptyList())
+        signature.path.assertType("List", listOf("String"))
+        signature.parameters.assertType("Parameters2", listOf("UUID", "Int"))
+        signature.parameters.arguments[0].assertType("UUID", emptyList())
+        signature.parameters.arguments[1].assertType("Int", emptyList())
+        signature.input.type.assertType("Input", listOf("Headers1", "EmptyBody"))
+        signature.input.headers.assertType("Headers1", listOf("String"))
+        signature.input.body.assertType("EmptyBody", emptyList())
         signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
         val firstOutput = signature.outputs.arguments[0]
         val secondOutput = signature.outputs.arguments[1]
@@ -62,9 +66,13 @@ class BytecodeParserTest {
         assertEquals("dev/akif/tapik/plugin/fixtures/SampleEndpoints", signature.ownerInternalName)
         assertEquals("getUser", signature.methodName)
 
-        signature.uriWithParameters.assertType("URIWithParameters2", listOf("UUID", "Int"))
-        signature.inputHeaders.assertType("Headers1", listOf("String"))
-        signature.inputBody.assertType("EmptyBody", emptyList())
+        signature.path.assertType("List", listOf("String"))
+        signature.parameters.assertType("Parameters2", listOf("UUID", "Int"))
+        signature.parameters.arguments[0].assertType("UUID", emptyList())
+        signature.parameters.arguments[1].assertType("Int", emptyList())
+        signature.input.type.assertType("Input", listOf("Headers1", "EmptyBody"))
+        signature.input.headers.assertType("Headers1", listOf("String"))
+        signature.input.body.assertType("EmptyBody", emptyList())
         signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
         val reflectedFirstOutput = signature.outputs.arguments[0]
         val reflectedSecondOutput = signature.outputs.arguments[1]

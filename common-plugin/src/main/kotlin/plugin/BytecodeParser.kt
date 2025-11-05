@@ -13,10 +13,16 @@ import java.lang.reflect.WildcardType
 object BytecodeParser {
     private const val TAPIK_PACKAGE = "dev.akif.tapik"
     private const val HTTP_ENDPOINT_FQCN = "$TAPIK_PACKAGE.HttpEndpoint"
-    private const val URI_WITH_PARAMETERS_PREFIX = "$TAPIK_PACKAGE.URIWithParameters"
+    private const val PARAMETERS_PREFIX = "$TAPIK_PACKAGE.Parameters"
     private const val INPUT_FQCN = "$TAPIK_PACKAGE.Input"
     private const val HEADERS_PREFIX = "$TAPIK_PACKAGE.Headers"
     private const val OUTPUTS_PREFIX = "$TAPIK_PACKAGE.Outputs"
+    private const val TUPLE_PREFIX = "$TAPIK_PACKAGE.Tuple"
+    private const val HEADER_FQCN = "$TAPIK_PACKAGE.Header"
+    private const val HEADER_VALUES_FQCN = "$TAPIK_PACKAGE.HeaderValues"
+    private const val HEADER_VALUES_PREFIX = "$TAPIK_PACKAGE.HeaderValues"
+    private const val PARAMETER_FQCN = "$TAPIK_PACKAGE.Parameter"
+    private const val OUTPUT_FQCN = "$TAPIK_PACKAGE.Output"
     private val JAVA_TO_KOTLIN_TYPES = mapOf(
         "java.lang.Boolean" to "Boolean",
         "java.lang.Byte" to "Byte",
@@ -29,6 +35,10 @@ object BytecodeParser {
         "java.lang.String" to "String",
         "java.lang.Object" to "Any",
         "java.lang.Void" to "Unit"
+    )
+    private val PATH_TYPE = TypeMetadata(
+        name = "List",
+        arguments = listOf(TypeMetadata("String"))
     )
 
     internal fun parseHttpEndpoint(
@@ -65,13 +75,13 @@ object BytecodeParser {
             return null
         }
 
-        val uriWithParameters = convertParameters(endpointClass.arguments[0]) ?: return null
+        val parameters = convertParameters(endpointClass.arguments[0]) ?: return null
         val input = convertInput(endpointClass.arguments[1]) ?: return null
         val outputs = convertOutputs(endpointClass.arguments[2]) ?: return null
 
         val imports = linkedSetOf<String>()
         imports += HTTP_ENDPOINT_FQCN
-        imports += uriWithParameters.imports
+        imports += parameters.imports
         imports += input.imports
         imports += outputs.imports
 
@@ -83,19 +93,26 @@ object BytecodeParser {
         val rawType = TypeMetadata(
             name = endpointClass.simpleName,
             arguments = listOf(
-                uriWithParameters.type,
+                parameters.type,
                 input.type,
                 outputs.type
             )
         )
 
+        val inputSignature =
+            InputSignature(
+                type = input.type,
+                headers = input.headers.type,
+                body = input.body.type
+            )
+
         return HttpEndpointSignature(
             name = endpointName,
             packageName = packageName,
             file = fileName,
-            uriWithParameters = uriWithParameters.type,
-            inputHeaders = input.headers.type,
-            inputBody = input.body.type,
+            path = PATH_TYPE,
+            parameters = parameters.type,
+            input = inputSignature,
             outputs = outputs.type,
             imports = imports.sorted(),
             rawType = rawType.toString(),
@@ -143,7 +160,30 @@ object BytecodeParser {
 
     private fun convertParameters(type: SignatureType): ConversionResult? {
         val classType = type.asClassType() ?: return convertGeneral(type)
-        if (!classType.name.startsWith(URI_WITH_PARAMETERS_PREFIX)) {
+        val tupleAlias = classType.asTupleAlias(PARAMETER_FQCN)
+        if (tupleAlias != null) {
+            val imports = linkedSetOf<String>()
+            val aliasImport = "${PARAMETERS_PREFIX}${tupleAlias.arity}"
+            if (shouldImport(aliasImport)) {
+                imports += aliasImport
+            }
+            val argumentResults =
+                if (tupleAlias.arity == 0) {
+                    emptyList()
+                } else {
+                    tupleAlias.elements.mapNotNull { convertParameterElement(it) }
+                }
+            argumentResults.forEach { imports += it.imports }
+
+            return ConversionResult(
+                type = TypeMetadata(
+                    name = "Parameters${tupleAlias.arity}",
+                    arguments = argumentResults.map { it.type }
+                ),
+                imports = imports
+            )
+        }
+        if (!classType.name.startsWith(PARAMETERS_PREFIX)) {
             return convertGeneral(type)
         }
 
@@ -166,6 +206,29 @@ object BytecodeParser {
 
     private fun convertHeaders(type: SignatureType): ConversionResult? {
         val classType = type.asClassType() ?: return convertGeneral(type)
+        val tupleAlias = classType.asTupleAlias(HEADER_FQCN)
+        if (tupleAlias != null) {
+            val imports = linkedSetOf<String>()
+            val aliasImport = "${HEADERS_PREFIX}${tupleAlias.arity}"
+            if (shouldImport(aliasImport)) {
+                imports += aliasImport
+            }
+            val argumentResults =
+                if (tupleAlias.arity == 0) {
+                    emptyList()
+                } else {
+                    tupleAlias.elements.mapNotNull { convertHeaderElement(it) }
+                }
+            argumentResults.forEach { imports += it.imports }
+
+            return ConversionResult(
+                type = TypeMetadata(
+                    name = "Headers${tupleAlias.arity}",
+                    arguments = argumentResults.map { it.type }
+                ),
+                imports = imports
+            )
+        }
         if (!classType.name.startsWith(HEADERS_PREFIX)) {
             return convertGeneral(type)
         }
@@ -216,6 +279,29 @@ object BytecodeParser {
 
     private fun convertOutputs(type: SignatureType): ConversionResult? {
         val classType = type.asClassType() ?: return convertGeneral(type)
+        val tupleAlias = classType.asTupleAlias(OUTPUT_FQCN)
+        if (tupleAlias != null) {
+            val imports = linkedSetOf<String>()
+            val aliasImport = "${OUTPUTS_PREFIX}${tupleAlias.arity}"
+            if (shouldImport(aliasImport)) {
+                imports += aliasImport
+            }
+            val argumentResults =
+                if (tupleAlias.arity == 0) {
+                    emptyList()
+                } else {
+                    tupleAlias.elements.mapNotNull { convertGeneral(it) }
+                }
+            argumentResults.forEach { imports += it.imports }
+
+            return ConversionResult(
+                type = TypeMetadata(
+                    name = "Outputs${tupleAlias.arity}",
+                    arguments = argumentResults.map { it.type }
+                ),
+                imports = imports
+            )
+        }
         if (!classType.name.startsWith(OUTPUTS_PREFIX)) {
             return convertGeneral(type)
         }
@@ -260,6 +346,98 @@ object BytecodeParser {
     }
 
     private fun convertClass(type: SignatureType.Class): ConversionResult {
+        type.asTupleAlias(HEADER_FQCN)?.let { alias ->
+            val imports = linkedSetOf<String>()
+            val aliasImport = "${HEADERS_PREFIX}${alias.arity}"
+            if (shouldImport(aliasImport)) {
+                imports += aliasImport
+            }
+            val argumentResults =
+                if (alias.arity == 0) {
+                    emptyList()
+                } else {
+                    alias.elements.mapNotNull { convertHeaderElement(it) }
+                }
+            argumentResults.forEach { imports += it.imports }
+
+            return ConversionResult(
+                type = TypeMetadata(
+                    name = "Headers${alias.arity}",
+                    arguments = argumentResults.map { it.type }
+                ),
+                imports = imports
+            )
+        }
+
+        type.asTupleAlias(HEADER_VALUES_FQCN)?.let { alias ->
+            val imports = linkedSetOf<String>()
+            val aliasImport = "${HEADER_VALUES_PREFIX}${alias.arity}"
+            if (shouldImport(aliasImport)) {
+                imports += aliasImport
+            }
+            val argumentResults =
+                if (alias.arity == 0) {
+                    emptyList()
+                } else {
+                    alias.elements.mapNotNull { convertHeaderElement(it) }
+                }
+            argumentResults.forEach { imports += it.imports }
+
+            return ConversionResult(
+                type = TypeMetadata(
+                    name = "HeaderValues${alias.arity}",
+                    arguments = argumentResults.map { it.type }
+                ),
+                imports = imports
+            )
+        }
+
+        type.asTupleAlias(PARAMETER_FQCN)?.let { alias ->
+            val imports = linkedSetOf<String>()
+            val aliasImport = "${PARAMETERS_PREFIX}${alias.arity}"
+            if (shouldImport(aliasImport)) {
+                imports += aliasImport
+            }
+            val argumentResults =
+                if (alias.arity == 0) {
+                    emptyList()
+                } else {
+                    alias.elements.mapNotNull { convertParameterElement(it) }
+                }
+            argumentResults.forEach { imports += it.imports }
+
+            return ConversionResult(
+                type = TypeMetadata(
+                    name = "Parameters${alias.arity}",
+                    arguments = argumentResults.map { it.type }
+                ),
+                imports = imports
+            )
+        }
+
+        type.asTupleAlias(OUTPUT_FQCN)?.let { alias ->
+            val imports = linkedSetOf<String>()
+            val aliasImport = "${OUTPUTS_PREFIX}${alias.arity}"
+            if (shouldImport(aliasImport)) {
+                imports += aliasImport
+            }
+            val argumentResults =
+                if (alias.arity == 0) {
+                    emptyList()
+                } else {
+                    alias.elements.mapNotNull { convertGeneral(it) }
+                }
+            argumentResults.forEach { imports += it.imports }
+
+            return ConversionResult(
+                type = TypeMetadata(
+                    name = "Outputs${alias.arity}",
+                    arguments = argumentResults.map { it.type }
+                ),
+                imports = imports
+            )
+        }
+
         val argumentResults = type.arguments.mapNotNull { convertGeneral(it) }
         val imports = linkedSetOf<String>()
         argumentResults.forEach { imports += it.imports }
@@ -277,6 +455,22 @@ object BytecodeParser {
             ),
             imports = imports
         )
+    }
+
+    private fun convertHeaderElement(type: SignatureType): ConversionResult? {
+        val classType = type.asClassType()
+        return when {
+            classType == null -> convertGeneral(type)
+            classType.name == HEADER_FQCN && classType.arguments.isNotEmpty() -> convertGeneral(classType.arguments.first())
+            classType.name == HEADER_VALUES_FQCN && classType.arguments.isNotEmpty() -> convertGeneral(classType.arguments.first())
+            else -> convertGeneral(type)
+        }
+    }
+
+    private fun convertParameterElement(type: SignatureType): ConversionResult? {
+        val classType = type.asClassType()
+        val valueType = classType?.arguments?.firstOrNull()
+        return if (valueType != null) convertGeneral(valueType) else convertGeneral(type)
     }
 
     private fun shouldImport(fqcn: String): Boolean {
@@ -303,6 +497,36 @@ object BytecodeParser {
         get() = name.substringAfterLast('.').replace('$', '.')
 
     private fun SignatureType.Class.importName(): String = name.replace('$', '.')
+
+    private data class TupleAlias(val arity: Int, val elements: List<SignatureType>)
+
+    private fun SignatureType.Class.asTupleAlias(expectedSuperFqcn: String): TupleAlias? {
+        if (!name.startsWith(TUPLE_PREFIX)) {
+            return null
+        }
+
+        val arity = simpleName.removePrefix("Tuple").toIntOrNull() ?: return null
+        if (arity == 0) {
+            if (arguments.isNotEmpty()) {
+                return null
+            }
+            return TupleAlias(arity, emptyList())
+        }
+
+        if (arguments.size != arity + 1) {
+            return null
+        }
+
+        val superArgument = arguments.first()
+        if (!superArgument.matchesRawType(expectedSuperFqcn)) {
+            return null
+        }
+
+        return TupleAlias(arity, arguments.drop(1))
+    }
+
+    private fun SignatureType.matchesRawType(fqcn: String): Boolean =
+        (this as? SignatureType.Class)?.name == fqcn
 
     private fun Type.toSignatureType(): SignatureType? = when (this) {
         is Class<*> -> {

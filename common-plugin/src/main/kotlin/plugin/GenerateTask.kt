@@ -217,13 +217,17 @@ class GenerateTask(
             description = endpoint.description,
             details = endpoint.details,
             method = endpoint.method.name,
-            uri = endpoint.uriWithParameters.toUriSegments(),
-            parameters = endpoint.uriWithParameters.extractParameters()
-                .buildParametersMetadata(uriWithParameters.arguments),
-            inputHeaders = endpoint.input.headers.toList().buildHeaderMetadata(inputHeaders.arguments),
-            inputBody = endpoint.input.body
-                .takeUnless { it === EmptyBody }
-                ?.let { createBodyMetadata(inputBody, it) },
+            path = endpoint.path,
+            parameters = endpoint.parameters
+                .toList()
+                .buildParametersMetadata(this.parameters.arguments),
+            input =
+                InputMetadata(
+                    headers = endpoint.input.headers.toList().buildHeaderMetadata(input.headers.arguments),
+                    body = endpoint.input.body
+                        .takeUnless { it === EmptyBody }
+                        ?.let { createBodyMetadata(input.body, it) }
+                ),
             outputs = endpoint.outputs.toList().buildOutputsMetadata(outputs.arguments),
             packageName = packageName,
             sourceFile = file,
@@ -307,38 +311,6 @@ class GenerateTask(
             name = type.simpleName,
             arguments = emptyList()
         )
-
-    private fun Any?.extractParameters(): List<Parameter<*>> =
-        this
-            .invokeNoArg("getParameters")
-            .extractTupleItems()
-
-    private fun Any?.toUriSegments(): List<String> =
-        this
-            .invokeNoArg("getUri")
-            ?.let { segments ->
-                if (segments is Collection<*>) {
-                    segments.filterIsInstance<String>()
-                } else {
-                    emptyList()
-                }
-            }.orEmpty()
-
-    private fun Any?.invokeNoArg(methodName: String): Any? =
-        runCatching {
-            this?.javaClass
-                ?.methods
-                ?.firstOrNull { it.name == methodName && it.parameterCount == 0 }
-                ?.apply { isAccessible = true }
-                ?.invoke(this)
-        }.getOrNull()
-
-    @Suppress("UNCHECKED_CAST")
-    private fun Any?.extractTupleItems(): List<Parameter<*>> =
-        (this as? Tuple)
-            ?.toList<Any?>()
-            ?.mapNotNull { it as? Parameter<*> }
-            .orEmpty()
 
     private fun Method.shouldProcessMethod(): Boolean {
         if (name == "<init>" || name == "<clinit>" || name.contains("$")) {

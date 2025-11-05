@@ -13,7 +13,7 @@ class HttpEndpointTest {
 
         assertEquals("getUser", endpoint.id)
         assertEquals(Method.GET, endpoint.method)
-        assertEquals(listOf("users"), endpoint.uriWithParameters.uri)
+        assertEquals(listOf("users"), endpoint.path)
         assertEquals("Get a user", endpoint.description)
         assertEquals("Loads a user by identifier", endpoint.details)
     }
@@ -34,7 +34,7 @@ class HttpEndpointTest {
                 ) { rawBody(mediaType = MediaType.Json) }
 
         assertEquals(Method.POST, endpoint.method)
-        assertEquals(listOf("items"), endpoint.uriWithParameters.uri)
+        assertEquals(listOf("items"), endpoint.path)
         assertEquals(listOf(inputHeader), endpoint.input.headers.toList())
         assertIs<StringBody>(endpoint.input.body)
         val bodies = endpoint.outputs.toList()
