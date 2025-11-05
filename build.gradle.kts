@@ -58,7 +58,8 @@ val publishable = setOf(
     ":common-plugin",
     ":core",
     ":jackson",
-    ":spring-restclient"
+    ":spring-restclient",
+    ":spring-webmvc"
 )
 
 val ktlintCheckTasks = mutableListOf<TaskProvider<Task>>()

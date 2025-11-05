@@ -61,7 +61,7 @@ class GenerateTask(
         writeReport(endpoints, generationOutputDirectory)
 
         RestClientBasedClientGenerator.generate(endpoints, generatedSourcesDir)
-
+        SpringWebMvcControllerGenerator.generate(endpoints, generatedSourcesDir)
         MarkdownDocumentationGenerator.generate(endpoints, generationOutputDirectory)
     }
 
@@ -239,21 +239,39 @@ class GenerateTask(
         parameterTypes: List<TypeMetadata>
     ): List<ParameterMetadata> =
         mapIndexed { index, parameter ->
-            val typeMetadata = parameterTypes.getOrNull(index)
+            val originalTypeMetadata = parameterTypes.getOrNull(index)
                 ?: runtimeTypeMetadata(parameter::class.java)
             when (parameter.position) {
                 ParameterPosition.Path -> PathVariableMetadata(
                     name = parameter.name,
-                    type = typeMetadata
+                    type = originalTypeMetadata
                 )
                 ParameterPosition.Query -> QueryParameterMetadata(
                     name = parameter.name,
-                    type = typeMetadata,
+                    type = resolveQueryParameterType(parameter, originalTypeMetadata),
                     required = parameter.required,
                     default = (parameter as? QueryParameter<*>)?.default?.toString()
                 )
             }
         }
+
+    private fun resolveQueryParameterType(
+        parameter: Parameter<*>,
+        typeMetadata: TypeMetadata
+    ): TypeMetadata {
+        if (parameter !is QueryParameter<*>) {
+            return typeMetadata
+        }
+        val defaultValue = parameter.default
+        if (parameter.required || defaultValue != null) {
+            return typeMetadata
+        }
+        return if (typeMetadata.nullable == true) {
+            typeMetadata
+        } else {
+            typeMetadata.copy(nullable = true)
+        }
+    }
 
     private fun List<Header<*>>.buildHeaderMetadata(
         headerTypes: List<TypeMetadata>

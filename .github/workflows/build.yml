@@ -35,10 +35,7 @@ jobs:
         restore-keys: ${{ runner.os }}-gradle-
 
     - name: Run KtLint Check
-      run: ./gradlew ktlintCheck
+      run: ./gradlew ktlintCheckAll
 
     - name: Run tests
-      run: ./gradlew test
-
-    - name: Run integration tests
-      run: ./gradlew integrationTest
+      run: ./gradlew check

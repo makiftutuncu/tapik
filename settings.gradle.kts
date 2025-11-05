@@ -43,5 +43,6 @@ include(":gradle-plugin")
 include(":jackson")
 include(":common-plugin")
 include(":spring-restclient")
+include(":spring-webmvc")
 
 rootProject.name = "tapik"

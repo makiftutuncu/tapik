@@ -51,5 +51,13 @@ class GenerateTaskTest {
         val interfaceContent = generatedInterface.readText()
         assertTrue(interfaceContent.contains("interface SampleEndpointsClient"), "Interface declaration missing")
         assertTrue(interfaceContent.contains("fun user("), "Generated method for endpoint missing")
+
+        val generatedController = File(generatedDir, "dev/akif/tapik/plugin/fixtures/SampleEndpointsController.kt")
+        assertTrue(
+            generatedController.exists(),
+            "Generated controller interface should exist, files: ${File(generatedController.parent).list()?.toList()}"
+        )
+        val controllerContent = generatedController.readText()
+        assertTrue(controllerContent.contains("interface SampleEndpointsController"), "Controller declaration missing")
     }
 }
