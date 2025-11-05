@@ -302,7 +302,7 @@ class GenerateTask(
     ): BodyMetadata =
         BodyMetadata(
             type = typeMetadata ?: runtimeTypeMetadata(body::class.java),
-            name = null,
+            name = body.name,
             mediaType = body.mediaType?.toString()
         )
 

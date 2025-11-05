@@ -12,6 +12,7 @@ class BodyTest {
     fun `empty body exposes no media type or bytes`() {
         assertNull(EmptyBody.mediaType)
         assertNull(EmptyBody.bytes(Unit))
+        assertEquals("empty", EmptyBody.name)
     }
 
     @Test
@@ -19,6 +20,7 @@ class BodyTest {
         val body = stringBody("payload")
 
         assertEquals(MediaType.PlainText, body.mediaType)
+        assertEquals("payload", body.name)
         assertContentEquals("hello".toByteArray(), body.bytes("hello"))
     }
 
@@ -28,6 +30,7 @@ class BodyTest {
         val payload = "raw".toByteArray()
 
         assertNull(body.mediaType)
+        assertEquals("bytes", body.name)
         assertContentEquals(payload, body.bytes(payload))
     }
 
@@ -52,7 +55,7 @@ class BodyTest {
                 }
             )
 
-        val body = JsonBody(codec)
+        val body = JsonBody(codec, "json")
         val payload = mapOf("answer" to 42)
 
         assertEquals(MediaType.Json, body.mediaType)
@@ -75,6 +78,7 @@ class BodyTest {
 
         val body = stringBody(upperCasingCodec)
         val bytes = body.bytes("ok")!!
+        assertEquals("string", body.name)
         assertContentEquals("OK".toByteArray(), bytes)
     }
 }

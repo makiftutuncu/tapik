@@ -157,7 +157,7 @@ class RestClientBasedClientGeneratorTest {
                         body =
                             BodyMetadata(
                                 type = TypeMetadata("dev.akif.tapik.StringBody"),
-                                name = null,
+                                name = "string",
                                 mediaType = "text/plain"
                             )
                     )
@@ -204,7 +204,7 @@ class RestClientBasedClientGeneratorTest {
                     body =
                         BodyMetadata(
                             type = TypeMetadata("dev.akif.tapik.StringBody"),
-                            name = null,
+                            name = "string",
                             mediaType = "text/plain"
                         )
                 ),
@@ -216,7 +216,7 @@ class RestClientBasedClientGeneratorTest {
                         body =
                             BodyMetadata(
                                 type = TypeMetadata("dev.akif.tapik.StringBody"),
-                                name = null,
+                                name = "string",
                                 mediaType = "text/plain"
                             )
                     )

@@ -16,6 +16,9 @@ sealed interface Body<T : Any> {
     /** Codec used to transform between payload instances and raw bytes. */
     val codec: ByteArrayCodec<T>
 
+    /** Friendly name associated with the body, if provided. */
+    val name: String
+
     /**
      * Encodes [value] into a [ByteArray].
      *
@@ -33,12 +36,15 @@ data object EmptyBody : Body<Unit> {
 
     override val codec: ByteArrayCodec<Unit> = ByteArrayCodec.nullable("empty", { ByteArray(0) }) { }
 
+    override val name: String = "empty"
+
     override fun bytes(value: Unit): ByteArray? = null
 }
 
 /** Text body coupled with a string codec. */
 data class StringBody(
-    override val codec: ByteArrayCodec<String>
+    override val codec: ByteArrayCodec<String>,
+    override val name: String
 ) : Body<String> {
     override val mediaType: MediaType = MediaType.PlainText
 }
@@ -46,12 +52,14 @@ data class StringBody(
 /** Arbitrary binary body described by a codec and optional media type. */
 data class RawBody(
     override val mediaType: MediaType?,
-    override val codec: ByteArrayCodec<ByteArray>
+    override val codec: ByteArrayCodec<ByteArray>,
+    override val name: String
 ) : Body<ByteArray>
 
 /** Structured payload encoded and decoded via JSON. */
 data class JsonBody<T : Any>(
-    override val codec: ByteArrayCodec<T>
+    override val codec: ByteArrayCodec<T>,
+    override val name: String
 ) : Body<T> {
     override val mediaType: MediaType = MediaType.Json
 }
@@ -63,7 +71,7 @@ data class JsonBody<T : Any>(
  * @return a [StringBody] backed by a codec that targets UTF-8 strings.
  * @see StringBody
  */
-fun stringBody(name: String = "string"): StringBody = stringBody(StringCodecs.string(name).toByteArrayCodec())
+fun stringBody(name: String = "string"): StringBody = stringBody(StringCodecs.string(name).toByteArrayCodec(), name)
 
 /**
  * Creates a text body using the provided [codec].
@@ -71,7 +79,10 @@ fun stringBody(name: String = "string"): StringBody = stringBody(StringCodecs.st
  * @param codec encoder/decoder that understands the textual payload.
  * @return a [StringBody] using the supplied codec.
  */
-fun stringBody(codec: ByteArrayCodec<String>): StringBody = StringBody(codec)
+fun stringBody(
+    codec: ByteArrayCodec<String>,
+    name: String = "string"
+): StringBody = StringBody(codec, name)
 
 /**
  * Creates a raw body that uses an identity codec and optional media type.
@@ -83,7 +94,7 @@ fun stringBody(codec: ByteArrayCodec<String>): StringBody = StringBody(codec)
 fun rawBody(
     name: String = "bytes",
     mediaType: MediaType? = null
-): RawBody = rawBody(ByteArrayCodec.identity(name), mediaType)
+): RawBody = rawBody(ByteArrayCodec.identity(name), mediaType, name)
 
 /**
  * Creates a raw body using the provided [codec] and optional [mediaType].
@@ -94,5 +105,6 @@ fun rawBody(
  */
 fun rawBody(
     codec: ByteArrayCodec<ByteArray>,
-    mediaType: MediaType? = null
-): RawBody = RawBody(mediaType, codec)
+    mediaType: MediaType? = null,
+    name: String = "bytes"
+): RawBody = RawBody(mediaType, codec, name)
