@@ -1,5 +1,6 @@
 import java.net.URI
 import org.gradle.api.Task
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
@@ -46,6 +47,22 @@ gradle.projectsEvaluated {
         dependsOn(moduleTasks)
         generator.moduleOutputDirectories.setFrom(moduleTasks.map { it.get().outputDirectory })
     }
+}
+
+val syncDokkaHtmlToDocs by tasks.registering(Sync::class) {
+    group = "documentation"
+    description = "Copies aggregated Dokka HTML output under docs/api for MkDocs."
+    dependsOn(tasks.named("dokkaGeneratePublicationHtml"))
+    from(layout.buildDirectory.dir("dokka/html"))
+    into(layout.projectDirectory.dir("docs/api"))
+}
+
+tasks.named("dokkaGeneratePublicationHtml").configure {
+    finalizedBy(syncDokkaHtmlToDocs)
+}
+
+tasks.matching { it.name == "dokkaGenerateHtml" }.configureEach {
+    finalizedBy(syncDokkaHtmlToDocs)
 }
 
 val skipLintProperty = providers.gradleProperty("skipLint").map { true }.orElse(false)

@@ -33,7 +33,7 @@ open class MarkdownDocumentationExtension @Inject constructor() : TapikGenerator
  * @property endpointPackages packages whose compiled classes will be inspected for Tapik endpoint declarations.
  * @property springRestClient nested DSL configuring the RestClient generator.
  * @property springWebMvc nested DSL configuring the WebMVC generator.
- * @property documentation nested DSL configuring Markdown documentation generation.
+ * @property markdownDocumentation nested DSL configuring Markdown documentation generation.
  */
 open class TapikExtension @Inject constructor(objects: ObjectFactory) {
     /** Packages whose compiled classes will be inspected for Tapik endpoint declarations. */
