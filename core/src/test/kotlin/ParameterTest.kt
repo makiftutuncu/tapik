@@ -2,8 +2,8 @@ package dev.akif.tapik
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ParameterTest {
@@ -22,19 +22,19 @@ class ParameterTest {
         val parameter = QueryParameter.string("search")
 
         assertTrue(parameter.required)
-        assertNull(parameter.default)
         assertEquals(ParameterPosition.Query, parameter.position)
     }
 
     @Test
     fun `query parameter optional helpers update required flag and default`() {
         val required = QueryParameter.int("limit")
-        val optional = required.optional
         val optionalWithDefault = required.optional(10)
 
-        assertFalse(optional.required)
-        assertNull(optional.default)
         assertFalse(optionalWithDefault.required)
         assertEquals(10, optionalWithDefault.default)
+
+        assertFailsWith<IllegalArgumentException> {
+            required.copy(required = false, default = null)
+        }
     }
 }

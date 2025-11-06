@@ -28,7 +28,8 @@ class GenerateTaskTest {
                 generatedSourcesDirectory = generatedDir,
                 endpointPackages = listOf("dev.akif.tapik.plugin.fixtures"),
                 compiledClassesDirectory = compiledDir,
-                additionalClasspathDirectories = emptyList()
+                additionalClasspathDirectories = emptyList(),
+                enabledGeneratorIds = setOf("spring-restclient", "spring-webmvc", "markdown-docs")
             ),
             log = { s, _ -> println(s) },
             logDebug = { s, _ -> println(s) },
@@ -59,5 +60,11 @@ class GenerateTaskTest {
         )
         val controllerContent = generatedController.readText()
         assertTrue(controllerContent.contains("interface SampleEndpointsController"), "Controller declaration missing")
+
+        val documentation = File(outputDir, "API.md")
+        assertTrue(
+            documentation.exists(),
+            "Generated documentation should exist, files: ${File(documentation.parent).list()?.toList()}"
+        )
     }
 }

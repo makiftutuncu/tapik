@@ -1,5 +1,6 @@
-package dev.akif.tapik.plugin
+package dev.akif.tapik.spring.webmvc
 
+import dev.akif.tapik.plugin.TapikGeneratorContext
 import dev.akif.tapik.plugin.metadata.*
 import org.junit.jupiter.api.io.CleanupMode
 import org.junit.jupiter.api.io.TempDir
@@ -20,9 +21,9 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate writes documented controller interface`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator.generate(
+        SpringWebMvcControllerGenerator().generate(
             endpoints = listOf(sampleMetadata()),
-            rootDir = rootDir
+            context = testContext(rootDir)
         )
 
         val generated = File(rootDir, "dev/akif/tapik/clients/UserEndpointsController.kt")
@@ -50,7 +51,7 @@ class SpringWebMvcControllerGeneratorTest {
             |    fun user(
 |        @SpringPathVariable(name = "userId") userId: UUID,
             |        @RequestParam(name = "page", required = false, defaultValue = "1") page: Int,
-            |        @RequestHeader(name = "X-Request-ID") X_Request_ID: String
+            |        @RequestHeader(name = "X-Request-ID") xRequestId: String
             |    ): Response1<String, URI>
             |}
             """.trimMargin()
@@ -62,9 +63,9 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate sanitizes identifiers and supports non standard methods`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator.generate(
+        SpringWebMvcControllerGenerator().generate(
             endpoints = listOf(metadataWithChallengingNames()),
-            rootDir = rootDir
+            context = testContext(rootDir)
         )
 
         val generated = File(rootDir, "dev/akif/tapik/clients/StatusEndpointsController.kt")
@@ -86,16 +87,25 @@ class SpringWebMvcControllerGeneratorTest {
             |     * HEAD endpoint with optional pieces.
             |     */
             |    @RequestMapping(method = [RequestMethod.HEAD], path = ["/api/status/{id}"])
-            |    fun `head status`(
+            |    fun headStatus(
 |        @SpringPathVariable(name = "id") id: UUID,
-            |        @RequestParam(name = "trace-id", required = false) trace_id: String?,
-            |        @RequestHeader(name = "X-Session-ID", required = false) X_Session_ID: UUID
+            |        @RequestParam(name = "trace-id", required = false, defaultValue = "trace-default") traceId: String,
+            |        @RequestHeader(name = "X-Session-ID", required = false) xSessionId: UUID
             |    ): ResponseWithoutBody0
             |}
             """.trimMargin()
 
         assertEquals(expected, content)
     }
+
+    private fun testContext(rootDir: File): TapikGeneratorContext =
+        TapikGeneratorContext(
+            outputDirectory = rootDir,
+            generatedSourcesDirectory = rootDir,
+            log = {},
+            logDebug = {},
+            logWarn = { _, _ -> }
+        )
 
     private fun sampleMetadata(): HttpEndpointMetadata =
         HttpEndpointMetadata(
@@ -179,9 +189,9 @@ class SpringWebMvcControllerGeneratorTest {
                     ),
                     QueryParameterMetadata(
                         name = "trace-id",
-                        type = TypeMetadata("kotlin.String", nullable = true),
+                        type = TypeMetadata("kotlin.String"),
                         required = false,
-                        default = null
+                        default = "trace-default"
                     )
                 ),
             input =

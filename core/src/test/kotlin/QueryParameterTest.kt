@@ -1,22 +1,21 @@
 package dev.akif.tapik
 
 import arrow.core.getOrElse
+import dev.akif.tapik.codec.StringCodecs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.fail
 
 class QueryParameterTest {
     @Test
-    fun `optional creates non-required parameter without default`() {
+    fun `optional requires a default value`() {
         val parameter = QueryParameter.string("name")
 
-        val optional = parameter.optional
-
-        assertFalse(optional.required)
-        assertNull(optional.default)
-        assertEquals(parameter.codec, optional.codec)
+        assertFailsWith<IllegalArgumentException> {
+            parameter.copy(required = false, default = null)
+        }
     }
 
     @Test
@@ -27,6 +26,18 @@ class QueryParameterTest {
 
         assertFalse(optional.required)
         assertEquals(25, optional.default)
+    }
+
+    @Test
+    fun `query helper requires default when parameter optional`() {
+        assertFailsWith<IllegalArgumentException> {
+            QueryParameter(
+                name = "page",
+                codec = StringCodecs.int("page"),
+                required = false,
+                default = null
+            )
+        }
     }
 
     @Test

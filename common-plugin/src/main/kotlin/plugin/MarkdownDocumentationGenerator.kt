@@ -6,9 +6,21 @@ import java.io.File
 /**
  * A generator that creates Markdown documentation from tapik endpoint definitions.
  */
-object MarkdownDocumentationGenerator {
-    private const val MARGIN = ">>>"
-    private const val BR = "<br />"
+class MarkdownDocumentationGenerator : TapikGenerator {
+    override val id: String = ID
+
+    override fun generate(
+        endpoints: List<HttpEndpointMetadata>,
+        context: TapikGeneratorContext
+    ) {
+        if (endpoints.isEmpty()) {
+            context.log("[tapik] No endpoints discovered; skipping Markdown documentation generation.")
+            return
+        }
+
+        context.log("[tapik] Generating Markdown documentation.")
+        generateDocumentation(endpoints, context.outputDirectory)
+    }
 
     /**
      * Generates Markdown documentation for the given endpoints and writes it to a file in the given root directory.
@@ -16,7 +28,7 @@ object MarkdownDocumentationGenerator {
      * @param endpoints The endpoints to generate documentation for.
      * @param rootDir The root directory to write the generated documentation to.
      */
-    fun generate(endpoints: List<HttpEndpointMetadata>, rootDir: File) {
+    private fun generateDocumentation(endpoints: List<HttpEndpointMetadata>, rootDir: File) {
         val content = endpoints
             .groupBy { it.packageName }
             .values
@@ -128,7 +140,7 @@ object MarkdownDocumentationGenerator {
                 outputs.map { output ->
                     val headerSummary =
                         if (output.headers.isEmpty()) {
-                            "-"
+                            ""
                         } else {
                             output.headers.joinToString(separator = "<br>") { header ->
                                 val values = inlineList(header.values) { mono(it) }
@@ -189,4 +201,10 @@ object MarkdownDocumentationGenerator {
         } else {
             items.zip(1..items.count()).joinToString(separator = BR) { (item, index) -> "$index. ${document(item)}" }
         }
+
+    private companion object {
+        private const val ID = "markdown-docs"
+        private const val MARGIN = ">>>"
+        private const val BR = "<br />"
+    }
 }

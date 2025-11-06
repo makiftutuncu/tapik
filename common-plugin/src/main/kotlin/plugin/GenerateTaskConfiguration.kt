@@ -10,11 +10,13 @@ import java.io.File
  * @param endpointPackages The packages to scan for endpoint definitions.
  * @param compiledClassesDirectory The directory containing the compiled classes of the project.
  * @param additionalClasspathDirectories Additional directories to add to the classpath when scanning for endpoints.
+ * @param enabledGeneratorIds Identifiers of code generators that should run.
  */
 data class GenerateTaskConfiguration(
     val outputDirectory: File,
     val generatedSourcesDirectory: File,
     val endpointPackages: List<String>,
     val compiledClassesDirectory: File,
-    val additionalClasspathDirectories: List<File>
+    val additionalClasspathDirectories: List<File>,
+    val enabledGeneratorIds: Set<String>
 )

@@ -47,7 +47,7 @@ class ClientExtensionsTest {
 
     @Test
     fun `getDefaultOrFail throws when default is missing`() {
-        val parameter = QueryParameter.int("limit").optional
+        val parameter = QueryParameter.int("limit")
 
         assertFailsWith<IllegalArgumentException> {
             with(TestClient) {

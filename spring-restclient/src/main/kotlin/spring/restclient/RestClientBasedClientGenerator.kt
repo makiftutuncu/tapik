@@ -1,21 +1,36 @@
-package dev.akif.tapik.plugin
+package dev.akif.tapik.spring.restclient
 
+import dev.akif.tapik.plugin.*
 import dev.akif.tapik.plugin.metadata.*
 import java.io.File
 
 /**
  * A generator that creates Spring RestClient-based clients from tapik endpoint definitions.
  */
-object RestClientBasedClientGenerator {
-    private const val TAPIK_PACKAGE = "dev.akif.tapik"
-    private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
-    private const val BASE_INTERFACE_NAME = "RestClientBasedClient"
-    private const val HTTP_PACKAGE_PREFIX = "$TAPIK_PACKAGE."
-    private val KOTLIN_COLLECTION_OVERRIDES = mapOf(
-        "java.util.Map" to "kotlin.collections.Map",
-        "java.util.List" to "kotlin.collections.List",
-        "java.util.Set" to "kotlin.collections.Set"
-    )
+class RestClientBasedClientGenerator : TapikGenerator {
+    /**
+     * Identifier used by the Gradle plugin to decide whether this generator should execute.
+     */
+    override val id: String = ID
+
+    /**
+     * Generates RestClient-based clients for the supplied endpoints, writing them under the given output directory.
+     *
+     * @param endpoints endpoint metadata discovered during analysis.
+     * @param context generator execution context containing output directories and logging callbacks.
+     */
+    override fun generate(
+        endpoints: List<HttpEndpointMetadata>,
+        context: TapikGeneratorContext
+    ) {
+        if (endpoints.isEmpty()) {
+            context.log("[tapik] No endpoints discovered; skipping Spring RestClient generation.")
+            return
+        }
+
+        context.log("[tapik] Generating Spring RestClient clients.")
+        generateClients(endpoints, context.generatedSourcesDirectory)
+    }
 
     /**
      * Generates client code for the given endpoints and writes them to the given root directory.
@@ -23,7 +38,10 @@ object RestClientBasedClientGenerator {
      * @param endpoints The endpoints to generate clients for.
      * @param rootDir The root directory to write the generated code to.
      */
-    fun generate(endpoints: List<HttpEndpointMetadata>, rootDir: File) {
+    private fun generateClients(
+        endpoints: List<HttpEndpointMetadata>,
+        rootDir: File
+    ) {
         endpoints
             .groupBy { it.packageName }
             .filterKeys { it.isNotBlank() }
@@ -81,26 +99,29 @@ object RestClientBasedClientGenerator {
         packageName: String,
         endpoints: List<HttpEndpointMetadata>
     ): List<String> {
-        val imports = mutableSetOf(
-            "arrow.core.getOrElse",
-            "dev.akif.tapik.*",
-            "$BASE_PACKAGE.*"
-        )
+        val imports =
+            mutableSetOf(
+                "arrow.core.getOrElse",
+                "dev.akif.tapik.*",
+                "$BASE_PACKAGE.*"
+            )
 
-        val typeImports = endpoints
-            .flatMap(HttpEndpointMetadata::imports)
-            .map { KOTLIN_COLLECTION_OVERRIDES[it] ?: it }
-            .filterNot { import ->
-                import.startsWith(HTTP_PACKAGE_PREFIX) ||
-                    import.startsWith("$BASE_PACKAGE.") ||
-                    import == BASE_PACKAGE ||
-                    import == TAPIK_PACKAGE ||
-                    import.substringBeforeLast('.', "") == packageName
+        val typeImports =
+            endpoints
+                .flatMap(HttpEndpointMetadata::imports)
+                .map { KOTLIN_COLLECTION_OVERRIDES[it] ?: it }
+                .filterNot { import ->
+                    import.startsWith(HTTP_PACKAGE_PREFIX) ||
+                        import.startsWith("$BASE_PACKAGE.") ||
+                        import == BASE_PACKAGE ||
+                        import == TAPIK_PACKAGE ||
+                        import.substringBeforeLast('.', "") == packageName
+                }
+
+        imports +=
+            typeImports.filterNot {
+                it.startsWith("kotlin.collections.")
             }
-
-        imports += typeImports.filterNot {
-            it.startsWith("kotlin.collections.")
-        }
 
         return imports.toSortedSet().toList()
     }
@@ -175,13 +196,14 @@ object RestClientBasedClientGenerator {
         private val inputBody = InputBodyGroup(endpoint.input.body, endpointExpression)
         private val outputs = OutputsGroup(endpoint.outputs, endpointExpression)
 
-        val inputs: List<String> = buildList {
-            addAll(parameters.requiredDeclarations)
-            addAll(inputHeaders.requiredDeclarations)
-            addAll(inputBody.inputs)
-            addAll(parameters.optionalDeclarations)
-            addAll(inputHeaders.optionalDeclarations)
-        }
+        val inputs: List<String> =
+            buildList {
+                addAll(parameters.requiredDeclarations)
+                addAll(inputHeaders.requiredDeclarations)
+                addAll(inputBody.inputs)
+                addAll(parameters.optionalDeclarations)
+                addAll(inputHeaders.optionalDeclarations)
+            }
 
         val uriArguments: String = parameters.argumentList
         val inputHeadersEncoding: String = inputHeaders.encodingCall
@@ -211,41 +233,46 @@ object RestClientBasedClientGenerator {
 
         init {
             val usedNames = mutableSetOf<String>()
-            entries = parameters.mapIndexed { index, parameter ->
-                val fallback = "parameter${index + 1}"
-                val baseName = when (parameter) {
-                    is PathVariableMetadata -> sanitizeIdentifier(parameter.name, fallback)
-                    is QueryParameterMetadata -> sanitizeIdentifier(parameter.name, fallback)
-                }
-                val name = uniqueName(baseName, usedNames)
-                val type = when (parameter) {
-                    is PathVariableMetadata -> parameter.type.render()
-                    is QueryParameterMetadata -> parameter.type.render()
-                }
-                when (parameter) {
-                    is PathVariableMetadata -> Entry(
-                        name = name,
-                        type = type,
-                        declaration = "$name: $type",
-                        hasDefault = false
-                    )
-                    is QueryParameterMetadata -> {
-                        val hasDefault = parameter.default != null
-                        val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
-                        val declaration = if (hasDefault) {
-                            "$name: $type = $parameterAccessor.asQueryParameter<$type>().getDefaultOrFail()"
-                        } else {
-                            "$name: $type"
+            entries =
+                parameters.mapIndexed { index, parameter ->
+                    val fallback = "parameter${index + 1}"
+                    val baseName =
+                        when (parameter) {
+                            is PathVariableMetadata -> sanitizeIdentifier(parameter.name, fallback)
+                            is QueryParameterMetadata -> sanitizeIdentifier(parameter.name, fallback)
                         }
-                        Entry(
-                            name = name,
-                            type = type,
-                            declaration = declaration,
-                            hasDefault = hasDefault
-                        )
+                    val name = uniqueName(baseName, usedNames)
+                    val type =
+                        when (parameter) {
+                            is PathVariableMetadata -> parameter.type.render()
+                            is QueryParameterMetadata -> parameter.type.render()
+                        }
+                    when (parameter) {
+                        is PathVariableMetadata ->
+                            Entry(
+                                name = name,
+                                type = type,
+                                declaration = "$name: $type",
+                                hasDefault = false
+                            )
+                        is QueryParameterMetadata -> {
+                            val hasDefault = parameter.default != null
+                            val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
+                            val declaration =
+                                if (hasDefault) {
+                                    "$name: $type = $parameterAccessor.asQueryParameter<$type>().getDefaultOrFail()"
+                                } else {
+                                    "$name: $type"
+                                }
+                            Entry(
+                                name = name,
+                                type = type,
+                                declaration = declaration,
+                                hasDefault = hasDefault
+                            )
+                        }
                     }
                 }
-            }
 
             requiredDeclarations = entries.filterNot { it.hasDefault }.map { it.declaration }
             optionalDeclarations = entries.filter { it.hasDefault }.map { it.declaration }
@@ -271,34 +298,36 @@ object RestClientBasedClientGenerator {
         val optionalDeclarations: List<String>
         private val argumentList: String
         val encodingCall: String
-            get() = if (count == 0) {
-                "emptyMap()"
-            } else {
-                val suffix = if (argumentList.isEmpty()) "()" else "($argumentList)"
-                "$endpointExpression.input.encodeInputHeaders$suffix"
-            }
+            get() =
+                if (count == 0) {
+                    "emptyMap()"
+                } else {
+                    val suffix = if (argumentList.isEmpty()) "()" else "($argumentList)"
+                    "$endpointExpression.input.encodeInputHeaders$suffix"
+                }
 
         init {
             val usedNames = mutableSetOf<String>()
-            entries = headers.mapIndexed { index, header ->
-                val fallback = "inputHeader${index + 1}"
-                val baseName = sanitizeIdentifier(header.name, fallback)
-                val name = uniqueName(baseName, usedNames)
-                val type = header.type.render()
-                val hasDefault = !header.required
-                val declaration =
-                    if (hasDefault) {
-                        "$name: $type = $endpointExpression.input.headers.item${index + 1}.asHeaderValues<$type>().getFirstValueOrFail()"
-                    } else {
-                        "$name: $type"
-                    }
-                Entry(
-                    name = name,
-                    type = type,
-                    declaration = declaration,
-                    hasDefault = hasDefault
-                )
-            }
+            entries =
+                headers.mapIndexed { index, header ->
+                    val fallback = "inputHeader${index + 1}"
+                    val baseName = sanitizeIdentifier(header.name, fallback)
+                    val name = uniqueName(baseName, usedNames)
+                    val type = header.type.render()
+                    val hasDefault = !header.required
+                    val declaration =
+                        if (hasDefault) {
+                            "$name: $type = $endpointExpression.input.headers.item${index + 1}.asHeaderValues<$type>().getFirstValueOrFail()"
+                        } else {
+                            "$name: $type"
+                        }
+                    Entry(
+                        name = name,
+                        type = type,
+                        declaration = declaration,
+                        hasDefault = hasDefault
+                    )
+                }
             count = entries.size
             requiredDeclarations = entries.filterNot { it.hasDefault }.map { it.declaration }
             optionalDeclarations = entries.filter { it.hasDefault }.map { it.declaration }
@@ -329,12 +358,22 @@ object RestClientBasedClientGenerator {
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
                 "JsonBody" -> {
-                    val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
+                    val valueType =
+                        body
+                            ?.type
+                            ?.arguments
+                            ?.firstOrNull()
+                            ?.render() ?: "Any"
                     inputs = listOf("inputBody: $valueType")
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
                 else -> {
-                    val valueType = body?.type?.arguments?.firstOrNull()?.render() ?: "Any"
+                    val valueType =
+                        body
+                            ?.type
+                            ?.arguments
+                            ?.firstOrNull()
+                            ?.render() ?: "Any"
                     inputs = listOf("inputBody: $valueType")
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
@@ -346,30 +385,33 @@ object RestClientBasedClientGenerator {
         outputs: List<OutputMetadata>,
         private val endpointExpression: String
     ) {
-        private val options: List<OutputOption> = outputs.mapIndexed { index, metadata ->
-            OutputOption(metadata = metadata, index = index + 1, endpointExpression = endpointExpression)
-        }
+        private val options: List<OutputOption> =
+            outputs.mapIndexed { index, metadata ->
+                OutputOption(metadata = metadata, index = index + 1, endpointExpression = endpointExpression)
+            }
 
         val requiresHeaders: Boolean = options.any(OutputOption::needsHeaders)
         val requiresBodyBytes: Boolean = options.any(OutputOption::needsBodyBytes)
 
-        val returnType: String = when {
-            options.isEmpty() -> "ResponseWithoutBody0"
-            options.size == 1 -> options.first().responseType
-            else -> {
-                val optionTypes = options.joinToString(", ") { it.responseType }
-                "OneOf${options.size}<$optionTypes>"
+        val returnType: String =
+            when {
+                options.isEmpty() -> "ResponseWithoutBody0"
+                options.size == 1 -> options.first().responseType
+                else -> {
+                    val optionTypes = options.joinToString(", ") { it.responseType }
+                    "OneOf${options.size}<$optionTypes>"
+                }
             }
-        }
 
-        val responseConstruction: String = when {
-            options.isEmpty() -> "        return ResponseWithoutBody0(status)"
-            options.size == 1 -> buildSingle(options.first())
-            else -> buildMultiple()
-        }
+        val responseConstruction: String =
+            when {
+                options.isEmpty() -> "        return ResponseWithoutBody0(status)"
+                options.size == 1 -> buildSingle(options.first())
+                else -> buildMultiple()
+            }
 
-        private fun buildSingle(option: OutputOption): String {
-            return buildString {
+        private fun buildSingle(option: OutputOption): String =
+            buildString {
                 if (option.needsHeaders) {
                     appendLine(option.buildHeaderDecodingBlock("        "))
                     if (option.needsBodyBytes) {
@@ -382,18 +424,18 @@ object RestClientBasedClientGenerator {
                 }
                 append("        return ${option.responseExpression(false)}")
             }
-        }
 
-        private fun buildMultiple(): String {
-            return buildString {
+        private fun buildMultiple(): String =
+            buildString {
                 appendLine("        val response = when {")
                 options.forEach { option ->
                     appendLine("            ${option.statusCondition} -> {")
-                    val innerBlocks = buildList {
-                        if (option.needsHeaders) add(option.buildHeaderDecodingBlock("                "))
-                        if (option.needsBodyBytes) add(option.buildBodyDecodingBlock("                "))
-                        add("                ${option.responseExpression(true)}")
-                    }.filter { it.isNotBlank() }
+                    val innerBlocks =
+                        buildList {
+                            if (option.needsHeaders) add(option.buildHeaderDecodingBlock("                "))
+                            if (option.needsBodyBytes) add(option.buildBodyDecodingBlock("                "))
+                            add("                ${option.responseExpression(true)}")
+                        }.filter { it.isNotBlank() }
                     appendLine(innerBlocks.joinToString(separator = "\n\n"))
                     appendLine("            }")
                 }
@@ -402,7 +444,6 @@ object RestClientBasedClientGenerator {
                 appendLine()
                 append("        return response")
             }
-        }
 
         private inner class OutputOption(
             private val metadata: OutputMetadata,
@@ -427,9 +468,10 @@ object RestClientBasedClientGenerator {
 
             init {
                 val usedNames = mutableSetOf<String>()
-                headerVarNames = metadata.headers.mapIndexed { idx, header ->
-                    uniqueName(sanitizeIdentifier(header.name, "output${index}Header${idx + 1}"), usedNames)
-                }
+                headerVarNames =
+                    metadata.headers.mapIndexed { idx, header ->
+                        uniqueName(sanitizeIdentifier(header.name, "output${index}Header${idx + 1}"), usedNames)
+                    }
                 responseType = computeResponseType()
             }
 
@@ -471,14 +513,14 @@ object RestClientBasedClientGenerator {
                 }
                 return buildString {
                     appendLine("${indent}val $headerParametersName = decodeHeaders${headerVarNames.size}(")
-                    appendLine("${indent}    headers${if (headerAccessors.isEmpty()) "" else ","}")
+                    appendLine("$indent    headers${if (headerAccessors.isEmpty()) "" else ","}")
                     headerAccessors.forEachIndexed { idx, accessor ->
                         val suffix = if (idx == headerAccessors.lastIndex) "" else ","
-                        appendLine("${indent}    $accessor$suffix")
+                        appendLine("$indent    $accessor$suffix")
                     }
-                    appendLine("${indent}).getOrElse {")
-                    appendLine("${indent}    error(\"Cannot decode headers: \" + it.joinToString(\": \") )")
-                    appendLine("${indent}}")
+                    appendLine("$indent).getOrElse {")
+                    appendLine("$indent    error(\"Cannot decode headers: \" + it.joinToString(\": \") )")
+                    appendLine("$indent}")
                     headerVarNames.forEachIndexed { idx, name ->
                         appendLine("${indent}val $name = $headerParametersName.item${idx + 1}.values")
                     }
@@ -491,7 +533,7 @@ object RestClientBasedClientGenerator {
                 }
                 return buildString {
                     appendLine("${indent}val decodedBody = $bodyDecoderExpr")
-                    appendLine("${indent}    .getOrElse { error(it.joinToString(\": \") ) }")
+                    appendLine("$indent    .getOrElse { error(it.joinToString(\": \") ) }")
                 }.trimEnd()
             }
 
@@ -506,4 +548,17 @@ object RestClientBasedClientGenerator {
         }
     }
 
+    private companion object {
+        private const val ID = "spring-restclient"
+        private const val TAPIK_PACKAGE = "dev.akif.tapik"
+        private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
+        private const val BASE_INTERFACE_NAME = "RestClientBasedClient"
+        private const val HTTP_PACKAGE_PREFIX = "$TAPIK_PACKAGE."
+        private val KOTLIN_COLLECTION_OVERRIDES =
+            mapOf(
+                "java.util.Map" to "kotlin.collections.Map",
+                "java.util.List" to "kotlin.collections.List",
+                "java.util.Set" to "kotlin.collections.Set"
+            )
+    }
 }

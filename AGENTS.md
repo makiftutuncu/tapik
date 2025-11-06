@@ -35,6 +35,7 @@
 - Dokka must use the latest released version without local patches or custom workarounds.
 - Apply a single shared Dokka configuration from the root build; modules should not duplicate task configuration.
 - KDoc is mandatory for every public API and must include type parameter, parameter, property, return value, throws, and reference tags where applicable.
+- Every code change must refresh the published Dokka output—update or add KDoc accordingly and run `./gradlew dokkaGenerateHtml` to ensure the HTML is regenerated before shipping.
 - Dokka builds should fail on undocumented symbols and publish source links back to `https://github.com/makiftutuncu/tapik`.
 - Generated documentation must include the footer `© {currentYear} Mehmet Akif Tütüncü`.
 

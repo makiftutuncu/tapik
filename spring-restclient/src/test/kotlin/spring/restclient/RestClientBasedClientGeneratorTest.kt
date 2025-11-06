@@ -1,13 +1,14 @@
-package dev.akif.tapik.plugin
+package dev.akif.tapik.spring.restclient
 
+import dev.akif.tapik.plugin.TapikGeneratorContext
 import dev.akif.tapik.plugin.metadata.*
 import org.junit.jupiter.api.io.CleanupMode
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.io.TempDir
 
 class RestClientBasedClientGeneratorTest {
     companion object {
@@ -20,14 +21,17 @@ class RestClientBasedClientGeneratorTest {
     fun `generate writes documented client interface`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator.generate(
+        RestClientBasedClientGenerator().generate(
             endpoints = listOf(sampleMetadata()),
-            rootDir = rootDir
+            context = testContext(rootDir)
         )
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/UserEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}")
+        assertTrue(
+            generated.exists(),
+            "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}"
+        )
 
         val content = generated.readText().trim()
         val expected =
@@ -49,14 +53,14 @@ class RestClientBasedClientGeneratorTest {
             |     */
             |    fun user(
 |        userId: UUID,
-|        X_Request_ID: String,
+|        xRequestId: String,
 |        page: Int = UserEndpoints.user.parameters.item2.asQueryParameter<Int>().getDefaultOrFail()
             |    ): Response1<String, URI> {
             |        val responseEntity = interpreter.send(
 |            method = UserEndpoints.user.method,
 |            uri = UserEndpoints.user.toURI(userId, page),
-            |            inputHeaders = UserEndpoints.user.input.encodeInputHeaders(X_Request_ID),
-|            inputBodyContentType = UserEndpoints.user.input.body.mediaType,
+            |            inputHeaders = UserEndpoints.user.input.encodeInputHeaders(xRequestId),
+            |            inputBodyContentType = UserEndpoints.user.input.body.mediaType,
             |            inputBody = ByteArray(0),
             |            outputs = UserEndpoints.user.outputs.toList()
             |        )
@@ -74,12 +78,12 @@ class RestClientBasedClientGeneratorTest {
             |        ).getOrElse {
             |            error("Cannot decode headers: " + it.joinToString(": ") )
             |        }
-            |        val Location = decodedOutput1Headers.item1.values
+            |        val location = decodedOutput1Headers.item1.values
             |
             |        val decodedBody = UserEndpoints.user.outputs.item1.body.codec.decode(bodyBytes)
             |            .getOrElse { error(it.joinToString(": ") ) }
             |
-            |        return Response1(status, decodedBody, Location)
+            |        return Response1(status, decodedBody, location)
             |    }
             |}
             """.trimMargin()
@@ -91,21 +95,33 @@ class RestClientBasedClientGeneratorTest {
     fun `generate sanitizes conflicting identifiers`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator.generate(
+        RestClientBasedClientGenerator().generate(
             endpoints = listOf(metadataWithChallengingNames()),
-            rootDir = rootDir
+            context = testContext(rootDir)
         )
 
         val generated =
             File(rootDir, "dev/akif/tapik/clients/WildEndpointsClient.kt")
-        assertTrue(generated.exists(), "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}")
+        assertTrue(
+            generated.exists(),
+            "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}"
+        )
 
         val content = generated.readText()
-        assertTrue(content.contains("fun `wild endpoint`("))
-        assertTrue(content.contains("_1st_id: Int"))
+        assertTrue(content.contains("fun wildEndpoint("))
+        assertTrue(content.contains("value1stId: Int"))
         assertTrue(content.contains("`class`: String"))
-        assertTrue(content.contains("WildEndpoints.wild.input.encodeInputHeaders(X_Trace_Id, X_Trace_Id_2)"))
+        assertTrue(content.contains("WildEndpoints.wild.input.encodeInputHeaders(xTraceId, xTraceId2)"))
     }
+
+    private fun testContext(rootDir: File): TapikGeneratorContext =
+        TapikGeneratorContext(
+            outputDirectory = rootDir,
+            generatedSourcesDirectory = rootDir,
+            log = {},
+            logDebug = {},
+            logWarn = { _, _ -> }
+        )
 
     private fun sampleMetadata(): HttpEndpointMetadata =
         HttpEndpointMetadata(
@@ -198,8 +214,18 @@ class RestClientBasedClientGeneratorTest {
                 InputMetadata(
                     headers =
                         listOf(
-                            HeaderMetadata("X-Trace-Id", TypeMetadata("kotlin.String"), required = true, values = emptyList()),
-                            HeaderMetadata("X Trace Id", TypeMetadata("kotlin.String"), required = false, values = emptyList())
+                            HeaderMetadata(
+                                "X-Trace-Id",
+                                TypeMetadata("kotlin.String"),
+                                required = true,
+                                values = emptyList()
+                            ),
+                            HeaderMetadata(
+                                "X Trace Id",
+                                TypeMetadata("kotlin.String"),
+                                required = false,
+                                values = emptyList()
+                            )
                         ),
                     body =
                         BodyMetadata(

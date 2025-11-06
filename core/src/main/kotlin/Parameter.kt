@@ -149,7 +149,7 @@ data class PathVariable<P : Any>(
 }
 
 /** Query parameter definition with optional default values.
- * @property default optional fallback when the caller omits the query parameter.
+ * @property default optional fallback when the caller omits the query parameter. Optional parameters must supply a default.
  */
 data class QueryParameter<Q : Any>(
     override val name: String,
@@ -159,13 +159,11 @@ data class QueryParameter<Q : Any>(
 ) : Parameter<Q> {
     override val position: ParameterPosition = ParameterPosition.Query
 
-    /**
-     * Returns an optional version of this parameter with no default value.
-     *
-     * @return a copy of the parameter marked as optional with its default cleared.
-     */
-    val optional: QueryParameter<Q>
-        get() = copy(required = false, default = null)
+    init {
+        if (!required) {
+            requireNotNull(default) { "Optional query parameter '$name' must define a default value." }
+        }
+    }
 
     /**
      * Returns an optional version of this parameter with the supplied [default] value.

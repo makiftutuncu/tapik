@@ -4,6 +4,7 @@ import dev.akif.tapik.*
 import dev.akif.tapik.plugin.metadata.*
 import java.io.File
 import java.lang.reflect.Method
+import java.util.ServiceLoader
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
@@ -46,8 +47,8 @@ class GenerateTask(
 
         val urls = (listOf(compiledDir) + config.additionalClasspathDirectories).map { it.toURI().toURL() }.toTypedArray()
 
-        val endpoints = URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
-            scanForHttpEndpoints(compiledDir, pkgs, classLoader).mapNotNull { signature ->
+        URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
+            val endpoints = scanForHttpEndpoints(compiledDir, pkgs, classLoader).mapNotNull { signature ->
                 resolveEndpoint(signature, classLoader)?.let { endpoint ->
                     runCatching { signature.toMetadata(endpoint) }
                         .onFailure { error ->
@@ -56,13 +57,19 @@ class GenerateTask(
                         .getOrNull()
                 }
             }
+
+            writeReport(endpoints, generationOutputDirectory)
+
+            val generatorContext = TapikGeneratorContext(
+                outputDirectory = generationOutputDirectory,
+                generatedSourcesDirectory = generatedSourcesDir,
+                log = { message -> log(message, null) },
+                logDebug = { message -> logDebug(message, null) },
+                logWarn = { message, throwable -> logWarn(message, throwable) }
+            )
+
+            invokeGenerators(endpoints, classLoader, generatorContext)
         }
-
-        writeReport(endpoints, generationOutputDirectory)
-
-        RestClientBasedClientGenerator.generate(endpoints, generatedSourcesDir)
-        SpringWebMvcControllerGenerator.generate(endpoints, generatedSourcesDir)
-        MarkdownDocumentationGenerator.generate(endpoints, generationOutputDirectory)
     }
 
     private fun writeReport(
@@ -71,9 +78,41 @@ class GenerateTask(
     ) {
         val file = outputDir.resolve("tapik-endpoints.txt")
         file.writeText(
-            endpoints.joinToString(separator = System.lineSeparator()) { it.toString() }
+            endpoints.joinToString(separator = System.lineSeparator() + System.lineSeparator()) { it.toString() }
         )
         log("[tapik] Endpoint scan report is written to: ${file.absolutePath}", null)
+    }
+
+    private fun invokeGenerators(
+        endpoints: List<HttpEndpointMetadata>,
+        classLoader: ClassLoader,
+        context: TapikGeneratorContext
+    ) {
+        val requestedGeneratorIds = config.enabledGeneratorIds
+        if (requestedGeneratorIds.isEmpty()) {
+            log("[tapik] No Tapik generators configured; skipping code generation.", null)
+            return
+        }
+
+        val availableGenerators = ServiceLoader.load(TapikGenerator::class.java, classLoader).toList()
+        val generatorsById = availableGenerators.associateBy { it.id }
+
+        requestedGeneratorIds
+            .filterNot(generatorsById::containsKey)
+            .forEach { id ->
+                logWarn("[tapik] Generator '$id' is configured but not available on the classpath.", null)
+            }
+
+        requestedGeneratorIds.mapNotNull(generatorsById::get).forEach { generator ->
+            log("[tapik] Running generator '${generator.id}'", null)
+            runCatching {
+                generator.generate(endpoints, context)
+            }.onSuccess {
+                log("[tapik] Generator '${generator.id}' completed successfully.", null)
+            }.onFailure { error ->
+                logWarn("[tapik] Generator '${generator.id}' failed.", error)
+            }
+        }
     }
 
     private fun scanForHttpEndpoints(
@@ -262,15 +301,10 @@ class GenerateTask(
         if (parameter !is QueryParameter<*>) {
             return typeMetadata
         }
-        val defaultValue = parameter.default
-        if (parameter.required || defaultValue != null) {
+        if (parameter.required) {
             return typeMetadata
         }
-        return if (typeMetadata.nullable == true) {
-            typeMetadata
-        } else {
-            typeMetadata.copy(nullable = true)
-        }
+        return typeMetadata
     }
 
     private fun List<Header<*>>.buildHeaderMetadata(

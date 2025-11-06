@@ -25,11 +25,23 @@ inline fun <reified P : Any> path(
 val path: PathVariable.Companion = PathVariable.Companion
 
 /**
- * Creates a query parameter with the given [name], [codec], and optional default.
+ * Creates a query parameter with the given [name] and [codec].
  *
  * @param name query parameter name.
  * @param codec codec used to encode and decode the parameter value.
- * @param required whether the caller must provide the parameter.
+ * @return query parameter definition.
+ * @see QueryParameter.optional
+ */
+fun <Q : Any> query(
+    name: String,
+    codec: StringCodec<Q>
+): QueryParameter<Q> = QueryParameter(name, codec, required = false, default = null)
+
+/**
+ * Creates a query parameter with the given [name], [codec], and a default.
+ *
+ * @param name query parameter name.
+ * @param codec codec used to encode and decode the parameter value.
  * @param default optional default value used when callers omit the parameter.
  * @return query parameter definition honouring the required/default combination.
  * @see QueryParameter.optional
@@ -37,9 +49,8 @@ val path: PathVariable.Companion = PathVariable.Companion
 fun <Q : Any> query(
     name: String,
     codec: StringCodec<Q>,
-    required: Boolean,
-    default: Q?
-): QueryParameter<Q> = QueryParameter(name, codec, required, default)
+    default: Q
+): QueryParameter<Q> = QueryParameter(name, codec, required = false, default)
 
 /** Shorthand accessor to factory helpers for query parameters. */
 val query: QueryParameter.Companion = QueryParameter.Companion

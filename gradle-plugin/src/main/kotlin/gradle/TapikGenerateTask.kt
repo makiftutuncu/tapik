@@ -5,6 +5,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import java.io.File
 
@@ -40,6 +41,10 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:Input
     abstract val additionalClassDirectories: ListProperty<String>
 
+    /** Identifiers of generators that should be executed. */
+    @get:Input
+    abstract val enabledGeneratorIds: SetProperty<String>
+
     /** Runtime classpath used when analysing endpoint bytecode via reflection fallback. */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
@@ -62,7 +67,8 @@ abstract class TapikGenerateTask : DefaultTask() {
                 generatedSourcesDirectory = generatedSourcesDirectory.get().asFile,
                 endpointPackages = endpointPackages.get(),
                 compiledClassesDirectory = compiledClassesDirectory.get().asFile,
-                additionalClasspathDirectories = compiledClassesDirectories
+                additionalClasspathDirectories = compiledClassesDirectories,
+                enabledGeneratorIds = enabledGeneratorIds.getOrElse(emptySet())
             ),
             log = logger::lifecycle,
             logDebug = logger::debug,

@@ -21,13 +21,14 @@ class TapikGradlePlugin : Plugin<Project> {
         val tapikGenerate = target.tasks.register<TapikGenerateTask>("tapikGenerate") {
             group = "tapik"
             description = "Generates Tapik outputs"
-            endpointPackages.set(extension.springRestClient.endpointPackages)
+            endpointPackages.set(target.provider { extension.resolvedEndpointPackages() })
             outputDirectory.set(target.layout.buildDirectory.dir("generated"))
             sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
             generatedSourcesDirectory.set(generatedSources)
             additionalClassDirectories.set(collectClassDirectories(target))
             runtimeClasspath.from(target.configurations.getByName("runtimeClasspath"))
+            enabledGeneratorIds.set(target.provider { extension.configuredGeneratorIds() })
         }
 
         tapikGenerate.configure {
