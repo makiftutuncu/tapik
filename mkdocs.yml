@@ -46,6 +46,18 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Guides:
+    - Getting Started: getting-started.md
+    - User Guide: user-guide.md
+  - Concepts:
+    - Type Safety: concepts/type-safety.md
+  - Code Generation:
+    - Overview: code-generation/index.md
+    - Spring RestClient Clients: code-generation/client.md
+    - Spring WebMVC Controllers: code-generation/server.md
+    - Markdown Documentation: code-generation/documentation.md
+  - Contributing:
+    - Development Guide: development.md
   - API Reference: api/index.html
 
 # Show “Edit this page” buttons that point to docs/ paths on main

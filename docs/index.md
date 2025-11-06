@@ -1,3 +1,43 @@
-# tapik
+# Tapik
 
-TODO
+Tapik lets you describe HTTP endpoints once in Kotlin and generate clients, servers, and human-readable documentation from the same source of truth. The library captures full type information, headers, URI parameters, and status-driven flows to keep runtime code and docs in sync.
+
+```mermaid
+flowchart LR
+    A[Endpoint DSL<br/>tapik modules] --> B[Gradle build<br/>classes]
+    B --> C[[Tapik Gradle Plugin]]
+    C -->|scans| D[Endpoint metadata]
+    C -->|runs generators| E[Spring RestClient clients]
+    C -->|runs generators| F[Spring WebMVC controllers]
+    C -->|runs generators| G[Markdown docs]
+    D --> H[tapik-endpoints.txt<br/>report]
+```
+
+## Key Capabilities
+
+- Declarative DSL to model HTTP verbs, URI templates, headers, bodies, and status-driven responses.
+- Classpath scanning that keeps generated artefacts aligned with compiled endpoint definitions.
+- Pluggable generator architecture powered by Java `ServiceLoader`; enable only what you need.
+- First-party generators for Spring RestClient clients, Spring WebMVC controllers, and Markdown documentation.
+- Kotlin-first ergonomics: strongly typed parameters, Arrow interoperability, and codec abstractions for custom payloads.
+
+## Module Overview
+
+| Module | Purpose | Highlights |
+| --- | --- | --- |
+| `core` | Endpoint DSL and supporting types | Path/query DSL, headers, status matching, response tuples, `OneOf` unions |
+| `codec` | Built-in codecs | String & byte codecs, media-type helpers |
+| `jackson` | Jackson integration | JSON codecs powered by Jackson ObjectMapper |
+| `spring-restclient` | Client generator | Produces RestClient-based clients + interpreter |
+| `spring-webmvc` | Server generator | Emits controller contracts + response mapping helpers |
+| `common-plugin` | Generator runtime | Bytecode scanning, metadata model, Markdown generator |
+| `gradle-plugin` | Build integration | Registers `tapikGenerate`, exposes DSL to select generators |
+
+## Next Steps
+
+- Start with [Getting Started](getting-started.md) for a hands-on walkthrough.
+- Read the [User Guide](user-guide.md) to apply the Gradle plugin and define endpoints.
+- Explore [Code Generation](code-generation/index.md) guidance for each generator.
+- Dive into [Type Safety](concepts/type-safety.md) to understand tuples and unions.
+- Contribute using the [Development Guide](development.md).
+- Browse the generated [API Reference](api/index.html) for library internals.

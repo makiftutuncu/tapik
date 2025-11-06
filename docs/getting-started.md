@@ -1,0 +1,113 @@
+# Getting Started
+
+Welcome! This guide walks you through the smallest possible Tapik project: adding the dependency, configuring the Gradle plugin, declaring an endpoint, and running the generators. You do not need prior knowledge of Tapik—follow the numbered steps and you will generate code and documentation within minutes.
+
+## 1. Choose the Modules You Need
+
+Tapik is split into JVM artifacts so you can pick only what your service requires:
+
+| Use Case | Dependency |
+| --- | --- |
+| Define endpoints, parameters, headers, codecs | `implementation("dev.akif.tapik:core:0.1.0")` |
+| Use ready-made string/byte codecs | `implementation("dev.akif.tapik:codec:0.1.0")` |
+| Encode/decode JSON with Jackson | `implementation("dev.akif.tapik:jackson:0.1.0")` |
+| Generate Spring RestClient clients | `implementation("dev.akif.tapik:spring-restclient:0.1.0")` |
+| Generate Spring WebMVC controllers | `implementation("dev.akif.tapik:spring-webmvc:0.1.0")` |
+
+Add them to your `build.gradle.kts` alongside the Kotlin JVM plugin.
+
+## 2. Apply the Tapik Gradle Plugin
+
+Tapik integrates with Gradle to scan compiled classes and run generators. Enable the plugin and declare the packages that contain your endpoints:
+
+```kotlin
+plugins {
+    kotlin("jvm") version "2.2.20"
+    id("dev.akif.tapik.plugin.gradle") version "0.1.0"
+}
+
+dependencies {
+    implementation("dev.akif.tapik:core:0.1.0")
+    implementation("dev.akif.tapik:codec:0.1.0")
+    implementation("dev.akif.tapik:jackson:0.1.0")
+    implementation("dev.akif.tapik:spring-restclient:0.1.0")
+}
+
+tapik {
+    endpointPackages("com.acme.catalog")
+
+    springRestClient { }
+    markdownDocumentation { }
+}
+```
+
+- `endpointPackages` should include every package that holds `val` properties returning `HttpEndpoint`.
+- Declaring `springRestClient { }` or `markdownDocumentation { }` is enough to opt into the corresponding generator; future options will live inside those blocks.
+
+## 3. Declare Your First Endpoint
+
+Create a Kotlin file in `src/main/kotlin/com/acme/catalog/ProductEndpoints.kt` and describe the HTTP contract using the Tapik DSL:
+
+```kotlin
+package com.acme.catalog
+
+import dev.akif.tapik.*
+import dev.akif.tapik.codec.StringCodecs
+import dev.akif.tapik.jackson.jsonBody
+
+object ProductEndpoints {
+    private val productId = path.uuid("productId")
+
+    val getProduct by http(
+        description = "Fetch product details",
+        details = "Returns localized information when the optional locale query parameter is supplied."
+    ) {
+        get.uri(root / "products" / productId + query.string("locale").optional("en-US"))
+            .input(header.uuid("X-Request-Id"))
+            .output(Status.OK) { jsonBody<ProductView>("product") }
+            .output(Status.NOT_FOUND) { jsonBody<ProblemDetails>("problem") }
+    }
+}
+```
+
+The DSL captures everything Tapik needs:
+
+- Path and query parameters (with codecs and defaults).
+- Request headers, bodies, media types.
+- Response variants keyed by status matchers.
+
+## 4. Compile and Generate
+
+Run the Tapik task after the Kotlin compiler produces bytecode:
+
+```bash
+./gradlew tapikGenerate
+```
+
+Behind the scenes the plugin:
+
+1. Scans compiled classes under the packages you configured.
+2. Writes a report to `build/generated/tapik-endpoints.txt`.
+3. Runs the enabled generators (Spring RestClient, Markdown docs, etc.).
+
+You will find the outputs in `build/generated/`:
+
+| Artefact | Location |
+| --- | --- |
+| Kotlin sources for clients/controllers | `build/generated/sources/tapik/main/kotlin/...` |
+| Markdown API summary | `build/generated/API.md` |
+| Scan report | `build/generated/tapik-endpoints.txt` |
+
+Gradle automatically adds the generated Kotlin sources to the `main` source set, so `./gradlew build` compiles them without extra configuration.
+
+## 5. Consume the Generated Code
+
+- Implement `RestClientBasedClient` interfaces or wire them via Spring dependency injection.
+- Add `ProductEndpoints.getProduct` to your controllers and convert responses to `ResponseEntity` using helper extensions.
+- Share the Markdown file with other teams to document your API contract.
+
+## What’s Next?
+
+- Dive into the [User Guide](user-guide.md) for deeper Gradle configuration and troubleshooting tips.
+- Explore Tapik’s [type-safety model](concepts/type-safety.md) to learn how `AllOf` and `OneOf` keep your code exhaustive.
+- Check out the [Code Generation](code-generation/index.md) section for strategy-specific guides.
