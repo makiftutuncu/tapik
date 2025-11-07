@@ -1,11 +1,11 @@
-# Tapik
+# tapik
 
-Tapik lets you describe HTTP endpoints once in Kotlin and generate clients, servers, and human-readable documentation from the same source of truth. The library captures full type information, headers, URI parameters, and status-driven flows to keep runtime code and docs in sync.
+tapik lets you describe HTTP endpoints once in Kotlin and generate clients, servers, and human-readable documentation from the same source of truth. The library captures full type information, headers, URI parameters, and status-driven flows to keep runtime code and docs in sync.
 
 ```mermaid
 flowchart LR
     A[Endpoint DSL<br/>tapik modules] --> B[Gradle build<br/>classes]
-    B --> C[[Tapik Gradle Plugin]]
+    B --> C[[tapik Gradle Plugin]]
     C -->|scans| D[Endpoint metadata]
     C -->|runs generators| E[Spring RestClient clients]
     C -->|runs generators| F[Spring WebMVC controllers]

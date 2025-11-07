@@ -1,9 +1,9 @@
 # User Guide
 
-This guide walks you through installing the Tapik Gradle plugin, declaring endpoints with the Kotlin DSL, and running the generators that create clients, servers, and documentation.
+This guide walks you through installing the tapik Gradle plugin, declaring endpoints with the Kotlin DSL, and running the generators that create clients, servers, and documentation.
 
 !!! tip
-    New to Tapik? Start with [Getting Started](getting-started.md) for a step-by-step tutorial before diving into the full plugin reference below.
+    New to tapik? Start with [Getting Started](getting-started.md) for a step-by-step tutorial before diving into the full plugin reference below.
 
 ## Prerequisites
 
@@ -95,7 +95,7 @@ Highlights:
 
 ## Running Generation
 
-Tapik registers an aggregated `tapikGenerate` task. It depends on `classes` for the current project and its siblings to ensure bytecode is available.
+tapik registers an aggregated `tapikGenerate` task. It depends on `classes` for the current project and its siblings to ensure bytecode is available.
 
 ```bash
 ./gradlew :service:tapikGenerate
@@ -121,7 +121,7 @@ When checking generated Kotlin into source control:
 
 - Run `./gradlew tapikGenerate` after any endpoint changes.
 - Review generated types as you would review hand-written code; they carry KDoc extracted from your endpoints.
-- For reproducibility, make sure the versions of Tapik dependencies are pinned via a version catalog or BOM.
+- For reproducibility, make sure the versions of tapik dependencies are pinned via a version catalog or BOM.
 
 ## Troubleshooting
 

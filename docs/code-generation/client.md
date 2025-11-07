@@ -55,7 +55,7 @@ interface ProductEndpointsClient : RestClientBasedClient {
 | No body, headers only | `ResponseWithoutBodyN<Header1, …>` |
 | Multiple outputs | `OneOfK<…>` wrapping the corresponding `ResponseX` type |
 
-You can pattern match on `OneOfK` (provided by Tapik’s `core` module) to branch on status-based responses.
+You can pattern match on `OneOfK` (provided by tapik’s `core` module) to branch on status-based responses.
 
 ## Header and Body Handling
 

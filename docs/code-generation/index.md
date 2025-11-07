@@ -1,6 +1,6 @@
 # Code Generation Overview
 
-Tapik generators transform endpoint metadata into artefacts during the `tapikGenerate` Gradle task. Generators are loaded with Java `ServiceLoader` so any dependency placed on the project or build classpath can contribute new outputs.
+tapik generators transform endpoint metadata into artefacts during the `tapikGenerate` Gradle task. Generators are loaded with Java `ServiceLoader` so any dependency placed on the project or build classpath can contribute new outputs.
 
 ## Built-in Generators
 
@@ -38,14 +38,14 @@ Notable behaviour:
 - Metadata, scan logs, and warnings are written using Gradle's logging APIs for easy diagnosis (`--info` for more detail).
 - Only configured generator IDs are executed; missing IDs log warnings without failing the build.
 
-## Extending Tapik
+## Extending tapik
 
 1. Implement `dev.akif.tapik.plugin.TapikGenerator` and package it in a module on the build classpath.
 2. Register your implementation under `META-INF/services/dev.akif.tapik.plugin.TapikGenerator`.
 3. Choose a unique `id`. Users enable it via `tapik { customGenerator { } }` or by manually populating the `enabledGeneratorIds` list.
 4. Use the supplied `TapikGeneratorContext` to discover output directories and log messages.
 
-Custom generators can co-exist with the provided ones and share the endpoint metadata that Tapik already extracts. Keep your generator pure and deterministic—Gradle caches `tapikGenerate` when outputs do not change.
+Custom generators can co-exist with the provided ones and share the endpoint metadata that tapik already extracts. Keep your generator pure and deterministic—Gradle caches `tapikGenerate` when outputs do not change.
 
 Proceed to the dedicated pages to learn about server, client, and documentation generation specifics:
 

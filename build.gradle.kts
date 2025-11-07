@@ -1,4 +1,3 @@
-import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import java.net.URI
 import org.gradle.api.Task
 import org.gradle.api.publish.PublishingExtension
@@ -13,15 +12,17 @@ import org.jetbrains.dokka.gradle.tasks.DokkaGenerateModuleTask
 import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.time.LocalDate
 
 val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
 val projectVersion = version.toString()
 val moduleTasks = mutableListOf<TaskProvider<DokkaGenerateModuleTask>>()
+val stagingRepositoryDirectory = layout.buildDirectory.dir("staging-deploy")
 
 plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.ktlint) apply false
-    alias(libs.plugins.nexusPublish)
+    alias(libs.plugins.jreleaser)
 }
 
 dependencies {
@@ -34,7 +35,7 @@ extensions.configure<DokkaExtension>("dokka") {
     pluginsConfiguration.named<DokkaHtmlPluginParameters>(
         DokkaHtmlPluginParameters.DOKKA_HTML_PARAMETERS_NAME
     ) {
-        footerMessage.set("© 2025 Mehmet Akif Tütüncü")
+        footerMessage.set("&#169; ${LocalDate.now().year} Mehmet Akif Tütüncü")
     }
     dokkaPublications.named("html") {
         outputDirectory.set(layout.buildDirectory.dir("dokka/html"))
@@ -83,10 +84,14 @@ val publishable = setOf(
     ":spring-restclient",
     ":spring-webmvc"
 )
-val signingKey = providers.gradleProperty("signingInMemoryKey").orNull
-val signingKeyPassword = providers.gradleProperty("signingInMemoryKeyPassword").orNull
-val mavenCentralUsername = providers.gradleProperty("mavenCentralUsername").orNull
-val mavenCentralPassword = providers.gradleProperty("mavenCentralPassword").orNull
+val signingKey =
+    providers.environmentVariable("JRELEASER_GPG_SECRET_KEY").orElse(
+        providers.gradleProperty("signingInMemoryKey")
+    ).orNull
+val signingKeyPassword =
+    providers.environmentVariable("JRELEASER_GPG_PASSPHRASE").orElse(
+        providers.gradleProperty("signingInMemoryKeyPassword")
+    ).orNull
 val shouldSignPublications = !signingKey.isNullOrBlank() && !signingKeyPassword.isNullOrBlank()
 
 val ktlintCheckTasks = mutableListOf<TaskProvider<Task>>()
@@ -115,7 +120,7 @@ subprojects {
             pluginsConfiguration.named<DokkaHtmlPluginParameters>(
                 DokkaHtmlPluginParameters.DOKKA_HTML_PARAMETERS_NAME
             ) {
-                footerMessage.set("© 2025 Mehmet Akif Tütüncü")
+                footerMessage.set("&#169; ${LocalDate.now().year} Mehmet Akif Tütüncü")
             }
 
             dokkaSourceSets.configureEach {
@@ -189,6 +194,12 @@ subprojects {
                         }
                     }
                 }
+                repositories {
+                    maven {
+                        name = "Staging"
+                        url = uri(stagingRepositoryDirectory.get().asFile)
+                    }
+                }
             }
             if (shouldSignPublications) {
                 pluginManager.apply("signing")
@@ -239,18 +250,6 @@ gradle.projectsEvaluated {
 
         tasks.named("check").configure {
             dependsOn(aggregate)
-        }
-    }
-}
-
-extensions.configure<NexusPublishExtension>("nexusPublishing") {
-    packageGroup.set("dev.akif.tapik")
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            mavenCentralUsername?.let { username.set(it) }
-            mavenCentralPassword?.let { password.set(it) }
         }
     }
 }

@@ -1,10 +1,10 @@
 # Getting Started
 
-Welcome! This guide walks you through the smallest possible Tapik project: adding the dependency, configuring the Gradle plugin, declaring an endpoint, and running the generators. You do not need prior knowledge of Tapik—follow the numbered steps and you will generate code and documentation within minutes.
+Welcome! This guide walks you through the smallest possible tapik project: adding the dependency, configuring the Gradle plugin, declaring an endpoint, and running the generators. You do not need prior knowledge of tapik—follow the numbered steps and you will generate code and documentation within minutes.
 
 ## 1. Choose the Modules You Need
 
-Tapik is split into JVM artifacts so you can pick only what your service requires:
+tapik is split into JVM artifacts so you can pick only what your service requires:
 
 | Use Case | Dependency |
 | --- | --- |
@@ -16,9 +16,9 @@ Tapik is split into JVM artifacts so you can pick only what your service require
 
 Add them to your `build.gradle.kts` alongside the Kotlin JVM plugin.
 
-## 2. Apply the Tapik Gradle Plugin
+## 2. Apply the tapik Gradle Plugin
 
-Tapik integrates with Gradle to scan compiled classes and run generators. Enable the plugin and declare the packages that contain your endpoints:
+tapik integrates with Gradle to scan compiled classes and run generators. Enable the plugin and declare the packages that contain your endpoints:
 
 ```kotlin
 plugins {
@@ -46,7 +46,7 @@ tapik {
 
 ## 3. Declare Your First Endpoint
 
-Create a Kotlin file in `src/main/kotlin/com/acme/catalog/ProductEndpoints.kt` and describe the HTTP contract using the Tapik DSL:
+Create a Kotlin file in `src/main/kotlin/com/acme/catalog/ProductEndpoints.kt` and describe the HTTP contract using the tapik DSL:
 
 ```kotlin
 package com.acme.catalog
@@ -70,7 +70,7 @@ object ProductEndpoints {
 }
 ```
 
-The DSL captures everything Tapik needs:
+The DSL captures everything tapik needs:
 
 - Path and query parameters (with codecs and defaults).
 - Request headers, bodies, media types.
@@ -78,7 +78,7 @@ The DSL captures everything Tapik needs:
 
 ## 4. Compile and Generate
 
-Run the Tapik task after the Kotlin compiler produces bytecode:
+Run the tapik task after the Kotlin compiler produces bytecode:
 
 ```bash
 ./gradlew tapikGenerate
@@ -109,5 +109,5 @@ Gradle automatically adds the generated Kotlin sources to the `main` source set,
 ## What’s Next?
 
 - Dive into the [User Guide](user-guide.md) for deeper Gradle configuration and troubleshooting tips.
-- Explore Tapik’s [type-safety model](concepts/type-safety.md) to learn how `AllOf` and `OneOf` keep your code exhaustive.
+- Explore tapik’s [type-safety model](concepts/type-safety.md) to learn how `AllOf` and `OneOf` keep your code exhaustive.
 - Check out the [Code Generation](code-generation/index.md) section for strategy-specific guides.

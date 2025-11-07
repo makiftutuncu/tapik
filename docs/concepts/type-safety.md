@@ -1,6 +1,6 @@
-# Type Safety in Tapik
+# Type Safety in tapik
 
-Tapik’s primary goal is to keep HTTP contracts type-safe from declaration to runtime. The DSL models every piece of an endpoint—parameters, headers, bodies, and response branches—with immutable, strongly-typed structures. Generators rely on these structures to emit Kotlin that cannot drift from the original definition.
+tapik’s primary goal is to keep HTTP contracts type-safe from declaration to runtime. The DSL models every piece of an endpoint—parameters, headers, bodies, and response branches—with immutable, strongly-typed structures. Generators rely on these structures to emit Kotlin that cannot drift from the original definition.
 
 ## Building Blocks
 
@@ -11,7 +11,7 @@ Tapik’s primary goal is to keep HTTP contracts type-safe from declaration to r
 
 ### AllOf and Tuple Aliases
 
-`AllOf` is a family of interfaces (`AllOf0` … `AllOf10`) with `itemN` accessors. Concrete Tapik types reuse these through the `Tuple` façade so you do not manipulate `AllOf` directly.
+`AllOf` is a family of interfaces (`AllOf0` … `AllOf10`) with `itemN` accessors. Concrete tapik types reuse these through the `Tuple` façade so you do not manipulate `AllOf` directly.
 
 ```kotlin
 typealias Headers3<H1, H2, H3> =
@@ -24,7 +24,7 @@ Because `Headers3` implements `AllOf4`, the compiler knows:
 - `headers.item2` is `Header<H1>`, preserving the codec type.
 - Iteration is still possible via the `Listable` interface.
 
-Tapik ships aliases for each arity so you can declare headers, parameters, and responses without manual tuple plumbing:
+tapik ships aliases for each arity so you can declare headers, parameters, and responses without manual tuple plumbing:
 
 | Alias | Description |
 | --- | --- |
@@ -54,7 +54,7 @@ Generators lean on these unions in two places:
 
 ### AllOf + OneOf Together
 
-`Outputs` is an `AllOf` tuple of `Output` definitions. At runtime, responses are wrapped in either a concrete `ResponseX` (single output) or a `OneOfK<ResponseX, …>` (multiple outputs). This combination gives Tapik strong guarantees:
+`Outputs` is an `AllOf` tuple of `Output` definitions. At runtime, responses are wrapped in either a concrete `ResponseX` (single output) or a `OneOfK<ResponseX, …>` (multiple outputs). This combination gives tapik strong guarantees:
 
 1. The number and order of outputs in the DSL matches the generated code and Markdown documentation.
 2. Header codecs are preserved all the way to runtime decoding (`decodeHeadersN`).
@@ -77,7 +77,7 @@ flowchart TD
 1. **Prefer aliases**: use `Headers3` instead of wiring `Tuple3` manually. The aliases pick correct variance and marker interfaces.
 2. **Let the DSL infer tuples**: `input(header.uuid("X-Request-Id"))` returns `Input<Headers1<UUID>, EmptyBody>` automatically—no explicit types required.
 3. **Use `select` in clients**: exhaustively pattern match `OneOf` results to enforce business logic for every status.
-4. **Return the right union option**: when implementing generated controllers, wrap alternate responses in `OneOfK.OptionN` to keep Tapik aware of which branch fired.
+4. **Return the right union option**: when implementing generated controllers, wrap alternate responses in `OneOfK.OptionN` to keep tapik aware of which branch fired.
 5. **Leverage codecs**: bodies and headers carry codecs, so even custom `AllOf` combinations continue to encode/decode data safely.
 
-Understanding `AllOf` and `OneOf` is the key to appreciating Tapik: the DSL describes APIs once, and the type system guarantees that every generated artifact agrees with the definition. Take a look at the runtime helpers (`EncodeHeadersMethods.kt`, `DecodeHeadersMethods.kt`, `Responses.kt`) if you want to explore further.
+Understanding `AllOf` and `OneOf` is the key to appreciating tapik: the DSL describes APIs once, and the type system guarantees that every generated artifact agrees with the definition. Take a look at the runtime helpers (`EncodeHeadersMethods.kt`, `DecodeHeadersMethods.kt`, `Responses.kt`) if you want to explore further.

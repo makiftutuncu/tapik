@@ -1,6 +1,6 @@
 # Development & Contribution Guide
 
-Tapik uses a multi-module Gradle build with Kotlin DSL, configuration cache, and extensive code generation. Follow these practices when contributing.
+tapik uses a multi-module Gradle build with Kotlin DSL, configuration cache, and extensive code generation. Follow these practices when contributing.
 
 ## Repository Layout
 
@@ -31,7 +31,7 @@ Tips:
 ## Coding Standards
 
 - Kotlin style follows `.editorconfig` (4-space indent, 120-char lines, LF endings).
-- Avoid wildcard imports unless they simplify Tapik package usage.
+- Avoid wildcard imports unless they simplify tapik package usage.
 - Keep packages under `dev.akif.tapik.<module>`; respect the flattened directory structure.
 - Document every public API with KDoc, including type parameters, parameters, returns, and throws.
 - Generated sources belong under `build/` or `generated/`; keep them out of VCS unless explicitly required.
@@ -66,4 +66,4 @@ Tips:
 6. Open a PR with intent, summary, linked issues, and screenshots/logs for user-visible changes.
 7. Request review from the relevant CODEOWNERS.
 
-By following these guidelines, you keep Tapik’s generators deterministic, its DSL approachable, and its documentation trustworthy.
+By following these guidelines, you keep tapik’s generators deterministic, its DSL approachable, and its documentation trustworthy.

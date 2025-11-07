@@ -1,6 +1,6 @@
 # Markdown Documentation
 
-Tapik ships a Markdown generator (`markdown-docs`) that produces a lightweight API reference from your endpoint definitions. This is useful for sharing REST contracts with stakeholders who do not read the Kotlin source.
+tapik ships a Markdown generator (`markdown-docs`) that produces a lightweight API reference from your endpoint definitions. This is useful for sharing REST contracts with stakeholders who do not read the Kotlin source.
 
 ## Output Layout
 
