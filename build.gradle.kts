@@ -1,7 +1,11 @@
+import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import java.net.URI
 import org.gradle.api.Task
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
@@ -17,6 +21,7 @@ val moduleTasks = mutableListOf<TaskProvider<DokkaGenerateModuleTask>>()
 plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.nexusPublish)
 }
 
 dependencies {
@@ -78,6 +83,11 @@ val publishable = setOf(
     ":spring-restclient",
     ":spring-webmvc"
 )
+val signingKey = providers.gradleProperty("signingInMemoryKey").orNull
+val signingKeyPassword = providers.gradleProperty("signingInMemoryKeyPassword").orNull
+val mavenCentralUsername = providers.gradleProperty("mavenCentralUsername").orNull
+val mavenCentralPassword = providers.gradleProperty("mavenCentralPassword").orNull
+val shouldSignPublications = !signingKey.isNullOrBlank() && !signingKeyPassword.isNullOrBlank()
 
 val ktlintCheckTasks = mutableListOf<TaskProvider<Task>>()
 
@@ -155,9 +165,36 @@ subprojects {
                         artifactId = project.name
                         pom {
                             name.set(project.name)
+                            description.set("tapik ${project.name}")
                             url.set("https://github.com/makiftutuncu/tapik")
+                            licenses {
+                                license {
+                                    name.set("MIT License")
+                                    url.set("https://opensource.org/licenses/MIT")
+                                    distribution.set("repo")
+                                }
+                            }
+                            developers {
+                                developer {
+                                    id.set("makiftutuncu")
+                                    name.set("Mehmet Akif Tütüncü")
+                                    url.set("https://akif.dev")
+                                }
+                            }
+                            scm {
+                                url.set("https://github.com/makiftutuncu/tapik")
+                                connection.set("scm:git:https://github.com/makiftutuncu/tapik.git")
+                                developerConnection.set("scm:git:ssh://git@github.com/makiftutuncu/tapik.git")
+                            }
                         }
                     }
+                }
+            }
+            if (shouldSignPublications) {
+                pluginManager.apply("signing")
+                extensions.configure<SigningExtension>("signing") {
+                    useInMemoryPgpKeys(signingKey, signingKeyPassword)
+                    sign(extensions.getByType(PublishingExtension::class).publications)
                 }
             }
         }
@@ -202,6 +239,18 @@ gradle.projectsEvaluated {
 
         tasks.named("check").configure {
             dependsOn(aggregate)
+        }
+    }
+}
+
+extensions.configure<NexusPublishExtension>("nexusPublishing") {
+    packageGroup.set("dev.akif.tapik")
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            mavenCentralUsername?.let { username.set(it) }
+            mavenCentralPassword?.let { password.set(it) }
         }
     }
 }
