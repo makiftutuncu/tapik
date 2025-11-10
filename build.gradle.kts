@@ -2,9 +2,11 @@ import java.net.URI
 import org.gradle.api.Task
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.plugins.signing.SigningExtension
+import org.gradle.plugins.signing.Sign
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
@@ -206,6 +208,9 @@ subprojects {
                 extensions.configure<SigningExtension>("signing") {
                     useInMemoryPgpKeys(signingKey, signingKeyPassword)
                     sign(extensions.getByType(PublishingExtension::class).publications)
+                }
+                tasks.withType<PublishToMavenRepository>().configureEach {
+                    dependsOn(tasks.withType<Sign>())
                 }
             }
         }
