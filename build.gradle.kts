@@ -1,14 +1,8 @@
 import java.net.URI
-import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import org.gradle.api.Task
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.plugins.signing.SigningExtension
-import org.gradle.plugins.signing.Sign
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
@@ -21,14 +15,11 @@ import java.time.LocalDate
 val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
 val projectVersion = version.toString()
 val moduleTasks = mutableListOf<TaskProvider<DokkaGenerateModuleTask>>()
-val projectDescription = "Type-safe APIs in Kotlin"
-val projectWebsite = "https://tapik.akif.dev"
-val projectScmUrl = "https://github.com/makiftutuncu/tapik"
 
 plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.ktlint) apply false
-    alias(libs.plugins.nexusPublish)
+    alias(libs.plugins.mavenPublish) apply false
 }
 
 dependencies {
@@ -51,21 +42,6 @@ extensions.configure<DokkaExtension>("dokka") {
     }
     dokkaSourceSets.configureEach {
         includes.from("Module.md")
-    }
-}
-
-val mavenCentralUsername = providers.environmentVariable("MAVEN_CENTRAL_USERNAME")
-val mavenCentralPassword = providers.environmentVariable("MAVEN_CENTRAL_PASSWORD")
-
-extensions.configure<NexusPublishExtension>("nexusPublishing") {
-    packageGroup.set("dev.akif.tapik")
-    repositories {
-        sonatype {
-            nexusUrl.set(URI("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(URI("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username.set(mavenCentralUsername)
-            password.set(mavenCentralPassword)
-        }
     }
 }
 
@@ -105,9 +81,6 @@ val publishable = setOf(
     ":spring-restclient",
     ":spring-webmvc"
 )
-val signingKey = providers.environmentVariable("MAVEN_CENTRAL_SIGNING_KEY").orNull
-val signingKeyPassword = providers.environmentVariable("MAVEN_CENTRAL_SIGNING_PASSWORD").orNull
-val shouldSignPublications = !signingKey.isNullOrBlank() && !signingKeyPassword.isNullOrBlank()
 
 val ktlintCheckTasks = mutableListOf<TaskProvider<Task>>()
 
@@ -187,52 +160,7 @@ subprojects {
                     from(dokkaModuleTask.flatMap { it.outputDirectory })
                 }
             }
-            extensions.configure<PublishingExtension> {
-                publications {
-                    create<MavenPublication>("mavenJava") {
-                        from(components["java"])
-                        artifactId = project.name
-                        pom {
-                            name.set("tapik ${project.name}")
-                            description.set(projectDescription)
-                            url.set(projectWebsite)
-                            licenses {
-                                license {
-                                    name.set("MIT License")
-                                    url.set("https://opensource.org/licenses/MIT")
-                                    distribution.set("repo")
-                                }
-                            }
-                            developers {
-                                developer {
-                                    id.set("makiftutuncu")
-                                    name.set("Mehmet Akif Tütüncü")
-                                    url.set("https://akif.dev")
-                                }
-                            }
-                            issueManagement {
-                                system.set("GitHub Issues")
-                                url.set("$projectScmUrl/issues")
-                            }
-                            scm {
-                                url.set(projectScmUrl)
-                                connection.set("scm:git:https://github.com/makiftutuncu/tapik.git")
-                                developerConnection.set("scm:git:ssh://git@github.com/makiftutuncu/tapik.git")
-                            }
-                        }
-                    }
-                }
-            }
-            if (shouldSignPublications) {
-                pluginManager.apply("signing")
-                extensions.configure<SigningExtension>("signing") {
-                    useInMemoryPgpKeys(signingKey, signingKeyPassword)
-                    sign(extensions.getByType(PublishingExtension::class).publications)
-                }
-                tasks.withType<PublishToMavenRepository>().configureEach {
-                    dependsOn(tasks.withType<Sign>())
-                }
-            }
+            pluginManager.apply("com.vanniktech.maven.publish")
         }
     }
 
