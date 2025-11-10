@@ -4,9 +4,11 @@ import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URI
 import java.time.LocalDate
+import java.util.Locale
 import org.gradle.api.Task
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
@@ -188,6 +190,17 @@ subprojects {
                     )
                 }
             }
+        }
+    }
+
+    tasks.withType<PublishToMavenRepository>().configureEach {
+        val publicationName = publication?.name ?: return@configureEach
+        val signTaskName =
+            "sign${publicationName.replaceFirstChar { it.titlecase(Locale.ROOT) }}Publication"
+        val publishTask = this
+
+        tasks.matching { it.name == signTaskName }.configureEach {
+            publishTask.dependsOn(this)
         }
     }
 
