@@ -156,13 +156,15 @@ subprojects {
                 withJavadocJar()
             }
             pluginManager.apply("com.vanniktech.maven.publish")
-            extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
-                configure(
-                    KotlinJvm(
-                        javadocJar = JavadocJar.Dokka("dokkaHtml"),
-                        sourcesJar = true
+            pluginManager.withPlugin("org.jetbrains.dokka") {
+                extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
+                    configure(
+                        KotlinJvm(
+                            javadocJar = JavadocJar.Dokka("dokkaGenerateModuleHtml"),
+                            sourcesJar = true
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -174,13 +176,15 @@ subprojects {
                 withJavadocJar()
             }
             pluginManager.apply("com.vanniktech.maven.publish")
-            extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
-                configure(
-                    GradlePlugin(
-                        javadocJar = JavadocJar.Dokka("dokkaHtml"),
-                        sourcesJar = true
+            pluginManager.withPlugin("org.jetbrains.dokka") {
+                extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
+                    configure(
+                        GradlePlugin(
+                            javadocJar = JavadocJar.Dokka("dokkaGenerateModuleHtml"),
+                            sourcesJar = true
+                        )
                     )
-                )
+                }
             }
         }
     }
