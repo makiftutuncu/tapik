@@ -1,8 +1,11 @@
+import com.vanniktech.maven.publish.GradlePlugin
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URI
 import org.gradle.api.Task
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.tasks.bundling.Jar
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
@@ -73,7 +76,7 @@ val runPluginValidationProperty =
     providers.gradleProperty("runPluginValidation").map { true }.orElse(false)
 val skipLintEnabled = skipLintProperty.get()
 val runPluginValidationEnabled = runPluginValidationProperty.get()
-val publishable = setOf(
+val kotlinPublishable = setOf(
     ":codec",
     ":common-plugin",
     ":core",
@@ -81,6 +84,7 @@ val publishable = setOf(
     ":spring-restclient",
     ":spring-webmvc"
 )
+val gradlePluginPublishable = setOf(":gradle-plugin")
 
 val ktlintCheckTasks = mutableListOf<TaskProvider<Task>>()
 
@@ -144,23 +148,40 @@ subprojects {
     }
 
     plugins.withId("org.jetbrains.kotlin.jvm") {
-        if (path in publishable) {
+        if (path in kotlinPublishable) {
             pluginManager.apply("java-library")
             pluginManager.apply("maven-publish")
             extensions.configure<JavaPluginExtension> {
                 withSourcesJar()
                 withJavadocJar()
             }
-            val javadocJar = tasks.named<Jar>("javadocJar")
-            pluginManager.withPlugin("org.jetbrains.dokka") {
-                val dokkaModuleTask =
-                    tasks.named<DokkaGenerateModuleTask>("dokkaGenerateModuleHtml")
-                javadocJar.configure {
-                    dependsOn(dokkaModuleTask)
-                    from(dokkaModuleTask.flatMap { it.outputDirectory })
-                }
+            pluginManager.apply("com.vanniktech.maven.publish")
+            extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
+                configure(
+                    KotlinJvm(
+                        javadocJar = JavadocJar.Dokka("dokkaHtml"),
+                        sourcesJar = true
+                    )
+                )
+            }
+        }
+    }
+
+    plugins.withId("java-gradle-plugin") {
+        if (path in gradlePluginPublishable) {
+            extensions.configure<JavaPluginExtension> {
+                withSourcesJar()
+                withJavadocJar()
             }
             pluginManager.apply("com.vanniktech.maven.publish")
+            extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
+                configure(
+                    GradlePlugin(
+                        javadocJar = JavadocJar.Dokka("dokkaHtml"),
+                        sourcesJar = true
+                    )
+                )
+            }
         }
     }
 
