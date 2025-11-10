@@ -3,6 +3,7 @@ import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URI
+import java.time.LocalDate
 import org.gradle.api.Task
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
@@ -13,7 +14,6 @@ import org.jetbrains.dokka.gradle.tasks.DokkaGenerateModuleTask
 import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
-import java.time.LocalDate
 
 val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
 val projectVersion = version.toString()
@@ -143,6 +143,10 @@ subprojects {
                 failOnWarning.set(true)
                 suppressObviousFunctions.set(true)
                 suppressInheritedMembers.set(true)
+            }
+
+            tasks.matching { it.name == "generateMetadataFileForMavenPublication" }.configureEach {
+                dependsOn("dokkaJavadocJar")
             }
         }
     }
