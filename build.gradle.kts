@@ -157,7 +157,6 @@ subprojects {
             pluginManager.apply("maven-publish")
             extensions.configure<JavaPluginExtension> {
                 withSourcesJar()
-                withJavadocJar()
             }
             pluginManager.apply("com.vanniktech.maven.publish")
             pluginManager.withPlugin("org.jetbrains.dokka") {
@@ -177,7 +176,6 @@ subprojects {
         if (path in gradlePluginPublishable) {
             extensions.configure<JavaPluginExtension> {
                 withSourcesJar()
-                withJavadocJar()
             }
             pluginManager.apply("com.vanniktech.maven.publish")
             pluginManager.withPlugin("org.jetbrains.dokka") {
