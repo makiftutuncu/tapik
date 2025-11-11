@@ -4,7 +4,6 @@ import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URI
 import java.time.LocalDate
-import java.util.Locale
 import org.gradle.api.Task
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
@@ -16,6 +15,7 @@ import org.jetbrains.dokka.gradle.tasks.DokkaGenerateModuleTask
 import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import org.gradle.plugins.signing.Sign
 
 val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
 val projectVersion = version.toString()
@@ -194,14 +194,7 @@ subprojects {
     }
 
     tasks.withType<PublishToMavenRepository>().configureEach {
-        val publicationName = publication?.name ?: return@configureEach
-        val signTaskName =
-            "sign${publicationName.replaceFirstChar { it.titlecase(Locale.ROOT) }}Publication"
-        val publishTask = this
-
-        tasks.matching { it.name == signTaskName }.configureEach {
-            publishTask.dependsOn(this)
-        }
+        dependsOn(tasks.withType<Sign>())
     }
 
     pluginManager.withPlugin("org.jlleitschuh.gradle.ktlint") {
