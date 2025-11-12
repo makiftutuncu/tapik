@@ -2,13 +2,11 @@ pluginManagement {
     includeBuild("build-logic")
     val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
     repositories {
-        mavenLocal()
         google()
         gradlePluginPortal()
         mavenCentral()
     }
     plugins {
-        id("dev.akif.tapik.plugin.gradle") version "0.1.0"
         id("org.jetbrains.kotlin.jvm") version kotlinVersion
         id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion
     }
