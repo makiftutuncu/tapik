@@ -59,19 +59,17 @@ gradle.projectsEvaluated {
     }
 }
 
+val dokkaGenerateTask = tasks.named("dokkaGenerate")
+
 val syncDokkaHtmlToDocs by tasks.registering(Sync::class) {
     group = "documentation"
     description = "Copies aggregated Dokka HTML output under docs/api for MkDocs."
-    dependsOn(tasks.named("dokkaGeneratePublicationHtml"))
+    dependsOn(dokkaGenerateTask)
     from(layout.buildDirectory.dir("dokka/html"))
     into(layout.projectDirectory.dir("docs/api"))
 }
 
-tasks.named("dokkaGeneratePublicationHtml").configure {
-    finalizedBy(syncDokkaHtmlToDocs)
-}
-
-tasks.matching { it.name == "dokkaGenerateHtml" }.configureEach {
+dokkaGenerateTask.configure {
     finalizedBy(syncDokkaHtmlToDocs)
 }
 
@@ -95,10 +93,22 @@ val ktlintCheckTasks = mutableListOf<TaskProvider<Task>>()
 subprojects {
     val skipLint = skipLintEnabled
     val runPluginValidation = runPluginValidationEnabled
+    var dokkaHtmlOutputsTask: TaskProvider<Task>? = null
 
     pluginManager.withPlugin("org.jetbrains.dokka") {
         val moduleTask = tasks.named<DokkaGenerateModuleTask>("dokkaGenerateModuleHtml")
         moduleTasks += moduleTask
+
+        val dokkaGenerateLifecycle = tasks.named("dokkaGenerate")
+        val dokkaHtmlOutputDir = layout.buildDirectory.dir("dokka/html")
+        val tapikDokkaHtmlOutputs =
+            tasks.register("tapikDokkaHtmlOutputs") {
+                group = "documentation"
+                description = "Exposes Dokka HTML output for Jar packaging."
+                dependsOn(dokkaGenerateLifecycle)
+                outputs.dir(dokkaHtmlOutputDir)
+            }
+        dokkaHtmlOutputsTask = tapikDokkaHtmlOutputs
 
         extensions.configure<DokkaExtension>("dokka") {
             moduleName.set(project.name)
@@ -167,7 +177,9 @@ subprojects {
                 extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
                     configure(
                         KotlinJvm(
-                            javadocJar = JavadocJar.Dokka("dokkaGenerateModuleHtml"),
+                            javadocJar = JavadocJar.Dokka(
+                                dokkaHtmlOutputsTask ?: tasks.named("tapikDokkaHtmlOutputs")
+                            ),
                             sourcesJar = true
                         )
                     )
@@ -186,7 +198,9 @@ subprojects {
                 extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
                     configure(
                         GradlePlugin(
-                            javadocJar = JavadocJar.Dokka("dokkaGenerateModuleHtml"),
+                            javadocJar = JavadocJar.Dokka(
+                                dokkaHtmlOutputsTask ?: tasks.named("tapikDokkaHtmlOutputs")
+                            ),
                             sourcesJar = true
                         )
                     )
