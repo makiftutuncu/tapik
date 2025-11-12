@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
     repositories {
         mavenLocal()

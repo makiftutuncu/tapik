@@ -1,27 +1,9 @@
 plugins {
     `kotlin-dsl`
+    id("buildlogic.convention.kotlin-dsl")
     `java-gradle-plugin`
     `maven-publish`
     alias(libs.plugins.dokka)
-}
-
-repositories {
-    mavenCentral()
-}
-
-val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
-
-kotlin {
-    jvmToolchain(javaVersion)
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-repositories {
-    google()
-    mavenCentral()
 }
 
 dependencies {

@@ -1,20 +1,7 @@
 plugins {
     `kotlin-dsl`
+    id("buildlogic.convention.kotlin-dsl")
     alias(libs.plugins.dokka)
-}
-
-repositories {
-    mavenCentral()
-}
-
-val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
-
-kotlin {
-    jvmToolchain(javaVersion)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 dependencies {

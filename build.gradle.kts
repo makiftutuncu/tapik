@@ -7,6 +7,7 @@ import java.time.LocalDate
 import org.gradle.api.Task
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
@@ -17,7 +18,7 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import org.gradle.plugins.signing.Sign
 
-val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
+val javaTargetVersion = providers.gradleProperty("javaTargetVersion").map(String::toInt).get()
 val projectVersion = version.toString()
 val moduleTasks = mutableListOf<TaskProvider<DokkaGenerateModuleTask>>()
 
@@ -25,6 +26,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.mavenPublish) apply false
+    alias(libs.plugins.kotlinJvm) apply false
 }
 
 dependencies {
@@ -118,7 +120,7 @@ subprojects {
             }
 
             dokkaSourceSets.configureEach {
-                jdkVersion.set(javaVersion)
+                jdkVersion.set(javaTargetVersion)
                 reportUndocumented.set(true)
                 documentedVisibilities.set(
                     setOf(VisibilityModifier.Public, VisibilityModifier.Protected)
@@ -193,9 +195,22 @@ subprojects {
         }
     }
 
-    tasks.withType<PublishToMavenRepository>().configureEach {
-        dependsOn(tasks.withType<Sign>())
+tasks.withType<PublishToMavenRepository>().configureEach {
+    dependsOn(tasks.withType<Sign>())
+}
+
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    onlyIf("Skip redundant pluginMaven publication created by kotlin-dsl") {
+        publication.name != "pluginMaven"
     }
+}
+
+val publishingToMavenLocal =
+    gradle.startParameter.taskNames.any { it.contains("ToMavenLocal") }
+
+tasks.withType<Sign>().configureEach {
+    onlyIf("Signing is skipped for mavenLocal publications") { !publishingToMavenLocal }
+}
 
     pluginManager.withPlugin("org.jlleitschuh.gradle.ktlint") {
         val ktlintCheck = tasks.named("ktlintCheck")

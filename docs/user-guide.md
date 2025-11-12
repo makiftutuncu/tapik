@@ -7,8 +7,8 @@ This guide walks you through installing the tapik Gradle plugin, declaring endpo
 
 ## Prerequisites
 
-- JDK compatible with the repository default (`javaVersion=24` in `gradle.properties`).
-- Gradle 8.7+ with the Kotlin DSL; configuration cache and task caching are supported out of the box.
+- JDK compatible with the repository defaults (`javaTargetVersion=21`, toolchain `javaToolchainVersion=24` in `gradle.properties`).
+- Gradle 9+ with the Kotlin DSL; configuration cache and task caching are supported out of the box.
 - Kotlin 2.2.20 (supplied via the GRADLE toolchain).
 - Optional modules you plan to use, such as `dev.akif.tapik:jackson` for JSON bodies or Spring starters for generated code.
 
