@@ -3,7 +3,7 @@
 ## Project Structure & Module Organization
 - tapik’s Kotlin library lives in `core`, `codec`, `jackson`, and `types`, with `spring-restclient` shipping the first integration that consumes those endpoint definitions; future integrations should follow the same module layout.
 - `gradle-plugin` ships the user-facing plugin that currently generates Spring RestClient code and will host additional client/server generators as new use-cases appear.
-- Each module keeps Kotlin sources in `src/main/kotlin` and tests in `src/test/kotlin`; shared build conventions sit in `buildSrc/kotlin-jvm.gradle.kts`, and dependency versions live in `gradle/libs.versions.toml` with toolchain defaults in `gradle.properties`.
+- Each module keeps Kotlin sources in `src/main/kotlin` and tests in `src/test/kotlin`; shared build conventions now live under the `build-logic` included build (`build-logic/src/main/kotlin/buildlogic.convention.kotlin-jvm.gradle.kts`), and dependency versions live in `gradle/libs.versions.toml` with toolchain defaults in `gradle.properties`.
 
 ## Build, Test, and Development Commands
 - `./gradlew build` compiles the library, plugin, and supporting modules while running unit tests.

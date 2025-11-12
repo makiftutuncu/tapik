@@ -1,5 +1,5 @@
 plugins {
-    id("buildsrc.convention.kotlin-jvm")
+    id("buildlogic.convention.kotlin-jvm")
     alias(libs.plugins.dokka)
     alias(libs.plugins.ktlint)
 }

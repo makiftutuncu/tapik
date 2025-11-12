@@ -1,15 +1,11 @@
-package buildsrc.convention
-
+import buildlogic.convention.configureKotlinAndJavaToolchains
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     kotlin("jvm")
 }
 
-kotlin {
-    val javaVersion = providers.gradleProperty("javaVersion").map(String::toInt).get()
-    jvmToolchain(javaVersion)
-}
+configureKotlinAndJavaToolchains()
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
