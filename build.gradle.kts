@@ -213,12 +213,6 @@ tasks.withType<PublishToMavenRepository>().configureEach {
     dependsOn(tasks.withType<Sign>())
 }
 
-tasks.withType<AbstractPublishToMaven>().configureEach {
-    onlyIf("Skip redundant pluginMaven publication created by kotlin-dsl") {
-        !name.contains("PluginMavenPublication", ignoreCase = true)
-    }
-}
-
 val publishingToMavenLocal =
     gradle.startParameter.taskNames.any { it.contains("ToMavenLocal") }
 
