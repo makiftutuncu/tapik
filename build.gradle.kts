@@ -215,7 +215,7 @@ tasks.withType<PublishToMavenRepository>().configureEach {
 
 tasks.withType<AbstractPublishToMaven>().configureEach {
     onlyIf("Skip redundant pluginMaven publication created by kotlin-dsl") {
-        publication.name != "pluginMaven"
+        !name.contains("PluginMavenPublication", ignoreCase = true)
     }
 }
 
