@@ -1,5 +1,5 @@
 plugins {
-    `kotlin-dsl`
+    id("org.jetbrains.kotlin.jvm")
     id("buildlogic.convention.kotlin-dsl")
     `java-gradle-plugin`
     `maven-publish`

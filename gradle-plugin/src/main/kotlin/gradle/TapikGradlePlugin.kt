@@ -2,7 +2,6 @@ package dev.akif.tapik.plugin.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.register
 
 /**
  * Registers Tapik-specific Gradle tasks and DSL extensions for client generation.
@@ -18,25 +17,25 @@ class TapikGradlePlugin : Plugin<Project> {
 
         val generatedSources = target.layout.buildDirectory.dir("generated/sources/tapik/main/kotlin")
 
-        val tapikGenerate = target.tasks.register<TapikGenerateTask>("tapikGenerate") {
-            group = "tapik"
-            description = "Generates Tapik outputs"
-            endpointPackages.set(target.provider { extension.resolvedEndpointPackages() })
-            outputDirectory.set(target.layout.buildDirectory.dir("generated"))
-            sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
-            compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
-            generatedSourcesDirectory.set(generatedSources)
-            additionalClassDirectories.set(collectClassDirectories(target))
-            runtimeClasspath.from(target.configurations.getByName("runtimeClasspath"))
-            enabledGeneratorIds.set(target.provider { extension.configuredGeneratorIds() })
+        val tapikGenerate = target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) {
+            it.group = "tapik"
+            it.description = "Generates Tapik outputs"
+            it.endpointPackages.set(target.provider { extension.resolvedEndpointPackages() })
+            it.outputDirectory.set(target.layout.buildDirectory.dir("generated"))
+            it.sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
+            it.compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
+            it.generatedSourcesDirectory.set(generatedSources)
+            it.additionalClassDirectories.set(collectClassDirectories(target))
+            it.runtimeClasspath.from(target.configurations.getByName("runtimeClasspath"))
+            it.enabledGeneratorIds.set(target.provider { extension.configuredGeneratorIds() })
         }
 
         tapikGenerate.configure {
             val upstreamClasses = target.rootProject.subprojects
                 .filter { it != target }
                 .mapNotNull { it.tasks.findByName("classes") }
-            dependsOn(upstreamClasses)
-            dependsOn(target.tasks.named("classes"))
+            it.dependsOn(upstreamClasses)
+            it.dependsOn(target.tasks.named("classes"))
         }
 
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
