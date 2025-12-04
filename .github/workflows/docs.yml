@@ -1,25 +1,26 @@
-name: Build & Deploy Documentation Website
+name: Build & Deploy Versioned Docs
 
 on:
-  push:
-    branches: [ main ]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name || github.ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -34,31 +35,33 @@ jobs:
           cache: gradle
 
       - name: Generate API reference
-        run: ./gradlew dokkaGenerateHtml
+        run: ./gradlew dokkaGenerate
 
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements-docs.txt ]; then pip install -r requirements-docs.txt; else pip install mkdocs mkdocs-material; fi
+          pip install -r requirements-docs.txt
 
-      - name: Build
-        run: mkdocs build --site-dir site
+      - name: Determine release version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#refs/tags/}"
+          VERSION="${VERSION#v}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing docs for version: $VERSION"
 
-      - name: Add CNAME
-        run: echo "tapik.akif.dev" > site/CNAME
+      - name: Verify Dokka output present
+        run: test -f docs/api/index.html && echo "Found docs/api/index.html"
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy docs with mike
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          git fetch origin gh-pages:gh-pages || true
+          git config user.name "tapik-bot"
+          git config user.email "tapik@users.noreply.github.com"
+          mike deploy --push --update-aliases "$VERSION" latest
+          mike set-default --push latest

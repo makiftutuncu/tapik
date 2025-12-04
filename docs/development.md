@@ -50,6 +50,15 @@ Tips:
 - Regenerate MkDocs content (`mkdocs build`) locally if you modify Markdown or navigation.
 - Generated documentation must include the footer `© {currentYear} Mehmet Akif Tütüncü`; the Dokka configuration enforces it—do not strip it.
 
+## Versioning After Releases
+
+- Releases use the current version. After a successful GitHub release, CI automatically runs `./gradlew bumpVersion` (defaults to a patch bump) and pushes the commit to the target branch so new development starts with a higher version.
+- For local bumps (e.g., pre-release rehearsal), run `./gradlew bumpVersion -PnewVersion=<nextVersion>`; omit `newVersion` to auto-increment the patch.
+- The task rewrites `gradle.properties`, docs (Markdown/HTML), Gradle scripts, and properties files that mention the previous version while skipping build outputs and `.gradle` state.
+- The task writes changes to disk; commit them along with any regenerated docs.
+- Docs are published from the release tag; they reflect the latest released version, not unreleased changes on `main`. Rerun `./gradlew dokkaGenerateHtml` locally only if you need to inspect updated API docs before the next release.
+- Published docs are versioned with `mike`: each release tag publishes its own docs and updates the `latest` alias plus the default version selector to the newest stable release.
+
 ## Dependency Management
 
 - Declare dependencies through the version catalog (`gradle/libs.versions.toml`).

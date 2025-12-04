@@ -26,6 +26,9 @@ theme:
       accent: indigo
 
 extra:
+  version:
+    provider: mike
+    default: latest
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/makiftutuncu
@@ -34,6 +37,7 @@ extra:
 
 plugins:
   - search
+  - mike
 
 markdown_extensions:
   - admonition

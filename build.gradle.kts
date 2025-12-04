@@ -7,7 +7,6 @@ import java.time.LocalDate
 import org.gradle.api.Task
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
@@ -27,6 +26,7 @@ plugins {
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.mavenPublish) apply false
     alias(libs.plugins.kotlinJvm) apply false
+    id("buildlogic.bump-version")
 }
 
 dependencies {
@@ -72,7 +72,6 @@ val syncDokkaHtmlToDocs by tasks.registering(Sync::class) {
 dokkaGenerateTask.configure {
     finalizedBy(syncDokkaHtmlToDocs)
 }
-
 val skipLintProperty = providers.gradleProperty("skipLint").map { true }.orElse(false)
 val runPluginValidationProperty =
     providers.gradleProperty("runPluginValidation").map { true }.orElse(false)
