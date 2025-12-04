@@ -8,11 +8,11 @@ tapik is split into JVM artifacts so you can pick only what your service require
 
 | Use Case | Dependency |
 | --- | --- |
-| Define endpoints, parameters, headers, codecs | `implementation("dev.akif.tapik:core:0.1.1")` |
-| Use ready-made string/byte codecs | `implementation("dev.akif.tapik:codec:0.1.1")` |
-| Encode/decode JSON with Jackson | `implementation("dev.akif.tapik:jackson:0.1.1")` |
-| Generate Spring RestClient clients | `implementation("dev.akif.tapik:spring-restclient:0.1.1")` |
-| Generate Spring WebMVC controllers | `implementation("dev.akif.tapik:spring-webmvc:0.1.1")` |
+| Define endpoints, parameters, headers, codecs | `implementation("dev.akif.tapik:core:0.1.2")` |
+| Use ready-made string/byte codecs | `implementation("dev.akif.tapik:codec:0.1.2")` |
+| Encode/decode JSON with Jackson | `implementation("dev.akif.tapik:jackson:0.1.2")` |
+| Generate Spring RestClient clients | `implementation("dev.akif.tapik:spring-restclient:0.1.2")` |
+| Generate Spring WebMVC controllers | `implementation("dev.akif.tapik:spring-webmvc:0.1.2")` |
 
 Add them to your `build.gradle.kts` alongside the Kotlin JVM plugin.
 
@@ -22,15 +22,14 @@ tapik integrates with Gradle to scan compiled classes and run generators. Enable
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.2.20"
-    id("dev.akif.tapik.plugin.gradle") version "0.1.1"
+    id("dev.akif.tapik.plugin.gradle") version "0.1.2"
 }
 
 dependencies {
-    implementation("dev.akif.tapik:core:0.1.1")
-    implementation("dev.akif.tapik:codec:0.1.1")
-    implementation("dev.akif.tapik:jackson:0.1.1")
-    implementation("dev.akif.tapik:spring-restclient:0.1.1")
+    implementation("dev.akif.tapik:core:0.1.2")
+    implementation("dev.akif.tapik:codec:0.1.2")
+    implementation("dev.akif.tapik:jackson:0.1.2")
+    implementation("dev.akif.tapik:spring-restclient:0.1.2")
 }
 
 tapik {

@@ -11,6 +11,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import java.io.File
 
 @DisableCachingByDefault(because = "Updates repository files with the new project version.")
 abstract class BumpVersionTask : DefaultTask() {
@@ -25,6 +26,9 @@ abstract class BumpVersionTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val targetFiles: ListProperty<RegularFile>
 
+    @get:Input
+    abstract val rootPath: Property<String>
+
     private fun bumpPatch(current: String): String {
         val parts = current.split(".").mapNotNull { it.toIntOrNull() }
         require(parts.size == 3) { "Current version must be in SemVer form (found $current)" }
@@ -34,7 +38,7 @@ abstract class BumpVersionTask : DefaultTask() {
 
     @TaskAction
     fun updateVersions() {
-        val rootDir = project.layout.projectDirectory.asFile
+        val rootDir = File(rootPath.get())
         val old = currentVersion.get()
         val explicitNew = newVersion.orNull?.trim().takeUnless { it.isNullOrBlank() }
         val next = explicitNew ?: bumpPatch(old)
