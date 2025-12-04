@@ -5,6 +5,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.arrowCore)
+    api(libs.arrowCore)
     testImplementation(libs.bundles.testCommon)
 }
