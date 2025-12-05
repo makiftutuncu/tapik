@@ -14,13 +14,13 @@ This guide walks you through installing the tapik Gradle plugin, declaring endpo
 
 | Component | Example Dependency |
 | --- | --- |
-| Endpoint DSL | `implementation("dev.akif.tapik:core:0.1.2")` |
-| Codecs | `implementation("dev.akif.tapik:codec:0.1.2")` |
-| Jackson integration | `implementation("dev.akif.tapik:jackson:0.1.2")` |
-| Gradle plugin | `id("dev.akif.tapik.plugin.gradle") version "0.1.2"` |
+| Endpoint DSL | `implementation("dev.akif.tapik:core:0.1.3")` |
+| Codecs | `implementation("dev.akif.tapik:codec:0.1.3")` |
+| Jackson integration | `implementation("dev.akif.tapik:jackson:0.1.3")` |
+| Gradle plugin | `id("dev.akif.tapik.plugin.gradle") version "0.1.3"` |
 
 !!! note
-    The version numbers match the repository snapshot (`version=0.1.2`). Replace them with the release you are consuming.
+    The version numbers match the repository snapshot (`version=0.1.3`). Replace them with the release you are consuming.
 
 ## Installing the Gradle Plugin
 
@@ -29,12 +29,12 @@ Configure the plugin in a module that produces HTTP endpoints or needs generated
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("dev.akif.tapik.plugin.gradle") version "0.1.2"
+    id("dev.akif.tapik.plugin.gradle") version "0.1.3"
 }
 
 dependencies {
-    implementation("dev.akif.tapik:core:0.1.2")
-    implementation("dev.akif.tapik:jackson:0.1.2") // for JSON helpers
+    implementation("dev.akif.tapik:core:0.1.3")
+    implementation("dev.akif.tapik:jackson:0.1.3") // for JSON helpers
 }
 
 tapik {
