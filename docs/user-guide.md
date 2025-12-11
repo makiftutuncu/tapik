@@ -14,13 +14,13 @@ This guide walks you through installing the tapik Gradle plugin, declaring endpo
 
 | Component | Example Dependency |
 | --- | --- |
-| Endpoint DSL | `implementation("dev.akif.tapik:core:0.1.3")` |
-| Codecs | `implementation("dev.akif.tapik:codec:0.1.3")` |
-| Jackson integration | `implementation("dev.akif.tapik:jackson:0.1.3")` |
-| Gradle plugin | `id("dev.akif.tapik.plugin.gradle") version "0.1.3"` |
+| Endpoint DSL | `implementation("dev.akif.tapik:core:0.2.0")` |
+| Codecs | `implementation("dev.akif.tapik:codec:0.2.0")` |
+| Jackson integration | `implementation("dev.akif.tapik:jackson:0.2.0")` |
+| Gradle plugin | `id("dev.akif.tapik.plugin.gradle") version "0.2.0"` |
 
 !!! note
-    The version numbers match the repository snapshot (`version=0.1.3`). Replace them with the release you are consuming.
+    The version numbers match the repository snapshot (`version=0.2.0`). Replace them with the release you are consuming.
 
 ## Installing the Gradle Plugin
 
@@ -29,12 +29,12 @@ Configure the plugin in a module that produces HTTP endpoints or needs generated
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("dev.akif.tapik.plugin.gradle") version "0.1.3"
+    id("dev.akif.tapik.plugin.gradle") version "0.2.0"
 }
 
 dependencies {
-    implementation("dev.akif.tapik:core:0.1.3")
-    implementation("dev.akif.tapik:jackson:0.1.3") // for JSON helpers
+    implementation("dev.akif.tapik:core:0.2.0")
+    implementation("dev.akif.tapik:jackson:0.2.0") // for JSON helpers
 }
 
 tapik {
@@ -70,11 +70,11 @@ object ProductEndpoints {
     private val productId = path.uuid("productId")
     private val locale = query.string("locale").optional("en-US")
 
-    val getProduct by http(
+    val getProduct by endpoint(
         description = "Fetch product details",
         details = "Returns localized information when the locale query parameter is supplied."
     ) {
-        get.uri(root / "products" / productId + locale)
+        get("products" / productId + locale)
             .input(header.uuid("X-Request-Id"))
             .output(Status.OK) {
                 jsonBody<ProductView>("product")
@@ -88,8 +88,8 @@ object ProductEndpoints {
 
 Highlights:
 
-- `http { ... }` infers the endpoint `id` from the property name (`getProduct`). The description and details flow into generated KDoc and Markdown.
-- Path building uses operator overloads: `root / "products" / productId`.
+- `endpoint { ... }` infers the endpoint `id` from the property name (`getProduct`). The description and details flow into generated KDoc and Markdown.
+- Path building uses operator overloads: `"products" / productId`.
 - Query parameters append with `+`, headers with `input { ... }`, and outputs use `output(Status.OK) { ... }`.
 - Response variants can be chained; the DSL supports `OneOf` unions to model branching behaviour.
 
@@ -130,6 +130,6 @@ When checking generated Kotlin into source control:
 | `Missing compiled classes` warning | `classes` task did not run before `tapikGenerate` | Run `./gradlew classes tapikGenerate` or wire tasks in your CI pipeline |
 | No generators execute | Generator blocks omitted in the `tapik` extension | Add `springRestClient { }`, `springWebMvc { }`, or `markdownDocumentation { }` |
 | Class not found during scan | Endpoint package not covered by `endpointPackages` | Ensure fully qualified package prefixes are listed |
-| Unexpected HTTP mappings | Endpoint `root` path missing leading segment | Start URIs with `root / "segment"` or `"segment" / ...` |
+| Unexpected HTTP mappings | Endpoint path missing leading segment | Start URIs with `"segment"` or `"segment" / ...` |
 
 If you create custom generators, place their implementation on the build classpath and expose them via the Java `ServiceLoader` contract. The Gradle plugin will pick them up automatically when their `id` is enabled.

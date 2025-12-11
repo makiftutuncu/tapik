@@ -8,11 +8,11 @@ tapik is split into JVM artifacts so you can pick only what your service require
 
 | Use Case | Dependency |
 | --- | --- |
-| Define endpoints, parameters, headers, codecs | `implementation("dev.akif.tapik:core:0.1.3")` |
-| Use ready-made string/byte codecs | `implementation("dev.akif.tapik:codec:0.1.3")` |
-| Encode/decode JSON with Jackson | `implementation("dev.akif.tapik:jackson:0.1.3")` |
-| Generate Spring RestClient clients | `implementation("dev.akif.tapik:spring-restclient:0.1.3")` |
-| Generate Spring WebMVC controllers | `implementation("dev.akif.tapik:spring-webmvc:0.1.3")` |
+| Define endpoints, parameters, headers, codecs | `implementation("dev.akif.tapik:core:0.2.0")` |
+| Use ready-made string/byte codecs | `implementation("dev.akif.tapik:codec:0.2.0")` |
+| Encode/decode JSON with Jackson | `implementation("dev.akif.tapik:jackson:0.2.0")` |
+| Generate Spring RestClient clients | `implementation("dev.akif.tapik:spring-restclient:0.2.0")` |
+| Generate Spring WebMVC controllers | `implementation("dev.akif.tapik:spring-webmvc:0.2.0")` |
 
 Add them to your `build.gradle.kts` alongside the Kotlin JVM plugin.
 
@@ -22,14 +22,14 @@ tapik integrates with Gradle to scan compiled classes and run generators. Enable
 
 ```kotlin
 plugins {
-    id("dev.akif.tapik.plugin.gradle") version "0.1.3"
+    id("dev.akif.tapik.plugin.gradle") version "0.2.0"
 }
 
 dependencies {
-    implementation("dev.akif.tapik:core:0.1.3")
-    implementation("dev.akif.tapik:codec:0.1.3")
-    implementation("dev.akif.tapik:jackson:0.1.3")
-    implementation("dev.akif.tapik:spring-restclient:0.1.3")
+    implementation("dev.akif.tapik:core:0.2.0")
+    implementation("dev.akif.tapik:codec:0.2.0")
+    implementation("dev.akif.tapik:jackson:0.2.0")
+    implementation("dev.akif.tapik:spring-restclient:0.2.0")
 }
 
 tapik {
@@ -57,11 +57,11 @@ import dev.akif.tapik.jackson.jsonBody
 object ProductEndpoints {
     private val productId = path.uuid("productId")
 
-    val getProduct by http(
+    val getProduct by endpoint(
         description = "Fetch product details",
         details = "Returns localized information when the optional locale query parameter is supplied."
     ) {
-        get.uri(root / "products" / productId + query.string("locale").optional("en-US"))
+        get("products" / productId + query.string("locale").optional("en-US"))
             .input(header.uuid("X-Request-Id"))
             .output(Status.OK) { jsonBody<ProductView>("product") }
             .output(Status.NOT_FOUND) { jsonBody<ProblemDetails>("problem") }

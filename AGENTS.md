@@ -8,12 +8,9 @@
 ## Build, Test, and Development Commands
 - `./gradlew build` compiles the library, plugin, and supporting modules while running unit tests.
 - `./gradlew check` runs the full verification suite (tests, ktlint, plugin checks).
-- `./gradlew ktlintCheck` enforces formatting; apply fixes with `./gradlew ktlintFormat` before committing.
+- Always apply formatting via `./gradlew ktlintFormat`; avoid trying to fix ktlint issues that can be auto-corrected.
 - Gradle runs with configuration cache, task caching, and parallel execution enabled by default; pass `-Dorg.gradle.configuration-cache=false` if debugging cache issues locally.
-- Skip ktlint during fast feedback loops with `./gradlew <task> -PskipLint`; CI should continue to run without that property.
-- Run `./gradlew ktlintCheckAll` to lint every module in one shot (it powers `check` unless `-PskipLint` is set).
 - Run Gradle plugin validation only when needed by passing `./gradlew <task> -PrunPluginValidation`; release builds should supply that flag.
-- Always apply formatting via `./gradlew ktlintFormat`; avoid manual whitespace-only edits.
 
 ## Coding Style & Naming Conventions
 - Kotlin sources follow the official style with 4-space indentation and LF endings (`.editorconfig` enforces 120-character lines, UTF-8, and trailing newline).

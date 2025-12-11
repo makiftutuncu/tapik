@@ -6,6 +6,7 @@ import dev.akif.tapik.codec.StringCodecs
 /**
  * Base contract for describing HTTP bodies flowing through an endpoint.
  *
+ * @param T type of the payload carried by the body.
  * @property mediaType preferred media type for the encoded payload when known.
  * @property codec encoder/decoder responsible for transforming between payload instances and raw bytes.
  */
@@ -101,6 +102,7 @@ fun rawBody(
  *
  * @param codec encoder/decoder that understands how to transform the payload bytes.
  * @param mediaType media type advertised for the body, if any.
+ * @param name friendly name used in error messages when encoding/decoding fails.
  * @return a [RawBody] that delegates encoding/decoding to [codec].
  */
 fun rawBody(
@@ -108,3 +110,10 @@ fun rawBody(
     mediaType: MediaType? = null,
     name: String = "bytes"
 ): RawBody = RawBody(mediaType, codec, name)
+
+/**
+ * Creates [EmptyBody]
+ *
+ * @return the singleton [EmptyBody] instance.
+ */
+fun emptyBody(): EmptyBody = EmptyBody

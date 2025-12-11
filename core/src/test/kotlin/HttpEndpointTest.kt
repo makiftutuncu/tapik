@@ -6,10 +6,24 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class HttpEndpointTest {
+    private val inputHeader = Header.string("X-Request-Id")
+    private val outputHeader = Header.int("X-Count")
+
+    private val getUser by endpoint(description = "Get a user", details = "Loads a user by identifier") {
+        get("users")
+    }
+
+    private val postItem by endpoint(description = "desc", details = "details") {
+        post("items")
+            .input(inputHeader) { stringBody() }
+            .output(Status.CREATED, headersOf(outputHeader)) {
+                rawBody(mediaType = MediaType.Json)
+            }
+    }
+
     @Test
-    fun `http endpoint without method chooses HTTP verb`() {
-        val builder = HttpEndpointWithoutMethod("getUser", "Get a user", "Loads a user by identifier")
-        val endpoint = builder.get.uri(root / "users")
+    fun `http endpoint builder chooses HTTP verb`() {
+        val endpoint = getUser
 
         assertEquals("getUser", endpoint.id)
         assertEquals(Method.GET, endpoint.method)
@@ -20,18 +34,7 @@ class HttpEndpointTest {
 
     @Test
     fun `endpoint builders accumulate headers bodies and outputs`() {
-        val base = HttpEndpointWithoutMethod("test", "desc", "details").post.uri(root / "items")
-
-        val inputHeader = Header.string("X-Request-Id")
-        val outputHeader = Header.int("X-Count")
-
-        val endpoint =
-            base
-                .input(inputHeader) { stringBody() }
-                .output(
-                    status = Status.CREATED,
-                    headers = { Headers1(outputHeader) }
-                ) { rawBody(mediaType = MediaType.Json) }
+        val endpoint = postItem
 
         assertEquals(Method.POST, endpoint.method)
         assertEquals(listOf("items"), endpoint.path)

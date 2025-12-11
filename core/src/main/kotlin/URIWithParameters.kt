@@ -11,17 +11,18 @@ import kotlin.jvm.JvmName
  * @param segment literal segment appended to the path.
  * @return URI template that tracks the accumulated path.
  */
-operator fun String.div(segment: String): URIWithParameters0 = listOf(this, segment) to Parameters0
+operator fun String.div(segment: String): URIWithParameters0 = listOf(this, segment) to emptyParameters()
 
 /**
  * Appends the [variable] placeholder to this base path segment while building a URI template.
  *
+ * @param P type of the path variable.
  * @receiver base path segment.
  * @param variable path variable placeholder appended to the path.
  * @return URI template capturing the supplied [variable].
  */
 operator fun <P : Any> String.div(variable: PathVariable<P>): URIWithParameters1<P> =
-    listOf(this) to Parameters1(variable)
+    listOf(this + "{${variable.name}}") to parametersOf(variable)
 
 /**
  * Adds a literal [segment] to the path portion of this URI template.
@@ -36,6 +37,7 @@ operator fun <P : Parameters> URIWithParameters<P>.div(segment: String): URIWith
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -49,6 +51,8 @@ operator fun <P1 : Any> URIWithParameters0.div(variable: PathVariable<P1>): URIW
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -62,6 +66,9 @@ operator fun <P1 : Any, P2 : Any> URIWithParameters1<P1>.div(variable: PathVaria
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -77,6 +84,10 @@ operator fun <P1 : Any, P2 : Any, P3 : Any> URIWithParameters2<P1, P2>.div(
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -92,6 +103,11 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any> URIWithParameters3<P1, P2,
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -107,6 +123,12 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any> URIWithParameter
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -122,6 +144,13 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any> URIWit
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -137,6 +166,14 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the seventh path/query parameter.
+ * @param P8 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -152,6 +189,15 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the seventh path/query parameter.
+ * @param P8 type of the eighth path/query parameter.
+ * @param P9 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -167,6 +213,16 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
 /**
  * Appends the given [variable] placeholder to the path portion of this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the seventh path/query parameter.
+ * @param P8 type of the eighth path/query parameter.
+ * @param P9 type of the ninth path/query parameter.
+ * @param P10 type of the new path variable.
  * @receiver URI template described by literal segments and captured parameters.
  * @param variable path variable placeholder appended to the template.
  * @return updated URI template capturing the additional [variable].
@@ -182,6 +238,7 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -195,6 +252,8 @@ operator fun <P1 : Any> URIWithParameters0.plus(parameter: QueryParameter<P1>): 
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -210,6 +269,9 @@ operator fun <P1 : Any, P2 : Any> URIWithParameters1<P1>.plus(
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -225,6 +287,10 @@ operator fun <P1 : Any, P2 : Any, P3 : Any> URIWithParameters2<P1, P2>.plus(
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -240,6 +306,11 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any> URIWithParameters3<P1, P2,
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -255,6 +326,12 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any> URIWithParameter
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -270,6 +347,13 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any> URIWit
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -285,6 +369,14 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the seventh path/query parameter.
+ * @param P8 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -300,6 +392,15 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the seventh path/query parameter.
+ * @param P8 type of the eighth path/query parameter.
+ * @param P9 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].
@@ -315,6 +416,16 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
 /**
  * Appends the given query [parameter] to this URI template.
  *
+ * @param P1 type of the first path/query parameter.
+ * @param P2 type of the second path/query parameter.
+ * @param P3 type of the third path/query parameter.
+ * @param P4 type of the fourth path/query parameter.
+ * @param P5 type of the fifth path/query parameter.
+ * @param P6 type of the sixth path/query parameter.
+ * @param P7 type of the seventh path/query parameter.
+ * @param P8 type of the eighth path/query parameter.
+ * @param P9 type of the ninth path/query parameter.
+ * @param P10 type of the new query parameter.
  * @receiver URI template described by literal segments and captured parameters.
  * @param parameter query parameter appended to the template.
  * @return updated URI template capturing the additional [parameter].

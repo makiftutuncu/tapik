@@ -7,12 +7,17 @@ import arrow.core.EitherNel
 import arrow.core.leftNel
 import arrow.core.right
 
-/** Returns an empty header tuple when no headers are expected. */
+/**
+ * Returns an empty header tuple when no headers are expected.
+ *
+ * @return an empty [HeaderValues0].
+ */
 fun decodeHeaders0(): HeaderValues0 = HeaderValues0
 
 /**
  * Decodes a single header definition from the raw header map.
  *
+ * @param H1 type of the first header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 header definition to decode.
  * @return either aggregated validation errors or the decoded header values.
@@ -21,11 +26,13 @@ fun decodeHeaders0(): HeaderValues0 = HeaderValues0
 fun <H1 : Any> decodeHeaders1(
     headers: Map<String, List<String>>,
     header1: Header<H1>
-): EitherNel<String, HeaderValues1<H1>> = decodeHeader(headers, header1).map { HeaderValues1(it) }
+): EitherNel<String, HeaderValues1<H1>> = decodeHeader(headers, header1).map { headerValuesOf(it) }
 
 /**
  * Decodes two header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -41,12 +48,15 @@ fun <H1 : Any, H2 : Any> decodeHeaders2(
         decodeHeader(headers, header1),
         decodeHeader(headers, header2)
     ) { values1, values2 ->
-        HeaderValues2(values1, values2)
+        headerValuesOf(values1, values2)
     }
 
 /**
  * Decodes three header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -65,12 +75,16 @@ fun <H1 : Any, H2 : Any, H3 : Any> decodeHeaders3(
         decodeHeader(headers, header2),
         decodeHeader(headers, header3)
     ) { values1, values2, values3 ->
-        HeaderValues3(values1, values2, values3)
+        headerValuesOf(values1, values2, values3)
     }
 
 /**
  * Decodes four header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
+ * @param H4 type of the fourth header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -92,12 +106,17 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> decodeHeaders4(
         decodeHeader(headers, header3),
         decodeHeader(headers, header4)
     ) { values1, values2, values3, values4 ->
-        HeaderValues4(values1, values2, values3, values4)
+        headerValuesOf(values1, values2, values3, values4)
     }
 
 /**
  * Decodes five header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
+ * @param H4 type of the fourth header.
+ * @param H5 type of the fifth header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -122,12 +141,18 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> decodeHeaders5(
         decodeHeader(headers, header4),
         decodeHeader(headers, header5)
     ) { values1, values2, values3, values4, values5 ->
-        HeaderValues5(values1, values2, values3, values4, values5)
+        headerValuesOf(values1, values2, values3, values4, values5)
     }
 
 /**
  * Decodes six header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
+ * @param H4 type of the fourth header.
+ * @param H5 type of the fifth header.
+ * @param H6 type of the sixth header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -155,12 +180,19 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> decodeHeaders6(
         decodeHeader(headers, header5),
         decodeHeader(headers, header6)
     ) { values1, values2, values3, values4, values5, values6 ->
-        HeaderValues6(values1, values2, values3, values4, values5, values6)
+        headerValuesOf(values1, values2, values3, values4, values5, values6)
     }
 
 /**
  * Decodes seven header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
+ * @param H4 type of the fourth header.
+ * @param H5 type of the fifth header.
+ * @param H6 type of the sixth header.
+ * @param H7 type of the seventh header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -191,12 +223,20 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> decod
         decodeHeader(headers, header6),
         decodeHeader(headers, header7)
     ) { values1, values2, values3, values4, values5, values6, values7 ->
-        HeaderValues7(values1, values2, values3, values4, values5, values6, values7)
+        headerValuesOf(values1, values2, values3, values4, values5, values6, values7)
     }
 
 /**
  * Decodes eight header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
+ * @param H4 type of the fourth header.
+ * @param H5 type of the fifth header.
+ * @param H6 type of the sixth header.
+ * @param H7 type of the seventh header.
+ * @param H8 type of the eighth header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -230,12 +270,21 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         decodeHeader(headers, header7),
         decodeHeader(headers, header8)
     ) { values1, values2, values3, values4, values5, values6, values7, values8 ->
-        HeaderValues8(values1, values2, values3, values4, values5, values6, values7, values8)
+        headerValuesOf(values1, values2, values3, values4, values5, values6, values7, values8)
     }
 
 /**
  * Decodes nine header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
+ * @param H4 type of the fourth header.
+ * @param H5 type of the fifth header.
+ * @param H6 type of the sixth header.
+ * @param H7 type of the seventh header.
+ * @param H8 type of the eighth header.
+ * @param H9 type of the ninth header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -272,12 +321,22 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         decodeHeader(headers, header8),
         decodeHeader(headers, header9)
     ) { values1, values2, values3, values4, values5, values6, values7, values8, values9 ->
-        HeaderValues9(values1, values2, values3, values4, values5, values6, values7, values8, values9)
+        headerValuesOf(values1, values2, values3, values4, values5, values6, values7, values8, values9)
     }
 
 /**
  * Decodes ten header definitions from the raw header map.
  *
+ * @param H1 type of the first header.
+ * @param H2 type of the second header.
+ * @param H3 type of the third header.
+ * @param H4 type of the fourth header.
+ * @param H5 type of the fifth header.
+ * @param H6 type of the sixth header.
+ * @param H7 type of the seventh header.
+ * @param H8 type of the eighth header.
+ * @param H9 type of the ninth header.
+ * @param H10 type of the tenth header.
  * @param headers raw HTTP headers keyed by name.
  * @param header1 first header definition to decode.
  * @param header2 second header definition to decode.
@@ -317,7 +376,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         decodeHeader(headers, header9),
         decodeHeader(headers, header10)
     ) { values1, values2, values3, values4, values5, values6, values7, values8, values9, values10 ->
-        HeaderValues10(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10)
+        headerValuesOf(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10)
     }
 
 /** Decodes header values for the given [header], accumulating all validation errors. */

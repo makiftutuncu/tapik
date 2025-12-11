@@ -9,7 +9,7 @@ tapik uses a multi-module Gradle build with Kotlin DSL, configuration cache, and
 - **Gradle integration**: `gradle-plugin`, shared conventions in the `build-logic` included build
 - **Docs**: MkDocs site in `docs/` and `mkdocs.yml`
 
-Module directories mirror the base package requirement: files under `src/main/kotlin` start immediately after `dev/akif/tapik` (for example, `core/src/main/kotlin/http/Endpoint.kt` declares `dev.akif.tapik.http.Endpoint`).
+Module directories mirror the base package requirement: files under `src/main/kotlin` start immediately after `dev/akif/tapik` (for example, `core/src/main/kotlin/HttpEndpoint.kt` declares `dev.akif.tapik.HttpEndpoint`).
 
 ## Tooling & Commands
 

@@ -5,9 +5,6 @@ package dev.akif.tapik
 import dev.akif.tapik.codec.StringCodec
 import kotlin.properties.ReadOnlyProperty
 
-/** Root URI used as the starting point for building endpoint paths. */
-val root: URIWithParameters0 = emptyList<String>() to Parameters0
-
 /**
  * Creates a path parameter with the given [name] and [codec].
  *
@@ -102,115 +99,62 @@ val unmatchedStatus: StatusMatcher =
     StatusMatcher.Unmatched
 
 /**
- * Declares an HTTP endpoint builder that captures property metadata at declaration time.
+ * Builds an [HttpEndpoint] with an explicit [id] using the DSL.
  *
- * The returned delegate instantiates a [HttpEndpointWithoutMethod] so the caller can chain
- * verb, URI, header, and body builders before materialising a [HttpEndpoint].
- *
+ * @param P tuple capturing path and query parameters.
+ * @param I inbound input definition for headers and body.
+ * @param O outbound response definitions.
+ * @param id unique identifier to assign to the endpoint (usually the property name).
  * @param description optional short description shown in generated documentation.
  * @param details optional long-form documentation such as business rules or references.
- * @param builder DSL block building the endpoint structure.
- * @return property delegate that records endpoint metadata using the owning property name.
- * @see HttpEndpoint
+ * @param builder DSL block invoked on a fresh [HttpEndpointVerbBuildingContext].
+ * @return fully materialised [HttpEndpoint] built from the provided [builder].
  */
-fun <T, P : Parameters, I : Input<*, *>, O : Outputs> http(
+fun <P : Parameters, I : Input<*, *>, O : Outputs> endpoint(
+    id: String,
     description: String? = null,
     details: String? = null,
-    builder: HttpEndpointWithoutMethod.() -> HttpEndpoint<P, I, O>
+    builder: HttpEndpointVerbBuildingContext.() -> HttpEndpointBuildingContext<P, I, O>
+): HttpEndpoint<P, I, O> {
+    val ctx = HttpEndpointVerbBuildingContext(id, description, details).builder()
+    return HttpEndpoint(
+        id = ctx.id,
+        description = ctx.description,
+        details = ctx.details,
+        method = ctx.method,
+        path = ctx.path,
+        parameters = ctx.parameters,
+        input = ctx.input,
+        outputs = ctx.outputs
+    )
+}
+
+/**
+ * Declares an HTTP endpoint builder that captures property metadata at declaration time.
+ *
+ * The returned delegate instantiates a [HttpEndpointVerbBuildingContext] so the caller can choose
+ * the verb and URI together, then chain header and body builders before materialising a [HttpEndpoint].
+ *
+ * @param T owner type that will receive the property.
+ * @param P tuple capturing path and query parameters.
+ * @param I inbound input definition for headers and body.
+ * @param O outbound response definitions.
+ * @param description optional short description shown in generated documentation.
+ * @param details optional long-form documentation such as business rules or references.
+ * @param builder DSL block building the endpoint structure using [HttpEndpointVerbBuildingContext].
+ * @return property delegate that records endpoint metadata using the owning property name and produces [HttpEndpoint].
+ * @see HttpEndpoint
+ */
+fun <T, P : Parameters, I : Input<*, *>, O : Outputs> endpoint(
+    description: String? = null,
+    details: String? = null,
+    builder: HttpEndpointVerbBuildingContext.() -> HttpEndpointBuildingContext<P, I, O>
 ): ReadOnlyProperty<T, HttpEndpoint<P, I, O>> =
     ReadOnlyProperty { _, property ->
-        HttpEndpointWithoutMethod(id = property.name, description = description, details = details).builder()
-    }
-
-/** Endpoint definition before an HTTP verb has been chosen.
- * @property id unique identifier inferred from the property name.
- * @property description optional short description of the endpoint.
- * @property details optional long-form description.
- */
-data class HttpEndpointWithoutMethod(
-    override val id: String,
-    override val description: String?,
-    override val details: String?
-) : Endpoint<Parameters0, Input<Headers0, EmptyBody>, Outputs0>() {
-    override val path: List<String> = root.first
-    override val parameters: Parameters0 = root.second
-    override val input: Input<Headers0, EmptyBody> = Input(Headers0, EmptyBody)
-    override val outputs: Outputs0 = Outputs0
-
-    /** Builder for a GET endpoint with this metadata retained. */
-    val get: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.GET)
-
-    /** Builder for a HEAD endpoint with this metadata retained. */
-    val head: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.HEAD)
-
-    /** Builder for a POST endpoint with this metadata retained. */
-    val post: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.POST)
-
-    /** Builder for a PUT endpoint with this metadata retained. */
-    val put: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.PUT)
-
-    /** Builder for a PATCH endpoint with this metadata retained. */
-    val patch: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.PATCH)
-
-    /** Builder for a DELETE endpoint with this metadata retained. */
-    val delete: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.DELETE)
-
-    /** Builder for an OPTIONS endpoint with this metadata retained. */
-    val options: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.OPTIONS)
-
-    /** Builder for a TRACE endpoint with this metadata retained. */
-    val trace: HttpEndpointWithoutURI = HttpEndpointWithoutURI(id, description, details, Method.TRACE)
-}
-
-/** Endpoint definition with method but without URI information.
- * @property method HTTP verb chosen for the endpoint.
- */
-data class HttpEndpointWithoutURI(
-    override val id: String,
-    override val description: String?,
-    override val details: String?,
-    private val method: Method
-) : Endpoint<Parameters0, Input<Headers0, EmptyBody>, Outputs0>() {
-    override val path: List<String> = root.first
-    override val parameters: Parameters0 = root.second
-    override val input: Input<Headers0, EmptyBody> = Input(Headers0, EmptyBody)
-    override val outputs: Outputs0 = Outputs0
-
-    /**
-     * Finalises the endpoint by supplying concrete [path] together with [parameters].
-     *
-     * @param uriWithParameters URI template together with captured parameters.
-     * @return fully-configured [HttpEndpoint] ready for header/body configuration.
-     */
-    fun <P : Parameters> uri(
-        uriWithParameters: URIWithParameters<P>
-    ): HttpEndpoint<P, Input<Headers0, EmptyBody>, Outputs0> =
-        HttpEndpoint(
-            id = this.id,
-            description = this.description,
-            details = this.details,
-            method = this.method,
-            path = uriWithParameters.first,
-            parameters = uriWithParameters.second,
-            input = this.input,
-            outputs = Outputs0
+        endpoint(
+            id = property.name,
+            description = description,
+            details = details,
+            builder = builder
         )
-}
-
-/** Fully-configured HTTP endpoint ready for code generation.
- * @property method HTTP verb associated with the endpoint.
- * @property path ordered path segments that form the template.
- * @property parameters tuple capturing referenced path and query parameters.
- * @property input request definition including headers and body.
- * @property outputs candidate response definitions matched by status.
- */
-data class HttpEndpoint<out P : Parameters, out I : Input<*, *>, out O : Outputs>(
-    public override val id: String,
-    public override val description: String?,
-    public override val details: String?,
-    val method: Method,
-    public override val path: List<String>,
-    public override val parameters: P,
-    public override val input: I,
-    public override val outputs: O
-) : Endpoint<P, I, O>()
+    }

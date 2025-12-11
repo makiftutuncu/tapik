@@ -5,11 +5,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import dev.akif.tapik.Headers0
 import dev.akif.tapik.Method
 import dev.akif.tapik.Output
 import dev.akif.tapik.Status
 import dev.akif.tapik.StatusMatcher
+import dev.akif.tapik.emptyHeaders
 import dev.akif.tapik.jackson.jsonBody
 import dev.akif.tapik.stringBody
 import org.springframework.http.HttpStatus
@@ -54,7 +54,7 @@ class RestClientInterpreterTest {
                 )
         )
 
-        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), Headers0, jsonBody<Map<String, Any?>>("user")))
+        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), emptyHeaders(), jsonBody<Map<String, Any?>>("user")))
 
         val response =
             interpreter.send(
@@ -82,7 +82,7 @@ class RestClientInterpreterTest {
                 )
         )
 
-        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), Headers0, jsonBody<Map<String, Any?>>("user")))
+        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), emptyHeaders(), jsonBody<Map<String, Any?>>("user")))
 
         val exception =
             assertFailsWith<RestClientResponseException> {
@@ -113,9 +113,9 @@ class RestClientInterpreterTest {
 
         val outputs =
             listOf(
-                Output(StatusMatcher.Is(Status.OK), Headers0, stringBody()),
-                Output(StatusMatcher.AnyOf(setOf(Status.CREATED, Status.NO_CONTENT)), Headers0, stringBody()),
-                Output(StatusMatcher.Predicate("status >= 500") { it.code >= 500 }, Headers0, stringBody())
+                Output(StatusMatcher.Is(Status.OK), emptyHeaders(), stringBody()),
+                Output(StatusMatcher.AnyOf(setOf(Status.CREATED, Status.NO_CONTENT)), emptyHeaders(), stringBody()),
+                Output(StatusMatcher.Predicate("status >= 500") { it.code >= 500 }, emptyHeaders(), stringBody())
             )
 
         val exception =

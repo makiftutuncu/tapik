@@ -11,7 +11,7 @@ class URIWithParametersTest {
         val page = QueryParameter.int("page")
         val pageSize = QueryParameter.int("pageSize")
 
-        val base = listOf("users") to Parameters0
+        val base = listOf("users") to emptyParameters()
 
         val uri =
             (base / userId / "posts" + page + pageSize).toURI(
@@ -26,7 +26,7 @@ class URIWithParametersTest {
     @Test
     fun `toURI omits query section when no query parameters are provided`() {
         val userId = PathVariable.int("id")
-        val base = listOf("users") to Parameters0
+        val base = listOf("users") to emptyParameters()
 
         val uri = (base / userId / "profile").toURI(42)
 

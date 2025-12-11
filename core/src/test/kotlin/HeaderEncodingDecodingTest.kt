@@ -9,48 +9,28 @@ import kotlin.test.fail
 class HeaderEncodingDecodingTest {
     private val inputHeader = Header.string("X-Request-Id")
     private val outputHeader = Header.int("X-Count")
+    private val encodeInputEndpoint by endpoint {
+        get("").input(inputHeader)
+    }
+    private val encodeOutputEndpoint by endpoint {
+        post("items").output(
+            status = Status.OK,
+            headers = headersOf(outputHeader)
+        ) {
+            stringBody()
+        }
+    }
 
     @Test
     fun `encode input headers serializes using codecs`() {
-        val endpoint =
-            HttpEndpoint(
-                id = "test",
-                description = null,
-                details = null,
-                method = Method.GET,
-                path = root.first,
-                parameters = root.second,
-                input = Input(Headers1(inputHeader), EmptyBody),
-                outputs = Outputs0
-            )
-
-        val encoded = endpoint.input.encodeInputHeaders("abc123")
+        val encoded = encodeInputEndpoint.input.encodeInputHeaders("abc123")
 
         assertEquals(mapOf("X-Request-Id" to listOf("abc123")), encoded)
     }
 
     @Test
     fun `encode output headers reuses codecs`() {
-        val endpoint =
-            (root / "items").let { uriWithParameters ->
-                HttpEndpoint(
-                    id = "test",
-                    description = null,
-                    details = null,
-                    method = Method.POST,
-                    path = uriWithParameters.first,
-                    parameters = uriWithParameters.second,
-                    input = Input(Headers0, EmptyBody),
-                    outputs = Outputs0
-                ).output(
-                    status = Status.OK,
-                    headers = { Headers1(outputHeader) }
-                ) {
-                    stringBody()
-                }
-            }
-
-        val encoded = endpoint.outputs.item1.encodeHeaders(5)
+        val encoded = encodeOutputEndpoint.outputs.item1.encodeHeaders(5)
 
         assertEquals(mapOf("X-Count" to listOf("5")), encoded)
     }

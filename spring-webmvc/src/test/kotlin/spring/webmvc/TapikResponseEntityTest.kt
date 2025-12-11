@@ -8,16 +8,14 @@ import kotlin.test.assertNull
 
 class TapikResponseEntityTest {
     object SampleEndpoints {
-        val user by http {
-            get
-                .uri("api" / "users" / path.uuid("id"))
-                .output(headers = { Headers1(Header.Location) }) { stringBody() }
-                .output(Status.NOT_FOUND) { dev.akif.tapik.EmptyBody }
+        val user by endpoint {
+            get("api" / "users" / path.uuid("id"))
+                .output(headers = headersOf(Header.Location)) { stringBody() }
+                .output(Status.NOT_FOUND) { EmptyBody }
         }
 
-        val ping by http {
-            get
-                .uri("health" / "ping")
+        val ping by endpoint {
+            get("health" / "ping")
                 .output { stringBody() }
         }
     }
