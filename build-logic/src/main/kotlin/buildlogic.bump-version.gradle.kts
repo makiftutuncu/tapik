@@ -14,8 +14,9 @@ tasks.register<BumpVersionTask>("bumpVersion") {
                 include(
                     "README.md",
                     "AGENTS.md",
-                    "mkdocs.yml",
-                    "docs/**/*.md",
+                    "antora-playbook.yml",
+                    "antora-preview-playbook.yml",
+                    "docs/**/*.adoc",
                     "docs/**/*.html",
                     "**/*.gradle.kts",
                     "**/*.properties"

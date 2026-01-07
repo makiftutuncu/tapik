@@ -1,0 +1,14 @@
+{
+  "name": "tapik-docs",
+  "private": true,
+  "scripts": {
+    "docs:preview": "antora antora-preview-playbook.yml && ./docs/scripts/copy-api.sh",
+    "docs:build": "antora antora-playbook.yml && ./docs/scripts/copy-api.sh"
+  },
+  "devDependencies": {
+    "@antora/cli": "^3.1.0",
+    "@antora/site-generator": "^3.1.0",
+    "@antora/lunr-extension": "^1.0.0-alpha.10",
+    "@sntke/antora-mermaid-extension": "^0.0.8"
+  }
+}

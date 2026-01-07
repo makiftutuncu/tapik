@@ -1,0 +1,68 @@
+= Code Generation Overview
+
+tapik generators transform endpoint metadata into artefacts during the +tapikGenerate+ Gradle task. Generators are loaded with Java +ServiceLoader+ so any dependency placed on the project or build classpath can contribute new outputs.
+
+== Built-in Generators
+
+|===
+| Generator ID | Module | Output | Enabled By
+
+| +spring-restclient+
+| +dev.akif.tapik:spring-restclient+
+| Kotlin interfaces + helpers backed by Spring +RestClient+
+| +tapik { springRestClient { } }+
+
+| +spring-webmvc+
+| +dev.akif.tapik:spring-webmvc+
+| Spring WebMVC controller interfaces + response mappers
+| +tapik { springWebMvc { } }+
+
+| +markdown-docs+
+| +dev.akif.tapik:common-plugin+ (bundled)
+| Markdown API overview
+| +tapik { markdownDocumentation { } }+
+|===
+
+Each generator writes to the shared output directories supplied by the Gradle task:
+
+* +generatedSourcesDirectory+ -> Kotlin sources (added to the main source set).
+* +outputDirectory+ -> other artefacts such as Markdown files or reports.
+
+== Execution Model
+
+[mermaid]
+----
+sequenceDiagram
+    participant Gradle
+    participant TapikGenerateTask as tapikGenerate Task
+    participant Scanner as Endpoint Scanner
+    participant Generators
+
+    Gradle->>TapikGenerateTask: run()
+    TapikGenerateTask->>Scanner: scan compiled classes
+    Scanner-->>TapikGenerateTask: List<HttpEndpointMetadata>
+    TapikGenerateTask->>Generators: invoke(id, metadata, context)
+    Generators-->>TapikGenerateTask: write sources & artefacts
+    TapikGenerateTask-->>Gradle: complete
+----
+
+Notable behaviour:
+
+* The scanner favours ASM parsing and falls back to reflection if bytecode targets a future JVM version.
+* Metadata, scan logs, and warnings are written using Gradle's logging APIs for easy diagnosis (+--info+ for more detail).
+* Only configured generator IDs are executed; missing IDs log warnings without failing the build.
+
+== Extending tapik
+
+. Implement +dev.akif.tapik.plugin.TapikGenerator+ and package it in a module on the build classpath.
+. Register your implementation under +META-INF/services/dev.akif.tapik.plugin.TapikGenerator+.
+. Choose a unique +id+. Users enable it via +tapik { customGenerator { } }+ or by manually populating the +enabledGeneratorIds+ list.
+. Use the supplied +TapikGeneratorContext+ to discover output directories and log messages.
+
+Custom generators can co-exist with the provided ones and share the endpoint metadata that tapik already extracts. Keep your generator pure and deterministic-Gradle caches +tapikGenerate+ when outputs do not change.
+
+Proceed to the dedicated pages to learn about server, client, and documentation generation specifics:
+
+* xref:code-generation/client.adoc[Spring RestClient Clients]
+* xref:code-generation/server.adoc[Spring WebMVC Controllers]
+* xref:code-generation/documentation.adoc[Markdown Documentation]

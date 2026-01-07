@@ -63,7 +63,7 @@ val dokkaGenerateTask = tasks.named("dokkaGenerate")
 
 val syncDokkaHtmlToDocs by tasks.registering(Sync::class) {
     group = "documentation"
-    description = "Copies aggregated Dokka HTML output under docs/api for MkDocs."
+    description = "Copies aggregated Dokka HTML output under docs/api for Antora."
     dependsOn(dokkaGenerateTask)
     from(layout.buildDirectory.dir("dokka/html"))
     into(layout.projectDirectory.dir("docs/api"))
