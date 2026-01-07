@@ -1,0 +1,8 @@
+<script>window.uiRootPath = '{{{uiRootPath}}}'</script>
+<script src="{{{uiRootPath}}}/js/site.js"></script>
+
+{{#if env.SITE_SEARCH_PROVIDER}}
+<script src="{{{uiRootPath}}}/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="{{{siteRootPath}}}" data-snippet-length="100" src="{{{uiRootPath}}}/js/search-ui.js"></script>
+<script src="{{{siteRootPath}}}/search-index.js"></script>
+{{/if}}

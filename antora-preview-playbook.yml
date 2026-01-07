@@ -1,0 +1,27 @@
+site:
+  title: tapik
+  start_page: tapik::index.adoc
+urls:
+  latest_version_segment: ''
+  latest_version_segment_strategy: replace
+content:
+  sources:
+    - url: .
+      branches: HEAD
+      tags: docs-v*
+      version: { 'docs-v{0}': 'v{0}' }
+      start_path: docs
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+  supplemental_files: ./docs/supplemental
+antora:
+  extensions:
+    - '@antora/lunr-extension'
+    - require: '@sntke/antora-mermaid-extension'
+      script_stem: head-scripts
+      mermaid_initialize_options:
+        start_on_load: true
+output:
+  dir: build/site

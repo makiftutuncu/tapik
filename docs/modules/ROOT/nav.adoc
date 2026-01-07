@@ -1,0 +1,14 @@
+* xref:index.adoc[Home]
+* Guides
+** xref:getting-started.adoc[Getting Started]
+** xref:user-guide.adoc[User Guide]
+* Concepts
+** xref:concepts/type-safety.adoc[Type Safety]
+* Code Generation
+** xref:code-generation/index.adoc[Overview]
+** xref:code-generation/client.adoc[Spring RestClient Clients]
+** xref:code-generation/server.adoc[Spring WebMVC Controllers]
+** xref:code-generation/documentation.adoc[Markdown Documentation]
+* Contributing
+** xref:development.adoc[Development Guide]
+* link:api/index.html[API Reference]

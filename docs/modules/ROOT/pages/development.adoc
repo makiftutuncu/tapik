@@ -1,0 +1,102 @@
+= Development & Contribution Guide
+
+tapik uses a multi-module Gradle build with Kotlin DSL, configuration cache, and extensive code generation. Follow these practices when contributing.
+
+== Repository Layout
+
+* *Core libraries*: +core+, +codec+, +jackson+
+* *Generators*: +spring-restclient+, +spring-webmvc+, +common-plugin+
+* *Gradle integration*: +gradle-plugin+, shared conventions in the +build-logic+ included build
+* *Docs*: Antora site in +docs/+ with playbook at +antora-playbook.yml+
+
+Module directories mirror the base package requirement: files under +src/main/kotlin+ start immediately after +dev/akif/tapik+ (for example, +core/src/main/kotlin/HttpEndpoint.kt+ declares +dev.akif.tapik.HttpEndpoint+).
+
+== Tooling & Commands
+
+|===
+| Task | Command | Notes
+
+| Full build & tests
+| +./gradlew build+
+| Compiles all modules, runs unit tests
+
+| Verification suite
+| +./gradlew check+
+| Includes ktlint and plugin checks
+
+| Formatting audit
+| +./gradlew ktlintCheck+
+| Use during CI or pre-commit
+
+| Auto-format
+| +./gradlew ktlintFormat+
+| Apply before committing formatting fixes
+
+| Dokka docs
+| +./gradlew dokkaGenerateHtml+
+| Must succeed; fails on undocumented public APIs
+
+| Generate outputs
+| +./gradlew tapikGenerate+
+| Refreshes generated clients, controllers, docs
+
+| Docs build
+| +npm run docs:preview+
+| Rebuilds the Antora site
+|===
+
+Tips:
+
+* Pass +-PskipLint+ for quick local iteration; CI should run without it.
+* Disable configuration cache while debugging with +-Dorg.gradle.configuration-cache=false+.
+* Plugin validation runs only when +-PrunPluginValidation+ is set.
+
+== Coding Standards
+
+* Kotlin style follows +.editorconfig+ (4-space indent, 120-char lines, LF endings).
+* Avoid wildcard imports unless they simplify tapik package usage.
+* Keep packages under +dev.akif.tapik.<module>+; respect the flattened directory structure.
+* Document every public API with KDoc, including type parameters, parameters, returns, and throws.
+* Generated sources belong under +build/+ or +generated/+; keep them out of VCS unless explicitly required.
+
+== Testing
+
+* Use +kotlin("test")+ with JUnit 5 (+junit-jupiter-params+ for parameterized cases).
+* Place unit tests adjacent to the module (+src/test/kotlin+).
+* For focused runs: +./gradlew :module:test+.
+* Integration flows (e.g., Spring-specific) should live in dedicated source sets such as +integrationTest+.
+* Favour descriptive test names that outline behaviour rather than method names.
+
+== Documentation Workflow
+
+* Update KDoc and run +./gradlew dokkaGenerateHtml+ before shipping changes.
+* Rebuild the Antora site (+npm run docs:preview+) locally if you modify AsciiDoc or navigation.
+* Generated documentation must include the footer +© {currentYear} Mehmet Akif Tütüncü+; the Dokka configuration enforces it - do not strip it.
+* For local previews that include the API reference, run +./gradlew dokkaGenerate+ then +./docs/scripts/copy-api.sh+ after the Antora build.
+
+== Versioning After Releases
+
+* Releases use the current version. After a successful GitHub release, CI automatically runs +./gradlew bumpVersion+ (defaults to a patch bump) and pushes the commit to the target branch so new development starts with a higher version.
+* For local bumps (e.g., pre-release rehearsal), run +./gradlew bumpVersion -PnewVersion=<nextVersion>+; omit +newVersion+ to auto-increment the patch.
+* The task rewrites +gradle.properties+, docs (AsciiDoc/HTML), Gradle scripts, and properties files that mention the previous version while skipping build outputs and +.gradle+ state.
+* The task writes changes to disk; commit them along with any regenerated docs.
+* Docs are published from release tags; they reflect the latest released version, not unreleased changes on +main+.
+* Published docs are versioned with Antora: each release tag produces a version and the site default tracks the newest tag.
+
+== Dependency Management
+
+* Declare dependencies through the version catalog (+gradle/libs.versions.toml+).
+* Reuse bundles like +libs.bundles.testCommon+ to keep versions aligned.
+* Avoid hard-coded coordinates in build scripts; prefer catalog aliases.
+
+== Contribution Checklist
+
+. Update or add tests that cover the behaviour you changed.
+. Run +./gradlew ktlintFormat build+ and ensure both pass.
+. Refresh generated outputs (+tapikGenerate+, Dokka) if your change affects them.
+. Verify Antora builds locally (+npm run docs:preview+) when touching documentation.
+. Craft concise, imperative commit messages (e.g., +Add Spring WebMVC generator+).
+. Open a PR with intent, summary, linked issues, and screenshots/logs for user-visible changes.
+. Request review from the relevant CODEOWNERS.
+
+By following these guidelines, you keep tapik's generators deterministic, its DSL approachable, and its documentation trustworthy.
