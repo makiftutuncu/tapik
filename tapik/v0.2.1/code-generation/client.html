@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Spring RestClient Clients :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/search.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.2.1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="../index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Guides</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../getting-started.html">Getting Started</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../user-guide.html">User Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Concepts</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Code Generation</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="index.html">Overview</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="client.html">Spring RestClient Clients</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="server.html">Spring WebMVC Controllers</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="documentation.html">Markdown Documentation</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">tapik</a></li>
+    <li>Code Generation</li>
+    <li><a href="client.html">Spring RestClient Clients</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.2.1</button>
+  <div class="version-menu">
+    <a class="version" href="../../code-generation/client.html">v0.2.4</a>
+    <a class="version" href="../../v0.2.3/code-generation/client.html">v0.2.3</a>
+    <a class="version" href="../../v0.2.2/code-generation/client.html">v0.2.2</a>
+    <a class="version is-current" href="client.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.2.1/docs/modules/ROOT/pages/code-generation/client.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Spring RestClient Clients</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The spring-restclient generator produces Kotlin interfaces that call HTTP endpoints through the Spring Framework RestClient API. Each generated interface groups endpoints by the source file that defined them and extends dev.akif.tapik.spring.restclient.RestClientBasedClient.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_generated_structure"><a class="anchor" href="#_generated_structure"></a>Generated Structure</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Location</strong>: build/generated/sources/tapik/main/kotlin/&lt;package&gt;/&lt;SourceFile&gt;Client.kt</p>
+</li>
+<li>
+<p><strong>Interface name</strong>: &lt;SourceFile&gt;Client</p>
+</li>
+<li>
+<p><strong>Base interface</strong>: RestClientBasedClient, which exposes:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>val restClient: RestClient</p>
+</li>
+<li>
+<p>val interpreter: RestClientInterpreter (lazy wrapper around restClient)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Method signature</strong>: one function per endpoint property, using descriptive parameter names derived from the DSL.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Example excerpt:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">interface ProductEndpointsClient : RestClientBasedClient {
+    /**
+     * Fetch product details.
+     */
+    fun getProduct(
+        productId: UUID,
+        locale: String = "en-US",
+        xRequestId: UUID
+    ): Response0&lt;ProductView&gt; {
+        val responseEntity = interpreter.send(
+            method = ProductEndpoints.getProduct.method,
+            uri = ProductEndpoints.getProduct.toURI(productId, locale),
+            inputHeaders = ProductEndpoints.getProduct.input.encodeInputHeaders(xRequestId),
+            inputBodyContentType = ProductEndpoints.getProduct.input.body.mediaType,
+            inputBody = ByteArray(0),
+            outputs = ProductEndpoints.getProduct.outputs.toList()
+        )
+
+        val status = responseEntity.statusCode.toStatus()
+        val bodyBytes = responseEntity.body ?: ByteArray(0)
+
+        val decodedBody = ProductEndpoints.getProduct.outputs.item1.body.codec.decode(bodyBytes)
+            .getOrElse { error(it.joinToString(": ")) }
+
+        return Response0(status, decodedBody)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Names and types are inferred from your endpoint declarations: path/query parameters become function parameters, headers with codecs translate into arguments, and bodies map to encoded values.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_return_types"><a class="anchor" href="#_return_types"></a>Return Types</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Endpoint outputs</th>
+<th class="tableblock halign-left valign-top">Generated return type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single body without headers</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response0&lt;T&gt;</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single body with headers</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ResponseN&lt;T, Header1, ...&gt; (where N matches the header arity)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No body, headers only</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ResponseWithoutBodyN&lt;Header1, ...&gt;</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multiple outputs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OneOfK&lt;...&gt; wrapping the corresponding ResponseX type</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>You can pattern match on OneOfK (provided by tapik&#8217;s core module) to branch on status-based responses.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_header_and_body_handling"><a class="anchor" href="#_header_and_body_handling"></a>Header and Body Handling</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Headers are encoded via the Input.encodeInputHeaders helpers from core; responses use the decodeHeadersX utilities to validate and decode header values.</p>
+</li>
+<li>
+<p>Bodies use the codec attached to the Body definition (for example, Jackson-based JSON codecs). Any CodecFailure surfaces as an IllegalStateException in generated code so mismatches fail fast.</p>
+</li>
+<li>
+<p>RestClientInterpreter validates response status codes and media types before the generator attempts to decode bodies, surfacing detailed RestClientResponseException messages when mismatches occur.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_instantiating_clients"><a class="anchor" href="#_instantiating_clients"></a>Instantiating Clients</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Create a Spring-managed implementation by delegating to the generated interface:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Component
+class HttpProductClient(
+    override val restClient: RestClient
+) : ProductEndpointsClient</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>RestClientBasedClient provides interpreter automatically, so implementations only supply the RestClient. You may inject a configured RestClient.Builder or reuse the application-wide client.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing_tips"><a class="anchor" href="#_testing_tips"></a>Testing Tips</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Drive endpoint behaviour through unit tests on the DSL before running code generation.</p>
+</li>
+<li>
+<p>Use Spring&#8217;s MockRestServiceServer to verify generated clients: intercept outgoing requests, assert the expected path/headers/body, and feed back fixtures that satisfy your endpoint outputs.</p>
+</li>
+<li>
+<p>If you customise codecs, add integration tests to ensure RestClientInterpreter can successfully decode the wire format.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_customisation_hooks"><a class="anchor" href="#_customisation_hooks"></a>Customisation Hooks</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Provide your own RestClient (set timeouts, interceptors, authentication) while reusing generated code.</p>
+</li>
+<li>
+<p>Override functions in the generated interface by writing extension functions or wrapping the generated interface inside a higher-level service.</p>
+</li>
+<li>
+<p>Add new generators for other HTTP client stacks by following the steps in <a href="index.html#extending-tapik" class="xref page">Code Generation Overview</a>; the Spring client serves as a realistic template.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="index.html">Overview</a></span>
+    <span class="next"><a href="server.html">Spring WebMVC Controllers</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../../_'</script>
+<script src="../../../_/js/site.js"></script>
+
+<script src="../../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../../.." data-snippet-length="100" src="../../../_/js/search-ui.js"></script>
+<script src="../../../search-index.js"></script>
+  </body>
+</html>

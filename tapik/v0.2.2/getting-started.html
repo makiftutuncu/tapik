@@ -33,7 +33,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="tapik" data-version="docs-v0.2.1">
+<div class="nav-container" data-component="tapik" data-version="v0.2.2">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -117,13 +117,15 @@
   </ul>
 </nav>
 <div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">docs-v0.2.1</button>
+  <button class="version-menu-toggle" title="Show other versions of page">v0.2.2</button>
   <div class="version-menu">
-    <a class="version" href="../getting-started.html">HEAD</a>
-    <a class="version is-current" href="getting-started.html">docs-v0.2.1</a>
+    <a class="version" href="../getting-started.html">v0.2.4</a>
+    <a class="version" href="../v0.2.3/getting-started.html">v0.2.3</a>
+    <a class="version is-current" href="getting-started.html">v0.2.2</a>
+    <a class="version" href="../v0.2.1/getting-started.html">v0.2.1</a>
   </div>
 </div>
-<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/docs-v0.2.1/docs/modules/ROOT/pages/getting-started.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.2.2/docs/modules/ROOT/pages/getting-started.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
@@ -158,23 +160,23 @@
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Define endpoints, parameters, headers, codecs</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:core:0.2.1")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:core:0.2.2")</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Use ready-made string/byte codecs</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:codec:0.2.1")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:codec:0.2.2")</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Encode/decode JSON with Jackson</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:jackson:0.2.1")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:jackson:0.2.2")</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Generate Spring RestClient clients</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:spring-restclient:0.2.1")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:spring-restclient:0.2.2")</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Generate Spring WebMVC controllers</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:spring-webmvc:0.2.1")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:spring-webmvc:0.2.2")</p></td>
 </tr>
 </tbody>
 </table>
@@ -192,14 +194,14 @@
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">plugins {
-    id("dev.akif.tapik.plugin.gradle") version "0.2.1"
+    id("dev.akif.tapik.plugin.gradle") version "0.2.2"
 }
 
 dependencies {
-    implementation("dev.akif.tapik:core:0.2.1")
-    implementation("dev.akif.tapik:codec:0.2.1")
-    implementation("dev.akif.tapik:jackson:0.2.1")
-    implementation("dev.akif.tapik:spring-restclient:0.2.1")
+    implementation("dev.akif.tapik:core:0.2.2")
+    implementation("dev.akif.tapik:codec:0.2.2")
+    implementation("dev.akif.tapik:jackson:0.2.2")
+    implementation("dev.akif.tapik:spring-restclient:0.2.2")
 }
 
 tapik {
