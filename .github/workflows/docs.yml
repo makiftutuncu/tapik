@@ -44,15 +44,6 @@ jobs:
       - name: Build Antora site
         run: npm run docs:build
 
-      - name: Tag docs release
-        if: github.event.release.tag_name
-        run: |
-          git config user.name "makiftutuncu"
-          git config user.email "makiftutuncu@users.noreply.github.com"
-          docs_tag="docs-${{ github.event.release.tag_name }}"
-          git tag -f "$docs_tag"
-          git push -f origin "$docs_tag"
-
       - name: Deploy docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
