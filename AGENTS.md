@@ -37,7 +37,7 @@
 - Generated documentation must include the footer `© {currentYear} Mehmet Akif Tütüncü`.
 - The documentation site is built with Antora. Source content lives under `docs/modules/ROOT`, the component descriptor is `docs/antora.yml`, and playbooks are `antora-playbook.yml` (release) and `antora-preview-playbook.yml` (PR preview).
 - Use `npm install` once, then `npm run docs:preview` for local preview (writes to `build/site` and runs `docs/scripts/copy-api.sh`).
-- Versioned docs are driven by `docs-v*` tags (e.g., `docs-v0.2.1`). The release workflow creates the docs tag from the release tag so Antora only scans tags that contain the Antora descriptor.
+- Versioned docs are driven by `docs-v*` tags. The release workflow creates the docs tag from the release tag so Antora only scans tags that contain the Antora descriptor.
 
 ## Commit & Pull Request Guidelines
 - Follow the existing Git history: short, imperative commit subjects (e.g., “Add name to type definitions”) without trailing punctuation.
