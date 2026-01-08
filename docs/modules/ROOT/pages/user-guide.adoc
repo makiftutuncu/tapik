@@ -18,21 +18,21 @@ New to tapik? Start with xref:getting-started.adoc[Getting Started] for a step-b
 | Component | Example Dependency
 
 | Endpoint DSL
-| +implementation("dev.akif.tapik:core:0.2.4")+
+| +implementation("dev.akif.tapik:core:0.2.5")+
 
 | Codecs
-| +implementation("dev.akif.tapik:codec:0.2.4")+
+| +implementation("dev.akif.tapik:codec:0.2.5")+
 
 | Jackson integration
-| +implementation("dev.akif.tapik:jackson:0.2.4")+
+| +implementation("dev.akif.tapik:jackson:0.2.5")+
 
 | Gradle plugin
-| +id("dev.akif.tapik.plugin.gradle") version "0.2.4"+
+| +id("dev.akif.tapik.plugin.gradle") version "0.2.5"+
 |===
 
 [NOTE]
 ====
-The version numbers match the repository snapshot (+version=0.2.4+). Replace them with the release you are consuming.
+The version numbers match the repository snapshot (+version=0.2.5+). Replace them with the release you are consuming.
 ====
 
 == Installing the Gradle Plugin
@@ -43,12 +43,12 @@ Configure the plugin in a module that produces HTTP endpoints or needs generated
 ----
 plugins {
     kotlin("jvm")
-    id("dev.akif.tapik.plugin.gradle") version "0.2.4"
+    id("dev.akif.tapik.plugin.gradle") version "0.2.5"
 }
 
 dependencies {
-    implementation("dev.akif.tapik:core:0.2.4")
-    implementation("dev.akif.tapik:jackson:0.2.4") // for JSON helpers
+    implementation("dev.akif.tapik:core:0.2.5")
+    implementation("dev.akif.tapik:jackson:0.2.5") // for JSON helpers
 }
 
 tapik {
