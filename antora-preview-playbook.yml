@@ -8,8 +8,10 @@ content:
   sources:
     - url: .
       branches: HEAD
-      tags: docs-v*
-      version: { 'docs-v{0}': 'v{0}' }
+      tags:
+        - v*
+        - '!v0.1.*'
+        - '!v0.2.0'
       start_path: docs
 ui:
   bundle:

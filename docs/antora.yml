@@ -1,5 +1,5 @@
 name: tapik
 title: tapik
-version: true
+version: v0.2.2
 nav:
   - modules/ROOT/nav.adoc

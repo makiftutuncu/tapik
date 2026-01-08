@@ -82,6 +82,7 @@ Tips:
 * The task writes changes to disk; commit them along with any regenerated docs.
 * Docs are published from release tags; they reflect the latest released version, not unreleased changes on +main+.
 * Published docs are versioned with Antora: each release tag produces a version and the site default tracks the newest tag.
+* Tags before +v0.2.1+ lack +docs/antora.yml+, so the Antora playbooks explicitly exclude +v0.1.*+ and +v0.2.0+.
 
 == Dependency Management
 

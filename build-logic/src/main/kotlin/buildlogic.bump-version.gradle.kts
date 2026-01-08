@@ -16,6 +16,7 @@ tasks.register<BumpVersionTask>("bumpVersion") {
                     "AGENTS.md",
                     "antora-playbook.yml",
                     "antora-preview-playbook.yml",
+                    "docs/antora.yml",
                     "docs/**/*.adoc",
                     "docs/**/*.html",
                     "**/*.gradle.kts",
