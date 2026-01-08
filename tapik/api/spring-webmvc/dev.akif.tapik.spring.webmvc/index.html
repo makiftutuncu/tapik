@@ -1,0 +1,190 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>dev.akif.tapik.spring.webmvc</title>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../index.html" tabindex="1">
+                    tapik
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">0.2.1
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":spring-webmvc/main">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":spring-webmvc/main" data-filter=":spring-webmvc/main">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    tapik
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="spring-webmvc::dev.akif.tapik.spring.webmvc////PointingToDeclaration//1107615412">
+  <div class="breadcrumbs"><a href="../index.html">spring-webmvc</a><span class="delimiter">/</span><span class="current">dev.akif.tapik.spring.webmvc</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="808873420%2FClasslikes%2F1107615412" anchor-label="SpringWebMvcControllerGenerator" id="808873420%2FClasslikes%2F1107615412" data-filterable-set=":spring-webmvc/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":spring-webmvc/main" data-filterable-set=":spring-webmvc/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-spring-web-mvc-controller-generator/index.html"><span>Spring</span><wbr><span>Web</span><wbr><span>Mvc</span><wbr><span>Controller</span><wbr><span><span>Generator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="808873420%2FClasslikes%2F1107615412"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":spring-webmvc/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-spring-web-mvc-controller-generator/index.html">SpringWebMvcControllerGenerator</a> : <a href="../../common-plugin/dev.akif.tapik.plugin/-tapik-generator/index.html">TapikGenerator</a></div><div class="brief "><p class="paragraph">Generates Spring Web MVC controller interfaces from Tapik endpoint metadata.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="180541837%2FFunctions%2F1107615412" anchor-label="toHttpStatus" id="180541837%2FFunctions%2F1107615412" data-filterable-set=":spring-webmvc/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":spring-webmvc/main" data-filterable-set=":spring-webmvc/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-http-status.html"><span>to</span><wbr><span>Http</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="180541837%2FFunctions%2F1107615412"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":spring-webmvc/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../core/dev.akif.tapik/-status/index.html">Status</a><span class="token punctuation">.</span><a href="to-http-status.html"><span class="token function">toHttpStatus</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.springframework.http/HttpStatus///PointingToDeclaration/">HttpStatus</span></div><div class="brief "><p class="paragraph">Converts Tapik <a href="../../core/dev.akif.tapik/-status/index.html">Status</a> definitions into Spring <span data-unresolved-link="org.springframework.http/HttpStatus///PointingToDeclaration/">HttpStatus</span> instances.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1159370004%2FFunctions%2F1107615412" anchor-label="toResponseEntity" id="1159370004%2FFunctions%2F1107615412" data-filterable-set=":spring-webmvc/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":spring-webmvc/main" data-filterable-set=":spring-webmvc/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-response-entity.html"><span>to</span><wbr><span>Response</span><wbr><span><span>Entity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1159370004%2FFunctions%2F1107615412"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":spring-webmvc/main"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-response-entity.html">P</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-parameters/index.html">Parameters</a><span class="token punctuation">, </span><a href="to-response-entity.html">I</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-input/index.html">Input</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span><a href="to-response-entity.html">O</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-outputs/index.html">Outputs</a><span class="token operator">&gt; </span><a href="../../core/dev.akif.tapik/-http-endpoint/index.html">HttpEndpoint</a><span class="token operator">&lt;</span><a href="to-response-entity.html">P</a><span class="token punctuation">, </span><a href="to-response-entity.html">I</a><span class="token punctuation">, </span><a href="to-response-entity.html">O</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-response-entity.html"><span class="token function">toResponseEntity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">choice<span class="token operator">: </span><a href="../../core/dev.akif.tapik/-one-of/index.html">OneOf</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.springframework.http/ResponseEntity///PointingToDeclaration/">ResponseEntity</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Converts a Tapik <code class="lang-kotlin">OneOf</code> response produced by an endpoint with multiple outputs into a Spring <span data-unresolved-link="org.springframework.http/ResponseEntity///PointingToDeclaration/">ResponseEntity</span>.</p></div><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-response-entity.html">P</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-parameters/index.html">Parameters</a><span class="token punctuation">, </span><a href="to-response-entity.html">I</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-input/index.html">Input</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span><a href="to-response-entity.html">O</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-outputs/index.html">Outputs</a><span class="token operator">&gt; </span><a href="../../core/dev.akif.tapik/-http-endpoint/index.html">HttpEndpoint</a><span class="token operator">&lt;</span><a href="to-response-entity.html">P</a><span class="token punctuation">, </span><a href="to-response-entity.html">I</a><span class="token punctuation">, </span><a href="to-response-entity.html">O</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-response-entity.html"><span class="token function">toResponseEntity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">response<span class="token operator">: </span><a href="../../core/dev.akif.tapik/-response/index.html">Response</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.springframework.http/ResponseEntity///PointingToDeclaration/">ResponseEntity</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Converts a Tapik <a href="../../core/dev.akif.tapik/-response/index.html">Response</a> produced by an endpoint with a single output into a Spring <span data-unresolved-link="org.springframework.http/ResponseEntity///PointingToDeclaration/">ResponseEntity</span>.</p></div><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-response-entity.html">P</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-parameters/index.html">Parameters</a><span class="token punctuation">, </span><a href="to-response-entity.html">I</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-input/index.html">Input</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span><a href="to-response-entity.html">O</a><span class="token operator"> : </span><a href="../../core/dev.akif.tapik/-outputs/index.html">Outputs</a><span class="token operator">&gt; </span><a href="../../core/dev.akif.tapik/-http-endpoint/index.html">HttpEndpoint</a><span class="token operator">&lt;</span><a href="to-response-entity.html">P</a><span class="token punctuation">, </span><a href="to-response-entity.html">I</a><span class="token punctuation">, </span><a href="to-response-entity.html">O</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-response-entity.html"><span class="token function">toResponseEntity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.springframework.http/ResponseEntity///PointingToDeclaration/">ResponseEntity</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Converts an arbitrary Tapik response representation into a Spring <span data-unresolved-link="org.springframework.http/ResponseEntity///PointingToDeclaration/">ResponseEntity</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1079561502%2FFunctions%2F1107615412" anchor-label="toSpringMediaType" id="1079561502%2FFunctions%2F1107615412" data-filterable-set=":spring-webmvc/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":spring-webmvc/main" data-filterable-set=":spring-webmvc/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-spring-media-type.html"><span>to</span><wbr><span>Spring</span><wbr><span>Media</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1079561502%2FFunctions%2F1107615412"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":spring-webmvc/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../core/dev.akif.tapik/-media-type/index.html">MediaType</a><span class="token punctuation">.</span><a href="to-spring-media-type.html"><span class="token function">toSpringMediaType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.springframework.http/MediaType///PointingToDeclaration/">MediaType</span></div><div class="brief "><p class="paragraph">Converts Tapik <a href="../../core/dev.akif.tapik/-media-type/index.html">MediaType</a> definitions into Spring <a href="../../core/dev.akif.tapik/-media-type/index.html">MediaType</a> instances.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Mehmet Akif Tütüncü</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

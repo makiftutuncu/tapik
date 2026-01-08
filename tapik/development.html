@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Development &amp; Contribution Guide :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../_/css/site.css">
+<link rel="stylesheet" href="../_/css/search.css">
+<link rel="stylesheet" href="../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="HEAD">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Guides</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="getting-started.html">Getting Started</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="user-guide.html">User Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Concepts</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Code Generation</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Spring RestClient Clients</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Spring WebMVC Controllers</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Markdown Documentation</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li>Contributing</li>
+    <li><a href="development.html">Development Guide</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/edit/HEAD/docs/modules/ROOT/pages/development.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Development &amp; Contribution Guide</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik uses a multi-module Gradle build with Kotlin DSL, configuration cache, and extensive code generation. Follow these practices when contributing.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_repository_layout"><a class="anchor" href="#_repository_layout"></a>Repository Layout</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Core libraries</strong>: core, codec, jackson</p>
+</li>
+<li>
+<p><strong>Generators</strong>: spring-restclient, spring-webmvc, common-plugin</p>
+</li>
+<li>
+<p><strong>Gradle integration</strong>: gradle-plugin, shared conventions in the build-logic included build</p>
+</li>
+<li>
+<p><strong>Docs</strong>: Antora site in docs/ with playbook at antora-playbook.yml</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Module directories mirror the base package requirement: files under src/main/kotlin start immediately after dev/akif/tapik (for example, core/src/main/kotlin/HttpEndpoint.kt declares dev.akif.tapik.HttpEndpoint).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tooling_commands"><a class="anchor" href="#_tooling_commands"></a>Tooling &amp; Commands</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Task</th>
+<th class="tableblock halign-left valign-top">Command</th>
+<th class="tableblock halign-left valign-top">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Full build &amp; tests</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">./gradlew build</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Compiles all modules, runs unit tests</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Verification suite</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">./gradlew check</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Includes ktlint and plugin checks</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Formatting audit</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">./gradlew ktlintCheck</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Use during CI or pre-commit</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auto-format</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">./gradlew ktlintFormat</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Apply before committing formatting fixes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Dokka docs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">./gradlew dokkaGenerateHtml</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must succeed; fails on undocumented public APIs</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generate outputs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">./gradlew tapikGenerate</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Refreshes generated clients, controllers, docs</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Docs build</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">npm run docs:preview</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Rebuilds the Antora site</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Tips:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Pass -PskipLint for quick local iteration; CI should run without it.</p>
+</li>
+<li>
+<p>Disable configuration cache while debugging with -Dorg.gradle.configuration-cache=false.</p>
+</li>
+<li>
+<p>Plugin validation runs only when -PrunPluginValidation is set.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_coding_standards"><a class="anchor" href="#_coding_standards"></a>Coding Standards</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Kotlin style follows .editorconfig (4-space indent, 120-char lines, LF endings).</p>
+</li>
+<li>
+<p>Avoid wildcard imports unless they simplify tapik package usage.</p>
+</li>
+<li>
+<p>Keep packages under dev.akif.tapik.&lt;module&gt;; respect the flattened directory structure.</p>
+</li>
+<li>
+<p>Document every public API with KDoc, including type parameters, parameters, returns, and throws.</p>
+</li>
+<li>
+<p>Generated sources belong under build/ or generated/; keep them out of VCS unless explicitly required.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing"><a class="anchor" href="#_testing"></a>Testing</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Use kotlin("test") with JUnit 5 (junit-jupiter-params for parameterized cases).</p>
+</li>
+<li>
+<p>Place unit tests adjacent to the module (src/test/kotlin).</p>
+</li>
+<li>
+<p>For focused runs: ./gradlew :module:test.</p>
+</li>
+<li>
+<p>Integration flows (e.g., Spring-specific) should live in dedicated source sets such as integrationTest.</p>
+</li>
+<li>
+<p>Favour descriptive test names that outline behaviour rather than method names.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_documentation_workflow"><a class="anchor" href="#_documentation_workflow"></a>Documentation Workflow</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Update KDoc and run ./gradlew dokkaGenerateHtml before shipping changes.</p>
+</li>
+<li>
+<p>Rebuild the Antora site (npm run docs:preview) locally if you modify AsciiDoc or navigation.</p>
+</li>
+<li>
+<p>Generated documentation must include the footer © {currentYear} Mehmet Akif Tütüncü; the Dokka configuration enforces it - do not strip it.</p>
+</li>
+<li>
+<p>For local previews that include the API reference, run ./gradlew dokkaGenerate then ./docs/scripts/copy-api.sh after the Antora build.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_versioning_after_releases"><a class="anchor" href="#_versioning_after_releases"></a>Versioning After Releases</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Releases use the current version. After a successful GitHub release, CI automatically runs ./gradlew bumpVersion (defaults to a patch bump) and pushes the commit to the target branch so new development starts with a higher version.</p>
+</li>
+<li>
+<p>For local bumps (e.g., pre-release rehearsal), run ./gradlew bumpVersion -PnewVersion=&lt;nextVersion&gt;; omit newVersion to auto-increment the patch.</p>
+</li>
+<li>
+<p>The task rewrites gradle.properties, docs (AsciiDoc/HTML), Gradle scripts, and properties files that mention the previous version while skipping build outputs and .gradle state.</p>
+</li>
+<li>
+<p>The task writes changes to disk; commit them along with any regenerated docs.</p>
+</li>
+<li>
+<p>Docs are published from release tags; they reflect the latest released version, not unreleased changes on main.</p>
+</li>
+<li>
+<p>Published docs are versioned with Antora: each release tag produces a version and the site default tracks the newest tag.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dependency_management"><a class="anchor" href="#_dependency_management"></a>Dependency Management</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Declare dependencies through the version catalog (gradle/libs.versions.toml).</p>
+</li>
+<li>
+<p>Reuse bundles like libs.bundles.testCommon to keep versions aligned.</p>
+</li>
+<li>
+<p>Avoid hard-coded coordinates in build scripts; prefer catalog aliases.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_contribution_checklist"><a class="anchor" href="#_contribution_checklist"></a>Contribution Checklist</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Update or add tests that cover the behaviour you changed.</p>
+</li>
+<li>
+<p>Run ./gradlew ktlintFormat build and ensure both pass.</p>
+</li>
+<li>
+<p>Refresh generated outputs (tapikGenerate, Dokka) if your change affects them.</p>
+</li>
+<li>
+<p>Verify Antora builds locally (npm run docs:preview) when touching documentation.</p>
+</li>
+<li>
+<p>Craft concise, imperative commit messages (e.g., Add Spring WebMVC generator).</p>
+</li>
+<li>
+<p>Open a PR with intent, summary, linked issues, and screenshots/logs for user-visible changes.</p>
+</li>
+<li>
+<p>Request review from the relevant CODEOWNERS.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>By following these guidelines, you keep tapik&#8217;s generators deterministic, its DSL approachable, and its documentation trustworthy.</p>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="code-generation/documentation.html">Markdown Documentation</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../_'</script>
+<script src="../_/js/site.js"></script>
+
+<script src="../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path=".." data-snippet-length="100" src="../_/js/search-ui.js"></script>
+<script src="../search-index.js"></script>
+  </body>
+</html>

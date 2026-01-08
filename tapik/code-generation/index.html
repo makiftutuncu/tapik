@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Code Generation Overview :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="HEAD">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="../index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Guides</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../getting-started.html">Getting Started</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../user-guide.html">User Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Concepts</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Code Generation</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="client.html">Spring RestClient Clients</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="server.html">Spring WebMVC Controllers</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="documentation.html">Markdown Documentation</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">tapik</a></li>
+    <li>Code Generation</li>
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/edit/HEAD/docs/modules/ROOT/pages/code-generation/index.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Code Generation Overview</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik generators transform endpoint metadata into artefacts during the tapikGenerate Gradle task. Generators are loaded with Java ServiceLoader so any dependency placed on the project or build classpath can contribute new outputs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_built_in_generators"><a class="anchor" href="#_built_in_generators"></a>Built-in Generators</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Generator ID</th>
+<th class="tableblock halign-left valign-top">Module</th>
+<th class="tableblock halign-left valign-top">Output</th>
+<th class="tableblock halign-left valign-top">Enabled By</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">spring-restclient</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dev.akif.tapik:spring-restclient</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Kotlin interfaces + helpers backed by Spring RestClient</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tapik { springRestClient { } }</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">spring-webmvc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dev.akif.tapik:spring-webmvc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Spring WebMVC controller interfaces + response mappers</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tapik { springWebMvc { } }</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">markdown-docs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dev.akif.tapik:common-plugin (bundled)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Markdown API overview</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tapik { markdownDocumentation { } }</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Each generator writes to the shared output directories supplied by the Gradle task:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>generatedSourcesDirectory &#8594; Kotlin sources (added to the main source set).</p>
+</li>
+<li>
+<p>outputDirectory &#8594; other artefacts such as Markdown files or reports.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_execution_model"><a class="anchor" href="#_execution_model"></a>Execution Model</h2>
+<div class="sectionbody">
+<div class="imageblock"><div class="mermaid content" style=" ">sequenceDiagram
+    participant Gradle
+    participant TapikGenerateTask as tapikGenerate Task
+    participant Scanner as Endpoint Scanner
+    participant Generators
+
+    Gradle->>TapikGenerateTask: run()
+    TapikGenerateTask->>Scanner: scan compiled classes
+    Scanner-->>TapikGenerateTask: List<HttpEndpointMetadata>
+    TapikGenerateTask->>Generators: invoke(id, metadata, context)
+    Generators-->>TapikGenerateTask: write sources & artefacts
+    TapikGenerateTask-->>Gradle: complete</div></div>
+<div class="paragraph">
+<p>Notable behaviour:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The scanner favours ASM parsing and falls back to reflection if bytecode targets a future JVM version.</p>
+</li>
+<li>
+<p>Metadata, scan logs, and warnings are written using Gradle&#8217;s logging APIs for easy diagnosis (--info for more detail).</p>
+</li>
+<li>
+<p>Only configured generator IDs are executed; missing IDs log warnings without failing the build.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_extending_tapik"><a class="anchor" href="#_extending_tapik"></a>Extending tapik</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Implement dev.akif.tapik.plugin.TapikGenerator and package it in a module on the build classpath.</p>
+</li>
+<li>
+<p>Register your implementation under META-INF/services/dev.akif.tapik.plugin.TapikGenerator.</p>
+</li>
+<li>
+<p>Choose a unique id. Users enable it via tapik { customGenerator { } } or by manually populating the enabledGeneratorIds list.</p>
+</li>
+<li>
+<p>Use the supplied TapikGeneratorContext to discover output directories and log messages.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Custom generators can co-exist with the provided ones and share the endpoint metadata that tapik already extracts. Keep your generator pure and deterministic-Gradle caches tapikGenerate when outputs do not change.</p>
+</div>
+<div class="paragraph">
+<p>Proceed to the dedicated pages to learn about server, client, and documentation generation specifics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="client.html" class="xref page">Spring RestClient Clients</a></p>
+</li>
+<li>
+<p><a href="server.html" class="xref page">Spring WebMVC Controllers</a></p>
+</li>
+<li>
+<p><a href="documentation.html" class="xref page">Markdown Documentation</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="../concepts/type-safety.html">Type Safety</a></span>
+    <span class="next"><a href="client.html">Spring RestClient Clients</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>

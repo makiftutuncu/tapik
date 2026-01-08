@@ -1,0 +1,159 @@
+:root {
+  --tapik-accent: #1a73e8;
+  --tapik-accent-strong: #1558c0;
+}
+
+/* Material-inspired surfaces + typography for both light and dark */
+body {
+  background: #f8f9fb;
+  color: #1b1b1f;
+}
+
+.nav,
+.nav-container {
+  background: #f3f6fb;
+  color: #1b1b1f;
+  border-right: 1px solid #d7e3f1;
+  padding: 0.5rem 0.5rem;
+}
+
+.toc.sidebar,
+.toc.sidebar .toc-menu,
+.toc.sidebar .toc-list {
+  background: #f3f6fb;
+  padding: 0.5rem 0.5rem;
+}
+
+.toc.sidebar {
+  position: sticky;
+  top: 6rem;
+}
+
+.toc.embedded,
+.toc.embedded .toc-menu,
+.toc.embedded .toc-list {
+  background: #f3f6fb;
+}
+
+.toc.embedded {
+  padding: 0.5rem 0.5rem;
+}
+
+.doc {
+  background: #ffffff;
+  color: #1b1b1f;
+  border: 1px solid #dfe6f0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(27, 27, 31, 0.08);
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1200px;
+  padding-top: 1rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.doc h1 {
+  margin-top: 0;
+}
+
+.doc > h1.page:first-child {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+@media screen and (min-width: 1024px) {
+  main > .content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-left: 2rem;
+  }
+}
+
+.doc h1,
+.doc h2,
+.doc h3,
+.doc h4 {
+  color: #1b1b1f;
+}
+
+.nav-link.is-active,
+.nav-link:hover,
+.doc a {
+  color: var(--tapik-accent);
+}
+
+.doc a:hover {
+  color: var(--tapik-accent-strong);
+}
+
+pre,
+code,
+.literalblock pre,
+.listingblock pre {
+  background: #eef3f8;
+  color: #1b1b1f;
+  border: 1px solid #d7e3f1;
+}
+
+.admonitionblock {
+  background: #eef3f8;
+  border: 1px solid #d7e3f1;
+  border-left: 4px solid var(--tapik-accent);
+}
+
+.admonitionblock .icon {
+  color: var(--tapik-accent);
+}
+
+.admonitionblock .content {
+  color: #1b1b1f;
+}
+
+table {
+  border-color: #d7e3f1;
+}
+
+table thead {
+  background: #eef3f8;
+}
+
+table th,
+.table td,
+table td {
+  border-color: #d7e3f1;
+}
+
+footer.footer {
+  display: none;
+}
+
+nav.pagination {
+  display: inline-flex;
+  justify-content: center;
+  gap: 2rem;
+  padding-top: 1.25rem;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0;
+  border-top: none;
+  max-width: 100%;
+}
+
+nav.pagination .prev,
+nav.pagination .next {
+  flex: 0 0 auto;
+  max-width: none;
+  text-align: center;
+}
+
+.pagination-container {
+  width: 100%;
+  text-align: center;
+}

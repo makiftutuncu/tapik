@@ -1,0 +1,1 @@
+sourceset_dependencies = '{":codec/main":[],":common-plugin/main":[],":core/main":[],":jackson/main":[],":spring-webmvc/main":[],":spring-restclient/main":[],":gradle-plugin/main":[]}'
