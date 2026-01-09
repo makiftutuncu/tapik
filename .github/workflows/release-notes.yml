@@ -86,9 +86,33 @@ jobs:
             echo "List of changes since version ${range_label}"
             echo
             if [ -n "${start_tag}" ]; then
-              git log --reverse --no-merges --pretty='- %s (%h)' "${range}"
+              base_ref="${start_tag}"
             else
-              git log --reverse --no-merges --pretty='- %s (%h)' "${end_ref}"
+              base_ref="$(git rev-list --max-parents=0 "${end_ref}" | tail -n1)"
+            fi
+
+            api_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${base_ref}...${end_ref}"
+            response="$(
+              curl -sS \
+                -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "${api_url}"
+            )"
+
+            if echo "${response}" | jq -e '.commits' >/dev/null 2>&1; then
+              echo "${response}" | jq -r '
+                .commits[]
+                | "- " + (.commit.message | split("\n")[0])
+                  + " (" + (.sha[0:7])
+                  + ", @" + ((.committer.login // .author.login // "unknown")) + ")"
+              '
+            else
+              echo "WARNING: GitHub compare API failed; falling back to committer names." >&2
+              if [ -n "${start_tag}" ]; then
+                git log --reverse --no-merges --pretty='- %s (%h, %cn)' "${range}"
+              else
+                git log --reverse --no-merges --pretty='- %s (%h, %cn)' "${end_ref}"
+              fi
             fi
           } > "${notes_file}"
 
