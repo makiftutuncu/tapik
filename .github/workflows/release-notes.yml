@@ -1,0 +1,104 @@
+name: Release Notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      end_ref:
+        description: "Tag, branch, or SHA to end the notes at (defaults to current ref/HEAD)."
+        required: false
+        type: string
+      start_tag:
+        description: "Optional starting tag (defaults to latest tag before end_ref)."
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      end_ref:
+        description: "Tag, branch, or SHA to end the notes at."
+        required: true
+        type: string
+      start_tag:
+        description: "Optional starting tag (defaults to latest tag before end_ref)."
+        required: false
+        type: string
+    outputs:
+      range:
+        description: "Git range used to generate notes."
+        value: ${{ jobs.generate.outputs.range }}
+      notes_file:
+        description: "Path to the generated release notes file."
+        value: ${{ jobs.generate.outputs.notes_file }}
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      range: ${{ steps.notes.outputs.range }}
+      notes_file: ${{ steps.notes.outputs.notes_file }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: notes
+        env:
+          END_REF: ${{ inputs.end_ref }}
+          START_TAG: ${{ inputs.start_tag }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          end_ref="${END_REF}"
+          if [ -z "${end_ref}" ]; then
+            if [ "${REF_TYPE}" = "tag" ]; then
+              end_ref="${REF_NAME}"
+            else
+              end_ref="HEAD"
+            fi
+          fi
+
+          git fetch --tags origin
+
+          start_tag="${START_TAG}"
+          if [ -z "${start_tag}" ]; then
+            if git show-ref --tags --verify --quiet "refs/tags/${end_ref}"; then
+              start_tag="$(git tag --list 'v*' --sort=-v:refname | grep -v "^${end_ref}$" | head -n1)"
+            else
+              start_tag="$(git tag --list 'v*' --sort=-v:refname | head -n1)"
+            fi
+          fi
+
+          if [ -n "${start_tag}" ]; then
+            range="${start_tag}..${end_ref}"
+            range_label="${start_tag} to ${end_ref}"
+          else
+            range="${end_ref}"
+            range_label="start of history to ${end_ref}"
+          fi
+
+          echo "Using range: ${range_label}"
+          notes_file="release-notes.md"
+          {
+            echo "List of changes since version ${range_label}"
+            echo
+            if [ -n "${start_tag}" ]; then
+              git log --reverse --no-merges --pretty='- %s (%h)' "${range}"
+            else
+              git log --reverse --no-merges --pretty='- %s (%h)' "${end_ref}"
+            fi
+          } > "${notes_file}"
+
+          echo "notes_file=${notes_file}" >> "$GITHUB_OUTPUT"
+          echo "range=${range_label}" >> "$GITHUB_OUTPUT"
+
+          cat "${notes_file}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release notes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: release-notes.md

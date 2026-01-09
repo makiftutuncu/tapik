@@ -80,6 +80,13 @@ jobs:
           fi
           echo "Bump verified: ${latest_tag:-none} -> ${RELEASE_TAG}"
 
+  generate-release-notes:
+    if: github.event_name != 'release' || github.event.release.prerelease == false
+    needs: [check-bump]
+    uses: ./.github/workflows/release-notes.yml
+    with:
+      end_ref: ${{ github.event.release.tag_name || inputs.release_tag }}
+
   publish-maven:
     if: github.event_name != 'release' || github.event.release.prerelease == false
     runs-on: ubuntu-latest
