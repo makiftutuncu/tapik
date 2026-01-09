@@ -8,7 +8,7 @@ spring = "6.2.14"
 mockk = "1.14.7"
 wiremock = "3.13.2"
 junit = "6.0.2"
-asm = "9.9"
+asm = "9.9.1"
 dokka = "2.1.0"
 
 [libraries]
