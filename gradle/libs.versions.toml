@@ -1,5 +1,5 @@
 [versions]
-arrow = "2.2.0"
+arrow = "2.2.1.1"
 jackson = "2.20.1"
 kotlin = "2.2.21"
 ktlint = "14.0.1"
