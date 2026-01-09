@@ -7,6 +7,11 @@ tasks.register<BumpVersionTask>("bumpVersion") {
     currentVersion.set(provider { version.toString() })
     newVersion.set(providers.gradleProperty("newVersion"))
     rootPath.set(layout.projectDirectory.asFile.absolutePath)
+    autoCommit.set(
+        providers.gradleProperty("bumpAutoCommit")
+            .map { it.toBooleanStrictOrNull() ?: true }
+            .orElse(true)
+    )
     targetFiles.set(
         layout.projectDirectory
             .asFileTree
