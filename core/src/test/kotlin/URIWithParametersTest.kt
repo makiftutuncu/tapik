@@ -32,4 +32,13 @@ class URIWithParametersTest {
 
         assertEquals("/users/42/profile", uri.toString())
     }
+
+    @Test
+    fun `toURI inserts path separator when starting from a base string and a path variable`() {
+        val userId = PathVariable.int("id")
+
+        val uri = ("users" / userId / "profile").toURI(42)
+
+        assertEquals("/users/42/profile", uri.toString())
+    }
 }

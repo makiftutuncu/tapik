@@ -22,7 +22,7 @@ operator fun String.div(segment: String): URIWithParameters0 = listOf(this, segm
  * @return URI template capturing the supplied [variable].
  */
 operator fun <P : Any> String.div(variable: PathVariable<P>): URIWithParameters1<P> =
-    listOf(this + "{${variable.name}}") to parametersOf(variable)
+    listOf(this, "{${variable.name}}") to parametersOf(variable)
 
 /**
  * Adds a literal [segment] to the path portion of this URI template.
