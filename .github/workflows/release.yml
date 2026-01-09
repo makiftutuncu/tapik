@@ -34,22 +34,51 @@ jobs:
             echo "release_tag is required for manual runs."
             exit 1
           fi
-          git fetch origin "${TARGET_BRANCH}"
-          release_version="$(grep '^version=' gradle.properties | cut -d= -f2)"
-          if [ -z "${release_version}" ]; then
-            echo "Could not read release version from gradle.properties."
+          git fetch --tags origin
+          release_version="${RELEASE_TAG#v}"
+          file_version="$(grep '^version=' gradle.properties | cut -d= -f2)"
+          if [ -z "${file_version}" ]; then
+            echo "Could not read version from gradle.properties."
             exit 1
           fi
-          current_version="$(git show "origin/${TARGET_BRANCH}:gradle.properties" | grep '^version=' | cut -d= -f2)"
-          if [ -z "${current_version}" ]; then
-            echo "Could not read current version from ${TARGET_BRANCH}."
+          if [ "${file_version}" != "${release_version}" ]; then
+            echo "Release aborted: you likely forgot to run the version bump before cutting the release."
+            echo "Expected gradle.properties version to match the release tag."
+            echo "  Release tag: ${RELEASE_TAG}  (version ${release_version})"
+            echo "  gradle.properties version: ${file_version}"
+            echo "Example fix:"
+            echo "  1) ./gradlew bumpVersion"
+            echo "  2) commit the version changes"
+            echo "  3) re-create the release tag (e.g., v${file_version})"
             exit 1
           fi
-          if [ "${current_version}" = "${release_version}" ]; then
-            echo "Bump is missing: ${TARGET_BRANCH} is still ${current_version} (release ${release_version})."
+          latest_tag="$(git tag --list 'v*' --sort=-v:refname | grep -v "^${RELEASE_TAG}$" | head -n1)"
+          if [ -n "${latest_tag}" ]; then
+            latest_version="${latest_tag#v}"
+            if [ "${latest_version}" = "${release_version}" ]; then
+              echo "Release aborted: you likely forgot to run the version bump before cutting the release."
+              echo "The release version matches the latest already-published version."
+              echo "  Latest release tag: ${latest_tag}"
+              echo "  New release tag:    ${RELEASE_TAG}"
+              echo "Example fix:"
+              echo "  1) ./gradlew bumpVersion"
+              echo "  2) commit the version changes"
+              echo "  3) re-create the release tag (e.g., v${file_version})"
+              exit 1
+            fi
+          fi
+          if [ "${latest_tag}" = "${RELEASE_TAG}" ]; then
+            echo "Release aborted: you likely forgot to run the version bump before cutting the release."
+            echo "The new release tag is identical to the latest release tag."
+            echo "  Latest release tag: ${latest_tag}"
+            echo "  New release tag:    ${RELEASE_TAG}"
+            echo "Example fix:"
+            echo "  1) ./gradlew bumpVersion"
+            echo "  2) commit the version changes"
+            echo "  3) re-create the release tag (e.g., v${file_version})"
             exit 1
           fi
-          echo "Bump verified: ${release_version} -> ${current_version}"
+          echo "Bump verified: ${latest_tag:-none} -> ${RELEASE_TAG}"
 
   publish-maven:
     if: github.event_name != 'release' || github.event.release.prerelease == false
