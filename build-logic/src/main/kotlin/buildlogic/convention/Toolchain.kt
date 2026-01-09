@@ -10,16 +10,18 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 fun Project.configureKotlinAndJavaToolchains() {
     val javaTargetVersion = intProperty("javaTargetVersion")
     val javaToolchainVersion = intProperty("javaToolchainVersion")
-
     extensions.findByType(KotlinJvmProjectExtension::class.java)?.apply {
         jvmToolchain(javaToolchainVersion)
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(javaTargetVersion.toString()))
+            languageVersion.set(KotlinVersion.KOTLIN_2_1)
+            apiVersion.set(KotlinVersion.KOTLIN_2_1)
             freeCompilerArgs.add("-Xjdk-release=$javaTargetVersion")
         }
     }
