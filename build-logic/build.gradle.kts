@@ -4,6 +4,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     `kotlin-dsl`
@@ -23,23 +24,27 @@ fun intProperty(name: String) =
 
 val javaTargetVersion = intProperty("javaTargetVersion").get()
 val javaToolchainVersion = intProperty("javaToolchainVersion").get()
+val buildLogicTargetVersion = minOf(javaTargetVersion, 24)
 
 kotlin {
     jvmToolchain(javaToolchainVersion)
     compilerOptions {
-        jvmTarget.set(JvmTarget.fromTarget(javaTargetVersion.toString()))
-        freeCompilerArgs.add("-Xjdk-release=$javaTargetVersion")
+        // Gradle's embedded Kotlin (kotlin-dsl) still tops out at JVM 24.
+        jvmTarget.set(JvmTarget.fromTarget(buildLogicTargetVersion.toString()))
+        languageVersion.set(KotlinVersion.KOTLIN_2_1)
+        apiVersion.set(KotlinVersion.KOTLIN_2_1)
+        freeCompilerArgs.add("-Xjdk-release=$buildLogicTargetVersion")
     }
 }
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(javaToolchainVersion))
-    sourceCompatibility = JavaVersion.toVersion(javaTargetVersion)
-    targetCompatibility = JavaVersion.toVersion(javaTargetVersion)
+    sourceCompatibility = JavaVersion.toVersion(buildLogicTargetVersion)
+    targetCompatibility = JavaVersion.toVersion(buildLogicTargetVersion)
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(javaTargetVersion)
+    options.release.set(buildLogicTargetVersion)
 }
 
 dependencies {
