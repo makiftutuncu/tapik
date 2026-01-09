@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>User Guide :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.2.5">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Guides</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="getting-started.html">Getting Started</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="user-guide.html">User Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Concepts</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Code Generation</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Spring RestClient Clients</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Spring WebMVC Controllers</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Markdown Documentation</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li>Guides</li>
+    <li><a href="user-guide.html">User Guide</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.2.5</button>
+  <div class="version-menu">
+    <a class="version" href="../user-guide.html">v0.2.6</a>
+    <a class="version is-current" href="user-guide.html">v0.2.5</a>
+    <a class="version" href="../v0.2.4/user-guide.html">v0.2.4</a>
+    <a class="version" href="../v0.2.3/user-guide.html">v0.2.3</a>
+    <a class="version" href="../v0.2.2/user-guide.html">v0.2.2</a>
+    <a class="version" href="../v0.2.1/user-guide.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.2.5/docs/modules/ROOT/pages/user-guide.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">User Guide</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This guide walks you through installing the tapik Gradle plugin, declaring endpoints with the Kotlin DSL, and running the generators that create clients, servers, and documentation.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>New to tapik? Start with <a href="getting-started.html" class="xref page">Getting Started</a> for a step-by-step tutorial before diving into the full plugin reference below.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>JDK compatible with the repository defaults (javaTargetVersion=21, toolchain javaToolchainVersion=24 in gradle.properties).</p>
+</li>
+<li>
+<p>Gradle 9+ with the Kotlin DSL; configuration cache and task caching are supported out of the box.</p>
+</li>
+<li>
+<p>Kotlin 2.2.20 (supplied via the Gradle toolchain).</p>
+</li>
+<li>
+<p>Optional modules you plan to use, such as dev.akif.tapik:jackson for JSON bodies or Spring starters for generated code.</p>
+</li>
+</ul>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Component</th>
+<th class="tableblock halign-left valign-top">Example Dependency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint DSL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:core:0.2.5")</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Codecs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:codec:0.2.5")</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jackson integration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:jackson:0.2.5")</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gradle plugin</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id("dev.akif.tapik.plugin.gradle") version "0.2.5"</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The version numbers match the repository snapshot (version=0.2.5). Replace them with the release you are consuming.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installing_the_gradle_plugin"><a class="anchor" href="#_installing_the_gradle_plugin"></a>Installing the Gradle Plugin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Configure the plugin in a module that produces HTTP endpoints or needs generated sources:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">plugins {
+    kotlin("jvm")
+    id("dev.akif.tapik.plugin.gradle") version "0.2.5"
+}
+
+dependencies {
+    implementation("dev.akif.tapik:core:0.2.5")
+    implementation("dev.akif.tapik:jackson:0.2.5") // for JSON helpers
+}
+
+tapik {
+    endpointPackages(
+        "com.acme.catalog.endpoints",
+        "com.acme.shared.http"
+    )
+
+    springRestClient { /* enables the Spring RestClient generator */ }
+    springWebMvc { /* enables the Spring WebMVC generator */ }
+    markdownDocumentation { /* enables the Markdown documentation generator */ }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Key things to remember:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>endpointPackages must reference the packages where compiled endpoint properties live. The scanner filters classes using these prefixes.</p>
+</li>
+<li>
+<p>The nested generator blocks are markers; you do not need to configure anything inside them unless future versions expose options.</p>
+</li>
+<li>
+<p>Generated Kotlin sources land under build/generated/sources/tapik/main/kotlin and are added to the main source set automatically.</p>
+</li>
+<li>
+<p>Non-source artefacts (for example, Markdown files) are written under build/generated.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_declaring_endpoints"><a class="anchor" href="#_declaring_endpoints"></a>Declaring Endpoints</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Endpoints are compile-time constants built with the DSL in the core module. The DSL collects metadata from property names, documentation strings, and nested builders.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package com.acme.catalog.endpoints
+
+import dev.akif.tapik.*
+import dev.akif.tapik.jackson.jsonBody
+
+object ProductEndpoints {
+    private val productId = path.uuid("productId")
+    private val locale = query.string("locale").optional("en-US")
+
+    val getProduct by endpoint(
+        description = "Fetch product details",
+        details = "Returns localized information when the locale query parameter is supplied."
+    ) {
+        get("products" / productId + locale)
+            .input(header.uuid("X-Request-Id"))
+            .output(Status.OK) {
+                jsonBody&lt;ProductView&gt;("product")
+            }
+            .output(Status.NOT_FOUND) {
+                jsonBody&lt;ProblemDetails&gt;("problem")
+            }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Highlights:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>endpoint { ... } infers the endpoint id from the property name (getProduct). The description and details flow into generated KDoc and Markdown.</p>
+</li>
+<li>
+<p>Path building uses operator overloads: "products" / productId.</p>
+</li>
+<li>
+<p>Query parameters append with , headers with +input { ... }, and outputs use output(Status.OK) { ... }.</p>
+</li>
+<li>
+<p>Response variants can be chained; the DSL supports OneOf unions to model branching behaviour.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_running_generation"><a class="anchor" href="#_running_generation"></a>Running Generation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik registers an aggregated tapikGenerate task. It depends on classes for the current project and its siblings to ensure bytecode is available.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./gradlew :service:tapikGenerate</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Execution flow:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Compiled classes are scanned for properties that return HttpEndpoint.</p>
+</li>
+<li>
+<p>Metadata describing the endpoints is persisted to build/generated/tapik-endpoints.txt.</p>
+</li>
+<li>
+<p>The selected generators (spring-restclient, spring-webmvc, markdown-docs) run sequentially.</p>
+</li>
+<li>
+<p>Generated sources are attached to the IDE/classpath; you can ./gradlew build without special configuration.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can run ./gradlew :service:classes tapikGenerate during fast feedback loops. Pass -PskipLint if you want to avoid ktlint locally.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_inspecting_outputs"><a class="anchor" href="#_inspecting_outputs"></a>Inspecting Outputs</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Kotlin sources</strong> live under build/generated/sources/tapik/main/kotlin.</p>
+</li>
+<li>
+<p><strong>Markdown documentation</strong> is emitted to build/generated/API.md.</p>
+</li>
+<li>
+<p><strong>Scan report</strong>: build/generated/tapik-endpoints.txt contains the raw metadata list.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When checking generated Kotlin into source control:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Run ./gradlew tapikGenerate after any endpoint changes.</p>
+</li>
+<li>
+<p>Review generated types as you would review hand-written code; they carry KDoc extracted from your endpoints.</p>
+</li>
+<li>
+<p>For reproducibility, make sure the versions of tapik dependencies are pinned via a version catalog or BOM.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a>Troubleshooting</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Symptom</th>
+<th class="tableblock halign-left valign-top">Common Cause</th>
+<th class="tableblock halign-left valign-top">Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Missing compiled classes warning</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">classes task did not run before tapikGenerate</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Run ./gradlew classes tapikGenerate or wire tasks in your CI pipeline</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No generators execute</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generator blocks omitted in the tapik extension</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Add springRestClient { }, springWebMvc { }, or markdownDocumentation { }</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class not found during scan</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint package not covered by endpointPackages</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ensure fully qualified package prefixes are listed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unexpected HTTP mappings</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint path missing leading segment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Start URIs with "segment" or "segment" / ...</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>If you create custom generators, place their implementation on the build classpath and expose them via the Java ServiceLoader contract. The Gradle plugin will pick them up automatically when their id is enabled.</p>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="getting-started.html">Getting Started</a></span>
+    <span class="next"><a href="concepts/type-safety.html">Type Safety</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>
