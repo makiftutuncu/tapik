@@ -71,11 +71,11 @@ abstract class BumpVersionTask : DefaultTask() {
                 return@forEach
             }
 
-            val original = target.readText()
+            val original = target.readText(Charsets.UTF_8)
             val updated = original.replace(old, next)
 
             if (original != updated) {
-                target.writeText(updated)
+                target.writeText(updated, Charsets.UTF_8)
                 updatedFiles.add(target)
                 logger.lifecycle(
                     "Updated version from $old to $next in ${target.relativeTo(rootDir)}"
