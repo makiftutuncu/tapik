@@ -5,6 +5,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import java.io.File
@@ -14,9 +15,9 @@ import java.io.File
  */
 @CacheableTask
 abstract class TapikGenerateTask : DefaultTask() {
-    /** Packages that will be scanned for compiled `HttpEndpoint` declarations. */
+    /** Base package that will be scanned for compiled `HttpEndpoint` declarations. */
     @get:Input
-    abstract val endpointPackages: ListProperty<String>
+    abstract val basePackage: Property<String>
 
     /** Directory containing the textual endpoint summary output. */
     @get:OutputDirectory
@@ -65,7 +66,7 @@ abstract class TapikGenerateTask : DefaultTask() {
             config = GenerateTaskConfiguration(
                 outputDirectory = outputDirectory.get().asFile,
                 generatedSourcesDirectory = generatedSourcesDirectory.get().asFile,
-                endpointPackages = endpointPackages.get(),
+                basePackage = basePackage.get(),
                 compiledClassesDirectory = compiledClassesDirectory.get().asFile,
                 additionalClasspathDirectories = compiledClassesDirectories,
                 enabledGeneratorIds = enabledGeneratorIds.getOrElse(emptySet())

@@ -26,7 +26,7 @@ class GenerateTaskTest {
             config = GenerateTaskConfiguration(
                 outputDirectory = outputDir,
                 generatedSourcesDirectory = generatedDir,
-                endpointPackages = listOf("dev.akif.tapik.plugin.fixtures"),
+                basePackage = "dev.akif.tapik.plugin",
                 compiledClassesDirectory = compiledDir,
                 additionalClasspathDirectories = emptyList(),
                 enabledGeneratorIds = setOf("spring-restclient", "spring-webmvc", "markdown-docs")

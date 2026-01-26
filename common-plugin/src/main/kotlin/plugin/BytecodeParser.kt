@@ -87,7 +87,11 @@ object BytecodeParser {
 
         val ownerClassName = ownerInternalName.replace('/', '.')
         val packageName = ownerClassName.substringBeforeLast('.', "")
-        val fileName = ownerClassName.substringAfterLast('.').substringAfterLast('$')
+        val fileName =
+            ownerClassName
+                .substringAfterLast('.')
+                .split('$')
+                .joinToString(separator = "") { it }
         val endpointName = deriveEndpointName(methodName)
 
         val rawType = TypeMetadata(

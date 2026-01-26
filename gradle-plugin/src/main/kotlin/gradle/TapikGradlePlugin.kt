@@ -20,7 +20,11 @@ class TapikGradlePlugin : Plugin<Project> {
         val tapikGenerate = target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) {
             it.group = "tapik"
             it.description = "Generates Tapik outputs"
-            it.endpointPackages.set(target.provider { extension.resolvedEndpointPackages() })
+            it.basePackage.set(target.provider {
+                extension.resolvedBasePackage().ifBlank {
+                    target.group.toString()
+                }
+            })
             it.outputDirectory.set(target.layout.buildDirectory.dir("generated"))
             it.sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             it.compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))

@@ -4,14 +4,24 @@ package dev.akif.tapik
  * Describes a decoded HTTP response together with its status code.
  *
  * @property status status code returned by the server.
+ * @property headers decoded header values in declaration order; empty when the endpoint defines no headers.
  */
 sealed interface Response {
     val status: Status
     val headers: Tuple<List<*>>
 }
 
+/**
+ * Marker for responses that intentionally carry no body payload.
+ */
 sealed interface ResponseWithoutBody : Response
 
+/**
+ * Marker for responses that carry a body payload.
+ *
+ * @param B type of the decoded body.
+ * @property body decoded response body.
+ */
 sealed interface ResponseWithBody<out B> : Response {
     val body: B
 }

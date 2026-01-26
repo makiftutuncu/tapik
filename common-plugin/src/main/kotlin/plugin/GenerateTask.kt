@@ -26,6 +26,7 @@ class GenerateTask(
     private val logDebug: (String, Throwable?) -> Unit,
     private val logWarn: (String, Throwable?) -> Unit
 ) {
+    private val apiImplementors: MutableSet<String> = linkedSetOf()
     /**
      * Generates client code from tapik endpoint definitions.
      */
@@ -37,7 +38,7 @@ class GenerateTask(
             }
             it.mkdirs()
         }
-        val pkgs = config.endpointPackages.filter { it.isNotBlank() }.distinct().sorted()
+        val basePackage = config.basePackage.trim()
 
         val compiledDir = config.compiledClassesDirectory
         if (!compiledDir.exists() || !compiledDir.isDirectory) {
@@ -48,7 +49,7 @@ class GenerateTask(
         val urls = (listOf(compiledDir) + config.additionalClasspathDirectories).map { it.toURI().toURL() }.toTypedArray()
 
         URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
-            val endpoints = scanForHttpEndpoints(compiledDir, pkgs, classLoader).mapNotNull { signature ->
+            val endpoints = scanForHttpEndpoints(compiledDir, basePackage, classLoader).mapNotNull { signature ->
                 resolveEndpoint(signature, classLoader)?.let { endpoint ->
                     runCatching { signature.toMetadata(endpoint) }
                         .onFailure { error ->
@@ -117,28 +118,24 @@ class GenerateTask(
 
     private fun scanForHttpEndpoints(
         compiledDir: File,
-        packages: List<String>,
+        basePackage: String,
         classLoader: URLClassLoader
     ): List<HttpEndpointSignature> {
-        val packageFilters = packages.map { it.replace('.', '/') }
+        val baseFilter = basePackage.replace('.', '/').takeIf { it.isNotBlank() }
         val results = LinkedHashMap<String, HttpEndpointSignature>()
 
         compiledDir.walkTopDown()
             .filter { it.isFile && it.extension == "class" }
             .forEach { classFile ->
                 val relativePath = classFile.relativeTo(compiledDir).path.replace(File.separatorChar, '/')
-                if (relativePath.startsWith("META-INF/")) {
-                    return@forEach
-                }
-                if (packageFilters.isNotEmpty() && packageFilters.none { relativePath.startsWith(it) }) {
-                    return@forEach
-                }
+                if (relativePath.startsWith("META-INF/")) return@forEach
+                if (baseFilter != null && !relativePath.startsWith(baseFilter)) return@forEach
 
                 try {
                     val classReader = ClassReader(classFile.readBytes())
                     val classNode = ClassNode()
                     classReader.accept(classNode, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
-                    processClassNode(classNode, results)
+                    processClassNode(classNode, classLoader, results)
                 } catch (e: IllegalArgumentException) {
                     if (e.message?.contains("Unsupported class file major version") == true) {
                         parseClassWithReflection(relativePath, classLoader, results)
@@ -158,8 +155,14 @@ class GenerateTask(
 
     private fun processClassNode(
         classNode: ClassNode,
+        classLoader: URLClassLoader,
         results: MutableMap<String, HttpEndpointSignature>
     ) {
+        if (!classNode.isApiImplementor(classLoader)) return
+        if (!classNode.isInterfaceFlag) {
+            apiImplementors += classNode.name
+        }
+
         classNode.methods.forEach { method ->
             if (!method.shouldProcessMethod()) return@forEach
             runCatching {
@@ -187,6 +190,10 @@ class GenerateTask(
             }
             .getOrNull()
             ?: return
+
+        if (!API::class.java.isAssignableFrom(clazz)) {
+            return
+        }
 
         clazz.declaredMethods
             .filter { it.shouldProcessMethod() }
@@ -217,11 +224,8 @@ class GenerateTask(
             val method = clazz.methods.firstOrNull { it.name == getterName }
                 ?: clazz.declaredMethods.firstOrNull { it.name == getterName }
                 ?: throw NoSuchMethodException("Method $getterName not found on $className")
-            val instance = if (Modifier.isStatic(method.modifiers)) {
-                null
-            } else {
-                resolveOwnerInstance(clazz)
-            }
+            val instance = if (Modifier.isStatic(method.modifiers)) null else resolveOwnerInstance(clazz)
+                ?: resolveFallbackInterfaceInstance(clazz, classLoader)
             method.isAccessible = true
             method.invoke(instance) as? HttpEndpoint<*, *, *>
                 ?: throw IllegalStateException("Resolved member $className#$getterName does not return HttpEndpoint")
@@ -236,6 +240,30 @@ class GenerateTask(
         }.recoverCatching {
             clazz.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
         }.getOrNull()
+
+    private fun resolveFallbackInterfaceInstance(
+        interfaceClass: Class<*>,
+        classLoader: ClassLoader
+    ): Any? {
+        if (!interfaceClass.isInterface) return null
+        val implementor =
+            apiImplementors.firstNotNullOfOrNull { name ->
+                runCatching { classLoader.loadClass(name.replace('/', '.')) }
+                    .getOrNull()
+                    ?.takeIf { interfaceClass.isAssignableFrom(it) && !it.isInterface }
+            } ?: return null
+        return resolveOwnerInstance(implementor)
+    }
+
+    private val ClassNode.isInterfaceFlag: Boolean
+        get() = (access and Opcodes.ACC_INTERFACE) != 0
+
+    private fun ClassNode.isApiImplementor(classLoader: ClassLoader): Boolean {
+        if (interfaces.any { it == API::class.java.name.replace('.', '/') }) return true
+        return runCatching { classLoader.loadClass(name.replace('/', '.')) }
+            .map { API::class.java.isAssignableFrom(it) }
+            .getOrDefault(false)
+    }
 
     private fun buildGetterName(propertyName: String): String =
         if (propertyName.isEmpty()) {

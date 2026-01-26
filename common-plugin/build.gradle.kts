@@ -1,6 +1,5 @@
 plugins {
-    `kotlin-dsl`
-    id("buildlogic.convention.kotlin-dsl")
+    id("buildlogic.convention.kotlin-jvm")
     alias(libs.plugins.dokka)
 }
 

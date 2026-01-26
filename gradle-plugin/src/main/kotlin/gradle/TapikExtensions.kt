@@ -2,7 +2,7 @@ package dev.akif.tapik.plugin.gradle
 
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 /**
@@ -30,14 +30,14 @@ open class MarkdownDocumentationExtension @Inject constructor() : TapikGenerator
 /**
  * Root Gradle extension exposing Tapik-specific configuration surfaces.
  *
- * @property endpointPackages packages whose compiled classes will be inspected for Tapik endpoint declarations.
+ * @property basePackage single base package whose compiled classes will be inspected for Tapik API implementations.
  * @property springRestClient nested DSL configuring the RestClient generator.
  * @property springWebMvc nested DSL configuring the WebMVC generator.
  * @property markdownDocumentation nested DSL configuring Markdown documentation generation.
  */
 open class TapikExtension @Inject constructor(objects: ObjectFactory) {
-    /** Packages whose compiled classes will be inspected for Tapik endpoint declarations. */
-    val endpointPackages: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
+    /** Base package whose compiled classes will be inspected for Tapik endpoint declarations. */
+    val basePackage: Property<String> = objects.property(String::class.java)
 
     /** Nested extension configuring Spring RestClient code generation. */
     val springRestClient: SpringRestClientExtension = objects.newInstance(SpringRestClientExtension::class.java)
@@ -50,21 +50,12 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
         objects.newInstance(MarkdownDocumentationExtension::class.java)
 
     /**
-     * Replaces the set of endpoint packages that will be scanned.
+     * Sets the base package that will be scanned for Tapik endpoints.
      *
-     * @param packages fully-qualified package names containing Tapik endpoints.
+     * @param pkg fully-qualified base package containing Tapik API implementations.
      */
-    fun endpointPackages(vararg packages: String) {
-        endpointPackages.set(packages.toList())
-    }
-
-    /**
-     * Replaces the set of endpoint packages that will be scanned.
-     *
-     * @param packages fully-qualified package names containing Tapik endpoints.
-     */
-    fun endpointPackages(packages: Iterable<String>) {
-        endpointPackages.set(packages.toList())
+    fun basePackage(pkg: String) {
+        basePackage.set(pkg)
     }
 
     /**
@@ -105,9 +96,7 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
         if (markdownDocumentation.isConfigured()) add("markdown-docs")
     }
 
-    /**
-     * Returns the distinct set of endpoint packages configured at the top level.
-     */
-    internal fun resolvedEndpointPackages(): List<String> =
-        endpointPackages.orNull.orEmpty().map(String::trim).filter { it.isNotEmpty() }.distinct()
+    /** Returns the configured base package, trimmed and defaulted to empty string when unset. */
+    internal fun resolvedBasePackage(): String =
+        basePackage.orNull?.trim().orEmpty()
 }

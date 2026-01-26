@@ -7,7 +7,7 @@ import java.io.File
  *
  * @param outputDirectory The directory to which the report is written.
  * @param generatedSourcesDirectory The directory to which the generated sources are written.
- * @param endpointPackages The packages to scan for endpoint definitions.
+ * @param basePackage The base package to scan for endpoint definitions.
  * @param compiledClassesDirectory The directory containing the compiled classes of the project.
  * @param additionalClasspathDirectories Additional directories to add to the classpath when scanning for endpoints.
  * @param enabledGeneratorIds Identifiers of code generators that should run.
@@ -15,7 +15,7 @@ import java.io.File
 data class GenerateTaskConfiguration(
     val outputDirectory: File,
     val generatedSourcesDirectory: File,
-    val endpointPackages: List<String>,
+    val basePackage: String,
     val compiledClassesDirectory: File,
     val additionalClasspathDirectories: List<File>,
     val enabledGeneratorIds: Set<String>

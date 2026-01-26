@@ -45,15 +45,17 @@ dependencies {
 }
 
 tapik {
-    endpointPackages("com.acme.catalog")
+    basePackage("com.acme.catalog")
 
     springRestClient { }
     markdownDocumentation { }
 }
 ----
 
-* +endpointPackages+ should include every package that holds +val+ properties returning +HttpEndpoint+.
+* +basePackage+ should point to the root package containing your +API+ implementations with +val+ properties returning +HttpEndpoint+.
 * Declaring +springRestClient { }+ or +markdownDocumentation { }+ is enough to opt into the corresponding generator; future options will live inside those blocks.
+
+TIP: Keep endpoint properties on concrete +API+ objects/classes; helpers can live in separate interfaces, but only +API+ implementors are scanned.
 
 == 3. Declare Your First Endpoint
 

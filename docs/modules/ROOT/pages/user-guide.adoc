@@ -52,10 +52,7 @@ dependencies {
 }
 
 tapik {
-    endpointPackages(
-        "com.acme.catalog.endpoints",
-        "com.acme.shared.http"
-    )
+    basePackage("com.acme.catalog")
 
     springRestClient { /* enables the Spring RestClient generator */ }
     springWebMvc { /* enables the Spring WebMVC generator */ }
@@ -65,10 +62,35 @@ tapik {
 
 Key things to remember:
 
-* +endpointPackages+ must reference the packages where compiled endpoint properties live. The scanner filters classes using these prefixes.
+* +basePackage+ must reference the package where your +API+ implementations live. Only those classes (and their +HttpEndpoint+ properties) are scanned.
 * The nested generator blocks are markers; you do not need to configure anything inside them unless future versions expose options.
 * Generated Kotlin sources land under +build/generated/sources/tapik/main/kotlin+ and are added to the main source set automatically.
 * Non-source artefacts (for example, Markdown files) are written under +build/generated+.
+
+=== Organizing endpoints
+
+The scanner only looks at concrete types that implement +API+ and at their +val+ properties whose type is +HttpEndpoint<*, *, *>. That leads to a few practical conventions:
+
+* Keep the actual endpoint properties on objects or classes that implement +API+. Extension properties or interface properties that do **not** live on a concrete +API+ implementor are not discovered.
+* To split definitions (read/write, bounded contexts) without multiplying generated clients, define helper functions in plain interfaces and use them from a single +API+ object:
++
+[source,kotlin]
+----
+interface ReadUsersDefs {
+    fun HttpEndpointVerbBuildingContext.configureGetEndpoint() = get("users" / path.uuid("id"))
+}
+interface WriteUsersDefs {
+    fun HttpEndpointVerbBuildingContext.configureCreateEndpoint() = post("users") { /* ... */ }
+}
+
+object Users : API, ReadUsersDefs, WriteUsersDefs {
+    val get by endpoint { configureGetEndpoint() }
+    val create by endpoint { configureCreateEndpoint() }
+}
+----
+This keeps one generated client/controller while letting you organize the DSL.
+* Nested +API+ objects are supported and treated as separate modules (e.g., +Users.Admin+ produces its own generated interfaces). If you want a single generated surface, keep helpers nested but avoid making them +API+; place endpoints only on the parent +API+ implementor.
+* Multiple layers of nesting work the same way: every concrete +API+ implementor yields its own generated outputs; nesting does not merge endpoints automatically.
 
 == Declaring Endpoints
 
@@ -158,8 +180,8 @@ When checking generated Kotlin into source control:
 | Add +springRestClient { }+, +springWebMvc { }+, or +markdownDocumentation { }+
 
 | Class not found during scan
-| Endpoint package not covered by +endpointPackages+
-| Ensure fully qualified package prefixes are listed
+| Class outside configured +basePackage+
+| Ensure your +API+ implementations live under the configured base package
 
 | Unexpected HTTP mappings
 | Endpoint path missing leading segment
