@@ -81,7 +81,8 @@ package com.acme.catalog.endpoints
 import dev.akif.tapik.*
 import dev.akif.tapik.jackson.jsonBody
 
-object ProductEndpoints {
+// Implement API to gain access to the `endpoint` DSL.
+object ProductEndpoints : API {
     private val productId = path.uuid("productId")
     private val locale = query.string("locale").optional("en-US")
 
@@ -100,6 +101,8 @@ object ProductEndpoints {
     }
 }
 ----
+
+Implementing +API+ is the convention to expose the endpoint DSL and keep your endpoints discoverable as properties (e.g., +ProductEndpoints.getProduct+).
 
 Highlights:
 

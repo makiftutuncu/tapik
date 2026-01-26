@@ -15,7 +15,8 @@ package dev.akif.tapik
  * @property input request definition including headers and body.
  * @property outputs candidate response definitions matched by status.
  */
-data class HttpEndpoint<out P : Parameters, out I : Input<*, *>, out O : Outputs>(
+@ConsistentCopyVisibility
+data class HttpEndpoint<out P : Parameters, out I : Input<*, *>, out O : Outputs> internal constructor(
     val id: String,
     val description: String?,
     val details: String?,

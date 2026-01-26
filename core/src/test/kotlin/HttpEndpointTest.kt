@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-class HttpEndpointTest {
+class HttpEndpointTest : API {
     private val inputHeader = Header.string("X-Request-Id")
     private val outputHeader = Header.int("X-Count")
 

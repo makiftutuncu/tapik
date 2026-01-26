@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class HeaderEncodingDecodingTest {
+class HeaderEncodingDecodingTest : API {
     private val inputHeader = Header.string("X-Request-Id")
     private val outputHeader = Header.int("X-Count")
     private val encodeInputEndpoint by endpoint {

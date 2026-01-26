@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class TapikResponseEntityTest {
-    object SampleEndpoints {
+    object SampleEndpoints : API {
         val user by endpoint {
             get("api" / "users" / path.uuid("id"))
                 .output(headers = headersOf(Header.Location)) { stringBody() }

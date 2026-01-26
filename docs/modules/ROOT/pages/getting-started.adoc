@@ -67,7 +67,8 @@ import dev.akif.tapik.*
 import dev.akif.tapik.codec.StringCodecs
 import dev.akif.tapik.jackson.jsonBody
 
-object ProductEndpoints {
+// Implement API to gain access to the `endpoint` DSL.
+object ProductEndpoints : API {
     private val productId = path.uuid("productId")
 
     val getProduct by endpoint(
@@ -81,6 +82,8 @@ object ProductEndpoints {
     }
 }
 ----
+
+Implementing the +API+ interface is the convention to access the endpoint DSL and keep endpoints grouped (e.g., +ProductEndpoints.getProduct+).
 
 The DSL captures everything tapik needs:
 
