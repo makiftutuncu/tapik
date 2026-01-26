@@ -9,6 +9,7 @@ import org.springframework.http.client.ClientHttpResponse
 import org.springframework.web.client.ResponseErrorHandler
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
+import org.springframework.web.client.toEntity
 import java.net.URI
 import org.springframework.http.HttpMethod as SpringMethod
 import org.springframework.http.MediaType as SpringMediaType
@@ -63,7 +64,7 @@ data class RestClientInterpreter(
                     )
                 }
             }.onStatus(unmatchedStatusHandler(outputs))
-            .toEntity(ByteArray::class.java)
+            .toEntity<ByteArray>()
 
     /**
      * Produces an error handler that verifies the response content type for [output].
