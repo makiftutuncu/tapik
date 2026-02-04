@@ -8,6 +8,7 @@ dependencies {
     api(project(":core"))
     compileOnly(project(":common-plugin"))
     implementation(libs.springWeb)
+    testImplementation(testFixtures(project(":core")))
     testImplementation(libs.bundles.testCommon)
     testImplementation(project(":common-plugin"))
 }

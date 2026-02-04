@@ -10,6 +10,7 @@ dependencies {
     compileOnly(project(":common-plugin"))
     implementation(libs.arrowCore)
     implementation(libs.springWeb)
+    testImplementation(testFixtures(project(":core")))
     testImplementation(libs.bundles.testCommon)
     testImplementation(libs.mockk)
     testImplementation(libs.wiremock)

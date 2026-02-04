@@ -24,7 +24,7 @@ data class UserPage(
     val total: Long
 )
 
-inline fun <reified T : Any> jsonBody(name: String): Body<T> =
+inline fun <reified T : Any> testJsonBody(name: String): Body<T> =
     JsonBody(
         ByteArrayCodec.unsafe(
             name,
@@ -37,12 +37,12 @@ inline fun <reified T : Any> jsonBody(name: String): Body<T> =
 object Users : API {
     private val base = "api" / "v1" / "users"
     private val id = path.long("id")
-    private val errorResponse = jsonBody<APIError>("error")
-    private val userResponse = jsonBody<UserResponse>("response")
+    private val errorResponse = testJsonBody<APIError>("error")
+    private val userResponse = testJsonBody<UserResponse>("response")
 
     val list by endpoint(description = "List all users", details = "This endpoint lists all users with pagination.") {
         get(base + query.int("page").optional(0) + query.int("perPage").optional(10))
-            .output { jsonBody<UserPage>("response") }
+            .output { testJsonBody<UserPage>("response") }
     }
 
     val create by endpoint(
@@ -51,7 +51,7 @@ object Users : API {
     ) {
         post(base).apply {
             input(header.Accept(MediaType.Json, MediaType.PlainText)) {
-                jsonBody<CreateUserRequest>("createUserRequest")
+                testJsonBody<CreateUserRequest>("createUserRequest")
             }
             output(
                 status = Status.CREATED,
@@ -95,7 +95,7 @@ object Users : API {
                 output(
                     Status.BAD_REQUEST,
                     headersOf(Header.ContentType(MediaType.Json))
-                ) { jsonBody<Map<String, String>>("error") }
+                ) { testJsonBody<Map<String, String>>("error") }
                 output(anyStatus(Status.UNAUTHORIZED, Status.FORBIDDEN)) { stringBody("authError") }
                 output(unmatchedStatus) { EmptyBody }
             }
