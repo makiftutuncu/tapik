@@ -7,7 +7,7 @@ mavenPublish = "0.36.0"
 spring = "6.2.16"
 mockk = "1.14.9"
 wiremock = "3.13.2"
-junit = "6.0.2"
+junit = "6.0.3"
 asm = "9.9.1"
 dokka = "2.1.0"
 
