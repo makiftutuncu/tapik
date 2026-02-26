@@ -1,6 +1,6 @@
 [versions]
 arrow = "2.2.1.1"
-jackson = "2.21.0"
+jackson = "2.21.1"
 kotlin = "2.3.10"
 ktlint = "14.0.1"
 mavenPublish = "0.36.0"
