@@ -33,7 +33,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="tapik" data-version="v0.2.6">
+<div class="nav-container" data-component="tapik" data-version="v0.2.7">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -117,9 +117,10 @@
   </ul>
 </nav>
 <div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">v0.2.6</button>
+  <button class="version-menu-toggle" title="Show other versions of page">v0.2.7</button>
   <div class="version-menu">
-    <a class="version is-current" href="user-guide.html">v0.2.6</a>
+    <a class="version is-current" href="user-guide.html">v0.2.7</a>
+    <a class="version" href="v0.2.6/user-guide.html">v0.2.6</a>
     <a class="version" href="v0.2.5/user-guide.html">v0.2.5</a>
     <a class="version" href="v0.2.4/user-guide.html">v0.2.4</a>
     <a class="version" href="v0.2.3/user-guide.html">v0.2.3</a>
@@ -127,7 +128,7 @@
     <a class="version" href="v0.2.1/user-guide.html">v0.2.1</a>
   </div>
 </div>
-<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.2.6/docs/modules/ROOT/pages/user-guide.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.2.7/docs/modules/ROOT/pages/user-guide.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
@@ -189,19 +190,19 @@
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint DSL</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:core:0.2.6")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:core:0.2.7")</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Codecs</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:codec:0.2.6")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:codec:0.2.7")</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Jackson integration</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:jackson:0.2.6")</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:jackson:0.2.7")</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Gradle plugin</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">id("dev.akif.tapik.plugin.gradle") version "0.2.6"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id("dev.akif.tapik.plugin.gradle") version "0.2.7"</p></td>
 </tr>
 </tbody>
 </table>
@@ -213,7 +214,7 @@
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The version numbers match the repository snapshot (version=0.2.6). Replace them with the release you are consuming.</p>
+<p>The version numbers match the repository snapshot (version=0.2.7). Replace them with the release you are consuming.</p>
 </div>
 </td>
 </tr>
@@ -231,19 +232,16 @@
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">plugins {
     kotlin("jvm")
-    id("dev.akif.tapik.plugin.gradle") version "0.2.6"
+    id("dev.akif.tapik.plugin.gradle") version "0.2.7"
 }
 
 dependencies {
-    implementation("dev.akif.tapik:core:0.2.6")
-    implementation("dev.akif.tapik:jackson:0.2.6") // for JSON helpers
+    implementation("dev.akif.tapik:core:0.2.7")
+    implementation("dev.akif.tapik:jackson:0.2.7") // for JSON helpers
 }
 
 tapik {
-    endpointPackages(
-        "com.acme.catalog.endpoints",
-        "com.acme.shared.http"
-    )
+    basePackage("com.acme.catalog")
 
     springRestClient { /* enables the Spring RestClient generator */ }
     springWebMvc { /* enables the Spring WebMVC generator */ }
@@ -257,7 +255,7 @@ tapik {
 <div class="ulist">
 <ul>
 <li>
-<p>endpointPackages must reference the packages where compiled endpoint properties live. The scanner filters classes using these prefixes.</p>
+<p>basePackage must reference the package where your API implementations live. Only those classes (and their HttpEndpoint properties) are scanned.</p>
 </li>
 <li>
 <p>The nested generator blocks are markers; you do not need to configure anything inside them unless future versions expose options.</p>
@@ -269,6 +267,46 @@ tapik {
 <p>Non-source artefacts (for example, Markdown files) are written under build/generated.</p>
 </li>
 </ul>
+</div>
+<div class="sect2">
+<h3 id="_organizing_endpoints"><a class="anchor" href="#_organizing_endpoints"></a>Organizing endpoints</h3>
+<div class="paragraph">
+<p>The scanner only looks at concrete types that implement API and at their val properties whose type is +HttpEndpoint&lt;*, *, *&gt;. That leads to a few practical conventions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Keep the actual endpoint properties on objects or classes that implement API. Extension properties or interface properties that do <strong>not</strong> live on a concrete API implementor are not discovered.</p>
+</li>
+<li>
+<p>To split definitions (read/write, bounded contexts) without multiplying generated clients, define helper functions in plain interfaces and use them from a single API object:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">interface ReadUsersDefs {
+    fun HttpEndpointVerbBuildingContext.configureGetEndpoint() = get("users" / path.uuid("id"))
+}
+interface WriteUsersDefs {
+    fun HttpEndpointVerbBuildingContext.configureCreateEndpoint() = post("users") { /* ... */ }
+}
+
+object Users : API, ReadUsersDefs, WriteUsersDefs {
+    val get by endpoint { configureGetEndpoint() }
+    val create by endpoint { configureCreateEndpoint() }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This keeps one generated client/controller while letting you organize the DSL.</p>
+</div>
+</li>
+<li>
+<p>Nested API objects are supported and treated as separate modules (e.g., Users.Admin produces its own generated interfaces). If you want a single generated surface, keep helpers nested but avoid making them API; place endpoints only on the parent API implementor.</p>
+</li>
+<li>
+<p>Multiple layers of nesting work the same way: every concrete API implementor yields its own generated outputs; nesting does not merge endpoints automatically.</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 </div>
@@ -285,7 +323,8 @@ tapik {
 import dev.akif.tapik.*
 import dev.akif.tapik.jackson.jsonBody
 
-object ProductEndpoints {
+// Implement API to gain access to the `endpoint` DSL.
+object ProductEndpoints : API {
     private val productId = path.uuid("productId")
     private val locale = query.string("locale").optional("en-US")
 
@@ -304,6 +343,9 @@ object ProductEndpoints {
     }
 }</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Implementing API is the convention to expose the endpoint DSL and keep your endpoints discoverable as properties (e.g., ProductEndpoints.getProduct).</p>
 </div>
 <div class="paragraph">
 <p>Highlights:</p>
@@ -435,8 +477,8 @@ object ProductEndpoints {
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Class not found during scan</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint package not covered by endpointPackages</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Ensure fully qualified package prefixes are listed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class outside configured basePackage</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ensure your API implementations live under the configured base package</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Unexpected HTTP mappings</p></td>
