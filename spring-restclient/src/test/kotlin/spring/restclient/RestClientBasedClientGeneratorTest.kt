@@ -1,5 +1,7 @@
 package dev.akif.tapik.spring.restclient
 
+import arrow.core.None
+import arrow.core.Some
 import dev.akif.tapik.plugin.TapikGeneratorContext
 import dev.akif.tapik.plugin.metadata.*
 import org.junit.jupiter.api.io.CleanupMode
@@ -141,7 +143,7 @@ class RestClientBasedClientGeneratorTest {
                         name = "page",
                         type = TypeMetadata("kotlin.Int"),
                         required = false,
-                        default = "1"
+                        default = Some("1")
                     )
                 ),
             input =
@@ -207,7 +209,7 @@ class RestClientBasedClientGeneratorTest {
                         name = "class",
                         type = TypeMetadata("kotlin.String"),
                         required = true,
-                        default = null
+                        default = None
                     )
                 ),
             input =

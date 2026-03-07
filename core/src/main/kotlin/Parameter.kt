@@ -2,6 +2,9 @@
 
 package dev.akif.tapik
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
 import dev.akif.tapik.codec.Defaults
 import dev.akif.tapik.codec.StringCodec
 import dev.akif.tapik.codec.StringCodecs
@@ -154,16 +157,10 @@ data class PathVariable<P : Any>(
 data class QueryParameter<Q : Any>(
     override val name: String,
     override val codec: StringCodec<Q>,
-    override val required: Boolean,
-    val default: Q?
+    val default: Option<Q?>
 ) : Parameter<Q> {
     override val position: ParameterPosition = ParameterPosition.Query
-
-    init {
-        if (!required) {
-            requireNotNull(default) { "Optional query parameter '$name' must define a default value." }
-        }
-    }
+    override val required: Boolean = default.isNone()
 
     /**
      * Returns an optional version of this parameter with the supplied [default] value.
@@ -172,7 +169,7 @@ data class QueryParameter<Q : Any>(
      * @return a copy of the parameter marked as optional with the provided default.
      * @see optional
      */
-    fun optional(default: Q): QueryParameter<Q> = copy(required = false, default = default)
+    fun optional(default: Q?): QueryParameter<Q> = copy(default = Some(default))
 
     /** Factory helpers for building [QueryParameter] definitions backed by common codecs. */
     companion object : Defaults<QueryParameter<Unit>, QueryParameter<Boolean>, QueryParameter<Byte>, QueryParameter<Short>, QueryParameter<Int>, QueryParameter<Long>, QueryParameter<Float>, QueryParameter<Double>, QueryParameter<BigInteger>, QueryParameter<BigDecimal>, QueryParameter<String>, QueryParameter<UUID>> {
@@ -183,7 +180,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the unit codec.
          */
         override fun unit(name: String): QueryParameter<Unit> =
-            QueryParameter(name, StringCodecs.unit(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.unit(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a boolean value.
@@ -192,7 +189,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the boolean codec.
          */
         override fun boolean(name: String): QueryParameter<Boolean> =
-            QueryParameter(name, StringCodecs.boolean(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.boolean(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a byte value.
@@ -201,7 +198,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the byte codec.
          */
         override fun byte(name: String): QueryParameter<Byte> =
-            QueryParameter(name, StringCodecs.byte(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.byte(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a short value.
@@ -210,7 +207,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the short codec.
          */
         override fun short(name: String): QueryParameter<Short> =
-            QueryParameter(name, StringCodecs.short(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.short(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting an integer value.
@@ -219,7 +216,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the int codec.
          */
         override fun int(name: String): QueryParameter<Int> =
-            QueryParameter(name, StringCodecs.int(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.int(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a long value.
@@ -228,7 +225,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the long codec.
          */
         override fun long(name: String): QueryParameter<Long> =
-            QueryParameter(name, StringCodecs.long(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.long(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a float value.
@@ -237,7 +234,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the float codec.
          */
         override fun float(name: String): QueryParameter<Float> =
-            QueryParameter(name, StringCodecs.float(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.float(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a double value.
@@ -246,7 +243,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the double codec.
          */
         override fun double(name: String): QueryParameter<Double> =
-            QueryParameter(name, StringCodecs.double(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.double(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a [BigInteger] value.
@@ -255,7 +252,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the big integer codec.
          */
         override fun bigInteger(name: String): QueryParameter<BigInteger> =
-            QueryParameter(name, StringCodecs.bigInteger(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.bigInteger(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a [BigDecimal] value.
@@ -264,7 +261,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the big decimal codec.
          */
         override fun bigDecimal(name: String): QueryParameter<BigDecimal> =
-            QueryParameter(name, StringCodecs.bigDecimal(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.bigDecimal(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a [String] value.
@@ -273,7 +270,7 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the string codec.
          */
         override fun string(name: String): QueryParameter<String> =
-            QueryParameter(name, StringCodecs.string(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.string(name), default = None)
 
         /**
          * Creates a required [QueryParameter] expecting a [UUID] value.
@@ -282,6 +279,6 @@ data class QueryParameter<Q : Any>(
          * @return query parameter backed by the UUID codec.
          */
         override fun uuid(name: String): QueryParameter<UUID> =
-            QueryParameter(name, StringCodecs.uuid(name), required = true, default = null)
+            QueryParameter(name, StringCodecs.uuid(name), default = None)
     }
 }

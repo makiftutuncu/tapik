@@ -2,6 +2,7 @@ package dev.akif.tapik.spring.webmvc
 
 import dev.akif.tapik.plugin.*
 import dev.akif.tapik.plugin.metadata.*
+import dev.akif.tapik.plugin.computeSimpleName
 import java.io.File
 
 /**
@@ -24,11 +25,11 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         context: TapikGeneratorContext
     ) {
         if (endpoints.isEmpty()) {
-            context.log("[tapik] No endpoints discovered; skipping Spring WebMVC generation.")
+            context.log("No endpoints discovered; skipping Spring WebMVC generation.")
             return
         }
 
-        context.log("[tapik] Generating Spring WebMVC controllers.")
+        context.log("Generating Spring WebMVC controllers.")
         generateControllers(endpoints, context.generatedSourcesDirectory)
     }
 
@@ -133,8 +134,8 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
 
         val importCandidates = mutableMapOf<String, String>()
         endpoints.flatMap(HttpEndpointMetadata::imports).forEach { fqcn ->
-            val simple = fqcn.substringAfterLast('.')
-            importCandidates.putIfAbsent(simple, fqcn)
+            val nestedSimple = computeSimpleName(fqcn)
+            importCandidates.putIfAbsent(nestedSimple, fqcn)
         }
 
         val referencedTypes = signatures.flatMap { it.referencedTypeNames }.toSet()
@@ -146,8 +147,7 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                 }.map { candidate ->
                     KOTLIN_COLLECTION_OVERRIDES[candidate] ?: candidate
                 }.filterNot { import ->
-                    import.startsWith(HTTP_PACKAGE_PREFIX) ||
-                        import.startsWith("$packageName.") ||
+                    isTopLevelTypeInPackage(import, packageName) ||
                         import == packageName ||
                         import.startsWith("kotlin.")
                 }
@@ -155,6 +155,18 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         imports += typeImports
 
         return imports.toSortedSet().toList()
+    }
+
+    private fun isTopLevelTypeInPackage(
+        import: String,
+        packageName: String
+    ): Boolean {
+        if (!import.startsWith("$packageName.")) {
+            return false
+        }
+
+        val afterPackage = import.removePrefix("$packageName.")
+        return !afterPackage.contains('.')
     }
 
     private inner class EndpointSignature(
@@ -199,6 +211,9 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         val typeSimpleNames: Set<String>
     )
 
+    private fun TypeMetadata.withNullable(nullable: Boolean): TypeMetadata =
+        copy(nullable = nullable)
+
     private data class ReturnTypeInfo(
         val type: String,
         val typeSimpleNames: Set<String>
@@ -228,7 +243,10 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                         typeSimpleNames = parameter.type.collectSimpleNames()
                     )
                 }
-                else -> null
+
+                else -> {
+                    null
+                }
             }
         }
 
@@ -240,16 +258,29 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                     val attributes = mutableListOf<String>()
                     attributes += """name = "${parameter.name}""""
                     attributes += "required = ${parameter.required}"
-                    parameter.default?.takeIf { it.isNotBlank() }?.let { default ->
-                        attributes += """defaultValue = "${default.escapeForAnnotation()}""""
+                    parameter.default.onSome { default ->
+                        if (default != null) {
+                            attributes += """defaultValue = "${default.escapeForAnnotation()}""""
+                        }
                     }
                     val annotation = "@RequestParam(${attributes.joinToString(", ")})"
+                    val hasNonNullDefault =
+                        parameter.default.fold({ false }) { it != null }
+                    val parameterType =
+                        if (!parameter.required && !hasNonNullDefault) {
+                            parameter.type.withNullable(true)
+                        } else {
+                            parameter.type
+                        }
                     ParameterSpec(
-                        declaration = "$annotation $argumentName: ${parameter.type.render()}",
-                        typeSimpleNames = parameter.type.collectSimpleNames()
+                        declaration = "$annotation $argumentName: ${parameterType.render()}",
+                        typeSimpleNames = parameterType.collectSimpleNames()
                     )
                 }
-                else -> null
+
+                else -> {
+                    null
+                }
             }
         }
 
@@ -295,16 +326,21 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                     simpleNames = argument?.collectSimpleNames() ?: emptySet()
                 )
             }
-            "StringBody" ->
+
+            "StringBody" -> {
                 BodyParameterType(
                     typeName = "String",
                     simpleNames = emptySet()
                 )
-            "RawBody" ->
+            }
+
+            "RawBody" -> {
                 BodyParameterType(
                     typeName = "ByteArray",
                     simpleNames = emptySet()
                 )
+            }
+
             else -> {
                 val argument = type.arguments.firstOrNull()
                 BodyParameterType(

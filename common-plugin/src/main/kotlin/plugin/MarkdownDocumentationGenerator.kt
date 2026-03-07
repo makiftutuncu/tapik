@@ -14,11 +14,11 @@ class MarkdownDocumentationGenerator : TapikGenerator {
         context: TapikGeneratorContext
     ) {
         if (endpoints.isEmpty()) {
-            context.log("[tapik] No endpoints discovered; skipping Markdown documentation generation.")
+            context.log("No endpoints discovered; skipping Markdown documentation generation.")
             return
         }
 
-        context.log("[tapik] Generating Markdown documentation.")
+        context.log("Generating Markdown documentation.")
         generateDocumentation(endpoints, context.outputDirectory)
     }
 
@@ -72,7 +72,7 @@ class MarkdownDocumentationGenerator : TapikGenerator {
                             listOf(it.name, it.type.toString(), "Path", "true", "")
 
                         is QueryParameterMetadata ->
-                            listOf(it.name, it.type.toString(), "Query", it.required.toString(), it.default.orEmpty())
+                            listOf(it.name, it.type.toString(), "Query", it.required.toString(), it.default.getOrNull().orEmpty())
                     }
                     listOf(
                         mono(name),

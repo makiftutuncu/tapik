@@ -1,5 +1,7 @@
 package dev.akif.tapik.plugin.metadata
 
+import arrow.core.Option
+
 /**
  * Describes a Kotlin type used while rendering generated clients.
  *
@@ -21,7 +23,11 @@ data class TypeMetadata(
         if (arguments.isEmpty()) {
             "$name${if (nullable == true) "?" else ""}"
         } else {
-            arguments.joinToString(prefix = "$name<", separator = ", ", postfix = ">${if (nullable == true) "?" else ""}")
+            arguments.joinToString(
+                prefix = "$name<",
+                separator = ", ",
+                postfix = ">${if (nullable == true) "?" else ""}"
+            )
         }
 }
 
@@ -50,8 +56,8 @@ data class PathVariableMetadata(
 data class QueryParameterMetadata(
     val name: String,
     val type: TypeMetadata,
-    val required: Boolean = false,
-    val default: String? = null
+    val required: Boolean,
+    val default: Option<String?>
 ) : ParameterMetadata
 
 /**

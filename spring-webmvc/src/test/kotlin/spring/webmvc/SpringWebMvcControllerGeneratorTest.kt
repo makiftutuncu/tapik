@@ -1,5 +1,7 @@
 package dev.akif.tapik.spring.webmvc
 
+import arrow.core.None
+import arrow.core.Some
 import dev.akif.tapik.plugin.TapikGeneratorContext
 import dev.akif.tapik.plugin.metadata.*
 import org.junit.jupiter.api.io.CleanupMode
@@ -35,6 +37,7 @@ class SpringWebMvcControllerGeneratorTest {
             |package dev.akif.tapik.clients
             |
             |import dev.akif.tapik.*
+|import dev.akif.tapik.StringBody
 |import java.net.URI
 |import java.util.UUID
 |import org.springframework.web.bind.annotation.*
@@ -98,6 +101,24 @@ class SpringWebMvcControllerGeneratorTest {
         assertEquals(expected, content)
     }
 
+    @Test
+    fun `generate keeps nested parameter types and imports them`() {
+        val rootDir = tempDir.toFile()
+
+        SpringWebMvcControllerGenerator().generate(
+            endpoints = listOf(metadataWithNestedParameterType()),
+            context = testContext(rootDir)
+        )
+
+        val generated = File(rootDir, "dev/akif/tapik/api/BookEndpointsController.kt")
+        assertTrue(generated.exists(), "Expected generated controller file")
+
+        val content = generated.readText().trim()
+        assertTrue(content.contains("import dev.akif.tapik.books.Book.Isbn"), "Expected import for nested type")
+        assertTrue(content.contains("@RequestParam(name = \"isbn\", required = false) isbn: Book.Isbn?"), "Expected nested type to be used in parameter and be nullable")
+        assertTrue(content.contains("interface BookEndpointsController"), "Expected controller interface")
+    }
+
     private fun testContext(rootDir: File): TapikGeneratorContext =
         TapikGeneratorContext(
             outputDirectory = rootDir,
@@ -125,7 +146,7 @@ class SpringWebMvcControllerGeneratorTest {
                         name = "page",
                         type = TypeMetadata("kotlin.Int"),
                         required = false,
-                        default = "1"
+                        default = Some("1")
                     )
                 ),
             input =
@@ -191,7 +212,7 @@ class SpringWebMvcControllerGeneratorTest {
                         name = "trace-id",
                         type = TypeMetadata("kotlin.String"),
                         required = false,
-                        default = "trace-default"
+                        default = Some("trace-default")
                     )
                 ),
             input =
@@ -225,6 +246,46 @@ class SpringWebMvcControllerGeneratorTest {
             imports =
                 listOf(
                     "java.util.UUID",
+                    "dev.akif.tapik.EmptyBody"
+                ),
+            rawType = "HttpEndpoint"
+        )
+
+    private fun metadataWithNestedParameterType(): HttpEndpointMetadata =
+        HttpEndpointMetadata(
+            id = "list",
+            propertyName = "list",
+            description = null,
+            details = null,
+            method = "GET",
+            path = listOf("books"),
+            parameters =
+                listOf(
+                    QueryParameterMetadata(
+                        name = "isbn",
+                        type = TypeMetadata("dev.akif.tapik.books.Book.Isbn"),
+                        required = false,
+                        default = None
+                    )
+                ),
+            input =
+                InputMetadata(
+                    headers = emptyList(),
+                    body = null
+                ),
+            outputs =
+                listOf(
+                    OutputMetadata(
+                        description = "No Content",
+                        headers = emptyList(),
+                        body = BodyMetadata(TypeMetadata("dev.akif.tapik.EmptyBody"))
+                    )
+                ),
+            packageName = "dev.akif.tapik.api",
+            sourceFile = "BookEndpoints",
+            imports =
+                listOf(
+                    "dev.akif.tapik.books.Book.Isbn",
                     "dev.akif.tapik.EmptyBody"
                 ),
             rawType = "HttpEndpoint"

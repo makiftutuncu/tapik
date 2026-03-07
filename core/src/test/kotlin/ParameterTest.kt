@@ -1,8 +1,8 @@
 package dev.akif.tapik
 
+import arrow.core.Some
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -31,10 +31,6 @@ class ParameterTest {
         val optionalWithDefault = required.optional(10)
 
         assertFalse(optionalWithDefault.required)
-        assertEquals(10, optionalWithDefault.default)
-
-        assertFailsWith<IllegalArgumentException> {
-            required.copy(required = false, default = null)
-        }
+        assertEquals(Some(10), optionalWithDefault.default)
     }
 }

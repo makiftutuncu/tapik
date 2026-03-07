@@ -2,6 +2,8 @@
 
 package dev.akif.tapik
 
+import arrow.core.None
+import arrow.core.Some
 import dev.akif.tapik.codec.StringCodec
 
 /**
@@ -31,7 +33,7 @@ val path: PathVariable.Companion = PathVariable.Companion
 fun <Q : Any> query(
     name: String,
     codec: StringCodec<Q>
-): QueryParameter<Q> = QueryParameter(name, codec, required = false, default = null)
+): QueryParameter<Q> = QueryParameter(name, codec, default = None)
 
 /**
  * Creates a query parameter with the given [name], [codec], and a default.
@@ -39,14 +41,14 @@ fun <Q : Any> query(
  * @param name query parameter name.
  * @param codec codec used to encode and decode the parameter value.
  * @param default optional default value used when callers omit the parameter.
- * @return query parameter definition honouring the required/default combination.
+ * @return query parameter definition honoring the required/default combination.
  * @see QueryParameter.optional
  */
 fun <Q : Any> query(
     name: String,
     codec: StringCodec<Q>,
-    default: Q
-): QueryParameter<Q> = QueryParameter(name, codec, required = false, default)
+    default: Q?
+): QueryParameter<Q> = QueryParameter(name, codec, default = Some(default))
 
 /** Shorthand accessor to factory helpers for query parameters. */
 val query: QueryParameter.Companion = QueryParameter.Companion

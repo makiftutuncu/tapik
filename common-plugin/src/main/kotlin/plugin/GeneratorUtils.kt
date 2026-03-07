@@ -25,7 +25,7 @@ fun TypeMetadata.render(): String {
  * @receiver Tapik type metadata instance.
  * @return simple type name without package information.
  */
-fun TypeMetadata.simpleName(): String = name.substringAfterLast('.')
+fun TypeMetadata.simpleName(): String = computeSimpleName(name)
 
 /**
  * Collects the simple names of the receiver type and all of its nested generic arguments.
@@ -61,7 +61,10 @@ fun TypeMetadata.determineBodyValueType(): String =
  * @param fallback fallback value used when [rawName] cannot be salvaged.
  * @return valid Kotlin identifier matching the supplied intent.
  */
-fun sanitizeIdentifier(rawName: String?, fallback: String): String {
+fun sanitizeIdentifier(
+    rawName: String?,
+    fallback: String
+): String {
     val primary = rawName?.trim().takeUnless { it.isNullOrEmpty() } ?: fallback
     normalizeIdentifier(primary)?.let { return it }
     normalizeIdentifier(fallback)?.let { return it }
@@ -75,7 +78,10 @@ fun sanitizeIdentifier(rawName: String?, fallback: String): String {
  * @param used mutable set tracking previously allocated identifiers.
  * @return unique identifier safe to use within the current scope.
  */
-fun uniqueName(base: String, used: MutableSet<String>): String {
+fun uniqueName(
+    base: String,
+    used: MutableSet<String>
+): String {
     val normalizedBase = normalizeIdentifier(base) ?: "value"
     var candidate = normalizedBase
     var rendered = renderIdentifier(candidate)
@@ -106,6 +112,26 @@ fun renderIdentifier(name: String): String {
 
 private val PRE_SANITIZED_PATTERN = Regex("[a-z][A-Za-z0-9]*")
 private val NON_ALPHANUMERIC = Regex("[^A-Za-z0-9]+")
+
+/**
+ * Derives a simple name from a fully-qualified type name, preserving nested class qualifiers.
+ *
+ * Examples:
+ * - "com.example.Book.Isbn" -> "Book.Isbn"
+ * - "java.util.Map" -> "Map"
+ *
+ * @param fqcn fully-qualified class name, possibly including nested types.
+ * @return tail name starting at the first segment that begins with an uppercase letter.
+ */
+fun computeSimpleName(fqcn: String): String {
+    val parts = fqcn.split('.')
+    val indexOfType = parts.indexOfFirst { it.firstOrNull()?.isUpperCase() == true }
+    return if (indexOfType == -1) {
+        parts.last()
+    } else {
+        parts.drop(indexOfType).joinToString(".")
+    }
+}
 
 private fun normalizeIdentifier(input: String): String? {
     val trimmed = input.trim()
@@ -153,7 +179,8 @@ private fun normalizeIdentifier(input: String): String? {
 
     if (!candidate.first().isLetter()) {
         candidate =
-            "value" + candidate.replaceFirstChar { ch ->
+            "value" +
+            candidate.replaceFirstChar { ch ->
                 if (ch.isLetter()) {
                     ch.uppercaseChar()
                 } else {
@@ -197,9 +224,34 @@ fun String.escapeForAnnotation(): String =
     replace("\\", "\\\\")
         .replace("\"", "\\\"")
 
-private val KOTLIN_KEYWORDS = setOf(
-    "as", "break", "class", "continue", "do", "else", "false", "for", "fun",
-    "if", "in", "interface", "is", "null", "object", "package", "return",
-    "super", "this", "throw", "true", "try", "typealias", "typeof", "val",
-    "var", "when", "while"
-)
+private val KOTLIN_KEYWORDS =
+    setOf(
+        "as",
+        "break",
+        "class",
+        "continue",
+        "do",
+        "else",
+        "false",
+        "for",
+        "fun",
+        "if",
+        "in",
+        "interface",
+        "is",
+        "null",
+        "object",
+        "package",
+        "return",
+        "super",
+        "this",
+        "throw",
+        "true",
+        "try",
+        "typealias",
+        "typeof",
+        "val",
+        "var",
+        "when",
+        "while"
+    )

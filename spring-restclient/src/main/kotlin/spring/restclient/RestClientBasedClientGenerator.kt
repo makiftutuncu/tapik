@@ -24,11 +24,11 @@ class RestClientBasedClientGenerator : TapikGenerator {
         context: TapikGeneratorContext
     ) {
         if (endpoints.isEmpty()) {
-            context.log("[tapik] No endpoints discovered; skipping Spring RestClient generation.")
+            context.log("No endpoints discovered; skipping Spring RestClient generation.")
             return
         }
 
-        context.log("[tapik] Generating Spring RestClient clients.")
+        context.log("Generating Spring RestClient clients.")
         generateClients(endpoints, context.generatedSourcesDirectory)
     }
 

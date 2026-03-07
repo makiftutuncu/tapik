@@ -1,16 +1,18 @@
 package dev.akif.tapik.plugin
 
+import arrow.core.None
 import dev.akif.tapik.*
+import dev.akif.tapik.codec.StringCodec
 import dev.akif.tapik.plugin.metadata.*
-import java.io.File
-import java.lang.reflect.Method
-import java.util.ServiceLoader
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
+import java.io.File
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.net.URLClassLoader
+import java.util.ServiceLoader
 
 /**
  * A task that generates client code from tapik endpoint definitions.
@@ -27,47 +29,61 @@ class GenerateTask(
     private val logWarn: (String, Throwable?) -> Unit
 ) {
     private val apiImplementors: MutableSet<String> = linkedSetOf()
+
     /**
      * Generates client code from tapik endpoint definitions.
      */
     fun generate() {
         val generationOutputDirectory = config.outputDirectory.also { it.mkdirs() }
-        val generatedSourcesDir = config.generatedSourcesDirectory.also {
-            if (it.exists()) {
-                it.deleteRecursively()
+        val generatedSourcesDir =
+            config.generatedSourcesDirectory.also {
+                if (it.exists()) {
+                    it.deleteRecursively()
+                }
+                it.mkdirs()
             }
-            it.mkdirs()
-        }
         val basePackage = config.basePackage.trim()
 
         val compiledDir = config.compiledClassesDirectory
         if (!compiledDir.exists() || !compiledDir.isDirectory) {
-            logWarn("[tapik] Missing compiled classes directory '${compiledDir.absolutePath}', please first compile the project.", null)
+            logWarn(
+                "Missing compiled classes directory '${compiledDir.absolutePath}', please first compile the project.",
+                null
+            )
             return
         }
 
-        val urls = (listOf(compiledDir) + config.additionalClasspathDirectories).map { it.toURI().toURL() }.toTypedArray()
+        val urls =
+            (
+                listOf(
+                    compiledDir
+                ) + config.additionalClasspathDirectories
+            ).map { it.toURI().toURL() }.toTypedArray()
 
         URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
-            val endpoints = scanForHttpEndpoints(compiledDir, basePackage, classLoader).mapNotNull { signature ->
-                resolveEndpoint(signature, classLoader)?.let { endpoint ->
-                    runCatching { signature.toMetadata(endpoint) }
-                        .onFailure { error ->
-                            logWarn("[tapik] Failed to build metadata for ${signature.packageName}.${signature.file}#${signature.name}", error)
-                        }
-                        .getOrNull()
+            val endpoints =
+                scanForHttpEndpoints(compiledDir, basePackage, classLoader).mapNotNull { signature ->
+                    resolveEndpoint(signature, classLoader)?.let { endpoint ->
+                        runCatching { signature.toMetadata(endpoint) }
+                            .onFailure { error ->
+                                logWarn(
+                                    "Failed to build metadata for ${signature.packageName}.${signature.file}#${signature.name}",
+                                    error
+                                )
+                            }.getOrNull()
+                    }
                 }
-            }
 
             writeReport(endpoints, generationOutputDirectory)
 
-            val generatorContext = TapikGeneratorContext(
-                outputDirectory = generationOutputDirectory,
-                generatedSourcesDirectory = generatedSourcesDir,
-                log = { message -> log(message, null) },
-                logDebug = { message -> logDebug(message, null) },
-                logWarn = { message, throwable -> logWarn(message, throwable) }
-            )
+            val generatorContext =
+                TapikGeneratorContext(
+                    outputDirectory = generationOutputDirectory,
+                    generatedSourcesDirectory = generatedSourcesDir,
+                    log = { message -> log("[tapik] $message", null) },
+                    logDebug = { message -> logDebug("[tapik (debug)] $message", null) },
+                    logWarn = { message, throwable -> logWarn("[tapik (warning)] $message", throwable) }
+                )
 
             invokeGenerators(endpoints, classLoader, generatorContext)
         }
@@ -81,7 +97,7 @@ class GenerateTask(
         file.writeText(
             endpoints.joinToString(separator = System.lineSeparator() + System.lineSeparator()) { it.toString() }
         )
-        log("[tapik] Endpoint scan report is written to: ${file.absolutePath}", null)
+        log("Endpoint scan report is written to: ${file.absolutePath}", null)
     }
 
     private fun invokeGenerators(
@@ -91,7 +107,7 @@ class GenerateTask(
     ) {
         val requestedGeneratorIds = config.enabledGeneratorIds
         if (requestedGeneratorIds.isEmpty()) {
-            log("[tapik] No Tapik generators configured; skipping code generation.", null)
+            log("No Tapik generators configured; skipping code generation.", null)
             return
         }
 
@@ -101,17 +117,17 @@ class GenerateTask(
         requestedGeneratorIds
             .filterNot(generatorsById::containsKey)
             .forEach { id ->
-                logWarn("[tapik] Generator '$id' is configured but not available on the classpath.", null)
+                logWarn("Generator '$id' is configured but not available on the classpath.", null)
             }
 
         requestedGeneratorIds.mapNotNull(generatorsById::get).forEach { generator ->
-            log("[tapik] Running generator '${generator.id}'", null)
+            log("Running generator '${generator.id}'", null)
             runCatching {
                 generator.generate(endpoints, context)
             }.onSuccess {
-                log("[tapik] Generator '${generator.id}' completed successfully.", null)
+                log("Generator '${generator.id}' completed successfully.", null)
             }.onFailure { error ->
-                logWarn("[tapik] Generator '${generator.id}' failed.", error)
+                logWarn("Generator '${generator.id}' failed.", error)
             }
         }
     }
@@ -124,7 +140,8 @@ class GenerateTask(
         val baseFilter = basePackage.replace('.', '/').takeIf { it.isNotBlank() }
         val results = LinkedHashMap<String, HttpEndpointSignature>()
 
-        compiledDir.walkTopDown()
+        compiledDir
+            .walkTopDown()
             .filter { it.isFile && it.extension == "class" }
             .forEach { classFile ->
                 val relativePath = classFile.relativeTo(compiledDir).path.replace(File.separatorChar, '/')
@@ -140,17 +157,19 @@ class GenerateTask(
                     if (e.message?.contains("Unsupported class file major version") == true) {
                         parseClassWithReflection(relativePath, classLoader, results)
                     } else {
-                        logWarn("[tapik] Failed to analyse class: ${classFile.absolutePath}", e)
+                        logWarn("Failed to analyse class: ${classFile.absolutePath}", e)
                     }
                 } catch (e: Exception) {
-                    logWarn("[tapik] Failed to analyse class: ${classFile.absolutePath}", e)
+                    logWarn("Failed to analyse class: ${classFile.absolutePath}", e)
                 }
             }
 
         return results.values
-            .sortedWith(compareBy<HttpEndpointSignature> { it.packageName }
-                .thenBy { it.file }
-                .thenBy { it.name })
+            .sortedWith(
+                compareBy<HttpEndpointSignature> { it.packageName }
+                    .thenBy { it.file }
+                    .thenBy { it.name }
+            )
     }
 
     private fun processClassNode(
@@ -168,11 +187,12 @@ class GenerateTask(
             runCatching {
                 BytecodeParser.parseHttpEndpoint(method.signature, classNode.name, method.name)
             }.onFailure { error ->
-                logDebug("[tapik] Failed to parse signature for ${classNode.name}#${method.name}", error)
-            }.getOrNull()?.let { signature ->
-                log("[tapik] Discovered endpoint ${signature.packageName}.${signature.file}#${signature.name}", null)
-                results[signature.uniqueKey] = signature
-            }
+                logDebug("Failed to parse signature for ${classNode.name}#${method.name}", error)
+            }.getOrNull()
+                ?.let { signature ->
+                    log("Discovered endpoint ${signature.packageName}.${signature.file}#${signature.name}", null)
+                    results[signature.uniqueKey] = signature
+                }
         }
     }
 
@@ -184,12 +204,12 @@ class GenerateTask(
         val ownerInternalName = relativePath.removeSuffix(".class")
         val className = ownerInternalName.replace('/', '.')
 
-        val clazz = runCatching { classLoader.loadClass(className) }
-            .onFailure { error ->
-                logWarn("[tapik] Failed to load class $className for reflection analysis", error)
-            }
-            .getOrNull()
-            ?: return
+        val clazz =
+            runCatching { classLoader.loadClass(className) }
+                .onFailure { error ->
+                    logWarn("Failed to load class $className for reflection analysis", error)
+                }.getOrNull()
+                ?: return
 
         if (!API::class.java.isAssignableFrom(clazz)) {
             return
@@ -201,11 +221,15 @@ class GenerateTask(
                 runCatching {
                     BytecodeParser.parseHttpEndpoint(method.genericReturnType, ownerInternalName, method.name)
                 }.onFailure { error ->
-                    logDebug("[tapik] Failed to parse signature for $className#${method.name} via reflection", error)
-                }.getOrNull()?.let { signatureResult ->
-                    log("[tapik] Discovered endpoint via reflection ${signatureResult.packageName}.${signatureResult.file}#${signatureResult.name}", null)
-                    results[signatureResult.uniqueKey] = signatureResult
-                }
+                    logDebug("Failed to parse signature for $className#${method.name} via reflection", error)
+                }.getOrNull()
+                    ?.let { signatureResult ->
+                        log(
+                            "Discovered endpoint via reflection ${signatureResult.packageName}.${signatureResult.file}#${signatureResult.name}",
+                            null
+                        )
+                        results[signatureResult.uniqueKey] = signatureResult
+                    }
             }
     }
 
@@ -213,24 +237,34 @@ class GenerateTask(
         signature: HttpEndpointSignature,
         classLoader: ClassLoader
     ): HttpEndpoint<*, *, *>? {
-        val className = signature.ownerInternalName
-            ?.replace('/', '.')
-            ?: listOfNotNull(signature.packageName.takeIf { it.isNotBlank() }, signature.file)
-                .joinToString(".")
+        val className =
+            signature.ownerInternalName
+                ?.replace('/', '.')
+                ?: listOfNotNull(signature.packageName.takeIf { it.isNotBlank() }, signature.file)
+                    .joinToString(".")
         val getterName = signature.methodName ?: buildGetterName(signature.name)
 
         return runCatching {
             val clazz = classLoader.loadClass(className)
-            val method = clazz.methods.firstOrNull { it.name == getterName }
-                ?: clazz.declaredMethods.firstOrNull { it.name == getterName }
-                ?: throw NoSuchMethodException("Method $getterName not found on $className")
-            val instance = if (Modifier.isStatic(method.modifiers)) null else resolveOwnerInstance(clazz)
-                ?: resolveFallbackInterfaceInstance(clazz, classLoader)
+            val method =
+                clazz.methods.firstOrNull { it.name == getterName }
+                    ?: clazz.declaredMethods.firstOrNull { it.name == getterName }
+                    ?: throw NoSuchMethodException("Method $getterName not found on $className")
+            val instance =
+                if (Modifier.isStatic(method.modifiers)) {
+                    null
+                } else {
+                    resolveOwnerInstance(clazz)
+                        ?: resolveFallbackInterfaceInstance(clazz, classLoader)
+                }
+            if (!Modifier.isStatic(method.modifiers) && instance == null) {
+                throw IllegalStateException("Failed to create instance of $className for endpoint resolution")
+            }
             method.isAccessible = true
             method.invoke(instance) as? HttpEndpoint<*, *, *>
                 ?: throw IllegalStateException("Resolved member $className#$getterName does not return HttpEndpoint")
         }.onFailure { error ->
-            logWarn("[tapik] Failed to resolve endpoint ${signature.packageName}.${signature.file}#${signature.name}", error)
+            logWarn("Failed to resolve endpoint ${signature.packageName}.${signature.file}#${signature.name}", error)
         }.getOrNull()
     }
 
@@ -269,15 +303,14 @@ class GenerateTask(
         if (propertyName.isEmpty()) {
             "get"
         } else {
-            val capitalized = propertyName.replaceFirstChar { ch ->
-                if (ch.isLowerCase()) ch.uppercaseChar().toString() else ch.toString()
-            }
+            val capitalized =
+                propertyName.replaceFirstChar { ch ->
+                    if (ch.isLowerCase()) ch.uppercaseChar().toString() else ch.toString()
+                }
             "get$capitalized"
         }
 
-    private fun HttpEndpointSignature.toMetadata(
-        endpoint: HttpEndpoint<*, *, *>
-    ): HttpEndpointMetadata =
+    private fun HttpEndpointSignature.toMetadata(endpoint: HttpEndpoint<*, *, *>): HttpEndpointMetadata =
         HttpEndpointMetadata(
             id = endpoint.id,
             propertyName = name,
@@ -285,15 +318,20 @@ class GenerateTask(
             details = endpoint.details,
             method = endpoint.method.name,
             path = endpoint.path,
-            parameters = endpoint.parameters
-                .toList()
-                .buildParametersMetadata(this.parameters.arguments),
+            parameters =
+                endpoint.parameters
+                    .toList()
+                    .buildParametersMetadata(this.parameters.arguments),
             input =
                 InputMetadata(
-                    headers = endpoint.input.headers.toList().buildHeaderMetadata(input.headers.arguments),
-                    body = endpoint.input.body
-                        .takeUnless { it === EmptyBody }
-                        ?.let { createBodyMetadata(input.body, it) }
+                    headers =
+                        endpoint.input.headers
+                            .toList()
+                            .buildHeaderMetadata(input.headers.arguments),
+                    body =
+                        endpoint.input.body
+                            .takeUnless { it === EmptyBody }
+                            ?.let { createBodyMetadata(input.body, it) }
                 ),
             outputs = endpoint.outputs.toList().buildOutputsMetadata(outputs.arguments),
             packageName = packageName,
@@ -302,23 +340,32 @@ class GenerateTask(
             rawType = rawType
         )
 
+    @Suppress("UNCHECKED_CAST")
     private fun List<Parameter<*>>.buildParametersMetadata(
         parameterTypes: List<TypeMetadata>
     ): List<ParameterMetadata> =
         mapIndexed { index, parameter ->
-            val originalTypeMetadata = parameterTypes.getOrNull(index)
-                ?: runtimeTypeMetadata(parameter::class.java)
+            val originalTypeMetadata =
+                parameterTypes.getOrNull(index)
+                    ?: runtimeTypeMetadata(parameter::class.java)
             when (parameter.position) {
-                ParameterPosition.Path -> PathVariableMetadata(
-                    name = parameter.name,
-                    type = originalTypeMetadata
-                )
-                ParameterPosition.Query -> QueryParameterMetadata(
-                    name = parameter.name,
-                    type = resolveQueryParameterType(parameter, originalTypeMetadata),
-                    required = parameter.required,
-                    default = (parameter as? QueryParameter<*>)?.default?.toString()
-                )
+                ParameterPosition.Path -> {
+                    PathVariableMetadata(
+                        name = parameter.name,
+                        type = originalTypeMetadata
+                    )
+                }
+
+                ParameterPosition.Query -> {
+                    QueryParameterMetadata(
+                        name = parameter.name,
+                        type = resolveQueryParameterType(parameter, originalTypeMetadata),
+                        required = parameter.required,
+                        default = (parameter as? QueryParameter<*>)?.let { q ->
+                            q.default.map { default -> default?.let { d -> (q.codec as StringCodec<Any>).encode(d) } }
+                        } ?: None
+                    )
+                }
             }
         }
 
@@ -335,17 +382,17 @@ class GenerateTask(
         return typeMetadata
     }
 
-    private fun List<Header<*>>.buildHeaderMetadata(
-        headerTypes: List<TypeMetadata>
-    ): List<HeaderMetadata> =
+    private fun List<Header<*>>.buildHeaderMetadata(headerTypes: List<TypeMetadata>): List<HeaderMetadata> =
         mapIndexed { index, header ->
-            val typeMetadata = headerTypes.getOrNull(index)
-                ?: runtimeTypeMetadata(header::class.java)
-            val values = if (header is HeaderValues<*>) {
-                header.values.map { it.toString() }
-            } else {
-                emptyList()
-            }
+            val typeMetadata =
+                headerTypes.getOrNull(index)
+                    ?: runtimeTypeMetadata(header::class.java)
+            val values =
+                if (header is HeaderValues<*>) {
+                    header.values.map { it.toString() }
+                } else {
+                    emptyList()
+                }
             HeaderMetadata(
                 name = header.name,
                 type = typeMetadata,
@@ -369,12 +416,26 @@ class GenerateTask(
             )
         }
 
-    private fun describeStatusMatcher(matcher: StatusMatcher): String = when (matcher) {
-        is StatusMatcher.Is -> matcher.status.let { "${it.code} ${it.name}" }
-        is StatusMatcher.AnyOf -> matcher.statuses.joinToString(prefix = "One of [", separator = ", ", postfix = "]") { "${it.code} ${it.name}" }
-        is StatusMatcher.Predicate -> matcher.description
-        StatusMatcher.Unmatched -> "Unmatched"
-    }
+    private fun describeStatusMatcher(matcher: StatusMatcher): String =
+        when (matcher) {
+            is StatusMatcher.Is -> {
+                matcher.status.let { "${it.code} ${it.name}" }
+            }
+
+            is StatusMatcher.AnyOf -> {
+                matcher.statuses.joinToString(prefix = "One of [", separator = ", ", postfix = "]") {
+                    "${it.code} ${it.name}"
+                }
+            }
+
+            is StatusMatcher.Predicate -> {
+                matcher.description
+            }
+
+            StatusMatcher.Unmatched -> {
+                "Unmatched"
+            }
+        }
 
     private fun createBodyMetadata(
         typeMetadata: TypeMetadata?,

@@ -1,5 +1,7 @@
 package dev.akif.tapik
 
+import arrow.core.getOrElse
+
 /**
  * Marker interface that provides helper extensions common to generated clients.
  *
@@ -38,8 +40,8 @@ interface Client {
      * @throws IllegalArgumentException when no default value has been configured.
      * @see QueryParameter.optional
      */
-    fun <T : Any> QueryParameter<T>.getDefaultOrFail(): T =
-        requireNotNull(default) { "Default value of query parameter '$name' is missing" }
+    fun <T : Any> QueryParameter<T>.getDefaultOrFail(): T? =
+        default.getOrElse { throw IllegalArgumentException("Default value of query parameter '$name' is missing") }
 
     /**
      * Returns the first header value from the collection, throwing if it is missing.
