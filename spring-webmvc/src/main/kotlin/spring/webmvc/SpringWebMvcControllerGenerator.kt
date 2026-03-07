@@ -1,8 +1,8 @@
 package dev.akif.tapik.spring.webmvc
 
 import dev.akif.tapik.plugin.*
-import dev.akif.tapik.plugin.metadata.*
 import dev.akif.tapik.plugin.computeSimpleName
+import dev.akif.tapik.plugin.metadata.*
 import java.io.File
 
 /**
@@ -211,8 +211,7 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         val typeSimpleNames: Set<String>
     )
 
-    private fun TypeMetadata.withNullable(nullable: Boolean): TypeMetadata =
-        copy(nullable = nullable)
+    private fun TypeMetadata.withNullable(nullable: Boolean): TypeMetadata = copy(nullable = nullable)
 
     private data class ReturnTypeInfo(
         val type: String,

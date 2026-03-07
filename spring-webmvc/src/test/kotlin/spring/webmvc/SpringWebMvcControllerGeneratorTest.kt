@@ -115,7 +115,10 @@ class SpringWebMvcControllerGeneratorTest {
 
         val content = generated.readText().trim()
         assertTrue(content.contains("import dev.akif.tapik.books.Book.Isbn"), "Expected import for nested type")
-        assertTrue(content.contains("@RequestParam(name = \"isbn\", required = false) isbn: Book.Isbn?"), "Expected nested type to be used in parameter and be nullable")
+        assertTrue(
+            content.contains("@RequestParam(name = \"isbn\", required = false) isbn: Book.Isbn?"),
+            "Expected nested type to be used in parameter and be nullable"
+        )
         assertTrue(content.contains("interface BookEndpointsController"), "Expected controller interface")
     }
 
