@@ -47,7 +47,7 @@ data class RestClientInterpreter(
             .method(SpringMethod.valueOf(method.name))
             .uri { it.pathSegment(*uri.path.split("/").toTypedArray()).query(uri.query).build() }
             .headers {
-                inputHeaders.forEach { (name, values) -> it[name] = values }
+                inputHeaders.forEach { (name, values) -> it.addAll(name, values) }
             }.apply {
                 if (inputBodyContentType != null) {
                     contentType(SpringMediaType(inputBodyContentType.major, inputBodyContentType.minor))

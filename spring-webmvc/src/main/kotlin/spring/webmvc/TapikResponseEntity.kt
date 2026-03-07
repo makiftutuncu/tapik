@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity
  */
 fun <P : Parameters, I : Input<*, *>, O : Outputs> HttpEndpoint<P, I, O>.toResponseEntity(
     response: Response
-): ResponseEntity<Any?> {
+): ResponseEntity<Any> {
     val output = outputs.toList().firstOrNull { output -> output.statusMatcher(response.status) }
     if (output == null) {
         error("Response didn't match to any known outputs")
@@ -32,7 +32,7 @@ fun <P : Parameters, I : Input<*, *>, O : Outputs> HttpEndpoint<P, I, O>.toRespo
  */
 fun <P : Parameters, I : Input<*, *>, O : Outputs> HttpEndpoint<P, I, O>.toResponseEntity(
     oneOf: OneOf
-): ResponseEntity<Any?> = toResponseEntity(selectResponse(oneOf))
+): ResponseEntity<Any> = toResponseEntity(selectResponse(oneOf))
 
 private fun selectResponse(oneOf: OneOf): Response =
     when (oneOf) {
@@ -140,7 +140,7 @@ private fun buildHttpHeaders(
         val codec = (header as Header<Any>).codec
         val encoded = values.filterNotNull().map { codec.encode(it) }
         if (encoded.isNotEmpty()) {
-            httpHeaders[header.name] = encoded
+            httpHeaders.addAll(header.name, encoded)
         }
     }
     output
