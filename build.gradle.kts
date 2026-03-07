@@ -2,6 +2,7 @@ import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SourcesJar
 import java.net.URI
 import java.time.LocalDate
 import org.gradle.api.Task
@@ -179,7 +180,7 @@ subprojects {
                             javadocJar = JavadocJar.Dokka(
                                 dokkaHtmlOutputsTask ?: tasks.named("tapikDokkaHtmlOutputs")
                             ),
-                            sourcesJar = true
+                            sourcesJar = SourcesJar.Sources()
                         )
                     )
                 }
@@ -200,7 +201,7 @@ subprojects {
                             javadocJar = JavadocJar.Dokka(
                                 dokkaHtmlOutputsTask ?: tasks.named("tapikDokkaHtmlOutputs")
                             ),
-                            sourcesJar = true
+                            sourcesJar = SourcesJar.Sources()
                         )
                     )
                 }
