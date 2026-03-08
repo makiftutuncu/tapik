@@ -2,7 +2,46 @@
 
 package dev.akif.tapik
 
+import java.net.URI
 import kotlin.jvm.JvmName
+
+/**
+ * Represents a URI template as a pair of literal path [List] segments and captured parameters [P].
+ */
+typealias URIWithParameters<P> = Pair<List<String>, P>
+
+/** URI template that captures no parameters. */
+typealias URIWithParameters0 = URIWithParameters<Parameters0>
+
+/** URI template that captures a single [Parameter]. */
+typealias URIWithParameters1<P1> = URIWithParameters<Parameters1<P1>>
+
+/** URI template that captures two [Parameter] values. */
+typealias URIWithParameters2<P1, P2> = URIWithParameters<Parameters2<P1, P2>>
+
+/** URI template that captures three [Parameter] values. */
+typealias URIWithParameters3<P1, P2, P3> = URIWithParameters<Parameters3<P1, P2, P3>>
+
+/** URI template that captures four [Parameter] values. */
+typealias URIWithParameters4<P1, P2, P3, P4> = URIWithParameters<Parameters4<P1, P2, P3, P4>>
+
+/** URI template that captures five [Parameter] values. */
+typealias URIWithParameters5<P1, P2, P3, P4, P5> = URIWithParameters<Parameters5<P1, P2, P3, P4, P5>>
+
+/** URI template that captures six [Parameter] values. */
+typealias URIWithParameters6<P1, P2, P3, P4, P5, P6> = URIWithParameters<Parameters6<P1, P2, P3, P4, P5, P6>>
+
+/** URI template that captures seven [Parameter] values. */
+typealias URIWithParameters7<P1, P2, P3, P4, P5, P6, P7> = URIWithParameters<Parameters7<P1, P2, P3, P4, P5, P6, P7>>
+
+/** URI template that captures eight [Parameter] values. */
+typealias URIWithParameters8<P1, P2, P3, P4, P5, P6, P7, P8> = URIWithParameters<Parameters8<P1, P2, P3, P4, P5, P6, P7, P8>>
+
+/** URI template that captures nine [Parameter] values. */
+typealias URIWithParameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9> = URIWithParameters<Parameters9<P1, P2, P3, P4, P5, P6, P7, P8, P9>>
+
+/** URI template that captures ten [Parameter] values. */
+typealias URIWithParameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> = URIWithParameters<Parameters10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>>
 
 /**
  * Concatenates the given [segment] to this base path segment while building a URI template.
@@ -437,3 +476,64 @@ operator fun <P1 : Any, P2 : Any, P3 : Any, P4 : Any, P5 : Any, P6 : Any, P7 : A
     val param: Parameter<P10> = parameter
     return first to (second + param)
 }
+
+/**
+ * Renders a concrete [URI] by applying encoded values to a path template and query definitions.
+ *
+ * Path parameter values must always be present and non-null. Query values are included when the
+ * parameter is required or when an optional parameter has a non-null encoded value.
+ *
+ * @param segments path template segments.
+ * @param parametersToValues encoded parameter values paired with their definitions.
+ * @return rendered [URI].
+ * @throws IllegalArgumentException when a path parameter value is missing/null or a required query value is null.
+ */
+fun renderURI(
+    segments: List<String>,
+    vararg parametersToValues: Pair<Parameter<*>, String?>
+): URI {
+    val pathValues =
+        parametersToValues
+            .asSequence()
+            .filter { it.first.position == ParameterPosition.Path }
+            .associate { (parameter, value) ->
+                parameter.name to
+                    requireNotNull(value) { "Path parameter '${parameter.name}' is required but was null" }
+            }
+
+    val path =
+        segments.joinToString(separator = "/", prefix = "/") { segment ->
+            val parameterName = segment.extractPathParameterName()
+            if (parameterName == null) {
+                segment
+            } else {
+                pathValues[parameterName]
+                    ?: throw IllegalArgumentException("Missing value for path parameter '$parameterName'")
+            }
+        }
+
+    val query =
+        parametersToValues
+            .asSequence()
+            .filter { it.first.position == ParameterPosition.Query }
+            .mapNotNull { (parameter, value) ->
+                if (value == null) {
+                    if (parameter.required) {
+                        throw IllegalArgumentException("Query parameter '${parameter.name}' is required but was null")
+                    }
+                    null
+                } else {
+                    "${parameter.name}=$value"
+                }
+            }.joinToString(separator = "&")
+            .takeIf { it.isNotEmpty() }
+
+    return URI.create(listOfNotNull(path, query).joinToString("?"))
+}
+
+private fun String.extractPathParameterName(): String? =
+    if (startsWith("{") && endsWith("}") && length > 2) {
+        removePrefix("{").removeSuffix("}")
+    } else {
+        null
+    }

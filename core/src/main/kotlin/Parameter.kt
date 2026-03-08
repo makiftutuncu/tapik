@@ -169,7 +169,7 @@ data class QueryParameter<Q : Any>(
      * @return a copy of the parameter marked as optional with the provided default.
      * @see optional
      */
-    fun optional(default: Q?): QueryParameter<Q> = copy(default = Some(default))
+    fun optional(default: Q? = null): QueryParameter<Q> = copy(default = Some(default))
 
     /** Factory helpers for building [QueryParameter] definitions backed by common codecs. */
     companion object : Defaults<QueryParameter<Unit>, QueryParameter<Boolean>, QueryParameter<Byte>, QueryParameter<Short>, QueryParameter<Int>, QueryParameter<Long>, QueryParameter<Float>, QueryParameter<Double>, QueryParameter<BigInteger>, QueryParameter<BigDecimal>, QueryParameter<String>, QueryParameter<UUID>> {

@@ -24,21 +24,24 @@ object BytecodeParser {
     private const val PARAMETER_FQCN = "$TAPIK_PACKAGE.Parameter"
     private const val OUTPUT_FQCN = "$TAPIK_PACKAGE.Output"
     private val JAVA_TO_KOTLIN_TYPES = mapOf(
-        "java.lang.Boolean" to "Boolean",
-        "java.lang.Byte" to "Byte",
-        "java.lang.Short" to "Short",
-        "java.lang.Integer" to "Int",
-        "java.lang.Long" to "Long",
-        "java.lang.Float" to "Float",
-        "java.lang.Double" to "Double",
-        "java.lang.Character" to "Char",
-        "java.lang.String" to "String",
-        "java.lang.Object" to "Any",
-        "java.lang.Void" to "Unit"
+        "java.lang.Boolean" to "kotlin.Boolean",
+        "java.lang.Byte" to "kotlin.Byte",
+        "java.lang.Short" to "kotlin.Short",
+        "java.lang.Integer" to "kotlin.Int",
+        "java.lang.Long" to "kotlin.Long",
+        "java.lang.Float" to "kotlin.Float",
+        "java.lang.Double" to "kotlin.Double",
+        "java.lang.Character" to "kotlin.Char",
+        "java.lang.String" to "kotlin.String",
+        "java.lang.Object" to "kotlin.Any",
+        "java.lang.Void" to "kotlin.Unit",
+        "java.util.List" to "kotlin.collections.List",
+        "java.util.Set" to "kotlin.collections.Set",
+        "java.util.Map" to "kotlin.collections.Map"
     )
     private val PATH_TYPE = TypeMetadata(
-        name = "List",
-        arguments = listOf(TypeMetadata("String"))
+        name = "kotlin.collections.List",
+        arguments = listOf(TypeMetadata("kotlin.String"))
     )
 
     internal fun parseHttpEndpoint(
@@ -79,12 +82,6 @@ object BytecodeParser {
         val input = convertInput(endpointClass.arguments[1]) ?: return null
         val outputs = convertOutputs(endpointClass.arguments[2]) ?: return null
 
-        val imports = linkedSetOf<String>()
-        imports += HTTP_ENDPOINT_FQCN
-        imports += parameters.imports
-        imports += input.imports
-        imports += outputs.imports
-
         val ownerClassName = ownerInternalName.replace('/', '.')
         val packageName = ownerClassName.substringBeforeLast('.', "")
         val fileName =
@@ -95,7 +92,7 @@ object BytecodeParser {
         val endpointName = deriveEndpointName(methodName)
 
         val rawType = TypeMetadata(
-            name = endpointClass.simpleName,
+            name = endpointClass.importName(),
             arguments = listOf(
                 parameters.type,
                 input.type,
@@ -118,7 +115,6 @@ object BytecodeParser {
             parameters = parameters.type,
             input = inputSignature,
             outputs = outputs.type,
-            imports = imports.sorted(),
             rawType = rawType.toString(),
             ownerInternalName = ownerInternalName,
             methodName = methodName
@@ -181,7 +177,7 @@ object BytecodeParser {
 
             return ConversionResult(
                 type = TypeMetadata(
-                    name = "Parameters${tupleAlias.arity}",
+                    name = "${PARAMETERS_PREFIX}${tupleAlias.arity}",
                     arguments = argumentResults.map { it.type }
                 ),
                 imports = imports
@@ -201,7 +197,7 @@ object BytecodeParser {
 
         return ConversionResult(
             type = TypeMetadata(
-                name = classType.simpleName,
+                name = classType.importName(),
                 arguments = argumentResults.map { it.type }
             ),
             imports = imports
@@ -227,7 +223,7 @@ object BytecodeParser {
 
             return ConversionResult(
                 type = TypeMetadata(
-                    name = "Headers${tupleAlias.arity}",
+                    name = "${HEADERS_PREFIX}${tupleAlias.arity}",
                     arguments = argumentResults.map { it.type }
                 ),
                 imports = imports
@@ -247,7 +243,7 @@ object BytecodeParser {
 
         return ConversionResult(
             type = TypeMetadata(
-                name = classType.simpleName,
+                name = classType.importName(),
                 arguments = argumentResults.map { it.type }
             ),
             imports = imports
@@ -272,7 +268,7 @@ object BytecodeParser {
 
         return InputConversionResult(
             type = TypeMetadata(
-                name = classType.simpleName,
+                name = classType.importName(),
                 arguments = listOf(headers.type, body.type)
             ),
             headers = headers,
@@ -300,7 +296,7 @@ object BytecodeParser {
 
             return ConversionResult(
                 type = TypeMetadata(
-                    name = "Outputs${tupleAlias.arity}",
+                    name = "${OUTPUTS_PREFIX}${tupleAlias.arity}",
                     arguments = argumentResults.map { it.type }
                 ),
                 imports = imports
@@ -320,7 +316,7 @@ object BytecodeParser {
 
         return ConversionResult(
             type = TypeMetadata(
-                name = classType.simpleName,
+                name = classType.importName(),
                 arguments = argumentResults.map { it.type }
             ),
             imports = imports
@@ -344,7 +340,7 @@ object BytecodeParser {
         }
 
         return ConversionResult(
-            type = TypeMetadata(name = "Array", arguments = listOf(component.type)),
+            type = TypeMetadata(name = "kotlin.Array", arguments = listOf(component.type)),
             imports = imports
         )
     }
@@ -366,7 +362,7 @@ object BytecodeParser {
 
             return ConversionResult(
                 type = TypeMetadata(
-                    name = "Headers${alias.arity}",
+                    name = "${HEADERS_PREFIX}${alias.arity}",
                     arguments = argumentResults.map { it.type }
                 ),
                 imports = imports
@@ -389,7 +385,7 @@ object BytecodeParser {
 
             return ConversionResult(
                 type = TypeMetadata(
-                    name = "HeaderValues${alias.arity}",
+                    name = "${HEADER_VALUES_PREFIX}${alias.arity}",
                     arguments = argumentResults.map { it.type }
                 ),
                 imports = imports
@@ -412,7 +408,7 @@ object BytecodeParser {
 
             return ConversionResult(
                 type = TypeMetadata(
-                    name = "Parameters${alias.arity}",
+                    name = "${PARAMETERS_PREFIX}${alias.arity}",
                     arguments = argumentResults.map { it.type }
                 ),
                 imports = imports
@@ -435,7 +431,7 @@ object BytecodeParser {
 
             return ConversionResult(
                 type = TypeMetadata(
-                    name = "Outputs${alias.arity}",
+                    name = "${OUTPUTS_PREFIX}${alias.arity}",
                     arguments = argumentResults.map { it.type }
                 ),
                 imports = imports
@@ -454,7 +450,7 @@ object BytecodeParser {
 
         return ConversionResult(
             type = TypeMetadata(
-                name = replacement ?: type.simpleName,
+                name = replacement ?: fqcn,
                 arguments = argumentResults.map { it.type }
             ),
             imports = imports

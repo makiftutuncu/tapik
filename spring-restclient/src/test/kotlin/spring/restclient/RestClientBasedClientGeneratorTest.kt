@@ -36,34 +36,43 @@ class RestClientBasedClientGeneratorTest {
         )
 
         val content = generated.readText().trim()
+        val imports =
+            content
+                .lineSequence()
+                .filter { it.startsWith("import ") }
+                .toList()
+        assertEquals(
+            listOf(
+                "import dev.akif.tapik.spring.restclient.toStatus",
+                "import dev.akif.tapik.encodeInputHeaders"
+            ),
+            imports
+        )
         val expected =
             """
             |package dev.akif.tapik.clients
             |
-            |import arrow.core.getOrElse
-            |import dev.akif.tapik.*
-            |import dev.akif.tapik.spring.restclient.*
-            |import java.net.URI
-            |import java.util.UUID
+            |import dev.akif.tapik.spring.restclient.toStatus
+            |import dev.akif.tapik.encodeInputHeaders
             |
             |// Generated from: dev.akif.tapik.clients.UserEndpoints
-            |interface UserEndpointsClient : RestClientBasedClient {
+            |interface UserEndpointsClient : dev.akif.tapik.spring.restclient.RestClientBasedClient {
             |    /**
             |     * Get user by id.
             |     *
             |     * Detailed documentation for the endpoint.
             |     */
-            |    fun user(
-|        userId: UUID,
-|        xRequestId: String,
-|        page: Int = UserEndpoints.user.parameters.item2.asQueryParameter<Int>().getDefaultOrFail()
-            |    ): Response1<String, URI> {
+|    fun user(
+|        userId: java.util.UUID,
+|        xRequestId: kotlin.String,
+|        page: kotlin.Int = UserEndpoints.user.parameters.item2.asQueryParameter<kotlin.Int>().getDefaultOrFail()
+            |    ): dev.akif.tapik.Response1<kotlin.String, java.net.URI> {
             |        val responseEntity = interpreter.send(
 |            method = UserEndpoints.user.method,
-|            uri = UserEndpoints.user.toURI(userId, page),
-            |            inputHeaders = UserEndpoints.user.input.encodeInputHeaders(xRequestId),
+|            uri = userToURI(userId, page),
+|            inputHeaders = UserEndpoints.user.input.encodeInputHeaders(xRequestId),
             |            inputBodyContentType = UserEndpoints.user.input.body.mediaType,
-            |            inputBody = ByteArray(0),
+            |            inputBody = kotlin.ByteArray(0),
             |            outputs = UserEndpoints.user.outputs.toList()
             |        )
             |
@@ -72,21 +81,36 @@ class RestClientBasedClientGeneratorTest {
             |        val headers = responseEntity.headers
             |            .mapValues { entry -> entry.value.map { it.orEmpty() } }
             |
-            |        val bodyBytes = responseEntity.body ?: ByteArray(0)
+            |        val bodyBytes = responseEntity.body ?: kotlin.ByteArray(0)
             |
-            |        val decodedOutput1Headers = decodeHeaders1(
+            |        val decodedOutput1HeadersResult = dev.akif.tapik.decodeHeaders1(
             |            headers,
             |            UserEndpoints.user.outputs.item1.headers.item1
-            |        ).getOrElse {
-            |            error("Cannot decode headers: " + it.joinToString(": ") )
+            |        )
+            |        val decodedOutput1Headers = when (val either = decodedOutput1HeadersResult) {
+            |            is arrow.core.Either.Left -> kotlin.error("Cannot decode headers: " + either.value.joinToString(": "))
+            |            is arrow.core.Either.Right -> either.value
             |        }
             |        val location = decodedOutput1Headers.item1.values
             |
-            |        val decodedBody = UserEndpoints.user.outputs.item1.body.codec.decode(bodyBytes)
-            |            .getOrElse { error(it.joinToString(": ") ) }
+            |        val decodedBodyResult = UserEndpoints.user.outputs.item1.body.codec.decode(bodyBytes)
+            |        val decodedBody = when (val either = decodedBodyResult) {
+            |            is arrow.core.Either.Left -> kotlin.error(either.value.joinToString(": "))
+            |            is arrow.core.Either.Right -> either.value
+            |        }
             |
-            |        return Response1(status, decodedBody, location)
+            |        return dev.akif.tapik.Response1(status, decodedBody, location)
             |    }
+            |
+            |    fun userToURI(
+|        userId: java.util.UUID,
+|        page: kotlin.Int = UserEndpoints.user.parameters.item2.asQueryParameter<kotlin.Int>().getDefaultOrFail()
+            |    ): java.net.URI =
+            |        dev.akif.tapik.renderURI(
+            |            UserEndpoints.user.path,
+            |            UserEndpoints.user.parameters.item1 to UserEndpoints.user.parameters.item1.codec.encode(userId),
+            |            UserEndpoints.user.parameters.item2 to UserEndpoints.user.parameters.item2.codec.encode(page)
+            |        )
             |}
             """.trimMargin()
 
@@ -110,10 +134,38 @@ class RestClientBasedClientGeneratorTest {
         )
 
         val content = generated.readText()
+        assertTrue(content.contains("import dev.akif.tapik.spring.restclient.toStatus"))
+        assertTrue(content.contains("import dev.akif.tapik.encodeInputHeaders"))
         assertTrue(content.contains("fun wildEndpoint("))
-        assertTrue(content.contains("value1stId: Int"))
-        assertTrue(content.contains("`class`: String"))
+        assertTrue(content.contains("value1stId: kotlin.Int"))
+        assertTrue(
+            content.contains(
+                "`class`: kotlin.String? = WildEndpoints.wild.parameters.item2.asQueryParameter<kotlin.String>().default.getOrNull()"
+            )
+        )
+        assertTrue(content.contains("uri = wildEndpointToURI(value1stId, `class`)"))
+        assertTrue(content.contains("fun wildEndpointToURI("))
         assertTrue(content.contains("WildEndpoints.wild.input.encodeInputHeaders(xTraceId, xTraceId2)"))
+    }
+
+    @Test
+    fun `generate keeps required query parameters non nullable without defaults`() {
+        val rootDir = tempDir.toFile()
+
+        RestClientBasedClientGenerator().generate(
+            endpoints = listOf(metadataWithRequiredQueryParameter()),
+            context = testContext(rootDir)
+        )
+
+        val generated = File(rootDir, "dev/akif/tapik/clients/RequiredQueryEndpointsClient.kt")
+        assertTrue(generated.exists(), "Expected generated interface file")
+
+        val content = generated.readText()
+        assertTrue(content.contains("term: kotlin.String"), "Expected non-nullable required query parameter")
+        assertTrue(
+            !content.contains("term: kotlin.String ="),
+            "Required query parameter must not have a default assignment"
+        )
     }
 
     private fun testContext(rootDir: File): TapikGeneratorContext =
@@ -182,12 +234,6 @@ class RestClientBasedClientGeneratorTest {
                 ),
             packageName = "dev.akif.tapik.clients",
             sourceFile = "UserEndpoints",
-            imports =
-                listOf(
-                    "java.util.UUID",
-                    "java.net.URI",
-                    "dev.akif.tapik.StringBody"
-                ),
             rawType = "HttpEndpoint"
         )
 
@@ -208,8 +254,8 @@ class RestClientBasedClientGeneratorTest {
                     QueryParameterMetadata(
                         name = "class",
                         type = TypeMetadata("kotlin.String"),
-                        required = true,
-                        default = None
+                        required = false,
+                        default = Some(null)
                     )
                 ),
             input =
@@ -251,12 +297,41 @@ class RestClientBasedClientGeneratorTest {
                 ),
             packageName = "dev.akif.tapik.clients",
             sourceFile = "WildEndpoints",
-            imports =
+            rawType = "HttpEndpoint"
+        )
+
+    private fun metadataWithRequiredQueryParameter(): HttpEndpointMetadata =
+        HttpEndpointMetadata(
+            id = "required query",
+            propertyName = "requiredQuery",
+            description = null,
+            details = null,
+            method = "GET",
+            path = listOf("api", "search"),
+            parameters =
                 listOf(
-                    "kotlin.String",
-                    "kotlin.Int",
-                    "dev.akif.tapik.StringBody"
+                    QueryParameterMetadata(
+                        name = "term",
+                        type = TypeMetadata("kotlin.String"),
+                        required = true,
+                        default = None
+                    )
                 ),
+            input =
+                InputMetadata(
+                    headers = emptyList(),
+                    body = null
+                ),
+            outputs =
+                listOf(
+                    OutputMetadata(
+                        description = "No Content",
+                        headers = emptyList(),
+                        body = BodyMetadata(TypeMetadata("dev.akif.tapik.EmptyBody"))
+                    )
+                ),
+            packageName = "dev.akif.tapik.clients",
+            sourceFile = "RequiredQueryEndpoints",
             rawType = "HttpEndpoint"
         )
 }

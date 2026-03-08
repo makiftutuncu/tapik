@@ -9,7 +9,7 @@ import dev.akif.tapik.plugin.metadata.TypeMetadata
  * @return Kotlin-compatible type literal.
  */
 fun TypeMetadata.render(): String {
-    val base = simpleName()
+    val base = name
     val renderedArgs = arguments.joinToString(", ") { it.render() }
     val nullableSuffix = if (nullable == true) "?" else ""
     return if (renderedArgs.isEmpty()) {
@@ -47,11 +47,11 @@ fun TypeMetadata.collectSimpleNames(): Set<String> =
  */
 fun TypeMetadata.determineBodyValueType(): String =
     when (simpleName()) {
-        "JsonBody" -> arguments.firstOrNull()?.render() ?: "Any"
-        "StringBody" -> "String"
-        "RawBody" -> "ByteArray"
-        "EmptyBody" -> "Unit"
-        else -> arguments.firstOrNull()?.render() ?: "Any"
+        "JsonBody" -> arguments.firstOrNull()?.render() ?: "kotlin.Any"
+        "StringBody" -> "kotlin.String"
+        "RawBody" -> "kotlin.ByteArray"
+        "EmptyBody" -> "kotlin.Unit"
+        else -> arguments.firstOrNull()?.render() ?: "kotlin.Any"
     }
 
 /**

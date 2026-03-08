@@ -33,18 +33,18 @@ class BytecodeParserTest {
         assertEquals("dev/akif/tapik/plugin/fixtures/SampleEndpoints", signature.ownerInternalName)
         assertEquals("getUser", signature.methodName)
 
-        signature.path.assertType("List", listOf("String"))
-        signature.parameters.assertType("Parameters2", listOf("UUID", "Int"))
-        signature.parameters.arguments[0].assertType("UUID", emptyList())
-        signature.parameters.arguments[1].assertType("Int", emptyList())
-        signature.input.type.assertType("Input", listOf("Headers1", "EmptyBody"))
-        signature.input.headers.assertType("Headers1", listOf("String"))
-        signature.input.body.assertType("EmptyBody", emptyList())
-        signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
+        signature.path.assertType("kotlin.collections.List", listOf("kotlin.String"))
+        signature.parameters.assertType("dev.akif.tapik.Parameters2", listOf("java.util.UUID", "kotlin.Int"))
+        signature.parameters.arguments[0].assertType("java.util.UUID", emptyList())
+        signature.parameters.arguments[1].assertType("kotlin.Int", emptyList())
+        signature.input.type.assertType("dev.akif.tapik.Input", listOf("dev.akif.tapik.Headers1", "dev.akif.tapik.EmptyBody"))
+        signature.input.headers.assertType("dev.akif.tapik.Headers1", listOf("kotlin.String"))
+        signature.input.body.assertType("dev.akif.tapik.EmptyBody", emptyList())
+        signature.outputs.assertType("dev.akif.tapik.Outputs2", listOf("dev.akif.tapik.Output", "dev.akif.tapik.Output"))
         val firstOutput = signature.outputs.arguments[0]
         val secondOutput = signature.outputs.arguments[1]
-        firstOutput.assertType("Output", listOf("Headers1", "StringBody"))
-        secondOutput.assertType("Output", listOf("Headers0", "StringBody"))
+        firstOutput.assertType("dev.akif.tapik.Output", listOf("dev.akif.tapik.Headers1", "dev.akif.tapik.StringBody"))
+        secondOutput.assertType("dev.akif.tapik.Output", listOf("dev.akif.tapik.Headers0", "dev.akif.tapik.StringBody"))
     }
 
     @Test
@@ -66,18 +66,18 @@ class BytecodeParserTest {
         assertEquals("dev/akif/tapik/plugin/fixtures/SampleEndpoints", signature.ownerInternalName)
         assertEquals("getUser", signature.methodName)
 
-        signature.path.assertType("List", listOf("String"))
-        signature.parameters.assertType("Parameters2", listOf("UUID", "Int"))
-        signature.parameters.arguments[0].assertType("UUID", emptyList())
-        signature.parameters.arguments[1].assertType("Int", emptyList())
-        signature.input.type.assertType("Input", listOf("Headers1", "EmptyBody"))
-        signature.input.headers.assertType("Headers1", listOf("String"))
-        signature.input.body.assertType("EmptyBody", emptyList())
-        signature.outputs.assertType("Outputs2", listOf("Output", "Output"))
+        signature.path.assertType("kotlin.collections.List", listOf("kotlin.String"))
+        signature.parameters.assertType("dev.akif.tapik.Parameters2", listOf("java.util.UUID", "kotlin.Int"))
+        signature.parameters.arguments[0].assertType("java.util.UUID", emptyList())
+        signature.parameters.arguments[1].assertType("kotlin.Int", emptyList())
+        signature.input.type.assertType("dev.akif.tapik.Input", listOf("dev.akif.tapik.Headers1", "dev.akif.tapik.EmptyBody"))
+        signature.input.headers.assertType("dev.akif.tapik.Headers1", listOf("kotlin.String"))
+        signature.input.body.assertType("dev.akif.tapik.EmptyBody", emptyList())
+        signature.outputs.assertType("dev.akif.tapik.Outputs2", listOf("dev.akif.tapik.Output", "dev.akif.tapik.Output"))
         val reflectedFirstOutput = signature.outputs.arguments[0]
         val reflectedSecondOutput = signature.outputs.arguments[1]
-        reflectedFirstOutput.assertType("Output", listOf("Headers1", "StringBody"))
-        reflectedSecondOutput.assertType("Output", listOf("Headers0", "StringBody"))
+        reflectedFirstOutput.assertType("dev.akif.tapik.Output", listOf("dev.akif.tapik.Headers1", "dev.akif.tapik.StringBody"))
+        reflectedSecondOutput.assertType("dev.akif.tapik.Output", listOf("dev.akif.tapik.Headers0", "dev.akif.tapik.StringBody"))
     }
 
     private fun readClassBytes(clazz: Class<*>): ByteArray {

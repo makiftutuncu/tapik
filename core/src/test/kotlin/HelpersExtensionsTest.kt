@@ -6,15 +6,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class ClientExtensionsTest {
-    private object TestClient : Client
+class HelpersExtensionsTest {
+    private object TestHelpers : Helpers
 
     @Test
     fun `asQueryParameter casts successfully`() {
         val parameter = QueryParameter.int("limit").optional(20)
 
         val cast =
-            with(TestClient) {
+            with(TestHelpers) {
                 parameter.asQueryParameter<Int>()
             }
 
@@ -25,7 +25,7 @@ class ClientExtensionsTest {
     fun `asQueryParameter fails fast when types mismatch`() {
         val error =
             assertFailsWith<IllegalStateException> {
-                with(TestClient) {
+                with(TestHelpers) {
                     "not a parameter".asQueryParameter<Int>()
                 }
             }
@@ -34,23 +34,23 @@ class ClientExtensionsTest {
     }
 
     @Test
-    fun `getDefaultOrFail returns configured default`() {
-        val parameter = QueryParameter.int("limit").optional(15)
+    fun `getDefaultOrFail returns configured query parameter default`() {
+        val parameter = QueryParameter.int("limit").optional(20)
 
-        val value =
-            with(TestClient) {
+        val defaultValue =
+            with(TestHelpers) {
                 parameter.getDefaultOrFail()
             }
 
-        assertEquals(15, value)
+        assertEquals(20, defaultValue)
     }
 
     @Test
-    fun `getDefaultOrFail throws when default is missing`() {
+    fun `getDefaultOrFail throws when query parameter default is missing`() {
         val parameter = QueryParameter.int("limit")
 
         assertFailsWith<IllegalArgumentException> {
-            with(TestClient) {
+            with(TestHelpers) {
                 parameter.getDefaultOrFail()
             }
         }
@@ -61,7 +61,7 @@ class ClientExtensionsTest {
         val values = HeaderValues("X-Tapik", StringCodecs.string("X-Tapik"), listOf("first", "second"))
 
         val first =
-            with(TestClient) {
+            with(TestHelpers) {
                 values.getFirstValueOrFail()
             }
 
@@ -73,7 +73,7 @@ class ClientExtensionsTest {
         val emptyValues = HeaderValues("X-Tapik", StringCodecs.string("X-Tapik"), emptyList())
 
         assertFailsWith<IllegalArgumentException> {
-            with(TestClient) {
+            with(TestHelpers) {
                 emptyValues.getFirstValueOrFail()
             }
         }

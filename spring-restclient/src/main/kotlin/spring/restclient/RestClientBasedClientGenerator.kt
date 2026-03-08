@@ -54,7 +54,6 @@ class RestClientBasedClientGenerator : TapikGenerator {
                     .forEach { (sourceFile, groupedEndpoints) ->
                         val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
                         val signatures = sortedEndpoints.map(::EndpointSignature)
-                        val imports = buildImportsFor(packageName, sortedEndpoints)
                         val interfaceName = "${sourceFile}Client"
                         val targetFile = File(packageDirectory, "$interfaceName.kt")
                         targetFile.writeText(
@@ -62,7 +61,6 @@ class RestClientBasedClientGenerator : TapikGenerator {
                                 packageName = packageName,
                                 interfaceName = interfaceName,
                                 sourceFile = sourceFile,
-                                imports = imports,
                                 signatures = signatures
                             )
                         )
@@ -74,20 +72,22 @@ class RestClientBasedClientGenerator : TapikGenerator {
         packageName: String,
         interfaceName: String,
         sourceFile: String,
-        imports: List<String>,
         signatures: List<EndpointSignature>
     ): String =
         buildString {
             appendLine("package $packageName")
             appendLine()
-            imports.forEach { appendLine("import $it") }
-            if (imports.isNotEmpty()) {
+            val extensionImports = buildExtensionImports(signatures)
+            extensionImports.forEach { appendLine("import $it") }
+            if (extensionImports.isNotEmpty()) {
                 appendLine()
             }
             appendLine("// Generated from: $packageName.$sourceFile")
             appendLine("interface $interfaceName : $BASE_INTERFACE_NAME {")
             signatures.forEachIndexed { index, signature ->
                 appendEndpoint(signature)
+                appendLine()
+                appendUriMethod(signature)
                 if (index != signatures.lastIndex) {
                     appendLine()
                 }
@@ -95,36 +95,13 @@ class RestClientBasedClientGenerator : TapikGenerator {
             appendLine("}")
         }
 
-    private fun buildImportsFor(
-        packageName: String,
-        endpoints: List<HttpEndpointMetadata>
-    ): List<String> {
-        val imports =
-            mutableSetOf(
-                "arrow.core.getOrElse",
-                "dev.akif.tapik.*",
-                "$BASE_PACKAGE.*"
-            )
-
-        val typeImports =
-            endpoints
-                .flatMap(HttpEndpointMetadata::imports)
-                .map { KOTLIN_COLLECTION_OVERRIDES[it] ?: it }
-                .filterNot { import ->
-                    import.startsWith(HTTP_PACKAGE_PREFIX) ||
-                        import.startsWith("$BASE_PACKAGE.") ||
-                        import == BASE_PACKAGE ||
-                        import == TAPIK_PACKAGE ||
-                        import.substringBeforeLast('.', "") == packageName
-                }
-
-        imports +=
-            typeImports.filterNot {
-                it.startsWith("kotlin.collections.")
+    private fun buildExtensionImports(signatures: List<EndpointSignature>): List<String> =
+        buildSet {
+            add("$BASE_PACKAGE.toStatus")
+            if (signatures.any(EndpointSignature::usesEncodeInputHeaders)) {
+                add("$TAPIK_PACKAGE.encodeInputHeaders")
             }
-
-        return imports.toSortedSet().toList()
-    }
+        }.toList()
 
     private fun StringBuilder.appendEndpoint(signature: EndpointSignature) {
         val hasSummary = signature.summaryLines.isNotEmpty()
@@ -148,9 +125,15 @@ class RestClientBasedClientGenerator : TapikGenerator {
         }
         appendLine(": ${signature.returnType} {")
         val endpointExpr = signature.endpointExpression
+        val uriInvocation =
+            if (signature.uriArguments.isEmpty()) {
+                "${signature.uriMethodName}()"
+            } else {
+                "${signature.uriMethodName}(${signature.uriArguments})"
+            }
         appendLine("        val responseEntity = interpreter.send(")
         appendLine("            method = $endpointExpr.method,")
-        appendLine("            uri = $endpointExpr.toURI(${signature.uriArguments}),")
+        appendLine("            uri = $uriInvocation,")
         appendLine("            inputHeaders = ${signature.inputHeadersEncoding},")
         appendLine("            inputBodyContentType = $endpointExpr.input.body.mediaType,")
         appendLine("            inputBody = ${signature.encodeBodyCall},")
@@ -167,12 +150,35 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
         if (signature.needsBodyBytes) {
             appendLine()
-            appendLine("        val bodyBytes = responseEntity.body ?: ByteArray(0)")
+            appendLine("        val bodyBytes = responseEntity.body ?: kotlin.ByteArray(0)")
         }
 
         appendLine()
         appendLine(signature.responseConstruction)
         appendLine("    }")
+    }
+
+    private fun StringBuilder.appendUriMethod(signature: EndpointSignature) {
+        append("    fun ${signature.uriMethodName}(")
+        if (signature.uriMethodParameters.isNotEmpty()) {
+            appendLine()
+            appendLine(signature.uriMethodParameters.joinToString(separator = ",\n") { "        $it" })
+            appendLine("    ): java.net.URI =")
+        } else {
+            appendLine("): java.net.URI =")
+        }
+
+        if (signature.uriRenderArguments.isEmpty()) {
+            appendLine("        dev.akif.tapik.renderURI(${signature.endpointExpression}.path)")
+            return
+        }
+
+        appendLine("        dev.akif.tapik.renderURI(")
+        appendLine("            ${signature.endpointExpression}.path,")
+        appendLine(
+            signature.uriRenderArguments.joinToString(separator = ",\n") { "            $it" }
+        )
+        appendLine("        )")
     }
 
     private class EndpointSignature(
@@ -205,8 +211,12 @@ class RestClientBasedClientGenerator : TapikGenerator {
                 addAll(inputHeaders.optionalDeclarations)
             }
 
+        val uriMethodName: String = "${methodName}ToURI"
+        val uriMethodParameters: List<String> = parameters.uriMethodDeclarations
+        val uriRenderArguments: List<String> = parameters.uriRenderArguments
         val uriArguments: String = parameters.argumentList
         val inputHeadersEncoding: String = inputHeaders.encodingCall
+        val usesEncodeInputHeaders: Boolean = inputHeaders.usesEncodeInputHeaders
         val encodeBodyCall: String = inputBody.encodeCall
         val needsHeadersMap: Boolean = outputs.requiresHeaders
         val needsBodyBytes: Boolean = outputs.requiresBodyBytes
@@ -222,6 +232,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
             val name: String,
             val type: String,
             val declaration: String,
+            val uriRenderArgument: String,
             val hasDefault: Boolean
         )
 
@@ -229,6 +240,8 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
         val requiredDeclarations: List<String>
         val optionalDeclarations: List<String>
+        val uriMethodDeclarations: List<String>
+        val uriRenderArguments: List<String>
         val argumentList: String
 
         init {
@@ -248,26 +261,49 @@ class RestClientBasedClientGenerator : TapikGenerator {
                             is QueryParameterMetadata -> parameter.type.render()
                         }
                     when (parameter) {
-                        is PathVariableMetadata ->
+                        is PathVariableMetadata -> {
+                            val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
                             Entry(
                                 name = name,
                                 type = type,
                                 declaration = "$name: $type",
+                                uriRenderArgument = "$parameterAccessor to $parameterAccessor.codec.encode($name)",
                                 hasDefault = false
                             )
+                        }
+
                         is QueryParameterMetadata -> {
-                            val hasDefault = parameter.default != null
+                            val hasDefault = !parameter.required
+                            val hasNonNullDefault = parameter.default.fold({ false }) { it != null }
+                            val nonNullableType = parameter.type.copy(nullable = false).render()
+                            val renderedType =
+                                if (parameter.required || hasNonNullDefault) {
+                                    nonNullableType
+                                } else {
+                                    parameter.type.copy(nullable = true).render()
+                                }
                             val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
                             val declaration =
                                 if (hasDefault) {
-                                    "$name: $type = $parameterAccessor.asQueryParameter<$type>().getDefaultOrFail()"
+                                    if (hasNonNullDefault) {
+                                        "$name: $renderedType = $parameterAccessor.asQueryParameter<$nonNullableType>().getDefaultOrFail()"
+                                    } else {
+                                        "$name: $renderedType = $parameterAccessor.asQueryParameter<$nonNullableType>().default.getOrNull()"
+                                    }
                                 } else {
-                                    "$name: $type"
+                                    "$name: $renderedType"
+                                }
+                            val encodedValueExpression =
+                                if (parameter.required || hasNonNullDefault) {
+                                    "$parameterAccessor.codec.encode($name)"
+                                } else {
+                                    "$name?.let { $parameterAccessor.codec.encode(it) }"
                                 }
                             Entry(
                                 name = name,
-                                type = type,
+                                type = renderedType,
                                 declaration = declaration,
+                                uriRenderArgument = "$parameterAccessor to $encodedValueExpression",
                                 hasDefault = hasDefault
                             )
                         }
@@ -276,6 +312,8 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
             requiredDeclarations = entries.filterNot { it.hasDefault }.map { it.declaration }
             optionalDeclarations = entries.filter { it.hasDefault }.map { it.declaration }
+            uriMethodDeclarations = entries.map { it.declaration }
+            uriRenderArguments = entries.map { it.uriRenderArgument }
             argumentList = entries.joinToString(", ") { it.name }
         }
     }
@@ -297,13 +335,15 @@ class RestClientBasedClientGenerator : TapikGenerator {
         val requiredDeclarations: List<String>
         val optionalDeclarations: List<String>
         private val argumentList: String
+        val usesEncodeInputHeaders: Boolean
+            get() = count > 0
         val encodingCall: String
             get() =
                 if (count == 0) {
-                    "emptyMap()"
+                    "kotlin.collections.emptyMap()"
                 } else {
-                    val suffix = if (argumentList.isEmpty()) "()" else "($argumentList)"
-                    "$endpointExpression.input.encodeInputHeaders$suffix"
+                    val arguments = argumentList.takeIf { it.isNotEmpty() } ?: ""
+                    "$endpointExpression.input.encodeInputHeaders($arguments)"
                 }
 
         init {
@@ -347,14 +387,14 @@ class RestClientBasedClientGenerator : TapikGenerator {
             when (typeName) {
                 "EmptyBody" -> {
                     inputs = emptyList()
-                    encodeCall = "ByteArray(0)"
+                    encodeCall = "kotlin.ByteArray(0)"
                 }
                 "RawBody" -> {
-                    inputs = listOf("inputBody: ByteArray")
+                    inputs = listOf("inputBody: kotlin.ByteArray")
                     encodeCall = "inputBody"
                 }
                 "StringBody" -> {
-                    inputs = listOf("inputBody: String")
+                    inputs = listOf("inputBody: kotlin.String")
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
                 "JsonBody" -> {
@@ -363,7 +403,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                             ?.type
                             ?.arguments
                             ?.firstOrNull()
-                            ?.render() ?: "Any"
+                            ?.render() ?: "kotlin.Any"
                     inputs = listOf("inputBody: $valueType")
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
@@ -373,7 +413,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                             ?.type
                             ?.arguments
                             ?.firstOrNull()
-                            ?.render() ?: "Any"
+                            ?.render() ?: "kotlin.Any"
                     inputs = listOf("inputBody: $valueType")
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
@@ -395,17 +435,17 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
         val returnType: String =
             when {
-                options.isEmpty() -> "ResponseWithoutBody0"
+                options.isEmpty() -> "$TAPIK_PACKAGE.ResponseWithoutBody0"
                 options.size == 1 -> options.first().responseType
                 else -> {
                     val optionTypes = options.joinToString(", ") { it.responseType }
-                    "OneOf${options.size}<$optionTypes>"
+                    "$TAPIK_PACKAGE.OneOf${options.size}<$optionTypes>"
                 }
             }
 
         val responseConstruction: String =
             when {
-                options.isEmpty() -> "        return ResponseWithoutBody0(status)"
+                options.isEmpty() -> "        return $TAPIK_PACKAGE.ResponseWithoutBody0(status)"
                 options.size == 1 -> buildSingle(options.first())
                 else -> buildMultiple()
             }
@@ -439,7 +479,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                     appendLine(innerBlocks.joinToString(separator = "\n\n"))
                     appendLine("            }")
                 }
-                appendLine("            else -> error(\"Response output did not match\")")
+                appendLine("            else -> kotlin.error(\"Response output did not match\")")
                 appendLine("        }")
                 appendLine()
                 append("        return response")
@@ -475,34 +515,36 @@ class RestClientBasedClientGenerator : TapikGenerator {
                 responseType = computeResponseType()
             }
 
-            private fun computeResponseType(): String =
-                if (hasBody) {
+            private fun computeResponseType(): String {
+                val renderedHeaderTypes = headerTypes.joinToString(", ")
+                return if (hasBody) {
                     if (headerTypes.isEmpty()) {
-                        "Response0<$bodyType>"
+                        "$TAPIK_PACKAGE.Response0<$bodyType>"
                     } else {
-                        "Response${headerTypes.size}<$bodyType, ${headerTypes.joinToString(", ")}>"
+                        "$TAPIK_PACKAGE.Response${headerTypes.size}<$bodyType, $renderedHeaderTypes>"
                     }
                 } else {
                     if (headerTypes.isEmpty()) {
-                        "ResponseWithoutBody0"
+                        "$TAPIK_PACKAGE.ResponseWithoutBody0"
                     } else {
-                        "ResponseWithoutBody${headerTypes.size}<${headerTypes.joinToString(", ")}>"
+                        "$TAPIK_PACKAGE.ResponseWithoutBody${headerTypes.size}<$renderedHeaderTypes>"
                     }
                 }
+            }
 
             private fun responseInstance(): String {
                 val headerArgs = if (headerVarNames.isEmpty()) "" else headerVarNames.joinToString(prefix = ", ")
                 return if (hasBody) {
                     if (headerVarNames.isEmpty()) {
-                        "Response0(status, decodedBody)"
+                        "$TAPIK_PACKAGE.Response0(status, decodedBody)"
                     } else {
-                        "Response${headerVarNames.size}(status, decodedBody$headerArgs)"
+                        "$TAPIK_PACKAGE.Response${headerVarNames.size}(status, decodedBody$headerArgs)"
                     }
                 } else {
                     if (headerVarNames.isEmpty()) {
-                        "ResponseWithoutBody0(status)"
+                        "$TAPIK_PACKAGE.ResponseWithoutBody0(status)"
                     } else {
-                        "ResponseWithoutBody${headerVarNames.size}(status$headerArgs)"
+                        "$TAPIK_PACKAGE.ResponseWithoutBody${headerVarNames.size}(status$headerArgs)"
                     }
                 }
             }
@@ -512,14 +554,22 @@ class RestClientBasedClientGenerator : TapikGenerator {
                     return ""
                 }
                 return buildString {
-                    appendLine("${indent}val $headerParametersName = decodeHeaders${headerVarNames.size}(")
-                    appendLine("$indent    headers${if (headerAccessors.isEmpty()) "" else ","}")
+                    appendLine(
+                        "${indent}val ${headerParametersName}Result = dev.akif.tapik.decodeHeaders${headerVarNames.size}("
+                    )
+                    appendLine("$indent    headers,")
                     headerAccessors.forEachIndexed { idx, accessor ->
                         val suffix = if (idx == headerAccessors.lastIndex) "" else ","
                         appendLine("$indent    $accessor$suffix")
                     }
-                    appendLine("$indent).getOrElse {")
-                    appendLine("$indent    error(\"Cannot decode headers: \" + it.joinToString(\": \") )")
+                    appendLine("$indent)")
+                    appendLine(
+                        "${indent}val $headerParametersName = when (val either = ${headerParametersName}Result) {"
+                    )
+                    appendLine(
+                        "$indent    is arrow.core.Either.Left -> kotlin.error(\"Cannot decode headers: \" + either.value.joinToString(\": \"))"
+                    )
+                    appendLine("$indent    is arrow.core.Either.Right -> either.value")
                     appendLine("$indent}")
                     headerVarNames.forEachIndexed { idx, name ->
                         appendLine("${indent}val $name = $headerParametersName.item${idx + 1}.values")
@@ -532,15 +582,20 @@ class RestClientBasedClientGenerator : TapikGenerator {
                     return ""
                 }
                 return buildString {
-                    appendLine("${indent}val decodedBody = $bodyDecoderExpr")
-                    appendLine("$indent    .getOrElse { error(it.joinToString(\": \") ) }")
+                    appendLine("${indent}val decodedBodyResult = $bodyDecoderExpr")
+                    appendLine("${indent}val decodedBody = when (val either = decodedBodyResult) {")
+                    appendLine(
+                        "$indent    is arrow.core.Either.Left -> kotlin.error(either.value.joinToString(\": \"))"
+                    )
+                    appendLine("$indent    is arrow.core.Either.Right -> either.value")
+                    appendLine("$indent}")
                 }.trimEnd()
             }
 
             fun responseExpression(wrapInOneOf: Boolean): String {
                 val instance = responseInstance()
                 return if (wrapInOneOf) {
-                    "OneOf${options.size}.Option$index($instance)"
+                    "$TAPIK_PACKAGE.OneOf${options.size}.Option$index($instance)"
                 } else {
                     instance
                 }
@@ -552,13 +607,6 @@ class RestClientBasedClientGenerator : TapikGenerator {
         private const val ID = "spring-restclient"
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
         private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
-        private const val BASE_INTERFACE_NAME = "RestClientBasedClient"
-        private const val HTTP_PACKAGE_PREFIX = "$TAPIK_PACKAGE."
-        private val KOTLIN_COLLECTION_OVERRIDES =
-            mapOf(
-                "java.util.Map" to "kotlin.collections.Map",
-                "java.util.List" to "kotlin.collections.List",
-                "java.util.Set" to "kotlin.collections.Set"
-            )
+        private const val BASE_INTERFACE_NAME = "$BASE_PACKAGE.RestClientBasedClient"
     }
 }

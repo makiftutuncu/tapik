@@ -12,7 +12,6 @@ import dev.akif.tapik.plugin.metadata.TypeMetadata
  * @property parameters tuple type describing the captured path and query parameters.
  * @property input input type describing required headers and body.
  * @property outputs tuple type describing candidate response branches; individual entries are `Output`.
- * @property imports fully-qualified types that must be imported when generating clients.
  * @property rawType string representation of the full endpoint type.
  * @property ownerInternalName internal JVM name of the class or file that hosts the endpoint.
  * @property methodName method or property accessor that materialises the endpoint.
@@ -25,7 +24,6 @@ data class HttpEndpointSignature(
     val parameters: TypeMetadata,
     val input: InputSignature,
     val outputs: TypeMetadata,
-    val imports: List<String>,
     val rawType: String,
     val ownerInternalName: String,
     val methodName: String

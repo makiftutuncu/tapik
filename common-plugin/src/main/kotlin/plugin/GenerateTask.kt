@@ -336,7 +336,6 @@ class GenerateTask(
             outputs = endpoint.outputs.toList().buildOutputsMetadata(outputs.arguments),
             packageName = packageName,
             sourceFile = file,
-            imports = imports,
             rawType = rawType
         )
 
@@ -447,11 +446,34 @@ class GenerateTask(
             mediaType = body.mediaType?.toString()
         )
 
-    private fun runtimeTypeMetadata(type: Class<*>): TypeMetadata =
-        TypeMetadata(
-            name = type.simpleName,
+    private fun runtimeTypeMetadata(type: Class<*>): TypeMetadata {
+        val rawTypeName = type.name.replace('$', '.')
+        val mappedTypeName = JAVA_TO_KOTLIN_RUNTIME_TYPES[rawTypeName] ?: rawTypeName
+        return TypeMetadata(
+            name = mappedTypeName,
             arguments = emptyList()
         )
+    }
+
+    private companion object {
+        private val JAVA_TO_KOTLIN_RUNTIME_TYPES =
+            mapOf(
+                "java.lang.Boolean" to "kotlin.Boolean",
+                "java.lang.Byte" to "kotlin.Byte",
+                "java.lang.Short" to "kotlin.Short",
+                "java.lang.Integer" to "kotlin.Int",
+                "java.lang.Long" to "kotlin.Long",
+                "java.lang.Float" to "kotlin.Float",
+                "java.lang.Double" to "kotlin.Double",
+                "java.lang.Character" to "kotlin.Char",
+                "java.lang.String" to "kotlin.String",
+                "java.lang.Object" to "kotlin.Any",
+                "java.lang.Void" to "kotlin.Unit",
+                "java.util.List" to "kotlin.collections.List",
+                "java.util.Set" to "kotlin.collections.Set",
+                "java.util.Map" to "kotlin.collections.Map"
+            )
+    }
 
     private fun Method.shouldProcessMethod(): Boolean {
         if (name == "<init>" || name == "<clinit>" || name.contains("$")) {

@@ -1,7 +1,6 @@
 package dev.akif.tapik.spring.webmvc
 
 import dev.akif.tapik.plugin.*
-import dev.akif.tapik.plugin.computeSimpleName
 import dev.akif.tapik.plugin.metadata.*
 import java.io.File
 
@@ -55,7 +54,6 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                     .forEach { (sourceFile, groupedEndpoints) ->
                         val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
                         val signatures = sortedEndpoints.map { EndpointSignature(it) }
-                        val imports = buildImportsFor(packageName, sortedEndpoints, signatures)
                         val interfaceName = "${sourceFile}Controller"
                         val targetFile = File(packageDirectory, "$interfaceName.kt")
                         targetFile.writeText(
@@ -63,7 +61,6 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                                 packageName = packageName,
                                 interfaceName = interfaceName,
                                 sourceFile = sourceFile,
-                                imports = imports,
                                 signatures = signatures
                             )
                         )
@@ -75,18 +72,13 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         packageName: String,
         interfaceName: String,
         sourceFile: String,
-        imports: List<String>,
         signatures: List<EndpointSignature>
     ): String =
         buildString {
             appendLine("package $packageName")
             appendLine()
-            imports.forEach { appendLine("import $it") }
-            if (imports.isNotEmpty()) {
-                appendLine()
-            }
             appendLine("// Generated from: $packageName.$sourceFile")
-            appendLine("interface $interfaceName {")
+            appendLine("interface $interfaceName : dev.akif.tapik.Helpers {")
             signatures.forEachIndexed { index, signature ->
                 appendSignature(signature)
                 if (index != signatures.lastIndex) {
@@ -120,55 +112,6 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         appendLine(": ${signature.returnType}")
     }
 
-    private fun buildImportsFor(
-        packageName: String,
-        endpoints: List<HttpEndpointMetadata>,
-        signatures: List<EndpointSignature>
-    ): List<String> {
-        val imports =
-            mutableSetOf(
-                "dev.akif.tapik.*",
-                "org.springframework.web.bind.annotation.*",
-                "org.springframework.web.bind.annotation.PathVariable as SpringPathVariable"
-            )
-
-        val importCandidates = mutableMapOf<String, String>()
-        endpoints.flatMap(HttpEndpointMetadata::imports).forEach { fqcn ->
-            val nestedSimple = computeSimpleName(fqcn)
-            importCandidates.putIfAbsent(nestedSimple, fqcn)
-        }
-
-        val referencedTypes = signatures.flatMap { it.referencedTypeNames }.toSet()
-
-        val typeImports =
-            referencedTypes
-                .mapNotNull { simple ->
-                    importCandidates[simple]
-                }.map { candidate ->
-                    KOTLIN_COLLECTION_OVERRIDES[candidate] ?: candidate
-                }.filterNot { import ->
-                    isTopLevelTypeInPackage(import, packageName) ||
-                        import == packageName ||
-                        import.startsWith("kotlin.")
-                }
-
-        imports += typeImports
-
-        return imports.toSortedSet().toList()
-    }
-
-    private fun isTopLevelTypeInPackage(
-        import: String,
-        packageName: String
-    ): Boolean {
-        if (!import.startsWith("$packageName.")) {
-            return false
-        }
-
-        val afterPackage = import.removePrefix("$packageName.")
-        return !afterPackage.contains('.')
-    }
-
     private inner class EndpointSignature(
         endpoint: HttpEndpointMetadata
     ) {
@@ -178,22 +121,17 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         val mappingAnnotations: List<String>
         val parameters: List<String>
         val returnType: String
-        val referencedTypeNames: Set<String>
 
         init {
             mappingAnnotations = buildMappingAnnotation(endpoint)
 
+            val endpointExpression = endpoint.renderEndpointExpression()
             val nameAllocator = NameAllocator()
-            val parameterSpecs = buildParameterSpecs(endpoint, nameAllocator)
+            val parameterSpecs = buildParameterSpecs(endpoint, endpointExpression, nameAllocator)
             parameters = parameterSpecs.map { it.declaration }
 
             val returnInfo = buildReturnType(endpoint.outputs)
             returnType = returnInfo.type
-
-            val typeNames = mutableSetOf<String>()
-            parameterSpecs.forEach { typeNames += it.typeSimpleNames }
-            typeNames += returnInfo.typeSimpleNames
-            referencedTypeNames = typeNames
         }
     }
 
@@ -207,24 +145,23 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     }
 
     private data class ParameterSpec(
-        val declaration: String,
-        val typeSimpleNames: Set<String>
+        val declaration: String
     )
 
     private fun TypeMetadata.withNullable(nullable: Boolean): TypeMetadata = copy(nullable = nullable)
 
     private data class ReturnTypeInfo(
-        val type: String,
-        val typeSimpleNames: Set<String>
+        val type: String
     )
 
     private fun buildParameterSpecs(
         endpoint: HttpEndpointMetadata,
+        endpointExpression: String,
         allocator: NameAllocator
     ): List<ParameterSpec> =
         buildList {
             addAll(endpoint.parameters.buildPathVariableSpecs(allocator))
-            addAll(endpoint.parameters.buildQueryParameterSpecs(allocator))
+            addAll(endpoint.parameters.buildQueryParameterSpecs(allocator, endpointExpression))
             addAll(endpoint.input.headers.buildHeaderSpecs(allocator))
             endpoint.input.body
                 ?.buildBodySpec(allocator)
@@ -236,10 +173,10 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
             when (parameter) {
                 is PathVariableMetadata -> {
                     val argumentName = allocator.allocate(parameter.name, "path${index + 1}")
-                    val annotation = """@SpringPathVariable(name = "${parameter.name}")"""
+                    val annotation =
+                        """@org.springframework.web.bind.annotation.PathVariable(name = "${parameter.name}")"""
                     ParameterSpec(
-                        declaration = "$annotation $argumentName: ${parameter.type.render()}",
-                        typeSimpleNames = parameter.type.collectSimpleNames()
+                        declaration = "$annotation $argumentName: ${parameter.type.render()}"
                     )
                 }
 
@@ -249,7 +186,10 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
             }
         }
 
-    private fun List<ParameterMetadata>.buildQueryParameterSpecs(allocator: NameAllocator): List<ParameterSpec> =
+    private fun List<ParameterMetadata>.buildQueryParameterSpecs(
+        allocator: NameAllocator,
+        endpointExpression: String
+    ): List<ParameterSpec> =
         mapIndexedNotNull { index, parameter ->
             when (parameter) {
                 is QueryParameterMetadata -> {
@@ -257,23 +197,26 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                     val attributes = mutableListOf<String>()
                     attributes += """name = "${parameter.name}""""
                     attributes += "required = ${parameter.required}"
-                    parameter.default.onSome { default ->
-                        if (default != null) {
-                            attributes += """defaultValue = "${default.escapeForAnnotation()}""""
-                        }
-                    }
-                    val annotation = "@RequestParam(${attributes.joinToString(", ")})"
-                    val hasNonNullDefault =
-                        parameter.default.fold({ false }) { it != null }
+                    val annotation = "@org.springframework.web.bind.annotation.RequestParam(${attributes.joinToString(
+                        ", "
+                    )})"
+                    val hasNonNullDefault = parameter.default.fold({ false }) { it != null }
+                    val nonNullableType = parameter.type.withNullable(false)
                     val parameterType =
-                        if (!parameter.required && !hasNonNullDefault) {
-                            parameter.type.withNullable(true)
+                        if (parameter.required || hasNonNullDefault) {
+                            nonNullableType
                         } else {
-                            parameter.type
+                            parameter.type.withNullable(true)
+                        }
+                    val parameterAccessor = "$endpointExpression.parameters.item${index + 1}"
+                    val defaultExpression =
+                        if (parameter.required || hasNonNullDefault) {
+                            "$parameterAccessor.asQueryParameter<${nonNullableType.render()}>().getDefaultOrFail()"
+                        } else {
+                            "$parameterAccessor.asQueryParameter<${nonNullableType.render()}>().default.getOrNull()"
                         }
                     ParameterSpec(
-                        declaration = "$annotation $argumentName: ${parameterType.render()}",
-                        typeSimpleNames = parameterType.collectSimpleNames()
+                        declaration = "$annotation $argumentName: ${parameterType.render()} = $defaultExpression"
                     )
                 }
 
@@ -291,10 +234,9 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
             if (!header.required) {
                 attributes += "required = false"
             }
-            val annotation = "@RequestHeader(${attributes.joinToString(", ")})"
+            val annotation = "@org.springframework.web.bind.annotation.RequestHeader(${attributes.joinToString(", ")})"
             ParameterSpec(
-                declaration = "$annotation $argumentName: ${header.type.render()}",
-                typeSimpleNames = header.type.collectSimpleNames()
+                declaration = "$annotation $argumentName: ${header.type.render()}"
             )
         }
 
@@ -303,17 +245,15 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
             return null
         }
         val argumentName = allocator.allocate(name ?: "body", "body")
-        val annotation = "@RequestBody"
+        val annotation = "@org.springframework.web.bind.annotation.RequestBody"
         val info = determineBodyParameterType()
         return ParameterSpec(
-            declaration = "$annotation $argumentName: ${info.typeName}",
-            typeSimpleNames = info.simpleNames
+            declaration = "$annotation $argumentName: ${info.typeName}"
         )
     }
 
     private data class BodyParameterType(
-        val typeName: String,
-        val simpleNames: Set<String>
+        val typeName: String
     )
 
     private fun BodyMetadata.determineBodyParameterType(): BodyParameterType =
@@ -321,30 +261,26 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
             "JsonBody" -> {
                 val argument = type.arguments.firstOrNull()
                 BodyParameterType(
-                    typeName = argument?.render() ?: "Any",
-                    simpleNames = argument?.collectSimpleNames() ?: emptySet()
+                    typeName = argument?.render() ?: "kotlin.Any"
                 )
             }
 
             "StringBody" -> {
                 BodyParameterType(
-                    typeName = "String",
-                    simpleNames = emptySet()
+                    typeName = "kotlin.String"
                 )
             }
 
             "RawBody" -> {
                 BodyParameterType(
-                    typeName = "ByteArray",
-                    simpleNames = emptySet()
+                    typeName = "kotlin.ByteArray"
                 )
             }
 
             else -> {
                 val argument = type.arguments.firstOrNull()
                 BodyParameterType(
-                    typeName = argument?.render() ?: "Any",
-                    simpleNames = argument?.collectSimpleNames() ?: emptySet()
+                    typeName = argument?.render() ?: "kotlin.Any"
                 )
             }
         }
@@ -352,8 +288,7 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     private fun buildReturnType(outputs: List<OutputMetadata>): ReturnTypeInfo {
         if (outputs.isEmpty()) {
             return ReturnTypeInfo(
-                type = "ResponseWithoutBody0",
-                typeSimpleNames = emptySet()
+                type = "$TAPIK_PACKAGE.ResponseWithoutBody0"
             )
         }
 
@@ -361,52 +296,45 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
 
         return if (options.size == 1) {
             ReturnTypeInfo(
-                type = options.first().type,
-                typeSimpleNames = options.first().typeSimpleNames
+                type = options.first().type
             )
         } else {
             val optionTypes = options.joinToString(", ") { it.type }
             ReturnTypeInfo(
-                type = "OneOf${options.size}<$optionTypes>",
-                typeSimpleNames = options.flatMapTo(mutableSetOf()) { it.typeSimpleNames }
+                type = "$TAPIK_PACKAGE.OneOf${options.size}<$optionTypes>"
             )
         }
     }
 
     private data class OutputTypeInfo(
-        val type: String,
-        val typeSimpleNames: Set<String>
+        val type: String
     )
 
     private fun OutputMetadata.toResponseTypeInfo(): OutputTypeInfo {
         val headerTypes = headers.map { it.type.render() }
-        val headerSimpleNames = headers.flatMap { it.type.collectSimpleNames() }
         val hasBody = body.type.simpleName() != "EmptyBody"
         val bodyType = if (hasBody) body.type.determineBodyValueType() else null
-        val bodySimpleNames = if (hasBody) body.type.collectSimpleNames() else emptySet()
 
         val responseType =
             if (hasBody) {
                 if (headerTypes.isEmpty()) {
-                    "Response0<$bodyType>"
+                    "$TAPIK_PACKAGE.Response0<$bodyType>"
                 } else {
-                    "Response${headerTypes.size}<$bodyType, ${headerTypes.joinToString(", ")}>"
+                    "$TAPIK_PACKAGE.Response${headerTypes.size}<$bodyType, ${headerTypes.joinToString(
+                        ", "
+                    )}>"
                 }
             } else {
                 if (headerTypes.isEmpty()) {
-                    "ResponseWithoutBody0"
+                    "$TAPIK_PACKAGE.ResponseWithoutBody0"
                 } else {
-                    "ResponseWithoutBody${headerTypes.size}<${headerTypes.joinToString(", ")}>"
+                    "$TAPIK_PACKAGE.ResponseWithoutBody${headerTypes.size}<${headerTypes.joinToString(
+                        ", "
+                    )}>"
                 }
             }
 
-        val simpleNames =
-            buildSet {
-                addAll(headerSimpleNames)
-                addAll(bodySimpleNames)
-            }
-
-        return OutputTypeInfo(responseType, simpleNames)
+        return OutputTypeInfo(responseType)
     }
 
     private fun buildMappingAnnotation(endpoint: HttpEndpointMetadata): List<String> {
@@ -429,24 +357,24 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
         val method = endpoint.method.uppercase()
         val annotation =
             when (method) {
-                "GET" -> "GetMapping"
-                "POST" -> "PostMapping"
-                "PUT" -> "PutMapping"
-                "DELETE" -> "DeleteMapping"
-                "PATCH" -> "PatchMapping"
-                else -> "RequestMapping"
+                "GET" -> "@org.springframework.web.bind.annotation.GetMapping"
+                "POST" -> "@org.springframework.web.bind.annotation.PostMapping"
+                "PUT" -> "@org.springframework.web.bind.annotation.PutMapping"
+                "DELETE" -> "@org.springframework.web.bind.annotation.DeleteMapping"
+                "PATCH" -> "@org.springframework.web.bind.annotation.PatchMapping"
+                else -> "@org.springframework.web.bind.annotation.RequestMapping"
             }
 
         val annotationLine =
-            if (annotation == "RequestMapping") {
-                val methodAttribute = """method = [RequestMethod.$method]"""
+            if (annotation == "@org.springframework.web.bind.annotation.RequestMapping") {
+                val methodAttribute = """method = [org.springframework.web.bind.annotation.RequestMethod.$method]"""
                 val combined = listOf(methodAttribute) + attributes
-                "@RequestMapping(${combined.joinToString(", ")})"
+                "$annotation(${combined.joinToString(", ")})"
             } else {
                 if (attributes.isEmpty()) {
-                    "@$annotation"
+                    annotation
                 } else {
-                    "@$annotation(${attributes.joinToString(", ")})"
+                    "$annotation(${attributes.joinToString(", ")})"
                 }
             }
 
@@ -462,15 +390,17 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     private fun List<String>.formatAsArray(): String =
         joinToString(prefix = "[\"", separator = "\", \"", postfix = "\"]") { it.escapeForAnnotation() }
 
+    private fun HttpEndpointMetadata.renderEndpointExpression(): String {
+        val endpointProperty = renderIdentifier(propertyName)
+        return if (sourceFile.endsWith("Kt")) {
+            endpointProperty
+        } else {
+            "$sourceFile.$endpointProperty"
+        }
+    }
+
     private companion object {
         private const val ID = "spring-webmvc"
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
-        private const val HTTP_PACKAGE_PREFIX = "$TAPIK_PACKAGE."
-        private val KOTLIN_COLLECTION_OVERRIDES =
-            mapOf(
-                "java.util.Map" to "kotlin.collections.Map",
-                "java.util.List" to "kotlin.collections.List",
-                "java.util.Set" to "kotlin.collections.Set"
-            )
     }
 }

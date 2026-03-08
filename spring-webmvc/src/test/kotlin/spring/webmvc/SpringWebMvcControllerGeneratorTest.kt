@@ -32,30 +32,24 @@ class SpringWebMvcControllerGeneratorTest {
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText().trim()
+        assertTrue(content.lineSequence().none { it.startsWith("import ") })
         val expected =
             """
             |package dev.akif.tapik.clients
             |
-            |import dev.akif.tapik.*
-|import dev.akif.tapik.StringBody
-|import java.net.URI
-|import java.util.UUID
-|import org.springframework.web.bind.annotation.*
-|import org.springframework.web.bind.annotation.PathVariable as SpringPathVariable
-            |
             |// Generated from: dev.akif.tapik.clients.UserEndpoints
-            |interface UserEndpointsController {
+            |interface UserEndpointsController : dev.akif.tapik.Helpers {
             |    /**
             |     * Get user by id.
             |     *
             |     * Detailed documentation for the endpoint.
             |     */
-            |    @GetMapping(path = ["/api/users/{userId}"], produces = ["text/plain"])
+|    @org.springframework.web.bind.annotation.GetMapping(path = ["/api/users/{userId}"], produces = ["text/plain"])
             |    fun user(
-|        @SpringPathVariable(name = "userId") userId: UUID,
-            |        @RequestParam(name = "page", required = false, defaultValue = "1") page: Int,
-            |        @RequestHeader(name = "X-Request-ID") xRequestId: String
-            |    ): Response1<String, URI>
+|        @org.springframework.web.bind.annotation.PathVariable(name = "userId") userId: java.util.UUID,
+            |        @org.springframework.web.bind.annotation.RequestParam(name = "page", required = false) page: kotlin.Int = UserEndpoints.user.parameters.item2.asQueryParameter<kotlin.Int>().getDefaultOrFail(),
+            |        @org.springframework.web.bind.annotation.RequestHeader(name = "X-Request-ID") xRequestId: kotlin.String
+            |    ): dev.akif.tapik.Response1<kotlin.String, java.net.URI>
             |}
             """.trimMargin()
 
@@ -75,26 +69,22 @@ class SpringWebMvcControllerGeneratorTest {
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText().trim()
+        assertTrue(content.lineSequence().none { it.startsWith("import ") })
         val expected =
             """
             |package dev.akif.tapik.clients
             |
-            |import dev.akif.tapik.*
-|import java.util.UUID
-|import org.springframework.web.bind.annotation.*
-|import org.springframework.web.bind.annotation.PathVariable as SpringPathVariable
-            |
             |// Generated from: dev.akif.tapik.clients.StatusEndpoints
-            |interface StatusEndpointsController {
+            |interface StatusEndpointsController : dev.akif.tapik.Helpers {
             |    /**
             |     * HEAD endpoint with optional pieces.
             |     */
-            |    @RequestMapping(method = [RequestMethod.HEAD], path = ["/api/status/{id}"])
+|    @org.springframework.web.bind.annotation.RequestMapping(method = [org.springframework.web.bind.annotation.RequestMethod.HEAD], path = ["/api/status/{id}"])
             |    fun headStatus(
-|        @SpringPathVariable(name = "id") id: UUID,
-            |        @RequestParam(name = "trace-id", required = false, defaultValue = "trace-default") traceId: String,
-            |        @RequestHeader(name = "X-Session-ID", required = false) xSessionId: UUID
-            |    ): ResponseWithoutBody0
+|        @org.springframework.web.bind.annotation.PathVariable(name = "id") id: java.util.UUID,
+            |        @org.springframework.web.bind.annotation.RequestParam(name = "trace-id", required = false) traceId: kotlin.String = StatusEndpoints.headStatus.parameters.item2.asQueryParameter<kotlin.String>().getDefaultOrFail(),
+            |        @org.springframework.web.bind.annotation.RequestHeader(name = "X-Session-ID", required = false) xSessionId: java.util.UUID
+            |    ): dev.akif.tapik.ResponseWithoutBody0
             |}
             """.trimMargin()
 
@@ -102,7 +92,7 @@ class SpringWebMvcControllerGeneratorTest {
     }
 
     @Test
-    fun `generate keeps nested parameter types and imports them`() {
+    fun `generate keeps nested parameter types with fully qualified references`() {
         val rootDir = tempDir.toFile()
 
         SpringWebMvcControllerGenerator().generate(
@@ -114,12 +104,35 @@ class SpringWebMvcControllerGeneratorTest {
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText().trim()
-        assertTrue(content.contains("import dev.akif.tapik.books.Book.Isbn"), "Expected import for nested type")
+        assertTrue(content.lineSequence().none { it.startsWith("import ") })
         assertTrue(
-            content.contains("@RequestParam(name = \"isbn\", required = false) isbn: Book.Isbn?"),
-            "Expected nested type to be used in parameter and be nullable"
+            content.contains(
+                "@org.springframework.web.bind.annotation.RequestParam(name = \"isbn\", required = false) isbn: dev.akif.tapik.books.Book.Isbn? = BookEndpoints.list.parameters.item1.asQueryParameter<dev.akif.tapik.books.Book.Isbn>().default.getOrNull()"
+            ),
+            "Expected nested type to be fully qualified and nullable"
         )
         assertTrue(content.contains("interface BookEndpointsController"), "Expected controller interface")
+    }
+
+    @Test
+    fun `generate keeps required query parameters non nullable with default expression`() {
+        val rootDir = tempDir.toFile()
+
+        SpringWebMvcControllerGenerator().generate(
+            endpoints = listOf(metadataWithRequiredQueryParameter()),
+            context = testContext(rootDir)
+        )
+
+        val generated = File(rootDir, "dev/akif/tapik/clients/RequiredQueryEndpointsController.kt")
+        assertTrue(generated.exists(), "Expected generated controller file")
+
+        val content = generated.readText()
+        assertTrue(
+            content.contains(
+                "@org.springframework.web.bind.annotation.RequestParam(name = \"term\", required = true) term: kotlin.String = RequiredQueryEndpoints.requiredQuery.parameters.item1.asQueryParameter<kotlin.String>().getDefaultOrFail()"
+            ),
+            "Expected required query parameter to remain non-nullable with a default expression"
+        )
     }
 
     private fun testContext(rootDir: File): TapikGeneratorContext =
@@ -188,12 +201,6 @@ class SpringWebMvcControllerGeneratorTest {
                 ),
             packageName = "dev.akif.tapik.clients",
             sourceFile = "UserEndpoints",
-            imports =
-                listOf(
-                    "java.util.UUID",
-                    "java.net.URI",
-                    "dev.akif.tapik.StringBody"
-                ),
             rawType = "HttpEndpoint"
         )
 
@@ -246,11 +253,6 @@ class SpringWebMvcControllerGeneratorTest {
                 ),
             packageName = "dev.akif.tapik.clients",
             sourceFile = "StatusEndpoints",
-            imports =
-                listOf(
-                    "java.util.UUID",
-                    "dev.akif.tapik.EmptyBody"
-                ),
             rawType = "HttpEndpoint"
         )
 
@@ -286,11 +288,41 @@ class SpringWebMvcControllerGeneratorTest {
                 ),
             packageName = "dev.akif.tapik.api",
             sourceFile = "BookEndpoints",
-            imports =
+            rawType = "HttpEndpoint"
+        )
+
+    private fun metadataWithRequiredQueryParameter(): HttpEndpointMetadata =
+        HttpEndpointMetadata(
+            id = "required query",
+            propertyName = "requiredQuery",
+            description = null,
+            details = null,
+            method = "GET",
+            path = listOf("api", "search"),
+            parameters =
                 listOf(
-                    "dev.akif.tapik.books.Book.Isbn",
-                    "dev.akif.tapik.EmptyBody"
+                    QueryParameterMetadata(
+                        name = "term",
+                        type = TypeMetadata("kotlin.String"),
+                        required = true,
+                        default = None
+                    )
                 ),
+            input =
+                InputMetadata(
+                    headers = emptyList(),
+                    body = null
+                ),
+            outputs =
+                listOf(
+                    OutputMetadata(
+                        description = "No Content",
+                        headers = emptyList(),
+                        body = BodyMetadata(TypeMetadata("dev.akif.tapik.EmptyBody"))
+                    )
+                ),
+            packageName = "dev.akif.tapik.clients",
+            sourceFile = "RequiredQueryEndpoints",
             rawType = "HttpEndpoint"
         )
 }
