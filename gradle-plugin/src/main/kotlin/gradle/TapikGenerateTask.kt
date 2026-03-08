@@ -5,8 +5,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import java.io.File
 
@@ -42,9 +42,17 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:Input
     abstract val additionalClassDirectories: ListProperty<String>
 
-    /** Identifiers of generators that should be executed. */
+    /** Import optimization flag keyed by generator identifier. */
     @get:Input
-    abstract val enabledGeneratorIds: SetProperty<String>
+    abstract val generatorOptimizeImports: MapProperty<String, Boolean>
+
+    /** Name prefix keyed by generator identifier. */
+    @get:Input
+    abstract val generatorNamePrefixes: MapProperty<String, String>
+
+    /** Name suffix keyed by generator identifier. */
+    @get:Input
+    abstract val generatorNameSuffixes: MapProperty<String, String>
 
     /** Runtime classpath used when analysing endpoint bytecode via reflection fallback. */
     @get:InputFiles
@@ -61,6 +69,11 @@ abstract class TapikGenerateTask : DefaultTask() {
                 .getOrElse(emptyList())
                 .map { File(it) } +
                 runtimeClasspath.files
+        val optimizeImportsByGenerator = generatorOptimizeImports.getOrElse(emptyMap())
+        val namePrefixesByGenerator = generatorNamePrefixes.getOrElse(emptyMap())
+        val nameSuffixesByGenerator = generatorNameSuffixes.getOrElse(emptyMap())
+        val generatorIds =
+            (optimizeImportsByGenerator.keys + namePrefixesByGenerator.keys + nameSuffixesByGenerator.keys).toSet()
 
         GenerateTask(
             config = GenerateTaskConfiguration(
@@ -69,7 +82,15 @@ abstract class TapikGenerateTask : DefaultTask() {
                 basePackage = basePackage.get(),
                 compiledClassesDirectory = compiledClassesDirectory.get().asFile,
                 additionalClasspathDirectories = compiledClassesDirectories,
-                enabledGeneratorIds = enabledGeneratorIds.getOrElse(emptySet())
+                generatorConfigurations =
+                    generatorIds
+                        .associateWith { generatorId ->
+                            GeneratorConfiguration(
+                                optimizeImports = optimizeImportsByGenerator.getOrElse(generatorId) { true },
+                                namePrefix = namePrefixesByGenerator[generatorId],
+                                nameSuffix = nameSuffixesByGenerator[generatorId]
+                            )
+                        }
             ),
             log = logger::lifecycle,
             logDebug = logger::debug,

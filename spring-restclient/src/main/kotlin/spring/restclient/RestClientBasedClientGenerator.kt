@@ -22,14 +22,21 @@ class RestClientBasedClientGenerator : TapikGenerator {
     override fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
-    ) {
+    ): TapikGenerationResult {
         if (endpoints.isEmpty()) {
             context.log("No endpoints discovered; skipping Spring RestClient generation.")
-            return
+            return TapikGenerationResult()
         }
 
         context.log("Generating Spring RestClient clients.")
-        generateClients(endpoints, context.generatedSourcesDirectory)
+        return TapikGenerationResult(
+            generateClients(
+                endpoints = endpoints,
+                rootDir = context.generatedSourcesDirectory,
+                namePrefix = context.generatorConfiguration.namePrefix.orEmpty(),
+                nameSuffix = context.generatorConfiguration.nameSuffix ?: DEFAULT_INTERFACE_SUFFIX
+            )
+        )
     }
 
     /**
@@ -40,8 +47,11 @@ class RestClientBasedClientGenerator : TapikGenerator {
      */
     private fun generateClients(
         endpoints: List<HttpEndpointMetadata>,
-        rootDir: File
-    ) {
+        rootDir: File,
+        namePrefix: String,
+        nameSuffix: String
+    ): Set<File> {
+        val generatedFiles = linkedSetOf<File>()
         endpoints
             .groupBy { it.packageName }
             .filterKeys { it.isNotBlank() }
@@ -54,7 +64,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                     .forEach { (sourceFile, groupedEndpoints) ->
                         val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
                         val signatures = sortedEndpoints.map(::EndpointSignature)
-                        val interfaceName = "${sourceFile}Client"
+                        val interfaceName = "$namePrefix$sourceFile$nameSuffix"
                         val targetFile = File(packageDirectory, "$interfaceName.kt")
                         targetFile.writeText(
                             buildInterfaceContent(
@@ -64,8 +74,10 @@ class RestClientBasedClientGenerator : TapikGenerator {
                                 signatures = signatures
                             )
                         )
+                        generatedFiles += targetFile
                     }
             }
+        return generatedFiles
     }
 
     private fun buildInterfaceContent(
@@ -237,6 +249,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
         )
 
         private val entries: List<Entry>
+        private val entriesInMethodOrder: List<Entry>
 
         val requiredDeclarations: List<String>
         val optionalDeclarations: List<String>
@@ -312,9 +325,10 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
             requiredDeclarations = entries.filterNot { it.hasDefault }.map { it.declaration }
             optionalDeclarations = entries.filter { it.hasDefault }.map { it.declaration }
-            uriMethodDeclarations = entries.map { it.declaration }
-            uriRenderArguments = entries.map { it.uriRenderArgument }
-            argumentList = entries.joinToString(", ") { it.name }
+            entriesInMethodOrder = entries.filterNot { it.hasDefault } + entries.filter { it.hasDefault }
+            uriMethodDeclarations = entriesInMethodOrder.map { it.declaration }
+            uriRenderArguments = entriesInMethodOrder.map { it.uriRenderArgument }
+            argumentList = entriesInMethodOrder.joinToString(", ") { it.name }
         }
     }
 
@@ -608,5 +622,6 @@ class RestClientBasedClientGenerator : TapikGenerator {
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
         private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
         private const val BASE_INTERFACE_NAME = "$BASE_PACKAGE.RestClientBasedClient"
+        private const val DEFAULT_INTERFACE_SUFFIX = "Client"
     }
 }

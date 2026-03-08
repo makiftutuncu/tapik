@@ -16,6 +16,7 @@ class TapikGradlePlugin : Plugin<Project> {
         val extension = target.extensions.create("tapik", TapikExtension::class.java)
 
         val generatedSources = target.layout.buildDirectory.dir("generated/sources/tapik/main/kotlin")
+        val resolvedGeneratorConfigurations = target.provider { extension.resolvedGeneratorConfigurations() }
 
         val tapikGenerate = target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) {
             it.group = "tapik"
@@ -31,7 +32,21 @@ class TapikGradlePlugin : Plugin<Project> {
             it.generatedSourcesDirectory.set(generatedSources)
             it.additionalClassDirectories.set(collectClassDirectories(target))
             it.runtimeClasspath.from(target.configurations.getByName("runtimeClasspath"))
-            it.enabledGeneratorIds.set(target.provider { extension.configuredGeneratorIds() })
+            it.generatorOptimizeImports.set(
+                resolvedGeneratorConfigurations.map { configurations ->
+                    configurations.mapValues { (_, config) -> config.optimizeImports }
+                }
+            )
+            it.generatorNamePrefixes.set(
+                resolvedGeneratorConfigurations.map { configurations ->
+                    configurations.mapValues { (_, config) -> config.namePrefix.orEmpty() }
+                }
+            )
+            it.generatorNameSuffixes.set(
+                resolvedGeneratorConfigurations.map { configurations ->
+                    configurations.mapValues { (_, config) -> config.nameSuffix.orEmpty() }
+                }
+            )
         }
 
         tapikGenerate.configure {

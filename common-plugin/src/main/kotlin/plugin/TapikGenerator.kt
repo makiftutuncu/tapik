@@ -19,32 +19,38 @@ interface TapikGenerator {
      *
      * @param endpoints endpoints discovered during bytecode scanning.
      * @param context contextual information and utilities required by generators.
+     * @return generation result including generated Kotlin source files.
      */
     fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
-    )
+    ): TapikGenerationResult
 }
 
 /**
- * Carries directories and logging utilities that Tapik generators rely on.
+ * Result of a [TapikGenerator] invocation.
  *
- * @param outputDirectory directory used for non-source outputs (reports, documentation).
- * @param generatedSourcesDirectory directory where generated Kotlin sources should be written.
- * @param log info-level logger.
- * @param logDebug debug-level logger.
- * @param logWarn warning-level logger that accepts an optional [Throwable].
+ * @property generatedSourceFiles Kotlin source files generated during this invocation.
+ */
+data class TapikGenerationResult(
+    val generatedSourceFiles: Set<File> = emptySet()
+)
+
+/**
+ * Carries directories and logging utilities that Tapik generators rely on.
  *
  * @property outputDirectory directory used for non-source outputs (reports, documentation).
  * @property generatedSourcesDirectory directory where generated Kotlin sources should be written.
  * @property log info-level logger.
  * @property logDebug debug-level logger.
  * @property logWarn warning-level logger that accepts an optional [Throwable].
+ * @property generatorConfiguration configuration for the current generator invocation.
  */
 data class TapikGeneratorContext(
     val outputDirectory: File,
     val generatedSourcesDirectory: File,
     val log: (String) -> Unit,
     val logDebug: (String) -> Unit,
-    val logWarn: (String, Throwable?) -> Unit
+    val logWarn: (String, Throwable?) -> Unit,
+    val generatorConfiguration: GeneratorConfiguration
 )

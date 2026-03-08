@@ -2,6 +2,7 @@ package dev.akif.tapik.spring.webmvc
 
 import arrow.core.None
 import arrow.core.Some
+import dev.akif.tapik.plugin.GeneratorConfiguration
 import dev.akif.tapik.plugin.TapikGeneratorContext
 import dev.akif.tapik.plugin.metadata.*
 import org.junit.jupiter.api.io.CleanupMode
@@ -135,13 +136,44 @@ class SpringWebMvcControllerGeneratorTest {
         )
     }
 
+    @Test
+    fun `generate uses configured name prefix and suffix for interface name`() {
+        val rootDir = tempDir.toFile()
+
+        SpringWebMvcControllerGenerator().generate(
+            endpoints = listOf(sampleMetadata()),
+            context =
+                testContext(rootDir).copy(
+                    generatorConfiguration =
+                        dev.akif.tapik.plugin.GeneratorConfiguration(
+                            optimizeImports = true,
+                            namePrefix = "My",
+                            nameSuffix = "Interface"
+                        )
+                )
+        )
+
+        val generated = File(rootDir, "dev/akif/tapik/clients/MyUserEndpointsInterface.kt")
+        assertTrue(generated.exists(), "Expected generated controller file with configured name")
+        assertTrue(
+            generated.readText().contains("interface MyUserEndpointsInterface"),
+            "Expected generated controller interface declaration to use configured prefix/suffix"
+        )
+    }
+
     private fun testContext(rootDir: File): TapikGeneratorContext =
         TapikGeneratorContext(
             outputDirectory = rootDir,
             generatedSourcesDirectory = rootDir,
             log = {},
             logDebug = {},
-            logWarn = { _, _ -> }
+            logWarn = { _, _ -> },
+            generatorConfiguration =
+                GeneratorConfiguration(
+                    optimizeImports = true,
+                    namePrefix = null,
+                    nameSuffix = null
+                )
         )
 
     private fun sampleMetadata(): HttpEndpointMetadata =

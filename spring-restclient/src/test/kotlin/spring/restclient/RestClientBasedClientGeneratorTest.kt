@@ -2,6 +2,7 @@ package dev.akif.tapik.spring.restclient
 
 import arrow.core.None
 import arrow.core.Some
+import dev.akif.tapik.plugin.GeneratorConfiguration
 import dev.akif.tapik.plugin.TapikGeneratorContext
 import dev.akif.tapik.plugin.metadata.*
 import org.junit.jupiter.api.io.CleanupMode
@@ -168,13 +169,79 @@ class RestClientBasedClientGeneratorTest {
         )
     }
 
+    @Test
+    fun `generate keeps toURI parameter order aligned with generated method parameter order`() {
+        val rootDir = tempDir.toFile()
+
+        RestClientBasedClientGenerator().generate(
+            endpoints = listOf(metadataWithMixedQueryOrdering()),
+            context = testContext(rootDir)
+        )
+
+        val generated = File(rootDir, "dev/akif/tapik/clients/MixedQueryEndpointsClient.kt")
+        assertTrue(generated.exists(), "Expected generated interface file")
+
+        val content = generated.readText()
+        val optionalDeclaration =
+            "optionalQ: kotlin.Int? = MixedQueryEndpoints.mixed.parameters.item1.asQueryParameter<kotlin.Int>().default.getOrNull()"
+        assertTrue(
+            Regex(
+                """fun mixed\(\s*requiredQ: kotlin\.String,\s*${Regex.escape(optionalDeclaration)}""",
+                setOf(RegexOption.DOT_MATCHES_ALL)
+            ).containsMatchIn(content),
+            "Expected method parameters in required-then-optional order"
+        )
+        assertTrue(
+            Regex(
+                """fun mixedToURI\(\s*requiredQ: kotlin\.String,\s*${Regex.escape(optionalDeclaration)}""",
+                setOf(RegexOption.DOT_MATCHES_ALL)
+            ).containsMatchIn(content),
+            "Expected toURI parameters in same order as generated method parameters"
+        )
+        assertTrue(
+            content.contains("uri = mixedToURI(requiredQ, optionalQ)"),
+            "Expected toURI invocation argument order to match method parameter order"
+        )
+    }
+
+    @Test
+    fun `generate uses configured name prefix and suffix for interface name`() {
+        val rootDir = tempDir.toFile()
+
+        RestClientBasedClientGenerator().generate(
+            endpoints = listOf(sampleMetadata()),
+            context =
+                testContext(rootDir).copy(
+                    generatorConfiguration =
+                        dev.akif.tapik.plugin.GeneratorConfiguration(
+                            optimizeImports = true,
+                            namePrefix = "My",
+                            nameSuffix = "Interface"
+                        )
+                )
+        )
+
+        val generated = File(rootDir, "dev/akif/tapik/clients/MyUserEndpointsInterface.kt")
+        assertTrue(generated.exists(), "Expected generated interface file with configured name")
+        assertTrue(
+            generated.readText().contains("interface MyUserEndpointsInterface"),
+            "Expected generated interface declaration to use configured prefix/suffix"
+        )
+    }
+
     private fun testContext(rootDir: File): TapikGeneratorContext =
         TapikGeneratorContext(
             outputDirectory = rootDir,
             generatedSourcesDirectory = rootDir,
             log = {},
             logDebug = {},
-            logWarn = { _, _ -> }
+            logWarn = { _, _ -> },
+            generatorConfiguration =
+                GeneratorConfiguration(
+                    optimizeImports = true,
+                    namePrefix = null,
+                    nameSuffix = null
+                )
         )
 
     private fun sampleMetadata(): HttpEndpointMetadata =
@@ -332,6 +399,47 @@ class RestClientBasedClientGeneratorTest {
                 ),
             packageName = "dev.akif.tapik.clients",
             sourceFile = "RequiredQueryEndpoints",
+            rawType = "HttpEndpoint"
+        )
+
+    private fun metadataWithMixedQueryOrdering(): HttpEndpointMetadata =
+        HttpEndpointMetadata(
+            id = "mixed",
+            propertyName = "mixed",
+            description = null,
+            details = null,
+            method = "GET",
+            path = listOf("api", "mixed"),
+            parameters =
+                listOf(
+                    QueryParameterMetadata(
+                        name = "optionalQ",
+                        type = TypeMetadata("kotlin.Int"),
+                        required = false,
+                        default = Some(null)
+                    ),
+                    QueryParameterMetadata(
+                        name = "requiredQ",
+                        type = TypeMetadata("kotlin.String"),
+                        required = true,
+                        default = None
+                    )
+                ),
+            input =
+                InputMetadata(
+                    headers = emptyList(),
+                    body = null
+                ),
+            outputs =
+                listOf(
+                    OutputMetadata(
+                        description = "No Content",
+                        headers = emptyList(),
+                        body = BodyMetadata(TypeMetadata("dev.akif.tapik.EmptyBody"))
+                    )
+                ),
+            packageName = "dev.akif.tapik.clients",
+            sourceFile = "MixedQueryEndpoints",
             rawType = "HttpEndpoint"
         )
 }

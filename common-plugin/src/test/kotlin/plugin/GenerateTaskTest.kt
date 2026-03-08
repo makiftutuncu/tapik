@@ -5,6 +5,7 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.io.CleanupMode
 import org.junit.jupiter.api.io.TempDir
@@ -29,7 +30,12 @@ class GenerateTaskTest {
                 basePackage = "dev.akif.tapik.plugin",
                 compiledClassesDirectory = compiledDir,
                 additionalClasspathDirectories = emptyList(),
-                enabledGeneratorIds = setOf("spring-restclient", "spring-webmvc", "markdown-docs")
+                generatorConfigurations =
+                    mapOf(
+                        "spring-restclient" to GeneratorConfiguration(optimizeImports = true, namePrefix = null, nameSuffix = null),
+                        "spring-webmvc" to GeneratorConfiguration(optimizeImports = true, namePrefix = null, nameSuffix = null),
+                        "markdown-docs" to GeneratorConfiguration(optimizeImports = false, namePrefix = null, nameSuffix = null)
+                    )
             ),
             log = { s, _ -> println(s) },
             logDebug = { s, _ -> println(s) },
@@ -65,6 +71,49 @@ class GenerateTaskTest {
         assertTrue(
             documentation.exists(),
             "Generated documentation should exist, files: ${File(documentation.parent).list()?.toList()}"
+        )
+    }
+
+    @Test
+    fun `generate applies import optimization per generator`() {
+        val compiledDir = File(SampleEndpoints::class.java.protectionDomain.codeSource.location.toURI())
+        val outputDir = temporaryDir.resolve("out-2").createDirectories().toFile()
+        val generatedDir = temporaryDir.resolve("generated-2").createDirectories().toFile()
+
+        GenerateTask(
+            config = GenerateTaskConfiguration(
+                outputDirectory = outputDir,
+                generatedSourcesDirectory = generatedDir,
+                basePackage = "dev.akif.tapik.plugin",
+                compiledClassesDirectory = compiledDir,
+                additionalClasspathDirectories = emptyList(),
+                generatorConfigurations =
+                    mapOf(
+                        "spring-restclient" to GeneratorConfiguration(optimizeImports = false, namePrefix = null, nameSuffix = null),
+                        "spring-webmvc" to GeneratorConfiguration(optimizeImports = true, namePrefix = null, nameSuffix = null),
+                        "markdown-docs" to GeneratorConfiguration(optimizeImports = false, namePrefix = null, nameSuffix = null)
+                    )
+            ),
+            log = { _, _ -> },
+            logDebug = { _, _ -> },
+            logWarn = { _, _ -> }
+        ).generate()
+
+        val generatedClient = File(generatedDir, "dev/akif/tapik/plugin/fixtures/SampleEndpointsClient.kt")
+        assertTrue(generatedClient.exists(), "Expected generated client interface")
+        val imports =
+            generatedClient
+                .readText()
+                .lineSequence()
+                .filter { it.startsWith("import ") }
+                .toList()
+        assertEquals(
+            listOf(
+                "import dev.akif.tapik.spring.restclient.toStatus",
+                "import dev.akif.tapik.encodeInputHeaders"
+            ),
+            imports,
+            "RestClient generator should not be import-optimized when disabled"
         )
     }
 }

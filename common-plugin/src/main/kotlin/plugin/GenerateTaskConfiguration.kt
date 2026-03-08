@@ -10,7 +10,8 @@ import java.io.File
  * @param basePackage The base package to scan for endpoint definitions.
  * @param compiledClassesDirectory The directory containing the compiled classes of the project.
  * @param additionalClasspathDirectories Additional directories to add to the classpath when scanning for endpoints.
- * @param enabledGeneratorIds Identifiers of code generators that should run.
+ * @param generatorConfigurations Map of generator id to its generation configuration.
+ * If a generator is enabled, it must be present in this map.
  */
 data class GenerateTaskConfiguration(
     val outputDirectory: File,
@@ -18,5 +19,19 @@ data class GenerateTaskConfiguration(
     val basePackage: String,
     val compiledClassesDirectory: File,
     val additionalClasspathDirectories: List<File>,
-    val enabledGeneratorIds: Set<String>
+    val generatorConfigurations: Map<String, GeneratorConfiguration>
+)
+
+/**
+ * Generator-specific configuration for [GenerateTask].
+ *
+ * @param optimizeImports Whether generated Kotlin sources for this generator should be post-processed
+ * to optimize imports.
+ * @param namePrefix Optional prefix for generated type names.
+ * @param nameSuffix Optional suffix for generated type names.
+ */
+data class GeneratorConfiguration(
+    val optimizeImports: Boolean,
+    val namePrefix: String?,
+    val nameSuffix: String?
 )

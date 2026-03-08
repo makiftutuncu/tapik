@@ -12,14 +12,14 @@ class MarkdownDocumentationGenerator : TapikGenerator {
     override fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
-    ) {
+    ): TapikGenerationResult {
         if (endpoints.isEmpty()) {
             context.log("No endpoints discovered; skipping Markdown documentation generation.")
-            return
+            return TapikGenerationResult()
         }
 
         context.log("Generating Markdown documentation.")
-        generateDocumentation(endpoints, context.outputDirectory)
+        return generateDocumentation(endpoints, context.outputDirectory)
     }
 
     /**
@@ -28,7 +28,7 @@ class MarkdownDocumentationGenerator : TapikGenerator {
      * @param endpoints The endpoints to generate documentation for.
      * @param rootDir The root directory to write the generated documentation to.
      */
-    private fun generateDocumentation(endpoints: List<HttpEndpointMetadata>, rootDir: File) {
+    private fun generateDocumentation(endpoints: List<HttpEndpointMetadata>, rootDir: File): TapikGenerationResult {
         val content = endpoints
             .groupBy { it.packageName }
             .values
@@ -46,7 +46,9 @@ class MarkdownDocumentationGenerator : TapikGenerator {
                         }
                     }
             }
-        File(rootDir, "API.md").writeText(content)
+        val file = File(rootDir, "API.md")
+        file.writeText(content)
+        return TapikGenerationResult(setOf(file))
     }
 
     private fun HttpEndpointMetadata.document(): String =

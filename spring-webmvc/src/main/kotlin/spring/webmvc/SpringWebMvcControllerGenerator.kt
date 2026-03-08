@@ -22,14 +22,21 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     override fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
-    ) {
+    ): TapikGenerationResult {
         if (endpoints.isEmpty()) {
             context.log("No endpoints discovered; skipping Spring WebMVC generation.")
-            return
+            return TapikGenerationResult()
         }
 
         context.log("Generating Spring WebMVC controllers.")
-        generateControllers(endpoints, context.generatedSourcesDirectory)
+        return TapikGenerationResult(
+            generateControllers(
+                endpoints = endpoints,
+                rootDir = context.generatedSourcesDirectory,
+                namePrefix = context.generatorConfiguration.namePrefix.orEmpty(),
+                nameSuffix = context.generatorConfiguration.nameSuffix ?: DEFAULT_INTERFACE_SUFFIX
+            )
+        )
     }
 
     /**
@@ -40,8 +47,11 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
      */
     private fun generateControllers(
         endpoints: List<HttpEndpointMetadata>,
-        rootDir: File
-    ) {
+        rootDir: File,
+        namePrefix: String,
+        nameSuffix: String
+    ): Set<File> {
+        val generatedFiles = linkedSetOf<File>()
         endpoints
             .groupBy { it.packageName }
             .filterKeys { it.isNotBlank() }
@@ -54,7 +64,7 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                     .forEach { (sourceFile, groupedEndpoints) ->
                         val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
                         val signatures = sortedEndpoints.map { EndpointSignature(it) }
-                        val interfaceName = "${sourceFile}Controller"
+                        val interfaceName = "$namePrefix$sourceFile$nameSuffix"
                         val targetFile = File(packageDirectory, "$interfaceName.kt")
                         targetFile.writeText(
                             buildInterfaceContent(
@@ -64,8 +74,10 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
                                 signatures = signatures
                             )
                         )
+                        generatedFiles += targetFile
                     }
             }
+        return generatedFiles
     }
 
     private fun buildInterfaceContent(
@@ -402,5 +414,6 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     private companion object {
         private const val ID = "spring-webmvc"
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
+        private const val DEFAULT_INTERFACE_SUFFIX = "Controller"
     }
 }

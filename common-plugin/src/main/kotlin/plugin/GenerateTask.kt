@@ -82,7 +82,12 @@ class GenerateTask(
                     generatedSourcesDirectory = generatedSourcesDir,
                     log = { message -> log("[tapik] $message", null) },
                     logDebug = { message -> logDebug("[tapik (debug)] $message", null) },
-                    logWarn = { message, throwable -> logWarn("[tapik (warning)] $message", throwable) }
+                    logWarn = { message, throwable -> logWarn("[tapik (warning)] $message", throwable) },
+                    generatorConfiguration = GeneratorConfiguration(
+                        optimizeImports = true,
+                        namePrefix = null,
+                        nameSuffix = null
+                    )
                 )
 
             invokeGenerators(endpoints, classLoader, generatorContext)
@@ -105,8 +110,8 @@ class GenerateTask(
         classLoader: ClassLoader,
         context: TapikGeneratorContext
     ) {
-        val requestedGeneratorIds = config.enabledGeneratorIds
-        if (requestedGeneratorIds.isEmpty()) {
+        val generatorConfigurations = config.generatorConfigurations
+        if (generatorConfigurations.isEmpty()) {
             log("No Tapik generators configured; skipping code generation.", null)
             return
         }
@@ -114,18 +119,31 @@ class GenerateTask(
         val availableGenerators = ServiceLoader.load(TapikGenerator::class.java, classLoader).toList()
         val generatorsById = availableGenerators.associateBy { it.id }
 
-        requestedGeneratorIds
+        generatorConfigurations.keys
             .filterNot(generatorsById::containsKey)
             .forEach { id ->
                 logWarn("Generator '$id' is configured but not available on the classpath.", null)
             }
 
-        requestedGeneratorIds.mapNotNull(generatorsById::get).forEach { generator ->
+        generatorConfigurations.forEach { (generatorId, generatorConfiguration) ->
+            val generator = generatorsById[generatorId] ?: return@forEach
             log("Running generator '${generator.id}'", null)
+            val generatorContext = context.copy(generatorConfiguration = generatorConfiguration)
             runCatching {
-                generator.generate(endpoints, context)
-            }.onSuccess {
+                generator.generate(endpoints, generatorContext)
+            }.onSuccess { generationResult ->
                 log("Generator '${generator.id}' completed successfully.", null)
+                if (generatorConfiguration.optimizeImports) {
+                    val touchedFiles =
+                        generationResult.generatedSourceFiles.filter { it.exists() && it.isFile && it.extension == "kt" }
+                    KotlinGeneratedSourceImportOptimizer.optimizeFiles(
+                        files = touchedFiles,
+                        logDebug = context.logDebug,
+                        logWarn = context.logWarn
+                    )
+                } else {
+                    log("Skipping import optimization for generator '${generator.id}'.", null)
+                }
             }.onFailure { error ->
                 logWarn("Generator '${generator.id}' failed.", error)
             }
