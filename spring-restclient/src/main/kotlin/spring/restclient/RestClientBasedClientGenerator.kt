@@ -7,105 +7,141 @@ import java.io.File
 /**
  * A generator that creates Spring RestClient-based clients from tapik endpoint definitions.
  */
-class RestClientBasedClientGenerator : TapikGenerator {
+class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
     /**
      * Identifier used by the Gradle plugin to decide whether this generator should execute.
      */
     override val id: String = ID
 
     /**
-     * Generates RestClient-based clients for the supplied endpoints, writing them under the given output directory.
+     * Builds Spring RestClient nested client contributions for the discovered endpoints.
      *
-     * @param endpoints endpoint metadata discovered during analysis.
-     * @param context generator execution context containing output directories and logging callbacks.
+     * @param endpoints endpoint metadata to translate into client members.
+     * @param context generation context carrying output directories and configuration.
+     * @return Kotlin contributions grouped by source file.
+     */
+    override fun contribute(
+        endpoints: List<HttpEndpointMetadata>,
+        context: TapikGeneratorContext
+    ): TapikKotlinContribution {
+        if (endpoints.isEmpty()) {
+            context.log("No endpoints discovered; skipping Spring RestClient client contributions.")
+            return TapikKotlinContribution()
+        }
+
+        context.log("Generating Spring RestClient client contributions.")
+        return TapikKotlinContribution(
+            sourceFiles =
+                buildSourceFileContributions(
+                    endpoints = endpoints,
+                    clientSuffix = context.generatorConfiguration.clientSuffix,
+                    endpointsSuffix = context.endpointsSuffix,
+                    generatedPackageName = context.generatedPackageName
+                )
+        )
+    }
+
+    /**
+     * Generates standalone Kotlin source files for tests or direct invocation.
+     *
+     * @param endpoints endpoint metadata to translate into generated files.
+     * @param context generation context carrying output directories and configuration.
+     * @return paths of generated Kotlin source files.
      */
     override fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
     ): TapikGenerationResult {
-        if (endpoints.isEmpty()) {
-            context.log("No endpoints discovered; skipping Spring RestClient generation.")
-            return TapikGenerationResult()
-        }
-
-        context.log("Generating Spring RestClient clients.")
-        return TapikGenerationResult(
-            generateClients(
-                endpoints = endpoints,
-                rootDir = context.generatedSourcesDirectory,
-                namePrefix = context.generatorConfiguration.namePrefix.orEmpty(),
-                nameSuffix = context.generatorConfiguration.nameSuffix ?: DEFAULT_INTERFACE_SUFFIX
+        val contribution = contribute(endpoints, context)
+        val generatedFiles = linkedSetOf<File>()
+        contribution.sourceFiles.forEach { sourceFile ->
+            val packageDirectory =
+                File(context.generatedSourcesDirectory, sourceFile.packageName.replace('.', '/')).also { it.mkdirs() }
+            val targetFile = File(packageDirectory, "${sourceFile.aggregateInterfaceName}.kt")
+            val endpointMembers =
+                sourceFile.endpointMembers.groupBy(
+                    keySelector = { it.endpointPropertyName },
+                    valueTransform = { it.content }
+                )
+            val fileEndpoints =
+                endpoints.filter {
+                    it.packageName == sourceFile.sourcePackageName && it.sourceFile == sourceFile.sourceFile
+                }
+            targetFile.writeText(
+                renderMergedKotlinEndpointFile(
+                    packageName = sourceFile.packageName,
+                    sourceFile = sourceFile.sourceFile,
+                    endpointsSuffix = context.endpointsSuffix,
+                    endpoints = fileEndpoints,
+                    aggregateInterfaces =
+                        listOf(
+                            AggregateInterfaceContribution(
+                                name = sourceFile.aggregateInterfaceName,
+                                nestedInterfaceName = sourceFile.nestedInterfaceName
+                            )
+                        ),
+                    endpointMembers = endpointMembers,
+                    imports = sourceFile.imports
+                )
             )
-        )
+            generatedFiles += targetFile
+        }
+        return TapikGenerationResult(generatedFiles)
     }
 
-    /**
-     * Generates client code for the given endpoints and writes them to the given root directory.
-     *
-     * @param endpoints The endpoints to generate clients for.
-     * @param rootDir The root directory to write the generated code to.
-     */
-    private fun generateClients(
+    private fun buildSourceFileContributions(
         endpoints: List<HttpEndpointMetadata>,
-        rootDir: File,
-        namePrefix: String,
-        nameSuffix: String
-    ): Set<File> {
-        val generatedFiles = linkedSetOf<File>()
+        clientSuffix: String,
+        endpointsSuffix: String,
+        generatedPackageName: String
+    ): List<KotlinSourceFileContribution> {
+        val contributions = mutableListOf<KotlinSourceFileContribution>()
         endpoints
             .groupBy { it.packageName }
             .filterKeys { it.isNotBlank() }
             .toSortedMap()
             .forEach { (packageName, packageEndpoints) ->
-                val packageDirectory = File(rootDir, packageName.replace('.', '/')).also { it.mkdirs() }
                 packageEndpoints
                     .groupBy { it.sourceFile }
                     .toSortedMap()
                     .forEach { (sourceFile, groupedEndpoints) ->
                         val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
-                        val signatures = sortedEndpoints.map(::EndpointSignature)
-                        val interfaceName = "$namePrefix$sourceFile$nameSuffix"
-                        val targetFile = File(packageDirectory, "$interfaceName.kt")
-                        targetFile.writeText(
-                            buildInterfaceContent(
-                                packageName = packageName,
-                                interfaceName = interfaceName,
+                        val signatures = createEndpointSignatures(sortedEndpoints, sourceFile, endpointsSuffix)
+                        contributions +=
+                            KotlinSourceFileContribution(
+                                packageName = packageName.toGeneratedPackageName(generatedPackageName),
+                                sourcePackageName = packageName,
                                 sourceFile = sourceFile,
-                                signatures = signatures
+                                aggregateInterfaceName = "$sourceFile$clientSuffix",
+                                nestedInterfaceName = clientSuffix,
+                                imports = buildExtensionImports(signatures).toSet(),
+                                endpointMembers =
+                                    signatures.map { signature ->
+                                        KotlinEndpointMemberContribution(
+                                            endpointPropertyName = signature.endpoint.propertyName,
+                                            content = buildNestedClientContent(signature, clientSuffix)
+                                        )
+                                    }
                             )
-                        )
-                        generatedFiles += targetFile
                     }
             }
-        return generatedFiles
+        return contributions
     }
 
-    private fun buildInterfaceContent(
-        packageName: String,
-        interfaceName: String,
+    private fun createEndpointSignatures(
+        endpoints: List<HttpEndpointMetadata>,
         sourceFile: String,
-        signatures: List<EndpointSignature>
-    ): String =
-        buildString {
-            appendLine("package $packageName")
-            appendLine()
-            val extensionImports = buildExtensionImports(signatures)
-            extensionImports.forEach { appendLine("import $it") }
-            if (extensionImports.isNotEmpty()) {
-                appendLine()
-            }
-            appendLine("// Generated from: $packageName.$sourceFile")
-            appendLine("interface $interfaceName : $BASE_INTERFACE_NAME {")
-            signatures.forEachIndexed { index, signature ->
-                appendEndpoint(signature)
-                appendLine()
-                appendUriMethod(signature)
-                if (index != signatures.lastIndex) {
-                    appendLine()
-                }
-            }
-            appendLine("}")
+        endpointsSuffix: String = "Endpoints"
+    ): List<EndpointSignature> {
+        val modelsByPropertyName =
+            buildEndpointContractModels(endpoints, sourceFile, endpointsSuffix).associateBy { it.endpoint.propertyName }
+        return endpoints.map { endpoint ->
+            EndpointSignature(
+                endpoint = endpoint,
+                contractModel = checkNotNull(modelsByPropertyName[endpoint.propertyName])
+            )
         }
+    }
 
     private fun buildExtensionImports(signatures: List<EndpointSignature>): List<String> =
         buildSet {
@@ -115,104 +151,101 @@ class RestClientBasedClientGenerator : TapikGenerator {
             }
         }.toList()
 
-    private fun StringBuilder.appendEndpoint(signature: EndpointSignature) {
+    private fun buildNestedClientContent(
+        signature: EndpointSignature,
+        nestedInterfaceName: String
+    ): String =
+        buildString {
+            appendLine("interface $nestedInterfaceName : $BASE_INTERFACE_NAME {")
+            appendEndpointMethod(signature, indentation = "    ")
+            appendLine("}")
+        }
+
+    private fun StringBuilder.appendEndpointMethod(
+        signature: EndpointSignature,
+        indentation: String
+    ) {
         val hasSummary = signature.summaryLines.isNotEmpty()
         val hasDetails = signature.detailLines.isNotEmpty()
         if (hasSummary || hasDetails) {
-            appendLine("    /**")
-            signature.summaryLines.forEach { appendLine("     * ${it.escapeForKdoc()}") }
+            appendLine("$indentation/**")
+            signature.summaryLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
             if (hasSummary && hasDetails) {
-                appendLine("     *")
+                appendLine("$indentation *")
             }
-            signature.detailLines.forEach { appendLine("     * ${it.escapeForKdoc()}") }
-            appendLine("     */")
+            signature.detailLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
+            appendLine("$indentation */")
         }
-        append("    fun ${signature.methodName}(")
+        append("${indentation}fun ${signature.methodName}(")
         if (signature.inputs.isNotEmpty()) {
             appendLine()
-            appendLine(signature.inputs.joinToString(separator = ",\n") { "        $it" })
-            append("    )")
+            appendLine(signature.inputs.joinToString(separator = ",\n") { "$indentation    $it" })
+            append("$indentation)")
         } else {
             append(")")
         }
         appendLine(": ${signature.returnType} {")
         val endpointExpr = signature.endpointExpression
-        val uriInvocation =
-            if (signature.uriArguments.isEmpty()) {
-                "${signature.uriMethodName}()"
-            } else {
-                "${signature.uriMethodName}(${signature.uriArguments})"
-            }
-        appendLine("        val responseEntity = interpreter.send(")
-        appendLine("            method = $endpointExpr.method,")
-        appendLine("            uri = $uriInvocation,")
-        appendLine("            inputHeaders = ${signature.inputHeadersEncoding},")
-        appendLine("            inputBodyContentType = $endpointExpr.input.body.mediaType,")
-        appendLine("            inputBody = ${signature.encodeBodyCall},")
-        appendLine("            outputs = $endpointExpr.outputs.toList()")
-        appendLine("        )")
+        appendLine("$indentation    val responseEntity = interpreter.send(")
+        appendLine("$indentation        method = $endpointExpr.method,")
+        appendInlineUriRendering(signature, indentation = "$indentation        ")
+        appendLine("$indentation        inputHeaders = ${signature.inputHeadersEncoding},")
+        appendLine("$indentation        inputBodyContentType = $endpointExpr.input.body.mediaType,")
+        appendLine("$indentation        inputBody = ${signature.encodeBodyCall},")
+        appendLine("$indentation        outputs = $endpointExpr.outputs.toList()")
+        appendLine("$indentation    )")
         appendLine()
-        appendLine("        val status = responseEntity.statusCode.toStatus()")
+        appendLine("$indentation    val status = responseEntity.statusCode.toStatus()")
 
         if (signature.needsHeadersMap) {
             appendLine()
-            appendLine("        val headers = responseEntity.headers")
-            appendLine("            .mapValues { entry -> entry.value.map { it.orEmpty() } }")
+            appendLine("$indentation    val headers = responseEntity.headers")
+            appendLine("$indentation        .mapValues { entry -> entry.value.map { it.orEmpty() } }")
         }
 
         if (signature.needsBodyBytes) {
             appendLine()
-            appendLine("        val bodyBytes = responseEntity.body ?: kotlin.ByteArray(0)")
+            appendLine("$indentation    val bodyBytes = responseEntity.body ?: kotlin.ByteArray(0)")
         }
 
         appendLine()
         appendLine(signature.responseConstruction)
-        appendLine("    }")
+        appendLine("$indentation}")
     }
 
-    private fun StringBuilder.appendUriMethod(signature: EndpointSignature) {
-        append("    fun ${signature.uriMethodName}(")
-        if (signature.uriMethodParameters.isNotEmpty()) {
-            appendLine()
-            appendLine(signature.uriMethodParameters.joinToString(separator = ",\n") { "        $it" })
-            appendLine("    ): java.net.URI =")
-        } else {
-            appendLine("): java.net.URI =")
-        }
-
+    private fun StringBuilder.appendInlineUriRendering(
+        signature: EndpointSignature,
+        indentation: String
+    ) {
         if (signature.uriRenderArguments.isEmpty()) {
-            appendLine("        dev.akif.tapik.renderURI(${signature.endpointExpression}.path)")
+            appendLine(
+                "$indentation" + "uri = dev.akif.tapik.renderURI(${signature.endpointExpression}.path),"
+            )
             return
         }
 
-        appendLine("        dev.akif.tapik.renderURI(")
-        appendLine("            ${signature.endpointExpression}.path,")
+        appendLine("$indentation" + "uri = dev.akif.tapik.renderURI(")
+        appendLine("$indentation    ${signature.endpointExpression}.path,")
         appendLine(
-            signature.uriRenderArguments.joinToString(separator = ",\n") { "            $it" }
+            signature.uriRenderArguments.joinToString(separator = ",\n") { "$indentation    $it" }
         )
-        appendLine("        )")
+        appendLine("$indentation),")
     }
 
     private class EndpointSignature(
-        endpoint: HttpEndpointMetadata
+        val endpoint: HttpEndpointMetadata,
+        contractModel: EndpointContractModel
     ) {
-        private val endpointObject: String = endpoint.sourceFile
-        private val endpointProperty: String = renderIdentifier(endpoint.propertyName)
-        val endpointExpression: String =
-            if (endpointObject.endsWith("Kt")) {
-                endpointProperty
-            } else {
-                "$endpointObject.$endpointProperty"
-            }
-        val methodName: String = renderIdentifier(endpoint.id)
+        val endpointExpression: String = contractModel.endpointReference
+        val methodName: String = contractModel.methodName
 
-        val summaryLines: List<String> = linesForDocumentation(endpoint.description)
-        val detailLines: List<String> = linesForDocumentation(endpoint.details)
+        val summaryLines: List<String> = contractModel.summaryLines
+        val detailLines: List<String> = contractModel.detailLines
 
         private val parameters = ParameterGroup(endpoint.parameters, endpointExpression)
         private val inputHeaders = InputHeadersGroup(endpoint.input.headers, endpointExpression)
         private val inputBody = InputBodyGroup(endpoint.input.body, endpointExpression)
-        private val outputs = OutputsGroup(endpoint.outputs, endpointExpression)
+        private val outputs = OutputsGroup(endpoint.outputs, contractModel.response, endpointExpression)
 
         val inputs: List<String> =
             buildList {
@@ -223,10 +256,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                 addAll(inputHeaders.optionalDeclarations)
             }
 
-        val uriMethodName: String = "${methodName}ToURI"
-        val uriMethodParameters: List<String> = parameters.uriMethodDeclarations
         val uriRenderArguments: List<String> = parameters.uriRenderArguments
-        val uriArguments: String = parameters.argumentList
         val inputHeadersEncoding: String = inputHeaders.encodingCall
         val usesEncodeInputHeaders: Boolean = inputHeaders.usesEncodeInputHeaders
         val encodeBodyCall: String = inputBody.encodeCall
@@ -253,9 +283,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
         val requiredDeclarations: List<String>
         val optionalDeclarations: List<String>
-        val uriMethodDeclarations: List<String>
         val uriRenderArguments: List<String>
-        val argumentList: String
 
         init {
             val usedNames = mutableSetOf<String>()
@@ -326,9 +354,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
             requiredDeclarations = entries.filterNot { it.hasDefault }.map { it.declaration }
             optionalDeclarations = entries.filter { it.hasDefault }.map { it.declaration }
             entriesInMethodOrder = entries.filterNot { it.hasDefault } + entries.filter { it.hasDefault }
-            uriMethodDeclarations = entriesInMethodOrder.map { it.declaration }
             uriRenderArguments = entriesInMethodOrder.map { it.uriRenderArgument }
-            argumentList = entriesInMethodOrder.joinToString(", ") { it.name }
         }
     }
 
@@ -437,29 +463,29 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
     private class OutputsGroup(
         outputs: List<OutputMetadata>,
+        responseModel: EndpointContractModel.ResponseModel,
         private val endpointExpression: String
     ) {
+        private val responseQualifier: String = "Response."
         private val options: List<OutputOption> =
             outputs.mapIndexed { index, metadata ->
-                OutputOption(metadata = metadata, index = index + 1, endpointExpression = endpointExpression)
+                OutputOption(
+                    metadata = metadata,
+                    variant = responseModel.variants[index],
+                    index = index + 1,
+                    endpointExpression = endpointExpression,
+                    responseQualifier = responseQualifier
+                )
             }
 
         val requiresHeaders: Boolean = options.any(OutputOption::needsHeaders)
         val requiresBodyBytes: Boolean = options.any(OutputOption::needsBodyBytes)
 
-        val returnType: String =
-            when {
-                options.isEmpty() -> "$TAPIK_PACKAGE.ResponseWithoutBody0"
-                options.size == 1 -> options.first().responseType
-                else -> {
-                    val optionTypes = options.joinToString(", ") { it.responseType }
-                    "$TAPIK_PACKAGE.OneOf${options.size}<$optionTypes>"
-                }
-            }
+        val returnType: String = "Response"
 
         val responseConstruction: String =
             when {
-                options.isEmpty() -> "        return $TAPIK_PACKAGE.ResponseWithoutBody0(status)"
+                options.isEmpty() -> "        kotlin.error(\"Endpoint does not declare any outputs\")"
                 options.size == 1 -> buildSingle(options.first())
                 else -> buildMultiple()
             }
@@ -476,7 +502,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                     appendLine(option.buildBodyDecodingBlock("        "))
                     appendLine()
                 }
-                append("        return ${option.responseExpression(false)}")
+                append("        return ${option.responseExpression()}")
             }
 
         private fun buildMultiple(): String =
@@ -488,7 +514,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                         buildList {
                             if (option.needsHeaders) add(option.buildHeaderDecodingBlock("                "))
                             if (option.needsBodyBytes) add(option.buildBodyDecodingBlock("                "))
-                            add("                ${option.responseExpression(true)}")
+                            add("                ${option.responseExpression()}")
                         }.filter { it.isNotBlank() }
                     appendLine(innerBlocks.joinToString(separator = "\n\n"))
                     appendLine("            }")
@@ -501,65 +527,41 @@ class RestClientBasedClientGenerator : TapikGenerator {
 
         private inner class OutputOption(
             private val metadata: OutputMetadata,
+            private val variant: EndpointContractModel.ResponseModel.Variant,
             val index: Int,
-            private val endpointExpression: String
+            private val endpointExpression: String,
+            private val responseQualifier: String
         ) {
             val needsHeaders: Boolean = metadata.headers.isNotEmpty()
             val needsBodyBytes: Boolean = metadata.body.type.simpleName() != "EmptyBody"
 
-            private val headerTypes: List<String> = metadata.headers.map { it.type.render() }
             private val headerVarNames: List<String>
             private val headerAccessors: List<String> =
                 List(metadata.headers.size) { idx -> "$endpointExpression.outputs.item$index.headers.item${idx + 1}" }
             private val headerParametersName: String = "decodedOutput${index}Headers"
             val statusCondition: String = "$endpointExpression.outputs.item$index.statusMatcher(status)"
 
-            private val bodyType: String = metadata.body.type.determineBodyValueType()
             private val hasBody: Boolean = needsBodyBytes
             private val bodyDecoderExpr: String = "$endpointExpression.outputs.item$index.body.codec.decode(bodyBytes)"
 
-            val responseType: String
-
             init {
-                val usedNames = mutableSetOf<String>()
-                headerVarNames =
-                    metadata.headers.mapIndexed { idx, header ->
-                        uniqueName(sanitizeIdentifier(header.name, "output${index}Header${idx + 1}"), usedNames)
-                    }
-                responseType = computeResponseType()
-            }
-
-            private fun computeResponseType(): String {
-                val renderedHeaderTypes = headerTypes.joinToString(", ")
-                return if (hasBody) {
-                    if (headerTypes.isEmpty()) {
-                        "$TAPIK_PACKAGE.Response0<$bodyType>"
-                    } else {
-                        "$TAPIK_PACKAGE.Response${headerTypes.size}<$bodyType, $renderedHeaderTypes>"
-                    }
-                } else {
-                    if (headerTypes.isEmpty()) {
-                        "$TAPIK_PACKAGE.ResponseWithoutBody0"
-                    } else {
-                        "$TAPIK_PACKAGE.ResponseWithoutBody${headerTypes.size}<$renderedHeaderTypes>"
-                    }
-                }
+                headerVarNames = if (hasBody) variant.fields.drop(1).map { it.name } else variant.fields.map { it.name }
             }
 
             private fun responseInstance(): String {
-                val headerArgs = if (headerVarNames.isEmpty()) "" else headerVarNames.joinToString(prefix = ", ")
-                return if (hasBody) {
-                    if (headerVarNames.isEmpty()) {
-                        "$TAPIK_PACKAGE.Response0(status, decodedBody)"
-                    } else {
-                        "$TAPIK_PACKAGE.Response${headerVarNames.size}(status, decodedBody$headerArgs)"
-                    }
+                val arguments = mutableListOf<String>()
+                if (variant.match !is OutputMatchMetadata.Exact) {
+                    arguments += "status"
+                }
+                if (hasBody) {
+                    arguments += "decodedBody"
+                }
+                arguments += headerVarNames
+                val typeReference = "$responseQualifier${variant.typeName}"
+                return if (arguments.isEmpty()) {
+                    typeReference
                 } else {
-                    if (headerVarNames.isEmpty()) {
-                        "$TAPIK_PACKAGE.ResponseWithoutBody0(status)"
-                    } else {
-                        "$TAPIK_PACKAGE.ResponseWithoutBody${headerVarNames.size}(status$headerArgs)"
-                    }
+                    "$typeReference(${arguments.joinToString(", ")})"
                 }
             }
 
@@ -585,8 +587,15 @@ class RestClientBasedClientGenerator : TapikGenerator {
                     )
                     appendLine("$indent    is arrow.core.Either.Right -> either.value")
                     appendLine("$indent}")
-                    headerVarNames.forEachIndexed { idx, name ->
-                        appendLine("${indent}val $name = $headerParametersName.item${idx + 1}.values")
+                    metadata.headers.forEachIndexed { idx, header ->
+                        val name = headerVarNames[idx]
+                        val valueExpression =
+                            if (header.cardinality == HeaderCardinality.Multiple) {
+                                "$headerParametersName.item${idx + 1}.values"
+                            } else {
+                                "$headerParametersName.item${idx + 1}.getFirstValueOrFail()"
+                            }
+                        appendLine("${indent}val $name = $valueExpression")
                     }
                 }.trimEnd()
             }
@@ -606,14 +615,7 @@ class RestClientBasedClientGenerator : TapikGenerator {
                 }.trimEnd()
             }
 
-            fun responseExpression(wrapInOneOf: Boolean): String {
-                val instance = responseInstance()
-                return if (wrapInOneOf) {
-                    "$TAPIK_PACKAGE.OneOf${options.size}.Option$index($instance)"
-                } else {
-                    instance
-                }
-            }
+            fun responseExpression(): String = responseInstance()
         }
     }
 
@@ -622,6 +624,11 @@ class RestClientBasedClientGenerator : TapikGenerator {
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
         private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
         private const val BASE_INTERFACE_NAME = "$BASE_PACKAGE.RestClientBasedClient"
-        private const val DEFAULT_INTERFACE_SUFFIX = "Client"
     }
 }
+
+private fun String.toGeneratedPackageName(generatedPackageName: String): String =
+    listOfNotNull(
+        takeIf(String::isNotBlank),
+        generatedPackageName.trim().takeIf(String::isNotBlank)
+    ).joinToString(".")

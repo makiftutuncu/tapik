@@ -41,6 +41,8 @@ data class TapikGenerationResult(
  *
  * @property outputDirectory directory used for non-source outputs (reports, documentation).
  * @property generatedSourcesDirectory directory where generated Kotlin sources should be written.
+ * @property generatedPackageName package segment appended to source packages for generated Kotlin sources.
+ * @property endpointsSuffix suffix appended to the source-level enclosing endpoints interface.
  * @property log info-level logger.
  * @property logDebug debug-level logger.
  * @property logWarn warning-level logger that accepts an optional [Throwable].
@@ -49,6 +51,8 @@ data class TapikGenerationResult(
 data class TapikGeneratorContext(
     val outputDirectory: File,
     val generatedSourcesDirectory: File,
+    val generatedPackageName: String = "generated",
+    val endpointsSuffix: String = "Endpoints",
     val log: (String) -> Unit,
     val logDebug: (String) -> Unit,
     val logWarn: (String, Throwable?) -> Unit,

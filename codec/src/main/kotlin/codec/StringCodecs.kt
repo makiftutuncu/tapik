@@ -2,12 +2,14 @@
 
 package dev.akif.tapik.codec
 
+import dev.akif.tapik.ValueClass
 import dev.akif.tapik.codec.Codec.Companion.identity
 import dev.akif.tapik.codec.Codec.Companion.nullable
 import dev.akif.tapik.codec.Codec.Companion.unsafe
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.UUID
+import kotlin.reflect.full.primaryConstructor
 
 /**
  * Collection of default string-based codecs for primitive types.
@@ -43,4 +45,35 @@ object StringCodecs : Defaults<StringCodec<Unit>, StringCodec<Boolean>, StringCo
     override fun string(name: String): StringCodec<String> = identity(name)
 
     override fun uuid(name: String): StringCodec<UUID> = unsafe(name, { it.toString() }) { UUID.fromString(it) }
+
+    /**
+     * Creates a [StringCodec] for a [ValueClass] wrapper by delegating to Tapik's default string codec and
+     * constructing the wrapper through its primary constructor.
+     *
+     * This is intended for value classes such as `UserId`, `OrderNumber`, or similar wrapper types that
+     * expose a single [ValueClass.value] property.
+     *
+     * @param V wrapped scalar value type used by the [ValueClass].
+     * @param T API wrapper type encoded and decoded by the returned codec.
+     * @param fallbackName name used in codec diagnostics when [T]'s simple name is unavailable.
+     * @param toString function that converts the wrapped [V] into its string representation.
+     * @return a [StringCodec] that round-trips [T] using its wrapped [ValueClass.value].
+     * @throws IllegalArgumentException when [T] does not expose a primary constructor.
+     * @see ValueClass
+     */
+    inline fun <V, reified T : ValueClass<V>> ofValueClass(
+        fallbackName: String = "value",
+        crossinline toString: (V) -> String = { it.toString() }
+    ): StringCodec<T> {
+        val constructor =
+            requireNotNull(T::class.primaryConstructor) {
+                "Cannot construct ${T::class.qualifiedName ?: fallbackName} because it does not declare a primary constructor"
+            }
+
+        return string(T::class.simpleName?.replaceFirstChar { it.lowercase() } ?: fallbackName)
+            .unsafeTransformSource(
+                from = { constructor.call(it) },
+                to = { toString(it.value) }
+            )
+    }
 }

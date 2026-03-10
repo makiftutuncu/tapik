@@ -1,32 +1,38 @@
 = Spring WebMVC Controllers
 
-The +spring-webmvc+ generator turns tapik endpoints into Spring MVC controller contracts. Implement the generated interfaces to keep routing, validation, and response typing aligned with the DSL.
+The +spring-webmvc+ generator turns tapik endpoints into Spring MVC controller contracts. Generated server signatures now return endpoint-specific response types instead of tapik's internal +ResponseX+ and +OneOf+ wrappers.
 
 == Generated Structure
 
-* *Location*: +build/generated/sources/tapik/main/kotlin/<package>/<SourceFile>Controller.kt+
-* *Interface name*: +<SourceFile>Controller+
+* *Location*: +build/generated/sources/tapik/main/kotlin/<package>/<SourceFile>Server.kt+
+* *Aggregate interface name*: +<SourceFile>Server+
+* *Endpoint contract name*: +<SourceFile>Endpoints.<EndpointProperty>+
 * *Annotations*: Each method is decorated with the appropriate +@GetMapping+, +@PostMapping+, ... annotations derived from the endpoint metadata, including +path+, +consumes+, and +produces+ attributes.
-* *Parameters*: Path variables receive +@SpringPathVariable+, query parameters use +@RequestParam+, headers use +@RequestHeader+, and bodies use +@RequestBody+. Default values defined in the DSL are carried into the annotation attributes.
-* *Return type*: Methods return tapik +ResponseX+ or +ResponseWithoutBodyX+ types. When multiple outputs exist, the return type is +OneOfK<...>+ containing those responses.
+* *Parameters*: Path variables receive +@PathVariable+, query parameters use +@RequestParam+, headers use +@RequestHeader+, and bodies use +@RequestBody+. Default values defined in the DSL are carried into the generated signatures.
+* *Return type*: Methods return the generated endpoint response type. Single-output endpoints get one +data class+ or +data object+; multi-output endpoints get a sealed +Response+ hierarchy.
 
 Example excerpt:
 
 [source,kotlin]
 ----
-interface ProductEndpointsController {
-    /**
-     * Fetch product details.
-     */
-    @GetMapping(
-        path = ["/products/{productId}"],
-        produces = ["application/json"]
-    )
-    fun getProduct(
-        @SpringPathVariable("productId") productId: UUID,
-        @RequestParam(name = "locale", required = false, defaultValue = "en-US") locale: String,
-        @RequestHeader(name = "X-Request-Id") xRequestId: UUID
-    ): Response0<ProductView>
+interface ProductEndpointsServer : ProductEndpoints.GetProduct.Server
+
+interface ProductEndpoints {
+    interface GetProduct {
+        data class Ok(val response: ProductView)
+
+        interface Server : dev.akif.tapik.Helpers {
+            @GetMapping(
+                path = ["/products/{productId}"],
+                produces = ["application/json"]
+            )
+            fun getProduct(
+                @PathVariable(name = "productId") productId: UUID,
+                @RequestParam(name = "locale", required = false) locale: String = "en-US",
+                @RequestHeader(name = "X-Request-Id") xRequestId: UUID
+            ): Ok
+        }
+    }
 }
 ----
 
@@ -37,24 +43,23 @@ Wire an implementation in your Spring application:
 [source,kotlin]
 ----
 @Component
-class ProductHandler : ProductEndpointsController {
+class ProductHandler : ProductEndpointsServer {
     override fun getProduct(
         productId: UUID,
         locale: String,
         xRequestId: UUID
-    ): Response0<ProductView> {
-        // fetch domain model and map it into the tapik response type
+    ): ProductEndpoints.GetProduct.Ok {
         val product = service.lookup(productId, locale)
-        return Response0(Status.OK, product)
+        return ProductEndpoints.GetProduct.Ok(response = product)
     }
 }
 ----
 
-The return value captures the HTTP status, headers, and body exactly as you modelled them in the DSL. Use helper builders from +dev.akif.tapik+ (for example, +Response0+, +ResponseWithoutBody1+, +OneOf2.Option1+) to produce the response variant that matches the status you intend to emit.
+For multiple outputs, return the matching sealed subtype. This keeps the implementation exhaustive without exposing transport wrappers in your application code.
 
 == Rendering Spring Responses
 
-Create a lightweight HTTP adapter that converts the tapik response to a Spring +ResponseEntity+ using the extensions in +TapikResponseEntity.kt+:
+The generated server contract stops at the typed response model. Rendering those responses as Spring +ResponseEntity+ values is intentionally left to a separate adapter layer.
 
 [source,kotlin]
 ----
@@ -67,28 +72,26 @@ class ProductController(
         productId: UUID,
         locale: String,
         xRequestId: UUID
-    ): ResponseEntity<Any?> =
-        ProductEndpoints.getProduct.toResponseEntity(
-            handler.getProduct(productId, locale, xRequestId)
-        )
+    ): ResponseEntity<Any?> {
+        val response = handler.getProduct(productId, locale, xRequestId)
+        // translate ProductEndpoints.GetProduct.Ok into ResponseEntity here
+    }
 }
 ----
 
-* +toResponseEntity(Response<*>)+ handles single-output endpoints.
-* +toResponseEntity(OneOf)+ handles multi-output unions.
-* Status and media-type conversions rely on +Status.toHttpStatus()+ and +MediaType.toSpringMediaType()+ helpers bundled with the generator.
+This keeps the generated server API focused on the contract itself. If you want automatic Spring rendering later, build that as a dedicated adapter on top of the generated response hierarchy.
 
 == Status and Header Validation
 
-+toResponseEntity+ enforces that your implementation returns the declared number of headers and selects the matching output variant for +OneOf+ unions. If a mismatch occurs (for example, returning +Option2+ while only one output is defined), the helper throws an error pointing at the offending endpoint.
+Non-exact status matchers still validate the runtime status value in the generated response constructors.
 
 == Tips for Server Implementations
 
-. *Reuse DSL metadata*: The generated interface references the +HttpEndpoint+ instances, so you can lean on +.outputs+ or +.parameters+ inside your implementation for additional logic (for example, building links).
-. *Combine with Spring validation*: Annotate generated parameters with additional validation annotations (e.g., +@Valid+, +@NotBlank+) in partial classes or wrapper controllers if you need extra constraints.
-. *Return domain models*: The response builders accept your domain types. Keep encoding logic inside the DSL via codecs so controller implementations stay small.
-. *Unit-test with tapik types*: Write tests against the generated interface contracts to verify that every response path returns the appropriate +Response*+ wrapper. Pair with the +toResponseEntity+ helper for end-to-end tests.
+. *Reuse DSL metadata*: The generated interfaces still reference the +HttpEndpoint+ instances, so you can lean on +.outputs+ or +.parameters+ inside your implementation for additional logic.
+. *Combine with Spring validation*: Add validation annotations such as +@Valid+ or +@NotBlank+ in wrapper controllers when you need extra constraints.
+. *Return endpoint-specific responses*: Construct the generated +data class+ or +data object+ directly instead of assembling tapik runtime wrappers by hand.
+. *Unit-test with generated contracts*: Test the generated response hierarchy directly and add adapter-level tests in your Spring translation layer.
 
 == Customising Routing
 
-The generator chooses method-level annotations based on the HTTP verb. For uncommon verbs (such as +OPTIONS+ or +TRACE+), it emits +@RequestMapping(method = [RequestMethod.VERB], path = [...])+. If you need additional attributes (for example, security annotations or custom +@CrossOrigin+ settings), declare them in your concrete controller implementation-interfaces are kept lean on purpose.
+The generator chooses method-level annotations based on the HTTP verb. For uncommon verbs such as +OPTIONS+ or +TRACE+, it emits +@RequestMapping(method = [RequestMethod.VERB], path = [...])+. If you need additional attributes such as security annotations or +@CrossOrigin+ settings, declare them in your concrete controller implementation or wrapper controller.

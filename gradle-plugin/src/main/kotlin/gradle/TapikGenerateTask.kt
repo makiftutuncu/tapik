@@ -19,6 +19,14 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:Input
     abstract val basePackage: Property<String>
 
+    /** Package segment appended to source packages for generated Kotlin sources. */
+    @get:Input
+    abstract val generatedPackageName: Property<String>
+
+    /** Suffix appended to the source-level enclosing endpoints interface. */
+    @get:Input
+    abstract val endpointsSuffix: Property<String>
+
     /** Directory containing the textual endpoint summary output. */
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
@@ -42,17 +50,13 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:Input
     abstract val additionalClassDirectories: ListProperty<String>
 
-    /** Import optimization flag keyed by generator identifier. */
+    /** Client suffix keyed by generator identifier. */
     @get:Input
-    abstract val generatorOptimizeImports: MapProperty<String, Boolean>
+    abstract val generatorClientSuffixes: MapProperty<String, String>
 
-    /** Name prefix keyed by generator identifier. */
+    /** Server suffix keyed by generator identifier. */
     @get:Input
-    abstract val generatorNamePrefixes: MapProperty<String, String>
-
-    /** Name suffix keyed by generator identifier. */
-    @get:Input
-    abstract val generatorNameSuffixes: MapProperty<String, String>
+    abstract val generatorServerSuffixes: MapProperty<String, String>
 
     /** Runtime classpath used when analysing endpoint bytecode via reflection fallback. */
     @get:InputFiles
@@ -69,16 +73,17 @@ abstract class TapikGenerateTask : DefaultTask() {
                 .getOrElse(emptyList())
                 .map { File(it) } +
                 runtimeClasspath.files
-        val optimizeImportsByGenerator = generatorOptimizeImports.getOrElse(emptyMap())
-        val namePrefixesByGenerator = generatorNamePrefixes.getOrElse(emptyMap())
-        val nameSuffixesByGenerator = generatorNameSuffixes.getOrElse(emptyMap())
+        val clientSuffixesByGenerator = generatorClientSuffixes.getOrElse(emptyMap())
+        val serverSuffixesByGenerator = generatorServerSuffixes.getOrElse(emptyMap())
         val generatorIds =
-            (optimizeImportsByGenerator.keys + namePrefixesByGenerator.keys + nameSuffixesByGenerator.keys).toSet()
+            (clientSuffixesByGenerator.keys + serverSuffixesByGenerator.keys).toSet()
 
         GenerateTask(
             config = GenerateTaskConfiguration(
                 outputDirectory = outputDirectory.get().asFile,
                 generatedSourcesDirectory = generatedSourcesDirectory.get().asFile,
+                generatedPackageName = generatedPackageName.get().trim().ifBlank { "generated" },
+                endpointsSuffix = endpointsSuffix.get(),
                 basePackage = basePackage.get(),
                 compiledClassesDirectory = compiledClassesDirectory.get().asFile,
                 additionalClasspathDirectories = compiledClassesDirectories,
@@ -86,9 +91,8 @@ abstract class TapikGenerateTask : DefaultTask() {
                     generatorIds
                         .associateWith { generatorId ->
                             GeneratorConfiguration(
-                                optimizeImports = optimizeImportsByGenerator.getOrElse(generatorId) { true },
-                                namePrefix = namePrefixesByGenerator[generatorId],
-                                nameSuffix = nameSuffixesByGenerator[generatorId]
+                                clientSuffix = clientSuffixesByGenerator.getOrElse(generatorId) { "Client" },
+                                serverSuffix = serverSuffixesByGenerator.getOrElse(generatorId) { "Server" }
                             )
                         }
             ),

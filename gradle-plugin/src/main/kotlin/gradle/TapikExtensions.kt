@@ -9,94 +9,74 @@ import javax.inject.Inject
 /**
  * Base type tracking whether a generator has been configured via the Gradle DSL.
  */
-abstract class TapikGeneratorExtension @Inject constructor(objects: ObjectFactory) {
+abstract class TapikGeneratorExtension @Inject constructor() {
     private var configured: Boolean = false
-
-    /**
-     * Generator-specific override for import optimization.
-     *
-     * When unset, root-level [TapikExtension.optimizeImports] value is used.
-     */
-    val optimizeImports: Property<Boolean> = objects.property(Boolean::class.java)
-
-    /** Prefix used for generated type names for this generator. */
-    val namePrefix: Property<String> = objects.property(String::class.java).convention("")
-
-    /** Suffix used for generated type names for this generator. */
-    val nameSuffix: Property<String> = objects.property(String::class.java).convention("")
 
     internal fun markConfigured() {
         configured = true
     }
 
     internal fun isConfigured(): Boolean = configured
-
-    /**
-     * Enables/disables import optimization for this generator specifically.
-     *
-     * @param enabled `true` to optimize imports, `false` to keep fully-qualified references.
-     */
-    fun optimizeImports(enabled: Boolean) {
-        optimizeImports.set(enabled)
-    }
-
-    /**
-     * Sets a prefix for generated type names for this generator.
-     *
-     * @param prefix text prepended to generated type names.
-     */
-    fun namePrefix(prefix: String) {
-        namePrefix.set(prefix)
-    }
-
-    /**
-     * Sets a suffix for generated type names for this generator.
-     *
-     * @param suffix text appended to generated type names.
-     */
-    fun nameSuffix(suffix: String) {
-        nameSuffix.set(suffix)
-    }
 }
 
 /** Configures Spring RestClient code generation for Tapik endpoints. */
 open class SpringRestClientExtension @Inject constructor(
     objects: ObjectFactory
-) : TapikGeneratorExtension(objects) {
-    init {
-        nameSuffix.convention("Client")
+) : TapikGeneratorExtension() {
+    /** Suffix appended to aggregate and nested client interfaces. */
+    val clientSuffix: Property<String> = objects.property(String::class.java).convention("Client")
+
+    /**
+     * Sets the suffix appended to aggregate and nested client interfaces.
+     *
+     * @param suffix client suffix.
+     */
+    fun clientSuffix(suffix: String) {
+        clientSuffix.set(suffix)
     }
 }
 
 /** Configures Spring WebMVC controller generation for Tapik endpoints. */
 open class SpringWebMvcExtension @Inject constructor(
     objects: ObjectFactory
-) : TapikGeneratorExtension(objects) {
-    init {
-        nameSuffix.convention("Controller")
+) : TapikGeneratorExtension() {
+    /** Suffix appended to aggregate and nested server interfaces. */
+    val serverSuffix: Property<String> = objects.property(String::class.java).convention("Server")
+
+    /**
+     * Sets the suffix appended to aggregate and nested server interfaces.
+     *
+     * @param suffix server suffix.
+     */
+    fun serverSuffix(suffix: String) {
+        serverSuffix.set(suffix)
     }
 }
 
 /** Configures Markdown documentation generation for Tapik endpoints. */
 open class MarkdownDocumentationExtension @Inject constructor(
     objects: ObjectFactory
-) : TapikGeneratorExtension(objects)
+) : TapikGeneratorExtension()
 
 /**
  * Root Gradle extension exposing Tapik-specific configuration surfaces.
  *
  * @property basePackage single base package whose compiled classes will be inspected for Tapik API implementations.
+ * @property generatedPackageName package segment appended to source packages for generated Kotlin sources.
+ * @property endpointsSuffix suffix appended to the source-level enclosing endpoints interface.
  * @property springRestClient nested DSL configuring the RestClient generator.
  * @property springWebMvc nested DSL configuring the WebMVC generator.
  * @property markdownDocumentation nested DSL configuring Markdown documentation generation.
- * @property optimizeImports default import optimization toggle for configured generators.
  */
 open class TapikExtension @Inject constructor(objects: ObjectFactory) {
     /** Base package whose compiled classes will be inspected for Tapik endpoint declarations. */
     val basePackage: Property<String> = objects.property(String::class.java)
 
-    /** Whether generated Kotlin sources should be post-processed to optimize imports. */
-    val optimizeImports: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
+    /** Package segment appended to source packages for generated Kotlin sources. */
+    val generatedPackageName: Property<String> = objects.property(String::class.java).convention("generated")
+
+    /** Suffix appended to the source-level enclosing endpoints interface. */
+    val endpointsSuffix: Property<String> = objects.property(String::class.java).convention("Endpoints")
 
     /** Nested extension configuring Spring RestClient code generation. */
     val springRestClient: SpringRestClientExtension = objects.newInstance(SpringRestClientExtension::class.java)
@@ -118,12 +98,21 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
     }
 
     /**
-     * Enables/disables post-processing that optimizes imports in generated Kotlin sources.
+     * Sets the package segment appended to source packages for generated Kotlin sources.
      *
-     * @param enabled `true` to optimize imports, `false` to keep fully-qualified references untouched.
+     * @param pkg generated package segment.
      */
-    fun optimizeImports(enabled: Boolean) {
-        optimizeImports.set(enabled)
+    fun generatedPackageName(pkg: String) {
+        generatedPackageName.set(pkg)
+    }
+
+    /**
+     * Sets the suffix appended to the source-level enclosing endpoints interface.
+     *
+     * @param suffix endpoints container suffix.
+     */
+    fun endpointsSuffix(suffix: String) {
+        endpointsSuffix.set(suffix)
     }
 
     /**
@@ -146,7 +135,6 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
      * Configures the [MarkdownDocumentationExtension] responsible for Markdown output generation.
      *
      * @param configure action applied to the nested [MarkdownDocumentationExtension].
-     * @return `Unit`.
      */
     fun markdownDocumentation(configure: Action<in MarkdownDocumentationExtension>) {
         markdownDocumentation.markConfigured()
@@ -157,9 +145,6 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
     internal fun resolvedBasePackage(): String =
         basePackage.orNull?.trim().orEmpty()
 
-    /** Returns the resolved root-level import optimization flag; defaults to `true`. */
-    internal fun resolvedOptimizeImports(): Boolean = optimizeImports.orNull ?: true
-
     /**
      * Returns generator-specific configurations for all enabled generators.
      */
@@ -169,9 +154,8 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
                 put(
                     "spring-restclient",
                     GeneratorConfiguration(
-                        optimizeImports = springRestClient.optimizeImports.orNull ?: resolvedOptimizeImports(),
-                        namePrefix = springRestClient.namePrefix.orNull,
-                        nameSuffix = springRestClient.nameSuffix.orNull
+                        clientSuffix = springRestClient.clientSuffix.get(),
+                        serverSuffix = "Server"
                     )
                 )
             }
@@ -179,20 +163,15 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
                 put(
                     "spring-webmvc",
                     GeneratorConfiguration(
-                        optimizeImports = springWebMvc.optimizeImports.orNull ?: resolvedOptimizeImports(),
-                        namePrefix = springWebMvc.namePrefix.orNull,
-                        nameSuffix = springWebMvc.nameSuffix.orNull
+                        clientSuffix = "Client",
+                        serverSuffix = springWebMvc.serverSuffix.get()
                     )
                 )
             }
             if (markdownDocumentation.isConfigured()) {
                 put(
                     "markdown-docs",
-                    GeneratorConfiguration(
-                        optimizeImports = markdownDocumentation.optimizeImports.orNull ?: resolvedOptimizeImports(),
-                        namePrefix = markdownDocumentation.namePrefix.orNull,
-                        nameSuffix = markdownDocumentation.nameSuffix.orNull
-                    )
+                    GeneratorConfiguration()
                 )
             }
         }

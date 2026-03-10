@@ -7,6 +7,8 @@ import java.io.File
  *
  * @param outputDirectory The directory to which the report is written.
  * @param generatedSourcesDirectory The directory to which the generated sources are written.
+ * @param generatedPackageName package segment appended to source packages for generated Kotlin sources.
+ * @param endpointsSuffix suffix appended to the source-level enclosing endpoints interface.
  * @param basePackage The base package to scan for endpoint definitions.
  * @param compiledClassesDirectory The directory containing the compiled classes of the project.
  * @param additionalClasspathDirectories Additional directories to add to the classpath when scanning for endpoints.
@@ -16,6 +18,8 @@ import java.io.File
 data class GenerateTaskConfiguration(
     val outputDirectory: File,
     val generatedSourcesDirectory: File,
+    val generatedPackageName: String = "generated",
+    val endpointsSuffix: String = "Endpoints",
     val basePackage: String,
     val compiledClassesDirectory: File,
     val additionalClasspathDirectories: List<File>,
@@ -25,13 +29,10 @@ data class GenerateTaskConfiguration(
 /**
  * Generator-specific configuration for [GenerateTask].
  *
- * @param optimizeImports Whether generated Kotlin sources for this generator should be post-processed
- * to optimize imports.
- * @param namePrefix Optional prefix for generated type names.
- * @param nameSuffix Optional suffix for generated type names.
+ * @param clientSuffix suffix appended to aggregate client interface names and nested client contracts.
+ * @param serverSuffix suffix appended to aggregate server interface names and nested server contracts.
  */
 data class GeneratorConfiguration(
-    val optimizeImports: Boolean,
-    val namePrefix: String?,
-    val nameSuffix: String?
+    val clientSuffix: String = "Client",
+    val serverSuffix: String = "Server"
 )

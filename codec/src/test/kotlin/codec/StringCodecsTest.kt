@@ -1,15 +1,34 @@
 package dev.akif.tapik.codec
 
 import arrow.core.getOrElse
+import dev.akif.tapik.ValueClass
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class StringCodecsTest {
+    @Test
+    fun `ofValueClass round trips value classes`() {
+        val codec = StringCodecs.ofValueClass<String, UserId>()
+
+        val decoded = codec.decode("user-1").getOrElse { fail("Unexpected decode failure: $it") }
+
+        assertEquals(UserId("user-1"), decoded)
+        assertEquals("user-1", codec.encode(decoded))
+    }
+
+    @Test
+    fun `ofValueClass uses custom string conversion when encoding`() {
+        val codec = StringCodecs.ofValueClass<Int, ItemId>(toString = { "item-$it" })
+
+        assertEquals("item-42", codec.encode(ItemId(42)))
+    }
+
     @ParameterizedTest
     @MethodSource("validBooleanInputs")
     fun `boolean codec strictly decodes accepted values`(
@@ -86,3 +105,13 @@ class StringCodecsTest {
             )
     }
 }
+
+@JvmInline
+value class UserId(
+    override val value: String
+) : ValueClass<String>
+
+@JvmInline
+value class ItemId(
+    override val value: Int
+) : ValueClass<Int>

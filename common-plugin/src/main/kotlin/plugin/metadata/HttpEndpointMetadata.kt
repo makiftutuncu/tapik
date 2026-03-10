@@ -67,13 +67,26 @@ data class QueryParameterMetadata(
  * @property type Kotlin type metadata for the header value.
  * @property required whether the header must be present on the wire.
  * @property values optional list of preconfigured header values.
+ * @property cardinality whether generated code should expose the header as one value or many.
  */
 data class HeaderMetadata(
     val name: String,
     val type: TypeMetadata,
     val required: Boolean = true,
-    val values: List<String> = emptyList()
+    val values: List<String> = emptyList(),
+    val cardinality: HeaderCardinality = HeaderCardinality.Single
 )
+
+/**
+ * Describes whether a generated header field should expose one value or many.
+ */
+enum class HeaderCardinality {
+    /** The header is modeled as a single scalar value. */
+    Single,
+
+    /** The header is modeled as a list because multiple values are expected. */
+    Multiple
+}
 
 /**
  * Metadata describing an HTTP body definition.
@@ -92,14 +105,62 @@ data class BodyMetadata(
  * Metadata describing a single output alternative including headers and body.
  *
  * @property description human-readable summary of the response branch.
+ * @property match machine-readable status matcher for the response branch.
  * @property headers headers returned when this branch is selected.
  * @property body type and serialization metadata for the payload.
  */
 data class OutputMetadata(
+    val match: OutputMatchMetadata,
     val description: String,
     val headers: List<HeaderMetadata>,
     val body: BodyMetadata
-)
+) {
+    constructor(
+        description: String,
+        headers: List<HeaderMetadata>,
+        body: BodyMetadata
+    ) : this(
+        match = OutputMatchMetadata.Described(description),
+        description = description,
+        headers = headers,
+        body = body
+    )
+}
+
+/**
+ * Machine-readable view of the status matcher backing an endpoint output.
+ */
+sealed interface OutputMatchMetadata {
+    /**
+     * Matches a single exact HTTP status.
+     *
+     * @property status exact status.
+     */
+    data class Exact(
+        val status: dev.akif.tapik.Status
+    ) : OutputMatchMetadata
+
+    /**
+     * Matches any status from a fixed set.
+     *
+     * @property statuses accepted statuses in declaration order.
+     */
+    data class AnyOf(
+        val statuses: List<dev.akif.tapik.Status>
+    ) : OutputMatchMetadata
+
+    /**
+     * Matches statuses described by a free-form predicate.
+     *
+     * @property description human-readable predicate description.
+     */
+    data class Described(
+        val description: String
+    ) : OutputMatchMetadata
+
+    /** Matches the fallback unmatched-status branch. */
+    data object Unmatched : OutputMatchMetadata
+}
 
 /**
  * Aggregated metadata describing a Tapik HTTP endpoint.

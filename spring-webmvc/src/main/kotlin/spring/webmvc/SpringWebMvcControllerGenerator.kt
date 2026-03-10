@@ -7,117 +7,172 @@ import java.io.File
 /**
  * Generates Spring Web MVC controller interfaces from Tapik endpoint metadata.
  */
-class SpringWebMvcControllerGenerator : TapikGenerator {
+class SpringWebMvcControllerGenerator : TapikKotlinEndpointGenerator {
     /**
      * Identifier used by the Gradle plugin to decide whether this generator should execute.
      */
     override val id: String = ID
 
     /**
-     * Generates Spring MVC controller interfaces for the supplied endpoints, writing them under the configured output directory.
+     * Builds Spring WebMVC nested server contributions for the discovered endpoints.
      *
-     * @param endpoints endpoint metadata discovered during analysis.
-     * @param context generator execution context containing output directories and logging callbacks.
+     * @param endpoints endpoint metadata to translate into server members.
+     * @param context generation context carrying output directories and configuration.
+     * @return Kotlin contributions grouped by source file.
+     */
+    override fun contribute(
+        endpoints: List<HttpEndpointMetadata>,
+        context: TapikGeneratorContext
+    ): TapikKotlinContribution {
+        if (endpoints.isEmpty()) {
+            context.log("No endpoints discovered; skipping Spring WebMVC server contributions.")
+            return TapikKotlinContribution()
+        }
+
+        context.log("Generating Spring WebMVC server contributions.")
+        return TapikKotlinContribution(
+            sourceFiles =
+                buildSourceFileContributions(
+                    endpoints = endpoints,
+                    serverSuffix = context.generatorConfiguration.serverSuffix,
+                    endpointsSuffix = context.endpointsSuffix,
+                    generatedPackageName = context.generatedPackageName
+                )
+        )
+    }
+
+    /**
+     * Generates standalone Kotlin source files for tests or direct invocation.
+     *
+     * @param endpoints endpoint metadata to translate into generated files.
+     * @param context generation context carrying output directories and configuration.
+     * @return paths of generated Kotlin source files.
      */
     override fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
     ): TapikGenerationResult {
-        if (endpoints.isEmpty()) {
-            context.log("No endpoints discovered; skipping Spring WebMVC generation.")
-            return TapikGenerationResult()
-        }
-
-        context.log("Generating Spring WebMVC controllers.")
-        return TapikGenerationResult(
-            generateControllers(
-                endpoints = endpoints,
-                rootDir = context.generatedSourcesDirectory,
-                namePrefix = context.generatorConfiguration.namePrefix.orEmpty(),
-                nameSuffix = context.generatorConfiguration.nameSuffix ?: DEFAULT_INTERFACE_SUFFIX
+        val contribution = contribute(endpoints, context)
+        val generatedFiles = linkedSetOf<File>()
+        contribution.sourceFiles.forEach { sourceFile ->
+            val packageDirectory =
+                File(context.generatedSourcesDirectory, sourceFile.packageName.replace('.', '/')).also { it.mkdirs() }
+            val targetFile = File(packageDirectory, "${sourceFile.aggregateInterfaceName}.kt")
+            val endpointMembers =
+                sourceFile.endpointMembers.groupBy(
+                    keySelector = { it.endpointPropertyName },
+                    valueTransform = { it.content }
+                )
+            val fileEndpoints =
+                endpoints.filter {
+                    it.packageName == sourceFile.sourcePackageName && it.sourceFile == sourceFile.sourceFile
+                }
+            targetFile.writeText(
+                renderMergedKotlinEndpointFile(
+                    packageName = sourceFile.packageName,
+                    sourceFile = sourceFile.sourceFile,
+                    endpointsSuffix = context.endpointsSuffix,
+                    endpoints = fileEndpoints,
+                    aggregateInterfaces =
+                        listOf(
+                            AggregateInterfaceContribution(
+                                name = sourceFile.aggregateInterfaceName,
+                                nestedInterfaceName = sourceFile.nestedInterfaceName
+                            )
+                        ),
+                    endpointMembers = endpointMembers,
+                    imports = sourceFile.imports
+                )
             )
-        )
+            generatedFiles += targetFile
+        }
+        return TapikGenerationResult(generatedFiles)
     }
 
-    /**
-     * Generates controller interfaces for Tapik endpoints.
-     *
-     * @param endpoints metadata describing the endpoints.
-     * @param rootDir directory that will contain the generated sources.
-     */
-    private fun generateControllers(
+    private fun buildSourceFileContributions(
         endpoints: List<HttpEndpointMetadata>,
-        rootDir: File,
-        namePrefix: String,
-        nameSuffix: String
-    ): Set<File> {
-        val generatedFiles = linkedSetOf<File>()
+        serverSuffix: String,
+        endpointsSuffix: String,
+        generatedPackageName: String
+    ): List<KotlinSourceFileContribution> {
+        val contributions = mutableListOf<KotlinSourceFileContribution>()
         endpoints
             .groupBy { it.packageName }
             .filterKeys { it.isNotBlank() }
             .toSortedMap()
             .forEach { (packageName, packageEndpoints) ->
-                val packageDirectory = File(rootDir, packageName.replace('.', '/')).also { it.mkdirs() }
                 packageEndpoints
                     .groupBy { it.sourceFile }
                     .toSortedMap()
                     .forEach { (sourceFile, groupedEndpoints) ->
                         val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
-                        val signatures = sortedEndpoints.map { EndpointSignature(it) }
-                        val interfaceName = "$namePrefix$sourceFile$nameSuffix"
-                        val targetFile = File(packageDirectory, "$interfaceName.kt")
-                        targetFile.writeText(
-                            buildInterfaceContent(
-                                packageName = packageName,
-                                interfaceName = interfaceName,
+                        val signatures = createEndpointSignatures(sortedEndpoints, sourceFile, endpointsSuffix)
+                        contributions +=
+                            KotlinSourceFileContribution(
+                                packageName = packageName.toGeneratedPackageName(generatedPackageName),
+                                sourcePackageName = packageName,
                                 sourceFile = sourceFile,
-                                signatures = signatures
+                                aggregateInterfaceName = "$sourceFile$serverSuffix",
+                                nestedInterfaceName = serverSuffix,
+                                endpointMembers =
+                                    signatures.map { signature ->
+                                        KotlinEndpointMemberContribution(
+                                            endpointPropertyName = signature.endpoint.propertyName,
+                                            content = buildNestedServerContent(signature, serverSuffix)
+                                        )
+                                    }
                             )
-                        )
-                        generatedFiles += targetFile
                     }
             }
-        return generatedFiles
+        return contributions
     }
 
-    private fun buildInterfaceContent(
-        packageName: String,
-        interfaceName: String,
+    private fun createEndpointSignatures(
+        endpoints: List<HttpEndpointMetadata>,
         sourceFile: String,
-        signatures: List<EndpointSignature>
+        endpointsSuffix: String = "Endpoints"
+    ): List<EndpointSignature> {
+        val modelsByPropertyName =
+            buildEndpointContractModels(endpoints, sourceFile, endpointsSuffix).associateBy { it.endpoint.propertyName }
+        return endpoints.map { endpoint ->
+            EndpointSignature(
+                endpoint = endpoint,
+                contractModel = checkNotNull(modelsByPropertyName[endpoint.propertyName])
+            )
+        }
+    }
+
+    private fun buildNestedServerContent(
+        signature: EndpointSignature,
+        nestedInterfaceName: String
     ): String =
         buildString {
-            appendLine("package $packageName")
-            appendLine()
-            appendLine("// Generated from: $packageName.$sourceFile")
-            appendLine("interface $interfaceName : dev.akif.tapik.Helpers {")
-            signatures.forEachIndexed { index, signature ->
-                appendSignature(signature)
-                if (index != signatures.lastIndex) {
-                    appendLine()
-                }
-            }
+            appendLine("interface $nestedInterfaceName : $TAPIK_PACKAGE.Helpers {")
+            appendSignature(signature, indentation = "    ")
             appendLine("}")
         }
 
-    private fun StringBuilder.appendSignature(signature: EndpointSignature) {
+    private fun StringBuilder.appendSignature(
+        signature: EndpointSignature,
+        indentation: String
+    ) {
         val hasSummary = signature.summaryLines.isNotEmpty()
         val hasDetails = signature.detailLines.isNotEmpty()
         if (hasSummary || hasDetails) {
-            appendLine("    /**")
-            signature.summaryLines.forEach { appendLine("     * ${it.escapeForKdoc()}") }
+            appendLine("$indentation/**")
+            signature.summaryLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
             if (hasSummary && hasDetails) {
-                appendLine("     *")
+                appendLine("$indentation *")
             }
-            signature.detailLines.forEach { appendLine("     * ${it.escapeForKdoc()}") }
-            appendLine("     */")
+            signature.detailLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
+            appendLine("$indentation */")
         }
-        signature.mappingAnnotations.forEach { appendLine("    $it") }
-        append("    fun ${signature.methodName}(")
+        signature.mappingAnnotations.forEach { appendLine("$indentation$it") }
+        append("${indentation}fun ${signature.methodName}(")
         if (signature.parameters.isNotEmpty()) {
             appendLine()
-            appendLine(signature.parameters.joinToString(separator = ",\n") { "        $it" })
-            append("    )")
+            appendLine(signature.parameters.joinToString(separator = ",\n") { "$indentation    $it" })
+            append("$indentation)")
         } else {
             append(")")
         }
@@ -125,25 +180,22 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     }
 
     private inner class EndpointSignature(
-        endpoint: HttpEndpointMetadata
+        val endpoint: HttpEndpointMetadata,
+        val contractModel: EndpointContractModel
     ) {
-        val methodName: String = renderIdentifier(endpoint.id)
-        val summaryLines: List<String> = linesForDocumentation(endpoint.description)
-        val detailLines: List<String> = linesForDocumentation(endpoint.details)
-        val mappingAnnotations: List<String>
+        val endpointExpression: String = contractModel.endpointReference
+        val methodName: String = contractModel.methodName
+        val summaryLines: List<String> = contractModel.summaryLines
+        val detailLines: List<String> = contractModel.detailLines
+        val mappingAnnotations: List<String> = buildMappingAnnotation(endpoint)
         val parameters: List<String>
         val returnType: String
 
         init {
-            mappingAnnotations = buildMappingAnnotation(endpoint)
-
-            val endpointExpression = endpoint.renderEndpointExpression()
             val nameAllocator = NameAllocator()
             val parameterSpecs = buildParameterSpecs(endpoint, endpointExpression, nameAllocator)
             parameters = parameterSpecs.map { it.declaration }
-
-            val returnInfo = buildReturnType(endpoint.outputs)
-            returnType = returnInfo.type
+            returnType = "Response"
         }
     }
 
@@ -161,10 +213,6 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     )
 
     private fun TypeMetadata.withNullable(nullable: Boolean): TypeMetadata = copy(nullable = nullable)
-
-    private data class ReturnTypeInfo(
-        val type: String
-    )
 
     private fun buildParameterSpecs(
         endpoint: HttpEndpointMetadata,
@@ -297,58 +345,6 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
             }
         }
 
-    private fun buildReturnType(outputs: List<OutputMetadata>): ReturnTypeInfo {
-        if (outputs.isEmpty()) {
-            return ReturnTypeInfo(
-                type = "$TAPIK_PACKAGE.ResponseWithoutBody0"
-            )
-        }
-
-        val options = outputs.map { it.toResponseTypeInfo() }
-
-        return if (options.size == 1) {
-            ReturnTypeInfo(
-                type = options.first().type
-            )
-        } else {
-            val optionTypes = options.joinToString(", ") { it.type }
-            ReturnTypeInfo(
-                type = "$TAPIK_PACKAGE.OneOf${options.size}<$optionTypes>"
-            )
-        }
-    }
-
-    private data class OutputTypeInfo(
-        val type: String
-    )
-
-    private fun OutputMetadata.toResponseTypeInfo(): OutputTypeInfo {
-        val headerTypes = headers.map { it.type.render() }
-        val hasBody = body.type.simpleName() != "EmptyBody"
-        val bodyType = if (hasBody) body.type.determineBodyValueType() else null
-
-        val responseType =
-            if (hasBody) {
-                if (headerTypes.isEmpty()) {
-                    "$TAPIK_PACKAGE.Response0<$bodyType>"
-                } else {
-                    "$TAPIK_PACKAGE.Response${headerTypes.size}<$bodyType, ${headerTypes.joinToString(
-                        ", "
-                    )}>"
-                }
-            } else {
-                if (headerTypes.isEmpty()) {
-                    "$TAPIK_PACKAGE.ResponseWithoutBody0"
-                } else {
-                    "$TAPIK_PACKAGE.ResponseWithoutBody${headerTypes.size}<${headerTypes.joinToString(
-                        ", "
-                    )}>"
-                }
-            }
-
-        return OutputTypeInfo(responseType)
-    }
-
     private fun buildMappingAnnotation(endpoint: HttpEndpointMetadata): List<String> {
         val path =
             endpoint.path
@@ -402,18 +398,14 @@ class SpringWebMvcControllerGenerator : TapikGenerator {
     private fun List<String>.formatAsArray(): String =
         joinToString(prefix = "[\"", separator = "\", \"", postfix = "\"]") { it.escapeForAnnotation() }
 
-    private fun HttpEndpointMetadata.renderEndpointExpression(): String {
-        val endpointProperty = renderIdentifier(propertyName)
-        return if (sourceFile.endsWith("Kt")) {
-            endpointProperty
-        } else {
-            "$sourceFile.$endpointProperty"
-        }
-    }
-
     private companion object {
         private const val ID = "spring-webmvc"
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
-        private const val DEFAULT_INTERFACE_SUFFIX = "Controller"
     }
 }
+
+private fun String.toGeneratedPackageName(generatedPackageName: String): String =
+    listOfNotNull(
+        takeIf(String::isNotBlank),
+        generatedPackageName.trim().takeIf(String::isNotBlank)
+    ).joinToString(".")

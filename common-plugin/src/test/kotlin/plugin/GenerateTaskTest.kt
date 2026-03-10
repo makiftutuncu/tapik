@@ -27,14 +27,15 @@ class GenerateTaskTest {
             config = GenerateTaskConfiguration(
                 outputDirectory = outputDir,
                 generatedSourcesDirectory = generatedDir,
+                endpointsSuffix = "Endpoints",
                 basePackage = "dev.akif.tapik.plugin",
                 compiledClassesDirectory = compiledDir,
                 additionalClasspathDirectories = emptyList(),
                 generatorConfigurations =
                     mapOf(
-                        "spring-restclient" to GeneratorConfiguration(optimizeImports = true, namePrefix = null, nameSuffix = null),
-                        "spring-webmvc" to GeneratorConfiguration(optimizeImports = true, namePrefix = null, nameSuffix = null),
-                        "markdown-docs" to GeneratorConfiguration(optimizeImports = false, namePrefix = null, nameSuffix = null)
+                        "spring-restclient" to GeneratorConfiguration(),
+                        "spring-webmvc" to GeneratorConfiguration(),
+                        "markdown-docs" to GeneratorConfiguration()
                     )
             ),
             log = { s, _ -> println(s) },
@@ -50,22 +51,15 @@ class GenerateTaskTest {
         val summaryLines = summaryFile.readText().lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
         assertTrue(summaryLines.any { "user" in it && "GET" in it }, "Summary should list generated endpoint")
 
-        val generatedInterface = File(generatedDir, "dev/akif/tapik/plugin/fixtures/SampleEndpointsClient.kt")
+        val generatedInterface = File(generatedDir, "dev/akif/tapik/plugin/fixtures/generated/SampleEndpoints.kt")
         assertTrue(
             generatedInterface.exists(),
             "Generated client interface should exist, files: ${File(generatedInterface.parent).list()?.toList()}"
         )
         val interfaceContent = generatedInterface.readText()
         assertTrue(interfaceContent.contains("interface SampleEndpointsClient"), "Interface declaration missing")
+        assertTrue(interfaceContent.contains("interface SampleEndpointsServer"), "Server aggregate missing")
         assertTrue(interfaceContent.contains("fun user("), "Generated method for endpoint missing")
-
-        val generatedController = File(generatedDir, "dev/akif/tapik/plugin/fixtures/SampleEndpointsController.kt")
-        assertTrue(
-            generatedController.exists(),
-            "Generated controller interface should exist, files: ${File(generatedController.parent).list()?.toList()}"
-        )
-        val controllerContent = generatedController.readText()
-        assertTrue(controllerContent.contains("interface SampleEndpointsController"), "Controller declaration missing")
 
         val documentation = File(outputDir, "API.md")
         assertTrue(
@@ -75,7 +69,7 @@ class GenerateTaskTest {
     }
 
     @Test
-    fun `generate applies import optimization per generator`() {
+    fun `generate optimizes imports for merged kotlin sources by default`() {
         val compiledDir = File(SampleEndpoints::class.java.protectionDomain.codeSource.location.toURI())
         val outputDir = temporaryDir.resolve("out-2").createDirectories().toFile()
         val generatedDir = temporaryDir.resolve("generated-2").createDirectories().toFile()
@@ -84,14 +78,15 @@ class GenerateTaskTest {
             config = GenerateTaskConfiguration(
                 outputDirectory = outputDir,
                 generatedSourcesDirectory = generatedDir,
+                endpointsSuffix = "Endpoints",
                 basePackage = "dev.akif.tapik.plugin",
                 compiledClassesDirectory = compiledDir,
                 additionalClasspathDirectories = emptyList(),
                 generatorConfigurations =
                     mapOf(
-                        "spring-restclient" to GeneratorConfiguration(optimizeImports = false, namePrefix = null, nameSuffix = null),
-                        "spring-webmvc" to GeneratorConfiguration(optimizeImports = true, namePrefix = null, nameSuffix = null),
-                        "markdown-docs" to GeneratorConfiguration(optimizeImports = false, namePrefix = null, nameSuffix = null)
+                        "spring-restclient" to GeneratorConfiguration(),
+                        "spring-webmvc" to GeneratorConfiguration(),
+                        "markdown-docs" to GeneratorConfiguration()
                     )
             ),
             log = { _, _ -> },
@@ -99,7 +94,7 @@ class GenerateTaskTest {
             logWarn = { _, _ -> }
         ).generate()
 
-        val generatedClient = File(generatedDir, "dev/akif/tapik/plugin/fixtures/SampleEndpointsClient.kt")
+        val generatedClient = File(generatedDir, "dev/akif/tapik/plugin/fixtures/generated/SampleEndpoints.kt")
         assertTrue(generatedClient.exists(), "Expected generated client interface")
         val imports =
             generatedClient
@@ -107,13 +102,44 @@ class GenerateTaskTest {
                 .lineSequence()
                 .filter { it.startsWith("import ") }
                 .toList()
-        assertEquals(
-            listOf(
-                "import dev.akif.tapik.spring.restclient.toStatus",
-                "import dev.akif.tapik.encodeInputHeaders"
-            ),
-            imports,
-            "RestClient generator should not be import-optimized when disabled"
+        assertTrue(
+            imports.contains("import dev.akif.tapik.encodeInputHeaders") &&
+                imports.contains("import dev.akif.tapik.spring.restclient.toStatus"),
+            "Merged Kotlin source should keep the optimized imports required by generated clients"
         )
+    }
+
+    @Test
+    fun `generate writes kotlin sources into configured generated package`() {
+        val compiledDir = File(SampleEndpoints::class.java.protectionDomain.codeSource.location.toURI())
+        val outputDir = temporaryDir.resolve("out-3").createDirectories().toFile()
+        val generatedDir = temporaryDir.resolve("generated-3").createDirectories().toFile()
+
+        GenerateTask(
+            config = GenerateTaskConfiguration(
+                outputDirectory = outputDir,
+                generatedSourcesDirectory = generatedDir,
+                generatedPackageName = "generated",
+                endpointsSuffix = "Endpoints",
+                basePackage = "dev.akif.tapik.plugin",
+                compiledClassesDirectory = compiledDir,
+                additionalClasspathDirectories = emptyList(),
+                generatorConfigurations =
+                    mapOf(
+                        "spring-restclient" to GeneratorConfiguration(),
+                        "spring-webmvc" to GeneratorConfiguration()
+                    )
+            ),
+            log = { _, _ -> },
+            logDebug = { _, _ -> },
+            logWarn = { _, _ -> }
+        ).generate()
+
+        val generatedClient = File(generatedDir, "dev/akif/tapik/plugin/fixtures/generated/SampleEndpoints.kt")
+        assertTrue(generatedClient.exists(), "Expected generated client interface in target package")
+        val content = generatedClient.readText()
+        assertTrue(content.contains("package dev.akif.tapik.plugin.fixtures.generated"))
+        assertTrue(content.contains("import dev.akif.tapik.plugin.fixtures.SampleEndpoints"))
+        assertTrue(content.contains("SampleEndpoints.user"))
     }
 }

@@ -26,25 +26,22 @@ class TapikGradlePlugin : Plugin<Project> {
                     target.group.toString()
                 }
             })
+            it.generatedPackageName.set(extension.generatedPackageName)
+            it.endpointsSuffix.set(extension.endpointsSuffix)
             it.outputDirectory.set(target.layout.buildDirectory.dir("generated"))
             it.sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             it.compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
             it.generatedSourcesDirectory.set(generatedSources)
             it.additionalClassDirectories.set(collectClassDirectories(target))
             it.runtimeClasspath.from(target.configurations.getByName("runtimeClasspath"))
-            it.generatorOptimizeImports.set(
+            it.generatorClientSuffixes.set(
                 resolvedGeneratorConfigurations.map { configurations ->
-                    configurations.mapValues { (_, config) -> config.optimizeImports }
+                    configurations.mapValues { (_, config) -> config.clientSuffix }
                 }
             )
-            it.generatorNamePrefixes.set(
+            it.generatorServerSuffixes.set(
                 resolvedGeneratorConfigurations.map { configurations ->
-                    configurations.mapValues { (_, config) -> config.namePrefix.orEmpty() }
-                }
-            )
-            it.generatorNameSuffixes.set(
-                resolvedGeneratorConfigurations.map { configurations ->
-                    configurations.mapValues { (_, config) -> config.nameSuffix.orEmpty() }
+                    configurations.mapValues { (_, config) -> config.serverSuffix }
                 }
             )
         }

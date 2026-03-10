@@ -6,5 +6,6 @@ plugins {
 
 dependencies {
     api(libs.arrowCore)
+    api(libs.kotlinReflect)
     testImplementation(libs.bundles.testCommon)
 }

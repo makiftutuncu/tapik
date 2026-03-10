@@ -23,13 +23,13 @@ class KotlinGeneratedSourceImportOptimizerTest {
         val output = KotlinGeneratedSourceImportOptimizer.optimizeContent(input)
 
         assertTrue(output.contains("import dev.akif.tapik.ResponseWithoutBody0"))
-        assertTrue(output.contains("import dev.akif.tapik.Status"))
+        assertTrue(output.contains("import dev.akif.tapik.Status.OK"))
         assertTrue(output.contains("import org.springframework.web.bind.annotation.RequestMapping"))
-        assertTrue(output.contains("import org.springframework.web.bind.annotation.RequestMethod"))
+        assertTrue(output.contains("import org.springframework.web.bind.annotation.RequestMethod.HEAD"))
         assertTrue(output.contains("@RequestMapping"))
-        assertTrue(output.contains("method = [RequestMethod.HEAD]"))
+        assertTrue(output.contains("method = [HEAD]"))
         assertTrue(output.contains("fun user(): ResponseWithoutBody0 ="))
-        assertTrue(output.contains("ResponseWithoutBody0(Status.OK)"))
+        assertTrue(output.contains("ResponseWithoutBody0(OK)"))
         assertTrue(!output.contains("fun user(): dev.akif.tapik.ResponseWithoutBody0"))
         assertTrue(!output.contains("@org.springframework.web.bind.annotation.RequestMapping"))
     }
@@ -116,5 +116,28 @@ class KotlinGeneratedSourceImportOptimizerTest {
 
         assertTrue(!output.contains("import dev.akif.tapik.clients.LocalType"))
         assertTrue(output.contains("fun user(localType: LocalType): Unit"))
+    }
+
+    @Test
+    fun `optimizeContent imports owner and preserves member access for qualified object chains`() {
+        val input =
+            """
+            package dev.akif.tapikdemo.api.generated
+
+            interface UsersClient {
+                fun create(
+                    accept: dev.akif.tapik.MediaType =
+                        dev.akif.tapikdemo.api.Users.create.input.headers.item1.asHeaderValues<dev.akif.tapik.MediaType>().getFirstValueOrFail()
+                ): kotlin.Unit
+            }
+            """.trimIndent()
+
+        val output = KotlinGeneratedSourceImportOptimizer.optimizeContent(input)
+
+        assertTrue(output.contains("import dev.akif.tapik.MediaType"))
+        assertTrue(output.contains("import dev.akif.tapikdemo.api.Users"))
+        assertTrue(output.contains("accept: MediaType ="))
+        assertTrue(output.contains("Users.create.input.headers.item1.asHeaderValues<MediaType>().getFirstValueOrFail()"))
+        assertTrue(!output.contains("import dev.akif.tapikdemo.api.Users.create.input.headers.item1.asHeaderValues"))
     }
 }

@@ -80,14 +80,12 @@ class GenerateTask(
                 TapikGeneratorContext(
                     outputDirectory = generationOutputDirectory,
                     generatedSourcesDirectory = generatedSourcesDir,
+                    generatedPackageName = config.generatedPackageName.trim().ifBlank { "generated" },
+                    endpointsSuffix = config.endpointsSuffix,
                     log = { message -> log("[tapik] $message", null) },
                     logDebug = { message -> logDebug("[tapik (debug)] $message", null) },
                     logWarn = { message, throwable -> logWarn("[tapik (warning)] $message", throwable) },
-                    generatorConfiguration = GeneratorConfiguration(
-                        optimizeImports = true,
-                        namePrefix = null,
-                        nameSuffix = null
-                    )
+                    generatorConfiguration = GeneratorConfiguration()
                 )
 
             invokeGenerators(endpoints, classLoader, generatorContext)
@@ -125,29 +123,132 @@ class GenerateTask(
                 logWarn("Generator '$id' is configured but not available on the classpath.", null)
             }
 
+        val kotlinGenerators = linkedMapOf<TapikKotlinEndpointGenerator, GeneratorConfiguration>()
         generatorConfigurations.forEach { (generatorId, generatorConfiguration) ->
             val generator = generatorsById[generatorId] ?: return@forEach
+            if (generator is TapikKotlinEndpointGenerator) {
+                kotlinGenerators[generator] = generatorConfiguration
+                return@forEach
+            }
             log("Running generator '${generator.id}'", null)
             val generatorContext = context.copy(generatorConfiguration = generatorConfiguration)
             runCatching {
                 generator.generate(endpoints, generatorContext)
             }.onSuccess { generationResult ->
                 log("Generator '${generator.id}' completed successfully.", null)
-                if (generatorConfiguration.optimizeImports) {
-                    val touchedFiles =
-                        generationResult.generatedSourceFiles.filter { it.exists() && it.isFile && it.extension == "kt" }
-                    KotlinGeneratedSourceImportOptimizer.optimizeFiles(
-                        files = touchedFiles,
-                        logDebug = context.logDebug,
-                        logWarn = context.logWarn
-                    )
-                } else {
-                    log("Skipping import optimization for generator '${generator.id}'.", null)
+                val touchedFiles =
+                    generationResult.generatedSourceFiles.filter { it.exists() && it.isFile && it.extension == "kt" }
+                KotlinGeneratedSourceImportOptimizer.optimizeFiles(
+                    files = touchedFiles,
+                    logDebug = context.logDebug,
+                    logWarn = context.logWarn
+                )
+            }.onFailure { error ->
+                logWarn("Generator '${generator.id}' failed.", error)
+            }
+        }
+
+        if (kotlinGenerators.isNotEmpty()) {
+            generateMergedKotlinSources(endpoints, kotlinGenerators, context)
+        }
+    }
+
+    private fun generateMergedKotlinSources(
+        endpoints: List<HttpEndpointMetadata>,
+        generators: Map<TapikKotlinEndpointGenerator, GeneratorConfiguration>,
+        context: TapikGeneratorContext
+    ): Set<File> {
+        data class FileState(
+            val packageName: String,
+            val sourcePackageName: String,
+            val sourceFile: String,
+            val imports: MutableSet<String> = linkedSetOf(),
+            val aggregateInterfaces: MutableList<AggregateInterfaceContribution> = mutableListOf(),
+            val endpointMembers: MutableMap<String, MutableList<String>> = linkedMapOf()
+        )
+
+        val fileStates = linkedMapOf<Triple<String, String, String>, FileState>()
+        val endpointsSuffix = context.endpointsSuffix
+
+        generators.forEach { (generator, generatorConfiguration) ->
+            log("Running generator '${generator.id}'", null)
+            val generatorContext = context.copy(generatorConfiguration = generatorConfiguration)
+            runCatching {
+                generator.contribute(endpoints, generatorContext)
+            }.onSuccess { contribution ->
+                log("Generator '${generator.id}' completed successfully.", null)
+                contribution.sourceFiles.forEach { sourceFile ->
+                    val key = Triple(sourceFile.packageName, sourceFile.sourcePackageName, sourceFile.sourceFile)
+                    val state =
+                        fileStates.getOrPut(key) {
+                            FileState(
+                                packageName = sourceFile.packageName,
+                                sourcePackageName = sourceFile.sourcePackageName,
+                                sourceFile = sourceFile.sourceFile
+                            )
+                        }
+                    state.imports += sourceFile.imports
+                    state.aggregateInterfaces +=
+                        AggregateInterfaceContribution(
+                            name = sourceFile.aggregateInterfaceName,
+                            nestedInterfaceName = sourceFile.nestedInterfaceName
+                        )
+                    sourceFile.endpointMembers.forEach { endpointMember ->
+                        state.endpointMembers
+                            .getOrPut(endpointMember.endpointPropertyName) { mutableListOf() }
+                            .add(endpointMember.content)
+                    }
                 }
             }.onFailure { error ->
                 logWarn("Generator '${generator.id}' failed.", error)
             }
         }
+
+        if (fileStates.isEmpty()) {
+            return emptySet()
+        }
+
+        val generatedFiles = linkedSetOf<File>()
+        val filesToOptimize = linkedSetOf<File>()
+        val writtenTargets = mutableMapOf<File, Triple<String, String, String>>()
+        fileStates.forEach { (_, state) ->
+            val packageName = state.packageName
+            val sourceFile = state.sourceFile
+            val packageDirectory = File(context.generatedSourcesDirectory, packageName.replace('.', '/')).also { it.mkdirs() }
+            val targetFile = File(packageDirectory, "${sourceFile.toEndpointContainerName(endpointsSuffix)}.kt")
+            writtenTargets[targetFile]?.let { existing ->
+                context.logWarn(
+                    "Multiple endpoint sources map to '${targetFile.absolutePath}' when using target package '$packageName': " +
+                        "${existing.second}.${existing.third} and ${state.sourcePackageName}.${state.sourceFile}. " +
+                        "Later output will overwrite earlier output.",
+                    null
+                )
+            }
+            writtenTargets[targetFile] = Triple(packageName, state.sourcePackageName, sourceFile)
+            val fileEndpoints =
+                endpoints.filter { it.packageName == state.sourcePackageName && it.sourceFile == sourceFile }
+            targetFile.writeText(
+                renderMergedKotlinEndpointFile(
+                    packageName = packageName,
+                    sourceFile = sourceFile,
+                    endpointsSuffix = endpointsSuffix,
+                    endpoints = fileEndpoints,
+                    aggregateInterfaces = state.aggregateInterfaces.distinctBy { it.name to it.nestedInterfaceName },
+                    endpointMembers = state.endpointMembers,
+                    imports = state.imports
+                )
+            )
+            generatedFiles += targetFile
+            filesToOptimize += targetFile
+        }
+
+        KotlinGeneratedSourceImportOptimizer.optimizeFiles(
+            files = filesToOptimize,
+            logDebug = context.logDebug,
+            logWarn = context.logWarn
+        )
+
+        return generatedFiles
     }
 
     private fun scanForHttpEndpoints(
@@ -414,7 +515,18 @@ class GenerateTask(
                 name = header.name,
                 type = typeMetadata,
                 required = header.required,
-                values = values
+                values = values,
+                cardinality =
+                    when (header) {
+                        is HeaderValues<*> ->
+                            if (header.values.size <= 1) {
+                                HeaderCardinality.Single
+                            } else {
+                                HeaderCardinality.Multiple
+                            }
+
+                        else -> HeaderCardinality.Single
+                    }
             )
         }
 
@@ -427,10 +539,19 @@ class GenerateTask(
             val headers = output.headers.toList().buildHeaderMetadata(headerValueTypes)
             val bodyMetadata = createBodyMetadata(bodyType, output.body)
             OutputMetadata(
+                match = output.statusMatcher.toMetadata(),
                 description = describeStatusMatcher(output.statusMatcher),
                 headers = headers,
                 body = bodyMetadata
             )
+        }
+
+    private fun StatusMatcher.toMetadata(): OutputMatchMetadata =
+        when (this) {
+            is StatusMatcher.Is -> OutputMatchMetadata.Exact(status)
+            is StatusMatcher.AnyOf -> OutputMatchMetadata.AnyOf(statuses.toList())
+            is StatusMatcher.Predicate -> OutputMatchMetadata.Described(description)
+            StatusMatcher.Unmatched -> OutputMatchMetadata.Unmatched
         }
 
     private fun describeStatusMatcher(matcher: StatusMatcher): String =

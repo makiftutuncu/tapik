@@ -128,23 +128,12 @@ object KotlinGeneratedSourceImportOptimizer {
                     return@let
                 }
 
-                val previousSegment = parsed.segments.getOrNull(parsed.segments.lastIndex - 1)
-                val isConstantMember =
-                    parsed.segments.last().looksLikeConstantMember() &&
-                    previousSegment?.firstOrNull()?.isUpperCase() == true
-                val importPath =
-                    if (isConstantMember) {
-                        parsed.segments.dropLast(1).joinToString(".")
-                    } else {
-                        parsed.segments.joinToString(".")
-                    }
+                val importPath = determineImportPath(parsed.segments) ?: return@let
                 val importSimpleName = importPath.substringAfterLast('.')
                 val replacement =
-                    if (isConstantMember) {
-                        "$importSimpleName.${parsed.segments.last()}"
-                    } else {
-                        importSimpleName
-                    }
+                    parsed.segments
+                        .drop(importPath.split('.').size)
+                        .fold(importSimpleName) { current, segment -> "$current.$segment" }
                 val requiresImport = !importPath.startsWith("kotlin.") && !importPath.startsWith("java.lang.")
 
                 occurrences +=
@@ -159,6 +148,23 @@ object KotlinGeneratedSourceImportOptimizer {
             }
         }
         return occurrences
+    }
+
+    private fun determineImportPath(segments: List<String>): String? {
+        val symbolStartIndex = segments.indexOfFirst { it.firstOrNull()?.isUpperCase() == true }
+        if (symbolStartIndex != -1) {
+            var importEndIndex = symbolStartIndex
+            while (importEndIndex + 1 < segments.size && segments[importEndIndex + 1].firstOrNull()?.isUpperCase() == true) {
+                importEndIndex++
+            }
+            return segments.take(importEndIndex + 1).joinToString(".")
+        }
+
+        if (segments.last().firstOrNull()?.isLowerCase() == true) {
+            return segments.joinToString(".")
+        }
+
+        return null
     }
 
     private fun collectIdentifiers(content: String): Set<String> {
