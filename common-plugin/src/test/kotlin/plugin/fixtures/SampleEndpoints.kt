@@ -7,6 +7,6 @@ object SampleEndpoints : API {
         get("api" / "users" / path.uuid("userId") + query.int("page").optional(1))
             .input(header.string("X-Request-ID"))
             .output(headers = headersOf(Header.Location)) { stringBody() }
-            .output(Status.NOT_FOUND) { stringBody() }
+            .output(Status.NotFound) { stringBody() }
     }
 }

@@ -15,22 +15,22 @@ class KotlinGeneratedSourceImportOptimizerTest {
                 @org.springframework.web.bind.annotation.RequestMapping(
                     method = [org.springframework.web.bind.annotation.RequestMethod.HEAD]
                 )
-                fun user(): dev.akif.tapik.ResponseWithoutBody0 =
-                    dev.akif.tapik.ResponseWithoutBody0(dev.akif.tapik.Status.OK)
+                fun user(): dev.akif.tapik.Method =
+                    dev.akif.tapik.Method.GET
             }
             """.trimIndent()
 
         val output = KotlinGeneratedSourceImportOptimizer.optimizeContent(input)
 
-        assertTrue(output.contains("import dev.akif.tapik.ResponseWithoutBody0"))
-        assertTrue(output.contains("import dev.akif.tapik.Status.OK"))
+        assertTrue(output.contains("import dev.akif.tapik.Method"))
+        assertTrue(output.contains("import dev.akif.tapik.Method.GET"))
         assertTrue(output.contains("import org.springframework.web.bind.annotation.RequestMapping"))
         assertTrue(output.contains("import org.springframework.web.bind.annotation.RequestMethod.HEAD"))
         assertTrue(output.contains("@RequestMapping"))
         assertTrue(output.contains("method = [HEAD]"))
-        assertTrue(output.contains("fun user(): ResponseWithoutBody0 ="))
-        assertTrue(output.contains("ResponseWithoutBody0(OK)"))
-        assertTrue(!output.contains("fun user(): dev.akif.tapik.ResponseWithoutBody0"))
+        assertTrue(output.contains("fun user(): Method ="))
+        assertTrue(output.contains("GET"))
+        assertTrue(!output.contains("fun user(): dev.akif.tapik.Method"))
         assertTrue(!output.contains("@org.springframework.web.bind.annotation.RequestMapping"))
     }
 

@@ -1,9 +1,29 @@
 package dev.akif.tapik.plugin
 
 import arrow.core.None
-import dev.akif.tapik.*
+import dev.akif.tapik.API
+import dev.akif.tapik.Body
+import dev.akif.tapik.EmptyBody
+import dev.akif.tapik.Header
+import dev.akif.tapik.HeaderValues
+import dev.akif.tapik.HttpEndpoint
+import dev.akif.tapik.Output
+import dev.akif.tapik.Parameter
+import dev.akif.tapik.ParameterPosition
+import dev.akif.tapik.QueryParameter
+import dev.akif.tapik.StatusMatcher
 import dev.akif.tapik.codec.StringCodec
-import dev.akif.tapik.plugin.metadata.*
+import dev.akif.tapik.plugin.metadata.BodyMetadata
+import dev.akif.tapik.plugin.metadata.HeaderCardinality
+import dev.akif.tapik.plugin.metadata.HeaderMetadata
+import dev.akif.tapik.plugin.metadata.HttpEndpointMetadata
+import dev.akif.tapik.plugin.metadata.InputMetadata
+import dev.akif.tapik.plugin.metadata.OutputMatchMetadata
+import dev.akif.tapik.plugin.metadata.OutputMetadata
+import dev.akif.tapik.plugin.metadata.ParameterMetadata
+import dev.akif.tapik.plugin.metadata.PathVariableMetadata
+import dev.akif.tapik.plugin.metadata.QueryParameterMetadata
+import dev.akif.tapik.plugin.metadata.TypeMetadata
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
@@ -15,23 +35,45 @@ import java.net.URLClassLoader
 import java.util.ServiceLoader
 
 /**
- * A task that generates client code from tapik endpoint definitions.
+ * Shared configuration for the Tapik code-generation engine.
  *
- * @param config The configuration for this task.
- * @param log A function to log messages.
- * @param logDebug A function to log debug messages.
- * @param logWarn A function to log warning messages.
+ * @property outputDirectory directory where non-source outputs such as reports are written.
+ * @property generatedSourcesDirectory directory where generated Kotlin sources are written.
+ * @property generatedPackageName package segment appended to source packages for generated Kotlin sources.
+ * @property endpointsSuffix suffix appended to the source-level enclosing endpoints interface.
+ * @property basePackage base package scanned for Tapik endpoint declarations.
+ * @property compiledClassesDirectory compiled classes directory of the project under analysis.
+ * @property additionalClasspathDirectories additional classpath roots used during endpoint resolution.
+ * @property generatorConfigurations generator-specific configuration keyed by generator id.
  */
-class GenerateTask(
-    private val config: GenerateTaskConfiguration,
-    private val log: (String, Throwable?) -> Unit,
-    private val logDebug: (String, Throwable?) -> Unit,
-    private val logWarn: (String, Throwable?) -> Unit
+data class TapikCodeGenerationConfiguration(
+    val outputDirectory: File,
+    val generatedSourcesDirectory: File,
+    val generatedPackageName: String = "generated",
+    val endpointsSuffix: String = "Endpoints",
+    val basePackage: String,
+    val compiledClassesDirectory: File,
+    val additionalClasspathDirectories: List<File>,
+    val generatorConfigurations: Map<String, GeneratorConfiguration>
+)
+
+/**
+ * Shared code-generation engine used by plugin frontends such as Gradle and Maven integrations.
+ *
+ * It scans compiled classes for Tapik endpoints, resolves metadata, emits the endpoint report, and
+ * invokes all configured generators available on the classpath.
+ *
+ * @param config engine configuration.
+ * @param logger logging callbacks used while scanning and generating.
+ */
+class TapikCodeGenerationEngine(
+    private val config: TapikCodeGenerationConfiguration,
+    private val logger: TapikLogger
 ) {
     private val apiImplementors: MutableSet<String> = linkedSetOf()
 
     /**
-     * Generates client code from tapik endpoint definitions.
+     * Executes endpoint discovery and generation using the configured engine inputs.
      */
     fun generate() {
         val generationOutputDirectory = config.outputDirectory.also { it.mkdirs() }
@@ -46,19 +88,14 @@ class GenerateTask(
 
         val compiledDir = config.compiledClassesDirectory
         if (!compiledDir.exists() || !compiledDir.isDirectory) {
-            logWarn(
+            logger.warn(
                 "Missing compiled classes directory '${compiledDir.absolutePath}', please first compile the project.",
                 null
             )
             return
         }
 
-        val urls =
-            (
-                listOf(
-                    compiledDir
-                ) + config.additionalClasspathDirectories
-            ).map { it.toURI().toURL() }.toTypedArray()
+        val urls = (listOf(compiledDir) + config.additionalClasspathDirectories).map { it.toURI().toURL() }.toTypedArray()
 
         URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
             val endpoints =
@@ -66,7 +103,7 @@ class GenerateTask(
                     resolveEndpoint(signature, classLoader)?.let { endpoint ->
                         runCatching { signature.toMetadata(endpoint) }
                             .onFailure { error ->
-                                logWarn(
+                                logger.warn(
                                     "Failed to build metadata for ${signature.packageName}.${signature.file}#${signature.name}",
                                     error
                                 )
@@ -82,9 +119,7 @@ class GenerateTask(
                     generatedSourcesDirectory = generatedSourcesDir,
                     generatedPackageName = config.generatedPackageName.trim().ifBlank { "generated" },
                     endpointsSuffix = config.endpointsSuffix,
-                    log = { message -> log("[tapik] $message", null) },
-                    logDebug = { message -> logDebug("[tapik (debug)] $message", null) },
-                    logWarn = { message, throwable -> logWarn("[tapik (warning)] $message", throwable) },
+                    logger = logger,
                     generatorConfiguration = GeneratorConfiguration()
                 )
 
@@ -100,7 +135,7 @@ class GenerateTask(
         file.writeText(
             endpoints.joinToString(separator = System.lineSeparator() + System.lineSeparator()) { it.toString() }
         )
-        log("Endpoint scan report is written to: ${file.absolutePath}", null)
+        logger.info("Endpoint scan report is written to: ${file.absolutePath}", null)
     }
 
     private fun invokeGenerators(
@@ -110,7 +145,7 @@ class GenerateTask(
     ) {
         val generatorConfigurations = config.generatorConfigurations
         if (generatorConfigurations.isEmpty()) {
-            log("No Tapik generators configured; skipping code generation.", null)
+            logger.info("No Tapik generators configured; skipping code generation.", null)
             return
         }
 
@@ -120,7 +155,7 @@ class GenerateTask(
         generatorConfigurations.keys
             .filterNot(generatorsById::containsKey)
             .forEach { id ->
-                logWarn("Generator '$id' is configured but not available on the classpath.", null)
+                logger.warn("Generator '$id' is configured but not available on the classpath.", null)
             }
 
         val kotlinGenerators = linkedMapOf<TapikKotlinEndpointGenerator, GeneratorConfiguration>()
@@ -130,21 +165,21 @@ class GenerateTask(
                 kotlinGenerators[generator] = generatorConfiguration
                 return@forEach
             }
-            log("Running generator '${generator.id}'", null)
+            if (generator !is TapikDirectGenerator) {
+                logger.warn("Generator '${generator.id}' does not implement a supported generator contract.", null)
+                return@forEach
+            }
+            logger.info("Running generator '${generator.id}'", null)
             val generatorContext = context.copy(generatorConfiguration = generatorConfiguration)
             runCatching {
                 generator.generate(endpoints, generatorContext)
-            }.onSuccess { generationResult ->
-                log("Generator '${generator.id}' completed successfully.", null)
+            }.onSuccess { generatedFiles ->
+                logger.info("Generator '${generator.id}' completed successfully.", null)
                 val touchedFiles =
-                    generationResult.generatedSourceFiles.filter { it.exists() && it.isFile && it.extension == "kt" }
-                KotlinGeneratedSourceImportOptimizer.optimizeFiles(
-                    files = touchedFiles,
-                    logDebug = context.logDebug,
-                    logWarn = context.logWarn
-                )
+                    generatedFiles.filter { it.exists() && it.isFile && it.extension == "kt" }
+                KotlinGeneratedSourceImportOptimizer.optimizeFiles(touchedFiles, logger)
             }.onFailure { error ->
-                logWarn("Generator '${generator.id}' failed.", error)
+                logger.warn("Generator '${generator.id}' failed.", error)
             }
         }
 
@@ -158,95 +193,35 @@ class GenerateTask(
         generators: Map<TapikKotlinEndpointGenerator, GeneratorConfiguration>,
         context: TapikGeneratorContext
     ): Set<File> {
-        data class FileState(
-            val packageName: String,
-            val sourcePackageName: String,
-            val sourceFile: String,
-            val imports: MutableSet<String> = linkedSetOf(),
-            val aggregateInterfaces: MutableList<AggregateInterfaceContribution> = mutableListOf(),
-            val endpointMembers: MutableMap<String, MutableList<String>> = linkedMapOf()
-        )
-
-        val fileStates = linkedMapOf<Triple<String, String, String>, FileState>()
-        val endpointsSuffix = context.endpointsSuffix
+        val sourceFiles = mutableListOf<KotlinSourceFileContribution>()
 
         generators.forEach { (generator, generatorConfiguration) ->
-            log("Running generator '${generator.id}'", null)
+            logger.info("Running generator '${generator.id}'", null)
             val generatorContext = context.copy(generatorConfiguration = generatorConfiguration)
             runCatching {
                 generator.contribute(endpoints, generatorContext)
             }.onSuccess { contribution ->
-                log("Generator '${generator.id}' completed successfully.", null)
-                contribution.sourceFiles.forEach { sourceFile ->
-                    val key = Triple(sourceFile.packageName, sourceFile.sourcePackageName, sourceFile.sourceFile)
-                    val state =
-                        fileStates.getOrPut(key) {
-                            FileState(
-                                packageName = sourceFile.packageName,
-                                sourcePackageName = sourceFile.sourcePackageName,
-                                sourceFile = sourceFile.sourceFile
-                            )
-                        }
-                    state.imports += sourceFile.imports
-                    state.aggregateInterfaces +=
-                        AggregateInterfaceContribution(
-                            name = sourceFile.aggregateInterfaceName,
-                            nestedInterfaceName = sourceFile.nestedInterfaceName
-                        )
-                    sourceFile.endpointMembers.forEach { endpointMember ->
-                        state.endpointMembers
-                            .getOrPut(endpointMember.endpointPropertyName) { mutableListOf() }
-                            .add(endpointMember.content)
-                    }
-                }
+                logger.info("Generator '${generator.id}' completed successfully.", null)
+                sourceFiles += contribution.sourceFiles
             }.onFailure { error ->
-                logWarn("Generator '${generator.id}' failed.", error)
+                logger.warn("Generator '${generator.id}' failed.", error)
             }
         }
 
-        if (fileStates.isEmpty()) {
+        if (sourceFiles.isEmpty()) {
             return emptySet()
         }
 
-        val generatedFiles = linkedSetOf<File>()
-        val filesToOptimize = linkedSetOf<File>()
-        val writtenTargets = mutableMapOf<File, Triple<String, String, String>>()
-        fileStates.forEach { (_, state) ->
-            val packageName = state.packageName
-            val sourceFile = state.sourceFile
-            val packageDirectory = File(context.generatedSourcesDirectory, packageName.replace('.', '/')).also { it.mkdirs() }
-            val targetFile = File(packageDirectory, "${sourceFile.toEndpointContainerName(endpointsSuffix)}.kt")
-            writtenTargets[targetFile]?.let { existing ->
-                context.logWarn(
-                    "Multiple endpoint sources map to '${targetFile.absolutePath}' when using target package '$packageName': " +
-                        "${existing.second}.${existing.third} and ${state.sourcePackageName}.${state.sourceFile}. " +
-                        "Later output will overwrite earlier output.",
-                    null
-                )
-            }
-            writtenTargets[targetFile] = Triple(packageName, state.sourcePackageName, sourceFile)
-            val fileEndpoints =
-                endpoints.filter { it.packageName == state.sourcePackageName && it.sourceFile == sourceFile }
-            targetFile.writeText(
-                renderMergedKotlinEndpointFile(
-                    packageName = packageName,
-                    sourceFile = sourceFile,
-                    endpointsSuffix = endpointsSuffix,
-                    endpoints = fileEndpoints,
-                    aggregateInterfaces = state.aggregateInterfaces.distinctBy { it.name to it.nestedInterfaceName },
-                    endpointMembers = state.endpointMembers,
-                    imports = state.imports
-                )
+        val generatedFiles =
+            writeMergedKotlinSourceFiles(
+                endpoints = endpoints,
+                sourceFiles = sourceFiles,
+                generatedSourcesDirectory = context.generatedSourcesDirectory,
+                endpointsSuffix = context.endpointsSuffix,
+                logWarn = { message, throwable -> logger.warn(message, throwable) }
             )
-            generatedFiles += targetFile
-            filesToOptimize += targetFile
-        }
 
-        KotlinGeneratedSourceImportOptimizer.optimizeFiles(
-            files = filesToOptimize,
-            logDebug = context.logDebug,
-            logWarn = context.logWarn
-        )
+        KotlinGeneratedSourceImportOptimizer.optimizeFiles(generatedFiles, logger)
 
         return generatedFiles
     }
@@ -276,10 +251,10 @@ class GenerateTask(
                     if (e.message?.contains("Unsupported class file major version") == true) {
                         parseClassWithReflection(relativePath, classLoader, results)
                     } else {
-                        logWarn("Failed to analyse class: ${classFile.absolutePath}", e)
+                        logger.warn("Failed to analyse class: ${classFile.absolutePath}", e)
                     }
                 } catch (e: Exception) {
-                    logWarn("Failed to analyse class: ${classFile.absolutePath}", e)
+                    logger.warn("Failed to analyse class: ${classFile.absolutePath}", e)
                 }
             }
 
@@ -293,7 +268,7 @@ class GenerateTask(
 
     private fun processClassNode(
         classNode: ClassNode,
-        classLoader: URLClassLoader,
+        classLoader: ClassLoader,
         results: MutableMap<String, HttpEndpointSignature>
     ) {
         if (!classNode.isApiImplementor(classLoader)) return
@@ -306,10 +281,10 @@ class GenerateTask(
             runCatching {
                 BytecodeParser.parseHttpEndpoint(method.signature, classNode.name, method.name)
             }.onFailure { error ->
-                logDebug("Failed to parse signature for ${classNode.name}#${method.name}", error)
+                logger.debug("Failed to parse signature for ${classNode.name}#${method.name}", error)
             }.getOrNull()
                 ?.let { signature ->
-                    log("Discovered endpoint ${signature.packageName}.${signature.file}#${signature.name}", null)
+                    logger.info("Discovered endpoint ${signature.packageName}.${signature.file}#${signature.name}", null)
                     results[signature.uniqueKey] = signature
                 }
         }
@@ -326,7 +301,7 @@ class GenerateTask(
         val clazz =
             runCatching { classLoader.loadClass(className) }
                 .onFailure { error ->
-                    logWarn("Failed to load class $className for reflection analysis", error)
+                    logger.warn("Failed to load class $className for reflection analysis", error)
                 }.getOrNull()
                 ?: return
 
@@ -340,10 +315,10 @@ class GenerateTask(
                 runCatching {
                     BytecodeParser.parseHttpEndpoint(method.genericReturnType, ownerInternalName, method.name)
                 }.onFailure { error ->
-                    logDebug("Failed to parse signature for $className#${method.name} via reflection", error)
+                    logger.debug("Failed to parse signature for $className#${method.name} via reflection", error)
                 }.getOrNull()
                     ?.let { signatureResult ->
-                        log(
+                        logger.info(
                             "Discovered endpoint via reflection ${signatureResult.packageName}.${signatureResult.file}#${signatureResult.name}",
                             null
                         )
@@ -383,7 +358,7 @@ class GenerateTask(
             method.invoke(instance) as? HttpEndpoint<*, *, *>
                 ?: throw IllegalStateException("Resolved member $className#$getterName does not return HttpEndpoint")
         }.onFailure { error ->
-            logWarn("Failed to resolve endpoint ${signature.packageName}.${signature.file}#${signature.name}", error)
+            logger.warn("Failed to resolve endpoint ${signature.packageName}.${signature.file}#${signature.name}", error)
         }.getOrNull()
     }
 
@@ -454,8 +429,7 @@ class GenerateTask(
                 ),
             outputs = endpoint.outputs.toList().buildOutputsMetadata(outputs.arguments),
             packageName = packageName,
-            sourceFile = file,
-            rawType = rawType
+            sourceFile = file
         )
 
     @Suppress("UNCHECKED_CAST")
@@ -477,7 +451,7 @@ class GenerateTask(
                 ParameterPosition.Query -> {
                     QueryParameterMetadata(
                         name = parameter.name,
-                        type = resolveQueryParameterType(parameter, originalTypeMetadata),
+                        type = originalTypeMetadata,
                         required = parameter.required,
                         default = (parameter as? QueryParameter<*>)?.let { q ->
                             q.default.map { default -> default?.let { d -> (q.codec as StringCodec<Any>).encode(d) } }
@@ -486,19 +460,6 @@ class GenerateTask(
                 }
             }
         }
-
-    private fun resolveQueryParameterType(
-        parameter: Parameter<*>,
-        typeMetadata: TypeMetadata
-    ): TypeMetadata {
-        if (parameter !is QueryParameter<*>) {
-            return typeMetadata
-        }
-        if (parameter.required) {
-            return typeMetadata
-        }
-        return typeMetadata
-    }
 
     private fun List<Header<*>>.buildHeaderMetadata(headerTypes: List<TypeMetadata>): List<HeaderMetadata> =
         mapIndexed { index, header ->
@@ -585,58 +546,21 @@ class GenerateTask(
             mediaType = body.mediaType?.toString()
         )
 
-    private fun runtimeTypeMetadata(type: Class<*>): TypeMetadata {
-        val rawTypeName = type.name.replace('$', '.')
-        val mappedTypeName = JAVA_TO_KOTLIN_RUNTIME_TYPES[rawTypeName] ?: rawTypeName
-        return TypeMetadata(
-            name = mappedTypeName,
-            arguments = emptyList()
+    private fun MethodNode.shouldProcessMethod(): Boolean =
+        !name.startsWith("<") &&
+            desc.startsWith("()") &&
+            (access and (Opcodes.ACC_SYNTHETIC or Opcodes.ACC_BRIDGE)) == 0
+
+    private fun Method.shouldProcessMethod(): Boolean =
+        parameterCount == 0 &&
+            !isSynthetic &&
+            !isBridge &&
+            !Modifier.isPrivate(modifiers) &&
+            declaringClass != Any::class.java
+
+    private fun runtimeTypeMetadata(type: Class<*>): TypeMetadata =
+        TypeMetadata(
+            name = type.name,
+            nullable = false
         )
-    }
-
-    private companion object {
-        private val JAVA_TO_KOTLIN_RUNTIME_TYPES =
-            mapOf(
-                "java.lang.Boolean" to "kotlin.Boolean",
-                "java.lang.Byte" to "kotlin.Byte",
-                "java.lang.Short" to "kotlin.Short",
-                "java.lang.Integer" to "kotlin.Int",
-                "java.lang.Long" to "kotlin.Long",
-                "java.lang.Float" to "kotlin.Float",
-                "java.lang.Double" to "kotlin.Double",
-                "java.lang.Character" to "kotlin.Char",
-                "java.lang.String" to "kotlin.String",
-                "java.lang.Object" to "kotlin.Any",
-                "java.lang.Void" to "kotlin.Unit",
-                "java.util.List" to "kotlin.collections.List",
-                "java.util.Set" to "kotlin.collections.Set",
-                "java.util.Map" to "kotlin.collections.Map"
-            )
-    }
-
-    private fun Method.shouldProcessMethod(): Boolean {
-        if (name == "<init>" || name == "<clinit>" || name.contains("$")) {
-            return false
-        }
-        if (isSynthetic || isBridge) {
-            return false
-        }
-        if (parameterCount != 0) {
-            return false
-        }
-        return true
-    }
-
-    private fun MethodNode.shouldProcessMethod(): Boolean {
-        if (signature == null) {
-            return false
-        }
-        if ((access and Opcodes.ACC_SYNTHETIC) != 0 || (access and Opcodes.ACC_BRIDGE) != 0) {
-            return false
-        }
-        if (name == "<init>" || name == "<clinit>" || name.contains("$")) {
-            return false
-        }
-        return true
-    }
 }

@@ -12,11 +12,10 @@ import dev.akif.tapik.plugin.metadata.TypeMetadata
  * @property parameters tuple type describing the captured path and query parameters.
  * @property input input type describing required headers and body.
  * @property outputs tuple type describing candidate response branches; individual entries are `Output`.
- * @property rawType string representation of the full endpoint type.
  * @property ownerInternalName internal JVM name of the class or file that hosts the endpoint.
  * @property methodName method or property accessor that materialises the endpoint.
  */
-data class HttpEndpointSignature(
+internal data class HttpEndpointSignature(
     val name: String,
     val packageName: String,
     val file: String,
@@ -24,7 +23,6 @@ data class HttpEndpointSignature(
     val parameters: TypeMetadata,
     val input: InputSignature,
     val outputs: TypeMetadata,
-    val rawType: String,
     val ownerInternalName: String,
     val methodName: String
 ) {
@@ -48,7 +46,7 @@ data class HttpEndpointSignature(
  * @property headers tuple type describing required headers.
  * @property body body type consumed by the endpoint.
  */
-data class InputSignature(
+internal data class InputSignature(
     val type: TypeMetadata,
     val headers: TypeMetadata,
     val body: TypeMetadata

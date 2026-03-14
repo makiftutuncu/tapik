@@ -19,13 +19,13 @@ data class Output<H : Headers, B : Body<*>>(
  * @param I type of the request input definition.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares no outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the existing configuration plus the newly added output.
  */
 @JvmName("outputWithStatus0")
 fun <P : Parameters, I : Input<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs0>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs1<Output<Headers0, B>>> =
     output(
@@ -42,14 +42,14 @@ fun <P : Parameters, I : Input<*, *>, B : Body<*>> HttpEndpointBuildingContext<P
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares no outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the existing configuration plus the newly added output.
  */
 @JvmName("outputWithStatusHeaders0")
 fun <P : Parameters, I : Input<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs0>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs1<Output<H, B>>> =
@@ -113,13 +113,13 @@ fun <P : Parameters, I : Input<*, *>, H : Headers, B : Body<*>> HttpEndpointBuil
  * @param O1 type of the existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares a single output.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original output and the newly added one.
  */
 @JvmName("outputWithStatus1")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs1<O1>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs2<O1, Output<Headers0, B>>> =
     output(
@@ -137,14 +137,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, B : Body<*>> HttpEndpoi
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares a single output.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original output and the newly added one.
  */
 @JvmName("outputWithStatusHeaders1")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs1<O1>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs2<O1, Output<H, B>>> =
@@ -211,13 +211,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, H : Headers, B : Body<*
  * @param O2 type of the second existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares two outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus2")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs2<O1, O2>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs3<O1, O2, Output<Headers0, B>>> =
     output(
@@ -236,14 +236,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, B : 
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares two outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders2")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs2<O1, O2>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs3<O1, O2, Output<H, B>>> =
@@ -313,13 +313,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, H : 
  * @param O3 type of the third existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares three outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus3")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs3<O1, O2, O3>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs4<O1, O2, O3, Output<Headers0, B>>> =
     output(
@@ -339,14 +339,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares three outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders3")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs3<O1, O2, O3>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs4<O1, O2, O3, Output<H, B>>> =
@@ -419,13 +419,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param O4 type of the fourth existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares four outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus4")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs4<O1, O2, O3, O4>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs5<O1, O2, O3, O4, Output<Headers0, B>>> =
     output(
@@ -446,14 +446,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares four outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders4")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs4<O1, O2, O3, O4>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs5<O1, O2, O3, O4, Output<H, B>>> =
@@ -529,13 +529,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param O5 type of the fifth existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares five outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus5")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs5<O1, O2, O3, O4, O5>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs6<O1, O2, O3, O4, O5, Output<Headers0, B>>> =
     output(
@@ -557,14 +557,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares five outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders5")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs5<O1, O2, O3, O4, O5>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs6<O1, O2, O3, O4, O5, Output<H, B>>> =
@@ -643,13 +643,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param O6 type of the sixth existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares six outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus6")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs6<O1, O2, O3, O4, O5, O6>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs7<O1, O2, O3, O4, O5, O6, Output<Headers0, B>>> =
     output(
@@ -672,14 +672,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares six outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders6")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs6<O1, O2, O3, O4, O5, O6>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs7<O1, O2, O3, O4, O5, O6, Output<H, B>>> =
@@ -761,13 +761,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param O7 type of the seventh existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares seven outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus7")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs7<O1, O2, O3, O4, O5, O6, O7>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs8<O1, O2, O3, O4, O5, O6, O7, Output<Headers0, B>>> =
     output(
@@ -791,14 +791,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares seven outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders7")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs7<O1, O2, O3, O4, O5, O6, O7>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs8<O1, O2, O3, O4, O5, O6, O7, Output<H, B>>> =
@@ -883,13 +883,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param O8 type of the eighth existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares eight outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus8")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, O8 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs8<O1, O2, O3, O4, O5, O6, O7, O8>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, Output<Headers0, B>>> =
     output(
@@ -914,14 +914,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares eight outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders8")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, O8 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs8<O1, O2, O3, O4, O5, O6, O7, O8>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, Output<H, B>>> =
@@ -1009,13 +1009,13 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param O9 type of the ninth existing output that remains unchanged.
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares nine outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatus9")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, O8 : Output<*, *>, O9 : Output<*, *>, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, O9>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs10<O1, O2, O3, O4, O5, O6, O7, O8, O9, Output<Headers0, B>>> =
     output(
@@ -1041,14 +1041,14 @@ fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 :
  * @param H type of the response header definition created by [headers].
  * @param B type of the response body definition created by [body].
  * @receiver Endpoint that currently declares nine outputs.
- * @param status HTTP status used to select the new output; defaults to [Status.OK].
+ * @param status HTTP status used to select the new output; defaults to [Status.Ok].
  * @param headers response headers emitted when [status] matches.
  * @param body factory producing the response body definition when [status] matches.
  * @return endpoint containing the original outputs together with the newly added one.
  */
 @JvmName("outputWithStatusHeaders9")
 fun <P : Parameters, I : Input<*, *>, O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, O8 : Output<*, *>, O9 : Output<*, *>, H : Headers, B : Body<*>> HttpEndpointBuildingContext<P, I, Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, O9>>.output(
-    status: Status = Status.OK,
+    status: Status = Status.Ok,
     headers: H,
     body: () -> B
 ): HttpEndpointBuildingContext<P, I, Outputs10<O1, O2, O3, O4, O5, O6, O7, O8, O9, Output<H, B>>> =

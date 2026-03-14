@@ -54,10 +54,10 @@ object Users : API {
                 testJsonBody<CreateUserRequest>("createUserRequest")
             }
             output(
-                status = Status.CREATED,
+                status = Status.Created,
                 headers = headersOf(Header.Location)
             ) { userResponse }
-            output(Status.BAD_REQUEST) { errorResponse }
+            output(Status.BadRequest) { errorResponse }
         }
     }
 
@@ -65,7 +65,7 @@ object Users : API {
         get(base / id).apply {
             input(header.boolean("Proxied"))
             output { userResponse }
-            output(Status.NOT_FOUND) { errorResponse }
+            output(Status.NotFound) { errorResponse }
         }
     }
 
@@ -75,7 +75,7 @@ object Users : API {
     ) {
         get(base / id / "status").apply {
             output { stringBody() }
-            output(Status.NOT_FOUND) { errorResponse }
+            output(Status.NotFound) { errorResponse }
         }
     }
 
@@ -93,10 +93,10 @@ object Users : API {
             post(path.boolean("on")).apply {
                 input(Header.Accept)
                 output(
-                    Status.BAD_REQUEST,
+                    Status.BadRequest,
                     headersOf(Header.ContentType(MediaType.Json))
                 ) { testJsonBody<Map<String, String>>("error") }
-                output(anyStatus(Status.UNAUTHORIZED, Status.FORBIDDEN)) { stringBody("authError") }
+                output(anyStatus(Status.Unauthorized, Status.Forbidden)) { stringBody("authError") }
                 output(unmatchedStatus) { EmptyBody }
             }
         }

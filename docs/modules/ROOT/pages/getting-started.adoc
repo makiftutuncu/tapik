@@ -79,8 +79,8 @@ object ProductEndpoints : API {
     ) {
         get("products" / productId + query.string("locale").optional("en-US"))
             .input(header.uuid("X-Request-Id"))
-            .output(Status.OK) { jsonBody<ProductView>("product") }
-            .output(Status.NOT_FOUND) { jsonBody<ProblemDetails>("problem") }
+            .output(Status.Ok) { jsonBody<ProductView>("product") }
+            .output(Status.NotFound) { jsonBody<ProblemDetails>("problem") }
     }
 }
 ----

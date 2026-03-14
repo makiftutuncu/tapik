@@ -38,8 +38,8 @@ Returns localized information when the locale query parameter is supplied.
 ### Outputs
 | Description | Headers | Body |
 | --- | --- | --- |
-| Status: 200 OK | - | `ProductView` named "product" as `application/json` |
-| Status: 404 NOT_FOUND | - | `ProblemDetails` named "problem" as `application/json` |
+| Status: 200 Ok | - | `ProductView` named "product" as `application/json` |
+| Status: 404 NotFound | - | `ProblemDetails` named "problem" as `application/json` |
 ----
 
 == Keeping Documentation Fresh

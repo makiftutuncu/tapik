@@ -114,10 +114,10 @@ object ProductEndpoints : API {
     ) {
         get("products" / productId + locale)
             .input(header.uuid("X-Request-Id"))
-            .output(Status.OK) {
+            .output(Status.Ok) {
                 jsonBody<ProductView>("product")
             }
-            .output(Status.NOT_FOUND) {
+            .output(Status.NotFound) {
                 jsonBody<ProblemDetails>("problem")
             }
     }
@@ -130,7 +130,7 @@ Highlights:
 
 * +endpoint { ... }+ infers the endpoint +id+ from the property name (+getProduct+). The description and details flow into generated KDoc and Markdown.
 * Path building uses operator overloads: +"products" / productId+.
-* Query parameters append with +, headers with +input { ... }+, and outputs use +output(Status.OK) { ... }+.
+* Query parameters append with +, headers with +input { ... }+, and outputs use +output(Status.Ok) { ... }+.
 * Response variants can be chained; the DSL supports +OneOf+ unions to model branching behaviour.
 
 == Running Generation

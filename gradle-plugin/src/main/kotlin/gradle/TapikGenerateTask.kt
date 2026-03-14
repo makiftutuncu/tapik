@@ -31,11 +31,6 @@ abstract class TapikGenerateTask : DefaultTask() {
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
 
-    /** Source directory containing the Kotlin declarations that define Tapik endpoints. */
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val sourceDirectory: DirectoryProperty
-
     /** Directory holding compiled classes associated with the project under analysis. */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -78,8 +73,8 @@ abstract class TapikGenerateTask : DefaultTask() {
         val generatorIds =
             (clientSuffixesByGenerator.keys + serverSuffixesByGenerator.keys).toSet()
 
-        GenerateTask(
-            config = GenerateTaskConfiguration(
+        TapikCodeGenerationEngine(
+            config = TapikCodeGenerationConfiguration(
                 outputDirectory = outputDirectory.get().asFile,
                 generatedSourcesDirectory = generatedSourcesDirectory.get().asFile,
                 generatedPackageName = generatedPackageName.get().trim().ifBlank { "generated" },
@@ -96,9 +91,7 @@ abstract class TapikGenerateTask : DefaultTask() {
                             )
                         }
             ),
-            log = logger::lifecycle,
-            logDebug = logger::debug,
-            logWarn = logger::warn
+            logger = TapikGradleLogger(logger)
         ).generate()
     }
 }

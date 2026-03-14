@@ -1,5 +1,7 @@
 package dev.akif.tapik.plugin
 
+import dev.akif.tapik.plugin.metadata.BodyMetadata
+import dev.akif.tapik.plugin.metadata.QueryParameterMetadata
 import dev.akif.tapik.plugin.metadata.TypeMetadata
 
 /**
@@ -28,31 +30,64 @@ fun TypeMetadata.render(): String {
 fun TypeMetadata.simpleName(): String = computeSimpleName(name)
 
 /**
- * Collects the simple names of the receiver type and all of its nested generic arguments.
+ * Returns the Kotlin value type exposed by generated code for the receiver body metadata.
  *
- * @receiver Tapik type metadata instance.
- * @return set containing the receiver's simple name plus the simple names of nested arguments.
+ * `JsonBody<T>` resolves to `T`, `StringBody` to `kotlin.String`, `RawBody` to `kotlin.ByteArray`,
+ * and unknown body wrappers fall back to their first generic argument or `kotlin.Any`.
+ *
+ * @receiver body metadata to inspect.
+ * @return generated Kotlin value type.
  */
-fun TypeMetadata.collectSimpleNames(): Set<String> =
-    buildSet {
-        add(simpleName())
-        arguments.forEach { addAll(it.collectSimpleNames()) }
+fun BodyMetadata.renderValueType(): String =
+    when (type.simpleName()) {
+        "JsonBody" -> type.arguments.firstOrNull()?.render() ?: "kotlin.Any"
+        "StringBody" -> "kotlin.String"
+        "RawBody" -> "kotlin.ByteArray"
+        else -> type.arguments.firstOrNull()?.render() ?: "kotlin.Any"
     }
 
 /**
- * Determines a Kotlin type that represents the payload carried by Tapik body metadata.
+ * Shared type information used when generators expose query parameters as Kotlin method arguments.
  *
- * @receiver Tapik type metadata instance.
- * @return Kotlin type name representing the decoded body value.
+ * @property nonNullableType rendered type without nullable marker.
+ * @property renderedType rendered Kotlin argument type after applying Tapik default/nullability rules.
+ * @property hasDefault whether the generated argument should declare a default expression.
+ * @property hasNonNullDefault whether the endpoint metadata guarantees a non-null default value.
  */
-fun TypeMetadata.determineBodyValueType(): String =
-    when (simpleName()) {
-        "JsonBody" -> arguments.firstOrNull()?.render() ?: "kotlin.Any"
-        "StringBody" -> "kotlin.String"
-        "RawBody" -> "kotlin.ByteArray"
-        "EmptyBody" -> "kotlin.Unit"
-        else -> arguments.firstOrNull()?.render() ?: "kotlin.Any"
-    }
+data class GeneratedQueryParameterTypeInfo(
+    val nonNullableType: String,
+    val renderedType: String,
+    val hasDefault: Boolean,
+    val hasNonNullDefault: Boolean
+)
+
+/**
+ * Resolves the Kotlin argument type information used by generated clients/controllers for a query parameter.
+ *
+ * Required parameters and optional parameters with non-null defaults stay non-nullable. Optional
+ * parameters without such defaults are rendered nullable and receive a nullable default expression.
+ *
+ * @receiver query parameter metadata to inspect.
+ * @return rendered type information shared by generators.
+ */
+fun QueryParameterMetadata.toGeneratedTypeInfo(): GeneratedQueryParameterTypeInfo {
+    val hasDefault = !required
+    val hasNonNullDefault = default.fold({ false }) { it != null }
+    val nonNullableType = type.copy(nullable = false).render()
+    val renderedType =
+        if (required || hasNonNullDefault) {
+            nonNullableType
+        } else {
+            type.copy(nullable = true).render()
+        }
+
+    return GeneratedQueryParameterTypeInfo(
+        nonNullableType = nonNullableType,
+        renderedType = renderedType,
+        hasDefault = hasDefault,
+        hasNonNullDefault = hasNonNullDefault
+    )
+}
 
 /**
  * Sanitises an arbitrary identifier so that it is safe to use as a Kotlin name.
@@ -101,7 +136,7 @@ fun uniqueName(
  * @param name identifier to render.
  * @return safe Kotlin identifier, quoted if necessary.
  */
-fun renderIdentifier(name: String): String {
+internal fun renderIdentifier(name: String): String {
     val candidate = normalizeIdentifier(name) ?: "value"
     return if (candidate in KOTLIN_KEYWORDS) {
         "`$candidate`"
@@ -123,7 +158,7 @@ private val NON_ALPHANUMERIC = Regex("[^A-Za-z0-9]+")
  * @param fqcn fully-qualified class name, possibly including nested types.
  * @return tail name starting at the first segment that begins with an uppercase letter.
  */
-fun computeSimpleName(fqcn: String): String {
+internal fun computeSimpleName(fqcn: String): String {
     val parts = fqcn.split('.')
     val indexOfType = parts.indexOfFirst { it.firstOrNull()?.isUpperCase() == true }
     return if (indexOfType == -1) {
@@ -132,6 +167,19 @@ fun computeSimpleName(fqcn: String): String {
         parts.drop(indexOfType).joinToString(".")
     }
 }
+
+/**
+ * Appends [generatedPackageName] to the receiver package unless the receiver is blank.
+ *
+ * @receiver source package name.
+ * @param generatedPackageName generated package segment.
+ * @return resolved target package name.
+ */
+fun String.toGeneratedPackageName(generatedPackageName: String): String =
+    listOfNotNull(
+        takeIf(String::isNotBlank),
+        generatedPackageName.trim().takeIf(String::isNotBlank)
+    ).joinToString(".")
 
 private fun normalizeIdentifier(input: String): String? {
     val trimmed = input.trim()
@@ -198,7 +246,7 @@ private fun normalizeIdentifier(input: String): String? {
  * @param text raw documentation block.
  * @return trimmed documentation lines or an empty list when [text] is blank.
  */
-fun linesForDocumentation(text: String?): List<String> =
+internal fun linesForDocumentation(text: String?): List<String> =
     text
         ?.trim()
         ?.takeIf { it.isNotEmpty() }

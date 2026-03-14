@@ -10,7 +10,7 @@ import java.lang.reflect.WildcardType
 /**
  * Inspects bytecode or reflective type information to extract Tapik HTTP endpoint signatures.
  */
-object BytecodeParser {
+internal object BytecodeParser {
     private const val TAPIK_PACKAGE = "dev.akif.tapik"
     private const val HTTP_ENDPOINT_FQCN = "$TAPIK_PACKAGE.HttpEndpoint"
     private const val PARAMETERS_PREFIX = "$TAPIK_PACKAGE.Parameters"
@@ -91,15 +91,6 @@ object BytecodeParser {
                 .joinToString(separator = "") { it }
         val endpointName = deriveEndpointName(methodName)
 
-        val rawType = TypeMetadata(
-            name = endpointClass.importName(),
-            arguments = listOf(
-                parameters.type,
-                input.type,
-                outputs.type
-            )
-        )
-
         val inputSignature =
             InputSignature(
                 type = input.type,
@@ -115,7 +106,6 @@ object BytecodeParser {
             parameters = parameters.type,
             input = inputSignature,
             outputs = outputs.type,
-            rawType = rawType.toString(),
             ownerInternalName = ownerInternalName,
             methodName = methodName
         )

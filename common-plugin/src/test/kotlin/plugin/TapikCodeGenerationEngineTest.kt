@@ -5,12 +5,11 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.io.CleanupMode
 import org.junit.jupiter.api.io.TempDir
 
-class GenerateTaskTest {
+class TapikCodeGenerationEngineTest {
     companion object {
         @JvmStatic
         @TempDir(cleanup = CleanupMode.ALWAYS)
@@ -23,8 +22,8 @@ class GenerateTaskTest {
         val outputDir = temporaryDir.resolve("out").createDirectories().toFile()
         val generatedDir = temporaryDir.resolve("generated").createDirectories().toFile()
 
-        GenerateTask(
-            config = GenerateTaskConfiguration(
+        TapikCodeGenerationEngine(
+            config = TapikCodeGenerationConfiguration(
                 outputDirectory = outputDir,
                 generatedSourcesDirectory = generatedDir,
                 endpointsSuffix = "Endpoints",
@@ -38,9 +37,7 @@ class GenerateTaskTest {
                         "markdown-docs" to GeneratorConfiguration()
                     )
             ),
-            log = { s, _ -> println(s) },
-            logDebug = { s, _ -> println(s) },
-            logWarn = { s, _ -> println(s) }
+            logger = TapikLogger.Console
         ).generate()
 
         val summaryFile = File(outputDir, "tapik-endpoints.txt")
@@ -74,8 +71,8 @@ class GenerateTaskTest {
         val outputDir = temporaryDir.resolve("out-2").createDirectories().toFile()
         val generatedDir = temporaryDir.resolve("generated-2").createDirectories().toFile()
 
-        GenerateTask(
-            config = GenerateTaskConfiguration(
+        TapikCodeGenerationEngine(
+            config = TapikCodeGenerationConfiguration(
                 outputDirectory = outputDir,
                 generatedSourcesDirectory = generatedDir,
                 endpointsSuffix = "Endpoints",
@@ -89,9 +86,7 @@ class GenerateTaskTest {
                         "markdown-docs" to GeneratorConfiguration()
                     )
             ),
-            log = { _, _ -> },
-            logDebug = { _, _ -> },
-            logWarn = { _, _ -> }
+            logger = TapikLogger.NoOp
         ).generate()
 
         val generatedClient = File(generatedDir, "dev/akif/tapik/plugin/fixtures/generated/SampleEndpoints.kt")
@@ -115,8 +110,8 @@ class GenerateTaskTest {
         val outputDir = temporaryDir.resolve("out-3").createDirectories().toFile()
         val generatedDir = temporaryDir.resolve("generated-3").createDirectories().toFile()
 
-        GenerateTask(
-            config = GenerateTaskConfiguration(
+        TapikCodeGenerationEngine(
+            config = TapikCodeGenerationConfiguration(
                 outputDirectory = outputDir,
                 generatedSourcesDirectory = generatedDir,
                 generatedPackageName = "generated",
@@ -130,9 +125,7 @@ class GenerateTaskTest {
                         "spring-webmvc" to GeneratorConfiguration()
                     )
             ),
-            log = { _, _ -> },
-            logDebug = { _, _ -> },
-            logWarn = { _, _ -> }
+            logger = TapikLogger.NoOp
         ).generate()
 
         val generatedClient = File(generatedDir, "dev/akif/tapik/plugin/fixtures/generated/SampleEndpoints.kt")

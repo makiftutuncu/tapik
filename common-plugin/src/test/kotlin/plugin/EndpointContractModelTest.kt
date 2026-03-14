@@ -26,7 +26,7 @@ class EndpointContractModelTest {
         assertEquals("Create", model.interfaceName)
         assertEquals("UsersEndpoints.Create.Response", model.response.typeName)
         assertEquals(listOf("Created", "BadRequest"), model.response.variants.map { it.typeName })
-        assertEquals(Status.CREATED, model.response.variants.first().status)
+        assertEquals(Status.Created, model.response.variants.first().status)
         assertEquals(
             listOf(
                 EndpointContractModel.ResponseModel.Field("response", "dev.akif.tapik.test.UserResponse"),
@@ -54,7 +54,7 @@ class EndpointContractModelTest {
                             outputs =
                                 listOf(
                                     OutputMetadata(
-                                        match = OutputMatchMetadata.Exact(Status.OK),
+                                        match = OutputMatchMetadata.Exact(Status.Ok),
                                         description = "OK",
                                         headers = emptyList(),
                                         body =
@@ -66,8 +66,7 @@ class EndpointContractModelTest {
                                     )
                                 ),
                             packageName = "dev.akif.tapik.test",
-                            sourceFile = "Users",
-                            rawType = "HttpEndpoint"
+                            sourceFile = "Users"
                         )
                     ),
                 sourceFile = "Users"
@@ -112,8 +111,7 @@ class EndpointContractModelTest {
                                     )
                                 ),
                             packageName = "dev.akif.tapik.test",
-                            sourceFile = "Files",
-                            rawType = "HttpEndpoint"
+                            sourceFile = "Files"
                         )
                     ),
                 sourceFile = "Files"
@@ -151,7 +149,7 @@ class EndpointContractModelTest {
                             outputs =
                                 listOf(
                                     OutputMetadata(
-                                        match = OutputMatchMetadata.Exact(Status.OK),
+                                        match = OutputMatchMetadata.Exact(Status.Ok),
                                         description = "OK",
                                         headers = emptyList(),
                                         body = BodyMetadata(type = TypeMetadata("dev.akif.tapik.StringBody"), name = "response")
@@ -164,8 +162,7 @@ class EndpointContractModelTest {
                                     )
                                 ),
                             packageName = "dev.akif.tapik.test",
-                            sourceFile = "Example",
-                            rawType = "HttpEndpoint"
+                            sourceFile = "Example"
                         )
                     ),
                 sourceFile = "Example"
@@ -202,7 +199,7 @@ class EndpointContractModelTest {
             outputs =
                 listOf(
                     OutputMetadata(
-                        match = OutputMatchMetadata.Exact(Status.CREATED),
+                        match = OutputMatchMetadata.Exact(Status.Created),
                         description = "Created",
                         headers =
                             listOf(
@@ -220,7 +217,7 @@ class EndpointContractModelTest {
                             )
                     ),
                     OutputMetadata(
-                        match = OutputMatchMetadata.Exact(Status.BAD_REQUEST),
+                        match = OutputMatchMetadata.Exact(Status.BadRequest),
                         description = "Bad Request",
                         headers = emptyList(),
                         body =
@@ -232,7 +229,6 @@ class EndpointContractModelTest {
                     )
                 ),
             packageName = "dev.akif.tapik.test",
-            sourceFile = "Users",
-            rawType = "HttpEndpoint"
+            sourceFile = "Users"
         )
 }

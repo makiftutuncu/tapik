@@ -1,6 +1,5 @@
 package dev.akif.tapik.spring.restclient
 
-import dev.akif.tapik.Helpers
 import org.springframework.web.client.RestClient
 
 /**
@@ -8,7 +7,7 @@ import org.springframework.web.client.RestClient
  *
  * @see RestClientInterpreter
  */
-interface RestClientBasedClient : Helpers {
+interface RestClientBasedClient {
     /** Underlying [RestClient] instance used to execute requests. */
     val restClient: RestClient
 

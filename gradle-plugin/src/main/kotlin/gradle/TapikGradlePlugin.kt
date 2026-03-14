@@ -29,7 +29,6 @@ class TapikGradlePlugin : Plugin<Project> {
             it.generatedPackageName.set(extension.generatedPackageName)
             it.endpointsSuffix.set(extension.endpointsSuffix)
             it.outputDirectory.set(target.layout.buildDirectory.dir("generated"))
-            it.sourceDirectory.set(target.layout.projectDirectory.dir("src/main/kotlin"))
             it.compiledClassesDirectory.set(target.layout.buildDirectory.dir("classes/kotlin/main"))
             it.generatedSourcesDirectory.set(generatedSources)
             it.additionalClassDirectories.set(collectClassDirectories(target))

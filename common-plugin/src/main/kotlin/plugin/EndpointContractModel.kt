@@ -8,23 +8,7 @@ import dev.akif.tapik.plugin.metadata.HttpEndpointMetadata
 import dev.akif.tapik.plugin.metadata.OutputMatchMetadata
 import dev.akif.tapik.plugin.metadata.OutputMetadata
 
-/**
- * Shared naming and shape information for generated endpoint contracts.
- *
- * This model lives in `common-plugin` so all Kotlin generators can derive identical names and
- * response structures before contributing their integration-specific members.
- *
- * @property endpoint endpoint metadata backing the generated contract.
- * @property enclosingInterfaceName generated source-level contract interface name.
- * @property interfaceName generated nested endpoint contract interface name.
- * @property endpointReference short reference to the original Tapik endpoint definition.
- * @property endpointImportPath importable owner path for the original Tapik endpoint definition.
- * @property methodName generated method name used by Kotlin integrations.
- * @property summaryLines summary documentation lines rendered from the endpoint description.
- * @property detailLines detailed documentation lines rendered from the endpoint details.
- * @property response generated public response model for the endpoint.
- */
-data class EndpointContractModel(
+internal data class EndpointContractModel(
     val endpoint: HttpEndpointMetadata,
     val enclosingInterfaceName: String,
     val interfaceName: String,
@@ -35,27 +19,11 @@ data class EndpointContractModel(
     val detailLines: List<String>,
     val response: ResponseModel
 ) {
-    /**
-     * Describes the generated public response type for the endpoint.
-     *
-     * @property typeName public Kotlin type name exposed by generated APIs.
-     * @property variants concrete response variants derived from endpoint outputs.
-     */
-    data class ResponseModel(
+    internal data class ResponseModel(
         val typeName: String,
         val variants: List<Variant>
     ) {
-        /**
-         * Describes one generated response variant.
-         *
-         * @property typeName Kotlin type name for the variant.
-         * @property match status matcher metadata represented by the variant.
-         * @property status exact status when the matcher is a single fixed status.
-         * @property description human-readable description used for diagnostics and naming.
-         * @property isObject whether the variant can be rendered as a `data object`.
-         * @property fields constructor fields exposed by the variant.
-         */
-        data class Variant(
+        internal data class Variant(
             val typeName: String,
             val match: OutputMatchMetadata,
             val status: Status?,
@@ -64,28 +32,14 @@ data class EndpointContractModel(
             val fields: List<Field>
         )
 
-        /**
-         * Describes one constructor/property field on a generated response variant.
-         *
-         * @property name generated Kotlin property name.
-         * @property type generated Kotlin property type.
-         */
-        data class Field(
+        internal data class Field(
             val name: String,
             val type: String
         )
     }
 }
 
-/**
- * Builds stable endpoint contract models for all endpoints in a source file.
- *
- * @param endpoints endpoint metadata declared in the same source file.
- * @param sourceFile Kotlin source file name used as the naming prefix.
- * @param endpointsSuffix suffix appended to the enclosing source-level endpoints interface.
- * @return stable contract models in endpoint declaration order.
- */
-fun buildEndpointContractModels(
+internal fun buildEndpointContractModels(
     endpoints: List<HttpEndpointMetadata>,
     sourceFile: String,
     endpointsSuffix: String = "Endpoints"
@@ -153,13 +107,34 @@ private fun OutputMetadata.toVariantModel(): EndpointContractModel.ResponseModel
     )
 }
 
+internal fun EndpointContractModel.toGenerationContext(): KotlinEndpointGenerationContext =
+    KotlinEndpointGenerationContext(
+        endpointReference = endpointReference,
+        methodName = methodName,
+        summaryLines = summaryLines,
+        detailLines = detailLines,
+        response =
+            KotlinEndpointResponseModel(
+                typeName = response.typeName,
+                variants =
+                    response.variants.map { variant ->
+                        KotlinEndpointResponseModel.Variant(
+                            typeName = variant.typeName,
+                            match = variant.match,
+                            fields =
+                                variant.fields.map { field ->
+                                    KotlinEndpointResponseModel.Field(
+                                        name = field.name,
+                                        type = field.type
+                                    )
+                                }
+                        )
+                    }
+            )
+    )
+
 private fun BodyMetadata.determineBodyFieldType(): String =
-    when (type.simpleName()) {
-        "JsonBody" -> type.arguments.firstOrNull()?.render() ?: "kotlin.Any"
-        "StringBody" -> "kotlin.String"
-        "RawBody" -> "kotlin.ByteArray"
-        else -> type.arguments.firstOrNull()?.render() ?: "kotlin.Any"
-    }
+    renderValueType()
 
 private fun HeaderMetadata.renderFieldType(): String {
     val scalarType = type.render()
@@ -176,8 +151,8 @@ private fun renderVariantTypeName(
 ): String {
     val rawBase =
         when (match) {
-            is OutputMatchMetadata.Exact -> match.status.name.lowercase().snakeToPascalCase()
-            is OutputMatchMetadata.AnyOf -> match.statuses.joinToString("Or") { it.name.lowercase().snakeToPascalCase() }
+            is OutputMatchMetadata.Exact -> match.status.name.toPascalIdentifier("Response")
+            is OutputMatchMetadata.AnyOf -> match.statuses.joinToString("Or") { it.name.toPascalIdentifier("Response") }
             is OutputMatchMetadata.Described -> description
             OutputMatchMetadata.Unmatched -> "Unmatched"
         }
@@ -217,7 +192,7 @@ private fun allocateEndpointContractName(
  * @receiver source file name that declared the endpoints.
  * @return enclosing endpoint-contract interface name.
  */
-fun String.toEndpointContainerName(endpointsSuffix: String = "Endpoints"): String =
+internal fun String.toEndpointContainerName(endpointsSuffix: String = "Endpoints"): String =
     if (endsWith(endpointsSuffix)) {
         this
     } else {
@@ -242,13 +217,6 @@ private fun HttpEndpointMetadata.renderEndpointImportPath(): String? {
         "$packagePrefix.$sourceFile"
     }
 }
-
-private fun String.snakeToPascalCase(): String =
-    split('_')
-        .filter { it.isNotBlank() }
-        .joinToString(separator = "") { part ->
-            part.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-        }
 
 private val TYPE_NAME_BOUNDARY = Regex("([a-z0-9])([A-Z])")
 private val TYPE_NAME_SEPARATOR = Regex("[^A-Za-z0-9]+")

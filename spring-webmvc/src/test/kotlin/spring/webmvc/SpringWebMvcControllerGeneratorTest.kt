@@ -4,7 +4,9 @@ import arrow.core.None
 import arrow.core.Some
 import dev.akif.tapik.plugin.GeneratorConfiguration
 import dev.akif.tapik.plugin.TapikGeneratorContext
+import dev.akif.tapik.plugin.TapikLogger
 import dev.akif.tapik.plugin.metadata.*
+import dev.akif.tapik.plugin.writeMergedKotlinSourceFiles
 import org.junit.jupiter.api.io.CleanupMode
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -23,12 +25,7 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate writes documented controller interface`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator().generate(
-            endpoints = listOf(sampleMetadata()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/UserEndpointsServer.kt")
+        val generated = generate(listOf(sampleMetadata()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText().trim()
@@ -38,7 +35,7 @@ class SpringWebMvcControllerGeneratorTest {
         assertTrue(content.contains("interface User {"))
         assertTrue(content.contains("data class Ok("))
         assertTrue(content.contains("val location: java.net.URI"))
-        assertTrue(content.contains("interface Server : dev.akif.tapik.Helpers {"))
+        assertTrue(content.contains("interface Server {"))
         assertTrue(
             content.contains(
                 "@org.springframework.web.bind.annotation.GetMapping(path = [\"/api/users/{userId}\"], produces = [\"text/plain\"])"
@@ -52,12 +49,7 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate sanitizes identifiers and supports non standard methods`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator().generate(
-            endpoints = listOf(metadataWithChallengingNames()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/StatusEndpointsServer.kt")
+        val generated = generate(listOf(metadataWithChallengingNames()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText().trim()
@@ -77,12 +69,7 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate keeps nested parameter types with fully qualified references`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator().generate(
-            endpoints = listOf(metadataWithNestedParameterType()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/api/generated/BookEndpointsServer.kt")
+        val generated = generate(listOf(metadataWithNestedParameterType()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText().trim()
@@ -100,12 +87,7 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate keeps required query parameters non nullable with default expression`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator().generate(
-            endpoints = listOf(metadataWithRequiredQueryParameter()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/RequiredQueryEndpointsServer.kt")
+        val generated = generate(listOf(metadataWithRequiredQueryParameter()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText()
@@ -122,9 +104,9 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate uses configured server and endpoints suffixes`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator().generate(
-            endpoints = listOf(sampleMetadata()),
-            context =
+        val generated =
+            generate(
+                listOf(sampleMetadata()),
                 testContext(rootDir).copy(
                     endpointsSuffix = "Contracts",
                     generatorConfiguration =
@@ -133,9 +115,8 @@ class SpringWebMvcControllerGeneratorTest {
                             serverSuffix = "Api"
                         )
                 )
-        )
+            )
 
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/UserEndpointsApi.kt")
         assertTrue(generated.exists(), "Expected generated controller file with configured name")
         assertTrue(
             generated.readText().contains("interface UserEndpointsApi"),
@@ -151,12 +132,7 @@ class SpringWebMvcControllerGeneratorTest {
     fun `generate uses shared sealed response hierarchy for multi output endpoints`() {
         val rootDir = tempDir.toFile()
 
-        SpringWebMvcControllerGenerator().generate(
-            endpoints = listOf(metadataWithMultipleOutputs()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/UsersServer.kt")
+        val generated = generate(listOf(metadataWithMultipleOutputs()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated controller file")
 
         val content = generated.readText()
@@ -182,11 +158,24 @@ class SpringWebMvcControllerGeneratorTest {
             generatedSourcesDirectory = rootDir,
             generatedPackageName = "generated",
             endpointsSuffix = "Endpoints",
-            log = {},
-            logDebug = {},
-            logWarn = { _, _ -> },
+            logger = TapikLogger.Console,
             generatorConfiguration = GeneratorConfiguration()
         )
+
+    private fun generate(
+        endpoints: List<HttpEndpointMetadata>,
+        context: TapikGeneratorContext
+    ): File {
+        val generator = SpringWebMvcControllerGenerator()
+        val contribution = generator.contribute(endpoints, context)
+        return writeMergedKotlinSourceFiles(
+            endpoints = endpoints,
+            sourceFiles = contribution.sourceFiles,
+            generatedSourcesDirectory = context.generatedSourcesDirectory,
+            endpointsSuffix = context.endpointsSuffix,
+            logWarn = { _, _ -> }
+        ).single()
+    }
 
     private fun sampleMetadata(): HttpEndpointMetadata =
         HttpEndpointMetadata(
@@ -244,8 +233,7 @@ class SpringWebMvcControllerGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "UserEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "UserEndpoints"
         )
 
     private fun metadataWithChallengingNames(): HttpEndpointMetadata =
@@ -296,8 +284,7 @@ class SpringWebMvcControllerGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "StatusEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "StatusEndpoints"
         )
 
     private fun metadataWithNestedParameterType(): HttpEndpointMetadata =
@@ -331,8 +318,7 @@ class SpringWebMvcControllerGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.api",
-            sourceFile = "BookEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "BookEndpoints"
         )
 
     private fun metadataWithRequiredQueryParameter(): HttpEndpointMetadata =
@@ -366,8 +352,7 @@ class SpringWebMvcControllerGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "RequiredQueryEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "RequiredQueryEndpoints"
         )
 
     private fun metadataWithMultipleOutputs(): HttpEndpointMetadata =
@@ -404,7 +389,7 @@ class SpringWebMvcControllerGeneratorTest {
             outputs =
                 listOf(
                     OutputMetadata(
-                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.CREATED),
+                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.Created),
                         description = "Created",
                         headers =
                             listOf(
@@ -425,7 +410,7 @@ class SpringWebMvcControllerGeneratorTest {
                             )
                     ),
                     OutputMetadata(
-                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.BAD_REQUEST),
+                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.BadRequest),
                         description = "Bad Request",
                         headers = emptyList(),
                         body =
@@ -441,7 +426,6 @@ class SpringWebMvcControllerGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "Users",
-            rawType = "HttpEndpoint"
+            sourceFile = "Users"
         )
 }

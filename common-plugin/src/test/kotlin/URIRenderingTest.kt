@@ -5,7 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class URIWithParametersTest {
+class URIRenderingTest {
     @Test
     fun `toURI replaces path variables and appends query parameters`() {
         val userId = PathVariable.uuid("userId")

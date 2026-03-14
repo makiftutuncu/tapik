@@ -8,13 +8,13 @@ import kotlin.test.assertEquals
 class StatusCodeMappingTest {
     @Test
     fun `Status converts to HttpStatusCode`() {
-        val code = Status.CREATED.toHttpStatusCode()
+        val code = Status.Created.toHttpStatusCode()
 
         assertEquals(HttpStatus.CREATED.value(), code.value())
     }
 
     @Test
     fun `HttpStatus converts back to Status`() {
-        assertEquals(Status.OK, HttpStatus.OK.toStatus())
+        assertEquals(Status.Ok, HttpStatus.OK.toStatus())
     }
 }

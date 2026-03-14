@@ -54,7 +54,7 @@ class RestClientInterpreterTest {
                 )
         )
 
-        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), emptyHeaders(), jsonBody<Map<String, Any?>>("user")))
+        val outputs = listOf(Output(StatusMatcher.Is(Status.Ok), emptyHeaders(), jsonBody<Map<String, Any?>>("user")))
 
         val response =
             interpreter.send(
@@ -82,7 +82,7 @@ class RestClientInterpreterTest {
                 )
         )
 
-        val outputs = listOf(Output(StatusMatcher.Is(Status.OK), emptyHeaders(), jsonBody<Map<String, Any?>>("user")))
+        val outputs = listOf(Output(StatusMatcher.Is(Status.Ok), emptyHeaders(), jsonBody<Map<String, Any?>>("user")))
 
         val exception =
             assertFailsWith<RestClientResponseException> {
@@ -113,8 +113,8 @@ class RestClientInterpreterTest {
 
         val outputs =
             listOf(
-                Output(StatusMatcher.Is(Status.OK), emptyHeaders(), stringBody()),
-                Output(StatusMatcher.AnyOf(setOf(Status.CREATED, Status.NO_CONTENT)), emptyHeaders(), stringBody()),
+                Output(StatusMatcher.Is(Status.Ok), emptyHeaders(), stringBody()),
+                Output(StatusMatcher.AnyOf(setOf(Status.Created, Status.NoContent)), emptyHeaders(), stringBody()),
                 Output(StatusMatcher.Predicate("status >= 500") { it.code >= 500 }, emptyHeaders(), stringBody())
             )
 
@@ -131,7 +131,7 @@ class RestClientInterpreterTest {
             }
 
         assertTrue(
-            exception.message!!.contains("expecting [OK, CREATED, NO_CONTENT, status >= 500]"),
+            exception.message!!.contains("expecting [Ok, Created, NoContent, status >= 500]"),
             exception.message
         )
     }

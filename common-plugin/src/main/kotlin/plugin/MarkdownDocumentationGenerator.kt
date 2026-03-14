@@ -6,19 +6,19 @@ import java.io.File
 /**
  * A generator that creates Markdown documentation from tapik endpoint definitions.
  */
-class MarkdownDocumentationGenerator : TapikGenerator {
+class MarkdownDocumentationGenerator : TapikDirectGenerator {
     override val id: String = ID
 
     override fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
-    ): TapikGenerationResult {
+    ): Set<File> {
         if (endpoints.isEmpty()) {
-            context.log("No endpoints discovered; skipping Markdown documentation generation.")
-            return TapikGenerationResult()
+            context.logger.info("No endpoints discovered; skipping Markdown documentation generation.")
+            return emptySet()
         }
 
-        context.log("Generating Markdown documentation.")
+        context.logger.info("Generating Markdown documentation.")
         return generateDocumentation(endpoints, context.outputDirectory)
     }
 
@@ -28,7 +28,7 @@ class MarkdownDocumentationGenerator : TapikGenerator {
      * @param endpoints The endpoints to generate documentation for.
      * @param rootDir The root directory to write the generated documentation to.
      */
-    private fun generateDocumentation(endpoints: List<HttpEndpointMetadata>, rootDir: File): TapikGenerationResult {
+    private fun generateDocumentation(endpoints: List<HttpEndpointMetadata>, rootDir: File): Set<File> {
         val content = endpoints
             .groupBy { it.packageName }
             .values
@@ -48,7 +48,7 @@ class MarkdownDocumentationGenerator : TapikGenerator {
             }
         val file = File(rootDir, "API.md")
         file.writeText(content)
-        return TapikGenerationResult(setOf(file))
+        return setOf(file)
     }
 
     private fun HttpEndpointMetadata.document(): String =

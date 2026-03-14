@@ -176,7 +176,6 @@ sealed interface OutputMatchMetadata {
  * @property outputs possible response alternatives together with their headers and bodies.
  * @property packageName package containing the endpoint declaration.
  * @property sourceFile Kotlin file hosting the endpoint declaration.
- * @property rawType string representation of the original endpoint type.
  */
 data class HttpEndpointMetadata(
     val id: String,
@@ -189,8 +188,7 @@ data class HttpEndpointMetadata(
     val input: InputMetadata,
     val outputs: List<OutputMetadata>,
     val packageName: String,
-    val sourceFile: String,
-    val rawType: String
+    val sourceFile: String
 )
 
 /**

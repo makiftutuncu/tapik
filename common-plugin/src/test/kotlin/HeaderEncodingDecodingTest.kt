@@ -12,27 +12,12 @@ class HeaderEncodingDecodingTest : API {
     private val encodeInputEndpoint by endpoint {
         get("").input(inputHeader)
     }
-    private val encodeOutputEndpoint by endpoint {
-        post("items").output(
-            status = Status.OK,
-            headers = headersOf(outputHeader)
-        ) {
-            stringBody()
-        }
-    }
 
     @Test
     fun `encode input headers serializes using codecs`() {
         val encoded = encodeInputEndpoint.input.encodeInputHeaders("abc123")
 
         assertEquals(mapOf("X-Request-Id" to listOf("abc123")), encoded)
-    }
-
-    @Test
-    fun `encode output headers reuses codecs`() {
-        val encoded = encodeOutputEndpoint.outputs.item1.encodeHeaders(5)
-
-        assertEquals(mapOf("X-Count" to listOf("5")), encoded)
     }
 
     @Test

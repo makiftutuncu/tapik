@@ -17,10 +17,10 @@ import org.springframework.http.MediaType as SpringMediaType
 /**
  * Executes Tapik endpoints using a Spring [RestClient] while enforcing status and content-type checks.
  *
- * @property client underlying [RestClient] instance.
+ * @param client underlying [RestClient] instance.
  */
-data class RestClientInterpreter(
-    val client: RestClient
+class RestClientInterpreter(
+    private val client: RestClient
 ) {
     /**
      * Sends a request to the configured [client] and validates the response against the expected [outputs].
@@ -74,7 +74,7 @@ data class RestClientInterpreter(
      * @param uri request URI.
      * @return an error handler that raises [RestClientResponseException] with detailed diagnostics.
      */
-    fun statusHandler(
+    private fun statusHandler(
         output: Output<*, *>,
         method: Method,
         uri: URI
@@ -104,7 +104,7 @@ data class RestClientInterpreter(
      * @param outputs collection of expected output definitions.
      * @return handler that throws [RestClientResponseException] for unmatched responses.
      */
-    fun unmatchedStatusHandler(outputs: List<Output<*, *>>): ResponseErrorHandler =
+    private fun unmatchedStatusHandler(outputs: List<Output<*, *>>): ResponseErrorHandler =
         object : ResponseErrorHandler {
             override fun hasError(response: ClientHttpResponse): Boolean = true
 

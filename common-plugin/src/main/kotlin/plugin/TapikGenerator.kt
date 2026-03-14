@@ -4,7 +4,7 @@ import dev.akif.tapik.plugin.metadata.HttpEndpointMetadata
 import java.io.File
 
 /**
- * Contract implemented by Tapik code generators loaded at runtime.
+ * Marker contract implemented by Tapik generators loaded at runtime.
  */
 interface TapikGenerator {
     /**
@@ -13,28 +13,24 @@ interface TapikGenerator {
      * @return generator identifier.
      */
     val id: String
+}
 
+/**
+ * Contract implemented by generators that directly emit artefacts during invocation.
+ */
+interface TapikDirectGenerator : TapikGenerator {
     /**
      * Generates artefacts for the provided endpoints.
      *
      * @param endpoints endpoints discovered during bytecode scanning.
      * @param context contextual information and utilities required by generators.
-     * @return generation result including generated Kotlin source files.
+     * @return files generated during this invocation.
      */
     fun generate(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
-    ): TapikGenerationResult
+    ): Set<File>
 }
-
-/**
- * Result of a [TapikGenerator] invocation.
- *
- * @property generatedSourceFiles Kotlin source files generated during this invocation.
- */
-data class TapikGenerationResult(
-    val generatedSourceFiles: Set<File> = emptySet()
-)
 
 /**
  * Carries directories and logging utilities that Tapik generators rely on.
@@ -43,9 +39,7 @@ data class TapikGenerationResult(
  * @property generatedSourcesDirectory directory where generated Kotlin sources should be written.
  * @property generatedPackageName package segment appended to source packages for generated Kotlin sources.
  * @property endpointsSuffix suffix appended to the source-level enclosing endpoints interface.
- * @property log info-level logger.
- * @property logDebug debug-level logger.
- * @property logWarn warning-level logger that accepts an optional [Throwable].
+ * @property logger logger used for generation progress and diagnostics.
  * @property generatorConfiguration configuration for the current generator invocation.
  */
 data class TapikGeneratorContext(
@@ -53,8 +47,6 @@ data class TapikGeneratorContext(
     val generatedSourcesDirectory: File,
     val generatedPackageName: String = "generated",
     val endpointsSuffix: String = "Endpoints",
-    val log: (String) -> Unit,
-    val logDebug: (String) -> Unit,
-    val logWarn: (String, Throwable?) -> Unit,
+    val logger: TapikLogger,
     val generatorConfiguration: GeneratorConfiguration
 )

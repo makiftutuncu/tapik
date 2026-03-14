@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core"))
+    api(project(":core"))
     implementation(libs.kotlinStdlib)
     implementation(libs.asm)
     implementation(libs.asmTree)

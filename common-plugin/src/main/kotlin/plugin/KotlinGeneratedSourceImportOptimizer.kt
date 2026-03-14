@@ -5,7 +5,7 @@ import java.io.File
 /**
  * Optimizes imports in generated Kotlin source files by shortening fully-qualified references where safe.
  */
-object KotlinGeneratedSourceImportOptimizer {
+internal object KotlinGeneratedSourceImportOptimizer {
     private val packageRoots =
         setOf(
             "dev",
@@ -23,23 +23,20 @@ object KotlinGeneratedSourceImportOptimizer {
      * Optimizes imports in specific [files].
      *
      * @param files Kotlin source files to optimize.
-     * @param logDebug optional debug logger.
-     * @param logWarn optional warning logger.
      */
     fun optimizeFiles(
         files: Iterable<File>,
-        logDebug: (String) -> Unit = {},
-        logWarn: (String, Throwable?) -> Unit = { _, _ -> }
+        logger: TapikLogger
     ) {
         files.forEach { file ->
             runCatching {
                 optimizeFile(file)
             }.onSuccess { changed ->
                 if (changed) {
-                    logDebug("Optimized imports in ${file.absolutePath}")
+                    logger.debug("Optimized imports in ${file.absolutePath}")
                 }
             }.onFailure { error ->
-                logWarn("Failed to optimize imports in ${file.absolutePath}", error)
+                logger.warn("Failed to optimize imports in ${file.absolutePath}", error)
             }
         }
     }

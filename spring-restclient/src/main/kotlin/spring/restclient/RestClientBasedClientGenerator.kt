@@ -2,7 +2,6 @@ package dev.akif.tapik.spring.restclient
 
 import dev.akif.tapik.plugin.*
 import dev.akif.tapik.plugin.metadata.*
-import java.io.File
 
 /**
  * A generator that creates Spring RestClient-based clients from tapik endpoint definitions.
@@ -23,133 +22,59 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
     override fun contribute(
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
-    ): TapikKotlinContribution {
-        if (endpoints.isEmpty()) {
-            context.log("No endpoints discovered; skipping Spring RestClient client contributions.")
-            return TapikKotlinContribution()
-        }
-
-        context.log("Generating Spring RestClient client contributions.")
-        return TapikKotlinContribution(
-            sourceFiles =
-                buildSourceFileContributions(
-                    endpoints = endpoints,
-                    clientSuffix = context.generatorConfiguration.clientSuffix,
-                    endpointsSuffix = context.endpointsSuffix,
-                    generatedPackageName = context.generatedPackageName
-                )
-        )
-    }
-
-    /**
-     * Generates standalone Kotlin source files for tests or direct invocation.
-     *
-     * @param endpoints endpoint metadata to translate into generated files.
-     * @param context generation context carrying output directories and configuration.
-     * @return paths of generated Kotlin source files.
-     */
-    override fun generate(
-        endpoints: List<HttpEndpointMetadata>,
-        context: TapikGeneratorContext
-    ): TapikGenerationResult {
-        val contribution = contribute(endpoints, context)
-        val generatedFiles = linkedSetOf<File>()
-        contribution.sourceFiles.forEach { sourceFile ->
-            val packageDirectory =
-                File(context.generatedSourcesDirectory, sourceFile.packageName.replace('.', '/')).also { it.mkdirs() }
-            val targetFile = File(packageDirectory, "${sourceFile.aggregateInterfaceName}.kt")
-            val endpointMembers =
-                sourceFile.endpointMembers.groupBy(
-                    keySelector = { it.endpointPropertyName },
-                    valueTransform = { it.content }
-                )
-            val fileEndpoints =
-                endpoints.filter {
-                    it.packageName == sourceFile.sourcePackageName && it.sourceFile == sourceFile.sourceFile
-                }
-            targetFile.writeText(
-                renderMergedKotlinEndpointFile(
-                    packageName = sourceFile.packageName,
-                    sourceFile = sourceFile.sourceFile,
-                    endpointsSuffix = context.endpointsSuffix,
-                    endpoints = fileEndpoints,
-                    aggregateInterfaces =
-                        listOf(
-                            AggregateInterfaceContribution(
-                                name = sourceFile.aggregateInterfaceName,
-                                nestedInterfaceName = sourceFile.nestedInterfaceName
-                            )
-                        ),
-                    endpointMembers = endpointMembers,
-                    imports = sourceFile.imports
-                )
+    ): TapikKotlinContribution =
+        contributeKotlinSourceFiles(
+            endpoints = endpoints,
+            context = context,
+            emptyMessage = "No endpoints discovered; skipping Spring RestClient client contributions.",
+            generatingMessage = "Generating Spring RestClient client contributions."
+        ) {
+            buildSourceFileContributions(
+                endpoints = endpoints,
+                clientSuffix = context.generatorConfiguration.clientSuffix,
+                endpointsSuffix = context.endpointsSuffix,
+                generatedPackageName = context.generatedPackageName
             )
-            generatedFiles += targetFile
         }
-        return TapikGenerationResult(generatedFiles)
-    }
 
     private fun buildSourceFileContributions(
         endpoints: List<HttpEndpointMetadata>,
         clientSuffix: String,
         endpointsSuffix: String,
         generatedPackageName: String
-    ): List<KotlinSourceFileContribution> {
-        val contributions = mutableListOf<KotlinSourceFileContribution>()
-        endpoints
-            .groupBy { it.packageName }
-            .filterKeys { it.isNotBlank() }
-            .toSortedMap()
-            .forEach { (packageName, packageEndpoints) ->
-                packageEndpoints
-                    .groupBy { it.sourceFile }
-                    .toSortedMap()
-                    .forEach { (sourceFile, groupedEndpoints) ->
-                        val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
-                        val signatures = createEndpointSignatures(sortedEndpoints, sourceFile, endpointsSuffix)
-                        contributions +=
-                            KotlinSourceFileContribution(
-                                packageName = packageName.toGeneratedPackageName(generatedPackageName),
-                                sourcePackageName = packageName,
-                                sourceFile = sourceFile,
-                                aggregateInterfaceName = "$sourceFile$clientSuffix",
-                                nestedInterfaceName = clientSuffix,
-                                imports = buildExtensionImports(signatures).toSet(),
-                                endpointMembers =
-                                    signatures.map { signature ->
-                                        KotlinEndpointMemberContribution(
-                                            endpointPropertyName = signature.endpoint.propertyName,
-                                            content = buildNestedClientContent(signature, clientSuffix)
-                                        )
-                                    }
-                            )
-                    }
+    ): List<KotlinSourceFileContribution> =
+        buildKotlinSourceFileContributions(
+            endpoints = endpoints,
+            endpointsSuffix = endpointsSuffix,
+            generatedPackageName = generatedPackageName,
+            aggregateInterfaceName = { sourceFile -> "$sourceFile$clientSuffix" },
+            nestedInterfaceName = clientSuffix,
+            imports = ::buildExtensionImports,
+            endpointMemberContent = { endpoint, contractModel ->
+                buildNestedClientContent(EndpointSignature(endpoint, contractModel), clientSuffix)
             }
-        return contributions
-    }
+        )
 
-    private fun createEndpointSignatures(
-        endpoints: List<HttpEndpointMetadata>,
-        sourceFile: String,
-        endpointsSuffix: String = "Endpoints"
-    ): List<EndpointSignature> {
-        val modelsByPropertyName =
-            buildEndpointContractModels(endpoints, sourceFile, endpointsSuffix).associateBy { it.endpoint.propertyName }
-        return endpoints.map { endpoint ->
-            EndpointSignature(
-                endpoint = endpoint,
-                contractModel = checkNotNull(modelsByPropertyName[endpoint.propertyName])
-            )
-        }
-    }
-
-    private fun buildExtensionImports(signatures: List<EndpointSignature>): List<String> =
+    private fun buildExtensionImports(endpoints: List<HttpEndpointMetadata>): Set<String> =
         buildSet {
             add("$BASE_PACKAGE.toStatus")
-            if (signatures.any(EndpointSignature::usesEncodeInputHeaders)) {
-                add("$TAPIK_PACKAGE.encodeInputHeaders")
+            if (endpoints.any { endpoint -> endpoint.parameters.any { it is QueryParameterMetadata } }) {
+                add("$TAPIK_PACKAGE.asQueryParameter")
+                add("$TAPIK_PACKAGE.getDefaultOrFail")
             }
-        }.toList()
+            if (endpoints.any { it.input.headers.isNotEmpty() }) {
+                add("$TAPIK_PACKAGE.encodeInputHeaders")
+                add("$TAPIK_PACKAGE.asHeaderValues")
+            }
+            if (
+                endpoints.any { endpoint ->
+                    endpoint.input.headers.isNotEmpty() ||
+                        endpoint.outputs.any { output -> output.headers.isNotEmpty() }
+                }
+            ) {
+                add("$TAPIK_PACKAGE.getFirstValueOrFail")
+            }
+        }
 
     private fun buildNestedClientContent(
         signature: EndpointSignature,
@@ -165,17 +90,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
         signature: EndpointSignature,
         indentation: String
     ) {
-        val hasSummary = signature.summaryLines.isNotEmpty()
-        val hasDetails = signature.detailLines.isNotEmpty()
-        if (hasSummary || hasDetails) {
-            appendLine("$indentation/**")
-            signature.summaryLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
-            if (hasSummary && hasDetails) {
-                appendLine("$indentation *")
-            }
-            signature.detailLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
-            appendLine("$indentation */")
-        }
+        appendGeneratedKdoc(signature.summaryLines, signature.detailLines, indentation)
         append("${indentation}fun ${signature.methodName}(")
         if (signature.inputs.isNotEmpty()) {
             appendLine()
@@ -234,18 +149,18 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
 
     private class EndpointSignature(
         val endpoint: HttpEndpointMetadata,
-        contractModel: EndpointContractModel
+        context: KotlinEndpointGenerationContext
     ) {
-        val endpointExpression: String = contractModel.endpointReference
-        val methodName: String = contractModel.methodName
+        val endpointExpression: String = context.endpointReference
+        val methodName: String = context.methodName
 
-        val summaryLines: List<String> = contractModel.summaryLines
-        val detailLines: List<String> = contractModel.detailLines
+        val summaryLines: List<String> = context.summaryLines
+        val detailLines: List<String> = context.detailLines
 
         private val parameters = ParameterGroup(endpoint.parameters, endpointExpression)
         private val inputHeaders = InputHeadersGroup(endpoint.input.headers, endpointExpression)
         private val inputBody = InputBodyGroup(endpoint.input.body, endpointExpression)
-        private val outputs = OutputsGroup(endpoint.outputs, contractModel.response, endpointExpression)
+        private val outputs = OutputsGroup(endpoint.outputs, context.response, endpointExpression)
 
         val inputs: List<String> =
             buildList {
@@ -314,38 +229,30 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
                         }
 
                         is QueryParameterMetadata -> {
-                            val hasDefault = !parameter.required
-                            val hasNonNullDefault = parameter.default.fold({ false }) { it != null }
-                            val nonNullableType = parameter.type.copy(nullable = false).render()
-                            val renderedType =
-                                if (parameter.required || hasNonNullDefault) {
-                                    nonNullableType
-                                } else {
-                                    parameter.type.copy(nullable = true).render()
-                                }
+                            val typeInfo = parameter.toGeneratedTypeInfo()
                             val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
                             val declaration =
-                                if (hasDefault) {
-                                    if (hasNonNullDefault) {
-                                        "$name: $renderedType = $parameterAccessor.asQueryParameter<$nonNullableType>().getDefaultOrFail()"
+                                if (typeInfo.hasDefault) {
+                                    if (typeInfo.hasNonNullDefault) {
+                                        "$name: ${typeInfo.renderedType} = $parameterAccessor.asQueryParameter<${typeInfo.nonNullableType}>().getDefaultOrFail()"
                                     } else {
-                                        "$name: $renderedType = $parameterAccessor.asQueryParameter<$nonNullableType>().default.getOrNull()"
+                                        "$name: ${typeInfo.renderedType} = $parameterAccessor.asQueryParameter<${typeInfo.nonNullableType}>().default.getOrNull()"
                                     }
                                 } else {
-                                    "$name: $renderedType"
+                                    "$name: ${typeInfo.renderedType}"
                                 }
                             val encodedValueExpression =
-                                if (parameter.required || hasNonNullDefault) {
+                                if (!typeInfo.hasDefault || typeInfo.hasNonNullDefault) {
                                     "$parameterAccessor.codec.encode($name)"
                                 } else {
                                     "$name?.let { $parameterAccessor.codec.encode(it) }"
                                 }
                             Entry(
                                 name = name,
-                                type = renderedType,
+                                type = typeInfo.renderedType,
                                 declaration = declaration,
                                 uriRenderArgument = "$parameterAccessor to $encodedValueExpression",
-                                hasDefault = hasDefault
+                                hasDefault = typeInfo.hasDefault
                             )
                         }
                     }
@@ -437,23 +344,8 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
                     inputs = listOf("inputBody: kotlin.String")
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
-                "JsonBody" -> {
-                    val valueType =
-                        body
-                            ?.type
-                            ?.arguments
-                            ?.firstOrNull()
-                            ?.render() ?: "kotlin.Any"
-                    inputs = listOf("inputBody: $valueType")
-                    encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
-                }
                 else -> {
-                    val valueType =
-                        body
-                            ?.type
-                            ?.arguments
-                            ?.firstOrNull()
-                            ?.render() ?: "kotlin.Any"
+                    val valueType = body?.renderValueType() ?: "kotlin.Any"
                     inputs = listOf("inputBody: $valueType")
                     encodeCall = "$endpointExpression.input.body.codec.encode(inputBody)"
                 }
@@ -463,7 +355,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
 
     private class OutputsGroup(
         outputs: List<OutputMetadata>,
-        responseModel: EndpointContractModel.ResponseModel,
+        responseModel: KotlinEndpointResponseModel,
         private val endpointExpression: String
     ) {
         private val responseQualifier: String = "Response."
@@ -527,7 +419,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
 
         private inner class OutputOption(
             private val metadata: OutputMetadata,
-            private val variant: EndpointContractModel.ResponseModel.Variant,
+            private val variant: KotlinEndpointResponseModel.Variant,
             val index: Int,
             private val endpointExpression: String,
             private val responseQualifier: String
@@ -626,9 +518,3 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
         private const val BASE_INTERFACE_NAME = "$BASE_PACKAGE.RestClientBasedClient"
     }
 }
-
-private fun String.toGeneratedPackageName(generatedPackageName: String): String =
-    listOfNotNull(
-        takeIf(String::isNotBlank),
-        generatedPackageName.trim().takeIf(String::isNotBlank)
-    ).joinToString(".")

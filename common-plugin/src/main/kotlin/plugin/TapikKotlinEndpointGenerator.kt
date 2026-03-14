@@ -2,6 +2,7 @@ package dev.akif.tapik.plugin
 
 import dev.akif.tapik.plugin.metadata.HttpEndpointMetadata
 import dev.akif.tapik.plugin.metadata.OutputMatchMetadata
+import java.io.File
 
 /**
  * Specialised Tapik generator that contributes nested Kotlin members to shared endpoint contract files.
@@ -14,11 +15,6 @@ interface TapikKotlinEndpointGenerator : TapikGenerator {
         endpoints: List<HttpEndpointMetadata>,
         context: TapikGeneratorContext
     ): TapikKotlinContribution
-
-    override fun generate(
-        endpoints: List<HttpEndpointMetadata>,
-        context: TapikGeneratorContext
-    ): TapikGenerationResult = TapikGenerationResult()
 }
 
 /**
@@ -63,6 +59,122 @@ data class KotlinEndpointMemberContribution(
 )
 
 /**
+ * Creates a Kotlin contribution result while handling the common empty-endpoint fast path and logging.
+ *
+ * @param endpoints discovered endpoint metadata.
+ * @param context generator context used for logging and configuration.
+ * @param emptyMessage message logged when no endpoints are available.
+ * @param generatingMessage message logged before generating contributions.
+ * @param sourceFiles builds the per-source-file contributions for the generator.
+ * @return Kotlin contribution wrapper for the generated source files.
+ */
+fun contributeKotlinSourceFiles(
+    endpoints: List<HttpEndpointMetadata>,
+    context: TapikGeneratorContext,
+    emptyMessage: String,
+    generatingMessage: String,
+    sourceFiles: () -> List<KotlinSourceFileContribution>
+): TapikKotlinContribution {
+    if (endpoints.isEmpty()) {
+        context.logger.info(emptyMessage)
+        return TapikKotlinContribution()
+    }
+
+    context.logger.info(generatingMessage)
+    return TapikKotlinContribution(sourceFiles = sourceFiles())
+}
+
+/**
+ * Builds source-file contribution DTOs for Kotlin generators from shared endpoint metadata.
+ *
+ * Endpoints are grouped by source package and source file so each generated file can contribute
+ * members to a single merged endpoint contract.
+ *
+ * @param endpoints endpoint metadata to translate into source-file contributions.
+ * @param endpointsSuffix suffix appended to source-level enclosing endpoints interfaces.
+ * @param generatedPackageName package segment appended to source packages for generated sources.
+ * @param aggregateInterfaceName generates the aggregate interface name for a source file.
+ * @param nestedInterfaceName nested interface name exposed by every contributed endpoint member.
+ * @param imports supplies any generator-specific imports required for one source file.
+ * @param endpointMemberContent builds nested content for one endpoint and its shared contract model.
+ * @return contributions grouped per generated Kotlin source file.
+ */
+fun buildKotlinSourceFileContributions(
+    endpoints: List<HttpEndpointMetadata>,
+    endpointsSuffix: String,
+    generatedPackageName: String,
+    aggregateInterfaceName: (sourceFile: String) -> String,
+    nestedInterfaceName: String,
+    imports: (endpointsInFile: List<HttpEndpointMetadata>) -> Set<String> = { emptySet() },
+    endpointMemberContent: (endpoint: HttpEndpointMetadata, context: KotlinEndpointGenerationContext) -> String
+): List<KotlinSourceFileContribution> {
+    val contributions = mutableListOf<KotlinSourceFileContribution>()
+    endpoints
+        .groupBy { it.packageName }
+        .filterKeys { it.isNotBlank() }
+        .toSortedMap()
+        .forEach { (packageName, packageEndpoints) ->
+            packageEndpoints
+                .groupBy { it.sourceFile }
+                .toSortedMap()
+                .forEach { (sourceFile, groupedEndpoints) ->
+                    val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
+                    val modelsByPropertyName =
+                        buildEndpointContractModels(sortedEndpoints, sourceFile, endpointsSuffix).associateBy { it.endpoint.propertyName }
+                    contributions +=
+                        KotlinSourceFileContribution(
+                            packageName = packageName.toGeneratedPackageName(generatedPackageName),
+                            sourcePackageName = packageName,
+                            sourceFile = sourceFile,
+                            aggregateInterfaceName = aggregateInterfaceName(sourceFile),
+                            nestedInterfaceName = nestedInterfaceName,
+                            imports = imports(sortedEndpoints),
+                            endpointMembers =
+                                sortedEndpoints.map { endpoint ->
+                                    KotlinEndpointMemberContribution(
+                                        endpointPropertyName = endpoint.propertyName,
+                                        content =
+                                            endpointMemberContent(
+                                                endpoint,
+                                                checkNotNull(modelsByPropertyName[endpoint.propertyName]).toGenerationContext()
+                                            )
+                                    )
+                                }
+                        )
+                }
+        }
+    return contributions
+}
+
+/**
+ * Appends a KDoc block when summary or detail lines are available.
+ *
+ * @receiver target builder.
+ * @param summaryLines first paragraph lines.
+ * @param detailLines remaining descriptive lines.
+ * @param indentation indentation prefix to apply to every emitted line.
+ */
+fun StringBuilder.appendGeneratedKdoc(
+    summaryLines: List<String>,
+    detailLines: List<String>,
+    indentation: String
+) {
+    val hasSummary = summaryLines.isNotEmpty()
+    val hasDetails = detailLines.isNotEmpty()
+    if (!hasSummary && !hasDetails) {
+        return
+    }
+
+    appendLine("$indentation/**")
+    summaryLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
+    if (hasSummary && hasDetails) {
+        appendLine("$indentation *")
+    }
+    detailLines.forEach { appendLine("$indentation * ${it.escapeForKdoc()}") }
+    appendLine("$indentation */")
+}
+
+/**
  * Renders one merged Kotlin endpoint contract file from shared endpoint metadata and generator-specific members.
  *
  * @param packageName package of the generated Kotlin file.
@@ -74,7 +186,7 @@ data class KotlinEndpointMemberContribution(
  * @param imports imports requested by contributing generators.
  * @return generated Kotlin source code for the merged endpoint contract file.
  */
-fun renderMergedKotlinEndpointFile(
+internal fun renderMergedKotlinEndpointFile(
     packageName: String,
     sourceFile: String,
     endpointsSuffix: String = "Endpoints",
@@ -153,12 +265,102 @@ fun renderMergedKotlinEndpointFile(
 }
 
 /**
+ * Writes merged Kotlin endpoint contract files to [generatedSourcesDirectory].
+ *
+ * Contributions that target the same source package and file are merged into one rendered contract file.
+ *
+ * @param endpoints endpoint metadata declared in the scanned sources.
+ * @param sourceFiles Kotlin contributions emitted by one or more generators.
+ * @param generatedSourcesDirectory root directory for generated Kotlin source files.
+ * @param endpointsSuffix suffix appended to source-level enclosing endpoints interfaces.
+ * @param logWarn warning logger used when multiple inputs collide on the same output path.
+ * @return generated Kotlin source files written to disk.
+ */
+fun writeMergedKotlinSourceFiles(
+    endpoints: List<HttpEndpointMetadata>,
+    sourceFiles: List<KotlinSourceFileContribution>,
+    generatedSourcesDirectory: File,
+    endpointsSuffix: String = "Endpoints",
+    logWarn: (String, Throwable?) -> Unit = { _, _ -> }
+): Set<File> {
+    data class FileState(
+        val packageName: String,
+        val sourcePackageName: String,
+        val sourceFile: String,
+        val imports: MutableSet<String> = linkedSetOf(),
+        val aggregateInterfaces: MutableList<AggregateInterfaceContribution> = mutableListOf(),
+        val endpointMembers: MutableMap<String, MutableList<String>> = linkedMapOf()
+    )
+
+    if (sourceFiles.isEmpty()) {
+        return emptySet()
+    }
+
+    val fileStates = linkedMapOf<Triple<String, String, String>, FileState>()
+    sourceFiles.forEach { sourceFile ->
+        val key = Triple(sourceFile.packageName, sourceFile.sourcePackageName, sourceFile.sourceFile)
+        val state =
+            fileStates.getOrPut(key) {
+                FileState(
+                    packageName = sourceFile.packageName,
+                    sourcePackageName = sourceFile.sourcePackageName,
+                    sourceFile = sourceFile.sourceFile
+                )
+            }
+        state.imports += sourceFile.imports
+        state.aggregateInterfaces +=
+            AggregateInterfaceContribution(
+                name = sourceFile.aggregateInterfaceName,
+                nestedInterfaceName = sourceFile.nestedInterfaceName
+            )
+        sourceFile.endpointMembers.forEach { endpointMember ->
+            state.endpointMembers
+                .getOrPut(endpointMember.endpointPropertyName) { mutableListOf() }
+                .add(endpointMember.content)
+        }
+    }
+
+    val generatedFiles = linkedSetOf<File>()
+    val writtenTargets = mutableMapOf<File, Triple<String, String, String>>()
+    fileStates.forEach { (_, state) ->
+        val packageDirectory =
+            File(generatedSourcesDirectory, state.packageName.replace('.', '/')).also { it.mkdirs() }
+        val targetFile = File(packageDirectory, "${state.sourceFile.toEndpointContainerName(endpointsSuffix)}.kt")
+        writtenTargets[targetFile]?.let { existing ->
+            logWarn(
+                "Multiple endpoint sources map to '${targetFile.absolutePath}' when using target package '${state.packageName}': " +
+                    "${existing.second}.${existing.third} and ${state.sourcePackageName}.${state.sourceFile}. " +
+                    "Later output will overwrite earlier output.",
+                null
+            )
+        }
+        writtenTargets[targetFile] = Triple(state.packageName, state.sourcePackageName, state.sourceFile)
+        val fileEndpoints =
+            endpoints.filter { it.packageName == state.sourcePackageName && it.sourceFile == state.sourceFile }
+        targetFile.writeText(
+            renderMergedKotlinEndpointFile(
+                packageName = state.packageName,
+                sourceFile = state.sourceFile,
+                endpointsSuffix = endpointsSuffix,
+                endpoints = fileEndpoints,
+                aggregateInterfaces = state.aggregateInterfaces.distinctBy { it.name to it.nestedInterfaceName },
+                endpointMembers = state.endpointMembers,
+                imports = state.imports
+            )
+        )
+        generatedFiles += targetFile
+    }
+
+    return generatedFiles
+}
+
+/**
  * Describes a generated aggregate interface that groups endpoint-specific nested integration interfaces.
  *
  * @property name generated aggregate interface name.
  * @property nestedInterfaceName nested interface inherited from each endpoint contract.
  */
-data class AggregateInterfaceContribution(
+internal data class AggregateInterfaceContribution(
     val name: String,
     val nestedInterfaceName: String
 )

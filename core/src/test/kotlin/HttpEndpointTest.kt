@@ -16,7 +16,7 @@ class HttpEndpointTest : API {
     private val postItem by endpoint(description = "desc", details = "details") {
         post("items")
             .input(inputHeader) { stringBody() }
-            .output(Status.CREATED, headersOf(outputHeader)) {
+            .output(Status.Created, headersOf(outputHeader)) {
                 rawBody(mediaType = MediaType.Json)
             }
     }
@@ -43,7 +43,7 @@ class HttpEndpointTest : API {
         val bodies = endpoint.outputs.toList()
         assertEquals(1, bodies.size)
         val output = bodies.first()
-        assertTrue(output.statusMatcher(Status.CREATED))
+        assertTrue(output.statusMatcher(Status.Created))
         assertEquals(listOf(outputHeader), output.headers.toList())
         assertEquals(MediaType.Json, (output.body as RawBody).mediaType)
     }

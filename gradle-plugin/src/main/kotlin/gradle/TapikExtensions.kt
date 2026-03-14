@@ -54,9 +54,7 @@ open class SpringWebMvcExtension @Inject constructor(
 }
 
 /** Configures Markdown documentation generation for Tapik endpoints. */
-open class MarkdownDocumentationExtension @Inject constructor(
-    objects: ObjectFactory
-) : TapikGeneratorExtension()
+open class MarkdownDocumentationExtension @Inject constructor() : TapikGeneratorExtension()
 
 /**
  * Root Gradle extension exposing Tapik-specific configuration surfaces.
@@ -154,8 +152,7 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
                 put(
                     "spring-restclient",
                     GeneratorConfiguration(
-                        clientSuffix = springRestClient.clientSuffix.get(),
-                        serverSuffix = "Server"
+                        clientSuffix = springRestClient.clientSuffix.get()
                     )
                 )
             }
@@ -163,7 +160,6 @@ open class TapikExtension @Inject constructor(objects: ObjectFactory) {
                 put(
                     "spring-webmvc",
                     GeneratorConfiguration(
-                        clientSuffix = "Client",
                         serverSuffix = springWebMvc.serverSuffix.get()
                     )
                 )

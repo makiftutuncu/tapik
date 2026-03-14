@@ -7,7 +7,7 @@ plugins {
 dependencies {
     api(project(":core"))
     api(project(":jackson"))
-    compileOnly(project(":common-plugin"))
+    api(project(":common-plugin"))
     implementation(libs.arrowCore)
     implementation(libs.springWeb)
     testImplementation(testFixtures(project(":core")))

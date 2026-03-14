@@ -63,11 +63,11 @@ interface UsersEndpoints {
             data class Created(
                 val response: UserResponse,
                 val location: URI
-            ) : Response(Status.CREATED)
+            ) : Response(Status.Created)
 
             data class BadRequest(
                 val error: ApiError
-            ) : Response(Status.BAD_REQUEST)
+            ) : Response(Status.BadRequest)
         }
     }
 }

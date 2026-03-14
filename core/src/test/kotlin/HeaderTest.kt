@@ -26,8 +26,11 @@ class HeaderTest {
 
     @Test
     fun `companion exposes well known headers`() {
-        assertEquals(Header.ACCEPT, Header.Accept.name)
-        assertEquals(Header.CONTENT_TYPE, Header.ContentType.name)
-        assertEquals(Header.LOCATION, Header.Location.name)
+        assertEquals(Header.ACCEPT_VALUE, Header.Accept.name)
+        assertEquals(Header.CONTENT_TYPE_VALUE, Header.ContentType.name)
+        assertEquals(Header.LOCATION_VALUE, Header.Location.name)
+        assertEquals(Header.AUTHORIZATION_VALUE, Header.Authorization.name)
+        assertEquals(Header.CONTENT_LENGTH_VALUE, Header.ContentLength.name)
+        assertEquals(Header.REFERER_VALUE, Header.Referer.name)
     }
 }

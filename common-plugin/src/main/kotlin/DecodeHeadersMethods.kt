@@ -386,12 +386,12 @@ private fun <H : Any> decodeHeader(
 ): EitherNel<String, HeaderValues<H>> =
     when (header) {
         is HeaderInput<H> -> {
-            val values = values[header.name]
-            if (values == null && header.required) {
+            val headerValues = values[header.name]
+            if (headerValues == null && header.required) {
                 "Required header '${header.name}' is missing".leftNel()
             } else {
                 val initial: EitherNel<String, List<H>> = emptyList<H>().right()
-                values
+                headerValues
                     .orEmpty()
                     .fold(initial) { acc, raw ->
                         zipOrAccumulate(
@@ -405,5 +405,6 @@ private fun <H : Any> decodeHeader(
                     }
             }
         }
+
         is HeaderValues<H> -> header.right()
     }

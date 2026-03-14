@@ -4,7 +4,9 @@ import arrow.core.None
 import arrow.core.Some
 import dev.akif.tapik.plugin.GeneratorConfiguration
 import dev.akif.tapik.plugin.TapikGeneratorContext
+import dev.akif.tapik.plugin.TapikLogger
 import dev.akif.tapik.plugin.metadata.*
+import dev.akif.tapik.plugin.writeMergedKotlinSourceFiles
 import org.junit.jupiter.api.io.CleanupMode
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -23,13 +25,7 @@ class RestClientBasedClientGeneratorTest {
     fun `generate writes documented client interface`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator().generate(
-            endpoints = listOf(sampleMetadata()),
-            context = testContext(rootDir)
-        )
-
-        val generated =
-            File(rootDir, "dev/akif/tapik/clients/generated/UserEndpointsClient.kt")
+        val generated = generate(listOf(sampleMetadata()), testContext(rootDir))
         assertTrue(
             generated.exists(),
             "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}"
@@ -60,13 +56,7 @@ class RestClientBasedClientGeneratorTest {
     fun `generate sanitizes conflicting identifiers`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator().generate(
-            endpoints = listOf(metadataWithChallengingNames()),
-            context = testContext(rootDir)
-        )
-
-        val generated =
-            File(rootDir, "dev/akif/tapik/clients/generated/WildEndpointsClient.kt")
+        val generated = generate(listOf(metadataWithChallengingNames()), testContext(rootDir))
         assertTrue(
             generated.exists(),
             "Expected generated interface file, files: ${File(generated.parent).list()?.toList()}"
@@ -98,12 +88,7 @@ class RestClientBasedClientGeneratorTest {
     fun `generate keeps required query parameters non nullable without defaults`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator().generate(
-            endpoints = listOf(metadataWithRequiredQueryParameter()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/RequiredQueryEndpointsClient.kt")
+        val generated = generate(listOf(metadataWithRequiredQueryParameter()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated interface file")
 
         val content = generated.readText()
@@ -118,12 +103,7 @@ class RestClientBasedClientGeneratorTest {
     fun `generate keeps renderURI argument order aligned with generated method parameter order`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator().generate(
-            endpoints = listOf(metadataWithMixedQueryOrdering()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/MixedQueryEndpointsClient.kt")
+        val generated = generate(listOf(metadataWithMixedQueryOrdering()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated interface file")
 
         val content = generated.readText()
@@ -150,12 +130,7 @@ class RestClientBasedClientGeneratorTest {
     fun `generate uses shared sealed response hierarchy for multi output endpoints`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator().generate(
-            endpoints = listOf(metadataWithMultipleOutputs()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/UsersClient.kt")
+        val generated = generate(listOf(metadataWithMultipleOutputs()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated client interface")
 
         val content = generated.readText()
@@ -176,12 +151,7 @@ class RestClientBasedClientGeneratorTest {
     fun `generate adds byte array safe equality and normalizes matcher variant names`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator().generate(
-            endpoints = listOf(metadataWithPredicateRawBodyOutput()),
-            context = testContext(rootDir)
-        )
-
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/ExampleClient.kt")
+        val generated = generate(listOf(metadataWithPredicateRawBodyOutput()), testContext(rootDir))
         assertTrue(generated.exists(), "Expected generated client interface")
 
         val content = generated.readText()
@@ -196,9 +166,9 @@ class RestClientBasedClientGeneratorTest {
     fun `generate uses configured client and endpoints suffixes`() {
         val rootDir = tempDir.toFile()
 
-        RestClientBasedClientGenerator().generate(
-            endpoints = listOf(sampleMetadata()),
-            context =
+        val generated =
+            generate(
+                listOf(sampleMetadata()),
                 testContext(rootDir).copy(
                     endpointsSuffix = "Contracts",
                     generatorConfiguration =
@@ -207,9 +177,8 @@ class RestClientBasedClientGeneratorTest {
                             serverSuffix = "Server"
                         )
                 )
-        )
+            )
 
-        val generated = File(rootDir, "dev/akif/tapik/clients/generated/UserEndpointsApi.kt")
         assertTrue(generated.exists(), "Expected generated interface file with configured name")
         assertTrue(
             generated.readText().contains("interface UserEndpointsApi"),
@@ -227,11 +196,24 @@ class RestClientBasedClientGeneratorTest {
             generatedSourcesDirectory = rootDir,
             generatedPackageName = "generated",
             endpointsSuffix = "Endpoints",
-            log = {},
-            logDebug = {},
-            logWarn = { _, _ -> },
+            logger = TapikLogger.Console,
             generatorConfiguration = GeneratorConfiguration()
         )
+
+    private fun generate(
+        endpoints: List<HttpEndpointMetadata>,
+        context: TapikGeneratorContext
+    ): File {
+        val generator = RestClientBasedClientGenerator()
+        val contribution = generator.contribute(endpoints, context)
+        return writeMergedKotlinSourceFiles(
+            endpoints = endpoints,
+            sourceFiles = contribution.sourceFiles,
+            generatedSourcesDirectory = context.generatedSourcesDirectory,
+            endpointsSuffix = context.endpointsSuffix,
+            logWarn = { _, _ -> }
+        ).single()
+    }
 
     private fun sampleMetadata(): HttpEndpointMetadata =
         HttpEndpointMetadata(
@@ -289,8 +271,7 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "UserEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "UserEndpoints"
         )
 
     private fun metadataWithChallengingNames(): HttpEndpointMetadata =
@@ -352,8 +333,7 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "WildEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "WildEndpoints"
         )
 
     private fun metadataWithRequiredQueryParameter(): HttpEndpointMetadata =
@@ -387,8 +367,7 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "RequiredQueryEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "RequiredQueryEndpoints"
         )
 
     private fun metadataWithMixedQueryOrdering(): HttpEndpointMetadata =
@@ -428,8 +407,7 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "MixedQueryEndpoints",
-            rawType = "HttpEndpoint"
+            sourceFile = "MixedQueryEndpoints"
         )
 
     private fun metadataWithMultipleOutputs(): HttpEndpointMetadata =
@@ -466,7 +444,7 @@ class RestClientBasedClientGeneratorTest {
             outputs =
                 listOf(
                     OutputMetadata(
-                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.CREATED),
+                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.Created),
                         description = "Created",
                         headers =
                             listOf(
@@ -487,7 +465,7 @@ class RestClientBasedClientGeneratorTest {
                             )
                     ),
                     OutputMetadata(
-                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.BAD_REQUEST),
+                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.BadRequest),
                         description = "Bad Request",
                         headers = emptyList(),
                         body =
@@ -503,8 +481,7 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "Users",
-            rawType = "HttpEndpoint"
+            sourceFile = "Users"
         )
 
     private fun metadataWithPredicateRawBodyOutput(): HttpEndpointMetadata =
@@ -520,7 +497,7 @@ class RestClientBasedClientGeneratorTest {
             outputs =
                 listOf(
                     OutputMetadata(
-                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.OK),
+                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.Ok),
                         description = "OK",
                         headers = emptyList(),
                         body =
@@ -543,7 +520,6 @@ class RestClientBasedClientGeneratorTest {
                     )
                 ),
             packageName = "dev.akif.tapik.clients",
-            sourceFile = "Example",
-            rawType = "HttpEndpoint"
+            sourceFile = "Example"
         )
 }

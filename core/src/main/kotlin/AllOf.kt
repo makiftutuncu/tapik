@@ -5,8 +5,6 @@ package dev.akif.tapik
  *
  * The DSL composes endpoint pieces using these interfaces so that code generators can
  * reason about the shape of header and parameter tuples without reflection.
- *
- * @see OneOf
  */
 sealed interface AllOf
 
