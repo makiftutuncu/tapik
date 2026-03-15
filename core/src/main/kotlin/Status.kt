@@ -1,6 +1,11 @@
 package dev.akif.tapik
 
-/** Enumerates the known HTTP status codes as defined by RFC 9110 and the IANA registry.
+/**
+ * Known HTTP status codes exposed as named constants.
+ *
+ * Tapik uses an enum instead of raw integers so endpoint definitions, generators, and interpreters
+ * can share one stable set of statuses without stringly typed comparisons.
+ *
  * @property code numeric HTTP status code backing the enum entry.
  */
 enum class Status(
@@ -81,12 +86,10 @@ enum class Status(
         private val codesToStatuses = entries.associateBy { it.code }
 
         /**
-         * Looks up the [Status] that corresponds to [code], throwing if the code is unknown.
+         * Resolves a numeric status code to the matching enum entry.
          *
-         * @param code numeric status code to resolve.
-         * @return the matching [Status] entry.
-         * @throws IllegalArgumentException when the code is not recognised by Tapik.
-         * @see Status.entries
+         * This exists so runtime integrations can convert framework-specific status values back into
+         * the same [Status] instances used by endpoint definitions.
          */
         fun of(code: Int): Status = requireNotNull(codesToStatuses[code]) { "Unknown status code: $code" }
     }

@@ -7,28 +7,25 @@ import arrow.core.Some
 import dev.akif.tapik.codec.StringCodec
 
 /**
- * Creates a path parameter with the given [name] and [codec].
+ * Defines a required path placeholder.
  *
- * @param name parameter name as it appears inside the URI template.
- * @param codec codec used to encode and decode parameter values.
- * @return path variable definition that is required by default.
- * @see PathVariable
+ * Use the returned [PathVariable] inside a URI template such as `"users" / path.long("id")`.
+ * Tapik renders it as `{name}` in the path while retaining [codec] so generators know the runtime
+ * type of the captured segment.
  */
 inline fun <reified P : Any> path(
     name: String,
     codec: StringCodec<P>
 ): PathVariable<P> = PathVariable(name, codec)
 
-/** Shorthand accessor to factory helpers for path parameters. */
+/** Shortcut to the predefined [PathVariable] factory methods such as [PathVariable.Companion.long]. */
 val path: PathVariable.Companion = PathVariable.Companion
 
 /**
- * Creates a query parameter with the given [name] and [codec].
+ * Defines a required query parameter.
  *
- * @param name query parameter name.
- * @param codec codec used to encode and decode the parameter value.
- * @return query parameter definition.
- * @see QueryParameter.optional
+ * Add it to a URI template with `+` so the query parameter becomes part of the endpoint contract
+ * without affecting the literal path segments.
  */
 fun <Q : Any> query(
     name: String,
@@ -36,13 +33,7 @@ fun <Q : Any> query(
 ): QueryParameter<Q> = QueryParameter(name, codec, default = None)
 
 /**
- * Creates a query parameter with the given [name], [codec], and a default.
- *
- * @param name query parameter name.
- * @param codec codec used to encode and decode the parameter value.
- * @param default optional default value used when callers omit the parameter.
- * @return query parameter definition honoring the required/default combination.
- * @see QueryParameter.optional
+ * Defines an optional query parameter by recording the [default] to use when callers omit it.
  */
 fun <Q : Any> query(
     name: String,
@@ -50,32 +41,27 @@ fun <Q : Any> query(
     default: Q?
 ): QueryParameter<Q> = QueryParameter(name, codec, default = Some(default))
 
-/** Shorthand accessor to factory helpers for query parameters. */
+/** Shortcut to the predefined [QueryParameter] factory methods such as [QueryParameter.Companion.int]. */
 val query: QueryParameter.Companion = QueryParameter.Companion
 
 /**
- * Creates a header definition with the given [name] and [codec].
+ * Defines a required header slot.
  *
- * @param name header name using canonical casing.
- * @param codec codec used to encode and decode header values.
- * @return header definition that requires a value by default.
- * @see Header
+ * Use the returned [Header] in `input(...)` when callers must provide the header, or call it as a
+ * function later to pin concrete values for an optional response header.
  */
 inline fun <reified H : Any> header(
     name: String,
     codec: StringCodec<H>
 ): Header<H> = HeaderInput(name, codec)
 
-/** Shorthand accessor to factory helpers for headers. */
+/** Shortcut to Tapik's predefined [Header] factory methods and standard header definitions. */
 val header: Header.Companion = Header.Companion
 
 /**
- * Matches any of the provided HTTP statuses.
+ * Matches any of the supplied statuses.
  *
- * @param first status that must always be matched.
- * @param rest additional statuses that will be included in the matcher.
- * @return matcher that succeeds when the response status is contained in the provided set.
- * @see StatusMatcher.AnyOf
+ * This is useful when multiple concrete status codes share the same response shape.
  */
 fun anyStatus(
     first: Status,
@@ -83,18 +69,16 @@ fun anyStatus(
 ): StatusMatcher = StatusMatcher.AnyOf(setOf(first, *rest))
 
 /**
- * Builds a [StatusMatcher] using an arbitrary [predicate] with [description].
+ * Builds a custom status matcher described by [description].
  *
- * @param description human readable description that surfaces in generated code and documentation.
- * @param predicate predicate invoked to determine whether a status matches.
- * @return matcher delegating matching logic to [predicate].
- * @see StatusMatcher.Predicate
+ * Use this when the matching rule matters to the endpoint contract but cannot be expressed as one
+ * fixed status or a small set of statuses.
  */
 fun matchStatus(
     description: String,
     predicate: (Status) -> Boolean
 ): StatusMatcher = StatusMatcher.Predicate(description, predicate)
 
-/** Status matcher that never matches any status code. */
+/** Status matcher that never succeeds, typically used as a sentinel or placeholder. */
 val unmatchedStatus: StatusMatcher =
     StatusMatcher.Unmatched

@@ -3,19 +3,11 @@
 package dev.akif.tapik
 
 /**
- * Entry point for building an HTTP endpoint.
+ * Staged endpoint builder state.
  *
- * @param P tuple capturing referenced path and query parameters.
- * @param I inbound definition coupling headers with the request body.
- * @param O outbound response definitions paired with status matchers.
- * @property id unique identifier inferred from the property name.
- * @property description optional short description of the endpoint.
- * @property details optional long-form description.
- * @property method HTTP verb associated with the endpoint.
- * @property path ordered URI segments forming the template.
- * @property parameters tuple capturing referenced path and query parameters.
- * @property input request definition including headers and body.
- * @property outputs candidate response definitions matched by status.
+ * Each DSL step returns a new instance with a more specific [input] or [outputs] type, which is
+ * how Tapik keeps the fluent builder immutable while still preserving the exact request and
+ * response shape at compile time.
  */
 data class HttpEndpointBuildingContext<P : Parameters, I : Input<*, *>, O : Outputs>(
     internal val id: String,

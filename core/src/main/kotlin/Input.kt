@@ -3,12 +3,14 @@
 package dev.akif.tapik
 
 /**
- * Couples the request headers with the request body definition.
+ * Request contract for an endpoint.
  *
- * @param headers tuple describing headers expected from the caller.
- * @param body body definition expected from the caller; defaults to [EmptyBody] when absent.
+ * Tapik keeps headers and body together because they are configured by the same DSL stage and are
+ * both needed to derive a client method signature or interpret an incoming request.
  */
 data class Input<H : Headers, B : Body<*>>(
+    /** Header contract applied to the request. */
     val headers: H,
+    /** Body contract applied to the request. */
     val body: B
 )

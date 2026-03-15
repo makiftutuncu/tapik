@@ -1,15 +1,19 @@
 package dev.akif.tapik
 
 /**
- * Common contract for tuple-like structures that can expose their elements as a list.
+ * Common contract for fixed-arity structures that also need an iterable view.
  *
- * @param T type of each element in the tuple.
+ * Tapik models headers, parameters, and outputs as tuples so it can preserve element types during
+ * DSL construction and still hand interpreters a regular [List] when they need to iterate.
+ *
+ * @param T type of each exposed element.
  */
 interface Listable<out T> {
     /**
-     * Constructs a list of all the items in this.
+     * Returns the elements in declaration order.
      *
-     * @return list of all the items in this.
+     * This is the bridge from Tapik's typed product types to the list-oriented code used by
+     * generators and interpreters.
      */
     fun toList(): List<T>
 }

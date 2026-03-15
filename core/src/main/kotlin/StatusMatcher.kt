@@ -1,61 +1,44 @@
 package dev.akif.tapik
 
-/**
- * Strategy for determining whether an HTTP status matches an output definition.
- */
+/** Strategy used to decide which output variant matches a response status. */
 sealed interface StatusMatcher : (Status) -> Boolean {
-    /** Matches a single [status] exactly. */
+    /** Matches one exact status code. */
     data class Is(
-        /** Status that must match for this matcher to evaluate to `true`. */
+        /** Status that selects the output. */
         val status: Status
     ) : StatusMatcher {
-        /**
-         * Evaluates whether [p1] matches the configured [status].
-         *
-         * @param p1 status under evaluation.
-         * @return `true` when [p1] equals [status].
-         */
+        /** Returns `true` only when the candidate status equals [status]. */
         override fun invoke(p1: Status): Boolean = status == p1
     }
 
-    /** Matches against any status contained in [statuses]. */
+    /** Matches any status contained in [statuses]. */
     data class AnyOf(
-        /** Set of statuses that match this predicate. */
+        /** Set of statuses that select the output. */
         val statuses: Set<Status>
     ) : StatusMatcher {
-        /**
-         * Evaluates whether [p1] is present inside [statuses].
-         *
-         * @param p1 status under evaluation.
-         * @return `true` when [p1] is included in [statuses].
-         */
+        /** Returns `true` when the candidate status is one of [statuses]. */
         override fun invoke(p1: Status): Boolean = p1 in statuses
     }
 
-    /** Delegates to an arbitrary [predicate] with a human-readable [description]. */
+    /**
+     * Custom matcher backed by an arbitrary predicate.
+     *
+     * [description] exists because the predicate itself cannot be rendered meaningfully in generated
+     * documentation, error messages, or code.
+     */
     data class Predicate(
-        /** Human-readable explanation used in generated documentation. */
+        /** Human-readable explanation of the matching rule. */
         val description: String,
-        /** Callback used to evaluate the matcher. */
+        /** Callback that decides whether a status selects the output. */
         val predicate: (Status) -> Boolean
     ) : StatusMatcher {
-        /**
-         * Delegates status matching to [predicate].
-         *
-         * @param p1 status under evaluation.
-         * @return `true` when [predicate] accepts [p1].
-         */
+        /** Delegates matching to [predicate]. */
         override fun invoke(p1: Status): Boolean = predicate(p1)
     }
 
-    /** Matches nothing, often used as a sentinel default. */
+    /** Matcher that never succeeds, typically used as a sentinel. */
     data object Unmatched : StatusMatcher {
-        /**
-         * Always returns `false` because the matcher never succeeds.
-         *
-         * @param p1 ignored status argument.
-         * @return `false`.
-         */
+        /** Always returns `false`, so this matcher never selects an output. */
         override fun invoke(p1: Status): Boolean = false
     }
 }

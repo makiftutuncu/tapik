@@ -3,66 +3,67 @@
 package dev.akif.tapik
 
 /**
- * Heterogeneous tuple describing response variants.
+ * Fixed-arity tuple of response variants.
  *
- * Construct instances via `Outputs(...)` when convenient.
+ * The typed tuple keeps the exact header and body shape of each output available to generators even
+ * after multiple `.output(...)` calls have been chained together.
  */
 typealias Outputs = Tuple<Output<*, *>>
 
-/** Empty collection of outputs. */
+/** Output tuple with no declared response variants yet. */
 typealias Outputs0 = Tuple0
 
-/** Outputs tuple with one element. */
+/** Output tuple with one response variant. */
 typealias Outputs1<O1> = Tuple1<Output<*, *>, O1>
 
-/** Outputs tuple with two elements. */
+/** Output tuple with two response variants. */
 typealias Outputs2<O1, O2> = Tuple2<Output<*, *>, O1, O2>
 
-/** Outputs tuple with three elements. */
+/** Output tuple with three response variants. */
 typealias Outputs3<O1, O2, O3> = Tuple3<Output<*, *>, O1, O2, O3>
 
-/** Outputs tuple with four elements. */
+/** Output tuple with four response variants. */
 typealias Outputs4<O1, O2, O3, O4> = Tuple4<Output<*, *>, O1, O2, O3, O4>
 
-/** Outputs tuple with five elements. */
+/** Output tuple with five response variants. */
 typealias Outputs5<O1, O2, O3, O4, O5> = Tuple5<Output<*, *>, O1, O2, O3, O4, O5>
 
-/** Outputs tuple with six elements. */
+/** Output tuple with six response variants. */
 typealias Outputs6<O1, O2, O3, O4, O5, O6> = Tuple6<Output<*, *>, O1, O2, O3, O4, O5, O6>
 
-/** Outputs tuple with seven elements. */
+/** Output tuple with seven response variants. */
 typealias Outputs7<O1, O2, O3, O4, O5, O6, O7> = Tuple7<Output<*, *>, O1, O2, O3, O4, O5, O6, O7>
 
-/** Outputs tuple with eight elements. */
+/** Output tuple with eight response variants. */
 typealias Outputs8<O1, O2, O3, O4, O5, O6, O7, O8> = Tuple8<Output<*, *>, O1, O2, O3, O4, O5, O6, O7, O8>
 
-/** Outputs tuple with nine elements. */
+/** Output tuple with nine response variants. */
 typealias Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, O9> = Tuple9<Output<*, *>, O1, O2, O3, O4, O5, O6, O7, O8, O9>
 
-/** Outputs tuple with ten elements. */
+/** Output tuple with ten response variants. */
 typealias Outputs10<O1, O2, O3, O4, O5, O6, O7, O8, O9, O10> =
     Tuple10<Output<*, *>, O1, O2, O3, O4, O5, O6, O7, O8, O9, O10>
 
-/** Returns an empty outputs tuple. */
+/** Returns the empty output tuple used before any response variants are declared. */
 fun emptyOutputs(): Outputs0 = Outputs0
 
-/** Returns an outputs tuple with one output. */
+/** Creates an output tuple with one response variant. */
 fun <O1 : Output<*, *>> outputsOf(output1: O1): Outputs1<O1> = Tuple1(output1)
 
-/** Returns an outputs tuple with two outputs. */
+/** Creates an output tuple with two response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2
 ): Outputs2<O1, O2> = Tuple2(output1, output2)
 
-/** Returns an outputs tuple with three outputs. */
+/** Creates an output tuple with three response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,
     output3: O3
 ): Outputs3<O1, O2, O3> = Tuple3(output1, output2, output3)
 
-/** Returns an outputs tuple with four outputs. */
+/** Creates an output tuple with four response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,
@@ -70,7 +71,7 @@ fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>>
     output4: O4
 ): Outputs4<O1, O2, O3, O4> = Tuple4(output1, output2, output3, output4)
 
-/** Returns an outputs tuple with five outputs. */
+/** Creates an output tuple with five response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,
@@ -79,7 +80,7 @@ fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>,
     output5: O5
 ): Outputs5<O1, O2, O3, O4, O5> = Tuple5(output1, output2, output3, output4, output5)
 
-/** Returns an outputs tuple with six outputs. */
+/** Creates an output tuple with six response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,
@@ -89,7 +90,7 @@ fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>,
     output6: O6
 ): Outputs6<O1, O2, O3, O4, O5, O6> = Tuple6(output1, output2, output3, output4, output5, output6)
 
-/** Returns an outputs tuple with seven outputs. */
+/** Creates an output tuple with seven response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,
@@ -100,7 +101,7 @@ fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>,
     output7: O7
 ): Outputs7<O1, O2, O3, O4, O5, O6, O7> = Tuple7(output1, output2, output3, output4, output5, output6, output7)
 
-/** Returns an outputs tuple with eight outputs. */
+/** Creates an output tuple with eight response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, O8 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,
@@ -113,7 +114,7 @@ fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>,
 ): Outputs8<O1, O2, O3, O4, O5, O6, O7, O8> =
     Tuple8(output1, output2, output3, output4, output5, output6, output7, output8)
 
-/** Returns an outputs tuple with nine outputs. */
+/** Creates an output tuple with nine response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, O8 : Output<*, *>, O9 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,
@@ -127,7 +128,7 @@ fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>,
 ): Outputs9<O1, O2, O3, O4, O5, O6, O7, O8, O9> =
     Tuple9(output1, output2, output3, output4, output5, output6, output7, output8, output9)
 
-/** Returns an outputs tuple with ten outputs. */
+/** Creates an output tuple with ten response variants. */
 fun <O1 : Output<*, *>, O2 : Output<*, *>, O3 : Output<*, *>, O4 : Output<*, *>, O5 : Output<*, *>, O6 : Output<*, *>, O7 : Output<*, *>, O8 : Output<*, *>, O9 : Output<*, *>, O10 : Output<*, *>> outputsOf(
     output1: O1,
     output2: O2,

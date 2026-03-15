@@ -182,16 +182,6 @@ private fun allocateEndpointContractName(
     return candidate
 }
 
-/**
- * Normalises a source file name into the shared enclosing endpoint-contract interface name.
- *
- * Source files that already end with `Endpoints` keep their name; others receive the `Endpoints`
- * suffix so generated contracts consistently nest endpoint interfaces under a single source-level
- * container.
- *
- * @receiver source file name that declared the endpoints.
- * @return enclosing endpoint-contract interface name.
- */
 internal fun String.toEndpointContainerName(endpointsSuffix: String = "Endpoints"): String =
     if (endsWith(endpointsSuffix)) {
         this

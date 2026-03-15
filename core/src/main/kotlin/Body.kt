@@ -4,34 +4,35 @@ import dev.akif.tapik.codec.*
 import dev.akif.tapik.codec.StringCodecs
 
 /**
- * Base contract for describing HTTP bodies flowing through an endpoint.
+ * Describes how an endpoint body is represented on the wire.
  *
- * @param T type of the payload carried by the body.
- * @property mediaType preferred media type for the encoded payload when known.
- * @property codec encoder/decoder responsible for transforming between payload instances and raw bytes.
+ * A body couples the semantic payload type [T] with the codec and media type needed to encode and
+ * decode it. Request and response definitions both use this contract.
+ *
+ * @param T payload type exposed to callers and generated clients.
+ * @property mediaType advertised content type when one is known.
+ * @property codec encoder/decoder that turns [T] into raw bytes and back.
  */
 sealed interface Body<T : Any> {
-    /** Preferred media type for the body if known. */
+    /** Preferred media type for the body, or `null` when the payload is not tied to a specific one. */
     val mediaType: MediaType?
 
-    /** Codec used to transform between payload instances and raw bytes. */
+    /** Codec responsible for the byte-level representation of the payload. */
     val codec: ByteArrayCodec<T>
 
-    /** Friendly name associated with the body, if provided. */
+    /** Short diagnostic name used in generated code and codec error messages. */
     val name: String
 
     /**
-     * Encodes [value] into a [ByteArray].
+     * Encodes [value] into its wire representation.
      *
-     * @param value instance to be encoded.
-     * @return encoded bytes or `null` when the body intentionally carries no content.
-     * @throws IllegalArgumentException when the codec refuses to encode [value].
-     * @see Codec.encode
+     * This delegates to [codec], except for bodies such as [EmptyBody] that intentionally suppress
+     * any payload and therefore return `null`.
      */
     fun bytes(value: T): ByteArray? = codec.encode(value)
 }
 
-/** Sentinel body representing the absence of content. */
+/** Body definition for requests or responses that must not carry content. */
 data object EmptyBody : Body<Unit> {
     override val mediaType: MediaType? = null
 
@@ -42,7 +43,7 @@ data object EmptyBody : Body<Unit> {
     override fun bytes(value: Unit): ByteArray? = null
 }
 
-/** Text body coupled with a string codec. */
+/** Text body encoded through a string-aware byte codec. */
 data class StringBody(
     override val codec: ByteArrayCodec<String>,
     override val name: String
@@ -50,14 +51,14 @@ data class StringBody(
     override val mediaType: MediaType = MediaType.PlainText
 }
 
-/** Arbitrary binary body described by a codec and optional media type. */
+/** Opaque binary body whose meaning is defined entirely by the supplied codec and media type. */
 data class RawBody(
     override val mediaType: MediaType?,
     override val codec: ByteArrayCodec<ByteArray>,
     override val name: String
 ) : Body<ByteArray>
 
-/** Structured payload encoded and decoded via JSON. */
+/** Structured body advertised as JSON. */
 data class JsonBody<T : Any>(
     override val codec: ByteArrayCodec<T>,
     override val name: String
@@ -65,55 +66,27 @@ data class JsonBody<T : Any>(
     override val mediaType: MediaType = MediaType.Json
 }
 
-/**
- * Creates a text body using a named string codec.
- *
- * @param name friendly name used in error messages when encoding/decoding fails.
- * @return a [StringBody] backed by a codec that targets UTF-8 strings.
- * @see StringBody
- */
+/** Creates a plain-text body backed by Tapik's default string codec. */
 fun stringBody(name: String = "string"): StringBody = stringBody(StringCodecs.string(name).toByteArrayCodec(), name)
 
-/**
- * Creates a text body using the provided [codec].
- *
- * @param codec encoder/decoder that understands the textual payload.
- * @return a [StringBody] using the supplied codec.
- */
+/** Creates a plain-text body that delegates encoding and decoding to [codec]. */
 fun stringBody(
     codec: ByteArrayCodec<String>,
     name: String = "string"
 ): StringBody = StringBody(codec, name)
 
-/**
- * Creates a raw body that uses an identity codec and optional media type.
- *
- * @param name friendly name used in error messages when encoding/decoding fails.
- * @param mediaType media type advertised for the body, if any.
- * @return a [RawBody] that passes bytes through unchanged.
- */
+/** Creates a binary body that passes bytes through unchanged. */
 fun rawBody(
     name: String = "bytes",
     mediaType: MediaType? = null
 ): RawBody = rawBody(ByteArrayCodec.identity(name), mediaType, name)
 
-/**
- * Creates a raw body using the provided [codec] and optional [mediaType].
- *
- * @param codec encoder/decoder that understands how to transform the payload bytes.
- * @param mediaType media type advertised for the body, if any.
- * @param name friendly name used in error messages when encoding/decoding fails.
- * @return a [RawBody] that delegates encoding/decoding to [codec].
- */
+/** Creates a binary body whose wire representation is controlled by [codec]. */
 fun rawBody(
     codec: ByteArrayCodec<ByteArray>,
     mediaType: MediaType? = null,
     name: String = "bytes"
 ): RawBody = RawBody(mediaType, codec, name)
 
-/**
- * Creates [EmptyBody]
- *
- * @return the singleton [EmptyBody] instance.
- */
+/** Returns the singleton body definition used when no payload is allowed. */
 fun emptyBody(): EmptyBody = EmptyBody

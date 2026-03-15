@@ -2,9 +2,6 @@ package dev.akif.tapik.plugin
 
 import java.io.File
 
-/**
- * Optimizes imports in generated Kotlin source files by shortening fully-qualified references where safe.
- */
 internal object KotlinGeneratedSourceImportOptimizer {
     private val packageRoots =
         setOf(

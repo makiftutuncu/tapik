@@ -66,14 +66,6 @@ class RestClientInterpreter(
             }.onStatus(unmatchedStatusHandler(outputs))
             .toEntity<ByteArray>()
 
-    /**
-     * Produces an error handler that verifies the response content type for [output].
-     *
-     * @param output definition that produced the handler.
-     * @param method HTTP method used for the request.
-     * @param uri request URI.
-     * @return an error handler that raises [RestClientResponseException] with detailed diagnostics.
-     */
     private fun statusHandler(
         output: Output<*, *>,
         method: Method,
@@ -98,12 +90,6 @@ class RestClientInterpreter(
             }
         }
 
-    /**
-     * Produces a [ResponseErrorHandler] for statuses not matched by any declared [outputs].
-     *
-     * @param outputs collection of expected output definitions.
-     * @return handler that throws [RestClientResponseException] for unmatched responses.
-     */
     private fun unmatchedStatusHandler(outputs: List<Output<*, *>>): ResponseErrorHandler =
         object : ResponseErrorHandler {
             override fun hasError(response: ClientHttpResponse): Boolean = true

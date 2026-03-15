@@ -130,12 +130,6 @@ fun uniqueName(
     return rendered
 }
 
-/**
- * Quotes Kotlin keywords and other unsafe symbols to produce a valid identifier.
- *
- * @param name identifier to render.
- * @return safe Kotlin identifier, quoted if necessary.
- */
 internal fun renderIdentifier(name: String): String {
     val candidate = normalizeIdentifier(name) ?: "value"
     return if (candidate in KOTLIN_KEYWORDS) {
@@ -148,16 +142,6 @@ internal fun renderIdentifier(name: String): String {
 private val PRE_SANITIZED_PATTERN = Regex("[a-z][A-Za-z0-9]*")
 private val NON_ALPHANUMERIC = Regex("[^A-Za-z0-9]+")
 
-/**
- * Derives a simple name from a fully-qualified type name, preserving nested class qualifiers.
- *
- * Examples:
- * - "com.example.Book.Isbn" -> "Book.Isbn"
- * - "java.util.Map" -> "Map"
- *
- * @param fqcn fully-qualified class name, possibly including nested types.
- * @return tail name starting at the first segment that begins with an uppercase letter.
- */
 internal fun computeSimpleName(fqcn: String): String {
     val parts = fqcn.split('.')
     val indexOfType = parts.indexOfFirst { it.firstOrNull()?.isUpperCase() == true }
@@ -240,12 +224,6 @@ private fun normalizeIdentifier(input: String): String? {
     return candidate
 }
 
-/**
- * Splits and trims multi-line documentation text into individual lines suitable for KDoc rendering.
- *
- * @param text raw documentation block.
- * @return trimmed documentation lines or an empty list when [text] is blank.
- */
 internal fun linesForDocumentation(text: String?): List<String> =
     text
         ?.trim()

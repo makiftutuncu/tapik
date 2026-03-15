@@ -1,6 +1,6 @@
 package dev.akif.tapik
 
-/** Location of a parameter within an HTTP request. */
+/** Whether a parameter is rendered into the path template or the query string. */
 enum class ParameterPosition {
     Path,
     Query

@@ -3,118 +3,58 @@
 package dev.akif.tapik.codec
 
 /**
- * Contract that supplies default codecs for common scalar values.
+ * Common factory surface for built-in scalar variants.
  *
- * Each type parameter represents the codec shape used for a particular primitive when materialising
- * endpoint metadata or generated clients.
+ * Tapik reuses this shape for different abstractions, such as codecs, headers, and parameters, so the
+ * DSL can ask for "the default Int representation" without caring what concrete type is being built.
  *
- * @param TUnit codec type used for Kotlin `Unit`.
- * @param TBoolean codec type used for `Boolean` values.
- * @param TByte codec type used for `Byte` values.
- * @param TShort codec type used for `Short` values.
- * @param TInt codec type used for `Int` values.
- * @param TLong codec type used for `Long` values.
- * @param TFloat codec type used for `Float` values.
- * @param TDouble codec type used for `Double` values.
- * @param TBigInteger codec type used for `BigInteger` values.
- * @param TBigDecimal codec type used for `BigDecimal` values.
- * @param TString codec type used for `String` values.
- * @param TUUID codec type used for `UUID` values.
+ * @param TUnit representation type used for Kotlin `Unit`.
+ * @param TBoolean representation type used for `Boolean` values.
+ * @param TByte representation type used for `Byte` values.
+ * @param TShort representation type used for `Short` values.
+ * @param TInt representation type used for `Int` values.
+ * @param TLong representation type used for `Long` values.
+ * @param TFloat representation type used for `Float` values.
+ * @param TDouble representation type used for `Double` values.
+ * @param TBigInteger representation type used for `BigInteger` values.
+ * @param TBigDecimal representation type used for `BigDecimal` values.
+ * @param TString representation type used for `String` values.
+ * @param TUUID representation type used for `UUID` values.
  */
 interface Defaults<TUnit, TBoolean, TByte, TShort, TInt, TLong, TFloat, TDouble, TBigInteger, TBigDecimal, TString, TUUID> {
-    /**
-     * Builds a codec for representing a `Unit` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Unit`.
-     */
+    /** Returns the default representation of a `Unit` value identified by [name]. */
     fun unit(name: String): TUnit
 
-    /**
-     * Builds a codec for representing a `Boolean` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Boolean`.
-     */
+    /** Returns the default representation of a `Boolean` value identified by [name]. */
     fun boolean(name: String): TBoolean
 
-    /**
-     * Builds a codec for representing a `Byte` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Byte`.
-     */
+    /** Returns the default representation of a `Byte` value identified by [name]. */
     fun byte(name: String): TByte
 
-    /**
-     * Builds a codec for representing a `Short` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Short`.
-     */
+    /** Returns the default representation of a `Short` value identified by [name]. */
     fun short(name: String): TShort
 
-    /**
-     * Builds a codec for representing an `Int` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Int`.
-     */
+    /** Returns the default representation of an `Int` value identified by [name]. */
     fun int(name: String): TInt
 
-    /**
-     * Builds a codec for representing a `Long` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Long`.
-     */
+    /** Returns the default representation of a `Long` value identified by [name]. */
     fun long(name: String): TLong
 
-    /**
-     * Builds a codec for representing a `Float` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Float`.
-     */
+    /** Returns the default representation of a `Float` value identified by [name]. */
     fun float(name: String): TFloat
 
-    /**
-     * Builds a codec for representing a `Double` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `Double`.
-     */
+    /** Returns the default representation of a `Double` value identified by [name]. */
     fun double(name: String): TDouble
 
-    /**
-     * Builds a codec for representing a `BigInteger` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `BigInteger`.
-     */
+    /** Returns the default representation of a `BigInteger` value identified by [name]. */
     fun bigInteger(name: String): TBigInteger
 
-    /**
-     * Builds a codec for representing a `BigDecimal` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `BigDecimal`.
-     */
+    /** Returns the default representation of a `BigDecimal` value identified by [name]. */
     fun bigDecimal(name: String): TBigDecimal
 
-    /**
-     * Builds a codec for representing a `String` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `String`.
-     */
+    /** Returns the default representation of a `String` value identified by [name]. */
     fun string(name: String): TString
 
-    /**
-     * Builds a codec for representing a `UUID` value.
-     *
-     * @param name human readable identifier used in error messages.
-     * @return default codec for `UUID`.
-     */
+    /** Returns the default representation of a `UUID` value identified by [name]. */
     fun uuid(name: String): TUUID
 }

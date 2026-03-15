@@ -174,18 +174,6 @@ fun StringBuilder.appendGeneratedKdoc(
     appendLine("$indentation */")
 }
 
-/**
- * Renders one merged Kotlin endpoint contract file from shared endpoint metadata and generator-specific members.
- *
- * @param packageName package of the generated Kotlin file.
- * @param sourceFile original endpoint source file name.
- * @param endpointsSuffix suffix appended to the source-level enclosing endpoints interface.
- * @param endpoints endpoint metadata declared in the source file.
- * @param aggregateInterfaces aggregate interfaces that should extend each endpoint contract's nested integration type.
- * @param endpointMembers generator-specific content grouped by endpoint property name.
- * @param imports imports requested by contributing generators.
- * @return generated Kotlin source code for the merged endpoint contract file.
- */
 internal fun renderMergedKotlinEndpointFile(
     packageName: String,
     sourceFile: String,
@@ -354,12 +342,6 @@ fun writeMergedKotlinSourceFiles(
     return generatedFiles
 }
 
-/**
- * Describes a generated aggregate interface that groups endpoint-specific nested integration interfaces.
- *
- * @property name generated aggregate interface name.
- * @property nestedInterfaceName nested interface inherited from each endpoint contract.
- */
 internal data class AggregateInterfaceContribution(
     val name: String,
     val nestedInterfaceName: String

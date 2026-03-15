@@ -1,208 +1,109 @@
 package dev.akif.tapik
 
 /**
- * Interim building context exposed inside `endpoint { }` blocks before an HTTP verb is selected.
+ * First stage of the endpoint DSL, exposed before a method has been chosen.
  *
- * The DSL implementation only exposes HTTP verb helpers here so callers cannot mutate other
- * metadata until they choose the method. Each helper returns a fully configured
- * [HttpEndpointBuildingContext] that the rest of the builder can keep mutating.
+ * Only verb-selection helpers live here. That restriction exists so every endpoint chooses its
+ * HTTP method and URI template before request and response details are added.
  */
 class HttpEndpointVerbBuildingContext internal constructor(
     private val id: String,
     private val description: String?,
     private val details: String?
 ) {
-    /**
-     * Creates a GET endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts a GET endpoint from a precomposed URI template. */
     fun <P1 : Parameters> get(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.GET, uriWithParameters)
 
-    /**
-     * Creates a GET endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts a GET endpoint from a slash-separated literal path. */
     fun get(path: String) = method(Method.GET, stringToUri(path))
 
-    /**
-     * Creates a GET endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts a GET endpoint whose URI is built from a single parameter. */
     fun <P : Any> get(parameter: Parameter<P>) = method(Method.GET, parameterToUri(parameter))
 
-    /**
-     * Creates a HEAD endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts a HEAD endpoint from a precomposed URI template. */
     fun <P1 : Parameters> head(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.HEAD, uriWithParameters)
 
-    /**
-     * Creates a HEAD endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts a HEAD endpoint from a slash-separated literal path. */
     fun head(path: String) = method(Method.HEAD, stringToUri(path))
 
-    /**
-     * Creates a HEAD endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts a HEAD endpoint whose URI is built from a single parameter. */
     fun <P : Any> head(parameter: Parameter<P>) = method(Method.HEAD, parameterToUri(parameter))
 
-    /**
-     * Creates a POST endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts a POST endpoint from a precomposed URI template. */
     fun <P1 : Parameters> post(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.POST, uriWithParameters)
 
-    /**
-     * Creates a POST endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts a POST endpoint from a slash-separated literal path. */
     fun post(path: String) = method(Method.POST, stringToUri(path))
 
-    /**
-     * Creates a POST endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts a POST endpoint whose URI is built from a single parameter. */
     fun <P : Any> post(parameter: Parameter<P>) = method(Method.POST, parameterToUri(parameter))
 
-    /**
-     * Creates a PUT endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts a PUT endpoint from a precomposed URI template. */
     fun <P1 : Parameters> put(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.PUT, uriWithParameters)
 
-    /**
-     * Creates a PUT endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts a PUT endpoint from a slash-separated literal path. */
     fun put(path: String) = method(Method.PUT, stringToUri(path))
 
-    /**
-     * Creates a PUT endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts a PUT endpoint whose URI is built from a single parameter. */
     fun <P : Any> put(parameter: Parameter<P>) = method(Method.PUT, parameterToUri(parameter))
 
-    /**
-     * Creates a PATCH endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts a PATCH endpoint from a precomposed URI template. */
     fun <P1 : Parameters> patch(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.PATCH, uriWithParameters)
 
-    /**
-     * Creates a PATCH endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts a PATCH endpoint from a slash-separated literal path. */
     fun patch(path: String) = method(Method.PATCH, stringToUri(path))
 
-    /**
-     * Creates a PATCH endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts a PATCH endpoint whose URI is built from a single parameter. */
     fun <P : Any> patch(parameter: Parameter<P>) = method(Method.PATCH, parameterToUri(parameter))
 
-    /**
-     * Creates a DELETE endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts a DELETE endpoint from a precomposed URI template. */
     fun <P1 : Parameters> delete(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.DELETE, uriWithParameters)
 
-    /**
-     * Creates a DELETE endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts a DELETE endpoint from a slash-separated literal path. */
     fun delete(path: String) = method(Method.DELETE, stringToUri(path))
 
-    /**
-     * Creates a DELETE endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts a DELETE endpoint whose URI is built from a single parameter. */
     fun <P : Any> delete(parameter: Parameter<P>) = method(Method.DELETE, parameterToUri(parameter))
 
-    /**
-     * Creates an OPTIONS endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts an OPTIONS endpoint from a precomposed URI template. */
     fun <P1 : Parameters> options(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.OPTIONS, uriWithParameters)
 
-    /**
-     * Creates an OPTIONS endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts an OPTIONS endpoint from a slash-separated literal path. */
     fun options(path: String) = method(Method.OPTIONS, stringToUri(path))
 
-    /**
-     * Creates an OPTIONS endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts an OPTIONS endpoint whose URI is built from a single parameter. */
     fun <P : Any> options(parameter: Parameter<P>) = method(Method.OPTIONS, parameterToUri(parameter))
 
-    /**
-     * Creates a TRACE endpoint for the provided [uriWithParameters].
-     *
-     * @param uriWithParameters URI template matched by the endpoint.
-     */
+    /** Starts a TRACE endpoint from a precomposed URI template. */
     fun <P1 : Parameters> trace(
         uriWithParameters: URIWithParameters<P1>
     ): HttpEndpointBuildingContext<P1, Input<Headers0, EmptyBody>, Outputs0> = method(Method.TRACE, uriWithParameters)
 
-    /**
-     * Creates a TRACE endpoint by supplying a literal path.
-     *
-     * @param path slash-separated segments describing the URI template.
-     */
+    /** Starts a TRACE endpoint from a slash-separated literal path. */
     fun trace(path: String) = method(Method.TRACE, stringToUri(path))
 
-    /**
-     * Creates a TRACE endpoint that uses a single parameter placeholder (path or query).
-     *
-     * @param parameter parameter whose name and codec derive the template segment.
-     */
+    /** Starts a TRACE endpoint whose URI is built from a single parameter. */
     fun <P : Any> trace(parameter: Parameter<P>) = method(Method.TRACE, parameterToUri(parameter))
 
     /**
-     * Configures the HTTP verb and URI for the endpoint being declared.
+     * Seeds the next builder stage with the chosen HTTP [method] and URI template.
      *
-     * @param P1 tuple capturing referenced path and query parameters.
-     * @param method HTTP verb associated with the endpoint.
-     * @param uriWithParameters URI template matched by the endpoint.
-     * @return fresh [HttpEndpointBuildingContext] pre-populated with the chosen verb and URI.
+     * The resulting context always starts with an empty request contract and no outputs so later DSL
+     * steps can refine those parts explicitly.
      */
     fun <P1 : Parameters> method(
         method: Method,

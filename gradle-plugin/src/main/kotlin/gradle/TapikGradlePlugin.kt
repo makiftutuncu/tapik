@@ -65,13 +65,6 @@ class TapikGradlePlugin : Plugin<Project> {
     }
 }
 
-/**
- * Collects class directories from the current project and its siblings so endpoint scanning can
- * resolve cross-project dependencies.
- *
- * @param project project requesting classpath augmentation.
- * @return distinct list of absolute class directory paths.
- */
 private fun collectClassDirectories(project: Project): List<String> = buildList {
     project.rootProject.allprojects.forEach { subproject ->
         add(subproject.layout.buildDirectory.dir("classes/kotlin/main").get().asFile.absolutePath)

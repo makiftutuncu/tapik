@@ -10,7 +10,13 @@ import java.math.BigInteger
 import java.net.URI
 import java.util.UUID
 
-/** Describes an HTTP header definition used by Tapik endpoints. */
+/**
+ * Describes one HTTP header slot in an endpoint contract.
+ *
+ * A header can either require the caller to supply a value, via [HeaderInput], or carry concrete
+ * values up front, via [HeaderValues]. That lets Tapik use the same abstraction for request
+ * headers, dynamic response headers, and fixed response headers.
+ */
 sealed interface Header<H : Any> {
     /** Canonical HTTP header name. */
     val name: String
@@ -18,14 +24,10 @@ sealed interface Header<H : Any> {
     /** Codec responsible for encoding and decoding header values. */
     val codec: StringCodec<H>
 
-    /**
-     * Indicates whether the header is required on the wire.
-     *
-     * `true` when the header must be supplied, `false` when Tapik will emit stored values instead.
-     */
+    /** Whether the header must be provided by the caller instead of being pre-populated. */
     val required: Boolean
 
-    /** Factory helpers and predefined header constants. */
+    /** Factory helpers and predefined standard headers. */
     companion object : Defaults<Header<Unit>, Header<Boolean>, Header<Byte>, Header<Short>, Header<Int>, Header<Long>, Header<Float>, Header<Double>, Header<BigInteger>, Header<BigDecimal>, Header<String>, Header<UUID>> {
         private fun mediaTypeHeader(name: String): Header<MediaType> =
             HeaderInput(name, HttpStringCodecs.mediaType(name))
@@ -334,12 +336,10 @@ sealed interface Header<H : Any> {
     }
 
     /**
-     * Creates a [HeaderValues] instance using the provided values, marking the header as optional.
+     * Binds one or more concrete values to this header definition.
      *
-     * @param first mandatory first header value.
-     * @param rest optional additional values that will be appended in the given order.
-     * @return a [HeaderValues] instance capturing the supplied values.
-     * @see HeaderValues
+     * The resulting [HeaderValues] is no longer required from the caller because Tapik already
+     * knows which values to send.
      */
     operator fun invoke(
         first: H,
@@ -347,7 +347,7 @@ sealed interface Header<H : Any> {
     ): Header<H> = HeaderValues(name, codec, listOf(first, *rest))
 }
 
-/** Required header definition backed by a [StringCodec]. */
+/** Header definition whose value must be supplied dynamically. */
 data class HeaderInput<H : Any>(
     /** Canonical header name. */
     override val name: String,
@@ -358,7 +358,7 @@ data class HeaderInput<H : Any>(
     override val required: Boolean = true
 }
 
-/** Optional header definition populated with explicit [values]. */
+/** Header definition whose wire values are already fixed. */
 data class HeaderValues<H : Any>(
     /** Canonical header name. */
     override val name: String,

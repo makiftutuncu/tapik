@@ -7,38 +7,16 @@ import arrow.core.EitherNel
 import arrow.core.leftNel
 import arrow.core.right
 
-/**
- * Returns an empty header tuple when no headers are expected.
- *
- * @return an empty [HeaderValues0].
- */
+/** Returns the empty header tuple for inputs that declare no headers. */
 fun decodeHeaders0(): HeaderValues0 = HeaderValues0
 
-/**
- * Decodes a single header definition from the raw header map.
- *
- * @param H1 type of the first header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes one declared header from a raw HTTP header map. */
 fun <H1 : Any> decodeHeaders1(
     headers: Map<String, List<String>>,
     header1: Header<H1>
 ): EitherNel<String, HeaderValues1<H1>> = decodeHeader(headers, header1).map { headerValuesOf(it) }
 
-/**
- * Decodes two header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes two declared headers and accumulates validation errors across both definitions. */
 fun <H1 : Any, H2 : Any> decodeHeaders2(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -51,19 +29,7 @@ fun <H1 : Any, H2 : Any> decodeHeaders2(
         headerValuesOf(values1, values2)
     }
 
-/**
- * Decodes three header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes three declared headers and accumulates validation errors across all three definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any> decodeHeaders3(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -78,21 +44,7 @@ fun <H1 : Any, H2 : Any, H3 : Any> decodeHeaders3(
         headerValuesOf(values1, values2, values3)
     }
 
-/**
- * Decodes four header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param H4 type of the fourth header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @param header4 fourth header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes four declared headers and accumulates validation errors across all four definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> decodeHeaders4(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -109,23 +61,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> decodeHeaders4(
         headerValuesOf(values1, values2, values3, values4)
     }
 
-/**
- * Decodes five header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param H4 type of the fourth header.
- * @param H5 type of the fifth header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @param header4 fourth header definition to decode.
- * @param header5 fifth header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes five declared headers and accumulates validation errors across all five definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> decodeHeaders5(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -144,25 +80,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> decodeHeaders5(
         headerValuesOf(values1, values2, values3, values4, values5)
     }
 
-/**
- * Decodes six header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param H4 type of the fourth header.
- * @param H5 type of the fifth header.
- * @param H6 type of the sixth header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @param header4 fourth header definition to decode.
- * @param header5 fifth header definition to decode.
- * @param header6 sixth header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes six declared headers and accumulates validation errors across all six definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> decodeHeaders6(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -183,27 +101,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> decodeHeaders6(
         headerValuesOf(values1, values2, values3, values4, values5, values6)
     }
 
-/**
- * Decodes seven header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param H4 type of the fourth header.
- * @param H5 type of the fifth header.
- * @param H6 type of the sixth header.
- * @param H7 type of the seventh header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @param header4 fourth header definition to decode.
- * @param header5 fifth header definition to decode.
- * @param header6 sixth header definition to decode.
- * @param header7 seventh header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes seven declared headers and accumulates validation errors across all seven definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> decodeHeaders7(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -226,29 +124,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> decod
         headerValuesOf(values1, values2, values3, values4, values5, values6, values7)
     }
 
-/**
- * Decodes eight header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param H4 type of the fourth header.
- * @param H5 type of the fifth header.
- * @param H6 type of the sixth header.
- * @param H7 type of the seventh header.
- * @param H8 type of the eighth header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @param header4 fourth header definition to decode.
- * @param header5 fifth header definition to decode.
- * @param header6 sixth header definition to decode.
- * @param header7 seventh header definition to decode.
- * @param header8 eighth header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes eight declared headers and accumulates validation errors across all eight definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any> decodeHeaders8(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -273,31 +149,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         headerValuesOf(values1, values2, values3, values4, values5, values6, values7, values8)
     }
 
-/**
- * Decodes nine header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param H4 type of the fourth header.
- * @param H5 type of the fifth header.
- * @param H6 type of the sixth header.
- * @param H7 type of the seventh header.
- * @param H8 type of the eighth header.
- * @param H9 type of the ninth header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @param header4 fourth header definition to decode.
- * @param header5 fifth header definition to decode.
- * @param header6 sixth header definition to decode.
- * @param header7 seventh header definition to decode.
- * @param header8 eighth header definition to decode.
- * @param header9 ninth header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes nine declared headers and accumulates validation errors across all nine definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any> decodeHeaders9(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -324,33 +176,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         headerValuesOf(values1, values2, values3, values4, values5, values6, values7, values8, values9)
     }
 
-/**
- * Decodes ten header definitions from the raw header map.
- *
- * @param H1 type of the first header.
- * @param H2 type of the second header.
- * @param H3 type of the third header.
- * @param H4 type of the fourth header.
- * @param H5 type of the fifth header.
- * @param H6 type of the sixth header.
- * @param H7 type of the seventh header.
- * @param H8 type of the eighth header.
- * @param H9 type of the ninth header.
- * @param H10 type of the tenth header.
- * @param headers raw HTTP headers keyed by name.
- * @param header1 first header definition to decode.
- * @param header2 second header definition to decode.
- * @param header3 third header definition to decode.
- * @param header4 fourth header definition to decode.
- * @param header5 fifth header definition to decode.
- * @param header6 sixth header definition to decode.
- * @param header7 seventh header definition to decode.
- * @param header8 eighth header definition to decode.
- * @param header9 ninth header definition to decode.
- * @param header10 tenth header definition to decode.
- * @return either aggregated validation errors or the decoded header values.
- * @see decodeHeader
- */
+/** Decodes ten declared headers and accumulates validation errors across all ten definitions. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any, H10 : Any> decodeHeaders10(
     headers: Map<String, List<String>>,
     header1: Header<H1>,
@@ -379,7 +205,6 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         headerValuesOf(values1, values2, values3, values4, values5, values6, values7, values8, values9, values10)
     }
 
-/** Decodes header values for the given [header], accumulating all validation errors. */
 private fun <H : Any> decodeHeader(
     values: Map<String, List<String>>,
     header: Header<H>

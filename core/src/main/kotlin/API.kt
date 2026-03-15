@@ -3,23 +3,18 @@ package dev.akif.tapik
 import kotlin.properties.ReadOnlyProperty
 
 /**
- * Entry point for the tapik endpoint DSL.
+ * Entry point for declaring endpoint sets with Tapik's DSL.
  *
- * Implement this interface (typically on a singleton object) to gain access to the `endpoint` builders.
- * This keeps endpoint construction constrained and discoverable (e.g., `Users.list`, `Products.get`).
+ * Implement this interface, usually on a singleton object, to group related endpoints under one
+ * type and gain access to the `endpoint` builders that capture each declaration as an
+ * [HttpEndpoint].
  */
 interface API {
     /**
-     * Builds an [HttpEndpoint] with an explicit [id] using the DSL.
+     * Builds an endpoint immediately using the supplied [id].
      *
-     * @param P tuple capturing path and query parameters.
-     * @param I inbound input definition for headers and body.
-     * @param O outbound response definitions.
-     * @param id unique identifier to assign to the endpoint (usually the property name).
-     * @param description optional short description shown in generated documentation.
-     * @param details optional long-form documentation such as business rules or references.
-     * @param builder DSL block invoked on a fresh [HttpEndpointVerbBuildingContext].
-     * @return fully materialised [HttpEndpoint] built from the provided [builder].
+     * The [builder] runs against a fresh [HttpEndpointVerbBuildingContext], which forces the DSL to
+     * choose the HTTP method and URI first and then refine the request and response shapes.
      */
     fun <P : Parameters, I : Input<*, *>, O : Outputs> endpoint(
         id: String,
@@ -41,20 +36,11 @@ interface API {
     }
 
     /**
-     * Declares an HTTP endpoint builder that captures property metadata at declaration time.
+     * Declares an endpoint as a property delegate.
      *
-     * The returned delegate instantiates a [HttpEndpointVerbBuildingContext] so the caller can choose
-     * the verb and URI together, then chain header and body builders before materialising a [HttpEndpoint].
-     *
-     * @param T owner type that will receive the property.
-     * @param P tuple capturing path and query parameters.
-     * @param I inbound input definition for headers and body.
-     * @param O outbound response definitions.
-     * @param description optional short description shown in generated documentation.
-     * @param details optional long-form documentation such as business rules or references.
-     * @param builder DSL block building the endpoint structure using [HttpEndpointVerbBuildingContext].
-     * @return property delegate that records endpoint metadata using the owning property name and produces [HttpEndpoint].
-     * @see HttpEndpoint
+     * This variant exists so endpoint definitions can stay close to the Kotlin property that names
+     * them. The delegate reuses the property name as the endpoint [HttpEndpoint.id], which keeps the
+     * declaration concise while still producing the same immutable endpoint contract.
      */
     fun <T, P : Parameters, I : Input<*, *>, O : Outputs> endpoint(
         description: String? = null,

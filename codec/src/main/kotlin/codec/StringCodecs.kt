@@ -12,11 +12,10 @@ import java.util.UUID
 import kotlin.reflect.full.primaryConstructor
 
 /**
- * Collection of default string-based codecs for primitive types.
+ * Default [StringCodec] factories for the scalar types used throughout Tapik's HTTP DSL.
  *
- * Each factory delegates to helpers from [Codec] to ensure consistent error handling across transports.
- *
- * @see Defaults
+ * This object centralizes the library's built-in string parsing rules so headers, parameters, and
+ * bodies all use the same conversions and error reporting.
  */
 object StringCodecs : Defaults<StringCodec<Unit>, StringCodec<Boolean>, StringCodec<Byte>, StringCodec<Short>, StringCodec<Int>, StringCodec<Long>, StringCodec<Float>, StringCodec<Double>, StringCodec<BigInteger>, StringCodec<BigDecimal>, StringCodec<String>, StringCodec<UUID>> {
     override fun unit(name: String): StringCodec<Unit> = nullable(name, { "" }) { }

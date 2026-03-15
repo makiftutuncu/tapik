@@ -2,29 +2,16 @@
 
 package dev.akif.tapik
 
-/** Returns an empty map when the request does not expect headers. */
+/** Returns an empty header map for inputs that declare no headers. */
 fun Input<Headers0, *>.encodeInputHeaders(): Map<String, List<String>> = emptyMap()
 
-/**
- * Encodes input headers for an endpoint expecting one header definition.
- *
- * @param h1 value for the first header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes the single declared input header into an HTTP header map. */
 fun <H1 : Any> Input<Headers1<H1>, *>.encodeInputHeaders(h1: H1): Map<String, List<String>> =
     build(
         encodeHeader(headers.item1 to h1)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 2 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes two declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any> Input<Headers2<H1, H2>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2
@@ -34,15 +21,7 @@ fun <H1 : Any, H2 : Any> Input<Headers2<H1, H2>, *>.encodeInputHeaders(
         encodeHeader(headers.item2 to h2)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 3 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes three declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any> Input<Headers3<H1, H2, H3>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
@@ -54,16 +33,7 @@ fun <H1 : Any, H2 : Any, H3 : Any> Input<Headers3<H1, H2, H3>, *>.encodeInputHea
         encodeHeader(headers.item3 to h3)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 4 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes four declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> Input<Headers4<H1, H2, H3, H4>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
@@ -77,17 +47,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any> Input<Headers4<H1, H2, H3, H4>, *>.
         encodeHeader(headers.item4 to h4)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 5 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes five declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> Input<Headers5<H1, H2, H3, H4, H5>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
@@ -103,18 +63,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any> Input<Headers5<H1, H2, H3
         encodeHeader(headers.item5 to h5)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 6 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes six declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> Input<Headers6<H1, H2, H3, H4, H5, H6>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
@@ -132,19 +81,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any> Input<Headers6<
         encodeHeader(headers.item6 to h6)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 7 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes seven declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> Input<Headers7<H1, H2, H3, H4, H5, H6, H7>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
@@ -164,20 +101,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any> Input
         encodeHeader(headers.item7 to h7)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 8 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
- * @param h8 value for the 8th header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes eight declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any> Input<Headers8<H1, H2, H3, H4, H5, H6, H7, H8>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
@@ -199,21 +123,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         encodeHeader(headers.item8 to h8)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 9 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
- * @param h8 value for the 8th header.
- * @param h9 value for the 9th header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes nine declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any> Input<Headers9<H1, H2, H3, H4, H5, H6, H7, H8, H9>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,
@@ -237,22 +147,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
         encodeHeader(headers.item9 to h9)
     )
 
-/**
- * Encodes input headers for an endpoint expecting 10 header definitions.
- *
- * @param h1 value for the first header.
- * @param h2 value for the second header.
- * @param h3 value for the third header.
- * @param h4 value for the 4th header.
- * @param h5 value for the 5th header.
- * @param h6 value for the 6th header.
- * @param h7 value for the 7th header.
- * @param h8 value for the 8th header.
- * @param h9 value for the 9th header.
- * @param h10 value for the 10th header.
- * @return map of header names to their encoded values.
- * @see encodeHeader
- */
+/** Encodes ten declared input headers into an HTTP header map. */
 fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : Any, H9 : Any, H10 : Any> Input<Headers10<H1, H2, H3, H4, H5, H6, H7, H8, H9, H10>, *>.encodeInputHeaders(
     h1: H1,
     h2: H2,

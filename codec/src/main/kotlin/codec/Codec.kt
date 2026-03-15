@@ -24,15 +24,16 @@ interface Codec<Source : Any, Target : Any> :
     val sourceClass: KClass<Source>
     val targetClass: KClass<Target>
 
-    /** Factory helpers for constructing common [Codec] variants. */
+    /** Factory helpers for common [Codec] construction patterns. */
     companion object {
         /**
          * Builds a codec that forwards values without transforming them.
          *
+         * This exists so code that expects a named codec factory can keep the same call shape even when
+         * the source and target types are identical.
+         *
          * @param T value type handled by the codec.
-         * @param name human readable identifier used in error messages.
-         * @return a codec that simply echoes the provided value for both encoding and decoding.
-         * @see identity
+         * @param name unused placeholder kept for symmetry with other codec factories.
          */
         inline fun <reified T : Any> identity(name: String): Codec<T, T> =
             object : Codec<T, T> {
@@ -45,14 +46,13 @@ interface Codec<Source : Any, Target : Any> :
             }
 
         /**
-         * Builds a codec that tolerates missing values by using a nullable decoding function.
+         * Builds a codec around a decoder that reports failure by returning `null`.
          *
          * @param I domain type to decode and encode.
          * @param O serialized representation produced during encoding.
-         * @param name human readable identifier used in error messages.
+         * @param name human readable identifier included in decode errors.
          * @param encoder transformation applied when encoding [I] to [O].
-         * @param decoder nullable transformation that converts [O] back to [I]; returning `null` yields an error.
-         * @return a codec that reports failures and uses [encoder] for serialization.
+         * @param decoder transformation that converts [O] back to [I]; returning `null` marks the input invalid.
          */
         inline fun <reified I : Any, reified O : Any> nullable(
             name: String,
@@ -73,14 +73,13 @@ interface Codec<Source : Any, Target : Any> :
             }
 
         /**
-         * Builds a codec wrapping potentially unsafe conversion logic.
+         * Builds a codec around a decoder that may throw while parsing.
          *
          * @param I domain type to decode and encode.
          * @param O serialized representation produced during encoding.
-         * @param name human readable identifier used in error messages.
+         * @param name human readable identifier included in decode errors.
          * @param encoder transformation applied when encoding [I] to [O].
          * @param decoder transformation that converts [O] back to [I]; thrown exceptions are captured as failures.
-         * @return a codec that surfaces decoding exceptions as error messages.
          */
         inline fun <reified I : Any, reified O : Any> unsafe(
             name: String,
@@ -104,15 +103,13 @@ interface Codec<Source : Any, Target : Any> :
 }
 
 /**
- * Builds a new codec by transforming the decoded source type.
+ * Adapts a codec to a different source type while reusing the original target representation.
  *
- * @param Source domain type handled by the original codec.
- * @param Target serialized type emitted by the original codec.
- * @param Source2 alternative domain type exposed by the returned codec.
- * @param from transformation that maps the decoded [Source] value to [Source2].
- * @param to transformation that maps the incoming [Source2] value back to [Source].
- * @return a codec that delegates encoding/decoding through [from] and [to].
- * @see unsafeTransformTarget
+ * Decoding still starts with the receiver, then maps the decoded value through [from]. Encoding goes
+ * the other way by converting [Source2] back to [Source] through [to] before delegating.
+ *
+ * The transformation is unsafe because neither mapping is validated or wrapped; exceptions from [from]
+ * or [to] escape to the caller.
  */
 inline fun <Source : Any, Target : Any, reified Source2 : Any> Codec<Source, Target>.unsafeTransformSource(
     crossinline from: (Source) -> Source2,
@@ -132,15 +129,13 @@ inline fun <Source : Any, Target : Any, reified Source2 : Any> Codec<Source, Tar
     }
 
 /**
- * Builds a new codec by transforming the encoded target type.
+ * Adapts a codec to a different target type while keeping the original source type.
  *
- * @param Source domain type handled by the original codec.
- * @param Target serialized type emitted by the original codec.
- * @param Target2 alternative serialized type emitted by the returned codec.
- * @param from transformation that converts [Target2] into the original [Target] prior to decoding.
- * @param to transformation that converts the encoded [Target] into [Target2].
- * @return a codec that delegates through [from] and [to] for encoding and decoding respectively.
- * @see unsafeTransformSource
+ * Decoding first converts the incoming [Target2] value into the receiver's [Target] with [from].
+ * Encoding delegates to the receiver, then maps the encoded value into [Target2] with [to].
+ *
+ * The transformation is unsafe because neither mapping is validated or wrapped; exceptions from [from]
+ * or [to] escape to the caller.
  */
 inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Target>.unsafeTransformTarget(
     crossinline from: (Target2) -> Target,
@@ -157,11 +152,8 @@ inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Tar
     }
 
 /**
- * Converts a [StringCodec] into a [ByteArrayCodec] using UTF-8 byte conversion.
- *
- * @param T domain type handled by the codec.
- * @return a codec that encodes to byte arrays and decodes via string conversion.
- * @see unsafeTransformTarget
+ * Converts a [StringCodec] into a [ByteArrayCodec] by bridging through Kotlin's default string/byte
+ * array conversions.
  */
 fun <T : Any> StringCodec<T>.toByteArrayCodec(): ByteArrayCodec<T> =
     unsafeTransformTarget(
