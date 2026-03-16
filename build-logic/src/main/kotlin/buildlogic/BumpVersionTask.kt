@@ -42,7 +42,7 @@ abstract class BumpVersionTask : DefaultTask() {
     }
 
     private fun runGit(rootDir: File, vararg args: String) {
-        val process = ProcessBuilder(listOf("git", *args))
+        val process = ProcessBuilder("git", *args)
             .directory(rootDir)
             .inheritIO()
             .start()

@@ -17,7 +17,7 @@ class HeaderTest {
 
     @Test
     fun `header values become optional`() {
-        val headerValues = Header.string("X-Group")("first", "second") as HeaderValues<String>
+        val headerValues = Header.string("X-Group")("first", "second")
 
         assertEquals("X-Group", headerValues.name)
         assertFalse(headerValues.required)

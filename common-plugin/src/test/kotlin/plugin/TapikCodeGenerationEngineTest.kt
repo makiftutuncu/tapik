@@ -132,6 +132,7 @@ class TapikCodeGenerationEngineTest {
         assertTrue(generatedClient.exists(), "Expected generated client interface in target package")
         val content = generatedClient.readText()
         assertTrue(content.contains("package dev.akif.tapik.plugin.fixtures.generated"))
+        assertTrue(content.contains("// Generated from: dev.akif.tapik.plugin.fixtures.SampleEndpoints"))
         assertTrue(content.contains("import dev.akif.tapik.plugin.fixtures.SampleEndpoints"))
         assertTrue(content.contains("SampleEndpoints.user"))
     }

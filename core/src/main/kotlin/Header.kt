@@ -341,10 +341,20 @@ sealed interface Header<H : Any> {
      * The resulting [HeaderValues] is no longer required from the caller because Tapik already
      * knows which values to send.
      */
-    operator fun invoke(
-        first: H,
-        vararg rest: H
-    ): Header<H> = HeaderValues(name, codec, listOf(first, *rest))
+    @Deprecated(
+        message = "Cannot call invoke() without arguments",
+        replaceWith = ReplaceWith("invoke(/*at least 1 argument*/)"),
+        level = DeprecationLevel.ERROR
+    )
+    operator fun invoke(): Nothing = error("Cannot call invoke() without arguments")
+
+    /**
+     * Binds one or more concrete values to this header definition.
+     *
+     * The resulting [HeaderValues] is no longer required from the caller because Tapik already
+     * knows which values to send.
+     */
+    operator fun invoke(vararg values: H): HeaderValues<H> = HeaderValues(name, codec, values.toList())
 }
 
 /** Header definition whose value must be supplied dynamically. */

@@ -175,7 +175,7 @@ fun <H1 : Any, H2 : Any, H3 : Any, H4 : Any, H5 : Any, H6 : Any, H7 : Any, H8 : 
 
 /** Groups encoded header name/value [pairs] by header name to match HTTP expectations. */
 private fun build(vararg pairs: Pair<String, String>): Map<String, List<String>> =
-    listOf(*pairs).groupBy({ it.first }) { it.second }
+    pairs.groupBy({ it.first }) { it.second }
 
 /** Serialises a single header [pair] using the configured codec. */
 private fun <H : Any> encodeHeader(pair: Pair<Header<H>, H>): Pair<String, String> {

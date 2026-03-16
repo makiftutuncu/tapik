@@ -176,6 +176,7 @@ fun StringBuilder.appendGeneratedKdoc(
 
 internal fun renderMergedKotlinEndpointFile(
     packageName: String,
+    sourcePackageName: String,
     sourceFile: String,
     endpointsSuffix: String = "Endpoints",
     endpoints: List<HttpEndpointMetadata>,
@@ -195,7 +196,7 @@ internal fun renderMergedKotlinEndpointFile(
 
     return buildString {
         appendLine("// This file is generated. Any changes will be lost.")
-        appendLine("// Generated from: $packageName.$sourceFile")
+        appendLine("// Generated from: $sourcePackageName.$sourceFile")
         appendLine()
         appendLine("package $packageName")
         appendLine()
@@ -328,6 +329,7 @@ fun writeMergedKotlinSourceFiles(
         targetFile.writeText(
             renderMergedKotlinEndpointFile(
                 packageName = state.packageName,
+                sourcePackageName = state.sourcePackageName,
                 sourceFile = state.sourceFile,
                 endpointsSuffix = endpointsSuffix,
                 endpoints = fileEndpoints,

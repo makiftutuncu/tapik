@@ -63,6 +63,18 @@ val header: Header.Companion = Header.Companion
  *
  * This is useful when multiple concrete status codes share the same response shape.
  */
+@Deprecated(
+    message = "Cannot call anyStatus() without arguments",
+    replaceWith = ReplaceWith("anyStatus(/*at least 1 argument*/)"),
+    level = DeprecationLevel.ERROR
+)
+fun anyStatus(): Nothing = error("Cannot call anyStatus() without arguments")
+
+/**
+ * Matches any of the supplied statuses.
+ *
+ * This is useful when multiple concrete status codes share the same response shape.
+ */
 fun anyStatus(
     first: Status,
     vararg rest: Status
