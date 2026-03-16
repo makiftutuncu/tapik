@@ -1,0 +1,69 @@
+= Capabilities and Roadmap
+
+This page keeps the support story in one place: what is shipped, where the extension points are, what is on the roadmap, and where the current boundaries are.
+
+== Shipped capabilities
+
+|===
+| Area | Current support
+
+| Contract authoring
+| Kotlin DSL for methods, paths, path variables, query parameters, headers, request bodies, and outputs
+
+| JSON support
+| `Jackson` integration in `dev.akif.tapik:jackson`
+
+| Scalar transport codecs
+| Built-in string codecs for common scalar types and value-class helpers
+
+| Client generation
+| Spring `RestClient`
+
+| Server generation
+| Spring `Web MVC`
+
+| Generated contract summary
+| `Markdown` output as `API.md`
+
+| Build integration
+| `Gradle` plugin
+|===
+
+== Extension points
+
+tapik is structured so the contract model can stay stable while integrations grow around it.
+
+Current extension points include:
+
+* custom `StringCodec` and `ByteArrayCodec` implementations,
+* separate codec modules, such as the current `Jackson` module,
+* generator implementations loaded through `ServiceLoader`,
+* Kotlin generators that contribute to generated endpoint contract files,
+* direct generators that write non-Kotlin artifacts.
+
+== Roadmap
+
+|===
+| Area | Direction
+
+| Build integration
+| Add a `Maven` plugin alongside the existing `Gradle` plugin
+
+| Client generation
+| Add more client targets, with Spring `WebClient`, `ktor`, `http4k`, and Java's HTTP client as expected future options
+
+| Server generation
+| Add more server technologies beyond Spring `Web MVC`
+
+| Codec libraries
+| Add more codec modules beyond `Jackson`
+|===
+
+== Current boundaries
+
+tapik does not yet provide:
+
+* a first-party `Maven` integration,
+* a first-party reactive client generator,
+* a first-party non-Spring server generator,
+* multiple first-party JSON or serialization stacks.

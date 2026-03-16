@@ -1,191 +1,166 @@
-= User Guide
+= Model HTTP Contracts
 
-This guide walks you through installing the tapik Gradle plugin, declaring endpoints with the Kotlin DSL, and running the generators that create clients, servers, and documentation.
-
-[TIP]
-====
-New to tapik? Start with xref:getting-started.adoc[Getting Started] for a step-by-step tutorial before diving into the full plugin reference below.
-====
-
-== Prerequisites
-
-* JDK compatible with the repository defaults (+javaTargetVersion=21+, toolchain +javaToolchainVersion=24+ in +gradle.properties+).
-* Gradle 9+ with the Kotlin DSL; configuration cache and task caching are supported out of the box.
-* Kotlin 2.2.20 (supplied via the Gradle toolchain).
-* Optional modules you plan to use, such as +dev.akif.tapik:jackson+ for JSON bodies or Spring starters for generated code.
-
-|===
-| Component | Example Dependency
-
-| Endpoint DSL
-| +implementation("dev.akif.tapik:core:0.2.7")+
-
-| Codecs
-| +implementation("dev.akif.tapik:codec:0.2.7")+
-
-| Jackson integration
-| +implementation("dev.akif.tapik:jackson:0.2.7")+
-
-| Gradle plugin
-| +id("dev.akif.tapik.plugin.gradle") version "0.2.7"+
-|===
-
-[NOTE]
-====
-The version numbers match the repository snapshot (+version=0.2.7+). Replace them with the release you are consuming.
-====
-
-== Installing the Gradle Plugin
-
-Configure the plugin in a module that produces HTTP endpoints or needs generated sources:
-
-[source,kotlin]
-----
-plugins {
-    kotlin("jvm")
-    id("dev.akif.tapik.plugin.gradle") version "0.2.7"
-}
-
-dependencies {
-    implementation("dev.akif.tapik:core:0.2.7")
-    implementation("dev.akif.tapik:jackson:0.2.7") // for JSON helpers
-}
-
-tapik {
-    basePackage("com.acme.catalog")
-
-    springRestClient { /* enables the Spring RestClient generator */ }
-    springWebMvc { /* enables the Spring WebMVC generator */ }
-    markdownDocumentation { /* enables the Markdown documentation generator */ }
-}
-----
-
-Key things to remember:
-
-* +basePackage+ must reference the package where your +API+ implementations live. Only those classes (and their +HttpEndpoint+ properties) are scanned.
-* The nested generator blocks are markers; you do not need to configure anything inside them unless future versions expose options.
-* Generated Kotlin sources land under +build/generated/sources/tapik/main/kotlin+ and are added to the main source set automatically.
-* Non-source artefacts (for example, Markdown files) are written under +build/generated+.
-
-=== Organizing endpoints
-
-The scanner only looks at concrete types that implement +API+ and at their +val+ properties whose type is +HttpEndpoint<*, *, *>. That leads to a few practical conventions:
-
-* Keep the actual endpoint properties on objects or classes that implement +API+. Extension properties or interface properties that do **not** live on a concrete +API+ implementor are not discovered.
-* To split definitions (read/write, bounded contexts) without multiplying generated clients, define helper functions in plain interfaces and use them from a single +API+ object:
-+
-[source,kotlin]
-----
-interface ReadUsersDefs {
-    fun HttpEndpointVerbBuildingContext.configureGetEndpoint() = get("users" / path.uuid("id"))
-}
-interface WriteUsersDefs {
-    fun HttpEndpointVerbBuildingContext.configureCreateEndpoint() = post("users") { /* ... */ }
-}
-
-object Users : API, ReadUsersDefs, WriteUsersDefs {
-    val get by endpoint { configureGetEndpoint() }
-    val create by endpoint { configureCreateEndpoint() }
-}
-----
-This keeps one generated client/controller while letting you organize the DSL.
-* Nested +API+ objects are supported and treated as separate modules (e.g., +Users.Admin+ produces its own generated interfaces). If you want a single generated surface, keep helpers nested but avoid making them +API+; place endpoints only on the parent +API+ implementor.
-* Multiple layers of nesting work the same way: every concrete +API+ implementor yields its own generated outputs; nesting does not merge endpoints automatically.
-
-== Declaring Endpoints
-
-Endpoints are compile-time constants built with the DSL in the +core+ module. The DSL collects metadata from property names, documentation strings, and nested builders.
-
-[source,kotlin]
-----
-package com.acme.catalog.endpoints
-
-import dev.akif.tapik.*
-import dev.akif.tapik.jackson.jsonBody
-
-// Implement API to gain access to the `endpoint` DSL.
-object ProductEndpoints : API {
-    private val productId = path.uuid("productId")
-    private val locale = query.string("locale").optional("en-US")
-
-    val getProduct by endpoint(
-        description = "Fetch product details",
-        details = "Returns localized information when the locale query parameter is supplied."
-    ) {
-        get("products" / productId + locale)
-            .input(header.uuid("X-Request-Id"))
-            .output(Status.Ok) {
-                jsonBody<ProductView>("product")
-            }
-            .output(Status.NotFound) {
-                jsonBody<ProblemDetails>("problem")
-            }
-    }
-}
-----
-
-Implementing +API+ is the convention to expose the endpoint DSL and keep your endpoints discoverable as properties (e.g., +ProductEndpoints.getProduct+).
-
-Highlights:
-
-* +endpoint { ... }+ infers the endpoint +id+ from the property name (+getProduct+). The description and details flow into generated KDoc and Markdown.
-* Path building uses operator overloads: +"products" / productId+.
-* Query parameters append with +, headers with +input { ... }+, and outputs use +output(Status.Ok) { ... }+.
-* Response variants can be chained; the DSL supports +OneOf+ unions to model branching behaviour.
-
-== Running Generation
-
-tapik registers an aggregated +tapikGenerate+ task. It depends on +classes+ for the current project and its siblings to ensure bytecode is available.
-
-[source,bash]
-----
-./gradlew :service:tapikGenerate
-----
-
-Execution flow:
-
-. Compiled classes are scanned for properties that return +HttpEndpoint+.
-. Metadata describing the endpoints is persisted to +build/generated/tapik-endpoints.txt+.
-. The selected generators (+spring-restclient+, +spring-webmvc+, +markdown-docs+) run sequentially.
-. Generated sources are attached to the IDE/classpath; you can +./gradlew build+ without special configuration.
+This guide covers the core job tapik solves: declaring an HTTP contract once so the same model can drive generated clients, generated server interfaces, and documentation.
 
 [TIP]
 ====
-You can run +./gradlew :service:classes tapikGenerate+ during fast feedback loops. Pass +-PskipLint+ if you want to avoid +ktlint+ locally.
+If you have not run tapik yet, start with xref:getting-started.adoc[Quickstart] first.
 ====
 
-== Inspecting Outputs
+== Start with one `API` type per contract area
 
-* *Kotlin sources* live under +build/generated/sources/tapik/main/kotlin+.
-* *Markdown documentation* is emitted to +build/generated/API.md+.
-* *Scan report*: +build/generated/tapik-endpoints.txt+ contains the raw metadata list.
+tapik discovers endpoints from concrete classes and objects that implement `API`.
 
-When checking generated Kotlin into source control:
+The most common pattern is one singleton object per API area:
 
-* Run +./gradlew tapikGenerate+ after any endpoint changes.
-* Review generated types as you would review hand-written code; they carry KDoc extracted from your endpoints.
-* For reproducibility, make sure the versions of tapik dependencies are pinned via a version catalog or BOM.
+[source,kotlin]
+----
+object CatalogApi : API {
+    val getProduct by endpoint { ... }
+    val createProduct by endpoint { ... }
+}
+----
 
-== Troubleshooting
+That keeps discovery predictable and gives generators one obvious place to group related endpoints.
 
-|===
-| Symptom | Common Cause | Fix
+== Let the endpoint property name carry the identity
 
-| +Missing compiled classes+ warning
-| +classes+ task did not run before +tapikGenerate+
-| Run +./gradlew classes tapikGenerate+ or wire tasks in your CI pipeline
+The delegated `endpoint` form uses the property name as the endpoint identifier:
 
-| No generators execute
-| Generator blocks omitted in the +tapik+ extension
-| Add +springRestClient { }+, +springWebMvc { }+, or +markdownDocumentation { }+
+[source,kotlin]
+----
+val getProduct by endpoint(
+    description = "Get a product by ID",
+    details = "Returns localized product data when the product exists."
+) {
+    get("products" / path.string("productId"))
+}
+----
 
-| Class not found during scan
-| Class outside configured +basePackage+
-| Ensure your +API+ implementations live under the configured base package
+That identifier flows into metadata and generated code, so descriptive property names matter.
 
-| Unexpected HTTP mappings
-| Endpoint path missing leading segment
-| Start URIs with +"segment"+ or +"segment" / ...+
-|===
+Use `description` for the short summary that should appear in generated docs. Use `details` only for behavior that a user of the endpoint needs to know but that does not fit in the summary.
 
-If you create custom generators, place their implementation on the build classpath and expose them via the Java +ServiceLoader+ contract. The Gradle plugin will pick them up automatically when their +id+ is enabled.
+== Build the request shape from the URI outward
+
+tapik contracts usually read best when you define reusable URI pieces first:
+
+[source,kotlin]
+----
+private val products = "api" / "v1" / "products"
+private val productId = path.string("productId")
+private val locale = query.string("locale").optional("en-US")
+private val page = query.int("page").optional(1)
+----
+
+Then use those pieces in the endpoint:
+
+[source,kotlin]
+----
+val getProduct by endpoint(
+    description = "Get a product by ID",
+    details = "Returns localized product data when the product exists."
+) {
+    get(products / productId + locale)
+        .input(header.uuid("X-Request-Id"))
+        .output(Status.Ok) { jsonBody<ProductView>("product") }
+        .output(Status.NotFound) { jsonBody<ProblemDetails>("problem") }
+}
+----
+
+This is the pattern to follow:
+
+* path variables model required URI segments,
+* query parameters model optional or filter-like inputs,
+* headers model protocol metadata,
+* bodies model the typed payload on the wire.
+
+== Add bodies only when the request really has one
+
+For request bodies, keep the endpoint honest about transport details:
+
+[source,kotlin]
+----
+val createProduct by endpoint(
+    description = "Create a product",
+    details = "Accepts a JSON request body and returns the created product."
+) {
+    post(products)
+        .input(header.Accept(MediaType.Json)) {
+            jsonBody<CreateProductRequest>("createProductRequest")
+        }
+        .output(Status.Created, headersOf(Header.Location)) {
+            jsonBody<ProductView>("product")
+        }
+        .output(Status.BadRequest) {
+            jsonBody<ProblemDetails>("problem")
+        }
+}
+----
+
+The request body and the output bodies are separate declarations because they solve different problems:
+
+* input bodies describe what the caller must send,
+* output bodies describe what the endpoint may return,
+* response headers belong on outputs, not on the endpoint as a whole.
+
+== Model protocol branches, not internal states
+
+Outputs are where tapik becomes most valuable. They define the observable branches of the endpoint contract.
+
+[source,kotlin]
+----
+val getAvatar by endpoint(
+    description = "Get a product image",
+    details = "Returns a raw PNG image for the requested product."
+) {
+    get(products / productId / "image" + query.int("size"))
+        .output {
+            rawBody(mediaType = MediaType.Custom("image", "png"))
+        }
+}
+----
+
+When an endpoint has more than one meaningful outcome, declare them explicitly:
+
+[source,kotlin]
+----
+val authenticate by endpoint(
+    description = "Validate a session token",
+    details = "Returns plain-text auth errors for unauthorized or forbidden responses."
+) {
+    post("api" / "v1" / "auth")
+        .output(Status.BadRequest, headersOf(Header.ContentType(MediaType.Json))) {
+            jsonBody<ProblemDetails>("problem")
+        }
+        .output(anyStatus(Status.Unauthorized, Status.Forbidden)) {
+            stringBody("authError")
+        }
+        .output(unmatchedStatus) { EmptyBody }
+}
+----
+
+Do this only when the branch matters to callers. tapik will preserve that shape in generated code.
+
+== Reuse definitions, not entire walls of DSL
+
+The DSL is easiest to maintain when shared wire-level concepts are extracted once:
+
+[source,kotlin]
+----
+private val requestId = header.uuid("X-Request-Id")
+private val locale = query.string("locale").optional("en-US")
+private val productId = path.string("productId")
+----
+
+Reuse is useful when it preserves meaning. If a helper hides the actual HTTP contract, it is usually too abstract for documentation and generation-oriented code.
+
+== Keep the source readable for the people who maintain it
+
+Good tapik contracts are concise, but they are not cryptic. A reader should be able to answer three questions directly from the source:
+
+* what request shape does this endpoint accept,
+* what responses can it produce,
+* why does this endpoint exist in the API at all.
+
+If those answers are clear in the contract, the generated artifacts usually become clear too.

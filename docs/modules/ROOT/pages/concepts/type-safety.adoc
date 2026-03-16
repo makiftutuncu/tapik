@@ -1,110 +1,87 @@
-= Type Safety in tapik
+= Type Safety
 
-tapik's primary goal is to keep HTTP contracts type-safe from declaration to runtime. The DSL models every piece of an endpoint-parameters, headers, bodies, and response branches-with immutable, strongly-typed structures. Generators rely on these structures to emit Kotlin that cannot drift from the original definition.
+tapik's type safety matters because the same typed contract drives authoring, generation, and runtime interpretation.
 
-== Building Blocks
+The point is not abstract purity. The point is that tapik can keep generated code aligned with your endpoint definitions without guessing from strings.
 
-|===
-| Concept | Interface | Purpose | Common Aliases
+== What tapik keeps in the type system
 
-| Heterogeneous tuple (product)
-| +AllOf+
-| Represents *all* items that must exist together
-| +Parameters+, +Headers+, +Outputs+, +HeaderValues+, +Responses+
+While you build an endpoint, tapik preserves:
 
-| Discriminated union (sum)
-| +OneOf+
-| Represents *one* branch chosen at runtime
-| +OneOf2+, +OneOf3+, ... up to +OneOf10+
-|===
+* the path and query parameters that appear in the URI,
+* whether query parameters are required or optional,
+* request headers and request body shape,
+* the set of possible outputs,
+* the body and header shape attached to each output branch.
 
-=== AllOf and Tuple Aliases
+That shape survives long enough for generators to use it directly.
 
-+AllOf+ is a family of interfaces (+AllOf0+ ... +AllOf10+) with +itemN+ accessors. Concrete tapik types reuse these through the +Tuple+ facade so you do not manipulate +AllOf+ directly.
+== Why that matters to users
 
-[source,kotlin]
-----
-typealias Headers3<H1, H2, H3> =
-    Tuple3<Header<*>, Header<H1>, Header<H2>, Header<H3>>
-----
+Because tapik retains the contract structure precisely:
 
-Because +Headers3+ implements +AllOf4+, the compiler knows:
+* optional query parameters can become optional generated method parameters,
+* required query parameters stay required,
+* response branches can become a sealed response hierarchy,
+* typed headers and bodies can surface as typed properties instead of raw maps.
 
-* +headers.item1+ is the first +Header<*>+.
-* +headers.item2+ is +Header<H1>+, preserving the codec type.
-* Iteration is still possible via the +Listable+ interface.
+This is what keeps client and server generation specific instead of generic.
 
-tapik ships aliases for each arity so you can declare headers, parameters, and responses without manual tuple plumbing:
+== A practical example
 
-|===
-| Alias | Description
-
-| +Parameters0+ ... +Parameters10+
-| Path/query parameter definitions
-
-| +Headers0+ ... +Headers10+
-| Request header definitions
-
-| +HeaderValues0+ ... +HeaderValues10+
-| Decoded inbound header values
-
-| +Outputs0+ ... +Outputs10+
-| Ordered list of +(StatusMatcher, Headers, Body)+ combinations
-
-| +Response0+ / +ResponseWithoutBody0+ families
-| Runtime response wrappers used internally by adapters and interpreters
-|===
-
-=== OneOf and Conditional Responses
-
-+OneOf+ models exclusive branches. Each arity exposes inline +OptionN+ value classes and a +select+ helper for exhaustive handling.
+If you declare:
 
 [source,kotlin]
 ----
-fun interpret(result: OneOf3<Response0<User>, ResponseWithoutBody0, ResponseWithoutBody0>) =
-    result.select(
-        when1 = { response -> "Found user ${response.body.id}" },
-        when2 = { "User missing" },
-        when3 = { "User deleted" }
-    )
+val getProduct by endpoint(
+    description = "Get a product by ID"
+) {
+    get("api" / "v1" / "products" / path.string("productId") + query.string("locale").optional("en-US"))
+        .input(header.uuid("X-Request-Id"))
+        .output(Status.Ok) { jsonBody<ProductView>("product") }
+        .output(Status.NotFound) { jsonBody<ProblemDetails>("problem") }
+}
 ----
 
-Generators still rely on these unions internally, but generated public APIs no longer expose them directly. Instead, code generation derives endpoint-specific response contracts:
+tapik still knows all of this later:
 
-* *Single-output endpoints* generate one +data class+ or +data object+.
-* *Multi-output endpoints* generate a sealed +Response+ hierarchy with one subtype per output branch.
-* *Adapters and interpreters* continue to use +OneOf+ and +ResponseX+ under the hood when converting between HTTP and generated contracts.
+* `productId` is part of the path and must be supplied,
+* `locale` is a query parameter with a default,
+* `X-Request-Id` is a required header,
+* the endpoint has two distinct response branches.
 
-=== AllOf + OneOf Together
+The resulting value is not just "some endpoint". Its type still carries that structure:
 
-+Outputs+ is an +AllOf+ tuple of +Output+ definitions. Code generation turns that metadata into endpoint-specific response contracts, while the runtime still uses +ResponseX+ and +OneOf+ internally for decoding and adaptation. This combination gives tapik strong guarantees:
-
-. The number and order of outputs in the DSL matches the generated code and Markdown documentation.
-. Header codecs are preserved all the way to runtime decoding (+decodeHeadersN+).
-. Adding a new output changes the generated sealed hierarchy, which becomes a compile-time change for every consumer.
-
-[mermaid]
+[source,kotlin]
 ----
-flowchart TD
-    DSL["HttpEndpoint DSL"] --> Tuple["Tuple / AllOf metadata"]
-    Tuple --> Outputs["Outputs tuple"]
-    Outputs --> Contract["Generated endpoint contract"]
-    Contract -->|single| PublicSingle["data class / data object"]
-    Contract -->|multiple| PublicUnion["sealed Response hierarchy"]
-    PublicSingle --> Client["Generated client"]
-    PublicUnion --> Client
-    PublicSingle --> Server["Generated controller"]
-    PublicUnion --> Server
-    Client --> Runtime["tapik ResponseX / OneOf internals"]
-    Server --> Runtime
+HttpEndpoint<
+    Parameters2<String, String>,
+    Input<Headers1<UUID>, EmptyBody>,
+    Outputs2<
+        Output<Headers0, JsonBody<ProductView>>,
+        Output<Headers0, JsonBody<ProblemDetails>>
+    >
+>
 ----
 
-== Tips for Working with These Types
+That is why a generated client can expose a method with a defaulted `locale` argument, and why a generated server interface can mirror the same input contract.
 
-. *Prefer aliases*: use +Headers3+ instead of wiring +Tuple3+ manually. The aliases pick correct variance and marker interfaces.
-. *Let the DSL infer tuples*: +input(header.uuid("X-Request-Id"))+ returns +Input<Headers1<UUID>, EmptyBody>+ automatically-no explicit types required.
-. *Use generated response hierarchies*: in clients and servers, branch on the generated endpoint-specific +Response+ subtypes rather than runtime +OneOf+ wrappers.
-. *Trust constructor validation*: generated responses validate non-exact status matchers at construction time, so invalid combinations fail fast.
-. *Leverage codecs*: bodies and headers carry codecs, so even custom +AllOf+ combinations continue to encode/decode data safely.
+== How tapik does it
 
-Understanding +AllOf+ and +OneOf+ is still key to appreciating tapik: the DSL describes APIs once, and the type system guarantees that every generated artifact agrees with the definition. Those runtime types now sit behind endpoint-specific generated contracts instead of leaking into consumer code. Take a look at the runtime helpers (+EncodeHeadersMethods.kt+, +DecodeHeadersMethods.kt+, +Responses.kt+) if you want to explore further.
+Internally, tapik uses typed tuples such as `Parameters`, `Headers`, `Input`, and `Outputs` to hold the structure of the contract as you compose it.
+
+Most users never need to work with those types directly. What matters is the behavior they enable:
+
+* ordering is preserved,
+* required versus optional inputs are preserved,
+* multi-output endpoints do not collapse into one weakly typed response.
+
+== What this does not guarantee
+
+tapik does not eliminate runtime HTTP problems. A remote service can still return invalid data, the wrong content type, or an unexpected status.
+
+What tapik does guarantee is narrower and more useful:
+
+* the contract you authored is explicit,
+* generators work from that contract instead of inference,
+* changing the contract forces corresponding generated code to change with it.

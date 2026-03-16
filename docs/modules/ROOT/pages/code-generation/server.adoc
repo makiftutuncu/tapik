@@ -1,97 +1,113 @@
-= Spring WebMVC Controllers
+= Generate a Server
 
-The +spring-webmvc+ generator turns tapik endpoints into Spring MVC controller contracts. Generated server signatures now return endpoint-specific response types instead of tapik's internal +ResponseX+ and +OneOf+ wrappers.
+The server generator targets Spring `Web MVC`.
 
-== Generated Structure
+Use it when you want Spring controller interfaces to stay aligned with the same tapik contract that also drives clients and documentation.
 
-* *Location*: +build/generated/sources/tapik/main/kotlin/<package>/<SourceFile>Server.kt+
-* *Aggregate interface name*: +<SourceFile>Server+
-* *Endpoint contract name*: +<SourceFile>Endpoints.<EndpointProperty>+
-* *Annotations*: Each method is decorated with the appropriate +@GetMapping+, +@PostMapping+, ... annotations derived from the endpoint metadata, including +path+, +consumes+, and +produces+ attributes.
-* *Parameters*: Path variables receive +@PathVariable+, query parameters use +@RequestParam+, headers use +@RequestHeader+, and bodies use +@RequestBody+. Default values defined in the DSL are carried into the generated signatures.
-* *Return type*: Methods return the generated endpoint response type. Single-output endpoints get one +data class+ or +data object+; multi-output endpoints get a sealed +Response+ hierarchy.
+Use `dev.akif.tapik:spring-webmvc` to enable it.
 
-Example excerpt:
+
+== Enable the generator
 
 [source,kotlin]
 ----
-interface ProductEndpointsServer : ProductEndpoints.GetProduct.Server
+dependencies {
+    implementation("dev.akif.tapik:spring-webmvc:<version>")
+}
 
-interface ProductEndpoints {
+tapik {
+    springWebMvc { }
+}
+----
+
+If you want a different generated suffix:
+
+[source,kotlin]
+----
+tapik {
+    springWebMvc {
+        serverSuffix("Api")
+    }
+}
+----
+
+== What gets generated
+
+The generator contributes Kotlin source files under:
+
+* `build/generated/sources/tapik/main/kotlin/<package>/...`
+
+For each source file of endpoint declarations, tapik generates:
+
+* an aggregate server interface such as `CatalogApiServer`,
+* one nested server contract per endpoint,
+* one generated response model per endpoint.
+
+[source,kotlin]
+----
+interface CatalogApiServer : CatalogApiEndpoints.GetProduct.Server
+
+interface CatalogApiEndpoints {
     interface GetProduct {
-        data class Ok(val response: ProductView)
+        sealed class Response(open val status: Status) {
+            data class Ok(
+                val body: ProductView
+            ) : Response(Status.Ok)
 
-        interface Server : dev.akif.tapik.Helpers {
-            @GetMapping(
-                path = ["/products/{productId}"],
-                produces = ["application/json"]
-            )
+            data class NotFound(
+                val body: ProblemDetails
+            ) : Response(Status.NotFound)
+        }
+
+        interface Server {
+            @org.springframework.web.bind.annotation.GetMapping(path = ["/api/v1/products/{productId}"])
             fun getProduct(
-                @PathVariable(name = "productId") productId: UUID,
-                @RequestParam(name = "locale", required = false) locale: String = "en-US",
-                @RequestHeader(name = "X-Request-Id") xRequestId: UUID
-            ): Ok
+                @org.springframework.web.bind.annotation.PathVariable(name = "productId") productId: String,
+                @org.springframework.web.bind.annotation.RequestHeader(name = "X-Request-Id") xRequestId: java.util.UUID
+            ): Response
         }
     }
 }
 ----
 
-== Implementing Controllers
+The exact generated code varies with the contract, but the behavior is consistent:
 
-Wire an implementation in your Spring application:
+* method and path come from the endpoint definition,
+* query parameters, headers, and request bodies map to the matching Spring annotations,
+* multi-output endpoints keep distinct response variants.
+
+== How Spring mapping is derived
+
+The generator uses the endpoint contract to choose the mapping form:
+
+* standard verbs such as `GET` and `POST` use the corresponding Spring mapping annotations,
+* nonstandard verbs such as `HEAD` fall back to `@RequestMapping` with an explicit request method,
+* media types come from the declared input and output bodies,
+* fixed response headers and typed bodies are reflected in the generated response model.
+
+== Implement the generated contract
+
+Your application still owns the controller implementation:
 
 [source,kotlin]
 ----
-@Component
-class ProductHandler : ProductEndpointsServer {
+@org.springframework.web.bind.annotation.RestController
+class CatalogController : CatalogApiServer {
     override fun getProduct(
-        productId: UUID,
-        locale: String,
-        xRequestId: UUID
-    ): ProductEndpoints.GetProduct.Ok {
-        val product = service.lookup(productId, locale)
-        return ProductEndpoints.GetProduct.Ok(response = product)
-    }
+        productId: String,
+        xRequestId: java.util.UUID
+    ): CatalogApiEndpoints.GetProduct.Response = TODO()
 }
 ----
 
-For multiple outputs, return the matching sealed subtype. This keeps the implementation exhaustive without exposing transport wrappers in your application code.
+This keeps the transport contract generated while leaving your business logic, persistence, and orchestration code handwritten.
 
-== Rendering Spring Responses
+== Boundaries
 
-The generated server contract stops at the typed response model. Rendering those responses as Spring +ResponseEntity+ values is intentionally left to a separate adapter layer.
+The server generator does not:
 
-[source,kotlin]
-----
-@RestController
-class ProductController(
-    private val handler: ProductHandler
-) {
-    @GetMapping("/products/{productId}")
-    fun getProduct(
-        productId: UUID,
-        locale: String,
-        xRequestId: UUID
-    ): ResponseEntity<Any?> {
-        val response = handler.getProduct(productId, locale, xRequestId)
-        // translate ProductEndpoints.GetProduct.Ok into ResponseEntity here
-    }
-}
-----
+* register controllers for you,
+* implement endpoint logic,
+* turn tapik into a full Spring application framework.
 
-This keeps the generated server API focused on the contract itself. If you want automatic Spring rendering later, build that as a dedicated adapter on top of the generated response hierarchy.
-
-== Status and Header Validation
-
-Non-exact status matchers still validate the runtime status value in the generated response constructors.
-
-== Tips for Server Implementations
-
-. *Reuse DSL metadata*: The generated interfaces still reference the +HttpEndpoint+ instances, so you can lean on +.outputs+ or +.parameters+ inside your implementation for additional logic.
-. *Combine with Spring validation*: Add validation annotations such as +@Valid+ or +@NotBlank+ in wrapper controllers when you need extra constraints.
-. *Return endpoint-specific responses*: Construct the generated +data class+ or +data object+ directly instead of assembling tapik runtime wrappers by hand.
-. *Unit-test with generated contracts*: Test the generated response hierarchy directly and add adapter-level tests in your Spring translation layer.
-
-== Customising Routing
-
-The generator chooses method-level annotations based on the HTTP verb. For uncommon verbs such as +OPTIONS+ or +TRACE+, it emits +@RequestMapping(method = [RequestMethod.VERB], path = [...])+. If you need additional attributes such as security annotations or +@CrossOrigin+ settings, declare them in your concrete controller implementation or wrapper controller.
+It generates the transport-facing interface and response model. Your application provides the actual behavior.

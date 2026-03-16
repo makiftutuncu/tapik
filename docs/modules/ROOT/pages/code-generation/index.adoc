@@ -1,68 +1,124 @@
-= Code Generation Overview
+= Generation Model
 
-tapik generators transform endpoint metadata into artefacts during the +tapikGenerate+ Gradle task. Generators are loaded with Java +ServiceLoader+ so any dependency placed on the project or build classpath can contribute new outputs.
+tapik generation starts from compiled endpoint contracts and produces only the outputs you explicitly enable.
 
-== Built-in Generators
+Today that workflow is exposed through the `Gradle` task `tapikGenerate`.
+
+== What the task does
+
+When you run `tapikGenerate`, tapik:
+
+. scans compiled classes under the configured `basePackage`,
+. discovers concrete `API` implementations,
+. resolves their `HttpEndpoint` declarations into metadata,
+. writes an endpoint scan report,
+. invokes the enabled generators found on the classpath.
+
+This matters because generators are not reading stale source docs or handwritten config. They are operating on the contract the code actually compiled to.
+
+== Built-in generators
 
 |===
-| Generator ID | Module | Output | Enabled By
+| Generator | Module | Output | Enabled by
 
-| +spring-restclient+
-| +dev.akif.tapik:spring-restclient+
-| Kotlin interfaces + helpers backed by Spring +RestClient+
-| +tapik { springRestClient { } }+
+| Spring `RestClient` client generator
+| `dev.akif.tapik:spring-restclient`
+| Generated Kotlin client interfaces
+| `tapik { springRestClient { } }`
 
-| +spring-webmvc+
-| +dev.akif.tapik:spring-webmvc+
-| Spring WebMVC controller interfaces + response mappers
-| +tapik { springWebMvc { } }+
+| Spring `Web MVC` server generator
+| `dev.akif.tapik:spring-webmvc`
+| Generated Kotlin server interfaces
+| `tapik { springWebMvc { } }`
 
-| +markdown-docs+
-| +dev.akif.tapik:common-plugin+ (bundled)
-| Markdown API overview
-| +tapik { markdownDocumentation { } }+
+| `Markdown` documentation generator
+| `dev.akif.tapik:common-plugin`
+| `API.md` endpoint summary
+| `tapik { markdownDocumentation { } }`
 |===
 
-Each generator writes to the shared output directories supplied by the Gradle task:
+== Where generated files go
 
-* +generatedSourcesDirectory+ -> Kotlin sources (added to the main source set).
-* +outputDirectory+ -> other artefacts such as Markdown files or reports.
+tapik writes to two output roots:
 
-== Execution Model
+* `build/generated/sources/tapik/main/kotlin` for generated Kotlin sources,
+* `build/generated` for non-source outputs such as `API.md` and `tapik-endpoints.txt`.
 
-[mermaid]
+Generated Kotlin sources are added to the main Kotlin source set automatically by the `Gradle` plugin.
+
+== Naming controls
+
+The root `tapik` extension controls the common naming surface:
+
+[source,kotlin]
 ----
-sequenceDiagram
-    participant Gradle
-    participant TapikGenerateTask as tapikGenerate Task
-    participant Scanner as Endpoint Scanner
-    participant Generators
+tapik {
+    basePackage("com.acme.catalog")
+    generatedPackageName("generated")
+    endpointsSuffix("Endpoints")
 
-    Gradle->>TapikGenerateTask: run()
-    TapikGenerateTask->>Scanner: scan compiled classes
-    Scanner-->>TapikGenerateTask: List<HttpEndpointMetadata>
-    TapikGenerateTask->>Generators: invoke(id, metadata, context)
-    Generators-->>TapikGenerateTask: write sources & artefacts
-    TapikGenerateTask-->>Gradle: complete
+    springRestClient {
+        clientSuffix("Client")
+    }
+
+    springWebMvc {
+        serverSuffix("Server")
+    }
+}
 ----
 
-Notable behaviour:
+Those settings affect:
 
-* The scanner favours ASM parsing and falls back to reflection if bytecode targets a future JVM version.
-* Metadata, scan logs, and warnings are written using Gradle's logging APIs for easy diagnosis (+--info+ for more detail).
-* Only configured generator IDs are executed; missing IDs log warnings without failing the build.
+* which package segment generated Kotlin files use,
+* the name of the generated endpoint container interface,
+* the aggregate client and server interface names.
 
-== Extending tapik
+== How extension works
 
-. Implement +dev.akif.tapik.plugin.TapikGenerator+ and package it in a module on the build classpath.
-. Register your implementation under +META-INF/services/dev.akif.tapik.plugin.TapikGenerator+.
-. Choose a unique +id+. Users enable it via +tapik { customGenerator { } }+ or by manually populating the +enabledGeneratorIds+ list.
-. Use the supplied +TapikGeneratorContext+ to discover output directories and log messages.
+tapik generators are discovered with Java `ServiceLoader`.
 
-Custom generators can co-exist with the provided ones and share the endpoint metadata that tapik already extracts. Keep your generator pure and deterministic-Gradle caches +tapikGenerate+ when outputs do not change.
+That keeps the extension boundary straightforward:
 
-Proceed to the dedicated pages to learn about server, client, and documentation generation specifics:
+* Kotlin generators can contribute generated endpoint contract members,
+* direct generators can write other artifacts such as `Markdown`,
+* other client, server, and documentation targets can be added without changing how endpoint discovery works.
 
-* xref:code-generation/client.adoc[Spring RestClient Clients]
-* xref:code-generation/server.adoc[Spring WebMVC Controllers]
-* xref:code-generation/documentation.adoc[Markdown Documentation]
+A minimal direct generator looks like this:
+
+[source,kotlin]
+----
+package com.acme.tapik
+
+import dev.akif.tapik.plugin.TapikDirectGenerator
+import dev.akif.tapik.plugin.TapikGeneratorContext
+import dev.akif.tapik.plugin.metadata.HttpEndpointMetadata
+import java.io.File
+
+class EndpointCountGenerator : TapikDirectGenerator {
+    override val id: String = "endpoint-count"
+
+    override fun generate(
+        endpoints: List<HttpEndpointMetadata>,
+        context: TapikGeneratorContext
+    ): Set<File> {
+        val output = context.outputDirectory.resolve("endpoint-count.txt")
+        output.writeText(endpoints.size.toString())
+        return setOf(output)
+    }
+}
+----
+
+Then register it under `META-INF/services/dev.akif.tapik.plugin.TapikGenerator`:
+
+[source,text]
+----
+com.acme.tapik.EndpointCountGenerator
+----
+
+Once that module is on the classpath, tapik can discover it through `ServiceLoader` just like the built-in generators.
+
+For the built-in outputs, continue with:
+
+* xref:code-generation/client.adoc[Generate a Client]
+* xref:code-generation/server.adoc[Generate a Server]
+* xref:code-generation/documentation.adoc[Generate Documentation]

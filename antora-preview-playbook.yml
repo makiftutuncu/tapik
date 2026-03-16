@@ -8,10 +8,7 @@ content:
   sources:
     - url: .
       branches: HEAD
-      tags:
-        - v*
-        - '!v0.1.*'
-        - '!v0.2.0'
+      tags: []
       start_path: docs
 ui:
   bundle:

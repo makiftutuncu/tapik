@@ -1,0 +1,65 @@
+= Project Layout and Discovery
+
+This page explains how tapik finds endpoint contracts and where generated files end up.
+
+If generation does not behave the way you expect, this is usually the first page to check.
+
+== tapik scans compiled classes, not source files
+
+The generation flow starts from compiled output under the module's main classes directory.
+
+That has two important consequences:
+
+* the relevant code has to compile first,
+* discovery behavior follows the compiled class layout, not just the source tree.
+
+The `Gradle` plugin wires `tapikGenerate` to the `classes` task so the usual workflow stays straightforward.
+
+== Discovery starts from `basePackage`
+
+The `Gradle` extension points tapik at one base package:
+
+[source,kotlin]
+----
+tapik {
+    basePackage("com.acme.catalog")
+}
+----
+
+tapik then scans compiled classes under that package and looks for concrete types assignable to `API`.
+
+If the configured base package is too narrow, endpoints outside it will not be discovered. If it is too broad, tapik will still only keep types that match the `API` contract.
+
+== What counts as a discoverable API
+
+In practice, the safest pattern is:
+
+* concrete class or object,
+* implements `API`,
+* under the configured base package,
+* exposes properties or methods that produce `HttpEndpoint` values.
+
+The delegated `endpoint` property form is the common case, but discovery also works from endpoint-returning members more generally.
+
+== Nested API types are discovered separately
+
+If you have multiple `API` implementors under the scanned package, tapik treats them as separate discovery targets.
+
+That is useful when you want separate generated surfaces. It also means tapik does not automatically merge nested API types into one logical contract unless your source organization already does that.
+
+== Where generated files go
+
+The `Gradle` plugin uses two output locations:
+
+* `build/generated/sources/tapik/main/kotlin` for generated Kotlin source,
+* `build/generated` for non-source outputs such as `API.md` and `tapik-endpoints.txt`.
+
+Generated Kotlin sources are added to the main source set automatically.
+
+By default, generated Kotlin types are written under a `generated` package segment relative to the source package.
+
+== Why this layout matters
+
+Today this workflow is exposed through the `Gradle` plugin.
+
+The shared generation engine is already separated from Gradle-specific wiring, which keeps the build integration boundary clear and avoids coupling discovery to one build tool's task model.

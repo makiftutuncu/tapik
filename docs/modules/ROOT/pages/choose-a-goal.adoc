@@ -1,0 +1,49 @@
+= Choose a Goal
+
+The fastest way to use tapik well is to start from the problem you need to solve.
+
+== I want to see whether tapik is the right tool
+
+Start with xref:index.adoc[Home] and xref:capabilities.adoc[Capabilities and Roadmap].
+
+Those pages answer:
+
+* what tapik solves,
+* what it supports,
+* where its integration boundaries are.
+
+== I want one typed source of truth for my HTTP contract
+
+Start with xref:getting-started.adoc[Quickstart], then move to xref:user-guide.adoc[Model HTTP Contracts].
+
+This path is for teams that want to stop duplicating endpoint shape across handwritten clients, servers, and docs.
+
+== I want a generated client
+
+Start with xref:code-generation/client.adoc[Generate a Client].
+
+If you need the broader support overview, check xref:capabilities.adoc[Capabilities and Roadmap].
+
+== I want generated server interfaces
+
+Start with xref:code-generation/server.adoc[Generate a Server].
+
+That path covers `Spring Web MVC` generation.
+
+== I want generated human-readable docs
+
+Start with xref:code-generation/documentation.adoc[Generate Documentation].
+
+Use that path when you want a build artifact such as `API.md` rather than a hand-maintained wiki.
+
+== I need custom IDs, wrappers, or codec behavior
+
+Start with xref:custom-types.adoc[Use Custom Types].
+
+That page covers value classes, custom codecs, and the boundary between tapik's `core` DSL and specific serialization libraries.
+
+== I need to understand why generation did or did not pick something up
+
+Start with xref:project-layout-and-discovery.adoc[Project Layout and Discovery], then use xref:troubleshooting.adoc[Troubleshooting].
+
+That is the right path when the problem is discovery, package scanning, naming, or build output rather than contract authoring itself.

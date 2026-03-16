@@ -1,0 +1,61 @@
+= Troubleshooting
+
+This page covers the most common ways tapik generation can fall short of what you expected.
+
+== Nothing is generated
+
+Check these first:
+
+* the module compiles successfully,
+* the endpoints live under the configured `basePackage`,
+* the relevant type implements `API`,
+* the generator block you need is actually enabled.
+
+tapik scans compiled classes, so source code that never produced class files will not be discovered.
+
+== Endpoints are discovered, but a generator does not run
+
+That usually means one of two things:
+
+* the generator block was not enabled in the `tapik` extension,
+* the generator module is not on the runtime classpath.
+
+For example, enabling `springRestClient { }` without depending on `dev.akif.tapik:spring-restclient` leaves tapik with a configured generator id but no matching generator implementation on the classpath.
+
+== Generated Kotlin types are in an unexpected package
+
+Check:
+
+* the source package of the `API` type,
+* the `generatedPackageName` setting,
+* the `endpointsSuffix`, `clientSuffix`, or `serverSuffix` settings.
+
+The generated Kotlin package defaults to the source package plus `generated`.
+
+== Query parameters or defaults do not look the way you expected
+
+tapik preserves whether a query parameter is required and whether it has a default.
+
+That means:
+
+* required query parameters remain required in generated signatures,
+* optional query parameters can surface with defaults in generated APIs.
+
+If the generated signature looks wrong, check the original contract first.
+
+== `Markdown` output is missing
+
+The `Markdown` generator only runs when:
+
+* `markdownDocumentation { }` is enabled,
+* at least one endpoint is discovered.
+
+When no endpoints are found, tapik skips `Markdown` generation rather than writing an empty summary.
+
+== Still unclear
+
+If the behavior still does not make sense:
+
+* inspect `build/generated/tapik-endpoints.txt`,
+* review xref:project-layout-and-discovery.adoc[Project Layout and Discovery],
+* then compare the generated output with the current endpoint contract rather than older docs or assumptions.

@@ -39,6 +39,11 @@
 - Dokka builds should fail on undocumented symbols and publish source links back to `https://github.com/makiftutuncu/tapik`.
 - Generated documentation must include the footer `© {currentYear} Mehmet Akif Tütüncü`.
 - The documentation site is built with Antora. Source content lives under `docs/modules/ROOT`, the component descriptor is `docs/antora.yml`, and playbooks are `antora-playbook.yml` (release) and `antora-preview-playbook.yml` (PR preview).
+- Antora content must be organized around user problems and user journeys, not module inventory.
+- Treat the current source, tests, generated outputs, and build behavior as the source of truth for Antora docs; do not inherit stale prose from older docs.
+- Capability pages must clearly separate what tapik supports today, what can already be extended through public plugin or codec surfaces, and what is planned next without presenting roadmap items as shipped features.
+- Prefer complete, source-verified examples over partial snippets, and include Mermaid if a diagram is necessary enough to justify its maintenance cost.
+- In Antora docs, mention tapik classes, methods, module names, extension names, task names, and dependency coordinates using inline monospace formatting.
 - Use `npm install` once, then `npm run docs:preview` for local preview (writes to `build/site` and runs `docs/scripts/copy-api.sh`).
 - Versioned docs are driven by `v*` release tags; Antora only scans tags that contain the Antora descriptor.
 

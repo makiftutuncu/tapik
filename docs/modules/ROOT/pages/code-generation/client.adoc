@@ -1,109 +1,116 @@
-= Spring RestClient Clients
+= Generate a Client
 
-The +spring-restclient+ generator produces Kotlin interfaces that call HTTP endpoints through the Spring Framework +RestClient+ API. Generated sources now expose endpoint-specific contracts instead of tapik's internal +ResponseX+ and +OneOf+ runtime wrappers.
+The client generator targets Spring's `RestClient`.
 
-== Generated Structure
+Use it when you want typed client methods generated from your tapik contracts while keeping ownership of actual HTTP client configuration in application code.
 
-* *Location*: +build/generated/sources/tapik/main/kotlin/<package>/<SourceFile>Client.kt+
-* *Aggregate interface name*: +<SourceFile>Client+
-* *Endpoint contract name*: +<SourceFile>Endpoints.<EndpointProperty>+
-* *Base interface*: +RestClientBasedClient+, which exposes:
-** +val restClient: RestClient+
-** +val interpreter: RestClientInterpreter+ (lazy wrapper around +restClient+)
-* *Method signature*: one function per endpoint property, using descriptive parameter names derived from the DSL and returning the endpoint contract's generated response type.
+Use `dev.akif.tapik:spring-restclient` to enable it.
 
-Example excerpt:
+== Enable the generator
+
+Add the module dependency and enable the generator block:
 
 [source,kotlin]
 ----
-interface ProductEndpointsClient : ProductEndpoints.GetProduct.Client
+dependencies {
+    implementation("dev.akif.tapik:spring-restclient:<version>")
+}
 
-interface ProductEndpoints {
+tapik {
+    springRestClient { }
+}
+----
+
+You can rename the generated client surface if the default suffix does not fit your project:
+
+[source,kotlin]
+----
+tapik {
+    springRestClient {
+        clientSuffix("Api")
+    }
+}
+----
+
+== What gets generated
+
+The generator contributes Kotlin source files under:
+
+* `build/generated/sources/tapik/main/kotlin/<package>/...`
+
+For one source file of endpoint declarations, tapik generates:
+
+* an aggregate client interface such as `CatalogApiClient`,
+* one nested client contract per endpoint,
+* one generated response model per endpoint.
+
+[source,kotlin]
+----
+interface CatalogApiClient : CatalogApiEndpoints.GetProduct.Client
+
+interface CatalogApiEndpoints {
     interface GetProduct {
-    data class Ok(val response: ProductView) 
-
-        interface Client : RestClientBasedClient {
-            fun getProduct(
-                productId: UUID,
-                locale: String = "en-US",
-                xRequestId: UUID
-            ): Ok {
-                // generated HTTP call and decoding
-                return Ok(response = decodedBody)
-            }
-        }
-    }
-}
-----
-
-[NOTE]
-====
-Names and types are inferred from your endpoint declarations: path/query parameters become function parameters, headers with codecs translate into arguments, and bodies map to encoded values.
-====
-
-== Response Types
-
-|===
-| Endpoint outputs | Generated return type
-
-| Single output
-| A direct endpoint-specific +data class+ or +data object+
-
-| Multiple outputs
-| A nested sealed +Response+ hierarchy inside the endpoint contract
-|===
-
-For an endpoint with multiple outputs, the generated contract looks like this:
-
-[source,kotlin]
-----
-interface UsersEndpoints {
-    interface Create {
         sealed class Response(open val status: Status) {
-            data class Created(
-                val response: UserResponse,
-                val location: URI
-            ) : Response(Status.Created)
+            data class Ok(
+                val body: ProductView
+            ) : Response(Status.Ok)
 
-            data class BadRequest(
-                val error: ApiError
-            ) : Response(Status.BadRequest)
+            data class NotFound(
+                val body: ProblemDetails
+            ) : Response(Status.NotFound)
+        }
+
+        interface Client : dev.akif.tapik.spring.restclient.RestClientBasedClient {
+            fun getProduct(
+                productId: String,
+                xRequestId: java.util.UUID
+            ): Response
         }
     }
 }
 ----
 
-This keeps client code exhaustive without exposing internal transport wrappers. Consumers branch on generated response variants directly.
+The important part is not the exact spelling. The important part is the shape:
 
-== Header and Body Handling
+* method parameters come from the endpoint contract,
+* optional query parameters keep their defaults,
+* multi-output endpoints become sealed response hierarchies.
 
-* Headers are encoded via the +Input.encodeInputHeaders+ helpers from +core+; generated clients decode them and populate the matching response constructor fields.
-* Bodies use the codec attached to the +Body+ definition (for example, Jackson-based JSON codecs). Any +CodecFailure+ surfaces as an +IllegalStateException+ in generated code so mismatches fail fast.
-* +RestClientInterpreter+ validates response status codes and media types before the generator attempts to decode bodies, surfacing detailed +RestClientResponseException+ messages when mismatches occur.
+== How execution works
 
-== Instantiating Clients
+Generated client methods delegate to `RestClientInterpreter`.
 
-Create a Spring-managed implementation by delegating to the generated interface:
+That interpreter is responsible for:
+
+* sending the request with the declared method, URI, headers, and optional body,
+* validating the returned status against the endpoint outputs,
+* validating response content type when the output body declares one.
+
+After that, the generated method decodes headers and bodies and constructs the endpoint-specific response type.
+
+== Use the client in application code
+
+Generated clients are regular interfaces. You provide a configured `RestClient` and inherit the generated methods:
 
 [source,kotlin]
 ----
-@Component
-class HttpProductClient(
-    override val restClient: RestClient
-) : ProductEndpointsClient
+@org.springframework.stereotype.Component
+class HttpCatalogClient(
+    override val restClient: org.springframework.web.client.RestClient
+) : CatalogApiClient
 ----
 
-+RestClientBasedClient+ provides +interpreter+ automatically, so implementations only supply the +RestClient+. You may inject a configured +RestClient.Builder+ or reuse the application-wide client.
+This keeps the split clear:
 
-== Testing Tips
+* tapik owns the generated contract and protocol mapping,
+* your application owns base URLs, auth, timeouts, interceptors, and bean wiring.
 
-. Drive endpoint behaviour through unit tests on the DSL before running code generation.
-. Use Spring's +MockRestServiceServer+ to verify generated clients: intercept outgoing requests, assert the expected path/headers/body, and feed back fixtures that satisfy your endpoint outputs.
-. For multi-output endpoints, assert on the generated sealed response variants rather than internal +OneOf+ wrappers.
-. If you customise codecs, add integration tests to ensure +RestClientInterpreter+ can successfully decode the wire format.
+== Boundaries
 
-== Customisation Hooks
+The generator does not:
 
-* Provide your own +RestClient+ (set timeouts, interceptors, authentication) while reusing generated code.
-* Override functions in the generated interface by writing extension functions or wrapping the generated interface inside a higher-level service.
-* Add new generators for other HTTP client stacks by following the steps in xref:code-generation/index.adoc#extending-tapik[Code Generation Overview]; the Spring client serves as a realistic template.
+* create Spring beans for you,
+* pick base URLs,
+* hide every HTTP concern behind a higher-level domain API.
+
+That is deliberate. tapik generates the typed transport contract. Your application decides how to compose it into services.

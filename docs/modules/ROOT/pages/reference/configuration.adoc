@@ -1,0 +1,72 @@
+= `Gradle` Configuration
+
+This page documents the `Gradle` configuration surface exposed by tapik.
+
+== Root Extension
+
+The `Gradle` plugin registers one `tapik` extension:
+
+[source,kotlin]
+----
+tapik {
+    basePackage("com.acme.catalog")
+    generatedPackageName("generated")
+    endpointsSuffix("Endpoints")
+
+    springRestClient { }
+    springWebMvc { }
+    markdownDocumentation { }
+}
+----
+
+== Root properties
+
+|===
+| Setting | Required | Default | Purpose
+
+| `basePackage`
+| No
+| Project group when unset or blank
+| Base package scanned for `API` implementations
+
+| `generatedPackageName`
+| No
+| `generated`
+| Package segment appended to source packages for generated Kotlin sources
+
+| `endpointsSuffix`
+| No
+| `Endpoints`
+| Suffix appended to generated endpoint container interfaces
+|===
+
+== Generator blocks
+
+Generator blocks do two things:
+
+* they enable the generator,
+* they supply generator-specific naming options where available.
+
+|===
+| Block | Current support | Default
+
+| `springRestClient { clientSuffix("...") }`
+| Enables Spring `RestClient` client generation
+| `Client`
+
+| `springWebMvc { serverSuffix("...") }`
+| Enables Spring `Web MVC` server generation
+| `Server`
+
+| `markdownDocumentation { }`
+| Enables `Markdown` documentation generation
+| No extra settings
+|===
+
+== What this configuration does not include
+
+The current `Gradle` plugin does not expose:
+
+* Maven configuration,
+* per-endpoint include or exclude rules,
+* generator blocks beyond the current `Spring` and `Markdown` set.

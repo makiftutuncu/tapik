@@ -1,66 +1,75 @@
 = tapik
 
-Tapik lets you describe HTTP endpoints once in Kotlin and generate clients, servers, and human-readable documentation from the same source of truth. The library captures full type information, headers, URI parameters, and status-driven flows to keep runtime code and docs in sync.
+tapik lets you describe an HTTP contract once in Kotlin and use that contract to generate typed clients, typed server interfaces, and human-readable documentation.
 
-[mermaid]
-----
-flowchart LR
-    A[Endpoint DSL<br/>tapik modules] --> B[Gradle build<br/>classes]
-    B --> C[[tapik Gradle Plugin]]
-    C -->|scans| D[Endpoint metadata]
-    C -->|runs generators| E[Spring RestClient clients]
-    C -->|runs generators| F[Spring WebMVC controllers]
-    C -->|runs generators| G[Markdown docs]
-    D --> H[tapik-endpoints.txt<br/>report]
-----
+It is built for teams that want one source of truth for request shape, response shape, and endpoint intent instead of maintaining separate controller signatures, client wrappers, and API notes by hand.
 
-== Key Capabilities
+== What tapik solves
 
-* Declarative DSL to model HTTP verbs, URI templates, headers, bodies, and status-driven responses.
-* Classpath scanning that keeps generated artefacts aligned with compiled endpoint definitions.
-* Pluggable generator architecture powered by Java +ServiceLoader+; enable only what you need.
-* First-party generators for Spring RestClient clients, Spring WebMVC controllers, and Markdown documentation.
-* Kotlin-first ergonomics: strongly typed parameters, Arrow interoperability, and codec abstractions for custom payloads.
+tapik is useful when your API contract is repeated in too many places:
 
-== Module Overview
+* endpoint declarations in one module,
+* client wrappers in another,
+* server interfaces or controllers somewhere else,
+* `Markdown` or wiki documentation that drifts over time.
+
+tapik replaces that duplication with one Kotlin contract model. Generation then works from the compiled contract, not from copied documentation.
+
+== What tapik can do
 
 |===
-| Module | Purpose | Highlights
+| Area | Available
 
-| +core+
-| Endpoint DSL and supporting types
-| Path/query DSL, headers, status matching, response tuples, +OneOf+ unions
+| Contract authoring
+| Define methods, paths, path variables, query parameters, headers, bodies, and outputs in the Kotlin DSL
 
-| +codec+
-| Built-in codecs
-| String & byte codecs, media-type helpers
+| Client generation
+| Generate Kotlin clients backed by Spring `RestClient`
 
-| +jackson+
-| Jackson integration
-| JSON codecs powered by Jackson ObjectMapper
+| Server generation
+| Generate Spring `Web MVC` server interfaces
 
-| +spring-restclient+
-| Client generator
-| Produces RestClient-based clients + interpreter
+| Codec support
+| Use built-in scalar codecs and `Jackson`-backed JSON bodies
 
-| +spring-webmvc+
-| Server generator
-| Emits controller contracts + response mapping helpers
-
-| +common-plugin+
-| Generator runtime
-| Bytecode scanning, metadata model, Markdown generator
-
-| +gradle-plugin+
 | Build integration
-| Registers +tapikGenerate+, exposes DSL to select generators
+| Run generation through the `Gradle` plugin
+
+| Human-readable docs
+| Generate a `Markdown` endpoint summary and publish API reference with `Dokka`
 |===
 
-== Next Steps
+== Where tapik fits well
 
-* Start with xref:getting-started.adoc[Getting Started] for a hands-on walkthrough.
-* Read the xref:user-guide.adoc[User Guide] to apply the Gradle plugin and define endpoints.
-* Explore xref:code-generation/index.adoc[Code Generation] guidance for each generator.
-* Dive into xref:concepts/type-safety.adoc[Type Safety] to understand tuples and unions.
-* Contribute using the xref:development.adoc[Development Guide].
-* Browse the generated link:api/index.html[API Reference] for library internals.
+tapik is a good fit when:
+
+* your API contract is authored in Kotlin,
+* you want generated artifacts to stay aligned with the code that defines the API,
+* your team values typed request and response models over stringly typed HTTP wrappers,
+* `Spring` is already part of the stack.
+
+== Start from your goal
+
+|===
+| If you want to... | Start here
+
+| See a complete first result quickly
+| xref:getting-started.adoc[Quickstart]
+
+| Decide whether tapik fits your use case
+| xref:choose-a-goal.adoc[Choose a Goal]
+
+| Model endpoints cleanly
+| xref:user-guide.adoc[Model HTTP Contracts]
+
+| Generate a Spring `RestClient` client
+| xref:code-generation/client.adoc[Generate a Client]
+
+| Generate Spring `Web MVC` server contracts
+| xref:code-generation/server.adoc[Generate a Server]
+
+| Review the support overview
+| xref:capabilities.adoc[Capabilities and Roadmap]
+|===
+
+The link:api/index.html[API Reference] complements this site. Use the Antora pages for workflow, architecture, and adoption guidance, then use `Dokka` for API-level detail.

@@ -1,59 +1,61 @@
-= Markdown Documentation
+= Generate Documentation
 
-tapik ships a Markdown generator (+markdown-docs+) that produces a lightweight API reference from your endpoint definitions. This is useful for sharing REST contracts with stakeholders who do not read the Kotlin source.
+tapik includes a `Markdown` generator that turns discovered endpoint metadata into a lightweight `API.md` file.
 
-== Output Layout
+Use it when you want a generated contract summary that can be published, diffed, or reviewed as part of your build output.
 
-* *Location*: +build/generated/API.md+
-* *Grouping*: Endpoints are grouped by package and Kotlin source file. Each group starts with an +# + heading for the file, followed by +##+ sections per endpoint.
-* *Content*:
-** HTTP method and resolved path.
-** Description and details from the DSL.
-** Tables for parameters, headers, and outputs.
-** Body type descriptions including codec names and media types.
+== Enable the generator
 
-Example excerpt:
-
-[source,markdown]
+[source,kotlin]
 ----
-# ProductEndpoints.kt
-
-## `getProduct`: Fetch product details
-
-`GET /products/{productId}`
-
-Returns localized information when the locale query parameter is supplied.
-
-### URI Parameters
-| Name | Type | Position | Required | Default Value |
-| --- | --- | --- | --- | --- |
-| `productId` | UUID | In Path | true |  |
-| `locale` | String | In Query | false | en-US |
-
-### Input Headers
-| Name | Type | Value(s) | Required |
-| --- | --- | --- | --- |
-| `X-Request-Id` | UUID | - | true |
-
-### Outputs
-| Description | Headers | Body |
-| --- | --- | --- |
-| Status: 200 Ok | - | `ProductView` named "product" as `application/json` |
-| Status: 404 NotFound | - | `ProblemDetails` named "problem" as `application/json` |
+tapik {
+    markdownDocumentation { }
+}
 ----
 
-== Keeping Documentation Fresh
+== What it generates
 
-* The report updates every time +tapikGenerate+ runs; check it into version control if you track API changes alongside code.
-* Because the generator reads descriptions and details from your DSL, updating KDoc or strings in endpoint declarations immediately reflects in the Markdown file.
-* Unknown codecs or missing media types show up verbatim; add KDoc to the DSL elements if you need richer context.
+The `Markdown` generator writes:
 
-== Customising or Extending
+* `build/generated/API.md`
 
-If you need additional formats (HTML, OpenAPI, etc.), use the Markdown generator as a blueprint:
+The generated file groups endpoints by package and source file and includes:
 
-. Depend on +dev.akif.tapik:common-plugin+ to reuse metadata types.
-. Implement +TapikGenerator+ and register a new +id+.
-. Traverse +HttpEndpointMetadata+ to produce your desired output. You can start from the source at +common-plugin/src/main/kotlin/plugin/MarkdownDocumentationGenerator.kt+.
+* endpoint ids and descriptions,
+* HTTP method and path,
+* URI parameter tables,
+* input header tables,
+* input body summaries,
+* output summaries, including headers and body shape.
 
-Remember to add your generator to the Gradle DSL via a nested extension or by manually specifying the +enabledGeneratorIds+ set.
+== What problem it solves
+
+The `Markdown` generator is useful when you need a generated artifact that is easy to:
+
+* attach to a build,
+* review in pull requests,
+* publish into another documentation pipeline,
+* inspect without reading generated Kotlin.
+
+It is especially helpful as a contract snapshot for teams that want something lighter than a full site generator.
+
+== How it relates to `Dokka`
+
+The `Markdown` generator and `Dokka` do different jobs:
+
+* `Dokka` documents tapik's Kotlin API surface,
+* `API.md` summarizes the endpoints discovered in your project.
+
+One documents the library. The other documents your declared HTTP contract.
+
+== Boundaries
+
+The `Markdown` generator is intentionally narrow. It does not replace a full user documentation site.
+
+It does not:
+
+* explain user journeys,
+* teach your architecture,
+* add conceptual context beyond what the endpoint contract already says.
+
+If you need narrative documentation, keep writing that separately and use `API.md` as a generated reference input.

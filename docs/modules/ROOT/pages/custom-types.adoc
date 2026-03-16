@@ -1,0 +1,61 @@
+= Use Custom Types
+
+tapik becomes much more useful once your HTTP contract can speak in your domain types instead of raw strings everywhere.
+
+This page covers value classes, custom transport codecs, and `Jackson`-backed bodies.
+
+== Use value classes for path, query, and header values
+
+tapik's scalar transport model is based on `StringCodec`.
+
+For domain wrappers such as identifiers, the easiest path is usually a Kotlin value class plus `StringCodecs.ofValueClass`:
+
+[source,kotlin]
+----
+@JvmInline
+value class ProductId(
+    override val value: String
+) : dev.akif.tapik.ValueClass<String>
+
+private val productId =
+    path("productId", dev.akif.tapik.codec.StringCodecs.ofValueClass<String, ProductId>())
+----
+
+That keeps the endpoint contract domain-oriented without forcing every client and server call site to pass raw strings.
+
+== Use `Jackson` when the wire format is JSON
+
+tapik does not hardcode `Jackson` into the `core` DSL. JSON support lives in the separate `jackson` module.
+
+[source,kotlin]
+----
+data class ProductView(
+    val id: String,
+    val name: String
+)
+
+val getProduct by endpoint {
+    get("api" / "v1" / "products" / path.string("productId"))
+        .output(Status.Ok) { dev.akif.tapik.jackson.jsonBody<ProductView>("product") }
+}
+----
+
+This separation keeps the core transport model independent from one JSON implementation.
+
+== Write a custom codec when built-ins are not enough
+
+If your transport format is not covered by the default codecs:
+
+* write a custom `StringCodec` for values that travel as strings,
+* write or adapt a `ByteArrayCodec` for values that travel as bodies,
+* keep the codec close to the wire format rather than hiding business rules inside it.
+
+That is usually enough for project-specific IDs, enums, wrappers, and nonstandard body encodings.
+
+== What tapik includes here
+
+tapik includes:
+
+* built-in scalar codecs in `codec`,
+* value-class helpers through `StringCodecs.ofValueClass`,
+* `Jackson`-backed JSON support in `jackson`.
