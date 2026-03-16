@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>User Guide :: tapik</title>
+    <title>Model HTTP Contracts :: tapik</title>
     <meta name="generator" content="Antora 3.1.14">
 <link rel="stylesheet" href="../_/css/site.css">
 <link rel="stylesheet" href="../_/css/search.css">
@@ -33,7 +33,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="tapik" data-version="v0.2.7">
+<div class="nav-container" data-component="tapik" data-version="v0.3.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -47,21 +47,51 @@
     <a class="nav-link" href="index.html">Home</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <span class="nav-text">Guides</span>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="getting-started.html">Getting Started</a>
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
   </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="user-guide.html">User Guide</a>
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
   </li>
 </ul>
   </li>
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Concepts</span>
+    <span class="nav-text">Generate outputs</span>
 <ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
   </li>
@@ -69,19 +99,13 @@
   </li>
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Code Generation</span>
+    <span class="nav-text">Reference</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="code-generation/index.html">Overview</a>
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="code-generation/client.html">Spring RestClient Clients</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="code-generation/server.html">Spring WebMVC Controllers</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="code-generation/documentation.html">Markdown Documentation</a>
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
   </li>
 </ul>
   </li>
@@ -112,14 +136,15 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">tapik</a></li>
-    <li>Guides</li>
-    <li><a href="user-guide.html">User Guide</a></li>
+    <li>Use tapik</li>
+    <li><a href="user-guide.html">Model HTTP Contracts</a></li>
   </ul>
 </nav>
 <div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">v0.2.7</button>
+  <button class="version-menu-toggle" title="Show other versions of page">v0.3.0</button>
   <div class="version-menu">
-    <a class="version is-current" href="user-guide.html">v0.2.7</a>
+    <a class="version is-current" href="user-guide.html">v0.3.0</a>
+    <a class="version" href="v0.2.7/user-guide.html">v0.2.7</a>
     <a class="version" href="v0.2.6/user-guide.html">v0.2.6</a>
     <a class="version" href="v0.2.5/user-guide.html">v0.2.5</a>
     <a class="version" href="v0.2.4/user-guide.html">v0.2.4</a>
@@ -128,18 +153,18 @@
     <a class="version" href="v0.2.1/user-guide.html">v0.2.1</a>
   </div>
 </div>
-<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.2.7/docs/modules/ROOT/pages/user-guide.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.3.0/docs/modules/ROOT/pages/user-guide.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">User Guide</h1>
+<h1 class="page">Model HTTP Contracts</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This guide walks you through installing the tapik Gradle plugin, declaring endpoints with the Kotlin DSL, and running the generators that create clients, servers, and documentation.</p>
+<p>This guide covers the core job tapik solves: declaring an HTTP contract once so the same model can drive generated clients, generated server interfaces, and documentation.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -149,7 +174,7 @@
 </td>
 <td class="content">
 <div class="paragraph">
-<p>New to tapik? Start with <a href="getting-started.html" class="xref page">Getting Started</a> for a step-by-step tutorial before diving into the full plugin reference below.</p>
+<p>If you have not run tapik yet, start with <a href="getting-started.html" class="xref page">Quickstart</a> first.</p>
 </div>
 </td>
 </tr>
@@ -158,345 +183,236 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>JDK compatible with the repository defaults (javaTargetVersion=21, toolchain javaToolchainVersion=24 in gradle.properties).</p>
-</li>
-<li>
-<p>Gradle 9+ with the Kotlin DSL; configuration cache and task caching are supported out of the box.</p>
-</li>
-<li>
-<p>Kotlin 2.2.20 (supplied via the Gradle toolchain).</p>
-</li>
-<li>
-<p>Optional modules you plan to use, such as dev.akif.tapik:jackson for JSON bodies or Spring starters for generated code.</p>
-</li>
-</ul>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Component</th>
-<th class="tableblock halign-left valign-top">Example Dependency</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint DSL</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:core:0.2.7")</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Codecs</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:codec:0.2.7")</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Jackson integration</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">implementation("dev.akif.tapik:jackson:0.2.7")</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Gradle plugin</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">id("dev.akif.tapik.plugin.gradle") version "0.2.7"</p></td>
-</tr>
-</tbody>
-</table>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>The version numbers match the repository snapshot (version=0.2.7). Replace them with the release you are consuming.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_installing_the_gradle_plugin"><a class="anchor" href="#_installing_the_gradle_plugin"></a>Installing the Gradle Plugin</h2>
+<h2 id="_start_with_one_api_type_per_contract_area"><a class="anchor" href="#_start_with_one_api_type_per_contract_area"></a>Start with one <code>API</code> type per contract area</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Configure the plugin in a module that produces HTTP endpoints or needs generated sources:</p>
+<p>tapik discovers endpoints from concrete classes and objects that implement <code>API</code>.</p>
+</div>
+<div class="paragraph">
+<p>The most common pattern is one singleton object per API area:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">plugins {
-    kotlin("jvm")
-    id("dev.akif.tapik.plugin.gradle") version "0.2.7"
-}
-
-dependencies {
-    implementation("dev.akif.tapik:core:0.2.7")
-    implementation("dev.akif.tapik:jackson:0.2.7") // for JSON helpers
-}
-
-tapik {
-    basePackage("com.acme.catalog")
-
-    springRestClient { /* enables the Spring RestClient generator */ }
-    springWebMvc { /* enables the Spring WebMVC generator */ }
-    markdownDocumentation { /* enables the Markdown documentation generator */ }
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">object CatalogApi : API {
+    val getProduct by endpoint { ... }
+    val createProduct by endpoint { ... }
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Key things to remember:</p>
+<p>That keeps discovery predictable and gives generators one obvious place to group related endpoints.</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>basePackage must reference the package where your API implementations live. Only those classes (and their HttpEndpoint properties) are scanned.</p>
-</li>
-<li>
-<p>The nested generator blocks are markers; you do not need to configure anything inside them unless future versions expose options.</p>
-</li>
-<li>
-<p>Generated Kotlin sources land under build/generated/sources/tapik/main/kotlin and are added to the main source set automatically.</p>
-</li>
-<li>
-<p>Non-source artefacts (for example, Markdown files) are written under build/generated.</p>
-</li>
-</ul>
 </div>
-<div class="sect2">
-<h3 id="_organizing_endpoints"><a class="anchor" href="#_organizing_endpoints"></a>Organizing endpoints</h3>
+</div>
+<div class="sect1">
+<h2 id="_let_the_endpoint_property_name_carry_the_identity"><a class="anchor" href="#_let_the_endpoint_property_name_carry_the_identity"></a>Let the endpoint property name carry the identity</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>The scanner only looks at concrete types that implement API and at their val properties whose type is +HttpEndpoint&lt;*, *, *&gt;. That leads to a few practical conventions:</p>
+<p>The delegated <code>endpoint</code> form uses the property name as the endpoint identifier:</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>Keep the actual endpoint properties on objects or classes that implement API. Extension properties or interface properties that do <strong>not</strong> live on a concrete API implementor are not discovered.</p>
-</li>
-<li>
-<p>To split definitions (read/write, bounded contexts) without multiplying generated clients, define helper functions in plain interfaces and use them from a single API object:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">interface ReadUsersDefs {
-    fun HttpEndpointVerbBuildingContext.configureGetEndpoint() = get("users" / path.uuid("id"))
-}
-interface WriteUsersDefs {
-    fun HttpEndpointVerbBuildingContext.configureCreateEndpoint() = post("users") { /* ... */ }
-}
-
-object Users : API, ReadUsersDefs, WriteUsersDefs {
-    val get by endpoint { configureGetEndpoint() }
-    val create by endpoint { configureCreateEndpoint() }
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val getProduct by endpoint(
+    description = "Get a product by ID",
+    details = "Returns localized product data when the product exists."
+) {
+    get("products" / path.string("productId"))
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This keeps one generated client/controller while letting you organize the DSL.</p>
+<p>That identifier flows into metadata and generated code, so descriptive property names matter.</p>
 </div>
-</li>
-<li>
-<p>Nested API objects are supported and treated as separate modules (e.g., Users.Admin produces its own generated interfaces). If you want a single generated surface, keep helpers nested but avoid making them API; place endpoints only on the parent API implementor.</p>
-</li>
-<li>
-<p>Multiple layers of nesting work the same way: every concrete API implementor yields its own generated outputs; nesting does not merge endpoints automatically.</p>
-</li>
-</ul>
-</div>
+<div class="paragraph">
+<p>Use <code>description</code> for the short summary that should appear in generated docs. Use <code>details</code> only for behavior that a user of the endpoint needs to know but that does not fit in the summary.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_declaring_endpoints"><a class="anchor" href="#_declaring_endpoints"></a>Declaring Endpoints</h2>
+<h2 id="_build_the_request_shape_from_the_uri_outward"><a class="anchor" href="#_build_the_request_shape_from_the_uri_outward"></a>Build the request shape from the URI outward</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Endpoints are compile-time constants built with the DSL in the core module. The DSL collects metadata from property names, documentation strings, and nested builders.</p>
+<p>tapik contracts usually read best when you define reusable URI pieces first:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package com.acme.catalog.endpoints
-
-import dev.akif.tapik.*
-import dev.akif.tapik.jackson.jsonBody
-
-// Implement API to gain access to the `endpoint` DSL.
-object ProductEndpoints : API {
-    private val productId = path.uuid("productId")
-    private val locale = query.string("locale").optional("en-US")
-
-    val getProduct by endpoint(
-        description = "Fetch product details",
-        details = "Returns localized information when the locale query parameter is supplied."
-    ) {
-        get("products" / productId + locale)
-            .input(header.uuid("X-Request-Id"))
-            .output(Status.OK) {
-                jsonBody&lt;ProductView&gt;("product")
-            }
-            .output(Status.NOT_FOUND) {
-                jsonBody&lt;ProblemDetails&gt;("problem")
-            }
-    }
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">private val products = "api" / "v1" / "products"
+private val productId = path.string("productId")
+private val locale = query.string("locale").optional("en-US")
+private val page = query.int("page").optional(1)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then use those pieces in the endpoint:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val getProduct by endpoint(
+    description = "Get a product by ID",
+    details = "Returns localized product data when the product exists."
+) {
+    get(products / productId + locale)
+        .input(header.uuid("X-Request-Id"))
+        .output(Status.Ok) { jsonBody&lt;ProductView&gt;("product") }
+        .output(Status.NotFound) { jsonBody&lt;ProblemDetails&gt;("problem") }
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Implementing API is the convention to expose the endpoint DSL and keep your endpoints discoverable as properties (e.g., ProductEndpoints.getProduct).</p>
-</div>
-<div class="paragraph">
-<p>Highlights:</p>
+<p>This is the pattern to follow:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>endpoint { ... } infers the endpoint id from the property name (getProduct). The description and details flow into generated KDoc and Markdown.</p>
+<p>path variables model required URI segments,</p>
 </li>
 <li>
-<p>Path building uses operator overloads: "products" / productId.</p>
+<p>query parameters model optional or filter-like inputs,</p>
 </li>
 <li>
-<p>Query parameters append with , headers with +input { ... }, and outputs use output(Status.OK) { ... }.</p>
+<p>headers model protocol metadata,</p>
 </li>
 <li>
-<p>Response variants can be chained; the DSL supports OneOf unions to model branching behaviour.</p>
+<p>bodies model the typed payload on the wire.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_running_generation"><a class="anchor" href="#_running_generation"></a>Running Generation</h2>
+<h2 id="_add_bodies_only_when_the_request_really_has_one"><a class="anchor" href="#_add_bodies_only_when_the_request_really_has_one"></a>Add bodies only when the request really has one</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>tapik registers an aggregated tapikGenerate task. It depends on classes for the current project and its siblings to ensure bytecode is available.</p>
+<p>For request bodies, keep the endpoint honest about transport details:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./gradlew :service:tapikGenerate</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val createProduct by endpoint(
+    description = "Create a product",
+    details = "Accepts a JSON request body and returns the created product."
+) {
+    post(products)
+        .input(header.Accept(MediaType.Json)) {
+            jsonBody&lt;CreateProductRequest&gt;("createProductRequest")
+        }
+        .output(Status.Created, headersOf(Header.Location)) {
+            jsonBody&lt;ProductView&gt;("product")
+        }
+        .output(Status.BadRequest) {
+            jsonBody&lt;ProblemDetails&gt;("problem")
+        }
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Execution flow:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Compiled classes are scanned for properties that return HttpEndpoint.</p>
-</li>
-<li>
-<p>Metadata describing the endpoints is persisted to build/generated/tapik-endpoints.txt.</p>
-</li>
-<li>
-<p>The selected generators (spring-restclient, spring-webmvc, markdown-docs) run sequentially.</p>
-</li>
-<li>
-<p>Generated sources are attached to the IDE/classpath; you can ./gradlew build without special configuration.</p>
-</li>
-</ol>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>You can run ./gradlew :service:classes tapikGenerate during fast feedback loops. Pass -PskipLint if you want to avoid ktlint locally.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_inspecting_outputs"><a class="anchor" href="#_inspecting_outputs"></a>Inspecting Outputs</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p><strong>Kotlin sources</strong> live under build/generated/sources/tapik/main/kotlin.</p>
-</li>
-<li>
-<p><strong>Markdown documentation</strong> is emitted to build/generated/API.md.</p>
-</li>
-<li>
-<p><strong>Scan report</strong>: build/generated/tapik-endpoints.txt contains the raw metadata list.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>When checking generated Kotlin into source control:</p>
+<p>The request body and the output bodies are separate declarations because they solve different problems:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Run ./gradlew tapikGenerate after any endpoint changes.</p>
+<p>input bodies describe what the caller must send,</p>
 </li>
 <li>
-<p>Review generated types as you would review hand-written code; they carry KDoc extracted from your endpoints.</p>
+<p>output bodies describe what the endpoint may return,</p>
 </li>
 <li>
-<p>For reproducibility, make sure the versions of tapik dependencies are pinned via a version catalog or BOM.</p>
+<p>response headers belong on outputs, not on the endpoint as a whole.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a>Troubleshooting</h2>
+<h2 id="_model_protocol_branches_not_internal_states"><a class="anchor" href="#_model_protocol_branches_not_internal_states"></a>Model protocol branches, not internal states</h2>
 <div class="sectionbody">
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Symptom</th>
-<th class="tableblock halign-left valign-top">Common Cause</th>
-<th class="tableblock halign-left valign-top">Fix</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Missing compiled classes warning</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">classes task did not run before tapikGenerate</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Run ./gradlew classes tapikGenerate or wire tasks in your CI pipeline</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">No generators execute</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Generator blocks omitted in the tapik extension</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Add springRestClient { }, springWebMvc { }, or markdownDocumentation { }</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Class not found during scan</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Class outside configured basePackage</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Ensure your API implementations live under the configured base package</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Unexpected HTTP mappings</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint path missing leading segment</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Start URIs with "segment" or "segment" / ...</p></td>
-</tr>
-</tbody>
-</table>
 <div class="paragraph">
-<p>If you create custom generators, place their implementation on the build classpath and expose them via the Java ServiceLoader contract. The Gradle plugin will pick them up automatically when their id is enabled.</p>
+<p>Outputs are where tapik becomes most valuable. They define the observable branches of the endpoint contract.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val getAvatar by endpoint(
+    description = "Get a product image",
+    details = "Returns a raw PNG image for the requested product."
+) {
+    get(products / productId / "image" + query.int("size"))
+        .output {
+            rawBody(mediaType = MediaType.Custom("image", "png"))
+        }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When an endpoint has more than one meaningful outcome, declare them explicitly:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val authenticate by endpoint(
+    description = "Validate a session token",
+    details = "Returns plain-text auth errors for unauthorized or forbidden responses."
+) {
+    post("api" / "v1" / "auth")
+        .output(Status.BadRequest, headersOf(Header.ContentType(MediaType.Json))) {
+            jsonBody&lt;ProblemDetails&gt;("problem")
+        }
+        .output(anyStatus(Status.Unauthorized, Status.Forbidden)) {
+            stringBody("authError")
+        }
+        .output(unmatchedStatus) { EmptyBody }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Do this only when the branch matters to callers. tapik will preserve that shape in generated code.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reuse_definitions_not_entire_walls_of_dsl"><a class="anchor" href="#_reuse_definitions_not_entire_walls_of_dsl"></a>Reuse definitions, not entire walls of DSL</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The DSL is easiest to maintain when shared wire-level concepts are extracted once:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">private val requestId = header.uuid("X-Request-Id")
+private val locale = query.string("locale").optional("en-US")
+private val productId = path.string("productId")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Reuse is useful when it preserves meaning. If a helper hides the actual HTTP contract, it is usually too abstract for documentation and generation-oriented code.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_keep_the_source_readable_for_the_people_who_maintain_it"><a class="anchor" href="#_keep_the_source_readable_for_the_people_who_maintain_it"></a>Keep the source readable for the people who maintain it</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Good tapik contracts are concise, but they are not cryptic. A reader should be able to answer three questions directly from the source:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>what request shape does this endpoint accept,</p>
+</li>
+<li>
+<p>what responses can it produce,</p>
+</li>
+<li>
+<p>why does this endpoint exist in the API at all.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If those answers are clear in the contract, the generated artifacts usually become clear too.</p>
 </div>
 </div>
 </div>
 <div class="pagination-container">
   <hr>
   <nav class="pagination">
-    <span class="prev"><a href="getting-started.html">Getting Started</a></span>
-    <span class="next"><a href="concepts/type-safety.html">Type Safety</a></span>
+    <span class="prev"><a href="choose-a-goal.html">Choose a Goal</a></span>
+    <span class="next"><a href="custom-types.html">Use Custom Types</a></span>
   </nav>
 </div>
 </article>

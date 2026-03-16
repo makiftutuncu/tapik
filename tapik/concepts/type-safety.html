@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Type Safety in tapik :: tapik</title>
+    <title>Type Safety :: tapik</title>
     <meta name="generator" content="Antora 3.1.14">
 <link rel="stylesheet" href="../../_/css/site.css">
 <link rel="stylesheet" href="../../_/css/search.css">
@@ -33,7 +33,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="tapik" data-version="v0.2.7">
+<div class="nav-container" data-component="tapik" data-version="v0.3.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -47,21 +47,51 @@
     <a class="nav-link" href="../index.html">Home</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Guides</span>
+    <span class="nav-text">Use tapik</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../getting-started.html">Getting Started</a>
+    <a class="nav-link" href="../user-guide.html">Model HTTP Contracts</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../user-guide.html">User Guide</a>
+    <a class="nav-link" href="../custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../project-layout-and-discovery.html">Project Layout and Discovery</a>
   </li>
 </ul>
   </li>
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Concepts</span>
+    <span class="nav-text">Generate outputs</span>
 <ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../capabilities.html">Capabilities and Roadmap</a>
+  </li>
   <li class="nav-item is-current-page" data-depth="2">
     <a class="nav-link" href="type-safety.html">Type Safety</a>
   </li>
@@ -69,19 +99,13 @@
   </li>
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Code Generation</span>
+    <span class="nav-text">Reference</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../code-generation/index.html">Overview</a>
+    <a class="nav-link" href="../reference/configuration.html">Gradle Configuration</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../code-generation/client.html">Spring RestClient Clients</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../code-generation/server.html">Spring WebMVC Controllers</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../code-generation/documentation.html">Markdown Documentation</a>
+    <a class="nav-link" href="../troubleshooting.html">Troubleshooting</a>
   </li>
 </ul>
   </li>
@@ -112,14 +136,15 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">tapik</a></li>
-    <li>Concepts</li>
+    <li>Understand tapik</li>
     <li><a href="type-safety.html">Type Safety</a></li>
   </ul>
 </nav>
 <div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">v0.2.7</button>
+  <button class="version-menu-toggle" title="Show other versions of page">v0.3.0</button>
   <div class="version-menu">
-    <a class="version is-current" href="type-safety.html">v0.2.7</a>
+    <a class="version is-current" href="type-safety.html">v0.3.0</a>
+    <a class="version" href="../v0.2.7/concepts/type-safety.html">v0.2.7</a>
     <a class="version" href="../v0.2.6/concepts/type-safety.html">v0.2.6</a>
     <a class="version" href="../v0.2.5/concepts/type-safety.html">v0.2.5</a>
     <a class="version" href="../v0.2.4/concepts/type-safety.html">v0.2.4</a>
@@ -128,210 +153,191 @@
     <a class="version" href="../v0.2.1/concepts/type-safety.html">v0.2.1</a>
   </div>
 </div>
-<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.2.7/docs/modules/ROOT/pages/concepts/type-safety.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.3.0/docs/modules/ROOT/pages/concepts/type-safety.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Type Safety in tapik</h1>
+<h1 class="page">Type Safety</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>tapik&#8217;s primary goal is to keep HTTP contracts type-safe from declaration to runtime. The DSL models every piece of an endpoint-parameters, headers, bodies, and response branches-with immutable, strongly-typed structures. Generators rely on these structures to emit Kotlin that cannot drift from the original definition.</p>
+<p>tapik&#8217;s type safety matters because the same typed contract drives authoring, generation, and runtime interpretation.</p>
+</div>
+<div class="paragraph">
+<p>The point is not abstract purity. The point is that tapik can keep generated code aligned with your endpoint definitions without guessing from strings.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_building_blocks"><a class="anchor" href="#_building_blocks"></a>Building Blocks</h2>
+<h2 id="_what_tapik_keeps_in_the_type_system"><a class="anchor" href="#_what_tapik_keeps_in_the_type_system"></a>What tapik keeps in the type system</h2>
 <div class="sectionbody">
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Concept</th>
-<th class="tableblock halign-left valign-top">Interface</th>
-<th class="tableblock halign-left valign-top">Purpose</th>
-<th class="tableblock halign-left valign-top">Common Aliases</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Heterogeneous tuple (product)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AllOf</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Represents <strong>all</strong> items that must exist together</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Parameters, Headers, Outputs, HeaderValues, Responses</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Discriminated union (sum)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">OneOf</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Represents <strong>one</strong> branch chosen at runtime</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">OneOf2, OneOf3, &#8230;&#8203; up to OneOf10</p></td>
-</tr>
-</tbody>
-</table>
-<div class="sect2">
-<h3 id="_allof_and_tuple_aliases"><a class="anchor" href="#_allof_and_tuple_aliases"></a>AllOf and Tuple Aliases</h3>
 <div class="paragraph">
-<p>AllOf is a family of interfaces (AllOf0 &#8230;&#8203; AllOf10) with itemN accessors. Concrete tapik types reuse these through the Tuple facade so you do not manipulate AllOf directly.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">typealias Headers3&lt;H1, H2, H3&gt; =
-    Tuple3&lt;Header&lt;*&gt;, Header&lt;H1&gt;, Header&lt;H2&gt;, Header&lt;H3&gt;&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Because Headers3 implements AllOf4, the compiler knows:</p>
+<p>While you build an endpoint, tapik preserves:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>headers.item1 is the first Header&lt;*&gt;.</p>
+<p>the path and query parameters that appear in the URI,</p>
 </li>
 <li>
-<p>headers.item2 is Header&lt;H1&gt;, preserving the codec type.</p>
+<p>whether query parameters are required or optional,</p>
 </li>
 <li>
-<p>Iteration is still possible via the Listable interface.</p>
+<p>request headers and request body shape,</p>
+</li>
+<li>
+<p>the set of possible outputs,</p>
+</li>
+<li>
+<p>the body and header shape attached to each output branch.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>tapik ships aliases for each arity so you can declare headers, parameters, and responses without manual tuple plumbing:</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Alias</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Parameters0 &#8230;&#8203; Parameters10</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Path/query parameter definitions</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Headers0 &#8230;&#8203; Headers10</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Request header definitions</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">HeaderValues0 &#8230;&#8203; HeaderValues10</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Decoded inbound header values</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Outputs0 &#8230;&#8203; Outputs10</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Ordered list of (StatusMatcher, Headers, Body) combinations</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Response0 / ResponseWithoutBody0 families</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Runtime responses returned by generated code</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect2">
-<h3 id="_oneof_and_conditional_responses"><a class="anchor" href="#_oneof_and_conditional_responses"></a>OneOf and Conditional Responses</h3>
-<div class="paragraph">
-<p>OneOf models exclusive branches. Each arity exposes inline OptionN value classes and a select helper for exhaustive handling.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">fun interpret(result: OneOf3&lt;Response0&lt;User&gt;, ResponseWithoutBody0, ResponseWithoutBody0&gt;) =
-    result.select(
-        when1 = { response -&gt; "Found user ${response.body.id}" },
-        when2 = { "User missing" },
-        when3 = { "User deleted" }
-    )</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Generators lean on these unions in two places:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>Client code</strong> returns OneOfK when an endpoint declares multiple outputs, forcing call sites to handle every status path.</p>
-</li>
-<li>
-<p><strong>Server code</strong> expects implementers to return the matching OptionN when emitting a non-default response, ensuring real runtime branches align with the DSL.</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_allof_oneof_together"><a class="anchor" href="#_allof_oneof_together"></a>AllOf + OneOf Together</h3>
-<div class="paragraph">
-<p>Outputs is an AllOf tuple of Output definitions. At runtime, responses are wrapped in either a concrete ResponseX (single output) or a OneOfK&lt;ResponseX, ...&gt; (multiple outputs). This combination gives tapik strong guarantees:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>The number and order of outputs in the DSL matches the generated code and Markdown documentation.</p>
-</li>
-<li>
-<p>Header codecs are preserved all the way to runtime decoding (decodeHeadersN).</p>
-</li>
-<li>
-<p>Exhaustive select calls mean adding a new output is a compile-time change for every consumer.</p>
-</li>
-</ol>
-</div>
-<div class="imageblock"><div class="mermaid content" style=" ">flowchart TD
-    DSL["HttpEndpoint DSL"] --> Tuple["Tuple / AllOf metadata"]
-    Tuple --> Outputs["Outputs tuple"]
-    Outputs -->|single| Response["ResponseX"]
-    Outputs -->|multiple| Union["OneOfK ResponseX"]
-    Response --> Client["Generated client"]
-    Union --> Client
-    Response --> Server["Generated controller"]
-    Union --> Server</div></div>
+<p>That shape survives long enough for generators to use it directly.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_tips_for_working_with_these_types"><a class="anchor" href="#_tips_for_working_with_these_types"></a>Tips for Working with These Types</h2>
+<h2 id="_why_that_matters_to_users"><a class="anchor" href="#_why_that_matters_to_users"></a>Why that matters to users</h2>
 <div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
+<div class="paragraph">
+<p>Because tapik retains the contract structure precisely:</p>
+</div>
+<div class="ulist">
+<ul>
 <li>
-<p><strong>Prefer aliases</strong>: use Headers3 instead of wiring Tuple3 manually. The aliases pick correct variance and marker interfaces.</p>
+<p>optional query parameters can become optional generated method parameters,</p>
 </li>
 <li>
-<p><strong>Let the DSL infer tuples</strong>: input(header.uuid("X-Request-Id")) returns Input&lt;Headers1&lt;UUID&gt;, EmptyBody&gt; automatically-no explicit types required.</p>
+<p>required query parameters stay required,</p>
 </li>
 <li>
-<p><strong>Use select in clients</strong>: exhaustively pattern match OneOf results to enforce business logic for every status.</p>
+<p>response branches can become a sealed response hierarchy,</p>
 </li>
 <li>
-<p><strong>Return the right union option</strong>: when implementing generated controllers, wrap alternate responses in OneOfK.OptionN to keep tapik aware of which branch fired.</p>
+<p>typed headers and bodies can surface as typed properties instead of raw maps.</p>
 </li>
-<li>
-<p><strong>Leverage codecs</strong>: bodies and headers carry codecs, so even custom AllOf combinations continue to encode/decode data safely.</p>
-</li>
-</ol>
+</ul>
 </div>
 <div class="paragraph">
-<p>Understanding AllOf and OneOf is the key to appreciating tapik: the DSL describes APIs once, and the type system guarantees that every generated artifact agrees with the definition. Take a look at the runtime helpers (EncodeHeadersMethods.kt, DecodeHeadersMethods.kt, Responses.kt) if you want to explore further.</p>
+<p>This is what keeps client and server generation specific instead of generic.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_practical_example"><a class="anchor" href="#_a_practical_example"></a>A practical example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you declare:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val getProduct by endpoint(
+    description = "Get a product by ID"
+) {
+    get("api" / "v1" / "products" / path.string("productId") + query.string("locale").optional("en-US"))
+        .input(header.uuid("X-Request-Id"))
+        .output(Status.Ok) { jsonBody&lt;ProductView&gt;("product") }
+        .output(Status.NotFound) { jsonBody&lt;ProblemDetails&gt;("problem") }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>tapik still knows all of this later:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>productId</code> is part of the path and must be supplied,</p>
+</li>
+<li>
+<p><code>locale</code> is a query parameter with a default,</p>
+</li>
+<li>
+<p><code>X-Request-Id</code> is a required header,</p>
+</li>
+<li>
+<p>the endpoint has two distinct response branches.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The resulting value is not just "some endpoint". Its type still carries that structure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">HttpEndpoint&lt;
+    Parameters2&lt;String, String&gt;,
+    Input&lt;Headers1&lt;UUID&gt;, EmptyBody&gt;,
+    Outputs2&lt;
+        Output&lt;Headers0, JsonBody&lt;ProductView&gt;&gt;,
+        Output&lt;Headers0, JsonBody&lt;ProblemDetails&gt;&gt;
+    &gt;
+&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That is why a generated client can expose a method with a defaulted <code>locale</code> argument, and why a generated server interface can mirror the same input contract.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_tapik_does_it"><a class="anchor" href="#_how_tapik_does_it"></a>How tapik does it</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Internally, tapik uses typed tuples such as <code>Parameters</code>, <code>Headers</code>, <code>Input</code>, and <code>Outputs</code> to hold the structure of the contract as you compose it.</p>
+</div>
+<div class="paragraph">
+<p>Most users never need to work with those types directly. What matters is the behavior they enable:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ordering is preserved,</p>
+</li>
+<li>
+<p>required versus optional inputs are preserved,</p>
+</li>
+<li>
+<p>multi-output endpoints do not collapse into one weakly typed response.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_this_does_not_guarantee"><a class="anchor" href="#_what_this_does_not_guarantee"></a>What this does not guarantee</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik does not eliminate runtime HTTP problems. A remote service can still return invalid data, the wrong content type, or an unexpected status.</p>
+</div>
+<div class="paragraph">
+<p>What tapik does guarantee is narrower and more useful:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the contract you authored is explicit,</p>
+</li>
+<li>
+<p>generators work from that contract instead of inference,</p>
+</li>
+<li>
+<p>changing the contract forces corresponding generated code to change with it.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
 <div class="pagination-container">
   <hr>
   <nav class="pagination">
-    <span class="prev"><a href="../user-guide.html">User Guide</a></span>
-    <span class="next"><a href="../code-generation/index.html">Overview</a></span>
+    <span class="prev"><a href="../capabilities.html">Capabilities and Roadmap</a></span>
+    <span class="next"><a href="../reference/configuration.html">Gradle Configuration</a></span>
   </nav>
 </div>
 </article>
