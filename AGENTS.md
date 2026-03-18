@@ -9,6 +9,7 @@
 - `./gradlew build` compiles the library, plugin, and supporting modules while running unit tests.
 - `./gradlew check` runs the full verification suite (tests, ktlint, plugin checks).
 - Always apply formatting via `./gradlew ktlintFormat`; avoid trying to fix ktlint issues that can be auto-corrected.
+- Always use `./gradlew bumpVersion` for release version changes; do not edit version-bearing files like `gradle.properties` or `docs/antora.yml` manually.
 - Gradle runs with configuration cache, task caching, and parallel execution enabled by default; pass `-Dorg.gradle.configuration-cache=false` if debugging cache issues locally.
 - Run Gradle plugin validation only when needed by passing `./gradlew <task> -PrunPluginValidation`; release builds should supply that flag.
 
