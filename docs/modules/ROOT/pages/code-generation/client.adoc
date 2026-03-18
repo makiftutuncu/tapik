@@ -6,6 +6,8 @@ Use it when you want typed client methods generated from your tapik contracts wh
 
 Use `dev.akif.tapik:spring-restclient` to enable it.
 
+The `spring-restclient` module carries the shared Spring HTTP mapping helpers from `dev.akif.tapik:common-spring` transitively, so typical application builds only need the `spring-restclient` dependency.
+
 == Enable the generator
 
 Add the module dependency and enable the generator block:

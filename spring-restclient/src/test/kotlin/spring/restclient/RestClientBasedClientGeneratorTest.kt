@@ -38,7 +38,7 @@ class RestClientBasedClientGeneratorTest {
                 .filter { it.startsWith("import ") }
                 .toList()
         assertTrue(imports.contains("import dev.akif.tapik.encodeInputHeaders"))
-        assertTrue(imports.contains("import dev.akif.tapik.spring.restclient.toStatus"))
+        assertTrue(imports.contains("import dev.akif.tapik.spring.toStatus"))
         assertTrue(imports.contains("import dev.akif.tapik.clients.UserEndpoints"))
         assertTrue(content.contains("interface UserEndpointsClient : UserEndpoints.User.Client"))
         assertTrue(content.contains("interface UserEndpoints {"))
@@ -63,7 +63,7 @@ class RestClientBasedClientGeneratorTest {
         )
 
         val content = generated.readText()
-        assertTrue(content.contains("import dev.akif.tapik.spring.restclient.toStatus"))
+        assertTrue(content.contains("import dev.akif.tapik.spring.toStatus"))
         assertTrue(content.contains("import dev.akif.tapik.encodeInputHeaders"))
         assertTrue(content.contains("import dev.akif.tapik.clients.WildEndpoints"))
         assertTrue(content.contains("interface WildEndpointsClient : WildEndpoints.Wild.Client"))

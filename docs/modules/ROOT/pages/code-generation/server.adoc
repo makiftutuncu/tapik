@@ -6,6 +6,8 @@ Use it when you want Spring controller interfaces to stay aligned with the same 
 
 Use `dev.akif.tapik:spring-webmvc` to enable it.
 
+The `spring-webmvc` module carries the shared Spring HTTP mapping helpers from `dev.akif.tapik:common-spring` transitively, so typical application builds only need the `spring-webmvc` dependency.
+
 
 == Enable the generator
 

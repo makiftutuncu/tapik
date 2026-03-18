@@ -12,8 +12,8 @@ The repository is organized by responsibility:
 | Contract DSL and runtime model
 | `core`, `codec`, `jackson`, `types`
 
-| Code generation
-| `common-plugin`, `spring-restclient`, `spring-webmvc`
+| Code generation and Spring support
+| `common-plugin`, `common-spring`, `spring-restclient`, `spring-webmvc`
 
 | Build integration
 | `gradle-plugin`

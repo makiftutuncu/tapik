@@ -37,6 +37,7 @@ plugins {
 }
 
 include(":codec")
+include(":common-spring")
 include(":core")
 include(":gradle-plugin")
 include(":jackson")

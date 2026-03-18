@@ -57,7 +57,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
 
     private fun buildExtensionImports(endpoints: List<HttpEndpointMetadata>): Set<String> =
         buildSet {
-            add("$BASE_PACKAGE.toStatus")
+            add("$SHARED_SPRING_PACKAGE.toStatus")
             if (endpoints.any { endpoint -> endpoint.parameters.any { it is QueryParameterMetadata } }) {
                 add("$TAPIK_PACKAGE.asQueryParameter")
                 add("$TAPIK_PACKAGE.getDefaultOrFail")
@@ -514,6 +514,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
     private companion object {
         private const val ID = "spring-restclient"
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
+        private const val SHARED_SPRING_PACKAGE = "$TAPIK_PACKAGE.spring"
         private const val BASE_PACKAGE = "$TAPIK_PACKAGE.spring.restclient"
         private const val BASE_INTERFACE_NAME = "$BASE_PACKAGE.RestClientBasedClient"
     }

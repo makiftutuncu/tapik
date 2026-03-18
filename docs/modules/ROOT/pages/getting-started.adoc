@@ -30,6 +30,8 @@ dependencies {
 
 Add `dev.akif.tapik:spring-webmvc:<version>` only if you also want generated `Spring Web MVC` server interfaces.
 
+Both Spring integration modules bring their shared Spring support transitively through `dev.akif.tapik:common-spring`, so you do not need to declare that module separately for normal usage.
+
 == 2. Enable generation
 
 tapik scans compiled classes under one base package and runs only the generators you enable:

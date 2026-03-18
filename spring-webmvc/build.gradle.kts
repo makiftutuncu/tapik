@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     api(project(":core"))
+    api(project(":common-spring"))
     api(project(":common-plugin"))
     implementation(libs.springWeb)
     testImplementation(testFixtures(project(":core")))

@@ -4,6 +4,8 @@ import dev.akif.tapik.MediaType
 import dev.akif.tapik.Method
 import dev.akif.tapik.Output
 import dev.akif.tapik.StatusMatcher
+import dev.akif.tapik.spring.toSpringMediaType
+import dev.akif.tapik.spring.toStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.web.client.ResponseErrorHandler
@@ -12,7 +14,6 @@ import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.toEntity
 import java.net.URI
 import org.springframework.http.HttpMethod as SpringMethod
-import org.springframework.http.MediaType as SpringMediaType
 
 /**
  * Executes Tapik endpoints using a Spring [RestClient] while enforcing status and content-type checks.
@@ -50,7 +51,7 @@ class RestClientInterpreter(
                 inputHeaders.forEach { (name, values) -> it.addAll(name, values) }
             }.apply {
                 if (inputBodyContentType != null) {
-                    contentType(SpringMediaType(inputBodyContentType.major, inputBodyContentType.minor))
+                    contentType(inputBodyContentType.toSpringMediaType())
                 }
                 if (inputBody != null) {
                     body { it.write(inputBody) }

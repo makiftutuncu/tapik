@@ -81,6 +81,7 @@ val runPluginValidationEnabled = runPluginValidationProperty.get()
 val kotlinPublishable = setOf(
     ":codec",
     ":common-plugin",
+    ":common-spring",
     ":core",
     ":jackson",
     ":spring-restclient",

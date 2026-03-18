@@ -99,7 +99,7 @@ class TapikCodeGenerationEngineTest {
                 .toList()
         assertTrue(
             imports.contains("import dev.akif.tapik.encodeInputHeaders") &&
-                imports.contains("import dev.akif.tapik.spring.restclient.toStatus"),
+                imports.contains("import dev.akif.tapik.spring.toStatus"),
             "Merged Kotlin source should keep the optimized imports required by generated clients"
         )
     }

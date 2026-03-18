@@ -62,4 +62,4 @@ By default, generated Kotlin types are written under a `generated` package segme
 
 Today this workflow is exposed through the `Gradle` plugin.
 
-The shared generation engine is already separated from Gradle-specific wiring, which keeps the build integration boundary clear and avoids coupling discovery to one build tool's task model.
+The shared generation engine is already separated from Gradle-specific wiring, and the Spring integrations now share their common HTTP mapping helpers through `common-spring`. That keeps the build integration boundary clear while also avoiding repeated Spring support code in each generator module.
