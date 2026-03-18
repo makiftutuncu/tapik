@@ -37,8 +37,13 @@ jobs:
           git fetch --tags origin
           release_version="${RELEASE_TAG#v}"
           file_version="$(grep '^version=' gradle.properties | cut -d= -f2)"
+          antora_version="$(grep '^version:' docs/antora.yml | sed 's/^version:[[:space:]]*//')"
           if [ -z "${file_version}" ]; then
             echo "Could not read version from gradle.properties."
+            exit 1
+          fi
+          if [ -z "${antora_version}" ]; then
+            echo "Could not read version from docs/antora.yml."
             exit 1
           fi
           if [ "${file_version}" != "${release_version}" ]; then
@@ -50,6 +55,17 @@ jobs:
             echo "  1) ./gradlew bumpVersion"
             echo "  2) commit the version changes"
             echo "  3) re-create the release tag (e.g., v${file_version})"
+            exit 1
+          fi
+          if [ "${antora_version}" != "${RELEASE_TAG}" ]; then
+            echo "Release aborted: you likely forgot to update docs/antora.yml before cutting the release."
+            echo "Expected Antora component version to match the release tag."
+            echo "  Release tag: ${RELEASE_TAG}"
+            echo "  docs/antora.yml version: ${antora_version}"
+            echo "Example fix:"
+            echo "  1) ./gradlew bumpVersion -PnewVersion=${release_version}"
+            echo "  2) commit the version changes"
+            echo "  3) re-create the release tag (e.g., ${antora_version})"
             exit 1
           fi
           latest_tag="$(git tag --list 'v*' --sort=-v:refname | grep -v "^${RELEASE_TAG}$" | head -n1)"

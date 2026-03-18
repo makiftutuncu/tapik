@@ -16,6 +16,11 @@ import java.io.File
 
 @DisableCachingByDefault(because = "Updates repository files with the new project version.")
 abstract class BumpVersionTask : DefaultTask() {
+    private companion object {
+        private const val ANTORA_DESCRIPTOR_PATH = "docs/antora.yml"
+        private val ANTORA_VERSION_REGEX = Regex("""(?m)^version:\s+.*$""")
+    }
+
     @get:Input
     abstract val currentVersion: Property<String>
 
@@ -72,7 +77,13 @@ abstract class BumpVersionTask : DefaultTask() {
             }
 
             val original = target.readText(Charsets.UTF_8)
-            val updated = original.replace(old, next)
+            val relativePath = target.relativeTo(rootDir).invariantSeparatorsPath
+            val updated =
+                if (relativePath == ANTORA_DESCRIPTOR_PATH) {
+                    updateAntoraDescriptor(original, next)
+                } else {
+                    original.replace(old, next)
+                }
 
             if (original != updated) {
                 target.writeText(updated, Charsets.UTF_8)
@@ -96,5 +107,17 @@ abstract class BumpVersionTask : DefaultTask() {
         runGit(rootDir, "rev-parse", "--is-inside-work-tree")
         runGit(rootDir, "add", "--", *updatedFiles.map { it.relativeTo(rootDir).path }.toTypedArray())
         runGit(rootDir, "commit", "-m", "Bump version from $old to $next")
+    }
+
+    private fun updateAntoraDescriptor(
+        original: String,
+        next: String
+    ): String {
+        val replacement = "version: v$next"
+        return if (ANTORA_VERSION_REGEX.containsMatchIn(original)) {
+            original.replace(ANTORA_VERSION_REGEX, replacement)
+        } else {
+            original
+        }
     }
 }
