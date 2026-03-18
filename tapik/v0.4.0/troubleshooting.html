@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Troubleshooting :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.4.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li>Reference</li>
+    <li><a href="troubleshooting.html">Troubleshooting</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.4.0</button>
+  <div class="version-menu">
+    <a class="version" href="../troubleshooting.html">v0.4.1</a>
+    <a class="version is-current" href="troubleshooting.html">v0.4.0</a>
+    <a class="version" href="../v0.3.0/troubleshooting.html">v0.3.0</a>
+    <a class="version is-missing" href="../v0.2.7/index.html">v0.2.7</a>
+    <a class="version is-missing" href="../v0.2.6/index.html">v0.2.6</a>
+    <a class="version is-missing" href="../v0.2.5/index.html">v0.2.5</a>
+    <a class="version is-missing" href="../v0.2.4/index.html">v0.2.4</a>
+    <a class="version is-missing" href="../v0.2.3/index.html">v0.2.3</a>
+    <a class="version is-missing" href="../v0.2.2/index.html">v0.2.2</a>
+    <a class="version is-missing" href="../v0.2.1/index.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.0/docs/modules/ROOT/pages/troubleshooting.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Troubleshooting</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page covers the most common ways tapik generation can fall short of what you expected.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nothing_is_generated"><a class="anchor" href="#_nothing_is_generated"></a>Nothing is generated</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Check these first:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the module compiles successfully,</p>
+</li>
+<li>
+<p>the endpoints live under the configured <code>basePackage</code>,</p>
+</li>
+<li>
+<p>the relevant type implements <code>API</code>,</p>
+</li>
+<li>
+<p>the generator block you need is actually enabled.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>tapik scans compiled classes, so source code that never produced class files will not be discovered.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_endpoints_are_discovered_but_a_generator_does_not_run"><a class="anchor" href="#_endpoints_are_discovered_but_a_generator_does_not_run"></a>Endpoints are discovered, but a generator does not run</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>That usually means one of two things:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the generator block was not enabled in the <code>tapik</code> extension,</p>
+</li>
+<li>
+<p>the generator module is not on the runtime classpath.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For example, enabling <code>springRestClient { }</code> without depending on <code>dev.akif.tapik:spring-restclient</code> leaves tapik with a configured generator id but no matching generator implementation on the classpath.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_generated_kotlin_types_are_in_an_unexpected_package"><a class="anchor" href="#_generated_kotlin_types_are_in_an_unexpected_package"></a>Generated Kotlin types are in an unexpected package</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Check:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the source package of the <code>API</code> type,</p>
+</li>
+<li>
+<p>the <code>generatedPackageName</code> setting,</p>
+</li>
+<li>
+<p>the <code>endpointsSuffix</code>, <code>clientSuffix</code>, or <code>serverSuffix</code> settings.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The generated Kotlin package defaults to the source package plus <code>generated</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_query_parameters_or_defaults_do_not_look_the_way_you_expected"><a class="anchor" href="#_query_parameters_or_defaults_do_not_look_the_way_you_expected"></a>Query parameters or defaults do not look the way you expected</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik preserves whether a query parameter is required and whether it has a default.</p>
+</div>
+<div class="paragraph">
+<p>That means:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>required query parameters remain required in generated signatures,</p>
+</li>
+<li>
+<p>optional query parameters can surface with defaults in generated APIs.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If the generated signature looks wrong, check the original contract first.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_markdown_output_is_missing"><a class="anchor" href="#_markdown_output_is_missing"></a><code>Markdown</code> output is missing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Markdown</code> generator only runs when:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>markdownDocumentation { }</code> is enabled,</p>
+</li>
+<li>
+<p>at least one endpoint is discovered.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When no endpoints are found, tapik skips <code>Markdown</code> generation rather than writing an empty summary.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_still_unclear"><a class="anchor" href="#_still_unclear"></a>Still unclear</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the behavior still does not make sense:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>inspect <code>build/generated/tapik-endpoints.txt</code>,</p>
+</li>
+<li>
+<p>review <a href="project-layout-and-discovery.html" class="xref page">Project Layout and Discovery</a>,</p>
+</li>
+<li>
+<p>then compare the generated output with the current endpoint contract rather than older docs or assumptions.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="reference/configuration.html">Gradle Configuration</a></span>
+    <span class="next"><a href="development.html">Development Guide</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>

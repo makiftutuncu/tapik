@@ -33,7 +33,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="tapik" data-version="v0.3.0">
+<div class="nav-container" data-component="tapik" data-version="v0.4.1">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -141,9 +141,11 @@
   </ul>
 </nav>
 <div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">v0.3.0</button>
+  <button class="version-menu-toggle" title="Show other versions of page">v0.4.1</button>
   <div class="version-menu">
-    <a class="version is-current" href="server.html">v0.3.0</a>
+    <a class="version is-current" href="server.html">v0.4.1</a>
+    <a class="version" href="../v0.4.0/code-generation/server.html">v0.4.0</a>
+    <a class="version" href="../v0.3.0/code-generation/server.html">v0.3.0</a>
     <a class="version" href="../v0.2.7/code-generation/server.html">v0.2.7</a>
     <a class="version" href="../v0.2.6/code-generation/server.html">v0.2.6</a>
     <a class="version" href="../v0.2.5/code-generation/server.html">v0.2.5</a>
@@ -153,7 +155,7 @@
     <a class="version" href="../v0.2.1/code-generation/server.html">v0.2.1</a>
   </div>
 </div>
-<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.3.0/docs/modules/ROOT/pages/code-generation/server.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.1/docs/modules/ROOT/pages/code-generation/server.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
@@ -171,6 +173,9 @@
 </div>
 <div class="paragraph">
 <p>Use <code>dev.akif.tapik:spring-webmvc</code> to enable it.</p>
+</div>
+<div class="paragraph">
+<p>The <code>spring-webmvc</code> module carries the shared Spring HTTP mapping helpers from <code>dev.akif.tapik:common-spring</code> transitively, so typical application builds only need the <code>spring-webmvc</code> dependency.</p>
 </div>
 </div>
 </div>
@@ -233,18 +238,20 @@ tapik {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">interface CatalogApiServer : CatalogApiEndpoints.GetProduct.Server
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import dev.akif.tapik.spring.toResponseEntity
+
+interface CatalogApiServer : CatalogApiEndpoints.GetProduct.Server
 
 interface CatalogApiEndpoints {
     interface GetProduct {
-        sealed class Response(open val status: Status) {
+        sealed interface Response : TapikResponse {
             data class Ok(
                 val body: ProductView
-            ) : Response(Status.Ok)
+            ) : Response
 
             data class NotFound(
                 val body: ProblemDetails
-            ) : Response(Status.NotFound)
+            ) : Response
         }
 
         interface Server {
@@ -255,6 +262,39 @@ interface CatalogApiEndpoints {
             ): Response
         }
     }
+}
+
+fun CatalogApiEndpoints.GetProduct.Response.toResponseEntity(): org.springframework.http.ResponseEntity&lt;kotlin.Any&gt; =
+    when (this) {
+        is CatalogApiEndpoints.GetProduct.Response.Ok -&gt;
+            toResponseEntity(
+                status = dev.akif.tapik.Status.Ok,
+                headers = kotlin.collections.emptyMap(),
+                mediaType = CatalogApi.getProduct.outputs.item1.body.mediaType,
+                body = CatalogApi.getProduct.outputs.item1.body.bytes(body)
+            )
+
+        is CatalogApiEndpoints.GetProduct.Response.NotFound -&gt;
+            toResponseEntity(
+                status = dev.akif.tapik.Status.NotFound,
+                headers = kotlin.collections.emptyMap(),
+                mediaType = CatalogApi.getProduct.outputs.item2.body.mediaType,
+                body = CatalogApi.getProduct.outputs.item2.body.bytes(body)
+            )
+    }
+
+@org.springframework.web.bind.annotation.ControllerAdvice
+class CatalogApiServerResponseAdvice : dev.akif.tapik.spring.TapikResponseBodyAdvice() {
+    override fun supportsTapikResponseType(responseType: Class&lt;*&gt;): kotlin.Boolean =
+        CatalogApiEndpoints.GetProduct.Response::class.java.isAssignableFrom(responseType)
+
+    override fun toResponseEntity(
+        body: dev.akif.tapik.TapikResponse
+    ): org.springframework.http.ResponseEntity&lt;kotlin.Any&gt; =
+        when (body) {
+            is CatalogApiEndpoints.GetProduct.Response -&gt; body.toResponseEntity()
+            else -&gt; kotlin.error("Unsupported TapikResponse type: " + body::class.qualifiedName)
+        }
 }</code></pre>
 </div>
 </div>
@@ -270,7 +310,10 @@ interface CatalogApiEndpoints {
 <p>query parameters, headers, and request bodies map to the matching Spring annotations,</p>
 </li>
 <li>
-<p>multi-output endpoints keep distinct response variants.</p>
+<p>multi-output endpoints keep distinct response variants,</p>
+</li>
+<li>
+<p>generated response advice turns those variants into Spring responses by using Tapik codecs and endpoint metadata.</p>
 </li>
 </ul>
 </div>

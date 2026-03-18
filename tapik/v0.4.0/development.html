@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Development Guide :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.4.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li>Contributing</li>
+    <li><a href="development.html">Development Guide</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.4.0</button>
+  <div class="version-menu">
+    <a class="version" href="../development.html">v0.4.1</a>
+    <a class="version is-current" href="development.html">v0.4.0</a>
+    <a class="version" href="../v0.3.0/development.html">v0.3.0</a>
+    <a class="version" href="../v0.2.7/development.html">v0.2.7</a>
+    <a class="version" href="../v0.2.6/development.html">v0.2.6</a>
+    <a class="version" href="../v0.2.5/development.html">v0.2.5</a>
+    <a class="version" href="../v0.2.4/development.html">v0.2.4</a>
+    <a class="version" href="../v0.2.3/development.html">v0.2.3</a>
+    <a class="version" href="../v0.2.2/development.html">v0.2.2</a>
+    <a class="version" href="../v0.2.1/development.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.0/docs/modules/ROOT/pages/development.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Development Guide</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page is for contributors working on tapik itself, not for teams adopting the library in an application.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_repository_layout"><a class="anchor" href="#_repository_layout"></a>Repository layout</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The repository is organized by responsibility:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Area</th>
+<th class="tableblock halign-left valign-top">Modules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contract DSL and runtime model</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>core</code>, <code>codec</code>, <code>jackson</code>, <code>types</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Code generation and Spring support</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>common-plugin</code>, <code>common-spring</code>, <code>spring-restclient</code>, <code>spring-webmvc</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Build integration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>gradle-plugin</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Documentation site</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>docs</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Shared build logic</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build-logic</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_common_commands"><a class="anchor" href="#_common_commands"></a>Common commands</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Task</th>
+<th class="tableblock halign-left valign-top">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Build everything</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./gradlew build</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Run the full verification suite</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./gradlew check</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reformat Kotlin</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./gradlew ktlintFormat</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Regenerate <code>API</code> reference</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./gradlew dokkaGenerate --console=plain</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Preview the Antora site</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>npm run docs:preview</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_working_on_contract_or_generator_changes"><a class="anchor" href="#_working_on_contract_or_generator_changes"></a>Working on contract or generator changes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When you change public <code>API</code> or generator behavior:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>update <code>KDoc</code>,</p>
+</li>
+<li>
+<p>rerun <code>Dokka</code>,</p>
+</li>
+<li>
+<p>verify the user docs against current source and generated outputs,</p>
+</li>
+<li>
+<p>keep examples source-backed and complete enough to be useful.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For docs work specifically:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>organize pages around user problems, not internal module tours,</p>
+</li>
+<li>
+<p>distinguish supported features from planned ones clearly,</p>
+</li>
+<li>
+<p>avoid inheriting stale wording from older docs,</p>
+</li>
+<li>
+<p>prefer verified examples over diagrams.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_release_and_versioned_docs"><a class="anchor" href="#_release_and_versioned_docs"></a>Release and versioned docs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Versioned Antora docs are driven by <code>v*</code> tags that contain the Antora descriptor. The preview playbook renders the current worktree. The release playbook renders tagged versions.</p>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="troubleshooting.html">Troubleshooting</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Project Layout and Discovery :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.3.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li>Use tapik</li>
+    <li><a href="project-layout-and-discovery.html">Project Layout and Discovery</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.3.0</button>
+  <div class="version-menu">
+    <a class="version" href="../project-layout-and-discovery.html">v0.4.1</a>
+    <a class="version" href="../v0.4.0/project-layout-and-discovery.html">v0.4.0</a>
+    <a class="version is-current" href="project-layout-and-discovery.html">v0.3.0</a>
+    <a class="version is-missing" href="../v0.2.7/index.html">v0.2.7</a>
+    <a class="version is-missing" href="../v0.2.6/index.html">v0.2.6</a>
+    <a class="version is-missing" href="../v0.2.5/index.html">v0.2.5</a>
+    <a class="version is-missing" href="../v0.2.4/index.html">v0.2.4</a>
+    <a class="version is-missing" href="../v0.2.3/index.html">v0.2.3</a>
+    <a class="version is-missing" href="../v0.2.2/index.html">v0.2.2</a>
+    <a class="version is-missing" href="../v0.2.1/index.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.3.0/docs/modules/ROOT/pages/project-layout-and-discovery.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Project Layout and Discovery</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page explains how tapik finds endpoint contracts and where generated files end up.</p>
+</div>
+<div class="paragraph">
+<p>If generation does not behave the way you expect, this is usually the first page to check.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tapik_scans_compiled_classes_not_source_files"><a class="anchor" href="#_tapik_scans_compiled_classes_not_source_files"></a>tapik scans compiled classes, not source files</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The generation flow starts from compiled output under the module&#8217;s main classes directory.</p>
+</div>
+<div class="paragraph">
+<p>That has two important consequences:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the relevant code has to compile first,</p>
+</li>
+<li>
+<p>discovery behavior follows the compiled class layout, not just the source tree.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>Gradle</code> plugin wires <code>tapikGenerate</code> to the <code>classes</code> task so the usual workflow stays straightforward.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_discovery_starts_from_basepackage"><a class="anchor" href="#_discovery_starts_from_basepackage"></a>Discovery starts from <code>basePackage</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Gradle</code> extension points tapik at one base package:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">tapik {
+    basePackage("com.acme.catalog")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>tapik then scans compiled classes under that package and looks for concrete types assignable to <code>API</code>.</p>
+</div>
+<div class="paragraph">
+<p>If the configured base package is too narrow, endpoints outside it will not be discovered. If it is too broad, tapik will still only keep types that match the <code>API</code> contract.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_counts_as_a_discoverable_api"><a class="anchor" href="#_what_counts_as_a_discoverable_api"></a>What counts as a discoverable API</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In practice, the safest pattern is:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>concrete class or object,</p>
+</li>
+<li>
+<p>implements <code>API</code>,</p>
+</li>
+<li>
+<p>under the configured base package,</p>
+</li>
+<li>
+<p>exposes properties or methods that produce <code>HttpEndpoint</code> values.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The delegated <code>endpoint</code> property form is the common case, but discovery also works from endpoint-returning members more generally.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nested_api_types_are_discovered_separately"><a class="anchor" href="#_nested_api_types_are_discovered_separately"></a>Nested API types are discovered separately</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you have multiple <code>API</code> implementors under the scanned package, tapik treats them as separate discovery targets.</p>
+</div>
+<div class="paragraph">
+<p>That is useful when you want separate generated surfaces. It also means tapik does not automatically merge nested API types into one logical contract unless your source organization already does that.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_where_generated_files_go"><a class="anchor" href="#_where_generated_files_go"></a>Where generated files go</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Gradle</code> plugin uses two output locations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>build/generated/sources/tapik/main/kotlin</code> for generated Kotlin source,</p>
+</li>
+<li>
+<p><code>build/generated</code> for non-source outputs such as <code>API.md</code> and <code>tapik-endpoints.txt</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Generated Kotlin sources are added to the main source set automatically.</p>
+</div>
+<div class="paragraph">
+<p>By default, generated Kotlin types are written under a <code>generated</code> package segment relative to the source package.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_why_this_layout_matters"><a class="anchor" href="#_why_this_layout_matters"></a>Why this layout matters</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Today this workflow is exposed through the <code>Gradle</code> plugin.</p>
+</div>
+<div class="paragraph">
+<p>The shared generation engine is already separated from Gradle-specific wiring, which keeps the build integration boundary clear and avoids coupling discovery to one build tool&#8217;s task model.</p>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="custom-types.html">Use Custom Types</a></span>
+    <span class="next"><a href="code-generation/client.html">Generate a Client</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>

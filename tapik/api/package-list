@@ -8,6 +8,8 @@ module:common-plugin
 dev.akif.tapik
 dev.akif.tapik.plugin
 dev.akif.tapik.plugin.metadata
+module:common-spring
+dev.akif.tapik.spring
 module:core
 dev.akif.tapik
 module:gradle-plugin

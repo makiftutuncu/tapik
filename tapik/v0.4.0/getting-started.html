@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Quickstart :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.4.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li><a href="getting-started.html">Quickstart</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.4.0</button>
+  <div class="version-menu">
+    <a class="version" href="../getting-started.html">v0.4.1</a>
+    <a class="version is-current" href="getting-started.html">v0.4.0</a>
+    <a class="version" href="../v0.3.0/getting-started.html">v0.3.0</a>
+    <a class="version" href="../v0.2.7/getting-started.html">v0.2.7</a>
+    <a class="version" href="../v0.2.6/getting-started.html">v0.2.6</a>
+    <a class="version" href="../v0.2.5/getting-started.html">v0.2.5</a>
+    <a class="version" href="../v0.2.4/getting-started.html">v0.2.4</a>
+    <a class="version" href="../v0.2.3/getting-started.html">v0.2.3</a>
+    <a class="version" href="../v0.2.2/getting-started.html">v0.2.2</a>
+    <a class="version" href="../v0.2.1/getting-started.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.0/docs/modules/ROOT/pages/getting-started.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Quickstart</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This walkthrough gets you from zero to one generated result with the smallest useful tapik setup.</p>
+</div>
+<div class="paragraph">
+<p>This example uses:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the <code>Gradle</code> plugin,</p>
+</li>
+<li>
+<p>the <code>core</code> contract DSL,</p>
+</li>
+<li>
+<p><code>Jackson</code>-backed JSON bodies,</p>
+</li>
+<li>
+<p>the Spring <code>RestClient</code> generator,</p>
+</li>
+<li>
+<p>the <code>Markdown</code> documentation generator.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_1_add_the_plugin_and_dependencies"><a class="anchor" href="#_1_add_the_plugin_and_dependencies"></a>1. Add the plugin and dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Apply the <code>Gradle</code> plugin to the module that owns your endpoint contracts:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">plugins {
+    kotlin("jvm")
+    id("dev.akif.tapik.plugin.gradle") version "&lt;version&gt;"
+}
+
+dependencies {
+    implementation("dev.akif.tapik:core:&lt;version&gt;")
+    implementation("dev.akif.tapik:jackson:&lt;version&gt;")
+    implementation("dev.akif.tapik:spring-restclient:&lt;version&gt;")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add <code>dev.akif.tapik:spring-webmvc:&lt;version&gt;</code> only if you also want generated <code>Spring Web MVC</code> server interfaces.</p>
+</div>
+<div class="paragraph">
+<p>Both Spring integration modules bring their shared Spring support transitively through <code>dev.akif.tapik:common-spring</code>, so you do not need to declare that module separately for normal usage.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2_enable_generation"><a class="anchor" href="#_2_enable_generation"></a>2. Enable generation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik scans compiled classes under one base package and runs only the generators you enable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">tapik {
+    basePackage("com.acme.catalog")
+
+    springRestClient { }
+    markdownDocumentation { }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For this first run:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>basePackage</code> tells tapik where to look for <code>API</code> implementations,</p>
+</li>
+<li>
+<p><code>springRestClient { }</code> turns on typed client generation,</p>
+</li>
+<li>
+<p><code>markdownDocumentation { }</code> writes a <code>Markdown</code> summary of the discovered endpoints.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_3_declare_one_endpoint"><a class="anchor" href="#_3_declare_one_endpoint"></a>3. Declare one endpoint</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Create an <code>API</code> type under the configured base package:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package com.acme.catalog
+
+import dev.akif.tapik.*
+import dev.akif.tapik.jackson.jsonBody
+
+data class ProductView(
+    val id: String,
+    val name: String,
+    val status: String
+)
+
+data class ProblemDetails(
+    val code: String,
+    val message: String
+)
+
+object CatalogApi : API {
+    private val products = "api" / "v1" / "products"
+    private val productId = path.string("productId")
+    private val locale = query.string("locale").optional("en-US")
+
+    val getProduct by endpoint(
+        description = "Get a product by ID",
+        details = "Returns localized product data when the product exists."
+    ) {
+        get(products / productId + locale)
+            .input(header.uuid("X-Request-Id"))
+            .output(Status.Ok) { jsonBody&lt;ProductView&gt;("product") }
+            .output(Status.NotFound) { jsonBody&lt;ProblemDetails&gt;("problem") }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This one declaration is enough for tapik to understand:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the HTTP method and URI template,</p>
+</li>
+<li>
+<p>the required path, query, and header inputs,</p>
+</li>
+<li>
+<p>the response branches the endpoint may produce,</p>
+</li>
+<li>
+<p>the summary text that should appear in generated documentation.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_4_run_tapik"><a class="anchor" href="#_4_run_tapik"></a>4. Run tapik</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./gradlew tapikGenerate</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The task compiles the project, scans the configured package, builds endpoint metadata, and runs the enabled generators.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_5_inspect_the_generated_files"><a class="anchor" href="#_5_inspect_the_generated_files"></a>5. Inspect the generated files</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>After the task completes, look at:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Output</th>
+<th class="tableblock halign-left valign-top">Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generated Kotlin sources</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build/generated/sources/tapik/main/kotlin/&#8230;&#8203;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generated <code>Markdown</code> summary</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build/generated/API.md</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Endpoint scan report</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build/generated/tapik-endpoints.txt</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Generated Kotlin sources are added to the main source set automatically.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_6_use_the_generated_client"><a class="anchor" href="#_6_use_the_generated_client"></a>6. Use the generated client</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With <code>spring-restclient</code> enabled, tapik generates a client interface that only needs a Spring <code>RestClient</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@org.springframework.stereotype.Component
+class HttpCatalogClient(
+    override val restClient: org.springframework.web.client.RestClient
+) : CatalogApiClient</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The generated method signature is derived from the endpoint contract, including path parameters, query defaults, headers, and response variants.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_to_do_next"><a class="anchor" href="#_what_to_do_next"></a>What to do next</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If this quickstart matches your use case, continue based on the next problem you want to solve:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="user-guide.html" class="xref page">Model HTTP Contracts</a> for real endpoint authoring patterns</p>
+</li>
+<li>
+<p><a href="code-generation/client.html" class="xref page">Generate a Client</a> for Spring <code>RestClient</code> specifics</p>
+</li>
+<li>
+<p><a href="code-generation/server.html" class="xref page">Generate a Server</a> if you want <code>Spring Web MVC</code> interfaces instead</p>
+</li>
+<li>
+<p><a href="capabilities.html" class="xref page">Capabilities and Roadmap</a> for the broader support overview</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="index.html">Home</a></span>
+    <span class="next"><a href="choose-a-goal.html">Choose a Goal</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>

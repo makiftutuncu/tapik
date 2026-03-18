@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Use Custom Types :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.3.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li>Use tapik</li>
+    <li><a href="custom-types.html">Use Custom Types</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.3.0</button>
+  <div class="version-menu">
+    <a class="version" href="../custom-types.html">v0.4.1</a>
+    <a class="version" href="../v0.4.0/custom-types.html">v0.4.0</a>
+    <a class="version is-current" href="custom-types.html">v0.3.0</a>
+    <a class="version is-missing" href="../v0.2.7/index.html">v0.2.7</a>
+    <a class="version is-missing" href="../v0.2.6/index.html">v0.2.6</a>
+    <a class="version is-missing" href="../v0.2.5/index.html">v0.2.5</a>
+    <a class="version is-missing" href="../v0.2.4/index.html">v0.2.4</a>
+    <a class="version is-missing" href="../v0.2.3/index.html">v0.2.3</a>
+    <a class="version is-missing" href="../v0.2.2/index.html">v0.2.2</a>
+    <a class="version is-missing" href="../v0.2.1/index.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.3.0/docs/modules/ROOT/pages/custom-types.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Use Custom Types</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik becomes much more useful once your HTTP contract can speak in your domain types instead of raw strings everywhere.</p>
+</div>
+<div class="paragraph">
+<p>This page covers value classes, custom transport codecs, and <code>Jackson</code>-backed bodies.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_use_value_classes_for_path_query_and_header_values"><a class="anchor" href="#_use_value_classes_for_path_query_and_header_values"></a>Use value classes for path, query, and header values</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik&#8217;s scalar transport model is based on <code>StringCodec</code>.</p>
+</div>
+<div class="paragraph">
+<p>For domain wrappers such as identifiers, the easiest path is usually a Kotlin value class plus <code>StringCodecs.ofValueClass</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@JvmInline
+value class ProductId(
+    override val value: String
+) : dev.akif.tapik.ValueClass&lt;String&gt;
+
+private val productId =
+    path("productId", dev.akif.tapik.codec.StringCodecs.ofValueClass&lt;String, ProductId&gt;())</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That keeps the endpoint contract domain-oriented without forcing every client and server call site to pass raw strings.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_use_jackson_when_the_wire_format_is_json"><a class="anchor" href="#_use_jackson_when_the_wire_format_is_json"></a>Use <code>Jackson</code> when the wire format is JSON</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik does not hardcode <code>Jackson</code> into the <code>core</code> DSL. JSON support lives in the separate <code>jackson</code> module.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">data class ProductView(
+    val id: String,
+    val name: String
+)
+
+val getProduct by endpoint {
+    get("api" / "v1" / "products" / path.string("productId"))
+        .output(Status.Ok) { dev.akif.tapik.jackson.jsonBody&lt;ProductView&gt;("product") }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This separation keeps the core transport model independent from one JSON implementation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_write_a_custom_codec_when_built_ins_are_not_enough"><a class="anchor" href="#_write_a_custom_codec_when_built_ins_are_not_enough"></a>Write a custom codec when built-ins are not enough</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If your transport format is not covered by the default codecs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>write a custom <code>StringCodec</code> for values that travel as strings,</p>
+</li>
+<li>
+<p>write or adapt a <code>ByteArrayCodec</code> for values that travel as bodies,</p>
+</li>
+<li>
+<p>keep the codec close to the wire format rather than hiding business rules inside it.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>That is usually enough for project-specific IDs, enums, wrappers, and nonstandard body encodings.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_tapik_includes_here"><a class="anchor" href="#_what_tapik_includes_here"></a>What tapik includes here</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik includes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>built-in scalar codecs in <code>codec</code>,</p>
+</li>
+<li>
+<p>value-class helpers through <code>StringCodecs.ofValueClass</code>,</p>
+</li>
+<li>
+<p><code>Jackson</code>-backed JSON support in <code>jackson</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="user-guide.html">Model HTTP Contracts</a></span>
+    <span class="next"><a href="project-layout-and-discovery.html">Project Layout and Discovery</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>
