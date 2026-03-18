@@ -52,14 +52,14 @@ interface CatalogApiClient : CatalogApiEndpoints.GetProduct.Client
 
 interface CatalogApiEndpoints {
     interface GetProduct {
-        sealed class Response(open val status: Status) {
+        sealed interface Response : TapikResponse {
             data class Ok(
                 val body: ProductView
-            ) : Response(Status.Ok)
+            ) : Response
 
             data class NotFound(
                 val body: ProblemDetails
-            ) : Response(Status.NotFound)
+            ) : Response
         }
 
         interface Client : dev.akif.tapik.spring.restclient.RestClientBasedClient {

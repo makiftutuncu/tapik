@@ -41,6 +41,9 @@
 - The documentation site is built with Antora. Source content lives under `docs/modules/ROOT`, the component descriptor is `docs/antora.yml`, and playbooks are `antora-playbook.yml` (release) and `antora-preview-playbook.yml` (PR preview).
 - Antora content must be organized around user problems and user journeys, not module inventory.
 - Treat the current source, tests, generated outputs, and build behavior as the source of truth for Antora docs; do not inherit stale prose from older docs.
+- When documenting generated code, keep snippets aligned with the actual generated shape rather than older conceptual examples.
+- Spring `Web MVC` server docs must reflect the generated Tapik response conversion path: endpoint `Response` is a `sealed interface`, per-endpoint `toResponseEntity()` extensions are generated, and generated `ResponseBodyAdvice` bridges `TapikResponse` to Spring responses.
+- Do not document generated response variants as carrying a shared inherited `status` property; exact-status variants do not store status, and only non-exact matcher variants carry a dedicated runtime status field when needed.
 - Capability pages must clearly separate what tapik supports today, what can already be extended through public plugin or codec surfaces, and what is planned next without presenting roadmap items as shipped features.
 - Prefer complete, source-verified examples over partial snippets, and include Mermaid if a diagram is necessary enough to justify its maintenance cost.
 - In Antora docs, mention tapik classes, methods, module names, extension names, task names, and dependency coordinates using inline monospace formatting.

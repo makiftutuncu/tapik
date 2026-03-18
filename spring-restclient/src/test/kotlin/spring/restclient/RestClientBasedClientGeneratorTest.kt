@@ -43,6 +43,7 @@ class RestClientBasedClientGeneratorTest {
         assertTrue(content.contains("interface UserEndpointsClient : UserEndpoints.User.Client"))
         assertTrue(content.contains("interface UserEndpoints {"))
         assertTrue(content.contains("interface User {"))
+        assertTrue(content.contains("sealed interface Response : dev.akif.tapik.TapikResponse {"))
         assertTrue(content.contains("data class Ok("))
         assertTrue(content.contains("val location: java.net.URI"))
         assertTrue(content.contains("interface Client : dev.akif.tapik.spring.restclient.RestClientBasedClient"))
@@ -137,7 +138,7 @@ class RestClientBasedClientGeneratorTest {
         assertTrue(content.contains("interface UsersClient : UsersEndpoints.Create.Client"))
         assertTrue(content.contains("interface UsersEndpoints {"))
         assertTrue(content.contains("interface Create {"))
-        assertTrue(content.contains("sealed class Response("))
+        assertTrue(content.contains("sealed interface Response : dev.akif.tapik.TapikResponse {"))
         assertTrue(content.contains("data class Created("))
         assertTrue(content.contains("val location: java.net.URI"))
         assertTrue(content.contains("data class BadRequest("))
@@ -156,10 +157,12 @@ class RestClientBasedClientGeneratorTest {
 
         val content = generated.readText()
         assertTrue(content.contains("import dev.akif.tapik.clients.Example"))
+        assertTrue(content.contains("sealed interface Response : dev.akif.tapik.TapikResponse {"))
         assertTrue(content.contains("data class Response4xx("))
+        assertTrue(content.contains("val responseStatus: dev.akif.tapik.Status"))
         assertTrue(content.contains("if (!bytes.contentEquals(other.bytes)) return false"))
         assertTrue(content.contains("result = 31 * result + bytes.contentHashCode()"))
-        assertTrue(content.contains("require(Example.test1.outputs.item2.statusMatcher(status))"))
+        assertTrue(content.contains("require(Example.test1.outputs.item2.statusMatcher(responseStatus))"))
     }
 
     @Test

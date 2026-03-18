@@ -27,6 +27,7 @@ internal data class EndpointContractModel(
             val typeName: String,
             val match: OutputMatchMetadata,
             val status: Status?,
+            val statusFieldName: String?,
             val description: String,
             val isObject: Boolean,
             val fields: List<Field>
@@ -101,6 +102,7 @@ private fun OutputMetadata.toVariantModel(): EndpointContractModel.ResponseModel
         typeName = renderVariantTypeName(match, description),
         match = match,
         status = match.asExactStatusOrNull(),
+        statusFieldName = match.determineStatusFieldName(usedFieldNames),
         description = description,
         isObject = fields.isEmpty(),
         fields = fields
@@ -121,6 +123,7 @@ internal fun EndpointContractModel.toGenerationContext(): KotlinEndpointGenerati
                         KotlinEndpointResponseModel.Variant(
                             typeName = variant.typeName,
                             match = variant.match,
+                            statusFieldName = variant.statusFieldName,
                             fields =
                                 variant.fields.map { field ->
                                     KotlinEndpointResponseModel.Field(
@@ -164,6 +167,14 @@ private fun OutputMatchMetadata.asExactStatusOrNull(): Status? =
     when (this) {
         is OutputMatchMetadata.Exact -> status
         else -> null
+    }
+
+private fun OutputMatchMetadata.determineStatusFieldName(
+    usedFieldNames: MutableSet<String>
+): String? =
+    when (this) {
+        is OutputMatchMetadata.Exact -> null
+        else -> uniqueName("responseStatus", usedFieldNames)
     }
 
 private fun allocateEndpointContractName(

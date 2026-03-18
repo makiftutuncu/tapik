@@ -16,6 +16,7 @@ arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 springWeb = { module = "org.springframework:spring-web", version.ref = "spring" }
+springWebMvc = { module = "org.springframework:spring-webmvc", version.ref = "spring" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 wiremock = { module = "org.wiremock:wiremock-standalone", version.ref = "wiremock" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }

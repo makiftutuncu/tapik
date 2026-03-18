@@ -34,11 +34,14 @@ data class KotlinEndpointResponseModel(
      *
      * @property typeName Kotlin type name for the variant.
      * @property match status matcher metadata represented by the variant.
+     * @property statusFieldName generated property name that stores a runtime status for non-exact
+     * output variants, or `null` when the variant has an exact status.
      * @property fields constructor fields exposed by the variant.
      */
     data class Variant(
         val typeName: String,
         val match: OutputMatchMetadata,
+        val statusFieldName: String?,
         val fields: List<Field>
     )
 

@@ -7,5 +7,6 @@ plugins {
 dependencies {
     api(project(":core"))
     api(libs.springWeb)
+    api(libs.springWebMvc)
     testImplementation(libs.bundles.testCommon)
 }

@@ -47,18 +47,20 @@ For each source file of endpoint declarations, tapik generates:
 
 [source,kotlin]
 ----
+import dev.akif.tapik.spring.toResponseEntity
+
 interface CatalogApiServer : CatalogApiEndpoints.GetProduct.Server
 
 interface CatalogApiEndpoints {
     interface GetProduct {
-        sealed class Response(open val status: Status) {
+        sealed interface Response : TapikResponse {
             data class Ok(
                 val body: ProductView
-            ) : Response(Status.Ok)
+            ) : Response
 
             data class NotFound(
                 val body: ProblemDetails
-            ) : Response(Status.NotFound)
+            ) : Response
         }
 
         interface Server {
@@ -70,13 +72,47 @@ interface CatalogApiEndpoints {
         }
     }
 }
+
+fun CatalogApiEndpoints.GetProduct.Response.toResponseEntity(): org.springframework.http.ResponseEntity<kotlin.Any> =
+    when (this) {
+        is CatalogApiEndpoints.GetProduct.Response.Ok ->
+            toResponseEntity(
+                status = dev.akif.tapik.Status.Ok,
+                headers = kotlin.collections.emptyMap(),
+                mediaType = CatalogApi.getProduct.outputs.item1.body.mediaType,
+                body = CatalogApi.getProduct.outputs.item1.body.bytes(body)
+            )
+
+        is CatalogApiEndpoints.GetProduct.Response.NotFound ->
+            toResponseEntity(
+                status = dev.akif.tapik.Status.NotFound,
+                headers = kotlin.collections.emptyMap(),
+                mediaType = CatalogApi.getProduct.outputs.item2.body.mediaType,
+                body = CatalogApi.getProduct.outputs.item2.body.bytes(body)
+            )
+    }
+
+@org.springframework.web.bind.annotation.ControllerAdvice
+class CatalogApiServerResponseAdvice : dev.akif.tapik.spring.TapikResponseBodyAdvice() {
+    override fun supportsTapikResponseType(responseType: Class<*>): kotlin.Boolean =
+        CatalogApiEndpoints.GetProduct.Response::class.java.isAssignableFrom(responseType)
+
+    override fun toResponseEntity(
+        body: dev.akif.tapik.TapikResponse
+    ): org.springframework.http.ResponseEntity<kotlin.Any> =
+        when (body) {
+            is CatalogApiEndpoints.GetProduct.Response -> body.toResponseEntity()
+            else -> kotlin.error("Unsupported TapikResponse type: " + body::class.qualifiedName)
+        }
+}
 ----
 
 The exact generated code varies with the contract, but the behavior is consistent:
 
 * method and path come from the endpoint definition,
 * query parameters, headers, and request bodies map to the matching Spring annotations,
-* multi-output endpoints keep distinct response variants.
+* multi-output endpoints keep distinct response variants,
+* generated response advice turns those variants into Spring responses by using Tapik codecs and endpoint metadata.
 
 == How Spring mapping is derived
 

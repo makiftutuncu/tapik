@@ -30,12 +30,28 @@ class SpringWebMvcControllerGeneratorTest {
 
         val content = generated.readText().trim()
         assertTrue(content.contains("import dev.akif.tapik.clients.UserEndpoints"))
+        assertTrue(content.contains("import dev.akif.tapik.spring.toResponseEntity"))
         assertTrue(content.contains("interface UserEndpointsServer : UserEndpoints.User.Server"))
         assertTrue(content.contains("interface UserEndpoints {"))
         assertTrue(content.contains("interface User {"))
+        assertTrue(content.contains("sealed interface Response : dev.akif.tapik.TapikResponse {"))
         assertTrue(content.contains("data class Ok("))
         assertTrue(content.contains("val location: java.net.URI"))
         assertTrue(content.contains("interface Server {"))
+        assertTrue(content.contains("fun UserEndpoints.User.Response.toResponseEntity()"))
+        assertTrue(
+            content.contains(
+                "@org.springframework.web.bind.annotation.ControllerAdvice"
+            )
+        )
+        assertTrue(
+            content.contains(
+                "class UserEndpointsServerResponseAdvice : dev.akif.tapik.spring.TapikResponseBodyAdvice"
+            )
+        )
+        assertTrue(content.contains("override fun supportsTapikResponseType(responseType: Class<*>)"))
+        assertTrue(content.contains("override fun toResponseEntity(body: dev.akif.tapik.TapikResponse)"))
+        assertTrue(content.contains("UserEndpoints.User.Response::class.java.isAssignableFrom(responseType)"))
         assertTrue(
             content.contains(
                 "@org.springframework.web.bind.annotation.GetMapping(path = [\"/api/users/{userId}\"], produces = [\"text/plain\"])"
@@ -137,12 +153,17 @@ class SpringWebMvcControllerGeneratorTest {
 
         val content = generated.readText()
         assertTrue(content.contains("interface UsersServer : UsersEndpoints.Create.Server"))
+        assertTrue(content.contains("import dev.akif.tapik.spring.toResponseEntity"))
         assertTrue(content.contains("interface UsersEndpoints {"))
         assertTrue(content.contains("interface Create {"))
-        assertTrue(content.contains("sealed class Response("))
+        assertTrue(content.contains("sealed interface Response : dev.akif.tapik.TapikResponse {"))
         assertTrue(content.contains("data class Created("))
         assertTrue(content.contains("val location: java.net.URI"))
         assertTrue(content.contains("data class BadRequest("))
+        assertTrue(content.contains("fun UsersEndpoints.Create.Response.toResponseEntity()"))
+        assertTrue(content.contains("is UsersEndpoints.Create.Response.Created ->"))
+        assertTrue(content.contains("is UsersEndpoints.Create.Response.BadRequest ->"))
+        assertTrue(content.contains("UsersEndpoints.Create.Response::class.java.isAssignableFrom(responseType)"))
         assertTrue(
             content.contains(
                 "@org.springframework.web.bind.annotation.PostMapping(path = [\"/api/v1/users\"], consumes = [\"application/json\"], produces = [\"application/json\"])"

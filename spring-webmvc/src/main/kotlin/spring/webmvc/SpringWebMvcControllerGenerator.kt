@@ -52,11 +52,17 @@ class SpringWebMvcControllerGenerator : TapikKotlinEndpointGenerator {
             imports = ::buildExtensionImports,
             endpointMemberContent = { endpoint, contractModel ->
                 buildNestedServerContent(EndpointSignature(endpoint, contractModel), serverSuffix)
+            },
+            topLevelDeclarations = { _, aggregateInterfaceName, endpointContexts ->
+                buildTopLevelDeclarations(aggregateInterfaceName, endpointContexts)
             }
         )
 
     private fun buildExtensionImports(endpoints: List<HttpEndpointMetadata>): Set<String> =
         buildSet {
+            if (endpoints.isNotEmpty()) {
+                add("$TAPIK_SPRING_PACKAGE.toResponseEntity")
+            }
             if (endpoints.any { endpoint -> endpoint.parameters.any { it is QueryParameterMetadata } }) {
                 add("$TAPIK_PACKAGE.asQueryParameter")
                 add("$TAPIK_PACKAGE.getDefaultOrFail")
@@ -72,6 +78,23 @@ class SpringWebMvcControllerGenerator : TapikKotlinEndpointGenerator {
             appendSignature(signature, indentation = "    ")
             appendLine("}")
         }
+
+    private fun buildTopLevelDeclarations(
+        aggregateInterfaceName: String,
+        endpointContexts: List<Pair<HttpEndpointMetadata, KotlinEndpointGenerationContext>>
+    ): List<String> {
+        val signatures = endpointContexts.map { (endpoint, context) -> EndpointSignature(endpoint, context) }
+        if (signatures.isEmpty()) {
+            return emptyList()
+        }
+
+        return buildList {
+            signatures.forEach { signature ->
+                add(buildResponseEntityExtension(signature))
+            }
+            add(buildResponseAdvice(aggregateInterfaceName, signatures))
+        }
+    }
 
     private fun StringBuilder.appendSignature(
         signature: EndpointSignature,
@@ -101,6 +124,8 @@ class SpringWebMvcControllerGenerator : TapikKotlinEndpointGenerator {
         val mappingAnnotations: List<String> = buildMappingAnnotation(endpoint)
         val parameters: List<String>
         val returnType: String
+        val responseTypeName: String = context.response.typeName
+        val responseModel: KotlinEndpointResponseModel = context.response
 
         init {
             val nameAllocator = NameAllocator()
@@ -109,6 +134,133 @@ class SpringWebMvcControllerGenerator : TapikKotlinEndpointGenerator {
             returnType = "Response"
         }
     }
+
+    private fun buildResponseEntityExtension(signature: EndpointSignature): String =
+        buildString {
+            appendLine(
+                "fun ${signature.responseTypeName}.toResponseEntity(): org.springframework.http.ResponseEntity<kotlin.Any> ="
+            )
+            appendLine("    when (this) {")
+            signature.endpoint.outputs.forEachIndexed { index, output ->
+                appendLine(
+                    "        is ${signature.responseTypeName}.${signature.responseModel.variants[index].typeName} ->"
+                )
+                appendLine("            toResponseEntity(")
+                appendLine(
+                    "                status = ${renderResponseStatusExpression(signature, index + 1)},"
+                )
+                appendLine(
+                    "                headers = ${renderResponseHeadersExpression(signature, output, index + 1)},"
+                )
+                appendLine(
+                    "                mediaType = ${signature.endpointExpression}.outputs.item${index + 1}.body.mediaType,"
+                )
+                appendLine("                body = ${renderResponseBodyExpression(signature, output, index + 1)}")
+                appendLine("            )")
+            }
+            append("    }")
+        }
+
+    private fun renderResponseStatusExpression(
+        signature: EndpointSignature,
+        outputIndex: Int
+    ): String {
+        val variant = signature.responseModel.variants[outputIndex - 1]
+        val exactStatus = (variant.match as? OutputMatchMetadata.Exact)?.status
+        return exactStatus?.let { "dev.akif.tapik.Status.${it.name}" } ?: checkNotNull(variant.statusFieldName)
+    }
+
+    private fun renderResponseHeadersExpression(
+        signature: EndpointSignature,
+        output: OutputMetadata,
+        outputIndex: Int
+    ): String {
+        if (output.headers.isEmpty()) {
+            return "kotlin.collections.emptyMap()"
+        }
+
+        val fieldNames = resolveHeaderFieldNames(signature, outputIndex)
+        return output.headers
+            .mapIndexed { index, header ->
+                val accessor = "${signature.endpointExpression}.outputs.item$outputIndex.headers.item${index + 1}"
+                val encodedValues =
+                    if (header.cardinality == HeaderCardinality.Multiple) {
+                        "${fieldNames[index]}.map { $accessor.codec.encode(it) }"
+                    } else {
+                        "kotlin.collections.listOf($accessor.codec.encode(${fieldNames[index]}))"
+                    }
+                "$accessor.name to $encodedValues"
+            }.joinToString(
+                prefix = "kotlin.collections.linkedMapOf(",
+                separator = ", ",
+                postfix = ")"
+            )
+    }
+
+    private fun renderResponseBodyExpression(
+        signature: EndpointSignature,
+        output: OutputMetadata,
+        outputIndex: Int
+    ): String {
+        if (output.body.type.simpleName() == "EmptyBody") {
+            return "null"
+        }
+
+        val bodyFieldName = checkNotNull(resolveBodyFieldName(signature, outputIndex))
+        return "${signature.endpointExpression}.outputs.item$outputIndex.body.bytes($bodyFieldName)"
+    }
+
+    private fun resolveBodyFieldName(
+        signature: EndpointSignature,
+        outputIndex: Int
+    ): String? {
+        val variant = signature.responseModel.variants[outputIndex - 1]
+        val hasBody =
+            signature.endpoint.outputs[outputIndex - 1]
+                .body.type
+                .simpleName() != "EmptyBody"
+        return if (hasBody) variant.fields.first().name else null
+    }
+
+    private fun resolveHeaderFieldNames(
+        signature: EndpointSignature,
+        outputIndex: Int
+    ): List<String> {
+        val variant = signature.responseModel.variants[outputIndex - 1]
+        val output = signature.endpoint.outputs[outputIndex - 1]
+        val bodyOffset = if (output.body.type.simpleName() == "EmptyBody") 0 else 1
+        return variant.fields.drop(bodyOffset).map { it.name }
+    }
+
+    private fun buildResponseAdvice(
+        aggregateInterfaceName: String,
+        signatures: List<EndpointSignature>
+    ): String =
+        buildString {
+            appendLine("@org.springframework.web.bind.annotation.ControllerAdvice")
+            appendLine(
+                "class ${aggregateInterfaceName}ResponseAdvice : dev.akif.tapik.spring.TapikResponseBodyAdvice {"
+            )
+            appendLine("    override fun supportsTapikResponseType(responseType: Class<*>): kotlin.Boolean =")
+            appendLine(
+                signatures.joinToString(separator = " ||\n") { signature ->
+                    "        ${signature.responseTypeName}::class.java.isAssignableFrom(responseType)"
+                }
+            )
+            appendLine()
+            appendLine(
+                "    override fun toResponseEntity(body: dev.akif.tapik.TapikResponse): org.springframework.http.ResponseEntity<kotlin.Any> ="
+            )
+            appendLine("        when (body) {")
+            signatures.forEach { signature ->
+                appendLine("            is ${signature.responseTypeName} -> body.toResponseEntity()")
+            }
+            appendLine(
+                "            else -> kotlin.error(\"Unsupported TapikResponse type: \" + body::class.qualifiedName)"
+            )
+            appendLine("        }")
+            append("}")
+        }
 
     private class NameAllocator {
         private val used = mutableSetOf<String>()
@@ -269,5 +421,6 @@ class SpringWebMvcControllerGenerator : TapikKotlinEndpointGenerator {
     private companion object {
         private const val ID = "spring-webmvc"
         private const val TAPIK_PACKAGE = "dev.akif.tapik"
+        private const val TAPIK_SPRING_PACKAGE = "dev.akif.tapik.spring"
     }
 }

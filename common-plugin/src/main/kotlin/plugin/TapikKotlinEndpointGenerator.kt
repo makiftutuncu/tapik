@@ -36,6 +36,7 @@ data class TapikKotlinContribution(
  * @property nestedInterfaceName nested integration interface name exposed by each endpoint contract.
  * @property imports imports requested by the contributing generator.
  * @property endpointMembers integration-specific nested members keyed by endpoint property name.
+ * @property topLevelDeclarations additional top-level Kotlin declarations emitted into the merged file.
  */
 data class KotlinSourceFileContribution(
     val packageName: String,
@@ -44,7 +45,8 @@ data class KotlinSourceFileContribution(
     val aggregateInterfaceName: String,
     val nestedInterfaceName: String,
     val imports: Set<String> = emptySet(),
-    val endpointMembers: List<KotlinEndpointMemberContribution>
+    val endpointMembers: List<KotlinEndpointMemberContribution>,
+    val topLevelDeclarations: List<String> = emptyList()
 )
 
 /**
@@ -97,6 +99,7 @@ fun contributeKotlinSourceFiles(
  * @param nestedInterfaceName nested interface name exposed by every contributed endpoint member.
  * @param imports supplies any generator-specific imports required for one source file.
  * @param endpointMemberContent builds nested content for one endpoint and its shared contract model.
+ * @param topLevelDeclarations builds additional top-level declarations for one generated file.
  * @return contributions grouped per generated Kotlin source file.
  */
 fun buildKotlinSourceFileContributions(
@@ -106,7 +109,12 @@ fun buildKotlinSourceFileContributions(
     aggregateInterfaceName: (sourceFile: String) -> String,
     nestedInterfaceName: String,
     imports: (endpointsInFile: List<HttpEndpointMetadata>) -> Set<String> = { emptySet() },
-    endpointMemberContent: (endpoint: HttpEndpointMetadata, context: KotlinEndpointGenerationContext) -> String
+    endpointMemberContent: (endpoint: HttpEndpointMetadata, context: KotlinEndpointGenerationContext) -> String,
+    topLevelDeclarations: (
+        sourceFile: String,
+        aggregateInterfaceName: String,
+        endpointContexts: List<Pair<HttpEndpointMetadata, KotlinEndpointGenerationContext>>
+    ) -> List<String> = { _, _, _ -> emptyList() }
 ): List<KotlinSourceFileContribution> {
     val contributions = mutableListOf<KotlinSourceFileContribution>()
     endpoints
@@ -119,27 +127,29 @@ fun buildKotlinSourceFileContributions(
                 .toSortedMap()
                 .forEach { (sourceFile, groupedEndpoints) ->
                     val sortedEndpoints = groupedEndpoints.sortedBy { it.id }
+                    val generatedAggregateInterfaceName = aggregateInterfaceName(sourceFile)
                     val modelsByPropertyName =
                         buildEndpointContractModels(sortedEndpoints, sourceFile, endpointsSuffix).associateBy { it.endpoint.propertyName }
+                    val endpointContexts =
+                        sortedEndpoints.map { endpoint ->
+                            endpoint to checkNotNull(modelsByPropertyName[endpoint.propertyName]).toGenerationContext()
+                        }
                     contributions +=
                         KotlinSourceFileContribution(
                             packageName = packageName.toGeneratedPackageName(generatedPackageName),
                             sourcePackageName = packageName,
                             sourceFile = sourceFile,
-                            aggregateInterfaceName = aggregateInterfaceName(sourceFile),
+                            aggregateInterfaceName = generatedAggregateInterfaceName,
                             nestedInterfaceName = nestedInterfaceName,
                             imports = imports(sortedEndpoints),
                             endpointMembers =
-                                sortedEndpoints.map { endpoint ->
+                                endpointContexts.map { (endpoint, generationContext) ->
                                     KotlinEndpointMemberContribution(
                                         endpointPropertyName = endpoint.propertyName,
-                                        content =
-                                            endpointMemberContent(
-                                                endpoint,
-                                                checkNotNull(modelsByPropertyName[endpoint.propertyName]).toGenerationContext()
-                                            )
+                                        content = endpointMemberContent(endpoint, generationContext)
                                     )
-                                }
+                                },
+                            topLevelDeclarations = topLevelDeclarations(sourceFile, generatedAggregateInterfaceName, endpointContexts)
                         )
                 }
         }
@@ -182,7 +192,8 @@ internal fun renderMergedKotlinEndpointFile(
     endpoints: List<HttpEndpointMetadata>,
     aggregateInterfaces: List<AggregateInterfaceContribution>,
     endpointMembers: Map<String, List<String>>,
-    imports: Set<String>
+    imports: Set<String>,
+    topLevelDeclarations: List<String>
 ): String {
     val sortedEndpoints = endpoints.sortedBy { it.id }
     val models = buildEndpointContractModels(sortedEndpoints, sourceFile, endpointsSuffix)
@@ -250,6 +261,17 @@ internal fun renderMergedKotlinEndpointFile(
         }
 
         appendLine("}")
+
+        if (topLevelDeclarations.isNotEmpty()) {
+            appendLine()
+            topLevelDeclarations.forEachIndexed { index, declaration ->
+                appendLine()
+                append(declaration.trimEnd())
+                if (index != topLevelDeclarations.lastIndex) {
+                    appendLine()
+                }
+            }
+        }
     }
 }
 
@@ -278,7 +300,8 @@ fun writeMergedKotlinSourceFiles(
         val sourceFile: String,
         val imports: MutableSet<String> = linkedSetOf(),
         val aggregateInterfaces: MutableList<AggregateInterfaceContribution> = mutableListOf(),
-        val endpointMembers: MutableMap<String, MutableList<String>> = linkedMapOf()
+        val endpointMembers: MutableMap<String, MutableList<String>> = linkedMapOf(),
+        val topLevelDeclarations: MutableList<String> = mutableListOf()
     )
 
     if (sourceFiles.isEmpty()) {
@@ -302,6 +325,7 @@ fun writeMergedKotlinSourceFiles(
                 name = sourceFile.aggregateInterfaceName,
                 nestedInterfaceName = sourceFile.nestedInterfaceName
             )
+        state.topLevelDeclarations += sourceFile.topLevelDeclarations
         sourceFile.endpointMembers.forEach { endpointMember ->
             state.endpointMembers
                 .getOrPut(endpointMember.endpointPropertyName) { mutableListOf() }
@@ -335,7 +359,8 @@ fun writeMergedKotlinSourceFiles(
                 endpoints = fileEndpoints,
                 aggregateInterfaces = state.aggregateInterfaces.distinctBy { it.name to it.nestedInterfaceName },
                 endpointMembers = state.endpointMembers,
-                imports = state.imports
+                imports = state.imports,
+                topLevelDeclarations = state.topLevelDeclarations.distinct()
             )
         )
         generatedFiles += targetFile
@@ -357,9 +382,7 @@ private fun renderSealedResponseHierarchy(
     model: EndpointContractModel
 ): String =
     buildString {
-        appendLine("    sealed class Response(")
-        appendLine("        open val status: dev.akif.tapik.Status")
-        appendLine("    ) {")
+        appendLine("    sealed interface Response : dev.akif.tapik.TapikResponse {")
         model.response.variants.forEachIndexed { index, variant ->
             append(renderVariantDeclaration(model, variant, outputIndex = index + 1))
             if (index != model.response.variants.lastIndex) {
@@ -379,20 +402,15 @@ private fun renderVariantDeclaration(
 ): String {
     val statusValidation = renderStatusValidation(variant, model.endpointReference, outputIndex)
     val constructorFields = buildConstructorFields(variant)
-    val superType =
-        when (variant.match) {
-            is OutputMatchMetadata.Exact -> " : Response(dev.akif.tapik.Status.${variant.match.status.name})"
-            else -> " : Response(status)"
-        }
-
-    if (variant.isObject && variant.match is OutputMatchMetadata.Exact) {
-        return "        data object ${variant.typeName}$superType"
-    }
 
     return buildString {
-        appendLine("        data class ${variant.typeName}(")
-        appendLine(constructorFields.joinToString(separator = ",\n") { "            $it" })
-        append("        )$superType")
+        if (variant.isObject && variant.match is OutputMatchMetadata.Exact) {
+            append("        data object ${variant.typeName} : Response")
+        } else {
+            appendLine("        data class ${variant.typeName}(")
+            appendLine(constructorFields.joinToString(separator = ",\n") { "            $it" })
+            append("        ) : Response")
+        }
         val bodySections =
             listOfNotNull(
                 statusValidation?.let {
@@ -425,7 +443,7 @@ private fun buildConstructorFields(
 ): List<String> =
     buildList {
         if (variant.match !is OutputMatchMetadata.Exact) {
-            add("override val status: dev.akif.tapik.Status")
+            add("val ${checkNotNull(variant.statusFieldName)}: dev.akif.tapik.Status")
         }
         addAll(variant.fields.map { field -> "val ${field.name}: ${field.type}" })
     }
@@ -440,7 +458,8 @@ private fun renderByteArrayOverrides(
     val equalityChecks =
         buildList {
             if (variant.match !is OutputMatchMetadata.Exact) {
-                add("status != other.status")
+                val statusFieldName = checkNotNull(variant.statusFieldName)
+                add("$statusFieldName != other.$statusFieldName")
             }
             addAll(
                 variant.fields.map { field ->
@@ -456,7 +475,7 @@ private fun renderByteArrayOverrides(
     val hashExpressions =
         buildList {
             if (variant.match !is OutputMatchMetadata.Exact) {
-                add("status.hashCode()")
+                add("${checkNotNull(variant.statusFieldName)}.hashCode()")
             }
             addAll(
                 variant.fields.map { field ->
@@ -502,22 +521,26 @@ private fun renderStatusValidation(
     when (val match = variant.match) {
         is OutputMatchMetadata.Exact -> null
         is OutputMatchMetadata.AnyOf -> {
+            val statusFieldName = checkNotNull(variant.statusFieldName)
             val statuses =
                 match.statuses.joinToString(prefix = "setOf(", separator = ", ", postfix = ")") {
                     "dev.akif.tapik.Status.${it.name}"
                 }
-            """require(status in $statuses) { "Status ${'$'}status does not match ${variant.description}" }"""
+            """require($statusFieldName in $statuses) { "Status ${'$'}$statusFieldName does not match ${variant.description}" }"""
         }
 
-        is OutputMatchMetadata.Described ->
-            """require($endpointExpression.outputs.item$outputIndex.statusMatcher(status)) { "Status ${'$'}status does not match ${variant.description}" }"""
+        is OutputMatchMetadata.Described -> {
+            val statusFieldName = checkNotNull(variant.statusFieldName)
+            """require($endpointExpression.outputs.item$outputIndex.statusMatcher($statusFieldName)) { "Status ${'$'}$statusFieldName does not match ${variant.description}" }"""
+        }
 
         OutputMatchMetadata.Unmatched -> {
+            val statusFieldName = checkNotNull(variant.statusFieldName)
             val precedingMatchers =
                 (1 until outputIndex).joinToString(separator = " && ") { index ->
-                    "!$endpointExpression.outputs.item$index.statusMatcher(status)"
+                    "!$endpointExpression.outputs.item$index.statusMatcher($statusFieldName)"
                 }
-            """require(${precedingMatchers.ifBlank { "true" }}) { "Status ${'$'}status does not match ${variant.description}" }"""
+            """require(${precedingMatchers.ifBlank { "true" }}) { "Status ${'$'}$statusFieldName does not match ${variant.description}" }"""
         }
     }
 
