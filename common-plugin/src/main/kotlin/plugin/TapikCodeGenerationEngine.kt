@@ -29,9 +29,11 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 import java.io.File
+import java.io.InputStream
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.net.URLClassLoader
+import java.util.jar.JarFile
 import java.util.ServiceLoader
 
 /**
@@ -43,7 +45,7 @@ import java.util.ServiceLoader
  * @property endpointsSuffix suffix appended to the source-level enclosing endpoints interface.
  * @property basePackage base package scanned for Tapik endpoint declarations.
  * @property compiledClassesDirectory compiled classes directory of the project under analysis.
- * @property additionalClasspathDirectories additional classpath roots used during endpoint resolution.
+ * @property additionalClasspathDirectories additional classpath roots used during endpoint discovery and resolution.
  * @property generatorConfigurations generator-specific configuration keyed by generator id.
  */
 data class TapikCodeGenerationConfiguration(
@@ -95,11 +97,14 @@ class TapikCodeGenerationEngine(
             return
         }
 
-        val urls = (listOf(compiledDir) + config.additionalClasspathDirectories).map { it.toURI().toURL() }.toTypedArray()
+        val scanRoots =
+            (listOf(compiledDir) + config.additionalClasspathDirectories)
+                .distinctBy { it.absoluteFile.normalize().path }
+        val urls = scanRoots.map { it.toURI().toURL() }.toTypedArray()
 
         URLClassLoader(urls, javaClass.classLoader).use { classLoader ->
             val endpoints =
-                scanForHttpEndpoints(compiledDir, basePackage, classLoader).mapNotNull { signature ->
+                scanForHttpEndpoints(scanRoots, basePackage, classLoader).mapNotNull { signature ->
                     resolveEndpoint(signature, classLoader)?.let { endpoint ->
                         runCatching { signature.toMetadata(endpoint) }
                             .onFailure { error ->
@@ -227,36 +232,21 @@ class TapikCodeGenerationEngine(
     }
 
     private fun scanForHttpEndpoints(
-        compiledDir: File,
+        scanRoots: List<File>,
         basePackage: String,
         classLoader: URLClassLoader
     ): List<HttpEndpointSignature> {
         val baseFilter = basePackage.replace('.', '/').takeIf { it.isNotBlank() }
         val results = LinkedHashMap<String, HttpEndpointSignature>()
 
-        compiledDir
-            .walkTopDown()
-            .filter { it.isFile && it.extension == "class" }
-            .forEach { classFile ->
-                val relativePath = classFile.relativeTo(compiledDir).path.replace(File.separatorChar, '/')
-                if (relativePath.startsWith("META-INF/")) return@forEach
-                if (baseFilter != null && !relativePath.startsWith(baseFilter)) return@forEach
-
-                try {
-                    val classReader = ClassReader(classFile.readBytes())
-                    val classNode = ClassNode()
-                    classReader.accept(classNode, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
-                    processClassNode(classNode, classLoader, results)
-                } catch (e: IllegalArgumentException) {
-                    if (e.message?.contains("Unsupported class file major version") == true) {
-                        parseClassWithReflection(relativePath, classLoader, results)
-                    } else {
-                        logger.warn("Failed to analyse class: ${classFile.absolutePath}", e)
-                    }
-                } catch (e: Exception) {
-                    logger.warn("Failed to analyse class: ${classFile.absolutePath}", e)
-                }
+        scanRoots.forEach { scanRoot ->
+            when {
+                scanRoot.isDirectory -> scanDirectoryForHttpEndpoints(scanRoot, baseFilter, classLoader, results)
+                scanRoot.isFile && scanRoot.extension.equals("jar", ignoreCase = true) ->
+                    scanJarForHttpEndpoints(scanRoot, baseFilter, classLoader, results)
+                scanRoot.exists() -> logger.debug("Skipping unsupported Tapik scan root '${scanRoot.absolutePath}'", null)
             }
+        }
 
         return results.values
             .sortedWith(
@@ -264,6 +254,84 @@ class TapikCodeGenerationEngine(
                     .thenBy { it.file }
                     .thenBy { it.name }
             )
+    }
+
+    private fun scanDirectoryForHttpEndpoints(
+        directory: File,
+        baseFilter: String?,
+        classLoader: URLClassLoader,
+        results: MutableMap<String, HttpEndpointSignature>
+    ) {
+        directory
+            .walkTopDown()
+            .filter { it.isFile && it.extension == "class" }
+            .forEach { classFile ->
+                val relativePath = classFile.relativeTo(directory).path.replace(File.separatorChar, '/')
+                analyseClass(
+                    relativePath = relativePath,
+                    sourceDescription = classFile.absolutePath,
+                    classBytes = { classFile.inputStream() },
+                    classLoader = classLoader,
+                    baseFilter = baseFilter,
+                    results = results
+                )
+            }
+    }
+
+    private fun scanJarForHttpEndpoints(
+        jarFile: File,
+        baseFilter: String?,
+        classLoader: URLClassLoader,
+        results: MutableMap<String, HttpEndpointSignature>
+    ) {
+        runCatching {
+            JarFile(jarFile).use { jar ->
+                jar.entries().asSequence()
+                    .filterNot { it.isDirectory }
+                    .filter { it.name.endsWith(".class") }
+                    .forEach { entry ->
+                        analyseClass(
+                            relativePath = entry.name,
+                            sourceDescription = "${jarFile.absolutePath}!/${entry.name}",
+                            classBytes = { jar.getInputStream(entry) },
+                            classLoader = classLoader,
+                            baseFilter = baseFilter,
+                            results = results
+                        )
+                    }
+            }
+        }.onFailure { error ->
+            logger.warn("Failed to analyse JAR scan root '${jarFile.absolutePath}'", error)
+        }
+    }
+
+    private fun analyseClass(
+        relativePath: String,
+        sourceDescription: String,
+        classBytes: () -> InputStream,
+        classLoader: URLClassLoader,
+        baseFilter: String?,
+        results: MutableMap<String, HttpEndpointSignature>
+    ) {
+        if (relativePath.startsWith("META-INF/")) return
+        if (baseFilter != null && !relativePath.startsWith(baseFilter)) return
+
+        try {
+            classBytes().use { input ->
+                val classReader = ClassReader(input)
+                val classNode = ClassNode()
+                classReader.accept(classNode, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
+                processClassNode(classNode, classLoader, results)
+            }
+        } catch (e: IllegalArgumentException) {
+            if (e.message?.contains("Unsupported class file major version") == true) {
+                parseClassWithReflection(relativePath, classLoader, results)
+            } else {
+                logger.warn("Failed to analyse class: $sourceDescription", e)
+            }
+        } catch (e: Exception) {
+            logger.warn("Failed to analyse class: $sourceDescription", e)
+        }
     }
 
     private fun processClassNode(
@@ -468,7 +536,8 @@ class TapikCodeGenerationEngine(
                     ?: runtimeTypeMetadata(header::class.java)
             val values =
                 if (header is HeaderValues<*>) {
-                    header.values.map { it.toString() }
+                    @Suppress("UNCHECKED_CAST")
+                    header.values.map { value -> (header.codec as StringCodec<Any>).encode(value) }
                 } else {
                     emptyList()
                 }

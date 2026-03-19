@@ -44,7 +44,8 @@ For one source file of endpoint declarations, tapik generates:
 
 * an aggregate client interface such as `CatalogApiClient`,
 * one nested client contract per endpoint,
-* one generated response model per endpoint.
+* one generated response model per endpoint,
+* one per-endpoint `uri(...)` helper that builds a concrete `java.net.URI` from the endpoint reference.
 
 [source,kotlin]
 ----
@@ -62,6 +63,14 @@ interface CatalogApiEndpoints {
             ) : Response
         }
 
+        companion object {
+            fun uri(productId: String): java.net.URI =
+                dev.akif.tapik.renderURI(
+                    CatalogApi.getProduct.path,
+                    CatalogApi.getProduct.parameters.item1 to CatalogApi.getProduct.parameters.item1.codec.encode(productId)
+                )
+        }
+
         interface Client : dev.akif.tapik.spring.restclient.RestClientBasedClient {
             fun getProduct(
                 productId: String,
@@ -75,7 +84,9 @@ interface CatalogApiEndpoints {
 The important part is not the exact spelling. The important part is the shape:
 
 * method parameters come from the endpoint contract,
+* input headers declared with concrete `HeaderValues(...)` stay baked into the endpoint and are sent automatically,
 * optional query parameters keep their defaults,
+* each endpoint contract can render its concrete request URI through `uri(...)`,
 * multi-output endpoints become sealed response hierarchies.
 
 == How execution works
@@ -84,7 +95,7 @@ Generated client methods delegate to `RestClientInterpreter`.
 
 That interpreter is responsible for:
 
-* sending the request with the declared method, URI, headers, and optional body,
+* sending the request with the declared method, the generated endpoint `uri(...)`, headers, and optional body,
 * validating the returned status against the endpoint outputs,
 * validating response content type when the output body declares one.
 

@@ -5,8 +5,14 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+val sourceSets = the<SourceSetContainer>()
+
 dependencies {
     api(project(":codec"))
     implementation(libs.arrowCore)
     testImplementation(libs.bundles.testCommon)
+}
+
+tasks.named<Jar>("jar") {
+    from(sourceSets.named("main").map { it.output })
 }

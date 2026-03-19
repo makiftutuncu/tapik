@@ -203,7 +203,14 @@ internal fun renderMergedKotlinEndpointFile(
             .mapNotNull { it.endpointImportPath }
             .filter { it.substringBeforeLast('.', "") != packageName }
             .toSet()
-    val resolvedImports = (imports + endpointImports).sorted()
+    val sharedUriImports =
+        buildSet {
+            if (sortedEndpoints.any { endpoint -> endpoint.parameters.any { it is dev.akif.tapik.plugin.metadata.QueryParameterMetadata } }) {
+                add("dev.akif.tapik.asQueryParameter")
+                add("dev.akif.tapik.getDefaultOrFail")
+            }
+        }
+    val resolvedImports = (imports + endpointImports + sharedUriImports).sorted()
 
     return buildString {
         appendLine("// This file is generated. Any changes will be lost.")
@@ -237,6 +244,9 @@ internal fun renderMergedKotlinEndpointFile(
             appendLine("    interface ${model.interfaceName} {")
             appendLine()
             append(indentBlock(renderResponseType(model), "    "))
+            appendLine()
+            appendLine()
+            append(indentBlock(renderUriFunction(model), "    "))
 
             endpointMembers[model.endpoint.propertyName]
                 ?.takeIf { it.isNotEmpty() }
@@ -377,6 +387,30 @@ internal data class AggregateInterfaceContribution(
 private fun renderResponseType(
     model: EndpointContractModel
 ): String = renderSealedResponseHierarchy(model)
+
+private fun renderUriFunction(
+    model: EndpointContractModel
+): String {
+    val uriParameters = buildGeneratedEndpointUriParameters(model.endpoint.parameters, model.endpointReference)
+    val parameterDeclarations = uriParameters.declarations()
+    val renderArguments = uriParameters.renderArguments()
+
+    return buildString {
+        appendLine("    companion object {")
+        if (parameterDeclarations.isEmpty()) {
+            appendLine("        fun uri(): java.net.URI = dev.akif.tapik.renderURI(${model.endpointReference}.path)")
+        } else {
+            appendLine("        fun uri(")
+            appendLine(parameterDeclarations.joinToString(separator = ",\n") { "            $it" })
+            appendLine("        ): java.net.URI =")
+            appendLine("            dev.akif.tapik.renderURI(")
+            appendLine("                ${model.endpointReference}.path,")
+            appendLine(renderArguments.joinToString(separator = ",\n") { "                $it" })
+            appendLine("            )")
+        }
+        append("    }")
+    }
+}
 
 private fun renderSealedResponseHierarchy(
     model: EndpointContractModel

@@ -21,9 +21,16 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class RestClientInterpreterTest {
+    private data class User(
+        val id: Int,
+        val name: String
+    )
+
     private lateinit var server: WireMockServer
     private lateinit var interpreter: RestClientInterpreter
 
@@ -68,6 +75,41 @@ class RestClientInterpreterTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals("""{"id":1,"name":"Tapik"}""", response.body?.decodeToString())
+    }
+
+    @Test
+    fun `send preserves generic jackson body types for generated client decoding`() {
+        server.stubFor(
+            get(urlEqualTo("/users"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""[{"id":1,"name":"Tapik"},{"id":2,"name":"Codex"}]""")
+                )
+        )
+
+        val body = jsonBody<List<User>>("users")
+        val outputs = listOf(Output(StatusMatcher.Is(Status.Ok), emptyHeaders(), body))
+
+        val response =
+            interpreter.send(
+                method = Method.GET,
+                uri = URI.create("/users"),
+                inputHeaders = emptyMap(),
+                inputBodyContentType = null,
+                inputBody = null,
+                outputs = outputs
+            )
+
+        val decoded =
+            body.codec.decode(requireNotNull(response.body)).fold(
+                ifLeft = { fail("Unexpected decode failure: $it") },
+                ifRight = { it }
+            )
+
+        assertEquals(listOf(User(1, "Tapik"), User(2, "Codex")), decoded)
+        assertIs<User>(decoded.first())
     }
 
     @Test

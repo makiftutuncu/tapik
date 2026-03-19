@@ -58,20 +58,17 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
     private fun buildExtensionImports(endpoints: List<HttpEndpointMetadata>): Set<String> =
         buildSet {
             add("$SHARED_SPRING_PACKAGE.toStatus")
+            if (endpoints.any { endpoint -> endpoint.outputs.any { output -> output.headers.isNotEmpty() } }) {
+                add("$SHARED_SPRING_PACKAGE.toTapikHeaders")
+            }
             if (endpoints.any { endpoint -> endpoint.parameters.any { it is QueryParameterMetadata } }) {
                 add("$TAPIK_PACKAGE.asQueryParameter")
                 add("$TAPIK_PACKAGE.getDefaultOrFail")
             }
             if (endpoints.any { it.input.headers.isNotEmpty() }) {
                 add("$TAPIK_PACKAGE.encodeInputHeaders")
-                add("$TAPIK_PACKAGE.asHeaderValues")
             }
-            if (
-                endpoints.any { endpoint ->
-                    endpoint.input.headers.isNotEmpty() ||
-                        endpoint.outputs.any { output -> output.headers.isNotEmpty() }
-                }
-            ) {
+            if (endpoints.any { endpoint -> endpoint.outputs.any { output -> output.headers.isNotEmpty() } }) {
                 add("$TAPIK_PACKAGE.getFirstValueOrFail")
             }
         }
@@ -103,7 +100,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
         val endpointExpr = signature.endpointExpression
         appendLine("$indentation    val responseEntity = interpreter.send(")
         appendLine("$indentation        method = $endpointExpr.method,")
-        appendInlineUriRendering(signature, indentation = "$indentation        ")
+        appendLine("$indentation        uri = ${signature.uriInvocation},")
         appendLine("$indentation        inputHeaders = ${signature.inputHeadersEncoding},")
         appendLine("$indentation        inputBodyContentType = $endpointExpr.input.body.mediaType,")
         appendLine("$indentation        inputBody = ${signature.encodeBodyCall},")
@@ -114,8 +111,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
 
         if (signature.needsHeadersMap) {
             appendLine()
-            appendLine("$indentation    val headers = responseEntity.headers")
-            appendLine("$indentation        .mapValues { entry -> entry.value.map { it.orEmpty() } }")
+            appendLine("$indentation    val headers = responseEntity.headers.toTapikHeaders()")
         }
 
         if (signature.needsBodyBytes) {
@@ -128,29 +124,11 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
         appendLine("$indentation}")
     }
 
-    private fun StringBuilder.appendInlineUriRendering(
-        signature: EndpointSignature,
-        indentation: String
-    ) {
-        if (signature.uriRenderArguments.isEmpty()) {
-            appendLine(
-                "$indentation" + "uri = dev.akif.tapik.renderURI(${signature.endpointExpression}.path),"
-            )
-            return
-        }
-
-        appendLine("$indentation" + "uri = dev.akif.tapik.renderURI(")
-        appendLine("$indentation    ${signature.endpointExpression}.path,")
-        appendLine(
-            signature.uriRenderArguments.joinToString(separator = ",\n") { "$indentation    $it" }
-        )
-        appendLine("$indentation),")
-    }
-
     private class EndpointSignature(
         val endpoint: HttpEndpointMetadata,
         context: KotlinEndpointGenerationContext
     ) {
+        private val contractTypeName: String = context.contractTypeName
         val endpointExpression: String = context.endpointReference
         val methodName: String = context.methodName
 
@@ -171,7 +149,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
                 addAll(inputHeaders.optionalDeclarations)
             }
 
-        val uriRenderArguments: List<String> = parameters.uriRenderArguments
+        val uriInvocation: String = "$contractTypeName.uri(${parameters.callArguments})"
         val inputHeadersEncoding: String = inputHeaders.encodingCall
         val usesEncodeInputHeaders: Boolean = inputHeaders.usesEncodeInputHeaders
         val encodeBodyCall: String = inputBody.encodeCall
@@ -187,9 +165,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
     ) {
         private data class Entry(
             val name: String,
-            val type: String,
             val declaration: String,
-            val uriRenderArgument: String,
             val hasDefault: Boolean
         )
 
@@ -198,7 +174,7 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
 
         val requiredDeclarations: List<String>
         val optionalDeclarations: List<String>
-        val uriRenderArguments: List<String>
+        val callArguments: String
 
         init {
             val usedNames = mutableSetOf<String>()
@@ -211,28 +187,14 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
                             is QueryParameterMetadata -> sanitizeIdentifier(parameter.name, fallback)
                         }
                     val name = uniqueName(baseName, usedNames)
-                    val type =
+                    val declaration =
                         when (parameter) {
-                            is PathVariableMetadata -> parameter.type.render()
-                            is QueryParameterMetadata -> parameter.type.render()
-                        }
-                    when (parameter) {
-                        is PathVariableMetadata -> {
-                            val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
-                            Entry(
-                                name = name,
-                                type = type,
-                                declaration = "$name: $type",
-                                uriRenderArgument = "$parameterAccessor to $parameterAccessor.codec.encode($name)",
-                                hasDefault = false
-                            )
-                        }
+                            is PathVariableMetadata -> "$name: ${parameter.type.render()}"
 
-                        is QueryParameterMetadata -> {
-                            val typeInfo = parameter.toGeneratedTypeInfo()
-                            val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
-                            val declaration =
+                            is QueryParameterMetadata -> {
+                                val typeInfo = parameter.toGeneratedTypeInfo()
                                 if (typeInfo.hasDefault) {
+                                    val parameterAccessor = "$endpointRef.parameters.item${index + 1}"
                                     if (typeInfo.hasNonNullDefault) {
                                         "$name: ${typeInfo.renderedType} = $parameterAccessor.asQueryParameter<${typeInfo.nonNullableType}>().getDefaultOrFail()"
                                     } else {
@@ -241,27 +203,20 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
                                 } else {
                                     "$name: ${typeInfo.renderedType}"
                                 }
-                            val encodedValueExpression =
-                                if (!typeInfo.hasDefault || typeInfo.hasNonNullDefault) {
-                                    "$parameterAccessor.codec.encode($name)"
-                                } else {
-                                    "$name?.let { $parameterAccessor.codec.encode(it) }"
-                                }
-                            Entry(
-                                name = name,
-                                type = typeInfo.renderedType,
-                                declaration = declaration,
-                                uriRenderArgument = "$parameterAccessor to $encodedValueExpression",
-                                hasDefault = typeInfo.hasDefault
-                            )
+                            }
                         }
-                    }
+
+                    Entry(
+                        name = name,
+                        declaration = declaration,
+                        hasDefault = parameter is QueryParameterMetadata && !parameter.required
+                    )
                 }
 
             requiredDeclarations = entries.filterNot { it.hasDefault }.map { it.declaration }
             optionalDeclarations = entries.filter { it.hasDefault }.map { it.declaration }
             entriesInMethodOrder = entries.filterNot { it.hasDefault } + entries.filter { it.hasDefault }
-            uriRenderArguments = entriesInMethodOrder.map { it.uriRenderArgument }
+            callArguments = entriesInMethodOrder.joinToString(", ") { it.name }
         }
     }
 
@@ -271,22 +226,22 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
     ) {
         private data class Entry(
             val name: String,
-            val type: String,
             val declaration: String,
             val hasDefault: Boolean
         )
 
         private val entries: List<Entry>
+        private val hasHeaders: Boolean = headers.isNotEmpty()
 
         val count: Int
         val requiredDeclarations: List<String>
         val optionalDeclarations: List<String>
         private val argumentList: String
         val usesEncodeInputHeaders: Boolean
-            get() = count > 0
+            get() = hasHeaders
         val encodingCall: String
             get() =
-                if (count == 0) {
+                if (!hasHeaders) {
                     "kotlin.collections.emptyMap()"
                 } else {
                     val arguments = argumentList.takeIf { it.isNotEmpty() } ?: ""
@@ -296,23 +251,17 @@ class RestClientBasedClientGenerator : TapikKotlinEndpointGenerator {
         init {
             val usedNames = mutableSetOf<String>()
             entries =
-                headers.mapIndexed { index, header ->
+                headers.mapIndexedNotNull { index, header ->
+                    if (!header.required) {
+                        return@mapIndexedNotNull null
+                    }
                     val fallback = "inputHeader${index + 1}"
                     val baseName = sanitizeIdentifier(header.name, fallback)
                     val name = uniqueName(baseName, usedNames)
-                    val type = header.type.render()
-                    val hasDefault = !header.required
-                    val declaration =
-                        if (hasDefault) {
-                            "$name: $type = $endpointExpression.input.headers.item${index + 1}.asHeaderValues<$type>().getFirstValueOrFail()"
-                        } else {
-                            "$name: $type"
-                        }
                     Entry(
                         name = name,
-                        type = type,
-                        declaration = declaration,
-                        hasDefault = hasDefault
+                        declaration = "$name: ${header.type.render()}",
+                        hasDefault = false
                     )
                 }
             count = entries.size

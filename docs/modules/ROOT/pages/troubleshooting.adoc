@@ -11,7 +11,7 @@ Check these first:
 * the relevant type implements `API`,
 * the generator block you need is actually enabled.
 
-tapik scans compiled classes, so source code that never produced class files will not be discovered.
+tapik scans compiled classes and dependency JARs on the analysis classpath, so source code that never produced bytecode will not be discovered.
 
 == Endpoints are discovered, but a generator does not run
 

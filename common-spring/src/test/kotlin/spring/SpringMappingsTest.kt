@@ -3,6 +3,7 @@ package dev.akif.tapik.spring
 import dev.akif.tapik.MediaType
 import dev.akif.tapik.Status
 import dev.akif.tapik.TapikResponse
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import kotlin.test.Test
@@ -34,6 +35,20 @@ class SpringMappingsTest {
     @Test
     fun `converts tapik media type to spring media type`() {
         assertEquals("application/json", MediaType.Json.toSpringMediaType().toString())
+    }
+
+    @Test
+    fun `converts spring headers to tapik header map`() {
+        val headers =
+            HttpHeaders().apply {
+                addAll("X-Trace-Id", listOf("trace-1", "trace-2"))
+                add("Content-Type", "application/json")
+            }
+
+        val tapikHeaders = headers.toTapikHeaders()
+
+        assertEquals(listOf("trace-1", "trace-2"), tapikHeaders["X-Trace-Id"])
+        assertEquals(listOf("application/json"), tapikHeaders["Content-Type"])
     }
 
     @Test

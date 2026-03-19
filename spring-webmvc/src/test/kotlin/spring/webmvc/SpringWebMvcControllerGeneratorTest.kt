@@ -169,8 +169,30 @@ class SpringWebMvcControllerGeneratorTest {
                 "@org.springframework.web.bind.annotation.PostMapping(path = [\"/api/v1/users\"], consumes = [\"application/json\"], produces = [\"application/json\"])"
             )
         )
+        assertTrue(
+            !content.contains("@org.springframework.web.bind.annotation.RequestHeader(name = \"Accept\")"),
+            "Expected fixed input headers to be omitted from generated server signatures"
+        )
+        assertTrue(!content.contains("accept: dev.akif.tapik.MediaType"))
         assertTrue(content.contains("fun create("))
         assertTrue(content.contains("): Response"))
+    }
+
+    @Test
+    fun `generate disambiguates duplicate exact status response variants`() {
+        val rootDir = tempDir.toFile()
+
+        val generated = generate(listOf(metadataWithDuplicateExactStatuses()), testContext(rootDir))
+        assertTrue(generated.exists(), "Expected generated controller file")
+
+        val content = generated.readText()
+        assertTrue(content.contains("sealed interface Response : dev.akif.tapik.TapikResponse {"))
+        assertTrue(content.contains("data class NotFoundUserNotFound("))
+        assertTrue(content.contains("data class NotFoundItemNotFound("))
+        assertTrue(content.contains("is ListsEndpoints.Delete.Response.NotFoundUserNotFound ->"))
+        assertTrue(content.contains("is ListsEndpoints.Delete.Response.NotFoundItemNotFound ->"))
+        assertTrue(content.contains("body = Lists.delete.outputs.item1.body.bytes(userNotFound)"))
+        assertTrue(content.contains("body = Lists.delete.outputs.item2.body.bytes(itemNotFound)"))
     }
 
     private fun testContext(rootDir: File): TapikGeneratorContext =
@@ -448,5 +470,58 @@ class SpringWebMvcControllerGeneratorTest {
                 ),
             packageName = "dev.akif.tapik.clients",
             sourceFile = "Users"
+        )
+
+    private fun metadataWithDuplicateExactStatuses(): HttpEndpointMetadata =
+        HttpEndpointMetadata(
+            id = "delete",
+            propertyName = "delete",
+            description = "Delete list item",
+            details = null,
+            method = "DELETE",
+            path = listOf("api", "v1", "lists", "{itemId}"),
+            parameters =
+                listOf(
+                    PathVariableMetadata(
+                        name = "itemId",
+                        type = TypeMetadata("java.util.UUID")
+                    )
+                ),
+            input = InputMetadata(headers = emptyList(), body = null),
+            outputs =
+                listOf(
+                    OutputMetadata(
+                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.NotFound),
+                        description = "Not Found",
+                        headers = emptyList(),
+                        body =
+                            BodyMetadata(
+                                type =
+                                    TypeMetadata(
+                                        "dev.akif.tapik.JsonBody",
+                                        arguments = listOf(TypeMetadata("dev.akif.tapik.clients.APIError"))
+                                    ),
+                                name = "userNotFound",
+                                mediaType = "application/json"
+                            )
+                    ),
+                    OutputMetadata(
+                        match = OutputMatchMetadata.Exact(dev.akif.tapik.Status.NotFound),
+                        description = "Not Found",
+                        headers = emptyList(),
+                        body =
+                            BodyMetadata(
+                                type =
+                                    TypeMetadata(
+                                        "dev.akif.tapik.JsonBody",
+                                        arguments = listOf(TypeMetadata("dev.akif.tapik.clients.APIError"))
+                                    ),
+                                name = "itemNotFound",
+                                mediaType = "application/json"
+                            )
+                    )
+                ),
+            packageName = "dev.akif.tapik.clients",
+            sourceFile = "Lists"
         )
 }

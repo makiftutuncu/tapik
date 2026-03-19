@@ -171,6 +171,85 @@ class EndpointContractModelTest {
         assertEquals(listOf("Ok", "Response4xx"), model.response.variants.map { it.typeName })
     }
 
+    @Test
+    fun `buildEndpointContractModels disambiguates duplicate exact statuses using body names`() {
+        val model =
+            buildEndpointContractModels(
+                endpoints =
+                    listOf(
+                        duplicateStatusMetadata(
+                            outputs =
+                                listOf(
+                                    errorOutput(name = "userNotFound"),
+                                    errorOutput(name = "itemNotFound")
+                                )
+                        )
+                    ),
+                sourceFile = "Lists"
+            ).single()
+
+        assertEquals(
+            listOf("NotFoundUserNotFound", "NotFoundItemNotFound"),
+            model.response.variants.map { it.typeName }
+        )
+    }
+
+    @Test
+    fun `buildEndpointContractModels falls back to numeric suffixes when duplicate statuses stay ambiguous`() {
+        val model =
+            buildEndpointContractModels(
+                endpoints =
+                    listOf(
+                        duplicateStatusMetadata(
+                            outputs =
+                                listOf(
+                                    errorOutput(name = "error"),
+                                    errorOutput(name = "error")
+                                )
+                        )
+                    ),
+                sourceFile = "Lists"
+            ).single()
+
+        assertEquals(
+            listOf("NotFoundError", "NotFoundError2"),
+            model.response.variants.map { it.typeName }
+        )
+    }
+
+    @Test
+    fun `buildEndpointContractModels falls back to numeric suffixes when duplicate statuses have no semantic suffix`() {
+        val model =
+            buildEndpointContractModels(
+                endpoints =
+                    listOf(
+                        duplicateStatusMetadata(
+                            outputs =
+                                listOf(
+                                    OutputMetadata(
+                                        match = OutputMatchMetadata.Exact(Status.NotFound),
+                                        description = "Not Found",
+                                        headers = emptyList(),
+                                        body = BodyMetadata(type = TypeMetadata("dev.akif.tapik.EmptyBody"))
+                                    ),
+                                    OutputMetadata(
+                                        match = OutputMatchMetadata.Exact(Status.NotFound),
+                                        description = "Not Found",
+                                        headers = emptyList(),
+                                        body = BodyMetadata(type = TypeMetadata("dev.akif.tapik.EmptyBody"))
+                                    )
+                                )
+                        )
+                    ),
+                sourceFile = "Lists"
+            ).single()
+
+        assertEquals(
+            listOf("NotFound", "NotFound2"),
+            model.response.variants.map { it.typeName }
+        )
+    }
+
     private fun usersCreateMetadata(): HttpEndpointMetadata =
         HttpEndpointMetadata(
             id = "create",
@@ -230,5 +309,33 @@ class EndpointContractModelTest {
                 ),
             packageName = "dev.akif.tapik.test",
             sourceFile = "Users"
+        )
+
+    private fun duplicateStatusMetadata(outputs: List<OutputMetadata>): HttpEndpointMetadata =
+        HttpEndpointMetadata(
+            id = "delete",
+            propertyName = "delete",
+            description = null,
+            details = null,
+            method = "DELETE",
+            path = listOf("api", "lists"),
+            parameters = emptyList(),
+            input = InputMetadata(headers = emptyList(), body = null),
+            outputs = outputs,
+            packageName = "dev.akif.tapik.test",
+            sourceFile = "Lists"
+        )
+
+    private fun errorOutput(name: String): OutputMetadata =
+        OutputMetadata(
+            match = OutputMatchMetadata.Exact(Status.NotFound),
+            description = "Not Found",
+            headers = emptyList(),
+            body =
+                BodyMetadata(
+                    type = TypeMetadata("dev.akif.tapik.JsonBody", arguments = listOf(TypeMetadata("dev.akif.tapik.test.APIError"))),
+                    name = name,
+                    mediaType = "application/json"
+                )
         )
 }

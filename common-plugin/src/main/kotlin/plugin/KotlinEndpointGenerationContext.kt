@@ -5,6 +5,7 @@ import dev.akif.tapik.plugin.metadata.OutputMatchMetadata
 /**
  * Shared naming and response-shape information exposed to Kotlin endpoint generators.
  *
+ * @property contractTypeName generated Kotlin type name for the endpoint contract that owns shared helpers.
  * @property endpointReference short reference to the original Tapik endpoint definition.
  * @property methodName generated method name used by Kotlin integrations.
  * @property summaryLines summary documentation lines rendered from the endpoint description.
@@ -12,6 +13,7 @@ import dev.akif.tapik.plugin.metadata.OutputMatchMetadata
  * @property response generated public response shape shared by Kotlin integrations.
  */
 data class KotlinEndpointGenerationContext(
+    val contractTypeName: String,
     val endpointReference: String,
     val methodName: String,
     val summaryLines: List<String>,

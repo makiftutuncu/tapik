@@ -39,6 +39,7 @@ class RestClientBasedClientGeneratorTest {
                 .toList()
         assertTrue(imports.contains("import dev.akif.tapik.encodeInputHeaders"))
         assertTrue(imports.contains("import dev.akif.tapik.spring.toStatus"))
+        assertTrue(imports.contains("import dev.akif.tapik.spring.toTapikHeaders"))
         assertTrue(imports.contains("import dev.akif.tapik.clients.UserEndpoints"))
         assertTrue(content.contains("interface UserEndpointsClient : UserEndpoints.User.Client"))
         assertTrue(content.contains("interface UserEndpoints {"))
@@ -50,7 +51,9 @@ class RestClientBasedClientGeneratorTest {
         assertTrue(content.contains("fun user("))
         assertTrue(content.contains("): Response {"))
         assertTrue(content.contains("return Response.Ok("))
-        assertTrue(content.contains("uri = dev.akif.tapik.renderURI("))
+        assertTrue(content.contains("fun uri("))
+        assertTrue(content.contains("uri = UserEndpoints.User.uri(userId, page),"))
+        assertTrue(content.contains("val headers = responseEntity.headers.toTapikHeaders()"))
     }
 
     @Test
@@ -75,14 +78,10 @@ class RestClientBasedClientGeneratorTest {
                 "`class`: kotlin.String? = WildEndpoints.wild.parameters.item2.asQueryParameter<kotlin.String>().default.getOrNull()"
             )
         )
-        assertTrue(content.contains("uri = dev.akif.tapik.renderURI("))
-        assertTrue(
-            content.contains(
-                "WildEndpoints.wild.parameters.item1 to WildEndpoints.wild.parameters.item1.codec.encode(value1stId)"
-            )
-        )
-        assertTrue(content.contains("WildEndpoints.wild.input.encodeInputHeaders(xTraceId, xTraceId2)"))
+        assertTrue(content.contains("WildEndpoints.wild.input.encodeInputHeaders(xTraceId)"))
+        assertTrue(!content.contains("xTraceId2: kotlin.String"))
         assertTrue(content.contains("data class Created("))
+        assertTrue(content.contains("uri = WildEndpoints.Wild.uri(value1stId, `class`),"))
     }
 
     @Test
@@ -101,7 +100,7 @@ class RestClientBasedClientGeneratorTest {
     }
 
     @Test
-    fun `generate keeps renderURI argument order aligned with generated method parameter order`() {
+    fun `generate keeps uri helper argument order aligned with generated method parameter order`() {
         val rootDir = tempDir.toFile()
 
         val generated = generate(listOf(metadataWithMixedQueryOrdering()), testContext(rootDir))
@@ -118,13 +117,7 @@ class RestClientBasedClientGeneratorTest {
             ).containsMatchIn(content),
             "Expected method parameters in required-then-optional order"
         )
-        assertTrue(
-            Regex(
-                """uri = dev\.akif\.tapik\.renderURI\(\s*MixedQueryEndpoints\.mixed\.path,\s*MixedQueryEndpoints\.mixed\.parameters\.item2 to MixedQueryEndpoints\.mixed\.parameters\.item2\.codec\.encode\(requiredQ\),\s*MixedQueryEndpoints\.mixed\.parameters\.item1 to optionalQ\?\.let \{ MixedQueryEndpoints\.mixed\.parameters\.item1\.codec\.encode\(it\) \}""",
-                setOf(RegexOption.DOT_MATCHES_ALL)
-            ).containsMatchIn(content),
-            "Expected renderURI argument order to match method parameter order"
-        )
+        assertTrue(content.contains("uri = MixedQueryEndpoints.Mixed.uri(requiredQ, optionalQ),"))
     }
 
     @Test
@@ -144,6 +137,9 @@ class RestClientBasedClientGeneratorTest {
         assertTrue(content.contains("data class BadRequest("))
         assertTrue(content.contains("fun create("))
         assertTrue(content.contains("): Response {"))
+        assertTrue(content.contains("Users.create.input.encodeInputHeaders()"))
+        assertTrue(!content.contains("accept: dev.akif.tapik.MediaType"))
+        assertTrue(!content.contains("asHeaderValues<dev.akif.tapik.MediaType>()"))
         assertTrue(content.contains("Response.Created(decodedBody, location)"))
         assertTrue(content.contains("Response.BadRequest(decodedBody)"))
     }

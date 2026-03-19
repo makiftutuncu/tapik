@@ -1,5 +1,6 @@
 package dev.akif.tapik.jackson
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dev.akif.tapik.*
@@ -10,6 +11,9 @@ val defaultObjectMapper: ObjectMapper = jacksonObjectMapper()
 /**
  * Builds a [JacksonCodec] for the requested type [T].
  *
+ * Generic type arguments from [T] are preserved, so codecs such as `jacksonCodec<List<User>>()`
+ * still decode elements as `User` instead of raw map values.
+ *
  * @param T domain type handled by the codec.
  * @param name human readable identifier used in error messages.
  * @param mapper optional mapper override; defaults to [defaultObjectMapper].
@@ -19,10 +23,16 @@ val defaultObjectMapper: ObjectMapper = jacksonObjectMapper()
 inline fun <reified T : Any> jacksonCodec(
     name: String,
     mapper: ObjectMapper? = null
-): JacksonCodec<T> = JacksonCodec(name, mapper ?: defaultObjectMapper, T::class)
+): JacksonCodec<T> {
+    val resolvedMapper = mapper ?: defaultObjectMapper
+    val sourceType = resolvedMapper.typeFactory.constructType(object : TypeReference<T>() {})
+    return JacksonCodec(name, resolvedMapper, T::class, sourceType)
+}
 
 /**
  * Builds a JSON [Body] definition using the provided Jackson codec.
+ *
+ * Generic type arguments from [T] are preserved for runtime decoding.
  *
  * @param T domain type represented by the body.
  * @param name human readable identifier used in error messages.

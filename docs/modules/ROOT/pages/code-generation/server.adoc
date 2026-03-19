@@ -110,7 +110,8 @@ class CatalogApiServerResponseAdvice : dev.akif.tapik.spring.TapikResponseBodyAd
 The exact generated code varies with the contract, but the behavior is consistent:
 
 * method and path come from the endpoint definition,
-* query parameters, headers, and request bodies map to the matching Spring annotations,
+* path variables, query parameters, required headers, and request bodies map to the matching Spring annotations,
+* input headers declared with fixed `HeaderValues(...)` stay in the contract and docs but are not exposed as server method parameters,
 * multi-output endpoints keep distinct response variants,
 * generated response advice turns those variants into Spring responses by using Tapik codecs and endpoint metadata.
 

@@ -26,6 +26,18 @@ class JacksonCodecTest {
     }
 
     @Test
+    fun `jacksonCodec preserves generic element types`() {
+        val codec = jacksonCodec<List<User>>("users")
+        val users = listOf(User(1, "Tapik"), User(2, "Codex"))
+
+        val encoded = codec.encode(users)
+        val decoded = codec.decode(encoded).getOrElse { fail("Unexpected decode failure") }
+
+        assertEquals(users, decoded)
+        assertIs<User>(decoded.first())
+    }
+
+    @Test
     fun `jacksonCodec surfaces mapper failures`() {
         val codec = jacksonCodec<User>("user")
 

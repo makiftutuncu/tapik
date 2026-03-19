@@ -9,6 +9,8 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.URI
 import java.util.UUID
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * Describes one HTTP header slot in an endpoint contract.
@@ -333,6 +335,28 @@ sealed interface Header<H : Any> {
 
         /** Predefined header definition for `WWW-Authenticate`. */
         val WwwAuthenticate: Header<String> = string(WWW_AUTHENTICATE_VALUE)
+
+        /**
+         * Builds an `Authorization` header value for HTTP Basic authentication.
+         *
+         * @param username username portion of the credential pair.
+         * @param password password portion of the credential pair.
+         * @return fixed `Authorization` header carrying the encoded Basic credentials.
+         */
+        @OptIn(ExperimentalEncodingApi::class)
+        fun basicAuthentication(
+            username: String,
+            password: String
+        ): HeaderValues<String> = Authorization(Base64.UrlSafe.encode("$username:$password".encodeToByteArray()))
+
+        /**
+         * Builds an `Authorization` header value for HTTP Bearer authentication.
+         *
+         * @param token bearer token to attach to the request.
+         * @return fixed `Authorization` header carrying the Bearer token.
+         */
+        @OptIn(ExperimentalEncodingApi::class)
+        fun bearerAuthentication(token: String): HeaderValues<String> = Authorization("Bearer $token")
     }
 
     /**
@@ -364,7 +388,7 @@ data class HeaderInput<H : Any>(
     /** Codec used to encode and decode header values. */
     override val codec: StringCodec<H>
 ) : Header<H> {
-    /** Flag signalling that the header must be present. */
+    /** Flag signaling that the header must be present. */
     override val required: Boolean = true
 }
 
@@ -377,6 +401,6 @@ data class HeaderValues<H : Any>(
     /** Concrete header values that will be sent on the wire. */
     val values: List<H>
 ) : Header<H> {
-    /** Flag signalling the header is optional because values are pre-supplied. */
+    /** Flag signaling the header is optional because values are pre-supplied. */
     override val required: Boolean = false
 }

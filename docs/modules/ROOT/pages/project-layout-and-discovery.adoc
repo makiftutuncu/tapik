@@ -6,12 +6,18 @@ If generation does not behave the way you expect, this is usually the first page
 
 == tapik scans compiled classes, not source files
 
-The generation flow starts from compiled output under the module's main classes directory.
+The generation flow starts from compiled bytecode on the analysis classpath.
 
 That has two important consequences:
 
 * the relevant code has to compile first,
 * discovery behavior follows the compiled class layout, not just the source tree.
+
+In the `Gradle` plugin that means tapik scans:
+
+* the current module's main compiled classes directory,
+* compiled class directories from sibling subprojects in the same build,
+* dependency JARs on the runtime classpath.
 
 The `Gradle` plugin wires `tapikGenerate` to the `classes` task so the usual workflow stays straightforward.
 
@@ -26,7 +32,7 @@ tapik {
 }
 ----
 
-tapik then scans compiled classes under that package and looks for concrete types assignable to `API`.
+tapik then scans compiled classes and dependency JAR entries under that package and looks for concrete types assignable to `API`.
 
 If the configured base package is too narrow, endpoints outside it will not be discovered. If it is too broad, tapik will still only keep types that match the `API` contract.
 

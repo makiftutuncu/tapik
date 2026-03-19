@@ -1,6 +1,7 @@
 package dev.akif.tapik.jackson
 
 import arrow.core.*
+import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.akif.tapik.codec.ByteArrayCodec
 import kotlin.reflect.KClass
@@ -12,11 +13,13 @@ import kotlin.reflect.KClass
  * @property name human-readable identifier used when reporting failures.
  * @property mapper Jackson mapper used for serialization and deserialization.
  * @property sourceClass runtime [KClass] representing the decoded type.
+ * @property sourceType full Jackson type used for decoding generic payloads safely.
  */
 class JacksonCodec<T : Any>(
     val name: String,
     val mapper: ObjectMapper,
-    override val sourceClass: KClass<T>
+    override val sourceClass: KClass<T>,
+    val sourceType: JavaType = mapper.typeFactory.constructType(sourceClass.java)
 ) : ByteArrayCodec<T> {
     /** Runtime [KClass] representing the byte array payload produced by [encode]. */
     override val targetClass: KClass<ByteArray> = ByteArray::class
@@ -29,7 +32,8 @@ class JacksonCodec<T : Any>(
      */
     override fun decode(input: ByteArray): EitherNel<String, T> =
         try {
-            mapper.readValue(input, sourceClass.java).right()
+            @Suppress("UNCHECKED_CAST")
+            (mapper.readValue(input, sourceType) as T).right()
         } catch (e: Exception) {
             "Cannot decode '$name' as ${sourceClass.simpleName}: $input: $e".leftNel()
         }

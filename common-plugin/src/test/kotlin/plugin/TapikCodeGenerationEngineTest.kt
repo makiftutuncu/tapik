@@ -3,7 +3,11 @@ package dev.akif.tapik.plugin
 import dev.akif.tapik.plugin.fixtures.SampleEndpoints
 import java.io.File
 import java.nio.file.Path
+import java.util.jar.JarEntry
+import java.util.jar.JarOutputStream
 import kotlin.io.path.createDirectories
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.io.CleanupMode
@@ -136,4 +140,117 @@ class TapikCodeGenerationEngineTest {
         assertTrue(content.contains("import dev.akif.tapik.plugin.fixtures.SampleEndpoints"))
         assertTrue(content.contains("SampleEndpoints.user"))
     }
+
+    @Test
+    fun `generate discovers endpoints from additional compiled class directories`() {
+        val compiledDir = temporaryDir.resolve("empty-compiled").createDirectories().toFile()
+        val additionalDir = temporaryDir.resolve("additional-compiled").createDirectories()
+        copyFixtureClassesToDirectory(additionalDir)
+        val outputDir = temporaryDir.resolve("out-4").createDirectories().toFile()
+        val generatedDir = temporaryDir.resolve("generated-4").createDirectories().toFile()
+
+        TapikCodeGenerationEngine(
+            config = TapikCodeGenerationConfiguration(
+                outputDirectory = outputDir,
+                generatedSourcesDirectory = generatedDir,
+                endpointsSuffix = "Endpoints",
+                basePackage = "dev.akif.tapik.plugin.fixtures",
+                compiledClassesDirectory = compiledDir,
+                additionalClasspathDirectories = listOf(additionalDir.toFile()),
+                generatorConfigurations = mapOf("markdown-docs" to GeneratorConfiguration())
+            ),
+            logger = TapikLogger.NoOp
+        ).generate()
+
+        val summaryLines = outputDir.resolve("tapik-endpoints.txt").readText().lineSequence().toList()
+        assertTrue(summaryLines.any { "user" in it && "GET" in it }, "Summary should list endpoint from additional class directory")
+    }
+
+    @Test
+    fun `generate discovers endpoints from dependency jars`() {
+        val compiledDir = temporaryDir.resolve("empty-compiled-jar").createDirectories().toFile()
+        val dependencyJar = temporaryDir.resolve("fixture-endpoints.jar")
+        copyFixtureClassesToJar(dependencyJar)
+        val outputDir = temporaryDir.resolve("out-5").createDirectories().toFile()
+        val generatedDir = temporaryDir.resolve("generated-5").createDirectories().toFile()
+
+        TapikCodeGenerationEngine(
+            config = TapikCodeGenerationConfiguration(
+                outputDirectory = outputDir,
+                generatedSourcesDirectory = generatedDir,
+                endpointsSuffix = "Endpoints",
+                basePackage = "dev.akif.tapik.plugin.fixtures",
+                compiledClassesDirectory = compiledDir,
+                additionalClasspathDirectories = listOf(dependencyJar.toFile()),
+                generatorConfigurations = mapOf("markdown-docs" to GeneratorConfiguration())
+            ),
+            logger = TapikLogger.NoOp
+        ).generate()
+
+        val summaryLines = outputDir.resolve("tapik-endpoints.txt").readText().lineSequence().toList()
+        assertTrue(summaryLines.any { "user" in it && "GET" in it }, "Summary should list endpoint from dependency JAR")
+    }
+
+    @Test
+    fun `generate documents fixed header values using their codecs`() {
+        val compiledDir = File(SampleEndpoints::class.java.protectionDomain.codeSource.location.toURI())
+        val outputDir = temporaryDir.resolve("out-6").createDirectories().toFile()
+        val generatedDir = temporaryDir.resolve("generated-6").createDirectories().toFile()
+
+        TapikCodeGenerationEngine(
+            config = TapikCodeGenerationConfiguration(
+                outputDirectory = outputDir,
+                generatedSourcesDirectory = generatedDir,
+                endpointsSuffix = "Endpoints",
+                basePackage = "dev.akif.tapik.plugin",
+                compiledClassesDirectory = compiledDir,
+                additionalClasspathDirectories = emptyList(),
+                generatorConfigurations = mapOf("markdown-docs" to GeneratorConfiguration())
+            ),
+            logger = TapikLogger.NoOp
+        ).generate()
+
+        val documentation = outputDir.resolve("API.md").readText()
+        assertTrue(documentation.contains("`encoded:alpha`"))
+        assertTrue(documentation.contains("`encoded:beta`"))
+    }
+
+    private fun copyFixtureClassesToDirectory(targetDirectory: Path) {
+        fixtureClassFiles().forEach { source ->
+            val relativePath = fixtureClassesRoot().relativize(source)
+            val target = targetDirectory.resolve(relativePath.toString())
+            target.parent?.createDirectories()
+            source.inputStream().use { input ->
+                target.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+    }
+
+    private fun copyFixtureClassesToJar(targetJar: Path) {
+        targetJar.outputStream().use { output ->
+            JarOutputStream(output).use { jar ->
+                fixtureClassFiles().forEach { source ->
+                    val relativePath = fixtureClassesRoot().relativize(source).toString().replace(File.separatorChar, '/')
+                    jar.putNextEntry(JarEntry(relativePath))
+                    source.inputStream().use { input -> input.copyTo(jar) }
+                    jar.closeEntry()
+                }
+            }
+        }
+    }
+
+    private fun fixtureClassFiles(): List<Path> =
+        fixtureClassesRoot()
+            .resolve("dev/akif/tapik/plugin/fixtures")
+            .toFile()
+            .listFiles()
+            ?.filter { it.isFile && it.name.startsWith("SampleEndpoints") && it.extension == "class" }
+            ?.map { it.toPath() }
+            ?.sortedBy { it.toString() }
+            .orEmpty()
+
+    private fun fixtureClassesRoot(): Path =
+        File(SampleEndpoints::class.java.protectionDomain.codeSource.location.toURI()).toPath()
 }

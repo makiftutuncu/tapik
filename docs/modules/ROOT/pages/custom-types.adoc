@@ -42,6 +42,10 @@ val getProduct by endpoint {
 
 This separation keeps the core transport model independent from one JSON implementation.
 
+`dev.akif.tapik.jackson.jsonBody<T>()` also keeps generic type arguments. For example,
+`jsonBody<List<ProductView>>("products")` will decode list elements back as `ProductView`
+instances in generated clients instead of raw `Map` values.
+
 == Write a custom codec when built-ins are not enough
 
 If your transport format is not covered by the default codecs:

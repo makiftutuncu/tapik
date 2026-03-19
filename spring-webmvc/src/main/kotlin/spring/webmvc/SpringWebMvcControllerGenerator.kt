@@ -341,13 +341,10 @@ class SpringWebMvcControllerGenerator : TapikKotlinEndpointGenerator {
         }
 
     private fun List<HeaderMetadata>.buildHeaderSpecs(allocator: NameAllocator): List<ParameterSpec> =
-        mapIndexed { index, header ->
+        filter { it.required }.mapIndexed { index, header ->
             val argumentName = allocator.allocate(header.name, "header${index + 1}")
             val attributes = mutableListOf<String>()
             attributes += """name = "${header.name}""""
-            if (!header.required) {
-                attributes += "required = false"
-            }
             val annotation = "@org.springframework.web.bind.annotation.RequestHeader(${attributes.joinToString(", ")})"
             ParameterSpec(
                 declaration = "$annotation $argumentName: ${header.type.render()}"

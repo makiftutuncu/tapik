@@ -7,10 +7,17 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class HeaderEncodingDecodingTest : API {
+    private val fixedHeader = Header.string("X-Group")("first", "second")
     private val inputHeader = Header.string("X-Request-Id")
     private val outputHeader = Header.int("X-Count")
     private val encodeInputEndpoint by endpoint {
         get("").input(inputHeader)
+    }
+    private val fixedHeadersEndpoint by endpoint {
+        get("").input(fixedHeader)
+    }
+    private val mixedHeadersEndpoint by endpoint {
+        get("").input(fixedHeader, inputHeader)
     }
 
     @Test
@@ -18,6 +25,26 @@ class HeaderEncodingDecodingTest : API {
         val encoded = encodeInputEndpoint.input.encodeInputHeaders("abc123")
 
         assertEquals(mapOf("X-Request-Id" to listOf("abc123")), encoded)
+    }
+
+    @Test
+    fun `encode input headers preserves embedded fixed header values`() {
+        val encoded = fixedHeadersEndpoint.input.encodeInputHeaders()
+
+        assertEquals(mapOf("X-Group" to listOf("first", "second")), encoded)
+    }
+
+    @Test
+    fun `encode input headers combines embedded fixed values with provided values`() {
+        val encoded = mixedHeadersEndpoint.input.encodeInputHeaders("abc123")
+
+        assertEquals(
+            mapOf(
+                "X-Group" to listOf("first", "second"),
+                "X-Request-Id" to listOf("abc123")
+            ),
+            encoded
+        )
     }
 
     @Test

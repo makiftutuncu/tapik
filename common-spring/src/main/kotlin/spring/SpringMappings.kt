@@ -2,6 +2,7 @@ package dev.akif.tapik.spring
 
 import dev.akif.tapik.MediaType
 import dev.akif.tapik.Status
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType as SpringMediaType
@@ -37,6 +38,19 @@ fun HttpStatus.toStatus(): Status = Status.of(value())
  * @return equivalent Tapik [Status].
  */
 fun HttpStatusCode.toStatus(): Status = Status.of(value())
+
+/**
+ * Converts Spring [HttpHeaders] into the plain header map shape expected by Tapik generators.
+ *
+ * @receiver Spring response headers.
+ * @return immutable map of header names to all of their string values.
+ */
+fun HttpHeaders.toTapikHeaders(): Map<String, List<String>> =
+    buildMap {
+        this@toTapikHeaders.forEach { name, values ->
+            put(name, values.toList())
+        }
+    }
 
 /**
  * Converts Tapik [MediaType] definitions into Spring [MediaType] instances.

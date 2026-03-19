@@ -12,6 +12,7 @@ internal data class EndpointContractModel(
     val endpoint: HttpEndpointMetadata,
     val enclosingInterfaceName: String,
     val interfaceName: String,
+    val contractTypeName: String,
     val endpointReference: String,
     val endpointImportPath: String?,
     val methodName: String,
@@ -54,6 +55,7 @@ internal fun buildEndpointContractModels(
             endpoint = endpoint,
             enclosingInterfaceName = enclosingInterfaceName,
             interfaceName = interfaceName,
+            contractTypeName = "$enclosingInterfaceName.$interfaceName",
             endpointReference = endpoint.renderEndpointReference(),
             endpointImportPath = endpoint.renderEndpointImportPath(),
             methodName = renderIdentifier(endpoint.id),
@@ -69,48 +71,91 @@ private fun buildResponseModel(
     enclosingInterfaceName: String,
     interfaceName: String
 ): EndpointContractModel.ResponseModel {
-    val variants = endpoint.outputs.map { output -> output.toVariantModel() }
+    val variants = buildResponseVariants(endpoint.outputs)
     return EndpointContractModel.ResponseModel(
         typeName = "$enclosingInterfaceName.$interfaceName.Response",
         variants = variants
     )
 }
 
-private fun OutputMetadata.toVariantModel(): EndpointContractModel.ResponseModel.Variant {
-    val usedFieldNames = mutableSetOf<String>()
-    val fields =
-        buildList {
-            if (body.type.simpleName() != "EmptyBody") {
-                add(
-                    EndpointContractModel.ResponseModel.Field(
-                        name = uniqueName(sanitizeIdentifier(body.name, "body"), usedFieldNames),
-                        type = body.determineBodyFieldType()
-                    )
-                )
-            }
-            headers.forEachIndexed { index, header ->
-                add(
-                    EndpointContractModel.ResponseModel.Field(
-                        name = uniqueName(sanitizeIdentifier(header.name, "header${index + 1}"), usedFieldNames),
-                        type = header.renderFieldType()
-                    )
-                )
-            }
+private fun buildResponseVariants(outputs: List<OutputMetadata>): List<EndpointContractModel.ResponseModel.Variant> {
+    val drafts =
+        outputs.map { output ->
+            val usedFieldNames = mutableSetOf<String>()
+            val fields = output.buildVariantFields(usedFieldNames)
+            ResponseVariantDraft(
+                output = output,
+                baseTypeName = renderVariantBaseTypeName(output.match, output.description),
+                semanticSuffix = output.determineSemanticVariantSuffix(),
+                statusFieldName = output.match.determineStatusFieldName(usedFieldNames),
+                fields = fields
+            )
         }
 
-    return EndpointContractModel.ResponseModel.Variant(
-        typeName = renderVariantTypeName(match, description),
-        match = match,
-        status = match.asExactStatusOrNull(),
-        statusFieldName = match.determineStatusFieldName(usedFieldNames),
-        description = description,
-        isObject = fields.isEmpty(),
-        fields = fields
-    )
+    val duplicateBaseNames =
+        drafts.groupingBy { it.baseTypeName }
+            .eachCount()
+            .filterValues { it > 1 }
+            .keys
+    val usedTypeNames = mutableSetOf<String>()
+
+    return drafts.map { draft ->
+        val preferredBaseName =
+            if (draft.baseTypeName in duplicateBaseNames) {
+                draft.semanticSuffix?.let { draft.baseTypeName + it } ?: draft.baseTypeName
+            } else {
+                draft.baseTypeName
+            }
+
+        EndpointContractModel.ResponseModel.Variant(
+            typeName = allocateUniqueVariantTypeName(preferredBaseName, usedTypeNames),
+            match = draft.output.match,
+            status = draft.output.match.asExactStatusOrNull(),
+            statusFieldName = draft.statusFieldName,
+            description = draft.output.description,
+            isObject = draft.fields.isEmpty(),
+            fields = draft.fields
+        )
+    }
 }
+
+private fun OutputMetadata.buildVariantFields(
+    usedFieldNames: MutableSet<String>
+): List<EndpointContractModel.ResponseModel.Field> =
+    buildList {
+        if (body.type.simpleName() != "EmptyBody") {
+            add(
+                EndpointContractModel.ResponseModel.Field(
+                    name = uniqueName(sanitizeIdentifier(body.name, "body"), usedFieldNames),
+                    type = body.determineBodyFieldType()
+                )
+            )
+        }
+        headers.forEachIndexed { index, header ->
+            add(
+                EndpointContractModel.ResponseModel.Field(
+                    name = uniqueName(sanitizeIdentifier(header.name, "header${index + 1}"), usedFieldNames),
+                    type = header.renderFieldType()
+                )
+            )
+        }
+    }
+
+private fun OutputMetadata.determineSemanticVariantSuffix(): String? =
+    when {
+        body.type.simpleName() != "EmptyBody" ->
+            body.name?.toPascalIdentifier("Body") ?: "Body"
+        headers.isNotEmpty() ->
+            headers.joinToString(separator = "") { header ->
+                header.name.toPascalIdentifier("Header")
+            }
+
+        else -> null
+    }
 
 internal fun EndpointContractModel.toGenerationContext(): KotlinEndpointGenerationContext =
     KotlinEndpointGenerationContext(
+        contractTypeName = contractTypeName,
         endpointReference = endpointReference,
         methodName = methodName,
         summaryLines = summaryLines,
@@ -148,7 +193,7 @@ private fun HeaderMetadata.renderFieldType(): String {
     }
 }
 
-private fun renderVariantTypeName(
+private fun renderVariantBaseTypeName(
     match: OutputMatchMetadata,
     description: String
 ): String {
@@ -162,6 +207,27 @@ private fun renderVariantTypeName(
 
     return rawBase.toPascalIdentifier("Response")
 }
+
+private fun allocateUniqueVariantTypeName(
+    baseName: String,
+    usedTypeNames: MutableSet<String>
+): String {
+    var candidate = baseName.toPascalIdentifier("Response")
+    var index = 2
+    while (!usedTypeNames.add(candidate)) {
+        candidate = (baseName + index.toString()).toPascalIdentifier("Response")
+        index++
+    }
+    return candidate
+}
+
+private data class ResponseVariantDraft(
+    val output: OutputMetadata,
+    val baseTypeName: String,
+    val semanticSuffix: String?,
+    val statusFieldName: String?,
+    val fields: List<EndpointContractModel.ResponseModel.Field>
+)
 
 private fun OutputMatchMetadata.asExactStatusOrNull(): Status? =
     when (this) {

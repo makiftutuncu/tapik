@@ -114,19 +114,18 @@ interface Codec<Source : Any, Target : Any> :
 inline fun <Source : Any, Target : Any, reified Source2 : Any> Codec<Source, Target>.unsafeTransformSource(
     crossinline from: (Source) -> Source2,
     crossinline to: (Source2) -> Source
-): Codec<Source2, Target> =
-    object : Codec<Source2, Target> {
+): Codec<Source2, Target> {
+    val codec = this
+    return object : Codec<Source2, Target> {
         override val sourceClass: KClass<Source2> = Source2::class
 
-        override val targetClass: KClass<Target> = this@unsafeTransformSource.targetClass
+        override val targetClass: KClass<Target> = codec.targetClass
 
-        override fun decode(input: Target): EitherNel<String, Source2> =
-            this@unsafeTransformSource.decode(input).map {
-                from(it)
-            }
+        override fun decode(input: Target): EitherNel<String, Source2> = codec.decode(input).map { from(it) }
 
-        override fun encode(input: Source2): Target = this@unsafeTransformSource.encode(to(input))
+        override fun encode(input: Source2): Target = codec.encode(to(input))
     }
+}
 
 /**
  * Adapts a codec to a different target type while keeping the original source type.
@@ -140,16 +139,18 @@ inline fun <Source : Any, Target : Any, reified Source2 : Any> Codec<Source, Tar
 inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Target>.unsafeTransformTarget(
     crossinline from: (Target2) -> Target,
     crossinline to: (Target) -> Target2
-): Codec<Source, Target2> =
-    object : Codec<Source, Target2> {
-        override val sourceClass: KClass<Source> = this@unsafeTransformTarget.sourceClass
+): Codec<Source, Target2> {
+    val codec = this
+    return object : Codec<Source, Target2> {
+        override val sourceClass: KClass<Source> = codec.sourceClass
 
         override val targetClass: KClass<Target2> = Target2::class
 
-        override fun decode(input: Target2): EitherNel<String, Source> = this@unsafeTransformTarget.decode(from(input))
+        override fun decode(input: Target2): EitherNel<String, Source> = codec.decode(from(input))
 
-        override fun encode(input: Source): Target2 = to(this@unsafeTransformTarget.encode(input))
+        override fun encode(input: Source): Target2 = to(codec.encode(input))
     }
+}
 
 /**
  * Converts a [StringCodec] into a [ByteArrayCodec] by bridging through Kotlin's default string/byte
@@ -157,6 +158,6 @@ inline fun <Source : Any, Target : Any, reified Target2 : Any> Codec<Source, Tar
  */
 fun <T : Any> StringCodec<T>.toByteArrayCodec(): ByteArrayCodec<T> =
     unsafeTransformTarget(
-        from = { String(it) },
-        to = { it.toByteArray() }
+        from = { it.decodeToString() },
+        to = { it.encodeToByteArray() }
     )
