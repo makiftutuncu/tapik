@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>tapik :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.4.1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li><a href="index.html">Home</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.4.1</button>
+  <div class="version-menu">
+    <a class="version" href="../index.html">v0.5.0</a>
+    <a class="version is-current" href="index.html">v0.4.1</a>
+    <a class="version" href="../v0.4.0/index.html">v0.4.0</a>
+    <a class="version" href="../v0.3.0/index.html">v0.3.0</a>
+    <a class="version" href="../v0.2.7/index.html">v0.2.7</a>
+    <a class="version" href="../v0.2.6/index.html">v0.2.6</a>
+    <a class="version" href="../v0.2.5/index.html">v0.2.5</a>
+    <a class="version" href="../v0.2.4/index.html">v0.2.4</a>
+    <a class="version" href="../v0.2.3/index.html">v0.2.3</a>
+    <a class="version" href="../v0.2.2/index.html">v0.2.2</a>
+    <a class="version" href="../v0.2.1/index.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.1/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">tapik</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik lets you describe an HTTP contract once in Kotlin and use that contract to generate typed clients, typed server interfaces, and human-readable documentation.</p>
+</div>
+<div class="paragraph">
+<p>It is built for teams that want one source of truth for request shape, response shape, and endpoint intent instead of maintaining separate controller signatures, client wrappers, and API notes by hand.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_tapik_solves"><a class="anchor" href="#_what_tapik_solves"></a>What tapik solves</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik is useful when your API contract is repeated in too many places:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>endpoint declarations in one module,</p>
+</li>
+<li>
+<p>client wrappers in another,</p>
+</li>
+<li>
+<p>server interfaces or controllers somewhere else,</p>
+</li>
+<li>
+<p><code>Markdown</code> or wiki documentation that drifts over time.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>tapik replaces that duplication with one Kotlin contract model. Generation then works from the compiled contract, not from copied documentation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_tapik_can_do"><a class="anchor" href="#_what_tapik_can_do"></a>What tapik can do</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Area</th>
+<th class="tableblock halign-left valign-top">Available</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contract authoring</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Define methods, paths, path variables, query parameters, headers, bodies, and outputs in the Kotlin DSL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client generation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generate Kotlin clients backed by Spring <code>RestClient</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Server generation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generate Spring <code>Web MVC</code> server interfaces</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Codec support</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Use built-in scalar codecs and <code>Jackson</code>-backed JSON bodies</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Build integration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Run generation through the <code>Gradle</code> plugin</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Human-readable docs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generate a <code>Markdown</code> endpoint summary and publish API reference with <code>Dokka</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_where_tapik_fits_well"><a class="anchor" href="#_where_tapik_fits_well"></a>Where tapik fits well</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik is a good fit when:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>your API contract is authored in Kotlin,</p>
+</li>
+<li>
+<p>you want generated artifacts to stay aligned with the code that defines the API,</p>
+</li>
+<li>
+<p>your team values typed request and response models over stringly typed HTTP wrappers,</p>
+</li>
+<li>
+<p><code>Spring</code> is already part of the stack.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_start_from_your_goal"><a class="anchor" href="#_start_from_your_goal"></a>Start from your goal</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">If you want to&#8230;&#8203;</th>
+<th class="tableblock halign-left valign-top">Start here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">See a complete first result quickly</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="getting-started.html" class="xref page">Quickstart</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Decide whether tapik fits your use case</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="choose-a-goal.html" class="xref page">Choose a Goal</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Model endpoints cleanly</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="user-guide.html" class="xref page">Model HTTP Contracts</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generate a Spring <code>RestClient</code> client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="code-generation/client.html" class="xref page">Generate a Client</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generate Spring <code>Web MVC</code> server contracts</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="code-generation/server.html" class="xref page">Generate a Server</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Review the support overview</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="capabilities.html" class="xref page">Capabilities and Roadmap</a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The <a href="api/index.html">API Reference</a> complements this site. Use the Antora pages for workflow, architecture, and adoption guidance, then use <code>Dokka</code> for API-level detail.</p>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="next"><a href="getting-started.html">Quickstart</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>

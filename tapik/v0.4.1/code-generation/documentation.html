@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Generate Documentation :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/search.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.4.1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="../index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">tapik</a></li>
+    <li>Generate outputs</li>
+    <li><a href="documentation.html">Generate Documentation</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.4.1</button>
+  <div class="version-menu">
+    <a class="version" href="../../code-generation/documentation.html">v0.5.0</a>
+    <a class="version is-current" href="documentation.html">v0.4.1</a>
+    <a class="version" href="../../v0.4.0/code-generation/documentation.html">v0.4.0</a>
+    <a class="version" href="../../v0.3.0/code-generation/documentation.html">v0.3.0</a>
+    <a class="version" href="../../v0.2.7/code-generation/documentation.html">v0.2.7</a>
+    <a class="version" href="../../v0.2.6/code-generation/documentation.html">v0.2.6</a>
+    <a class="version" href="../../v0.2.5/code-generation/documentation.html">v0.2.5</a>
+    <a class="version" href="../../v0.2.4/code-generation/documentation.html">v0.2.4</a>
+    <a class="version" href="../../v0.2.3/code-generation/documentation.html">v0.2.3</a>
+    <a class="version" href="../../v0.2.2/code-generation/documentation.html">v0.2.2</a>
+    <a class="version" href="../../v0.2.1/code-generation/documentation.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.1/docs/modules/ROOT/pages/code-generation/documentation.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Generate Documentation</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik includes a <code>Markdown</code> generator that turns discovered endpoint metadata into a lightweight <code>API.md</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Use it when you want a generated contract summary that can be published, diffed, or reviewed as part of your build output.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_enable_the_generator"><a class="anchor" href="#_enable_the_generator"></a>Enable the generator</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">tapik {
+    markdownDocumentation { }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_it_generates"><a class="anchor" href="#_what_it_generates"></a>What it generates</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Markdown</code> generator writes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>build/generated/API.md</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The generated file groups endpoints by package and source file and includes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>endpoint ids and descriptions,</p>
+</li>
+<li>
+<p>HTTP method and path,</p>
+</li>
+<li>
+<p>URI parameter tables,</p>
+</li>
+<li>
+<p>input header tables,</p>
+</li>
+<li>
+<p>input body summaries,</p>
+</li>
+<li>
+<p>output summaries, including headers and body shape.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_problem_it_solves"><a class="anchor" href="#_what_problem_it_solves"></a>What problem it solves</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Markdown</code> generator is useful when you need a generated artifact that is easy to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>attach to a build,</p>
+</li>
+<li>
+<p>review in pull requests,</p>
+</li>
+<li>
+<p>publish into another documentation pipeline,</p>
+</li>
+<li>
+<p>inspect without reading generated Kotlin.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It is especially helpful as a contract snapshot for teams that want something lighter than a full site generator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_it_relates_to_dokka"><a class="anchor" href="#_how_it_relates_to_dokka"></a>How it relates to <code>Dokka</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Markdown</code> generator and <code>Dokka</code> do different jobs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Dokka</code> documents tapik&#8217;s Kotlin API surface,</p>
+</li>
+<li>
+<p><code>API.md</code> summarizes the endpoints discovered in your project.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>One documents the library. The other documents your declared HTTP contract.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_boundaries"><a class="anchor" href="#_boundaries"></a>Boundaries</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Markdown</code> generator is intentionally narrow. It does not replace a full user documentation site.</p>
+</div>
+<div class="paragraph">
+<p>It does not:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>explain user journeys,</p>
+</li>
+<li>
+<p>teach your architecture,</p>
+</li>
+<li>
+<p>add conceptual context beyond what the endpoint contract already says.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you need narrative documentation, keep writing that separately and use <code>API.md</code> as a generated reference input.</p>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="server.html">Generate a Server</a></span>
+    <span class="next"><a href="index.html">Generation Model</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../../_'</script>
+<script src="../../../_/js/site.js"></script>
+
+<script src="../../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../../.." data-snippet-length="100" src="../../../_/js/search-ui.js"></script>
+<script src="../../../search-index.js"></script>
+  </body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Model HTTP Contracts :: tapik</title>
+    <meta name="generator" content="Antora 3.1.14">
+<link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="../../_/css/search.css">
+<link rel="stylesheet" href="../../_/css/custom.css">
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; mermaid.initialize({"startOnLoad":true});</script>  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../..">tapik</a>
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs">
+        </div>
+      </div>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tapik" data-version="v0.4.1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">tapik</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Home</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="getting-started.html">Quickstart</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="choose-a-goal.html">Choose a Goal</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Use tapik</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="user-guide.html">Model HTTP Contracts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-types.html">Use Custom Types</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="project-layout-and-discovery.html">Project Layout and Discovery</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Generate outputs</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/client.html">Generate a Client</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/server.html">Generate a Server</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/documentation.html">Generate Documentation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="code-generation/index.html">Generation Model</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Understand tapik</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="capabilities.html">Capabilities and Roadmap</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="concepts/type-safety.html">Type Safety</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Reference</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/configuration.html">Gradle Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Contributing</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="development.html">Development Guide</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="api/index.html">API Reference</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">tapik</a></li>
+    <li>Use tapik</li>
+    <li><a href="user-guide.html">Model HTTP Contracts</a></li>
+  </ul>
+</nav>
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">v0.4.1</button>
+  <div class="version-menu">
+    <a class="version" href="../user-guide.html">v0.5.0</a>
+    <a class="version is-current" href="user-guide.html">v0.4.1</a>
+    <a class="version" href="../v0.4.0/user-guide.html">v0.4.0</a>
+    <a class="version" href="../v0.3.0/user-guide.html">v0.3.0</a>
+    <a class="version" href="../v0.2.7/user-guide.html">v0.2.7</a>
+    <a class="version" href="../v0.2.6/user-guide.html">v0.2.6</a>
+    <a class="version" href="../v0.2.5/user-guide.html">v0.2.5</a>
+    <a class="version" href="../v0.2.4/user-guide.html">v0.2.4</a>
+    <a class="version" href="../v0.2.3/user-guide.html">v0.2.3</a>
+    <a class="version" href="../v0.2.2/user-guide.html">v0.2.2</a>
+    <a class="version" href="../v0.2.1/user-guide.html">v0.2.1</a>
+  </div>
+</div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.1/docs/modules/ROOT/pages/user-guide.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Model HTTP Contracts</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This guide covers the core job tapik solves: declaring an HTTP contract once so the same model can drive generated clients, generated server interfaces, and documentation.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you have not run tapik yet, start with <a href="getting-started.html" class="xref page">Quickstart</a> first.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_start_with_one_api_type_per_contract_area"><a class="anchor" href="#_start_with_one_api_type_per_contract_area"></a>Start with one <code>API</code> type per contract area</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik discovers endpoints from concrete classes and objects that implement <code>API</code>.</p>
+</div>
+<div class="paragraph">
+<p>The most common pattern is one singleton object per API area:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">object CatalogApi : API {
+    val getProduct by endpoint { ... }
+    val createProduct by endpoint { ... }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That keeps discovery predictable and gives generators one obvious place to group related endpoints.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_let_the_endpoint_property_name_carry_the_identity"><a class="anchor" href="#_let_the_endpoint_property_name_carry_the_identity"></a>Let the endpoint property name carry the identity</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The delegated <code>endpoint</code> form uses the property name as the endpoint identifier:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val getProduct by endpoint(
+    description = "Get a product by ID",
+    details = "Returns localized product data when the product exists."
+) {
+    get("products" / path.string("productId"))
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That identifier flows into metadata and generated code, so descriptive property names matter.</p>
+</div>
+<div class="paragraph">
+<p>Use <code>description</code> for the short summary that should appear in generated docs. Use <code>details</code> only for behavior that a user of the endpoint needs to know but that does not fit in the summary.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_build_the_request_shape_from_the_uri_outward"><a class="anchor" href="#_build_the_request_shape_from_the_uri_outward"></a>Build the request shape from the URI outward</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>tapik contracts usually read best when you define reusable URI pieces first:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">private val products = "api" / "v1" / "products"
+private val productId = path.string("productId")
+private val locale = query.string("locale").optional("en-US")
+private val page = query.int("page").optional(1)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then use those pieces in the endpoint:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val getProduct by endpoint(
+    description = "Get a product by ID",
+    details = "Returns localized product data when the product exists."
+) {
+    get(products / productId + locale)
+        .input(header.uuid("X-Request-Id"))
+        .output(Status.Ok) { jsonBody&lt;ProductView&gt;("product") }
+        .output(Status.NotFound) { jsonBody&lt;ProblemDetails&gt;("problem") }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is the pattern to follow:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>path variables model required URI segments,</p>
+</li>
+<li>
+<p>query parameters model optional or filter-like inputs,</p>
+</li>
+<li>
+<p>headers model protocol metadata,</p>
+</li>
+<li>
+<p>bodies model the typed payload on the wire.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_add_bodies_only_when_the_request_really_has_one"><a class="anchor" href="#_add_bodies_only_when_the_request_really_has_one"></a>Add bodies only when the request really has one</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For request bodies, keep the endpoint honest about transport details:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val createProduct by endpoint(
+    description = "Create a product",
+    details = "Accepts a JSON request body and returns the created product."
+) {
+    post(products)
+        .input(header.Accept(MediaType.Json)) {
+            jsonBody&lt;CreateProductRequest&gt;("createProductRequest")
+        }
+        .output(Status.Created, headersOf(Header.Location)) {
+            jsonBody&lt;ProductView&gt;("product")
+        }
+        .output(Status.BadRequest) {
+            jsonBody&lt;ProblemDetails&gt;("problem")
+        }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The request body and the output bodies are separate declarations because they solve different problems:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>input bodies describe what the caller must send,</p>
+</li>
+<li>
+<p>output bodies describe what the endpoint may return,</p>
+</li>
+<li>
+<p>response headers belong on outputs, not on the endpoint as a whole.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_model_protocol_branches_not_internal_states"><a class="anchor" href="#_model_protocol_branches_not_internal_states"></a>Model protocol branches, not internal states</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Outputs are where tapik becomes most valuable. They define the observable branches of the endpoint contract.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val getAvatar by endpoint(
+    description = "Get a product image",
+    details = "Returns a raw PNG image for the requested product."
+) {
+    get(products / productId / "image" + query.int("size"))
+        .output {
+            rawBody(mediaType = MediaType.Custom("image", "png"))
+        }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When an endpoint has more than one meaningful outcome, declare them explicitly:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val authenticate by endpoint(
+    description = "Validate a session token",
+    details = "Returns plain-text auth errors for unauthorized or forbidden responses."
+) {
+    post("api" / "v1" / "auth")
+        .output(Status.BadRequest, headersOf(Header.ContentType(MediaType.Json))) {
+            jsonBody&lt;ProblemDetails&gt;("problem")
+        }
+        .output(anyStatus(Status.Unauthorized, Status.Forbidden)) {
+            stringBody("authError")
+        }
+        .output(unmatchedStatus) { EmptyBody }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Do this only when the branch matters to callers. tapik will preserve that shape in generated code.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reuse_definitions_not_entire_walls_of_dsl"><a class="anchor" href="#_reuse_definitions_not_entire_walls_of_dsl"></a>Reuse definitions, not entire walls of DSL</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The DSL is easiest to maintain when shared wire-level concepts are extracted once:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">private val requestId = header.uuid("X-Request-Id")
+private val locale = query.string("locale").optional("en-US")
+private val productId = path.string("productId")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Reuse is useful when it preserves meaning. If a helper hides the actual HTTP contract, it is usually too abstract for documentation and generation-oriented code.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_keep_the_source_readable_for_the_people_who_maintain_it"><a class="anchor" href="#_keep_the_source_readable_for_the_people_who_maintain_it"></a>Keep the source readable for the people who maintain it</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Good tapik contracts are concise, but they are not cryptic. A reader should be able to answer three questions directly from the source:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>what request shape does this endpoint accept,</p>
+</li>
+<li>
+<p>what responses can it produce,</p>
+</li>
+<li>
+<p>why does this endpoint exist in the API at all.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If those answers are clear in the contract, the generated artifacts usually become clear too.</p>
+</div>
+</div>
+</div>
+<div class="pagination-container">
+  <hr>
+  <nav class="pagination">
+    <span class="prev"><a href="choose-a-goal.html">Choose a Goal</a></span>
+    <span class="next"><a href="custom-types.html">Use Custom Types</a></span>
+  </nav>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script>window.uiRootPath = '../../_'</script>
+<script src="../../_/js/site.js"></script>
+
+<script src="../../_/js/vendor/lunr.js"></script>
+<script id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" src="../../_/js/search-ui.js"></script>
+<script src="../../search-index.js"></script>
+  </body>
+</html>

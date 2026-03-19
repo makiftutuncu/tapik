@@ -33,7 +33,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="tapik" data-version="v0.4.1">
+<div class="nav-container" data-component="tapik" data-version="v0.5.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -141,9 +141,10 @@
   </ul>
 </nav>
 <div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">v0.4.1</button>
+  <button class="version-menu-toggle" title="Show other versions of page">v0.5.0</button>
   <div class="version-menu">
-    <a class="version is-current" href="project-layout-and-discovery.html">v0.4.1</a>
+    <a class="version is-current" href="project-layout-and-discovery.html">v0.5.0</a>
+    <a class="version" href="v0.4.1/project-layout-and-discovery.html">v0.4.1</a>
     <a class="version" href="v0.4.0/project-layout-and-discovery.html">v0.4.0</a>
     <a class="version" href="v0.3.0/project-layout-and-discovery.html">v0.3.0</a>
     <a class="version is-missing" href="v0.2.7/index.html">v0.2.7</a>
@@ -155,7 +156,7 @@
     <a class="version is-missing" href="v0.2.1/index.html">v0.2.1</a>
   </div>
 </div>
-<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.4.1/docs/modules/ROOT/pages/project-layout-and-discovery.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/makiftutuncu/tapik/blob/v0.5.0/docs/modules/ROOT/pages/project-layout-and-discovery.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
@@ -177,7 +178,7 @@
 <h2 id="_tapik_scans_compiled_classes_not_source_files"><a class="anchor" href="#_tapik_scans_compiled_classes_not_source_files"></a>tapik scans compiled classes, not source files</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The generation flow starts from compiled output under the module&#8217;s main classes directory.</p>
+<p>The generation flow starts from compiled bytecode on the analysis classpath.</p>
 </div>
 <div class="paragraph">
 <p>That has two important consequences:</p>
@@ -189,6 +190,22 @@
 </li>
 <li>
 <p>discovery behavior follows the compiled class layout, not just the source tree.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the <code>Gradle</code> plugin that means tapik scans:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the current module&#8217;s main compiled classes directory,</p>
+</li>
+<li>
+<p>compiled class directories from sibling subprojects in the same build,</p>
+</li>
+<li>
+<p>dependency JARs on the runtime classpath.</p>
 </li>
 </ul>
 </div>
@@ -211,7 +228,7 @@
 </div>
 </div>
 <div class="paragraph">
-<p>tapik then scans compiled classes under that package and looks for concrete types assignable to <code>API</code>.</p>
+<p>tapik then scans compiled classes and dependency JAR entries under that package and looks for concrete types assignable to <code>API</code>.</p>
 </div>
 <div class="paragraph">
 <p>If the configured base package is too narrow, endpoints outside it will not be discovered. If it is too broad, tapik will still only keep types that match the <code>API</code> contract.</p>
