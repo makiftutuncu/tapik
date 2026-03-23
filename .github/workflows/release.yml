@@ -124,7 +124,7 @@ jobs:
           distribution: temurin
 
       - name: Configure Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build, test, and publish to Maven Central
         run: ./gradlew clean publishAndReleaseToMavenCentral -PrunPluginValidation
