@@ -9,7 +9,7 @@ mockk = "1.14.9"
 wiremock = "3.13.2"
 junit = "6.0.3"
 asm = "9.9.1"
-dokka = "2.1.0"
+dokka = "2.2.0"
 
 [libraries]
 arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
