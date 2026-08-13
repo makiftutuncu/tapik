@@ -13,6 +13,8 @@ object BooksApi : Api(id = "Books") {
 
 Delegation registers endpoints in declaration order without package scanning. An implementation should use Kotlin's
 `provideDelegate` convention so registration occurs during API initialization rather than on first property access.
+`Api.endpoints` exposes a read-only ordered `List<Endpoint<*, *, *, *, *, Ready>>` for discovery. This view is
+necessarily star-projected, while each delegated endpoint property retains its complete inferred generic type.
 
 ## Endpoint structure
 
@@ -23,10 +25,21 @@ Endpoint<
     P : Paths,
     Q : Queries,
     H : Headers,
-    I : RequestInput,
-    O : Outputs
+    I : Input,
+    O : Outputs,
+    S : EndpointState
 >
 ```
+
+Endpoint identity has two compile-time states. Standard method builders produce an immutable `Endpoint<..., Draft>`.
+Property delegation creates a new `Endpoint<..., Ready>` whose qualified ID combines the API ID and property name.
+Only ready endpoints expose `id` and may be consumed by targets. Modifiers preserve the state parameter, allowing
+ordinary Kotlin functions to compose draft endpoint values before declaration without admitting an incomplete
+endpoint to target interpretation.
+
+Every endpoint initially has `noHeaders`, `noInput`, and `DefaultOutputs`. `NoInput` is the type of the `noInput`
+value. `DefaultOutputs` means one empty `200`
+response and is replaced when the first explicit output is added.
 
 `Method` is a simple enum containing `GET`, `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, `CONNECT`, `OPTIONS`, `TRACE`,
 and `QUERY`. The method is part of the endpoint value; it does not need its own generic type parameter.

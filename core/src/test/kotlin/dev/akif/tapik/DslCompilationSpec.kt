@@ -91,6 +91,61 @@ class DslCompilationSpec : FunSpec({
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
+
+    test("compile a delegated endpoint inside an API") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val list by get(root / "books")
+            }
+
+            val id = Books.list.id
+            """
+        ) shouldBe ExitCode.OK
+    }
+
+    test("not expose an id on a draft endpoint") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val draft = get(root / "books")
+                val invalid = draft.id
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not accept a draft endpoint where a ready endpoint is required") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            fun consume(endpoint: Endpoint<*, *, *, *, *, Ready>) = Unit
+
+            object Books : Api("Books") {
+                val invalid = consume(get(root / "books"))
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not delegate an endpoint outside an API") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val draft = get(root / "books")
+            }
+
+            val invalid by Books.draft
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
 })
 
 private fun compile(source: String): ExitCode {
