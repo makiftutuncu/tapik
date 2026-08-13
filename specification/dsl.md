@@ -31,6 +31,10 @@ Endpoint<
 All ordered heterogeneous collections use fixed-arity types from zero through eight. Concrete element types are
 preserved exactly. Reaching a ninth element is a compilation failure.
 
+The shared tuple algebra consists of `Tuple0` through `Tuple8`. `Tuple0` is the empty value; each non-empty tuple
+stores its elements in `_1` through `_8`, exposes them in declaration order through `values`, and appends one value
+with `and`. `Tuple8` has no append operation. Every tuple has structural value semantics.
+
 ## URI
 
 URI fragments are reusable and composed with `/` for path segments and `+` for query parameters.
