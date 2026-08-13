@@ -3,17 +3,11 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 2
-indent_style = space
 insert_final_newline = true
+indent_style = space
+indent_size = 4
 max_line_length = 120
 trim_trailing_whitespace = true
 
-[*.{kt,kts}]
-ij_kotlin_allow_trailing_comma = false
-ij_kotlin_allow_trailing_comma_on_call_site = false
-ij_kotlin_code_style_defaults = KOTLIN_OFFICIAL
-indent_size = 4
-ktlint_function_signature_body_expression_wrapping = multiline
-ktlint_standard_filename = disabled
-ktlint_standard_no-wildcard-imports = disabled
+[*.md]
+trim_trailing_whitespace = false
