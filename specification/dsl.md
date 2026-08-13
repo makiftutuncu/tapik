@@ -47,8 +47,15 @@ val book = root / "books" / path.uuid("bookId")
 val pagedBooks = root / "books" + query.int("page").optional(default = 1)
 ```
 
-Leading slashes are normalized. Declaration order is preserved. Path variables are always required. Wildcard paths
-will use `path.remaining("path")` when introduced.
+URI construction always starts with the `root` value. A string passed to `/` is an already-encoded path fragment and
+may contain multiple segments. Leading and trailing `/` characters are normalized away at composition boundaries;
+each remaining segment is appended to the URI's path list without encoding or decoding. A fragment with no segments,
+or with an empty segment caused by repeated internal separators, is rejected. The empty path list represents `/`, and
+trailing slashes do not distinguish otherwise equal URIs.
+
+Static fragments do not consume typed tuple arity. Declaration order is preserved. Path variables are always
+required. `Paths` and `Queries` alias tuples of `PathVariable` and `QueryParameter` respectively. Wildcard paths will
+use `path.remaining("path")` when introduced.
 
 Queries preserve one of three presence modes in their types:
 
