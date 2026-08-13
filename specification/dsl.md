@@ -20,6 +20,7 @@ The conceptual endpoint type is:
 
 ```kotlin
 Endpoint<
+    M : Method,
     P : Paths,
     Q : Queries,
     H : Headers,
@@ -27,6 +28,10 @@ Endpoint<
     O : Outputs
 >
 ```
+
+Each standard OpenAPI 3.2 HTTP method has a distinct `Method` singleton type, including `QUERY`. This lets endpoint
+types retain their method instead of widening it to an enum. Other valid, case-sensitive HTTP method tokens use a
+`Method.Custom` value and map to OpenAPI's `additionalOperations`; a custom value cannot duplicate a standard method.
 
 All ordered heterogeneous collections use fixed-arity types from zero through eight. Concrete element types are
 preserved exactly. Reaching a ninth element is a compilation failure.

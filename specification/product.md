@@ -23,7 +23,7 @@ Kotlin definitions are the sole source of truth. OpenAPI is an output and will n
 
 Targets are developed in this order:
 
-1. OpenAPI output aligned closely with the latest specification
+1. OpenAPI 3.2.0 output, with later specification upgrades handled as explicit product changes
 2. Spring RestClient clients
 3. Spring Web MVC servers
 
