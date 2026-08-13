@@ -73,8 +73,12 @@ constructors.
 One generic format combines a codec and schema:
 
 ```kotlin
-Format<T, Representation>
+Format<Value, Representation>
 ```
+
+Both types are non-null. A codec uses Tapik's dependency-free `DecodeResult`, whose failure contains one or more
+`DecodeError` values. A decode error has a message and may retain a cause and a string location. Schemas are untyped;
+the enclosing `Format<Value, Representation>` establishes their relationship to the Kotlin type.
 
 String and byte-array formats may be public type aliases. Parameters use string formats; bodies use byte-array
 formats. A body owns its media type separately so one format can serve default, vendor-specific, and problem media
@@ -88,6 +92,10 @@ val bookIdFormat =
         .transform(decode = ::BookId, encode = BookId::value)
         .named("BookId")
 ```
+
+`transform` is safe by default: exceptions from its decoding transformation become decode failures with the original
+exception as their cause. `transformOrThrow` provides the explicit propagating variant. Both reuse the original wire
+representation and schema. `named` immutably assigns the schema name.
 
 Kotlin serialization body builders are enabled by:
 
