@@ -1,55 +1,38 @@
 package dev.akif.tapik
 
-/** Marker shared by typed path variables stored in a [Uri]. */
-sealed interface PathVariable
-
-/** Marker shared by typed query parameters stored in a [Uri]. */
-sealed interface QueryParameter
-
-/** An ordered, heterogeneous tuple of path variables. */
-typealias Paths = Tuple<PathVariable>
-
-/** An ordered, heterogeneous tuple of query parameters. */
-typealias Queries = Tuple<QueryParameter>
-
 /**
- * An immutable URI definition with exact path-parameter and query-parameter tuple types.
+ * An immutable URI definition with exact path-variable and query-parameter tuple types.
  *
- * @param P path-parameter tuple type.
+ * @param P path-variable tuple type.
  * @param Q query-parameter tuple type.
  * @property path normalized, already-encoded path segments.
- * @property pathParameters path parameters in declaration order.
+ * @property pathVariables path variables in declaration order.
  * @property queryParameters query parameters in declaration order.
  */
 @ConsistentCopyVisibility
 data class Uri<out P : Paths, out Q : Queries> internal constructor(
-    val path: List<String>,
-    val pathParameters: P,
+    val path: List<PathSegment>,
+    val pathVariables: P,
     val queryParameters: Q
-)
+) {
+    /** Returns the complete URI template. */
+    override fun toString(): String =
+        if (path.isEmpty()) {
+            "/"
+        } else {
+            path.joinToString(separator = "/", prefix = "/") { segment ->
+                when (segment) {
+                    is PathSegment.Literal -> segment.value
+                    is PathVariable<*> -> "{${segment.name}}"
+                }
+            }
+        }
+}
 
 /** The root URI from which all URI definitions start. */
-val root: Uri<Tuple0, Tuple0> =
+val root: Uri<Paths0, Queries0> =
     Uri(
         path = emptyList(),
-        pathParameters = Tuple0,
-        queryParameters = Tuple0
+        pathVariables = Paths0,
+        queryParameters = Queries0
     )
-
-/** Appends the non-empty segments in an already-encoded [fragment]. */
-operator fun <P : Paths, Q : Queries> Uri<P, Q>.div(fragment: String): Uri<P, Q> {
-    val normalizedFragment = fragment.trim('/')
-
-    require(normalizedFragment.isNotEmpty()) { "URI path fragment must contain at least one segment" }
-
-    val newSegments = normalizedFragment.split('/')
-    require(newSegments.none(String::isEmpty)) {
-        "URI path fragment must not contain empty segments: '$fragment'"
-    }
-
-    return Uri(
-        path = path + newSegments,
-        pathParameters = pathParameters,
-        queryParameters = queryParameters
-    )
-}

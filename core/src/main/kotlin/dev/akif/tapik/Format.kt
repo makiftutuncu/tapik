@@ -10,6 +10,9 @@ data class Format<Value : Any, Representation : Any>(
     val codec: Codec<Value, Representation>,
     val schema: Schema
 ) {
+    /** Factory namespace for cached formats of common types. */
+    companion object : FormatDefaults<String> by StringFormats
+
     /** Decodes [representation]. */
     fun decode(representation: Representation): DecodeResult<Value> = codec.decode(representation)
 
@@ -84,3 +87,7 @@ typealias StringFormat<Value> = Format<Value, String>
 
 /** A format serialized as a [ByteArray]. */
 typealias ByteArrayFormat<Value> = Format<Value, ByteArray>
+
+/** Shortcut to the default formats on [Format.Companion]. */
+val format: Format.Companion
+    get() = Format.Companion

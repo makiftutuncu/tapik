@@ -54,8 +54,26 @@ or with an empty segment caused by repeated internal separators, is rejected. Th
 trailing slashes do not distinguish otherwise equal URIs.
 
 Static fragments do not consume typed tuple arity. Declaration order is preserved. Path variables are always
-required. `Paths` and `Queries` alias tuples of `PathVariable` and `QueryParameter` respectively. Wildcard paths will
-use `path.remaining("path")` when introduced.
+required. `Paths` and `Queries` alias tuples of `PathVariable` and `QueryParameter` respectively; their concrete
+arity aliases are `Paths0` through `Paths8` and `Queries0` through `Queries8`. Domain APIs use these aliases instead
+of exposing the underlying tuple types. Wildcard paths will use `path.remaining("path")` when introduced.
+
+`Uri.path` is a list of `PathSegment` values. A literal fragment contributes one literal segment per `/`-separated
+part; a `PathVariable<Value>` is both a path segment and the exact value stored in the URI's `Paths` tuple. Variable
+names are non-blank URI-template names and unique within a URI. `Uri.toString()` joins literal segments and variable
+names such as `{bookId}` into the complete path template.
+
+Generic and convenient path-variable builders coexist:
+
+```kotlin
+path<BookId>(name = "bookId", format = bookIdFormat)
+path.string("slug")
+path.uuid("bookId")
+```
+
+`path` is an alias of `PathVariable.Companion`, where all built-in builders live. The companion implements a shared
+named-defaults interface that query parameters, headers, and similar named values can also implement without
+duplicating the common factory shape. This keeps generic construction and discoverable built-ins on the domain type.
 
 Queries preserve one of three presence modes in their types:
 
@@ -84,16 +102,19 @@ String and byte-array formats may be public type aliases. Parameters use string 
 formats. A body owns its media type separately so one format can serve default, vendor-specific, and problem media
 types.
 
-The cached `string` defaults are named after their Kotlin types: `boolean`, `byte`, `short`, `int`, `long`, `float`,
-`double`, `bigInteger`, `bigDecimal`, `string`, `uuid`, `localDate`, `localTime`, `localDateTime`, `offsetTime`,
-`offsetDateTime`, `instant`, `duration`, and `period`. Their scalar schemas use the corresponding OpenAPI format when
-one exists. A failed parse produces a structured decode failure and retains the parsing exception as its cause.
+The cached string defaults live on `Format.Companion`; `format` is an ergonomic alias of that companion.
+`FormatDefaults<Representation>` describes the common scalar-format shape for any representation, and
+`StringFormats` implements it for `String`. Defaults are named after their Kotlin types: `boolean`, `byte`,
+`short`, `int`, `long`, `float`, `double`, `bigInteger`, `bigDecimal`, `string`, `uuid`, `localDate`, `localTime`,
+`localDateTime`, `offsetTime`, `offsetDateTime`, `instant`, `duration`, and `period`. Their scalar schemas use the
+corresponding OpenAPI format when one exists. A failed parse produces a structured decode failure and retains the
+parsing exception as its cause.
 
 Value-class formats favor discoverable transformation syntax:
 
 ```kotlin
 val bookIdFormat =
-    string.uuid
+    format.uuid
         .transform(decode = ::BookId, encode = BookId::value)
         .named("BookId")
 ```
