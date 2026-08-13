@@ -73,6 +73,21 @@ class FormatSpec : FunSpec({
         original.schema shouldBe ScalarSchema(type = SchemaType.STRING)
         named.schema shouldBe ScalarSchema(type = SchemaType.STRING, name = "BookId")
     }
+
+    test("lift a format to repeated values") {
+        val repeated = format.int.repeated()
+
+        repeated.decode(listOf("1", "2", "3")) shouldBe DecodeResult.Success(listOf(1, 2, 3))
+        repeated.encode(listOf(1, 2, 3)) shouldBe listOf("1", "2", "3")
+        repeated.schema shouldBe ArraySchema(items = format.int.schema)
+    }
+
+    test("accumulate failures while decoding repeated values") {
+        val failure = format.int.repeated().decode(listOf("first", "2", "third")) as DecodeResult.Failure
+
+        failure.errors.map(DecodeError::message) shouldBe
+            listOf("Cannot decode 'first' as Int", "Cannot decode 'third' as Int")
+    }
 })
 
 private fun identityStringFormat(): Format<String, String> =

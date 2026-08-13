@@ -54,14 +54,14 @@ class PathVariableSpec : FunSpec({
             Queries0
         > = root / "books" / bookId / "authors" / authorId
 
-        uri.path shouldBe
+        uri.segments shouldBe
             listOf(
                 PathSegment.Literal("books"),
                 bookId,
                 PathSegment.Literal("authors"),
                 authorId
             )
-        uri.pathVariables.values shouldBe listOf(bookId, authorId)
+        uri.paths.values shouldBe listOf(bookId, authorId)
         uri.toString() shouldBe "/books/{bookId}/authors/{authorId}"
     }
 
@@ -83,7 +83,7 @@ class PathVariableSpec : FunSpec({
                 path.string("seven") /
                 path.string("eight")
 
-        uri.pathVariables.values.map(PathVariable<*>::name) shouldBe
+        uri.paths.values.map(PathVariable<*>::name) shouldBe
             listOf("one", "two", "three", "four", "five", "six", "seven", "eight")
         uri.toString() shouldBe "/{one}/{two}/{three}/{four}/{five}/{six}/{seven}/{eight}"
     }

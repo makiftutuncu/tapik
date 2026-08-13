@@ -91,3 +91,35 @@ typealias ByteArrayFormat<Value> = Format<Value, ByteArray>
 /** Shortcut to the default formats on [Format.Companion]. */
 val format: Format.Companion
     get() = Format.Companion
+
+/**
+ * Lifts this element format into a format for ordered lists.
+ *
+ * Decoding preserves input order and accumulates every element failure.
+ */
+fun <Value : Any, Representation : Any> Format<Value, Representation>.repeated(): Format<List<Value>, List<Representation>> =
+    Format(
+        codec =
+            Codec(
+                decoder =
+                    Decoder { representations ->
+                        val values = mutableListOf<Value>()
+                        val errors = mutableListOf<DecodeError>()
+
+                        representations.forEach { representation ->
+                            when (val result = decode(representation)) {
+                                is DecodeResult.Success -> values += result.value
+                                is DecodeResult.Failure -> errors += result.errors
+                            }
+                        }
+
+                        if (errors.isEmpty()) {
+                            DecodeResult.Success(values)
+                        } else {
+                            DecodeResult.Failure(errors)
+                        }
+                    },
+                encoder = Encoder { values -> values.map(::encode) }
+            ),
+        schema = ArraySchema(items = schema)
+    )

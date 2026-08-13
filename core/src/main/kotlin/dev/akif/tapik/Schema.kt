@@ -34,3 +34,19 @@ data class ScalarSchema(
 
     override fun named(name: String): ScalarSchema = copy(name = name)
 }
+
+/**
+ * An array whose elements are described by [items], with an optional reusable [name].
+ *
+ * @throws IllegalArgumentException when [name] is present but blank.
+ */
+data class ArraySchema(
+    val items: Schema,
+    override val name: String? = null
+) : Schema {
+    init {
+        require(name == null || name.isNotBlank()) { "Schema name must not be blank" }
+    }
+
+    override fun named(name: String): ArraySchema = copy(name = name)
+}

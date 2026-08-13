@@ -173,3 +173,104 @@ typealias Paths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value8>
         PathVariable<Value7>,
         PathVariable<Value8>
     >
+
+/** Appends the non-empty segments in an already-encoded [fragment]. */
+operator fun <P : Paths> Uri<P, Queries0>.div(fragment: String): Uri<P, Queries0> {
+    val normalizedFragment = fragment.trim('/')
+
+    require(normalizedFragment.isNotEmpty()) { "URI path fragment must contain at least one segment" }
+
+    val newSegments = normalizedFragment.split('/')
+    require(newSegments.none(String::isEmpty)) {
+        "URI path fragment must not contain empty segments: '$fragment'"
+    }
+
+    return Uri(
+        segments = segments + newSegments.map(PathSegment::Literal),
+        paths = paths,
+        queries = queries
+    )
+}
+
+private fun <P : Paths> Uri<*, Queries0>.append(
+    variable: PathVariable<*>,
+    newPaths: P
+): Uri<P, Queries0> {
+    require(paths.values.none { it.name == variable.name }) {
+        "Path variable '${variable.name}' is already defined"
+    }
+
+    return Uri(
+        segments = segments + variable,
+        paths = newPaths,
+        queries = queries
+    )
+}
+
+/** Appends the first path [variable]. */
+@JvmName("uriWithNoPathsDivPathVariable")
+operator fun <Value : Any> Uri<Paths0, Queries0>.div(
+    variable: PathVariable<Value>
+): Uri<Paths1<Value>, Queries0> = append(variable, Paths1(variable))
+
+/** Appends a second path [variable]. */
+@JvmName("uriWithOnePathDivPathVariable")
+operator fun <Value1 : Any, Value : Any> Uri<Paths1<Value1>, Queries0>.div(
+    variable: PathVariable<Value>
+): Uri<Paths2<Value1, Value>, Queries0> = append(variable, Paths2(paths._1, variable))
+
+/** Appends a third path [variable]. */
+@JvmName("uriWithTwoPathsDivPathVariable")
+operator fun <Value1 : Any, Value2 : Any, Value : Any>
+    Uri<Paths2<Value1, Value2>, Queries0>.div(
+        variable: PathVariable<Value>
+    ): Uri<Paths3<Value1, Value2, Value>, Queries0> =
+        append(variable, Paths3(paths._1, paths._2, variable))
+
+/** Appends a fourth path [variable]. */
+@JvmName("uriWithThreePathsDivPathVariable")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value : Any>
+    Uri<Paths3<Value1, Value2, Value3>, Queries0>.div(
+        variable: PathVariable<Value>
+    ): Uri<Paths4<Value1, Value2, Value3, Value>, Queries0> =
+        append(variable, Paths4(paths._1, paths._2, paths._3, variable))
+
+/** Appends a fifth path [variable]. */
+@JvmName("uriWithFourPathsDivPathVariable")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value : Any>
+    Uri<Paths4<Value1, Value2, Value3, Value4>, Queries0>.div(
+        variable: PathVariable<Value>
+    ): Uri<Paths5<Value1, Value2, Value3, Value4, Value>, Queries0> =
+        append(variable, Paths5(paths._1, paths._2, paths._3, paths._4, variable))
+
+/** Appends a sixth path [variable]. */
+@JvmName("uriWithFivePathsDivPathVariable")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value5 : Any, Value : Any>
+    Uri<Paths5<Value1, Value2, Value3, Value4, Value5>, Queries0>.div(
+        variable: PathVariable<Value>
+    ): Uri<Paths6<Value1, Value2, Value3, Value4, Value5, Value>, Queries0> =
+        append(variable, Paths6(paths._1, paths._2, paths._3, paths._4, paths._5, variable))
+
+/** Appends a seventh path [variable]. */
+@JvmName("uriWithSixPathsDivPathVariable")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value5 : Any, Value6 : Any, Value : Any>
+    Uri<Paths6<Value1, Value2, Value3, Value4, Value5, Value6>, Queries0>.div(
+        variable: PathVariable<Value>
+    ): Uri<Paths7<Value1, Value2, Value3, Value4, Value5, Value6, Value>, Queries0> =
+        append(variable, Paths7(paths._1, paths._2, paths._3, paths._4, paths._5, paths._6, variable))
+
+/** Appends an eighth path [variable]. */
+@JvmName("uriWithSevenPathsDivPathVariable")
+operator fun <
+    Value1 : Any,
+    Value2 : Any,
+    Value3 : Any,
+    Value4 : Any,
+    Value5 : Any,
+    Value6 : Any,
+    Value7 : Any,
+    Value : Any
+> Uri<Paths7<Value1, Value2, Value3, Value4, Value5, Value6, Value7>, Queries0>.div(
+    variable: PathVariable<Value>
+): Uri<Paths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value>, Queries0> =
+    append(variable, Paths8(paths._1, paths._2, paths._3, paths._4, paths._5, paths._6, paths._7, variable))
