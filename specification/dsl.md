@@ -33,9 +33,9 @@ Endpoint<
 
 Endpoint identity has two compile-time states. Standard method builders produce an immutable `Endpoint<..., Draft>`.
 Property delegation creates a new `Endpoint<..., Ready>` whose qualified ID combines the API ID and property name.
-Only ready endpoints expose `id` and may be consumed by targets. Modifiers preserve the state parameter, allowing
-ordinary Kotlin functions to compose draft endpoint values before declaration without admitting an incomplete
-endpoint to target interpretation.
+Only ready endpoints expose `id` and may be consumed by targets. Contract modifiers are available only on draft
+endpoints and return new draft values, allowing ordinary Kotlin functions to compose definitions before declaration
+without creating divergent ready contracts that share an ID.
 
 Every endpoint initially has `noHeaders`, `noInput`, and `DefaultOutputs`. `NoInput` is the type of the `noInput`
 value. `DefaultOutputs` means one empty `200`
@@ -172,6 +172,11 @@ Request headers belong directly to an endpoint and append in declaration order:
 .header(authorization)
 .headers(headersOf(requestId, traceId))
 ```
+
+`.headers(...)` is a one-time bulk initializer available only while a draft endpoint has `Headers0`. After any
+headers have been initialized, `.header(...)` is the only header modifier and appends one definition at a time.
+Both modifiers retain exact header types; reaching a ninth header is a compilation failure. Ready endpoints expose
+neither modifier.
 
 Headers retain required, optional, defaulted, or fixed presence in separate header-presence types. Fixed queries may
 also be supported. Header names compare case-insensitively for uniqueness.

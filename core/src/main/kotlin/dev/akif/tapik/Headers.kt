@@ -249,3 +249,172 @@ fun <
     header8: Header8
 ): Headers8<Header1, Header2, Header3, Header4, Header5, Header6, Header7, Header8> =
     validated(Headers8(header1, header2, header3, header4, header5, header6, header7, header8))
+
+/**
+ * Initializes this headerless draft endpoint with [headers].
+ *
+ * This bulk modifier is unavailable after any header has been added.
+ */
+fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
+    Endpoint<P, Q, Headers0, I, O, Draft>.headers(
+        headers: H
+    ): Endpoint<P, Q, H, I, O, Draft> = withHeaders(headers)
+
+private fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
+    Endpoint<P, Q, *, I, O, Draft>.withHeaders(
+        headers: H
+    ): Endpoint<P, Q, H, I, O, Draft> =
+        Endpoint(
+            method = method,
+            uri = uri,
+            headers = headers,
+            input = input,
+            outputs = outputs,
+            state = state
+        )
+
+private fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
+    Endpoint<P, Q, *, I, O, Draft>.append(
+        header: Header<*, *>,
+        headers: H
+    ): Endpoint<P, Q, H, I, O, Draft> {
+        require(this.headers.values.none { it.name.equals(header.name, ignoreCase = true) }) {
+            "Header '${header.name}' is already defined"
+        }
+        return withHeaders(headers)
+    }
+
+/** Appends the first request [header]. */
+@JvmName("headerlessEndpointHeader")
+fun <P : Paths, Q : Queries, I : Input, O : Outputs, HeaderType : Header<*, *>>
+    Endpoint<P, Q, Headers0, I, O, Draft>.header(
+        header: HeaderType
+    ): Endpoint<P, Q, Headers1<HeaderType>, I, O, Draft> = append(header, Headers1(header))
+
+/** Appends a second request [header]. */
+@JvmName("endpointWithOneHeaderHeader")
+fun <P : Paths, Q : Queries, I : Input, O : Outputs, Header1 : Header<*, *>, HeaderType : Header<*, *>>
+    Endpoint<P, Q, Headers1<Header1>, I, O, Draft>.header(
+        header: HeaderType
+    ): Endpoint<P, Q, Headers2<Header1, HeaderType>, I, O, Draft> =
+        append(header, Headers2(headers._1, header))
+
+/** Appends a third request [header]. */
+@JvmName("endpointWithTwoHeadersHeader")
+fun <
+    P : Paths,
+    Q : Queries,
+    I : Input,
+    O : Outputs,
+    Header1 : Header<*, *>,
+    Header2 : Header<*, *>,
+    HeaderType : Header<*, *>
+> Endpoint<P, Q, Headers2<Header1, Header2>, I, O, Draft>.header(
+    header: HeaderType
+): Endpoint<P, Q, Headers3<Header1, Header2, HeaderType>, I, O, Draft> =
+    append(header, Headers3(headers._1, headers._2, header))
+
+/** Appends a fourth request [header]. */
+@JvmName("endpointWithThreeHeadersHeader")
+fun <
+    P : Paths,
+    Q : Queries,
+    I : Input,
+    O : Outputs,
+    Header1 : Header<*, *>,
+    Header2 : Header<*, *>,
+    Header3 : Header<*, *>,
+    HeaderType : Header<*, *>
+> Endpoint<P, Q, Headers3<Header1, Header2, Header3>, I, O, Draft>.header(
+    header: HeaderType
+): Endpoint<P, Q, Headers4<Header1, Header2, Header3, HeaderType>, I, O, Draft> =
+    append(header, Headers4(headers._1, headers._2, headers._3, header))
+
+/** Appends a fifth request [header]. */
+@JvmName("endpointWithFourHeadersHeader")
+fun <
+    P : Paths,
+    Q : Queries,
+    I : Input,
+    O : Outputs,
+    Header1 : Header<*, *>,
+    Header2 : Header<*, *>,
+    Header3 : Header<*, *>,
+    Header4 : Header<*, *>,
+    HeaderType : Header<*, *>
+> Endpoint<P, Q, Headers4<Header1, Header2, Header3, Header4>, I, O, Draft>.header(
+    header: HeaderType
+): Endpoint<P, Q, Headers5<Header1, Header2, Header3, Header4, HeaderType>, I, O, Draft> =
+    append(header, Headers5(headers._1, headers._2, headers._3, headers._4, header))
+
+/** Appends a sixth request [header]. */
+@JvmName("endpointWithFiveHeadersHeader")
+fun <
+    P : Paths,
+    Q : Queries,
+    I : Input,
+    O : Outputs,
+    Header1 : Header<*, *>,
+    Header2 : Header<*, *>,
+    Header3 : Header<*, *>,
+    Header4 : Header<*, *>,
+    Header5 : Header<*, *>,
+    HeaderType : Header<*, *>
+> Endpoint<P, Q, Headers5<Header1, Header2, Header3, Header4, Header5>, I, O, Draft>.header(
+    header: HeaderType
+): Endpoint<P, Q, Headers6<Header1, Header2, Header3, Header4, Header5, HeaderType>, I, O, Draft> =
+    append(header, Headers6(headers._1, headers._2, headers._3, headers._4, headers._5, header))
+
+/** Appends a seventh request [header]. */
+@JvmName("endpointWithSixHeadersHeader")
+fun <
+    P : Paths,
+    Q : Queries,
+    I : Input,
+    O : Outputs,
+    Header1 : Header<*, *>,
+    Header2 : Header<*, *>,
+    Header3 : Header<*, *>,
+    Header4 : Header<*, *>,
+    Header5 : Header<*, *>,
+    Header6 : Header<*, *>,
+    HeaderType : Header<*, *>
+> Endpoint<P, Q, Headers6<Header1, Header2, Header3, Header4, Header5, Header6>, I, O, Draft>.header(
+    header: HeaderType
+): Endpoint<P, Q, Headers7<Header1, Header2, Header3, Header4, Header5, Header6, HeaderType>, I, O, Draft> =
+    append(
+        header,
+        Headers7(headers._1, headers._2, headers._3, headers._4, headers._5, headers._6, header)
+    )
+
+/** Appends an eighth request [header]. */
+@JvmName("endpointWithSevenHeadersHeader")
+fun <
+    P : Paths,
+    Q : Queries,
+    I : Input,
+    O : Outputs,
+    Header1 : Header<*, *>,
+    Header2 : Header<*, *>,
+    Header3 : Header<*, *>,
+    Header4 : Header<*, *>,
+    Header5 : Header<*, *>,
+    Header6 : Header<*, *>,
+    Header7 : Header<*, *>,
+    HeaderType : Header<*, *>
+> Endpoint<P, Q, Headers7<Header1, Header2, Header3, Header4, Header5, Header6, Header7>, I, O, Draft>.header(
+    header: HeaderType
+): Endpoint<P, Q, Headers8<Header1, Header2, Header3, Header4, Header5, Header6, Header7, HeaderType>, I, O, Draft> =
+    append(
+        header,
+        Headers8(
+            headers._1,
+            headers._2,
+            headers._3,
+            headers._4,
+            headers._5,
+            headers._6,
+            headers._7,
+            header
+        )
+    )

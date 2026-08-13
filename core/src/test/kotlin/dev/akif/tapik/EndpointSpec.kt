@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import java.util.UUID
 
 class EndpointSpec : FunSpec({
     test("bind endpoint identity through property delegation") {
@@ -73,6 +74,44 @@ class EndpointSpec : FunSpec({
             }
 
         books.list.id shouldBe "Books.list"
+    }
+
+    test("initialize and append request headers while retaining exact types") {
+        val requestId = header.uuid("X-Request-Id")
+        val source = header.string("X-Source").fixed("tapik")
+        val trace = header.string("X-Trace").optional()
+        val books =
+            object : Api("Books") {
+                val create by
+                    post(root / "books")
+                        .headers(headersOf(requestId, source))
+                        .header(trace)
+            }
+        val create: Endpoint<
+            Paths0,
+            Queries0,
+            Headers3<
+                Header<UUID, Required>,
+                Header<String, Fixed<String>>,
+                Header<String, Optional>
+            >,
+            NoInput,
+            DefaultOutputs,
+            Ready
+        > = books.create
+
+        create.headers.values shouldBe listOf(requestId, source, trace)
+    }
+
+    test("reject duplicate endpoint header names case insensitively") {
+        shouldThrow<IllegalArgumentException> {
+            object : Api("Books") {
+                val create by
+                    post(root / "books")
+                        .header(header.string("X-Request-Id"))
+                        .header(header.uuid("x-request-id"))
+            }
+        }
     }
 
     test("reject blank API identifiers") {

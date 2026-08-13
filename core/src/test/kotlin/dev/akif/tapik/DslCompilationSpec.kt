@@ -146,6 +146,54 @@ class DslCompilationSpec : FunSpec({
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
+
+    test("not bulk initialize headers after adding a header") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val invalid by post(root / "books")
+                    .header(header.string("X-One"))
+                    .headers(headersOf(header.string("X-Two")))
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not modify headers on a ready endpoint") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val create by post(root / "books")
+                val invalid = create.header(header.string("X-Request-Id"))
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not compile more than eight endpoint headers") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val invalid by post(root / "books")
+                    .header(header.string("one"))
+                    .header(header.string("two"))
+                    .header(header.string("three"))
+                    .header(header.string("four"))
+                    .header(header.string("five"))
+                    .header(header.string("six"))
+                    .header(header.string("seven"))
+                    .header(header.string("eight"))
+                    .header(header.string("nine"))
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
 })
 
 private fun compile(source: String): ExitCode {
