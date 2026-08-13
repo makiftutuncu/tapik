@@ -84,6 +84,11 @@ String and byte-array formats may be public type aliases. Parameters use string 
 formats. A body owns its media type separately so one format can serve default, vendor-specific, and problem media
 types.
 
+The cached `string` defaults are named after their Kotlin types: `boolean`, `byte`, `short`, `int`, `long`, `float`,
+`double`, `bigInteger`, `bigDecimal`, `string`, `uuid`, `localDate`, `localTime`, `localDateTime`, `offsetTime`,
+`offsetDateTime`, `instant`, `duration`, and `period`. Their scalar schemas use the corresponding OpenAPI format when
+one exists. A failed parse produces a structured decode failure and retains the parsing exception as its cause.
+
 Value-class formats favor discoverable transformation syntax:
 
 ```kotlin
