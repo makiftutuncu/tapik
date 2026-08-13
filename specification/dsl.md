@@ -163,6 +163,19 @@ Request headers belong directly to an endpoint and append in declaration order:
 Headers retain required, optional, defaulted, or fixed presence in separate header-presence types. Fixed queries may
 also be supported. Header names compare case-insensitively for uniqueness.
 
+The scalar representation is `Header<Value, Presence>`. Generic and convenient builders coexist on
+`Header.Companion`:
+
+```kotlin
+header<BookId>(name = "X-Book-Id", format = bookIdFormat)
+header.uuid("X-Request-Id")
+header.string("X-Source").fixed("tapik")
+```
+
+`headersOf` accepts between one and eight headers, preserves their exact types and declaration order in `Headers1`
+through `Headers8`, and rejects duplicate names case-insensitively. `Headers0` represents the absence of headers and
+`noHeaders` is its named DSL value; calling `headersOf()` with no arguments is intentionally unavailable.
+
 Request input has distinct states:
 
 ```kotlin

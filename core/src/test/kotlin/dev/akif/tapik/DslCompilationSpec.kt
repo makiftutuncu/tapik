@@ -61,6 +61,36 @@ class DslCompilationSpec : FunSpec({
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
+
+    test("not compile an empty headers group") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = headersOf()
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not compile more than eight headers") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = headersOf(
+                header.string("one"),
+                header.string("two"),
+                header.string("three"),
+                header.string("four"),
+                header.string("five"),
+                header.string("six"),
+                header.string("seven"),
+                header.string("eight"),
+                header.string("nine")
+            )
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
 })
 
 private fun compile(source: String): ExitCode {
