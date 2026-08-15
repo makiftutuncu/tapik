@@ -339,6 +339,32 @@ class DslCompilationSpec : FunSpec({
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
+
+    test("not document a ready endpoint") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val list by get(root / "books")
+                val invalid = list.summary("List books")
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not tag a ready endpoint") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val list by get(root / "books")
+                val invalid = list.tag("books")
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
 })
 
 private fun compile(source: String): ExitCode {

@@ -36,6 +36,8 @@ data class Ready(
  * @property headers request headers.
  * @property input request input.
  * @property outputs response alternatives.
+ * @property documentation human-readable endpoint documentation.
+ * @property tags endpoint tags using set semantics.
  * @property state binding state.
  */
 @ConsistentCopyVisibility
@@ -52,6 +54,8 @@ data class Endpoint<
     val headers: H,
     val input: I,
     val outputs: O,
+    val documentation: EndpointDocumentation,
+    val tags: Set<String>,
     val state: S
 )
 
@@ -77,6 +81,8 @@ operator fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
                 headers = headers,
                 input = input,
                 outputs = outputs,
+                documentation = documentation,
+                tags = tags,
                 state = Ready("${thisRef.id}.${property.name}")
             )
         thisRef.register(ready)

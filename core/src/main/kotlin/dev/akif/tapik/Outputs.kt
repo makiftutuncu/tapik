@@ -100,6 +100,8 @@ private fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
             headers = headers,
             input = input,
             outputs = outputs,
+            documentation = documentation,
+            tags = tags,
             state = state
         )
 

@@ -33,6 +33,8 @@ fun <P : Paths, Q : Queries, H : Headers, O : Outputs, B : Bodies>
             headers = headers,
             input = BodyInput(bodies),
             outputs = outputs,
+            documentation = documentation,
+            tags = tags,
             state = state
         )
     }

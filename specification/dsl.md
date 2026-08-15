@@ -266,8 +266,13 @@ val create by post(
     .document(summary = "Create a book", description = "Adds a book.")
 ```
 
-Inputs and outputs can carry their applicable summaries and descriptions. `.tag(value)` appends; `.tags(set)`
-replaces. Tags intentionally use set semantics rather than declaration-order semantics.
+`EndpointDocumentation` initially owns the optional summary and description without adding generic parameters to
+`Endpoint`. Blank present values are invalid. Omitting one value from `.document(...)` retains its current value.
+Documentation modifiers are available only on draft endpoints.
+
+Inputs and outputs can later carry their applicable summaries and descriptions. Endpoint builders accept an initial
+tag set. `.tag(value)` appends; `.tags(set)` replaces. Tags intentionally use set semantics rather than
+declaration-order semantics, reject blank values, and are mutable only while the endpoint is a draft.
 
 ## Design fixture
 
