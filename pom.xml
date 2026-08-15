@@ -6,7 +6,7 @@
 
     <groupId>dev.akif.tapik</groupId>
     <artifactId>tapik-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.6.0</version>
     <packaging>pom</packaging>
 
     <name>tapik</name>
@@ -15,6 +15,7 @@
 
     <modules>
         <module>core</module>
+        <module>format-kotlinx</module>
     </modules>
 
     <properties>
@@ -23,6 +24,7 @@
         <kotlin.compiler.daemon>false</kotlin.compiler.daemon>
         <kotlin.version>2.4.10</kotlin.version>
         <kotest.version>6.2.4</kotest.version>
+        <kotlinx-serialization.version>1.11.0</kotlinx-serialization.version>
         <maven.enforcer.version>3.6.2</maven.enforcer.version>
         <maven.surefire.version>3.5.5</maven.surefire.version>
     </properties>
@@ -45,6 +47,11 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-compiler-embeddable</artifactId>
                 <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-serialization-json</artifactId>
+                <version>${kotlinx-serialization.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

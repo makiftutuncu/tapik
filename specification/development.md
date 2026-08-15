@@ -27,3 +27,6 @@ itself deferred until the first compile-failure behavior is implemented.
 The rewrite starts with one `core` artifact. New artifacts are introduced only when a specification needs an
 independently consumable boundary. The Kotlin serialization integration is expected to become
 `dev.akif.tapik:format-kotlinx` with packages under `dev.akif.tapik.format.kotlinx`.
+
+`core` remains dependency-free. `format-kotlinx` depends on Kotlin serialization and converts its serializers into
+core codecs and schemas without leaking Kotlin serialization types into endpoint contracts.

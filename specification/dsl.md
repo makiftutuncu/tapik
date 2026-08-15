@@ -159,10 +159,20 @@ Kotlin serialization body builders are enabled by:
 
 ```kotlin
 import dev.akif.tapik.format.kotlinx.jsonBody
+
+val defaultJson = jsonBody<Book>(format = Json.Default)
+val configuredJson = jsonBody<Book>(format = applicationJson)
 ```
 
-They use a cached global default provider. An API may configure a default provider, and an individual body may
-override it with `using`. Multiple named providers are not required.
+Every body is attached to its concrete format when built. Body builders take the serialization format directly and
+do not consult API or Tapik-global configuration. Derived core formats are cached per serialization-format and
+serializer pair, so repeated body construction does not recreate them. `Json.Default` is the default argument for
+the Kotlin serialization JSON builder.
+
+Kotlin serialization schema derivation initially covers primitives, enums, lists, maps, nullable properties,
+objects, and value classes. Recursive object references are retained as schema references. Unsupported descriptor
+kinds fail while the format is built. Object schema properties retain separate `required` and `deprecated` flags;
+derivers set each flag only when their source metadata can express it reliably.
 
 ## Request headers and input
 
