@@ -194,6 +194,78 @@ class DslCompilationSpec : FunSpec({
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
+
+    test("not combine bodies with different model types") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            data class Author(val value: String)
+
+            fun <Value : Any> valueBody(): Body<Value> = error("Only compiled")
+
+            val invalid = bodiesOf(valueBody<Book>(), valueBody<Author>())
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not accept noBody before a real body") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            fun bookBody(): Body<Book> = error("Only compiled")
+
+            val invalid = bodiesOf(noBody, bookBody())
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not accept noBody more than once") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            fun bookBody(): Body<Book> = error("Only compiled")
+
+            val invalid = bodiesOf(bookBody(), noBody, noBody)
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not attach input twice") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            fun bookBody(): Body<Book> = error("Only compiled")
+
+            object Books : Api("Books") {
+                val invalid by post(root / "books").input(bookBody()).input(bookBody())
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not attach input to a ready endpoint") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            fun bookBody(): Body<Book> = error("Only compiled")
+
+            object Books : Api("Books") {
+                val create by post(root / "books")
+                val invalid = create.input(bookBody())
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
 })
 
 private fun compile(source: String): ExitCode {

@@ -198,7 +198,7 @@ Request input has distinct states:
 
 ```kotlin
 NoInput
-Input<B : Bodies>
+BodyInput<B : Bodies>
 ```
 
 Only an endpoint with `NoInput` offers `.input(...)`, so a second input is a compilation failure. Bodies within one
@@ -209,8 +209,13 @@ input are alternative media representations of exactly one logical Kotlin type:
 .input(bodiesOf(jsonBody<UpdateBook>(), noBody))
 ```
 
-`NoBody` is the type and `noBody` is its DSL value. It may appear at most once, in any position, and counts toward the
-arity limit. Multiple real bodies must use the same declared Kotlin type and distinct media types.
+`NoBody` is the type and `noBody` is its DSL value. It may appear at most once and counts toward the arity limit. To
+keep that rule simple and type-safe, `noBody` must be the final argument to `bodiesOf`. Multiple real
+bodies must use the same declared Kotlin type and distinct media types.
+
+`MediaType` initially wraps the complete media-type string as its own evolvable type. Built-in values cover JSON,
+XML, plain text, and arbitrary bytes. A `Body<Value>` combines one media type with a `ByteArrayFormat<Value>`; format
+integrations such as Kotlin serialization provide convenient builders including `jsonBody<Value>()`.
 
 ## Outputs
 
