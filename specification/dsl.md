@@ -286,7 +286,8 @@ declaration-order semantics, reject blank values, and are mutable only while the
 
 ## Design fixture
 
-The initial library fixture will grow to cover books, authors, and rentals. Its first endpoints are:
+The `fixtures` module's `dev.akif.tapik.fixtures.library` package covers books, authors, and rentals. Its first
+endpoints are:
 
 ```text
 GET  /books

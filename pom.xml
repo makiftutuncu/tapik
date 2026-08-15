@@ -16,6 +16,7 @@
     <modules>
         <module>core</module>
         <module>format-kotlinx</module>
+        <module>fixtures</module>
     </modules>
 
     <properties>

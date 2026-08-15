@@ -30,3 +30,8 @@ independently consumable boundary. The Kotlin serialization integration is expec
 
 `core` remains dependency-free. `format-kotlinx` depends on Kotlin serialization and converts its serializers into
 core codecs and schemas without leaking Kotlin serialization types into endpoint contracts.
+
+The non-production `fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
+`dev.akif.tapik.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact in
+their tests so every interpreter is verified against the same contract instead of maintaining target-specific
+fixtures.
