@@ -37,8 +37,8 @@ Only ready endpoints expose `id` and may be consumed by targets. Contract modifi
 endpoints and return new draft values, allowing ordinary Kotlin functions to compose definitions before declaration
 without creating divergent ready contracts that share an ID.
 
-Every endpoint initially has `noHeaders`, `noInput`, and `DefaultOutputs`. `NoInput` is the type of the `noInput`
-value. `DefaultOutputs` means one empty `200`
+Every endpoint initially has `noHeaders`, `noInput`, and `DefaultOutput`. `NoInput` is the type of the `noInput`
+value. `DefaultOutput` means one empty `200`
 response and is replaced when the first explicit output is added.
 
 `Method` is a simple enum containing `GET`, `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, `CONNECT`, `OPTIONS`, `TRACE`,
@@ -239,14 +239,18 @@ The output grammar is status matcher, body or bodies, then optional headers:
 )
 ```
 
-Output headers append and preserve declaration order. Multiple `.output(...)` calls append distinct response
-alternatives. Matcher kind, concrete headers, and concrete body formats remain in the output's generic type.
+Output headers preserve declaration order. Multiple `.output(...)` calls append distinct response alternatives.
+Matcher kind, concrete headers, and concrete body formats remain in the output's generic type.
 
-An endpoint with no explicit outputs means an empty `200` response. Adding the first explicit output removes that
-implicit response. Bodyless explicit responses use `Status.NoContent with noBody`; no status-only special case exists.
+`Outputs` is a tuple of output alternatives, with `Outputs1` through `Outputs8` retaining every concrete output type.
+`DefaultOutput` is the distinct initial type and exposes its empty `200` response as a singleton at runtime. Adding
+the first explicit output replaces that default with `Outputs1`; later calls append in declaration order. A ninth
+output is a compilation failure, and duplicate exact statuses are rejected. Bodyless explicit responses use
+`Status.NoContent with noBody`; no status-only special case exists.
 
-Exact, set, range, default, and described predicate matchers may exist in Tapik. Neutral matcher capabilities should
-be represented in types where useful; targets provide tailored diagnostics for unsupported matchers.
+The initial DSL implements `ExactStatus`, produced by `Status with ...`. Set, range, default, and described predicate
+matchers may follow. Neutral matcher capabilities should be represented in types where useful; targets provide
+tailored diagnostics for unsupported matchers.
 
 ## Documentation and tags
 

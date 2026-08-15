@@ -18,7 +18,7 @@ class EndpointSpec : FunSpec({
             Queries1<QueryParameter<Int, Default<Int>>>,
             Headers0,
             NoInput,
-            DefaultOutputs,
+            DefaultOutput,
             Ready
         > = books.list
 
@@ -28,7 +28,7 @@ class EndpointSpec : FunSpec({
         list.uri.toString() shouldBe "/books?page={page}"
         list.headers shouldBeSameInstanceAs noHeaders
         list.input shouldBeSameInstanceAs noInput
-        list.outputs shouldBeSameInstanceAs DefaultOutputs
+        list.outputs shouldBeSameInstanceAs DefaultOutput
     }
 
     test("register ready endpoints in declaration order") {
@@ -67,8 +67,8 @@ class EndpointSpec : FunSpec({
         val books =
             object : Api("Books") {
                 private fun <P : Paths, Q : Queries> reusable(
-                    endpoint: Endpoint<P, Q, Headers0, NoInput, DefaultOutputs, Draft>
-                ): Endpoint<P, Q, Headers0, NoInput, DefaultOutputs, Draft> = endpoint
+                    endpoint: Endpoint<P, Q, Headers0, NoInput, DefaultOutput, Draft>
+                ): Endpoint<P, Q, Headers0, NoInput, DefaultOutput, Draft> = endpoint
 
                 val list by reusable(get(root / "books"))
             }
@@ -96,7 +96,7 @@ class EndpointSpec : FunSpec({
                 Header<String, Optional>
             >,
             NoInput,
-            DefaultOutputs,
+            DefaultOutput,
             Ready
         > = books.create
 

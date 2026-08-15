@@ -266,6 +266,79 @@ class DslCompilationSpec : FunSpec({
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
+
+    test("compile outputs in status body header order") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            fun bookBody(): Body<Book> = error("Only compiled")
+
+            object Books : Api("Books") {
+                val get by get(root / "books")
+                    .output(Status.Ok with bodiesOf(bookBody(), noBody) with headersOf(header.string("X-Source")))
+            }
+            """
+        ) shouldBe ExitCode.OK
+    }
+
+    test("not attach headers before an output body") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = Status.Ok with headersOf(header.string("X-Source"))
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not attach a second body after output headers") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            fun bookBody(): Body<Book> = error("Only compiled")
+
+            val invalid = Status.Ok with bookBody() with headersOf(header.string("X-Source")) with bookBody()
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not attach an output to a ready endpoint") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val list by get(root / "books")
+                val invalid = list.output(Status.Ok with noBody)
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not compile more than eight outputs") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val invalid by get(root / "books")
+                    .output(Status(200) with noBody)
+                    .output(Status(201) with noBody)
+                    .output(Status(202) with noBody)
+                    .output(Status(203) with noBody)
+                    .output(Status(204) with noBody)
+                    .output(Status(205) with noBody)
+                    .output(Status(206) with noBody)
+                    .output(Status(207) with noBody)
+                    .output(Status(208) with noBody)
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
 })
 
 private fun compile(source: String): ExitCode {

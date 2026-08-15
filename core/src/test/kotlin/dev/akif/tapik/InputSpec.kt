@@ -16,7 +16,7 @@ class InputSpec : FunSpec({
             Queries0,
             Headers0,
             BodyInput<Bodies1<Body<CreateBook>>>,
-            DefaultOutputs,
+            DefaultOutput,
             Ready
         > = books.create
 

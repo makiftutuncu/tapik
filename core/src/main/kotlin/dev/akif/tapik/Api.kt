@@ -57,13 +57,13 @@ abstract class Api(
     private fun <P : Paths, Q : Queries> endpoint(
         method: Method,
         uri: Uri<P, Q>
-    ): Endpoint<P, Q, Headers0, NoInput, DefaultOutputs, Draft> =
+    ): Endpoint<P, Q, Headers0, NoInput, DefaultOutput, Draft> =
         Endpoint(
             method = method,
             uri = uri,
             headers = noHeaders,
             input = noInput,
-            outputs = DefaultOutputs,
+            outputs = DefaultOutput,
             state = Draft
         )
 }
