@@ -13,11 +13,12 @@ class BooksApiSpec : FunSpec({
         BooksApi.endpoints.map { it.method } shouldContainExactly
             listOf(Method.GET, Method.GET, Method.POST)
         BooksApi.endpoints.map { it.uri.toString() } shouldContainExactly
-            listOf("/books?page={page}", "/books/{bookId}", "/books")
+            listOf("/books?page={page}&authorId={authorId}", "/books/{bookId}", "/books")
     }
 
     test("exercise request and response contract features") {
         BooksApi.list.headers.values.single().name shouldBe "X-Request-Id"
+        BooksApi.list.uri.queries.values[1].shouldBeInstanceOf<RepeatedQueryParameter<*, *>>()
         BooksApi.list.outputs.values.size shouldBe 1
         BooksApi.get.uri.paths.values.single().format shouldBe bookIdFormat
         BooksApi.get.outputs.values.size shouldBe 2

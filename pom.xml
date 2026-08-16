@@ -17,6 +17,7 @@
         <module>core</module>
         <module>format-kotlinx</module>
         <module>fixtures</module>
+        <module>openapi</module>
     </modules>
 
     <properties>

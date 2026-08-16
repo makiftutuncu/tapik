@@ -13,7 +13,10 @@ object BooksApi : Api("Books") {
     /** Lists books one page at a time. */
     val list by
         get(
-            uri = books + query.int("page").optional(default = 1),
+            uri =
+                books +
+                    query.int("page").optional(default = 1) +
+                    query("authorId", authorIdFormat).repeated().optional(),
             summary = "List books",
             tags = setOf("books")
         )

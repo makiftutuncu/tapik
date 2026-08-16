@@ -35,3 +35,7 @@ The non-production `fixtures` module contains ordinary Tapik definitions grouped
 `dev.akif.tapik.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact in
 their tests so every interpreter is verified against the same contract instead of maintaining target-specific
 fixtures.
+
+The `openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy contracts into
+a neutral metadata model. Its public document model represents the OpenAPI output itself, and deterministic JSON is
+the first rendering format.

@@ -29,6 +29,10 @@ Targets are developed in this order:
 
 Kotlin serialization is the default format integration. Jackson follows for the Spring ecosystem.
 
+The initial OpenAPI target is a programmatic interpreter over explicitly supplied, compiled `Api` values. It runs
+after contract compilation, reads their immutable endpoint graphs without reflection, and fails generation when a
+valid Tapik construct cannot be represented by OpenAPI 3.2.0. A later Maven plugin wraps the same interpreter.
+
 ## Non-goals for the foundation
 
 - OpenAPI consumption
