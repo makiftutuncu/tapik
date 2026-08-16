@@ -8,6 +8,12 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import java.util.UUID
 
 class EndpointSpec : FunSpec({
+    test("derive the API ID from its concrete type") {
+        class Books : Api()
+
+        Books().id shouldBe "Books"
+    }
+
     test("bind endpoint identity through property delegation") {
         val books =
             object : Api("Books") {

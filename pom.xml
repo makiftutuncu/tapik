@@ -15,6 +15,7 @@
 
     <modules>
         <module>core</module>
+        <module>plugin-compiler</module>
         <module>plugin-core</module>
         <module>format-kotlinx</module>
         <module>fixtures</module>

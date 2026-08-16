@@ -37,6 +37,7 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `core` | `dev.akif:tapik-core` |
 | `format-kotlinx` | `dev.akif:tapik-format-kotlinx` |
 | `fixtures` | `dev.akif:tapik-fixtures` |
+| `plugin-compiler` | `dev.akif:tapik-plugin-compiler` |
 | `plugin-core` | `dev.akif:tapik-plugin-core` |
 | `plugin-openapi` | `dev.akif:tapik-plugin-openapi` |
 | `plugin-maven` | `dev.akif:tapik-plugin-maven` |
@@ -49,8 +50,9 @@ defines host-neutral registry loading, target configuration, target execution, a
 Target modules and adapters for Maven, Gradle, or command-line use depend on `plugin-core`; it must not depend on any
 build-tool API.
 
-Plugin module packages mirror their folder names: `plugin-core` uses `dev.akif.tapik.plugin.core`, `plugin-openapi`
-uses `dev.akif.tapik.plugin.openapi`, and `plugin-maven` uses `dev.akif.tapik.plugin.maven`.
+Plugin module packages mirror their folder names: `plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `plugin-core`
+uses `dev.akif.tapik.plugin.core`, `plugin-openapi` uses `dev.akif.tapik.plugin.openapi`, and `plugin-maven` uses
+`dev.akif.tapik.plugin.maven`.
 
 The non-production `fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
 `dev.akif.tapik.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact in

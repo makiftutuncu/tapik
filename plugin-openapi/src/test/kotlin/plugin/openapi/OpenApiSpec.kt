@@ -1,7 +1,7 @@
 package dev.akif.tapik.plugin.openapi
 
 import dev.akif.tapik.*
-import dev.akif.tapik.fixtures.library.BooksApi
+import dev.akif.tapik.fixtures.library.Books
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -11,7 +11,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 class OpenApiSpec : FunSpec({
-    val document = OpenApi.from(BooksApi, version = "0.6.0")
+    val document = OpenApi.from(Books, version = "0.6.0")
 
     test("interpret API identity paths and operations") {
         document.specificationVersion shouldBe "3.2.0"
@@ -166,7 +166,7 @@ class OpenApiSpec : FunSpec({
     test("allow qualified component naming") {
         val qualified =
             OpenApi.from(
-                api = BooksApi,
+                api = Books,
                 version = "0.6.0",
                 componentNaming = OpenApiComponentNaming.Qualified
             )

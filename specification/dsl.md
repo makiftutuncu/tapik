@@ -6,7 +6,7 @@ Endpoints are declared only inside an `Api` and only through property delegation
 the endpoint ID. `Books.list` and `Authors.list` are distinct meaningful IDs.
 
 ```kotlin
-object BooksApi : Api(id = "Books") {
+object Books : Api() {
     val list by get(root / "books")
 }
 ```

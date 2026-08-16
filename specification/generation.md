@@ -21,8 +21,18 @@ catalog later. Generated registries retain source declaration order internally, 
 remain deterministic across multiple artifacts and rejects duplicate API IDs.
 
 Registry providers are generated during Kotlin compilation and exposed through a shared runtime discovery mechanism.
-Maven, Gradle, and command-line adapters consume the same providers. Explicit API class configuration remains a
-temporary fallback and does not form part of target implementations.
+Maven, Gradle, and command-line adapters consume the same providers.
+
+For Kotlin/JVM, `plugin-compiler` inspects resolved compiler IR and selects every concrete public named class or object
+whose type extends `Api`. Objects are referenced directly; classes must expose a public no-argument constructor and
+are instantiated once per generated registry. The provider retains these instances in source declaration order and
+is exposed through the standard service-provider mechanism. Abstract API base classes are ignored. Unsupported API
+visibility or construction fails compilation. The plugin does not execute endpoint expressions, discover APIs
+reflectively, or create a second contract representation. Compilations without a concrete API type do not publish a
+registry.
+
+Incremental Kotlin compilation is rejected initially because a partial IR view cannot safely produce a complete
+registry. Supporting incremental aggregation remains required future work.
 
 ## OpenAPI target
 

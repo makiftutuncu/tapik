@@ -3,14 +3,18 @@ package dev.akif.tapik
 /**
  * A named, ordered collection of delegated endpoint definitions.
  *
- * @property id API identifier used to qualify endpoint property names.
- * @throws IllegalArgumentException when [id] is blank.
+ * @param id optional API identifier used to qualify endpoint property names. The concrete type's simple name is used
+ * when omitted.
+ * @property id resolved API identifier.
+ * @throws IllegalArgumentException when [id] is blank or the concrete type has no simple name.
  */
 abstract class Api(
-    val id: String
+    id: String? = null
 ) {
+    val id: String = id ?: requireNotNull(this::class.simpleName) { "API type must have a simple name" }
+
     init {
-        require(id.isNotBlank()) { "API ID must not be blank" }
+        require(this.id.isNotBlank()) { "API ID must not be blank" }
     }
 
     /** Ready endpoints in property declaration order. */

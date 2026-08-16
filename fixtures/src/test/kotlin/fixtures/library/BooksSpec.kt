@@ -6,25 +6,25 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 
-class BooksApiSpec : FunSpec({
+class BooksSpec : FunSpec({
     test("declare the initial endpoints in source order") {
-        BooksApi.endpoints.map { it.id } shouldContainExactly
+        Books.endpoints.map { it.id } shouldContainExactly
             listOf("Books.list", "Books.get", "Books.create")
-        BooksApi.endpoints.map { it.method } shouldContainExactly
+        Books.endpoints.map { it.method } shouldContainExactly
             listOf(Method.GET, Method.GET, Method.POST)
-        BooksApi.endpoints.map { it.uri.toString() } shouldContainExactly
+        Books.endpoints.map { it.uri.toString() } shouldContainExactly
             listOf("/books?page={page}&authorId={authorId}", "/books/{bookId}", "/books")
     }
 
     test("exercise request and response contract features") {
-        BooksApi.list.headers.values.single().name shouldBe "X-Request-Id"
-        BooksApi.list.uri.queries.values[1].shouldBeInstanceOf<RepeatedQueryParameter<*, *>>()
-        BooksApi.list.outputs.values.size shouldBe 1
-        BooksApi.get.uri.paths.values.single().format shouldBe bookIdFormat
-        BooksApi.get.outputs.values.size shouldBe 2
-        BooksApi.create.input.shouldBeInstanceOf<BodyInput<*>>()
-        BooksApi.create.outputs.values.size shouldBe 2
-        BooksApi.create.tags shouldBe setOf("books")
+        Books.list.headers.values.single().name shouldBe "X-Request-Id"
+        Books.list.uri.queries.values[1].shouldBeInstanceOf<RepeatedQueryParameter<*, *>>()
+        Books.list.outputs.values.size shouldBe 1
+        Books.get.uri.paths.values.single().format shouldBe bookIdFormat
+        Books.get.outputs.values.size shouldBe 2
+        Books.create.input.shouldBeInstanceOf<BodyInput<*>>()
+        Books.create.outputs.values.size shouldBe 2
+        Books.create.tags shouldBe setOf("books")
     }
 
     test("use the transformed book identifier format") {

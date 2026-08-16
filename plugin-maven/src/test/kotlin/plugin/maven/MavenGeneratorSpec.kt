@@ -1,6 +1,6 @@
 package dev.akif.tapik.plugin.maven
 
-import dev.akif.tapik.fixtures.library.BooksApi
+import dev.akif.tapik.fixtures.library.Books
 import dev.akif.tapik.plugin.openapi.OpenApi
 import dev.akif.tapik.plugin.openapi.toJson
 import io.kotest.core.spec.style.FunSpec
@@ -23,7 +23,7 @@ class MavenGeneratorSpec : FunSpec({
 
         written.single() shouldBe output.resolve("Books.openapi.json")
         Files.readString(written.single()) shouldBe
-            OpenApi.from(BooksApi, version = "0.6.0").toJson()
+            OpenApi.from(Books, version = "0.6.0").toJson()
     }
 
     test("keep the project class loader active while APIs are consumed") {
@@ -33,7 +33,7 @@ class MavenGeneratorSpec : FunSpec({
             classpath = emptyList(),
             parentClassLoader = MavenGeneratorSpec::class.java.classLoader
         ) { apis ->
-            apis.single() shouldBe BooksApi
+            apis.single() shouldBe Books
             Thread.currentThread().contextClassLoader shouldNotBe previous
         }
 

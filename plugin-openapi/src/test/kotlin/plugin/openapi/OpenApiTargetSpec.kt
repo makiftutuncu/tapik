@@ -2,7 +2,7 @@ package dev.akif.tapik.plugin.openapi
 
 import dev.akif.tapik.Api
 import dev.akif.tapik.plugin.core.*
-import dev.akif.tapik.fixtures.library.BooksApi
+import dev.akif.tapik.fixtures.library.Books
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -19,7 +19,7 @@ class OpenApiTargetSpec : FunSpec({
         val result =
             OpenApiTarget.generate(
                 GenerationRequest(
-                    apis = listOf(BooksApi, empty),
+                    apis = listOf(Books, empty),
                     configuration = targetConfigurationOf("version" to "0.6.0")
                 )
             )
@@ -35,7 +35,7 @@ class OpenApiTargetSpec : FunSpec({
         val result =
             OpenApiTarget.generate(
                 GenerationRequest(
-                    apis = listOf(BooksApi),
+                    apis = listOf(Books),
                     configuration =
                         targetConfigurationOf(
                             "version" to "1.2.3",
@@ -50,7 +50,7 @@ class OpenApiTargetSpec : FunSpec({
         result.artifacts.single().content.contains('\n') shouldBe false
         result.artifacts.single().content shouldBe
             OpenApi.from(
-                api = BooksApi,
+                api = Books,
                 version = "1.2.3",
                 componentNaming = OpenApiComponentNaming.Qualified
             ).toJson(pretty = false)
@@ -58,12 +58,12 @@ class OpenApiTargetSpec : FunSpec({
 
     test("reject invalid OpenAPI target configuration") {
         shouldThrow<IllegalArgumentException> {
-            OpenApiTarget.generate(GenerationRequest(listOf(BooksApi)))
+            OpenApiTarget.generate(GenerationRequest(listOf(Books)))
         }
         shouldThrow<IllegalArgumentException> {
             OpenApiTarget.generate(
                 GenerationRequest(
-                    listOf(BooksApi),
+                    listOf(Books),
                     targetConfigurationOf("version" to "1", "unknown" to "value")
                 )
             )
