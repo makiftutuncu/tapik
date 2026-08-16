@@ -29,3 +29,16 @@ temporary fallback and does not form part of target implementations.
 The OpenAPI target accepts all APIs in one execution and generates one document artifact per API. Its host-neutral
 configuration requires a document version and supports pretty JSON, component naming, and a relative output template.
 The `{api}` placeholder expands to the API ID, and the default template is `{api}.openapi.json`.
+
+## Maven adapter
+
+`dev.akif:tapik-plugin-maven` is a thin host adapter exposing one `generate` goal. Each Maven execution selects
+one target and supplies its own target configuration. The goal runs in `process-classes` by default and resolves the
+project compile and runtime classpath so same-module documentation targets can consume compiled API objects.
+
+The adapter loads every compiler-generated API registry visible to the project classpath. Conflicting API IDs fail
+generation.
+
+`outputDirectory` defaults to `${project.build.directory}/generated/tapik`. Target artifact paths are resolved below
+that directory and written as UTF-8. Maven configuration is translated into the host-neutral configuration model
+before target selection; Maven types do not cross into `plugin-core` or target modules.

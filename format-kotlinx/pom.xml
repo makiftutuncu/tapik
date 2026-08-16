@@ -5,18 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>dev.akif.tapik</groupId>
+        <groupId>dev.akif</groupId>
         <artifactId>tapik-parent</artifactId>
         <version>0.6.0</version>
     </parent>
 
-    <artifactId>format-kotlinx</artifactId>
+    <artifactId>tapik-format-kotlinx</artifactId>
     <name>tapik Kotlin serialization formats</name>
 
     <dependencies>
         <dependency>
-            <groupId>dev.akif.tapik</groupId>
-            <artifactId>core</artifactId>
+            <groupId>dev.akif</groupId>
+            <artifactId>tapik-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

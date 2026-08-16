@@ -1,0 +1,10 @@
+package dev.akif.tapik.plugin.openapi
+
+/**
+ * A valid Tapik contract that cannot be represented by the current OpenAPI target.
+ *
+ * @param message explanation of the unsupported or inconsistent construct.
+ */
+class OpenApiGenerationException(
+    message: String
+) : IllegalArgumentException(message)
