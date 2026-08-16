@@ -1,0 +1,19 @@
+{
+    "openapi": "3.2.0",
+    "info": {
+        "title": "Books",
+        "version": "0.6.0"
+    },
+    "paths": {
+        "/books": {
+            "get": {
+                "operationId": "Books.list",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

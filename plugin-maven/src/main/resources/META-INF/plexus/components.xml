@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set>
+    <components>
+        <component>
+            <role>org.jetbrains.kotlin.maven.KotlinMavenPluginExtension</role>
+            <role-hint>tapik</role-hint>
+            <implementation>dev.akif.tapik.plugin.maven.TapikKotlinMavenPluginExtension</implementation>
+            <description>Activates Tapik API registry generation during Kotlin compilation.</description>
+            <isolated-realm>false</isolated-realm>
+        </component>
+    </components>
+</component-set>

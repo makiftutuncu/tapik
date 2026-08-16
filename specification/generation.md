@@ -34,6 +34,13 @@ registry.
 Incremental Kotlin compilation is rejected initially because a partial IR view cannot safely produce a complete
 registry. Supporting incremental aggregation remains required future work.
 
+### Maven activation
+
+`tapik-plugin-maven` is the single user-facing Tapik build-plugin artifact. A Maven project adds that artifact as a
+dependency of Kotlin's Maven plugin and enables the `tapik` compiler plugin, then uses the same artifact for one or
+more `generate` executions. Its Maven-specific compiler adapter only activates the host-neutral compiler plugin; it
+does not own discovery or generation behavior and does not introduce compiler options.
+
 ## OpenAPI target
 
 The OpenAPI target accepts all APIs in one execution and generates one document artifact per API. Its host-neutral

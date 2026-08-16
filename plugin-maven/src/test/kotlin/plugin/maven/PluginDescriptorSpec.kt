@@ -25,6 +25,19 @@ class PluginDescriptorSpec : FunSpec({
         document.texts("/plugin/mojos/mojo[goal='generate']/parameters/parameter/name") shouldContainExactlyInAnyOrder
             listOf("project", "target", "outputDirectory", "targetConfiguration")
     }
+
+    test("publish the Tapik Kotlin Maven compiler extension") {
+        val descriptor =
+            requireNotNull(PluginDescriptorSpec::class.java.getResourceAsStream("/META-INF/plexus/components.xml"))
+        val document = descriptor.use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+
+        document.text("/component-set/components/component/role") shouldBe
+            "org.jetbrains.kotlin.maven.KotlinMavenPluginExtension"
+        document.text("/component-set/components/component/role-hint") shouldBe "tapik"
+        document.text("/component-set/components/component/implementation") shouldBe
+            "dev.akif.tapik.plugin.maven.TapikKotlinMavenPluginExtension"
+        document.text("/component-set/components/component/isolated-realm") shouldBe "false"
+    }
 })
 
 private fun Document.text(expression: String): String =

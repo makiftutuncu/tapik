@@ -21,6 +21,7 @@
         <module>fixtures</module>
         <module>plugin-openapi</module>
         <module>plugin-maven</module>
+        <module>plugin-maven-integration</module>
     </modules>
 
     <properties>
@@ -53,6 +54,11 @@
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-compiler-embeddable</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
             <dependency>

@@ -41,6 +41,7 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `plugin-core` | `dev.akif:tapik-plugin-core` |
 | `plugin-openapi` | `dev.akif:tapik-plugin-openapi` |
 | `plugin-maven` | `dev.akif:tapik-plugin-maven` |
+| `plugin-maven-integration` | `dev.akif:tapik-plugin-maven-integration` |
 
 `core` remains dependency-free. `format-kotlinx` depends on Kotlin serialization and converts its serializers into
 core codecs and schemas without leaking Kotlin serialization types into endpoint contracts.
@@ -52,7 +53,8 @@ build-tool API.
 
 Plugin module packages mirror their folder names: `plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `plugin-core`
 uses `dev.akif.tapik.plugin.core`, `plugin-openapi` uses `dev.akif.tapik.plugin.openapi`, and `plugin-maven` uses
-`dev.akif.tapik.plugin.maven`.
+`dev.akif.tapik.plugin.maven`. The non-production `plugin-maven-integration` module verifies the complete Maven user
+workflow against the reactor-built artifacts.
 
 The non-production `fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
 `dev.akif.tapik.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact in
