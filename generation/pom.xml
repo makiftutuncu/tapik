@@ -10,29 +10,14 @@
         <version>0.6.0</version>
     </parent>
 
-    <artifactId>openapi</artifactId>
-    <name>tapik OpenAPI</name>
+    <artifactId>generation</artifactId>
+    <name>tapik generation</name>
 
     <dependencies>
         <dependency>
             <groupId>dev.akif.tapik</groupId>
             <artifactId>core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.akif.tapik</groupId>
-            <artifactId>generation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-serialization-json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.akif.tapik</groupId>
-            <artifactId>fixtures</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.kotest</groupId>

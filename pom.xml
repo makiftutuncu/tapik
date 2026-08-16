@@ -15,6 +15,7 @@
 
     <modules>
         <module>core</module>
+        <module>generation</module>
         <module>format-kotlinx</module>
         <module>fixtures</module>
         <module>openapi</module>
