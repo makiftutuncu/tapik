@@ -1,0 +1,19 @@
+{
+    "openapi": "3.2.0",
+    "info": {
+        "title": "Authors",
+        "version": "0.6.0"
+    },
+    "paths": {
+        "/authors": {
+            "get": {
+                "operationId": "Authors.list",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

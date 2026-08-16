@@ -41,6 +41,11 @@ dependency of Kotlin's Maven plugin and enables the `tapik` compiler plugin, the
 more `generate` executions. Its Maven-specific compiler adapter only activates the host-neutral compiler plugin; it
 does not own discovery or generation behavior and does not introduce compiler options.
 
+Generated registries travel with compiled contract artifacts. A consuming Maven project discovers registries from
+its own output and its compile classpath, combines every API deterministically, and applies the configured target to
+all of them by default. Consuming a contract dependency therefore behaves like compiling its API definitions in the
+current project.
+
 ## OpenAPI target
 
 The OpenAPI target accepts all APIs in one execution and generates one document artifact per API. Its host-neutral

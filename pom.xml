@@ -21,6 +21,7 @@
         <module>fixtures</module>
         <module>plugin-openapi</module>
         <module>plugin-maven</module>
+        <module>plugin-maven-contract-integration</module>
         <module>plugin-maven-integration</module>
     </modules>
 
