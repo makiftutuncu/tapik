@@ -11,6 +11,10 @@ Every target has a unique non-blank ID. Selecting an unknown target, registering
 APIs, or supplying APIs with duplicate IDs fails before target execution. Target-specific configuration is parsed and
 validated by the target so every host observes the same behavior.
 
+Generation targets are contributed through host-neutral target registries discovered with Java's service-provider
+mechanism. Build-tool adapters and future command-line applications load the same registries instead of hard-coding
+known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
+
 Generated artifact paths are relative and normalized. A generation result cannot contain the same path twice.
 
 ## API registries
