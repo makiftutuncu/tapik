@@ -63,6 +63,11 @@
                 <version>${kotlin.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-metadata-jvm</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlinx-serialization-json</artifactId>
                 <version>${kotlinx-serialization.version}</version>

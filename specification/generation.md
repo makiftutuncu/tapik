@@ -46,6 +46,18 @@ its own output and its compile classpath, combines every API deterministically, 
 all of them by default. Consuming a contract dependency therefore behaves like compiling its API definitions in the
 current project.
 
+## Compiled contract types
+
+Targets that generate typed source use a compiled view pairing each runtime `Api` and endpoint value with the
+endpoint property's actual Kotlin return type. The type is read from Kotlin class metadata, including classifiers,
+generic projections, nullability, type-alias abbreviations, outer types, flexible upper bounds, and definitely
+non-null types. Tapik does not infer model types from schemas, execute reflective endpoint discovery, or serialize a
+second endpoint metadata model.
+
+Runtime endpoint order remains authoritative. Declared properties from the concrete API and its API base classes are
+matched to those endpoint values by their delegated property names. Missing, incompatible, or unreadable Kotlin
+metadata fails generation with the API and endpoint location in the diagnostic.
+
 ## OpenAPI target
 
 The OpenAPI target accepts all APIs in one execution and generates one document artifact per API. Its host-neutral
