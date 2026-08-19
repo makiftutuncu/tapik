@@ -1,11 +1,22 @@
 package dev.akif.tapik.plugin.maven.integration
 
 import dev.akif.tapik.ApiRegistry
+import dev.akif.tapik.plugin.maven.contract.integration.Author
 import dev.akif.tapik.plugin.maven.contract.integration.Authors
+import dev.akif.tapik.plugin.maven.integration.generated.AuthorsClient
+import dev.akif.tapik.spring.restclient.RestClientTransport
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.header
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.RestClient
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.ServiceLoader
@@ -25,6 +36,33 @@ class MavenUsageSpec : FunSpec({
 
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
+    }
+
+    test("execute a client generated from a contract dependency") {
+        val builder = RestClient.builder().baseUrl("https://library.example")
+        val server = MockRestServiceServer.bindTo(builder).build()
+        val client =
+            object : AuthorsClient {
+                override val authorsApi = Authors()
+                override val restClientTransport = RestClientTransport(builder.build())
+            }
+
+        server
+            .expect(requestTo("https://library.example/authors?name=Ursula"))
+            .andExpect(method(HttpMethod.GET))
+            .andExpect(header("X-Request-Id", "request-1"))
+            .andRespond(
+                withSuccess(
+                    """[{"id":"author-1","name":"Ursula K. Le Guin"}]""",
+                    MediaType.APPLICATION_JSON
+                )
+            )
+
+        client.list(xRequestId = "request-1", name = "Ursula") shouldBe
+            AuthorsClient.ListResponse.Ok(
+                body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
+            )
+        server.verify()
     }
 })
 

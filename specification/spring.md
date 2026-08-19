@@ -40,3 +40,7 @@ with the API and endpoint ID.
 `packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `clientSuffix` selects the
 interface-name suffix and defaults to `Client`. Each source artifact follows the package path and uses the concrete API
 type name plus that suffix.
+
+The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its RestClient
+client during `generate-sources`, compiles the generated source, and executes a typed request and response through
+Spring's mock HTTP server.
