@@ -19,6 +19,8 @@
         <module>plugin-core</module>
         <module>format-kotlinx</module>
         <module>fixtures</module>
+        <module>spring</module>
+        <module>spring-restclient</module>
         <module>plugin-openapi</module>
         <module>plugin-maven</module>
         <module>plugin-maven-contract-integration</module>
@@ -32,6 +34,7 @@
         <kotlin.version>2.4.10</kotlin.version>
         <kotest.version>6.2.4</kotest.version>
         <kotlinx-serialization.version>1.11.0</kotlinx-serialization.version>
+        <spring-framework.version>7.0.8</spring-framework.version>
         <maven.enforcer.version>3.6.2</maven.enforcer.version>
         <maven.surefire.version>3.5.5</maven.surefire.version>
         <maven.version>3.9.16</maven.version>
@@ -40,6 +43,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>io.kotest</groupId>
                 <artifactId>kotest-bom</artifactId>
