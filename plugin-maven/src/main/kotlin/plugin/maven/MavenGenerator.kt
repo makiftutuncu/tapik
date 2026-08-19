@@ -1,6 +1,7 @@
 package dev.akif.tapik.plugin.maven
 
 import dev.akif.tapik.plugin.core.ArtifactWriter
+import dev.akif.tapik.plugin.core.ArtifactKind
 import dev.akif.tapik.plugin.core.GenerationEngine
 import dev.akif.tapik.plugin.core.GenerationTargetCatalog
 import dev.akif.tapik.plugin.core.ScalarConfigurationValue
@@ -14,7 +15,7 @@ internal class MavenGenerator {
         targetConfiguration: Map<String, String>,
         outputDirectory: Path,
         parentClassLoader: ClassLoader
-    ): List<Path> =
+    ): MavenGeneration =
         ProjectApis.use(classpath, parentClassLoader) { apis ->
             val configuration =
                 TargetConfiguration(
@@ -22,6 +23,14 @@ internal class MavenGenerator {
                 )
             val targets = GenerationTargetCatalog.load(parentClassLoader).targets
             val result = GenerationEngine(targets).generate(targetId, apis, configuration)
-            ArtifactWriter.write(result, outputDirectory)
+            MavenGeneration(
+                written = ArtifactWriter.write(result, outputDirectory),
+                containsSources = result.artifacts.any { artifact -> artifact.kind == ArtifactKind.SOURCE }
+            )
         }
 }
+
+internal data class MavenGeneration(
+    val written: List<Path>,
+    val containsSources: Boolean
+)

@@ -80,3 +80,8 @@ generation.
 `outputDirectory` defaults to `${project.build.directory}/generated/tapik`. Target artifact paths are resolved below
 that directory and written as UTF-8. Maven configuration is translated into the host-neutral configuration model
 before target selection; Maven types do not cross into `plugin-core` or target modules.
+
+When an execution returns `SOURCE` artifacts, the adapter adds that execution's output directory as a project compile
+source root. Source targets may run in `generate-sources` when their APIs come from compiled contract dependencies.
+Targets consuming APIs declared in the current project continue to run after those contracts are compiled until a
+compiler-integrated source-generation path is implemented.

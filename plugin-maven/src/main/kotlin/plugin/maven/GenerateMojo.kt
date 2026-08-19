@@ -37,7 +37,7 @@ class GenerateMojo : AbstractMojo() {
     override fun execute() {
         try {
             val classpath = project.compileClasspathElements.map(Path::of)
-            val written =
+            val generation =
                 MavenGenerator().generate(
                     classpath = classpath,
                     targetId = target,
@@ -45,7 +45,10 @@ class GenerateMojo : AbstractMojo() {
                     outputDirectory = outputDirectory.toPath(),
                     parentClassLoader = requireNotNull(javaClass.classLoader)
                 )
-            written.forEach { path -> log.info("Generated ${projectRelativePath(path)}") }
+            if (generation.containsSources) {
+                project.addCompileSourceRoot(outputDirectory.absolutePath)
+            }
+            generation.written.forEach { path -> log.info("Generated ${projectRelativePath(path)}") }
         } catch (cause: Exception) {
             throw MojoExecutionException("Tapik generation failed: ${cause.message}", cause)
         }

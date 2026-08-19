@@ -16,6 +16,13 @@ class MavenUsageSpec : FunSpec({
         apis.map { api -> api.id }.sorted() shouldContainExactly listOf("Authors", "Books")
         apis.single { api -> api.id == "Authors" }.shouldBeInstanceOf<Authors>()
 
+        Files.isRegularFile(
+            Path.of(
+                "target/generated-sources/tapik-restclient/dev/akif/tapik/plugin/maven/integration/generated/AuthorsClient.kt"
+            )
+        ) shouldBe true
+        Class.forName("dev.akif.tapik.plugin.maven.integration.generated.AuthorsClient").isInterface shouldBe true
+
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
     }

@@ -12,7 +12,7 @@ class MavenGeneratorSpec : FunSpec({
     test("generate OpenAPI from every registered project API") {
         val output = Files.createTempDirectory("tapik-maven-").apply { toFile().deleteOnExit() }
 
-        val written =
+        val generation =
             MavenGenerator().generate(
                 classpath = emptyList(),
                 targetId = "openapi",
@@ -21,8 +21,9 @@ class MavenGeneratorSpec : FunSpec({
                 parentClassLoader = MavenGeneratorSpec::class.java.classLoader
             )
 
-        written.single() shouldBe output.resolve("Books.openapi.json")
-        Files.readString(written.single()) shouldBe
+        generation.containsSources shouldBe false
+        generation.written.single() shouldBe output.resolve("Books.openapi.json")
+        Files.readString(generation.written.single()) shouldBe
             OpenApi.from(Books, version = "0.6.0").toJson()
     }
 
