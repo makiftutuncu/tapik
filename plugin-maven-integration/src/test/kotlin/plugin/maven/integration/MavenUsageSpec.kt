@@ -4,6 +4,7 @@ import dev.akif.tapik.ApiRegistry
 import dev.akif.tapik.plugin.maven.contract.integration.Author
 import dev.akif.tapik.plugin.maven.contract.integration.Authors
 import dev.akif.tapik.plugin.maven.integration.generated.AuthorsClient
+import dev.akif.tapik.plugin.maven.integration.generated.AuthorsServer
 import dev.akif.tapik.spring.restclient.RestClientTransport
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -16,7 +17,12 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.client.RestClient
+import org.springframework.web.bind.annotation.RestController
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.ServiceLoader
@@ -33,6 +39,12 @@ class MavenUsageSpec : FunSpec({
             )
         ) shouldBe true
         Class.forName("dev.akif.tapik.plugin.maven.integration.generated.AuthorsClient").isInterface shouldBe true
+        Files.isRegularFile(
+            Path.of(
+                "target/generated-sources/tapik-webmvc/dev/akif/tapik/plugin/maven/integration/generated/AuthorsServer.kt"
+            )
+        ) shouldBe true
+        Class.forName("dev.akif.tapik.plugin.maven.integration.generated.AuthorsServer").isInterface shouldBe true
 
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
@@ -64,7 +76,34 @@ class MavenUsageSpec : FunSpec({
             )
         server.verify()
     }
+
+    test("serve a response through a generated WebMVC interface") {
+        val mvc = MockMvcBuilders.standaloneSetup(AuthorsController()).build()
+
+        mvc
+            .perform(
+                get("/authors")
+                    .queryParam("name", "Ursula")
+                    .header("X-Request-Id", "request-1")
+            )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().string("""[{"id":"author-1","name":"Ursula K. Le Guin"}]"""))
+    }
 })
+
+@RestController
+private class AuthorsController : AuthorsServer {
+    override val authorsApi: Authors = Authors()
+
+    override fun list(
+        xRequestId: String,
+        name: String?
+    ): AuthorsServer.ListResponse =
+        AuthorsServer.ListResponse.Ok(
+            body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
+        )
+}
 
 private fun generated(api: String): String =
     Files.readString(Path.of("target/generated/tapik/$api.openapi.json"))

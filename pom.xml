@@ -21,6 +21,7 @@
         <module>fixtures</module>
         <module>spring</module>
         <module>spring-restclient</module>
+        <module>spring-webmvc</module>
         <module>plugin-openapi</module>
         <module>plugin-maven</module>
         <module>plugin-maven-contract-integration</module>
@@ -35,6 +36,7 @@
         <kotest.version>6.2.4</kotest.version>
         <kotlinx-serialization.version>1.11.0</kotlinx-serialization.version>
         <spring-framework.version>7.0.8</spring-framework.version>
+        <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
         <maven.enforcer.version>3.6.2</maven.enforcer.version>
         <maven.surefire.version>3.5.5</maven.surefire.version>
         <maven.version>3.9.16</maven.version>
@@ -49,6 +51,11 @@
                 <version>${spring-framework.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta-servlet.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.kotest</groupId>

@@ -44,3 +44,36 @@ type name plus that suffix.
 The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its RestClient
 client during `generate-sources`, compiles the generated source, and executes a typed request and response through
 Spring's mock HTTP server.
+
+## WebMVC generation target
+
+The `spring-webmvc` target generates one Kotlin server interface for each selected API. The interface exposes a
+uniquely named property for the concrete API value, a typed abstract handler method for every endpoint, nested sealed
+response types, and Spring-mapped default methods that adapt HTTP requests to those handlers. Users decide how server
+implementations become Spring controllers; annotating an implementation with `@RestController` is sufficient.
+
+Generated Spring mapping methods receive wire values rather than asking Spring to convert contract values. They decode
+path variables, query parameters, headers, and bodies through the formats attached to the endpoint. Decode failures and
+fixed-header mismatches produce `400 Bad Request`. `CONNECT` and `QUERY` fail generation because Spring WebMVC cannot
+map them.
+
+Request body alternatives are selected by a compatible request `Content-Type` in declaration order. Every encoded
+alternative remains supported; an unmatched content type produces `415 Unsupported Media Type`. When `noBody` is an
+alternative, an absent request body is decoded as `null`.
+
+Generated mapping methods encode handler responses through the selected output definition and return Spring
+`ResponseEntity<ByteArray>`. When an output has multiple encoded body representations, the first representation
+compatible with the request's `Accept` values is selected in declaration order. Missing or wildcard `Accept` values
+select the first representation, while no compatible representation produces `406 Not Acceptable`. Statuses and
+headers come from the selected response variant and endpoint definition.
+
+A defaulted output header is exposed as a nullable response field defaulting to `null`. When a handler leaves that
+field unset, the mapping method encodes the default carried by the endpoint definition.
+
+`packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `serverSuffix` selects the
+interface-name suffix and defaults to `Server`. Generated Spring mapping method names append `Http` to the corresponding
+typed handler method name.
+
+The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its WebMVC
+server during `generate-sources`, compiles an implementation of the generated interface, and serves a typed response
+through Spring's mock MVC runtime.

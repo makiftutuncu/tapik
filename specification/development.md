@@ -43,6 +43,9 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `plugin-maven` | `dev.akif:tapik-plugin-maven` |
 | `plugin-maven-contract-integration` | `dev.akif:tapik-plugin-maven-contract-integration` |
 | `plugin-maven-integration` | `dev.akif:tapik-plugin-maven-integration` |
+| `spring` | `dev.akif:tapik-spring` |
+| `spring-restclient` | `dev.akif:tapik-spring-restclient` |
+| `spring-webmvc` | `dev.akif:tapik-spring-webmvc` |
 
 `core` remains dependency-free. `format-kotlinx` depends on Kotlin serialization and converts its serializers into
 core codecs and schemas without leaking Kotlin serialization types into endpoint contracts.
@@ -51,6 +54,9 @@ core codecs and schemas without leaking Kotlin serialization types into endpoint
 defines host-neutral registry loading, target configuration, target execution, and generated artifact contracts.
 Target modules and adapters for Maven, Gradle, or command-line use depend on `plugin-core`; it must not depend on any
 build-tool API.
+
+Spring integration packages mirror their module folders: `spring` uses `dev.akif.tapik.spring`, `spring-restclient`
+uses `dev.akif.tapik.spring.restclient`, and `spring-webmvc` uses `dev.akif.tapik.spring.webmvc`.
 
 Plugin module packages mirror their folder names: `plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `plugin-core`
 uses `dev.akif.tapik.plugin.core`, `plugin-openapi` uses `dev.akif.tapik.plugin.openapi`, and `plugin-maven` uses
