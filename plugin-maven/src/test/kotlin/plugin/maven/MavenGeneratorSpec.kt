@@ -18,6 +18,7 @@ class MavenGeneratorSpec : FunSpec({
                 targetId = "openapi",
                 targetConfiguration = mapOf("version" to "0.6.0"),
                 outputDirectory = output,
+                executionId = "openapi",
                 parentClassLoader = MavenGeneratorSpec::class.java.classLoader
             )
 
@@ -39,5 +40,31 @@ class MavenGeneratorSpec : FunSpec({
         }
 
         Thread.currentThread().contextClassLoader shouldBe previous
+    }
+
+    test("replace artifacts from the same Maven execution") {
+        val output = Files.createTempDirectory("tapik-maven-").apply { toFile().deleteOnExit() }
+        val generator = MavenGenerator()
+        val parentClassLoader = MavenGeneratorSpec::class.java.classLoader
+
+        generator.generate(
+            classpath = emptyList(),
+            targetId = "openapi",
+            targetConfiguration = mapOf("version" to "0.6.0", "output" to "old/{api}.json"),
+            outputDirectory = output,
+            executionId = "documentation",
+            parentClassLoader = parentClassLoader
+        )
+        generator.generate(
+            classpath = emptyList(),
+            targetId = "openapi",
+            targetConfiguration = mapOf("version" to "0.6.0", "output" to "new/{api}.json"),
+            outputDirectory = output,
+            executionId = "documentation",
+            parentClassLoader = parentClassLoader
+        )
+
+        Files.exists(output.resolve("old/Books.json")) shouldBe false
+        Files.exists(output.resolve("new/Books.json")) shouldBe true
     }
 })

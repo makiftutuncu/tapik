@@ -14,6 +14,7 @@ internal class MavenGenerator {
         targetId: String,
         targetConfiguration: Map<String, String>,
         outputDirectory: Path,
+        executionId: String,
         parentClassLoader: ClassLoader
     ): MavenGeneration =
         ProjectApis.use(classpath, parentClassLoader) { apis ->
@@ -24,7 +25,7 @@ internal class MavenGenerator {
             val targets = GenerationTargetCatalog.load(parentClassLoader).targets
             val result = GenerationEngine(targets).generate(targetId, apis, configuration)
             MavenGeneration(
-                written = ArtifactWriter.write(result, outputDirectory),
+                written = ArtifactWriter.write(result, outputDirectory, owner = executionId),
                 containsSources = result.artifacts.any { artifact -> artifact.kind == ArtifactKind.SOURCE }
             )
         }

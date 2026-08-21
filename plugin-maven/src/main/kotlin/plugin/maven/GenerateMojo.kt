@@ -1,6 +1,7 @@
 package dev.akif.tapik.plugin.maven
 
 import org.apache.maven.plugin.AbstractMojo
+import org.apache.maven.plugin.MojoExecution
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
@@ -20,6 +21,9 @@ import java.nio.file.Path
 class GenerateMojo : AbstractMojo() {
     @field:Parameter(defaultValue = "\${project}", readonly = true, required = true)
     private lateinit var project: MavenProject
+
+    @field:Parameter(defaultValue = "\${mojoExecution}", readonly = true, required = true)
+    private lateinit var mojoExecution: MojoExecution
 
     @field:Parameter(property = "tapik.target", required = true)
     private lateinit var target: String
@@ -43,6 +47,7 @@ class GenerateMojo : AbstractMojo() {
                     targetId = target,
                     targetConfiguration = targetConfiguration,
                     outputDirectory = outputDirectory.toPath(),
+                    executionId = mojoExecution.executionId,
                     parentClassLoader = requireNotNull(javaClass.classLoader)
                 )
             if (generation.containsSources) {
