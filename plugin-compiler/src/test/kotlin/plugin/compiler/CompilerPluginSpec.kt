@@ -9,16 +9,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import org.jetbrains.kotlin.cli.common.ExitCode
-import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 import java.net.URLClassLoader
-import java.nio.file.Files
-import java.nio.file.Path
 import java.util.ServiceLoader
-import java.util.jar.JarEntry
-import java.util.jar.JarOutputStream
-import kotlin.io.path.inputStream
 
 class CompilerPluginSpec : FunSpec({
     test("generate a registry referencing every public API class and object in declaration order") {
@@ -106,47 +98,3 @@ class CompilerPluginSpec : FunSpec({
             "tapik API class 'example.Books' must declare a public no-argument constructor"
     }
 })
-
-private data class Compilation(
-    val exitCode: ExitCode,
-    val outputDirectory: Path,
-    val messages: String
-)
-
-private fun compile(sourceText: String): Compilation {
-    val workspace = Files.createTempDirectory("tapik-compiler-").apply { toFile().deleteOnExit() }
-    val source = workspace.resolve("Fixture.kt").apply { Files.writeString(this, sourceText) }
-    val output = Files.createDirectories(workspace.resolve("classes"))
-    val pluginJar = pluginJar(workspace.resolve("tapik-plugin-compiler.jar"))
-    val compilerOutput = ByteArrayOutputStream()
-    val exitCode =
-        K2JVMCompiler().exec(
-            PrintStream(compilerOutput),
-            source.toString(),
-            "-d",
-            output.toString(),
-            "-classpath",
-            System.getProperty("java.class.path"),
-            "-Xplugin=${pluginJar}",
-            "-module-name",
-            "compiler-plugin-fixture"
-        )
-    return Compilation(exitCode, output, compilerOutput.toString())
-}
-
-private fun pluginJar(destination: Path): Path {
-    val classes = Path.of("target", "classes")
-    JarOutputStream(Files.newOutputStream(destination)).use { jar ->
-        Files.walk(classes).use { paths ->
-            paths
-                .filter(Files::isRegularFile)
-                .forEach { path ->
-                    val relative = classes.relativize(path).toString().replace(path.fileSystem.separator, "/")
-                    jar.putNextEntry(JarEntry(relative))
-                    path.inputStream().use { input -> input.copyTo(jar) }
-                    jar.closeEntry()
-                }
-        }
-    }
-    return destination
-}

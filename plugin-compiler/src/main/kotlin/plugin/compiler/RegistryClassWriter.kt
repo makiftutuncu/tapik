@@ -24,18 +24,62 @@ import java.nio.file.Path
 import java.security.MessageDigest
 
 internal object RegistryClassWriter {
-    fun write(
+    fun synchronize(
         outputDirectory: Path,
         apiTypes: List<RegisteredApiType>
     ) {
-        val registryInternalName = registryInternalName(apiTypes)
-        val classFile = outputDirectory.resolve("$registryInternalName.class")
-        Files.createDirectories(requireNotNull(classFile.parent))
-        Files.write(classFile, classBytes(registryInternalName, apiTypes))
+        removeGeneratedRegistryClasses(outputDirectory)
+        val registryInternalName =
+            if (apiTypes.isNotEmpty()) {
+                registryInternalName(apiTypes)
+            } else {
+                null
+            }
+        if (registryInternalName != null) {
+            val classFile = outputDirectory.resolve("$registryInternalName.class")
+            Files.createDirectories(requireNotNull(classFile.parent))
+            Files.write(classFile, classBytes(registryInternalName, apiTypes))
+        }
+        synchronizeServiceFile(outputDirectory, registryInternalName)
+    }
 
+    private fun removeGeneratedRegistryClasses(outputDirectory: Path) {
+        val generatedPackage = outputDirectory.resolve(GENERATED_PACKAGE)
+        if (!Files.isDirectory(generatedPackage)) return
+        Files.list(generatedPackage).use { paths ->
+            paths
+                .filter { path -> OWNED_CLASS_FILE.matches(path.fileName.toString()) }
+                .forEach(Files::deleteIfExists)
+        }
+    }
+
+    private fun synchronizeServiceFile(
+        outputDirectory: Path,
+        registryInternalName: String?
+    ) {
         val serviceFile = outputDirectory.resolve(SERVICE_PATH)
+        val retainedLines =
+            if (Files.exists(serviceFile)) {
+                Files.readAllLines(serviceFile, UTF_8).filterNot(::isGeneratedProvider)
+            } else {
+                emptyList()
+            }
+        val lines = retainedLines + listOfNotNull(registryInternalName?.replace('/', '.'))
+        if (lines.isEmpty()) {
+            Files.deleteIfExists(serviceFile)
+            return
+        }
         Files.createDirectories(requireNotNull(serviceFile.parent))
-        Files.writeString(serviceFile, "${registryInternalName.replace('/', '.')}\n", UTF_8)
+        Files.writeString(serviceFile, lines.joinToString(separator = "\n", postfix = "\n"), UTF_8)
+    }
+
+    private fun isGeneratedProvider(line: String): Boolean =
+        OWNED_PROVIDER.matches(line.substringBefore('#').trim())
+
+    private fun registryInternalName(apiTypes: List<RegisteredApiType>): String {
+        val input = apiTypes.joinToString("\u0000") { "${it.internalName}:${it.instantiation}" }.toByteArray(UTF_8)
+        val hash = MessageDigest.getInstance("SHA-256").digest(input).take(8).joinToString("") { byte -> "%02x".format(byte) }
+        return "$GENERATED_PACKAGE/TapikApiRegistry_$hash"
     }
 
     private fun classBytes(
@@ -124,11 +168,6 @@ internal object RegistryClassWriter {
         getter.visitEnd()
     }
 
-    private fun registryInternalName(apiTypes: List<RegisteredApiType>): String {
-        val input = apiTypes.joinToString("\u0000") { "${it.internalName}:${it.instantiation}" }.toByteArray(UTF_8)
-        val hash = MessageDigest.getInstance("SHA-256").digest(input).take(8).joinToString("") { byte -> "%02x".format(byte) }
-        return "$GENERATED_PACKAGE/TapikApiRegistry_$hash"
-    }
 }
 
 private const val API_INTERNAL_NAME: String = "dev/akif/tapik/Api"
@@ -136,3 +175,6 @@ private const val API_REGISTRY_INTERNAL_NAME: String = "dev/akif/tapik/ApiRegist
 private const val APIS_FIELD: String = "apis"
 private const val GENERATED_PACKAGE: String = "dev/akif/tapik/generated"
 private const val SERVICE_PATH: String = "META-INF/services/dev.akif.tapik.ApiRegistry"
+private val OWNED_PROVIDER: Regex =
+    Regex("dev\\.akif\\.tapik\\.generated\\.TapikApiRegistry(?:_[0-9a-f]{16})?")
+private val OWNED_CLASS_FILE: Regex = Regex("TapikApiRegistry(?:_[0-9a-f]{16})?\\.class")

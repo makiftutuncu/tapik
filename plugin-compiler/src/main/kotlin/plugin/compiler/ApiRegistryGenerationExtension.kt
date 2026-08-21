@@ -28,7 +28,11 @@ internal class ApiRegistryGenerationExtension(
         moduleFragment: IrModuleFragment,
         pluginContext: IrPluginContext
     ) {
-        val apiClass = pluginContext.referenceClass(API_CLASS_ID)?.owner ?: return
+        val apiClass = pluginContext.referenceClass(API_CLASS_ID)?.owner
+        if (apiClass == null) {
+            RegistryClassWriter.synchronize(outputDirectory, emptyList())
+            return
+        }
         val apiTypes = mutableListOf<IrClass>()
         moduleFragment.acceptChildrenVoid(
             object : IrVisitorVoid() {
@@ -44,12 +48,13 @@ internal class ApiRegistryGenerationExtension(
                 }
             }
         )
-        if (apiTypes.isEmpty()) return
-
         val registeredTypes = apiTypes.mapNotNull { apiType -> apiType.registeredApiType() }
-        if (registeredTypes.size != apiTypes.size) return
+        if (registeredTypes.size != apiTypes.size) {
+            RegistryClassWriter.synchronize(outputDirectory, emptyList())
+            return
+        }
 
-        RegistryClassWriter.write(outputDirectory, registeredTypes)
+        RegistryClassWriter.synchronize(outputDirectory, registeredTypes)
     }
 
     private fun IrClass.registeredApiType(): RegisteredApiType? {

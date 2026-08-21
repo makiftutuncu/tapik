@@ -35,6 +35,12 @@ visibility or construction fails compilation. The plugin does not execute endpoi
 reflectively, or create a second contract representation. Compilations without a concrete API type do not publish a
 registry.
 
+Each compiler output directory has one deterministic compiler-owned registry class and one corresponding entry in the
+standard `ApiRegistry` service descriptor. Every compilation synchronizes those artifacts, including non-clean
+recompilations: changed APIs replace the generated class, while a compilation with no valid concrete API removes the
+generated class and its service entry. Other provider entries in the shared service descriptor are preserved, so a
+manually supplied registry can coexist with the compiler-owned registry.
+
 Incremental Kotlin compilation is rejected initially because a partial IR view cannot safely produce a complete
 registry. Supporting incremental aggregation remains required future work.
 
