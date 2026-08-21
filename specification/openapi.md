@@ -13,6 +13,11 @@ OpenAPI tooling might treat specially.
 Repeated query parameters use an array schema with `style: form` and `explode: true`, representing one query name
 with repeated wire values. Scalar query parameters omit these fields and use the OpenAPI defaults.
 
+Default and fixed parameter values are encoded through their format before becoming JSON Schema `default` and
+`const` values. The encoded representation is interpreted according to the format's schema, so transformed and
+value-class formats, custom enum codecs, nullable schemas, and repeated formats retain their actual wire values and
+JSON types.
+
 ## Schema components
 
 Every named Tapik schema becomes an OpenAPI schema component and every reference follows the same component-naming

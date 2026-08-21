@@ -1,10 +1,6 @@
 package dev.akif.tapik.plugin.openapi
 
 import dev.akif.tapik.*
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonPrimitive
 
 /** Programmatic OpenAPI 3.2 interpreter for compiled Tapik API values. */
 object OpenApi {
@@ -115,29 +111,33 @@ private class Interpreter(
 
     private fun Query.parameter(): OpenApiParameter =
         when (this) {
-            is QueryParameter<*, *> ->
-                OpenApiParameter(
-                    name = name,
-                    location = OpenApiParameterLocation.QUERY,
-                    required = presence.required,
-                    deprecated = false,
-                    schema = schemas.schema(format.schema).withPresence(presence, format),
-                    style = null,
-                    explode = null
-                )
-            is RepeatedQueryParameter<*, *> ->
-                OpenApiParameter(
-                    name = name,
-                    location = OpenApiParameterLocation.QUERY,
-                    required = presence.required,
-                    deprecated = false,
-                    schema = schemas.schema(format.schema).withPresence(presence, format),
-                    style = "form",
-                    explode = true
-                )
+            is QueryParameter<*, *> -> parameter()
+            is RepeatedQueryParameter<*, *> -> parameter()
         }
 
-    private fun Header<*, *>.parameter(): OpenApiParameter =
+    private fun <Value : Any> QueryParameter<Value, *>.parameter(): OpenApiParameter =
+        OpenApiParameter(
+            name = name,
+            location = OpenApiParameterLocation.QUERY,
+            required = presence.required,
+            deprecated = false,
+            schema = schemas.schema(format.schema).withPresence(presence, format),
+            style = null,
+            explode = null
+        )
+
+    private fun <Value : Any> RepeatedQueryParameter<Value, *>.parameter(): OpenApiParameter =
+        OpenApiParameter(
+            name = name,
+            location = OpenApiParameterLocation.QUERY,
+            required = presence.required,
+            deprecated = false,
+            schema = schemas.schema(format.schema).withPresence(presence, format),
+            style = "form",
+            explode = true
+        )
+
+    private fun <Value : Any> Header<Value, *>.parameter(): OpenApiParameter =
         OpenApiParameter(
             name = name,
             location = OpenApiParameterLocation.HEADER,
@@ -192,7 +192,7 @@ private class Interpreter(
             }
         }
 
-    private fun Header<*, *>.responseHeader(): OpenApiHeader =
+    private fun <Value : Any> Header<Value, *>.responseHeader(): OpenApiHeader =
         OpenApiHeader(
             required = presence.required,
             deprecated = false,
@@ -209,34 +209,6 @@ private class Interpreter(
 
 private val Presence<*>.required: Boolean
     get() = this === Required || this is Fixed<*>
-
-private fun OpenApiSchema.withPresence(
-    presence: Presence<*>,
-    format: Format<*, *>
-): OpenApiSchema =
-    when (presence) {
-        Required,
-        Optional -> this
-        is Default<*> -> copy(defaultValue = jsonValue(presence.value, format))
-        is Fixed<*> -> copy(constantValue = jsonValue(presence.value, format))
-    }
-
-private fun jsonValue(
-    value: Any,
-    format: Format<*, *>
-): JsonElement =
-    when (value) {
-        is Boolean -> JsonPrimitive(value)
-        is Number -> JsonPrimitive(value)
-        is String -> JsonPrimitive(value)
-        is Char -> JsonPrimitive(value.toString())
-        is Enum<*> -> JsonPrimitive(value.name)
-        is List<*> -> JsonArray(value.map { it?.let { element -> jsonValue(element, format) } ?: JsonNull })
-        else -> JsonPrimitive(format.encodeUntyped(value).toString())
-    }
-
-@Suppress("UNCHECKED_CAST")
-private fun Format<*, *>.encodeUntyped(value: Any): Any = (this as Format<Any, Any>).encode(value)
 
 private fun Endpoint<*, *, *, *, *, Ready>.pathTemplate(): String {
     if (uri.segments.isEmpty()) return "/"
