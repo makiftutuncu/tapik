@@ -64,7 +64,8 @@ internal data class RestClientOutput(
     val definitionAccess: String,
     val bodies: List<RestClientOutputBody>,
     val allowsNoBody: Boolean,
-    val headers: List<RestClientOutputHeader>
+    val headers: List<RestClientOutputHeader>,
+    val fixedHeaders: List<RestClientFixedOutputHeader>
 )
 
 internal data class RestClientOutputBody(
@@ -78,6 +79,11 @@ internal data class RestClientOutputHeader(
     val type: String,
     val definitionAccess: String,
     val presence: Presence<*>
+)
+
+internal data class RestClientFixedOutputHeader(
+    val wireName: String,
+    val definitionAccess: String
 )
 
 internal fun restClientApiModel(
@@ -281,28 +287,34 @@ private fun outputs(
                 )
             }
         val usedHeaderNames = mutableSetOf<String>()
-        val headers =
-            output.headers.values.mapIndexedNotNull { headerIndex, header ->
-                if (header.presence is Fixed<*>) return@mapIndexedNotNull null
-                val headerType = requireNotNull(headerTypes?.getOrNull(headerIndex)) {
-                    "$endpointId output ${index + 1} is missing its compiled header type"
-                }
+        val headers = mutableListOf<RestClientOutputHeader>()
+        val fixedHeaders = mutableListOf<RestClientFixedOutputHeader>()
+        output.headers.values.forEachIndexed { headerIndex, header ->
+            val headerType = requireNotNull(headerTypes?.getOrNull(headerIndex)) {
+                "$endpointId output ${index + 1} is missing its compiled header type"
+            }
+            val definitionAccess = "$outputAccess.headers._${headerIndex + 1}"
+            if (header.presence is Fixed<*>) {
+                fixedHeaders += RestClientFixedOutputHeader(header.name, definitionAccess)
+            } else {
                 val rawType = headerType.argument(0, "$endpointId output header '${header.name}'").render()
                 val renderedType = if (header.presence === Optional) "$rawType?" else rawType
-                RestClientOutputHeader(
+                headers += RestClientOutputHeader(
                     name = uniqueName(header.name.lowerCamel("header${headerIndex + 1}"), usedHeaderNames),
                     wireName = header.name,
                     type = renderedType,
-                    definitionAccess = "$outputAccess.headers._${headerIndex + 1}",
+                    definitionAccess = definitionAccess,
                     presence = header.presence
                 )
             }
+        }
         RestClientOutput(
             variantName = exact.status.variantName(),
             definitionAccess = outputAccess,
             bodies = bodies,
             allowsNoBody = output.bodies.values.any { body -> body is NoBody },
-            headers = headers
+            headers = headers,
+            fixedHeaders = fixedHeaders
         )
     }
 }

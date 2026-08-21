@@ -6,9 +6,11 @@ import dev.akif.tapik.plugin.maven.contract.integration.Authors
 import dev.akif.tapik.plugin.maven.integration.generated.AuthorsClient
 import dev.akif.tapik.plugin.maven.integration.generated.AuthorsServer
 import dev.akif.tapik.spring.restclient.RestClientTransport
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
@@ -67,7 +69,7 @@ class MavenUsageSpec : FunSpec({
                 withSuccess(
                     """[{"id":"author-1","name":"Ursula K. Le Guin"}]""",
                     MediaType.APPLICATION_JSON
-                )
+                ).header("x-api-version", "1")
             )
 
         client.list(xRequestId = "request-1", name = "Ursula") shouldBe
@@ -75,6 +77,31 @@ class MavenUsageSpec : FunSpec({
                 body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
             )
         server.verify()
+    }
+
+    test("reject missing, mismatched, or repeated fixed response headers") {
+        listOf(emptyList(), listOf("2"), listOf("1", "1")).forEach { apiVersions ->
+            val builder = RestClient.builder().baseUrl("https://library.example")
+            val server = MockRestServiceServer.bindTo(builder).build()
+            val client =
+                object : AuthorsClient {
+                    override val authorsApi = Authors()
+                    override val restClientTransport = RestClientTransport(builder.build())
+                }
+            val response =
+                withSuccess(
+                    """[{"id":"author-1","name":"Ursula K. Le Guin"}]""",
+                    MediaType.APPLICATION_JSON
+                )
+            if (apiVersions.isNotEmpty()) {
+                response.header("X-API-Version", *apiVersions.toTypedArray())
+            }
+            server.expect(requestTo("https://library.example/authors")).andRespond(response)
+
+            shouldThrow<IllegalStateException> { client.list(xRequestId = "request-1") }
+                .message shouldContain "X-API-Version"
+            server.verify()
+        }
     }
 
     test("serve a response through a generated WebMVC interface") {

@@ -28,6 +28,10 @@ sealed response type. Exact-status output alternatives become response variants 
 Generated response data classes containing byte-array fields compare those fields by content and derive their hash
 codes from the byte content.
 
+Fixed output headers are contract checks rather than public response fields. For each selected output, a generated
+client encodes the fixed value through its header format and requires the transport response to contain exactly one
+value with that encoding. A missing header, a different value, or repeated values fail response decoding.
+
 Generated method inputs are derived from the endpoint's compiled Kotlin type. Required path variables, queries,
 headers, and request bodies precede optional or defaulted values. Runtime endpoint values supply names, formats,
 defaults, media types, matchers, and codecs. Generated code performs URI construction, request encoding, output

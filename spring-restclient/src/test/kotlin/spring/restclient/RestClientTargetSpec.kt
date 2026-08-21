@@ -48,7 +48,28 @@ class RestClientTargetSpec : FunSpec({
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
+
+    test("validate fixed response headers without exposing response fields") {
+        val source =
+            RestClientTarget.generate(GenerationRequest(apis = listOf(FixedResponses)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "public data object Ok : CheckResponse"
+        source shouldContain "requireFixedHeader("
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
 })
+
+public object FixedResponses : Api() {
+    private val apiVersion = header.string("X-API-Version").fixed("1")
+
+    public val check by
+        get(root / "check")
+            .output(Status.Ok with noBody with headersOf(apiVersion))
+}
 
 public object BinaryDownloads : Api() {
     private val binaryFormat: ByteArrayFormat<ByteArray> =

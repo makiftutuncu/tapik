@@ -28,6 +28,15 @@
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "headers": {
+                            "X-API-Version": {
+                                "required": true,
+                                "schema": {
+                                    "type": "string",
+                                    "const": "1"
+                                }
+                            }
+                        },
                         "content": {
                             "application/json": {
                                 "schema": {

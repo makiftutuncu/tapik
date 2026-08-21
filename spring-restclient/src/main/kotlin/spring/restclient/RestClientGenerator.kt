@@ -29,7 +29,11 @@ internal class RestClientGenerator(
             }
             if (model.endpoints.isNotEmpty()) {
                 appendLine()
-                appendDecodeHelpers()
+                appendDecodeHelpers(
+                    includeFixedHeaders = model.endpoints.any { endpoint ->
+                        endpoint.outputs.any { output -> output.fixedHeaders.isNotEmpty() }
+                    }
+                )
             }
             append('}')
         }
@@ -158,6 +162,7 @@ private fun StringBuilder.appendOutput(
     output: RestClientOutput
 ) {
     appendLine("            ${output.definitionAccess}.matcher.matches(response.status) -> {")
+    output.fixedHeaders.forEach { header -> appendFixedHeader(endpoint, header) }
     if (output.bodies.isNotEmpty()) appendDecodedBody(endpoint, output)
     output.headers.forEach { header -> appendDecodedHeader(endpoint, header) }
     val arguments =
@@ -173,6 +178,19 @@ private fun StringBuilder.appendOutput(
         }
     appendLine("                $construction")
     appendLine("            }")
+}
+
+private fun StringBuilder.appendFixedHeader(
+    endpoint: RestClientEndpointModel,
+    header: RestClientFixedOutputHeader
+) {
+    appendLine("                requireFixedHeader(")
+    appendLine("                    response = response,")
+    appendLine("                    name = ${header.wireName.kotlinString()},")
+    appendLine("                    format = ${header.definitionAccess}.format,")
+    appendLine("                    expected = ${header.definitionAccess}.presence.value,")
+    appendLine("                    endpointId = ${endpoint.id.kotlinString()}")
+    appendLine("                )")
 }
 
 private fun StringBuilder.appendDecodedBody(
@@ -241,7 +259,7 @@ private fun StringBuilder.appendDecodedHeader(
     }
 }
 
-private fun StringBuilder.appendDecodeHelpers() {
+private fun StringBuilder.appendDecodeHelpers(includeFixedHeaders: Boolean) {
     appendLine("    private fun <Value : kotlin.Any> decodeBody(")
     appendLine("        format: dev.akif.tapik.ByteArrayFormat<Value>,")
     appendLine("        bytes: kotlin.ByteArray,")
@@ -266,6 +284,7 @@ private fun StringBuilder.appendDecodeHelpers() {
     )
     appendLine("        }")
     appendLine()
+    if (includeFixedHeaders) appendFixedHeaderHelper()
     appendLine("    private fun requireMediaType(")
     appendLine("        response: dev.akif.tapik.spring.restclient.RestClientResponse,")
     appendLine("        expected: dev.akif.tapik.MediaType,")
@@ -277,4 +296,26 @@ private fun StringBuilder.appendDecodeHelpers() {
     )
     appendLine("        }")
     appendLine("    }")
+}
+
+private fun StringBuilder.appendFixedHeaderHelper() {
+    appendLine("    private fun <Value : kotlin.Any> requireFixedHeader(")
+    appendLine("        response: dev.akif.tapik.spring.restclient.RestClientResponse,")
+    appendLine("        name: kotlin.String,")
+    appendLine("        format: dev.akif.tapik.StringFormat<Value>,")
+    appendLine("        expected: Value,")
+    appendLine("        endpointId: kotlin.String")
+    appendLine("    ) {")
+    appendLine("        val actual =")
+    appendLine("            response.headers.entries")
+    appendLine("                .filter { (headerName, _) -> headerName.equals(name, ignoreCase = true) }")
+    appendLine("                .flatMap { (_, values) -> values }")
+    appendLine("        val encoded = format.encode(expected)")
+    appendLine("        if (actual != listOf(encoded)) {")
+    appendLine(
+        "            kotlin.error(\"Unexpected fixed response header \$name for \$endpointId: expected exactly [\$encoded], got \$actual\")"
+    )
+    appendLine("        }")
+    appendLine("    }")
+    appendLine()
 }
