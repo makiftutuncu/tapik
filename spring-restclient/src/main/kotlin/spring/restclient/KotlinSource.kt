@@ -2,35 +2,6 @@ package dev.akif.tapik.spring.restclient
 
 import dev.akif.tapik.plugin.core.*
 
-internal fun KotlinType.render(): String {
-    val source = abbreviation ?: this
-    val classifier =
-        when (val value = source.classifier) {
-            is KotlinClassClassifier -> value.name
-            is KotlinTypeAliasClassifier -> value.name
-            is KotlinTypeParameterClassifier ->
-                throw IllegalArgumentException("Cannot render unresolved Kotlin type parameter ${value.id}")
-        }
-    val arguments =
-        source.arguments
-            .takeIf(List<*>::isNotEmpty)
-            ?.joinToString(prefix = "<", postfix = ">") { projection ->
-                when (projection) {
-                    KotlinStarProjection -> "*"
-                    is KotlinTypedProjection -> {
-                        val variance =
-                            when (projection.variance) {
-                                KotlinVariance.INVARIANT -> ""
-                                KotlinVariance.IN -> "in "
-                                KotlinVariance.OUT -> "out "
-                            }
-                        variance + projection.type.render()
-                    }
-                }
-            }.orEmpty()
-    return classifier + arguments + if (source.nullable) "?" else ""
-}
-
 internal fun KotlinType.argument(index: Int, location: String): KotlinType {
     val projection =
         arguments.getOrNull(index)

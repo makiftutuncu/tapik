@@ -1,5 +1,7 @@
 package dev.akif.tapik.spring.restclient
 
+import dev.akif.tapik.plugin.core.KotlinSourceType
+
 internal fun StringBuilder.appendResponse(endpoint: RestClientEndpointModel) {
     appendLine("    public sealed interface ${endpoint.responseName} {")
     endpoint.outputs.forEach { output ->
@@ -10,9 +12,9 @@ internal fun StringBuilder.appendResponse(endpoint: RestClientEndpointModel) {
             appendLine("        public data class ${output.variantName}(")
             fields.forEachIndexed { index, field ->
                 val suffix = if (index == fields.lastIndex) "" else ","
-                appendLine("            public val ${field.name}: ${field.type}$suffix")
+                appendLine("            public val ${field.name}: ${field.type.source}$suffix")
             }
-            if (fields.any(RestClientParameter::isByteArray)) {
+            if (fields.any(RestClientResponseField::isByteArray)) {
                 appendLine("        ) : ${endpoint.responseName} {")
                 appendContentEquals(output.variantName, fields)
                 appendLine()
@@ -28,7 +30,7 @@ internal fun StringBuilder.appendResponse(endpoint: RestClientEndpointModel) {
 
 private fun StringBuilder.appendContentEquals(
     variantName: String,
-    fields: List<RestClientParameter>
+    fields: List<RestClientResponseField>
 ) {
     appendLine("            override fun equals(other: kotlin.Any?): kotlin.Boolean =")
     appendLine("                this === other ||")
@@ -41,7 +43,7 @@ private fun StringBuilder.appendContentEquals(
     appendLine("                    )")
 }
 
-private fun StringBuilder.appendContentHashCode(fields: List<RestClientParameter>) {
+private fun StringBuilder.appendContentHashCode(fields: List<RestClientResponseField>) {
     appendLine("            override fun hashCode(): kotlin.Int {")
     appendLine("                var result = ${fields.first().hashCodeExpression()}")
     fields.drop(1).forEach { field ->
@@ -51,28 +53,33 @@ private fun StringBuilder.appendContentHashCode(fields: List<RestClientParameter
     appendLine("            }")
 }
 
-private fun RestClientParameter.equalsExpression(): String =
+private fun RestClientResponseField.equalsExpression(): String =
     when {
         !isByteArray() -> "$name == other.$name"
-        type.endsWith('?') -> "$name?.contentEquals(other.$name) ?: (other.$name == null)"
+        type.expandedType.nullable -> "$name?.contentEquals(other.$name) ?: (other.$name == null)"
         else -> "$name.contentEquals(other.$name)"
     }
 
-private fun RestClientParameter.hashCodeExpression(): String =
+private fun RestClientResponseField.hashCodeExpression(): String =
     when {
-        isByteArray() && type.endsWith('?') -> "$name?.contentHashCode() ?: 0"
+        isByteArray() && type.expandedType.nullable -> "$name?.contentHashCode() ?: 0"
         isByteArray() -> "$name.contentHashCode()"
-        type.endsWith('?') -> "$name?.hashCode() ?: 0"
+        type.expandedType.nullable -> "$name?.hashCode() ?: 0"
         else -> "$name.hashCode()"
     }
 
-private fun RestClientParameter.isByteArray(): Boolean = type.removeSuffix("?") == "kotlin.ByteArray"
+private fun RestClientResponseField.isByteArray(): Boolean = type.expandsTo("kotlin.ByteArray")
 
-private fun RestClientOutput.fields(): List<RestClientParameter> =
+private fun RestClientOutput.fields(): List<RestClientResponseField> =
     buildList {
         bodies.firstOrNull()?.let { body ->
-            val type = if (allowsNoBody) "${body.type}?" else body.type
-            add(RestClientParameter("body", type))
+            val type = if (allowsNoBody) body.type.asNullable() else body.type
+            add(RestClientResponseField("body", type))
         }
-        headers.forEach { header -> add(RestClientParameter(header.name, header.type)) }
+        headers.forEach { header -> add(RestClientResponseField(header.name, header.type)) }
     }
+
+private data class RestClientResponseField(
+    val name: String,
+    val type: KotlinSourceType
+)

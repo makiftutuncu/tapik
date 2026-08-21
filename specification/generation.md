@@ -68,6 +68,12 @@ Runtime endpoint order remains authoritative. Declared properties from the concr
 matched to those endpoint values by their delegated property names. Missing, incompatible, or unreadable Kotlin
 metadata fails generation with the API and endpoint location in the diagnostic.
 
+Typed source targets derive a neutral source type that keeps emitted spelling separate from the expanded classifier
+identity. Type aliases are emitted by their source names while target semantics continue to use their expanded types;
+containing types and generic projections are rendered without flattening their structure. Flexible platform types,
+definitely-non-null types, and unresolved type parameters are rejected with their contract location until Tapik can
+reproduce them without losing information.
+
 ## OpenAPI target
 
 The OpenAPI target accepts all APIs in one execution and generates one document artifact per API. Its host-neutral

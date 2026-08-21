@@ -2,6 +2,7 @@ package dev.akif.tapik.spring.webmvc
 
 import dev.akif.tapik.Method
 import dev.akif.tapik.Presence
+import dev.akif.tapik.plugin.core.KotlinSourceType
 
 internal data class WebMvcApiModel(
     val packageName: String,
@@ -69,7 +70,7 @@ internal data class WebMvcOutput(
 )
 
 internal data class WebMvcOutputBody(
-    val type: String,
+    val type: KotlinSourceType,
     val definitionAccess: String,
     val mediaType: String
 )
@@ -77,7 +78,7 @@ internal data class WebMvcOutputBody(
 internal data class WebMvcOutputHeader(
     val name: String?,
     val wireName: String,
-    val type: String,
+    val type: KotlinSourceType,
     val definitionAccess: String,
     val presence: Presence<*>,
     val defaultExpression: String?

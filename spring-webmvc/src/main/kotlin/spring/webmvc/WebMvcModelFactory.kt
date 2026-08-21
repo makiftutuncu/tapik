@@ -5,6 +5,7 @@ import dev.akif.tapik.plugin.core.CompiledApi
 import dev.akif.tapik.plugin.core.CompiledEndpoint
 import dev.akif.tapik.plugin.core.KotlinClassClassifier
 import dev.akif.tapik.plugin.core.KotlinType
+import dev.akif.tapik.plugin.core.toKotlinSourceType
 
 internal fun webMvcApiModel(
     compiled: CompiledApi,
@@ -42,7 +43,11 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): WebMvc
     }
     val paths =
         value.uri.paths.values.mapIndexed { index, path ->
-            val valueType = pathTypes[index].argument(0, "${value.id} path '${path.name}'").render()
+            val valueType =
+                pathTypes[index]
+                    .argument(0, "${value.id} path '${path.name}'")
+                    .toKotlinSourceType("${value.id} path '${path.name}'")
+                    .source
             val name = uniqueName(path.name.kotlinIdentifier("path${index + 1}"), usedNames)
             val rawName = uniqueName(name.removeSurrounding("`") + "Raw", usedRawNames)
             WebMvcWireParameter(
@@ -62,7 +67,11 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): WebMvc
     val queries =
         value.uri.queries.values.mapIndexed { index, query ->
             val queryType = queryTypes[index]
-            val elementType = queryType.argument(0, "${value.id} query '${query.name}'").render()
+            val elementType =
+                queryType
+                    .argument(0, "${value.id} query '${query.name}'")
+                    .toKotlinSourceType("${value.id} query '${query.name}'")
+                    .source
             val repeated = query is RepeatedQueryParameter<*, *>
             val typeName = if (repeated) "kotlin.collections.List<$elementType>" else elementType
             val presence =
@@ -97,7 +106,11 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): WebMvc
     }
     val headers =
         value.headers.values.mapIndexed { index, header ->
-            val valueType = headerTypes[index].argument(0, "${value.id} header '${header.name}'").render()
+            val valueType =
+                headerTypes[index]
+                    .argument(0, "${value.id} header '${header.name}'")
+                    .toKotlinSourceType("${value.id} header '${header.name}'")
+                    .source
             val access = "$endpointAccess.headers._${index + 1}"
             val name = uniqueName(header.name.kotlinIdentifier("header${index + 1}"), usedNames)
             val rawName = uniqueName(name.removeSurrounding("`") + "Raw", usedRawNames)
@@ -173,7 +186,13 @@ private fun requestBody(
     }
     val encoded = input.bodies.values.withIndex().filter { (_, body) -> body is Body<*> }
     if (encoded.isEmpty()) return null
-    val types = encoded.map { (index, _) -> bodyTypes[index].argument(0, "$endpointId request body").render() }
+    val types =
+        encoded.map { (index, _) ->
+            bodyTypes[index]
+                .argument(0, "$endpointId request body")
+                .toKotlinSourceType("$endpointId request body")
+                .source
+        }
     require(types.distinct().size == 1) { "$endpointId request body alternatives must decode to one value type" }
     val name = uniqueName("body", usedNames)
     return WebMvcRequestBody(
@@ -228,12 +247,15 @@ private fun outputs(
                     "$endpointId output ${index + 1} is missing its compiled body type"
                 }
                 WebMvcOutputBody(
-                    type = bodyType.argument(0, "$endpointId output body").render(),
+                    type =
+                        bodyType
+                            .argument(0, "$endpointId output body")
+                            .toKotlinSourceType("$endpointId output body"),
                     definitionAccess = "$outputAccess.bodies._${bodyIndex + 1}",
                     mediaType = body.mediaType.value
                 )
             }
-        require(bodies.map(WebMvcOutputBody::type).distinct().size <= 1) {
+        require(bodies.map { body -> body.type.source }.distinct().size <= 1) {
             "$endpointId output ${index + 1} body alternatives must encode one value type"
         }
         val usedHeaderNames = mutableSetOf<String>().apply { if (bodies.isNotEmpty()) add("body") }
@@ -242,10 +264,13 @@ private fun outputs(
                 val headerType = requireNotNull(headerTypes?.getOrNull(headerIndex)) {
                     "$endpointId output ${index + 1} is missing its compiled header type"
                 }
-                val rawType = headerType.argument(0, "$endpointId output header '${header.name}'").render()
+                val rawType =
+                    headerType
+                        .argument(0, "$endpointId output header '${header.name}'")
+                        .toKotlinSourceType("$endpointId output header '${header.name}'")
                 val renderedType =
                     when (header.presence) {
-                        Optional, is Default<*> -> "$rawType?"
+                        Optional, is Default<*> -> rawType.asNullable()
                         Required, is Fixed<*> -> rawType
                     }
                 WebMvcOutputHeader(

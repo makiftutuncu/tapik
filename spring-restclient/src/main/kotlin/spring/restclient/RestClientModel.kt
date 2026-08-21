@@ -4,7 +4,9 @@ import dev.akif.tapik.*
 import dev.akif.tapik.plugin.core.CompiledApi
 import dev.akif.tapik.plugin.core.CompiledEndpoint
 import dev.akif.tapik.plugin.core.KotlinClassClassifier
+import dev.akif.tapik.plugin.core.KotlinSourceType
 import dev.akif.tapik.plugin.core.KotlinType
+import dev.akif.tapik.plugin.core.toKotlinSourceType
 
 internal data class RestClientApiModel(
     val packageName: String,
@@ -69,14 +71,14 @@ internal data class RestClientOutput(
 )
 
 internal data class RestClientOutputBody(
-    val type: String,
+    val type: KotlinSourceType,
     val definitionAccess: String
 )
 
 internal data class RestClientOutputHeader(
     val name: String,
     val wireName: String,
-    val type: String,
+    val type: KotlinSourceType,
     val definitionAccess: String,
     val presence: Presence<*>
 )
@@ -126,7 +128,7 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): RestCl
                 definitionAccess = "$endpointAccess.uri.paths._${index + 1}",
                 repeated = false,
                 optional = false
-            ) to RestClientParameter(name, pathType.render())
+            ) to RestClientParameter(name, pathType.toKotlinSourceType("${value.id} path '${path.name}'").source)
         }
 
     val queryTypes = type.argument(1, value.id).tupleElements("${value.id} queries")
@@ -136,7 +138,11 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): RestCl
     val queries =
         value.uri.queries.values.mapIndexed { index, query ->
             val queryType = queryTypes[index]
-            val elementType = queryType.argument(0, "${value.id} query '${query.name}'").render()
+            val elementType =
+                queryType
+                    .argument(0, "${value.id} query '${query.name}'")
+                    .toKotlinSourceType("${value.id} query '${query.name}'")
+                    .source
             val repeated = query is RepeatedQueryParameter<*, *>
             val typeName = if (repeated) "kotlin.collections.List<$elementType>" else elementType
             val presence =
@@ -168,7 +174,11 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): RestCl
     }
     val headers =
         value.headers.values.mapIndexed { index, header ->
-            val valueType = headerTypes[index].argument(0, "${value.id} header '${header.name}'").render()
+            val valueType =
+                headerTypes[index]
+                    .argument(0, "${value.id} header '${header.name}'")
+                    .toKotlinSourceType("${value.id} header '${header.name}'")
+                    .source
             val access = "$endpointAccess.headers._${index + 1}"
             val parameterName = uniqueName(header.name.kotlinIdentifier("header${index + 1}"), usedNames)
             val parameter =
@@ -237,7 +247,11 @@ private fun requestBody(
     val encoded = input.bodies.values.withIndex().filter { (_, body) -> body is Body<*> }
     require(encoded.size <= 1) { "$endpointId has multiple request body representations, which are not supported" }
     val indexed = encoded.singleOrNull() ?: return null
-    val valueType = bodyTypes[indexed.index].argument(0, "$endpointId request body").render()
+    val valueType =
+        bodyTypes[indexed.index]
+            .argument(0, "$endpointId request body")
+            .toKotlinSourceType("$endpointId request body")
+            .source
     return RestClientRequestBodyModel(
         parameterName = uniqueName("body", usedNames),
         type = valueType,
@@ -282,7 +296,10 @@ private fun outputs(
                     "$endpointId output ${index + 1} is missing its compiled body type"
                 }
                 RestClientOutputBody(
-                    type = bodyType.argument(0, "$endpointId output body").render(),
+                    type =
+                        bodyType
+                            .argument(0, "$endpointId output body")
+                            .toKotlinSourceType("$endpointId output body"),
                     definitionAccess = "$outputAccess.bodies._${bodyIndex + 1}"
                 )
             }
@@ -297,8 +314,11 @@ private fun outputs(
             if (header.presence is Fixed<*>) {
                 fixedHeaders += RestClientFixedOutputHeader(header.name, definitionAccess)
             } else {
-                val rawType = headerType.argument(0, "$endpointId output header '${header.name}'").render()
-                val renderedType = if (header.presence === Optional) "$rawType?" else rawType
+                val rawType =
+                    headerType
+                        .argument(0, "$endpointId output header '${header.name}'")
+                        .toKotlinSourceType("$endpointId output header '${header.name}'")
+                val renderedType = if (header.presence === Optional) rawType.asNullable() else rawType
                 headers += RestClientOutputHeader(
                     name = uniqueName(header.name.lowerCamel("header${headerIndex + 1}"), usedHeaderNames),
                     wireName = header.name,

@@ -92,13 +92,14 @@ class WebMvcTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
-    test("generate content equality for ByteArray response fields") {
+    test("generate content equality for aliased ByteArray response fields") {
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(BinaryResponses)))
                 .artifacts
                 .single()
                 .content
 
+        source shouldContain "body: dev.akif.tapik.spring.webmvc.BinaryContent"
         source shouldContain "body.contentEquals(other.body)"
         source shouldContain "body.contentHashCode()"
         val compilation = compileKotlin(source)
@@ -115,6 +116,8 @@ class WebMvcTargetSpec : FunSpec({
         }
     }
 })
+
+public typealias BinaryContent = ByteArray
 
 public object BodyAlternatives : Api() {
     private val bytes: ByteArrayFormat<String> =
@@ -149,7 +152,7 @@ public object DefaultResponseHeaders : Api() {
 }
 
 public object BinaryResponses : Api() {
-    private val bytes: ByteArrayFormat<ByteArray> =
+    private val bytes: ByteArrayFormat<BinaryContent> =
         Format(
             codec =
                 Codec(

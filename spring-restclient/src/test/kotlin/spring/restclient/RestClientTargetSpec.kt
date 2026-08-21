@@ -36,13 +36,14 @@ class RestClientTargetSpec : FunSpec({
         }
     }
 
-    test("generate content equality for ByteArray response fields") {
+    test("generate content equality for aliased ByteArray response fields") {
         val source =
             RestClientTarget.generate(GenerationRequest(apis = listOf(BinaryDownloads)))
                 .artifacts
                 .single()
                 .content
 
+        source shouldContain "body: dev.akif.tapik.spring.restclient.BinaryContent"
         source shouldContain "body.contentEquals(other.body)"
         source shouldContain "body.contentHashCode()"
         val compilation = compileKotlin(source)
@@ -63,6 +64,8 @@ class RestClientTargetSpec : FunSpec({
     }
 })
 
+public typealias BinaryContent = ByteArray
+
 public object FixedResponses : Api() {
     private val apiVersion = header.string("X-API-Version").fixed("1")
 
@@ -72,7 +75,7 @@ public object FixedResponses : Api() {
 }
 
 public object BinaryDownloads : Api() {
-    private val binaryFormat: ByteArrayFormat<ByteArray> =
+    private val binaryFormat: ByteArrayFormat<BinaryContent> =
         Format(
             codec =
                 Codec(

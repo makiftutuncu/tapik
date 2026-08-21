@@ -1,5 +1,7 @@
 package dev.akif.tapik.spring.webmvc
 
+import dev.akif.tapik.plugin.core.KotlinSourceType
+
 internal fun StringBuilder.appendResponses(endpoint: WebMvcEndpointModel) {
     appendLine("    public sealed interface ${endpoint.responseName} {")
     endpoint.outputs.forEach { output ->
@@ -11,9 +13,9 @@ internal fun StringBuilder.appendResponses(endpoint: WebMvcEndpointModel) {
             fields.forEachIndexed { index, field ->
                 val suffix = if (index == fields.lastIndex) "" else ","
                 val default = field.defaultExpression?.let { expression -> " = $expression" }.orEmpty()
-                appendLine("            public val ${field.name}: ${field.type}$default$suffix")
+                appendLine("            public val ${field.name}: ${field.type.source}$default$suffix")
             }
-            if (fields.any(WebMvcParameter::isByteArray)) {
+            if (fields.any(WebMvcResponseField::isByteArray)) {
                 appendLine("        ) : ${endpoint.responseName} {")
                 appendContentEquals(output.variantName, fields)
                 appendLine()
@@ -27,20 +29,20 @@ internal fun StringBuilder.appendResponses(endpoint: WebMvcEndpointModel) {
     appendLine("    }")
 }
 
-private fun WebMvcOutput.fields(): List<WebMvcParameter> =
+private fun WebMvcOutput.fields(): List<WebMvcResponseField> =
     buildList {
         bodies.firstOrNull()?.let { body ->
-            val type = if (allowsNoBody) "${body.type}?" else body.type
-            add(WebMvcParameter("body", type, if (allowsNoBody) "null" else null))
+            val type = if (allowsNoBody) body.type.asNullable() else body.type
+            add(WebMvcResponseField("body", type, if (allowsNoBody) "null" else null))
         }
         headers.forEach { header ->
-            header.name?.let { name -> add(WebMvcParameter(name, header.type, header.defaultExpression)) }
+            header.name?.let { name -> add(WebMvcResponseField(name, header.type, header.defaultExpression)) }
         }
     }
 
 private fun StringBuilder.appendContentEquals(
     variantName: String,
-    fields: List<WebMvcParameter>
+    fields: List<WebMvcResponseField>
 ) {
     appendLine("            override fun equals(other: kotlin.Any?): kotlin.Boolean =")
     appendLine("                this === other ||")
@@ -53,7 +55,7 @@ private fun StringBuilder.appendContentEquals(
     appendLine("                    )")
 }
 
-private fun StringBuilder.appendContentHashCode(fields: List<WebMvcParameter>) {
+private fun StringBuilder.appendContentHashCode(fields: List<WebMvcResponseField>) {
     appendLine("            override fun hashCode(): kotlin.Int {")
     appendLine("                var result = ${fields.first().hashCodeExpression()}")
     fields.drop(1).forEach { field ->
@@ -63,19 +65,25 @@ private fun StringBuilder.appendContentHashCode(fields: List<WebMvcParameter>) {
     appendLine("            }")
 }
 
-private fun WebMvcParameter.equalsExpression(): String =
+private fun WebMvcResponseField.equalsExpression(): String =
     when {
         !isByteArray() -> "$name == other.$name"
-        type.endsWith('?') -> "$name?.contentEquals(other.$name) ?: (other.$name == null)"
+        type.expandedType.nullable -> "$name?.contentEquals(other.$name) ?: (other.$name == null)"
         else -> "$name.contentEquals(other.$name)"
     }
 
-private fun WebMvcParameter.hashCodeExpression(): String =
+private fun WebMvcResponseField.hashCodeExpression(): String =
     when {
-        isByteArray() && type.endsWith('?') -> "$name?.contentHashCode() ?: 0"
+        isByteArray() && type.expandedType.nullable -> "$name?.contentHashCode() ?: 0"
         isByteArray() -> "$name.contentHashCode()"
-        type.endsWith('?') -> "$name?.hashCode() ?: 0"
+        type.expandedType.nullable -> "$name?.hashCode() ?: 0"
         else -> "$name.hashCode()"
     }
 
-private fun WebMvcParameter.isByteArray(): Boolean = type.removeSuffix("?") == "kotlin.ByteArray"
+private fun WebMvcResponseField.isByteArray(): Boolean = type.expandsTo("kotlin.ByteArray")
+
+private data class WebMvcResponseField(
+    val name: String,
+    val type: KotlinSourceType,
+    val defaultExpression: String?
+)
