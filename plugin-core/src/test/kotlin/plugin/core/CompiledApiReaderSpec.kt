@@ -1,9 +1,11 @@
 package dev.akif.tapik.plugin.core
 
 import dev.akif.tapik.*
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 
 private data class Item(
     val name: String
@@ -27,6 +29,10 @@ private class TypedApi : BaseApi() {
     val items by
         get(root / "items")
             .output(Status.Ok with body(MediaType.Json, itemsFormat))
+}
+
+private class InaccessibleApi : Api() {
+    internal val hidden by get(root / "hidden")
 }
 
 class CompiledApiReaderSpec : FunSpec({
@@ -58,6 +64,15 @@ class CompiledApiReaderSpec : FunSpec({
         val outputs = endpointType.argumentType(4)
 
         outputs.abbreviation?.classifier shouldBe KotlinTypeAliasClassifier("dev.akif.tapik.Outputs1")
+    }
+
+    test("reject endpoint properties that generated targets cannot access") {
+        val failure = shouldThrow<CompiledApiInspectionException> {
+            CompiledApiReader.read(InaccessibleApi())
+        }
+
+        requireNotNull(failure.message) shouldContain
+            "Endpoint property 'InaccessibleApi.hidden' must be public for generated targets"
     }
 })
 

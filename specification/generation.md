@@ -19,10 +19,10 @@ Generated artifact paths are relative and normalized. A generation result cannot
 
 ## API registries
 
-A compiled contract contributes an `ApiRegistry` containing all concrete Kotlin `object` declarations extending
-`Api`. Registration is automatic by default; generation-time include and exclude filters may narrow the resulting
-catalog later. Generated registries retain source declaration order internally, while a catalog orders APIs by ID to
-remain deterministic across multiple artifacts and rejects duplicate API IDs.
+A compiled contract contributes an `ApiRegistry` containing all concrete Kotlin classes and objects extending `Api`.
+Registration is automatic by default; generation-time include and exclude filters may narrow the resulting catalog
+later. Generated registries retain source declaration order internally, while a catalog orders APIs by ID to remain
+deterministic across multiple artifacts and rejects duplicate API IDs.
 
 Registry providers are generated during Kotlin compilation and exposed through a shared runtime discovery mechanism.
 Maven, Gradle, and command-line adapters consume the same providers.
@@ -34,6 +34,12 @@ is exposed through the standard service-provider mechanism. Abstract API base cl
 visibility or construction fails compilation. The plugin does not execute endpoint expressions, discover APIs
 reflectively, or create a second contract representation. Compilations without a concrete API type do not publish a
 registry.
+
+Every delegated endpoint property reachable from a registered API, including properties declared by API base classes,
+must be public. Private, protected, and internal endpoint properties fail contract compilation because generated
+targets access them from another package and potentially another module. Kotlin's public-signature visibility rules
+likewise reject inaccessible model types exposed by a public endpoint property. Metadata inspection repeats the
+endpoint-property check so contracts produced without the current compiler plugin fail before target source emission.
 
 Each compiler output directory has one deterministic compiler-owned registry class and one corresponding entry in the
 standard `ApiRegistry` service descriptor. Every compilation synchronizes those artifacts, including non-clean

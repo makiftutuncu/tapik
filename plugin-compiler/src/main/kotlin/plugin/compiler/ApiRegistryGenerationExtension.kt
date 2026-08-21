@@ -11,6 +11,8 @@ import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.util.isSubclassOf
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
@@ -29,7 +31,8 @@ internal class ApiRegistryGenerationExtension(
         pluginContext: IrPluginContext
     ) {
         val apiClass = pluginContext.referenceClass(API_CLASS_ID)?.owner
-        if (apiClass == null) {
+        val endpointClass = pluginContext.referenceClass(ENDPOINT_CLASS_ID)?.owner
+        if (apiClass == null || endpointClass == null) {
             RegistryClassWriter.synchronize(outputDirectory, emptyList())
             return
         }
@@ -48,6 +51,10 @@ internal class ApiRegistryGenerationExtension(
                 }
             }
         )
+        if (!validateEndpointProperties(apiTypes, apiClass, endpointClass)) {
+            RegistryClassWriter.synchronize(outputDirectory, emptyList())
+            return
+        }
         val registeredTypes = apiTypes.mapNotNull { apiType -> apiType.registeredApiType() }
         if (registeredTypes.size != apiTypes.size) {
             RegistryClassWriter.synchronize(outputDirectory, emptyList())
@@ -55,6 +62,33 @@ internal class ApiRegistryGenerationExtension(
         }
 
         RegistryClassWriter.synchronize(outputDirectory, registeredTypes)
+    }
+
+    private fun validateEndpointProperties(
+        apiTypes: List<IrClass>,
+        apiClass: IrClass,
+        endpointClass: IrClass
+    ): Boolean {
+        var valid = true
+        val inspected = mutableSetOf<IrProperty>()
+        apiTypes.forEach { apiType ->
+            apiType.apiHierarchy(apiClass).forEach { declaringType ->
+                declaringType.declarations
+                    .filterIsInstance<IrProperty>()
+                    .filter { property -> property.getter?.returnType?.classOrNull?.owner == endpointClass }
+                    .filter(inspected::add)
+                    .filter { property -> property.visibility != DescriptorVisibilities.PUBLIC }
+                    .forEach { property ->
+                        val owner = declaringType.fqNameWhenAvailable?.asString() ?: declaringType.name.asString()
+                        messages.report(
+                            ERROR,
+                            "Tapik endpoint property '$owner.${property.name}' must be public for generated targets"
+                        )
+                        valid = false
+                    }
+            }
+        }
+        return valid
     }
 
     private fun IrClass.registeredApiType(): RegisteredApiType? {
@@ -97,6 +131,22 @@ private fun IrClass.isEffectivelyPublic(): Boolean {
     return true
 }
 
+private fun IrClass.apiHierarchy(apiClass: IrClass): Sequence<IrClass> =
+    sequence {
+        val pending = ArrayDeque<IrClass>()
+        val visited = mutableSetOf<IrClass>()
+        pending += this@apiHierarchy
+        while (pending.isNotEmpty()) {
+            val current = pending.removeFirst()
+            if (!visited.add(current) || current == apiClass) continue
+            yield(current)
+            current.superTypes
+                .mapNotNull { type -> type.classOrNull?.owner }
+                .filter { parent -> parent == apiClass || parent.isSubclassOf(apiClass) }
+                .forEach(pending::addLast)
+        }
+    }
+
 private fun IrClass.jvmInternalName(): String {
     val classNames = mutableListOf<String>()
     var declaration = this
@@ -115,3 +165,4 @@ private fun IrClass.jvmInternalName(): String {
 }
 
 private val API_CLASS_ID: ClassId = ClassId.topLevel(FqName("dev.akif.tapik.Api"))
+private val ENDPOINT_CLASS_ID: ClassId = ClassId.topLevel(FqName("dev.akif.tapik.Endpoint"))

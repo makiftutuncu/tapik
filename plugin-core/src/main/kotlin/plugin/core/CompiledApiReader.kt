@@ -5,8 +5,10 @@ import dev.akif.tapik.id
 import kotlin.metadata.KmClassifier
 import kotlin.metadata.KmType
 import kotlin.metadata.KmVariance
+import kotlin.metadata.Visibility
 import kotlin.metadata.isDefinitelyNonNull
 import kotlin.metadata.isNullable
+import kotlin.metadata.visibility
 import kotlin.metadata.jvm.KotlinClassMetadata
 import kotlin.metadata.KmTypeProjection as KmTypeProjectionMetadata
 
@@ -20,7 +22,7 @@ object CompiledApiReader {
      * @throws CompiledApiInspectionException when metadata is unavailable, unreadable, or inconsistent with [api].
      */
     fun read(api: Api): CompiledApi {
-        val propertyTypes = propertyTypes(api)
+        val properties = properties(api)
         val prefix = "${api.id}."
         val endpoints =
             api.endpoints.map { endpoint ->
@@ -30,11 +32,17 @@ object CompiledApiReader {
                     )
                 }
                 val propertyName = endpoint.id.removePrefix(prefix)
-                val type =
-                    propertyTypes[propertyName]
+                val property =
+                    properties[propertyName]
                         ?: throw CompiledApiInspectionException(
                             "Cannot find compiled property '$propertyName' for endpoint '${endpoint.id}'"
                         )
+                if (property.visibility != Visibility.PUBLIC) {
+                    throw CompiledApiInspectionException(
+                        "Endpoint property '${endpoint.id}' must be public for generated targets"
+                    )
+                }
+                val type = property.type
                 if (type.classifier != ENDPOINT_CLASSIFIER) {
                     throw CompiledApiInspectionException(
                         "Compiled property '$propertyName' for endpoint '${endpoint.id}' has type '${type.classifier}'"
@@ -45,7 +53,7 @@ object CompiledApiReader {
         return CompiledApi(api, endpoints)
     }
 
-    private fun propertyTypes(api: Api): Map<String, KotlinType> =
+    private fun properties(api: Api): Map<String, CompiledProperty> =
         buildMap {
             var apiType: Class<*>? = api.javaClass
             while (apiType != null && apiType != Api::class.java) {
@@ -54,7 +62,7 @@ object CompiledApiReader {
             }
         }
 
-    private fun metadataProperties(apiType: Class<*>): Map<String, KotlinType> {
+    private fun metadataProperties(apiType: Class<*>): Map<String, CompiledProperty> {
         val metadata =
             apiType.getAnnotation(Metadata::class.java)
                 ?: throw CompiledApiInspectionException(
@@ -70,12 +78,17 @@ object CompiledApiReader {
                 )
             } ?: throw CompiledApiInspectionException(
                 "Kotlin metadata for API type '${apiType.name}' does not describe a class"
-            )
+        )
         return classMetadata.kmClass.properties.associate { property ->
-            property.name to property.returnType.toKotlinType()
+            property.name to CompiledProperty(property.returnType.toKotlinType(), property.visibility)
         }
     }
 }
+
+private data class CompiledProperty(
+    val type: KotlinType,
+    val visibility: Visibility
+)
 
 private fun KmType.toKotlinType(): KotlinType =
     KotlinType(

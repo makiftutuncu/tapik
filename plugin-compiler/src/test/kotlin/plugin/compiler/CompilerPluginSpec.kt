@@ -97,4 +97,72 @@ class CompilerPluginSpec : FunSpec({
         compilation.messages shouldContain
             "tapik API class 'example.Books' must declare a public no-argument constructor"
     }
+
+    test("reject non-public endpoint properties") {
+        val compilation =
+            compile(
+                """
+                package example
+
+                import dev.akif.tapik.*
+
+                class Books : Api() {
+                    private val hidden by get(root / "hidden")
+                    internal val local by get(root / "local")
+                    protected val inherited by get(root / "inherited")
+                }
+                """.trimIndent()
+            )
+
+        compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
+        compilation.messages shouldContain
+            "tapik endpoint property 'example.Books.hidden' must be public for generated targets"
+        compilation.messages shouldContain
+            "tapik endpoint property 'example.Books.local' must be public for generated targets"
+        compilation.messages shouldContain
+            "tapik endpoint property 'example.Books.inherited' must be public for generated targets"
+    }
+
+    test("reject inherited non-public endpoint properties") {
+        val compilation =
+            compile(
+                """
+                package example
+
+                import dev.akif.tapik.*
+
+                abstract class LibraryApi : Api() {
+                    protected val health by get(root / "health")
+                }
+
+                class Books : LibraryApi()
+                """.trimIndent()
+            )
+
+        compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
+        compilation.messages shouldContain
+            "tapik endpoint property 'example.LibraryApi.health' must be public for generated targets"
+    }
+
+    test("let Kotlin reject inaccessible types in public endpoint signatures") {
+        val compilation =
+            compile(
+                """
+                package example
+
+                import dev.akif.tapik.*
+
+                private data class BookId(val value: String)
+                private val bookId = format.string.transform(::BookId, BookId::value)
+
+                class Books : Api() {
+                    val get by get(root / path("bookId", bookId))
+                }
+                """.trimIndent()
+            )
+
+        compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
+        compilation.messages shouldContain "exposes"
+        compilation.messages shouldContain "BookId"
+    }
 })
