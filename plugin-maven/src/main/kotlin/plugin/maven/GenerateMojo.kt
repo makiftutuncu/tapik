@@ -40,10 +40,9 @@ class GenerateMojo : AbstractMojo() {
 
     override fun execute() {
         try {
-            val classpath = project.compileClasspathElements.map(Path::of)
             val generation =
                 MavenGenerator().generate(
-                    classpath = classpath,
+                    classpath = project.generationClasspath(),
                     targetId = target,
                     targetConfiguration = targetConfiguration,
                     outputDirectory = outputDirectory.toPath(),

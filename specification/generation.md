@@ -91,6 +91,8 @@ The `{api}` placeholder expands to the API ID, and the default template is `{api
 `dev.akif:tapik-plugin-maven` is a thin host adapter exposing one `generate` goal. Each Maven execution selects
 one target and supplies its own target configuration. The goal runs in `process-classes` by default and resolves the
 project compile and runtime classpath so same-module documentation targets can consume compiled API objects.
+Compile-classpath entries retain Maven's order and precede runtime-only entries. Paths are normalized and duplicate
+entries are passed to generation only once.
 
 The adapter loads every compiler-generated API registry visible to the project classpath. Conflicting API IDs fail
 generation.
