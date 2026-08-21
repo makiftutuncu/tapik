@@ -1,5 +1,6 @@
 package dev.akif.tapik
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -32,6 +33,17 @@ class InputSpec : FunSpec({
             }
 
         books.create.input.bodies shouldBeSameInstanceAs alternatives
+    }
+
+    test("validate body alternatives at the bulk input boundary") {
+        val json = body(MediaType.Json, createBookFormat())
+        val invalid = Bodies2(json, json)
+
+        shouldThrow<IllegalArgumentException> {
+            object : Api("Books") {
+                val create by post(root / "books").input(invalid)
+            }
+        }
     }
 })
 

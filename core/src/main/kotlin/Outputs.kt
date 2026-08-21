@@ -26,14 +26,15 @@ sealed interface OutputAlternative
  * @property bodies alternative body representations.
  * @property headers headers produced with this output.
  */
-data class Output<out M : StatusMatcher, out B : Bodies, out H : Headers>(
+@ConsistentCopyVisibility
+data class Output<out M : StatusMatcher, out B : Bodies, out H : Headers> internal constructor(
     val matcher: M,
     val bodies: B,
     val headers: H
 ) : OutputAlternative
 
-/** An ordered, heterogeneous tuple of endpoint output alternatives. */
-typealias Outputs = Tuple<OutputAlternative>
+/** An ordered, non-empty heterogeneous tuple of endpoint output alternatives. */
+typealias Outputs = NonEmptyTuple<OutputAlternative>
 
 /** An output tuple with one alternative. */
 typealias Outputs1<Output1> = Tuple1<OutputAlternative, Output1>
@@ -83,12 +84,12 @@ infix fun Status.with(noBody: NoBody): Output<ExactStatus, Bodies1<NoBody>, Head
 
 /** Combines this exact status with alternative [bodies]. */
 infix fun <B : Bodies> Status.with(bodies: B): Output<ExactStatus, B, Headers0> =
-    Output(ExactStatus(this), bodies, noHeaders)
+    Output(ExactStatus(this), validatedBodies(bodies), noHeaders)
 
 /** Attaches [headers] after this output's status and bodies. */
-infix fun <M : StatusMatcher, B : Bodies, H : Headers> Output<M, B, Headers0>.with(
+infix fun <M : StatusMatcher, B : Bodies, H : NonEmptyTuple<Header<*, *>>> Output<M, B, Headers0>.with(
     headers: H
-): Output<M, B, H> = Output(matcher, bodies, headers)
+): Output<M, B, H> = Output(matcher, bodies, validatedHeaders(headers))
 
 private fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
     Endpoint<P, Q, H, I, *, Draft>.withOutputs(

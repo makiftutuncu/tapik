@@ -142,7 +142,7 @@ typealias Headers7<Header1, Header2, Header3, Header4, Header5, Header6, Header7
 typealias Headers8<Header1, Header2, Header3, Header4, Header5, Header6, Header7, Header8> =
     Tuple8<Header<*, *>, Header1, Header2, Header3, Header4, Header5, Header6, Header7, Header8>
 
-private fun <H : Headers> validated(headers: H): H {
+internal fun <H : Headers> validatedHeaders(headers: H): H {
     val names = mutableSetOf<String>()
     require(headers.values.all { names.add(it.name.lowercase()) }) {
         "Header names must be unique ignoring case"
@@ -151,20 +151,21 @@ private fun <H : Headers> validated(headers: H): H {
 }
 
 /** Groups one [header1]. */
-fun <Header1 : Header<*, *>> headersOf(header1: Header1): Headers1<Header1> = validated(Headers1(header1))
+fun <Header1 : Header<*, *>> headersOf(header1: Header1): Headers1<Header1> =
+    validatedHeaders(Headers1(header1))
 
 /** Groups [header1] and [header2]. */
 fun <Header1 : Header<*, *>, Header2 : Header<*, *>> headersOf(
     header1: Header1,
     header2: Header2
-): Headers2<Header1, Header2> = validated(Headers2(header1, header2))
+): Headers2<Header1, Header2> = validatedHeaders(Headers2(header1, header2))
 
 /** Groups three headers in declaration order. */
 fun <Header1 : Header<*, *>, Header2 : Header<*, *>, Header3 : Header<*, *>> headersOf(
     header1: Header1,
     header2: Header2,
     header3: Header3
-): Headers3<Header1, Header2, Header3> = validated(Headers3(header1, header2, header3))
+): Headers3<Header1, Header2, Header3> = validatedHeaders(Headers3(header1, header2, header3))
 
 /** Groups four headers in declaration order. */
 fun <Header1 : Header<*, *>, Header2 : Header<*, *>, Header3 : Header<*, *>, Header4 : Header<*, *>> headersOf(
@@ -172,7 +173,7 @@ fun <Header1 : Header<*, *>, Header2 : Header<*, *>, Header3 : Header<*, *>, Hea
     header2: Header2,
     header3: Header3,
     header4: Header4
-): Headers4<Header1, Header2, Header3, Header4> = validated(Headers4(header1, header2, header3, header4))
+): Headers4<Header1, Header2, Header3, Header4> = validatedHeaders(Headers4(header1, header2, header3, header4))
 
 /** Groups five headers in declaration order. */
 fun <
@@ -188,7 +189,7 @@ fun <
     header4: Header4,
     header5: Header5
 ): Headers5<Header1, Header2, Header3, Header4, Header5> =
-    validated(Headers5(header1, header2, header3, header4, header5))
+    validatedHeaders(Headers5(header1, header2, header3, header4, header5))
 
 /** Groups six headers in declaration order. */
 fun <
@@ -206,7 +207,7 @@ fun <
     header5: Header5,
     header6: Header6
 ): Headers6<Header1, Header2, Header3, Header4, Header5, Header6> =
-    validated(Headers6(header1, header2, header3, header4, header5, header6))
+    validatedHeaders(Headers6(header1, header2, header3, header4, header5, header6))
 
 /** Groups seven headers in declaration order. */
 fun <
@@ -226,7 +227,7 @@ fun <
     header6: Header6,
     header7: Header7
 ): Headers7<Header1, Header2, Header3, Header4, Header5, Header6, Header7> =
-    validated(Headers7(header1, header2, header3, header4, header5, header6, header7))
+    validatedHeaders(Headers7(header1, header2, header3, header4, header5, header6, header7))
 
 /** Groups eight headers in declaration order. */
 fun <
@@ -248,17 +249,17 @@ fun <
     header7: Header7,
     header8: Header8
 ): Headers8<Header1, Header2, Header3, Header4, Header5, Header6, Header7, Header8> =
-    validated(Headers8(header1, header2, header3, header4, header5, header6, header7, header8))
+    validatedHeaders(Headers8(header1, header2, header3, header4, header5, header6, header7, header8))
 
 /**
  * Initializes this headerless draft endpoint with [headers].
  *
  * This bulk modifier is unavailable after any header has been added.
  */
-fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
+fun <P : Paths, Q : Queries, H : NonEmptyTuple<Header<*, *>>, I : Input, O : Outputs>
     Endpoint<P, Q, Headers0, I, O, Draft>.headers(
         headers: H
-    ): Endpoint<P, Q, H, I, O, Draft> = withHeaders(headers)
+    ): Endpoint<P, Q, H, I, O, Draft> = withHeaders(validatedHeaders(headers))
 
 private fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
     Endpoint<P, Q, *, I, O, Draft>.withHeaders(

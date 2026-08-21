@@ -66,6 +66,16 @@ class HeaderSpec : FunSpec({
         }
     }
 
+    test("validate headers at the bulk endpoint boundary") {
+        val invalid = Headers2(header.string("X-Request-Id"), header.uuid("x-request-id"))
+
+        shouldThrow<IllegalArgumentException> {
+            object : Api("Books") {
+                val list by get(root / "books").headers(invalid)
+            }
+        }
+    }
+
     test("support eight headers") {
         val headers =
             headersOf(

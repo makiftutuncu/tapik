@@ -48,8 +48,14 @@ All ordered heterogeneous collections use fixed-arity types from zero through ei
 preserved exactly. Reaching a ninth element is a compilation failure.
 
 The shared tuple algebra consists of `Tuple0` through `Tuple8`. `Tuple0` is the empty value; each non-empty tuple
-stores its elements in `_1` through `_8`, exposes them in declaration order through `values`, and appends one value
-with `and`. `Tuple8` has no append operation. Every tuple has structural value semantics.
+stores its elements in `_1` through `_8` and exposes them in declaration order through `values`. `NonEmptyTuple`
+distinguishes `Tuple1` through `Tuple8` wherever an empty collection is not a valid contract state. Every tuple has
+structural value semantics.
+
+Tuple values are publicly readable structural results of the DSL, not a second public construction API. Non-empty
+tuple constructors, their generated `copy` functions, and generic tuple appending are internal to core. Public code
+constructs domain tuples only through validated factories and endpoint modifiers such as `bodiesOf`, `headersOf`,
+`input`, `header`, and `output`.
 
 ## URI
 
@@ -183,10 +189,10 @@ Request headers belong directly to an endpoint and append in declaration order:
 .headers(headersOf(requestId, traceId))
 ```
 
-`.headers(...)` is a one-time bulk initializer available only while a draft endpoint has `Headers0`. After any
-headers have been initialized, `.header(...)` is the only header modifier and appends one definition at a time.
-Both modifiers retain exact header types; reaching a ninth header is a compilation failure. Ready endpoints expose
-neither modifier.
+`.headers(...)` is a one-time bulk initializer available only while a draft endpoint has `Headers0` and accepts a
+non-empty `Headers1` through `Headers8` value. After any headers have been initialized, `.header(...)` is the only
+header modifier and appends one definition at a time. Both modifiers retain exact header types; reaching a ninth
+header is a compilation failure. Ready endpoints expose neither modifier.
 
 Headers retain required, optional, defaulted, or fixed presence in separate header-presence types. Fixed queries may
 also be supported. Header names compare case-insensitively for uniqueness.
@@ -223,6 +229,9 @@ input are alternative media representations of exactly one logical Kotlin type:
 keep that rule simple and type-safe, `noBody` must be the final argument to `bodiesOf`. Multiple real
 bodies must use the same declared Kotlin type and distinct media types.
 
+`Bodies` is non-empty by construction. `bodiesOf` and the single-body overloads are the public construction boundary;
+request and output bulk modifiers validate received body groups before accepting them.
+
 `MediaType` initially wraps the complete media-type string as its own evolvable type. Built-in values cover JSON,
 XML, plain text, and arbitrary bytes. A `Body<Value>` combines one media type with a `ByteArrayFormat<Value>`; format
 integrations such as Kotlin serialization provide convenient builders including `jsonBody<Value>()`.
@@ -252,7 +261,12 @@ The output grammar is status matcher, body or bodies, then optional headers:
 Output headers preserve declaration order. Multiple `.output(...)` calls append distinct response alternatives.
 Matcher kind, concrete headers, and concrete body formats remain in the output's generic type.
 
-`Outputs` is a tuple of output alternatives, with `Outputs1` through `Outputs8` retaining every concrete output type.
+`Output` values are created through the status/body `with` grammar; their constructor and generated `copy` function
+are internal to core. Attaching output headers accepts only non-empty `Headers1` through `Headers8` values and validates
+their names before creating the next output value.
+
+`Outputs` is a non-empty tuple of output alternatives, with `Outputs1` through `Outputs8` retaining every concrete
+output type.
 `DefaultOutput` is the distinct initial type and exposes its empty `200` response as a singleton at runtime. Adding
 the first explicit output replaces that default with `Outputs1`; later calls append in declaration order. A ninth
 output is a compilation failure, and duplicate exact statuses are rejected. Bodyless explicit responses use

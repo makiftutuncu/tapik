@@ -72,6 +72,26 @@ class DslCompilationSpec : FunSpec({
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
 
+    test("not expose raw non-empty tuple construction") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = Tuple1<Any, String>("value")
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not expose generic tuple appending") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = Tuple0 and "value"
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
     test("not compile more than eight headers") {
         compile(
             """
@@ -161,6 +181,18 @@ class DslCompilationSpec : FunSpec({
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
 
+    test("not bulk initialize an empty header tuple") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val invalid by get(root / "books").headers(noHeaders)
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
     test("not modify headers on a ready endpoint") {
         compile(
             """
@@ -210,6 +242,36 @@ class DslCompilationSpec : FunSpec({
         ) shouldBe ExitCode.COMPILATION_ERROR
     }
 
+    test("not construct heterogeneous bodies through a raw tuple") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            data class Author(val value: String)
+
+            fun bookBody(): Body<Book> = error("Only compiled")
+            fun authorBody(): Body<Author> = error("Only compiled")
+
+            val invalid: Bodies2<Body<Book>, Body<Author>> = Tuple2(bookBody(), authorBody())
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not copy a body tuple around its validation boundary") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            data class Book(val value: String)
+            fun bookBody(mediaType: MediaType): Body<Book> = error("Only compiled")
+
+            val bodies = bodiesOf(bookBody(MediaType.Json), bookBody(MediaType.Xml))
+            val invalid = bodies.copy(_2 = bodies._1)
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
     test("not accept noBody before a real body") {
         compile(
             """
@@ -246,6 +308,18 @@ class DslCompilationSpec : FunSpec({
 
             object Books : Api("Books") {
                 val invalid by post(root / "books").input(bookBody()).input(bookBody())
+            }
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not attach an empty body tuple as input") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api("Books") {
+                val invalid by post(root / "books").input(noHeaders)
             }
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
@@ -289,6 +363,37 @@ class DslCompilationSpec : FunSpec({
             import dev.akif.tapik.*
 
             val invalid = Status.Ok with headersOf(header.string("X-Source"))
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not accept an empty tuple as output bodies") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = Status.Ok with noHeaders
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not attach an empty output header tuple") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = Status.Ok with noBody with noHeaders
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not expose direct output construction") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val output = Status.Ok with noBody
+            val invalid = Output(output.matcher, output.bodies, output.headers)
             """
         ) shouldBe ExitCode.COMPILATION_ERROR
     }

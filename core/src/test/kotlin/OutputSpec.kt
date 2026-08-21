@@ -39,6 +39,19 @@ class OutputSpec : FunSpec({
         empty.bodies.values shouldBe listOf(noBody)
     }
 
+    test("validate body alternatives at the output boundary") {
+        val json = body(MediaType.Json, outputBookFormat())
+        val invalid = Bodies2(json, json)
+
+        shouldThrow<IllegalArgumentException> { Status.Ok with invalid }
+    }
+
+    test("validate headers at the output boundary") {
+        val invalid = Headers2(header.string("X-Request-Id"), header.uuid("x-request-id"))
+
+        shouldThrow<IllegalArgumentException> { Status.Ok with noBody with invalid }
+    }
+
     test("replace the default output then append explicit outputs") {
         val json = body(MediaType.Json, outputBookFormat())
         val ok = Status.Ok with json

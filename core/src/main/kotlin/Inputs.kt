@@ -26,12 +26,12 @@ fun <P : Paths, Q : Queries, H : Headers, O : Outputs, B : Bodies>
     Endpoint<P, Q, H, NoInput, O, Draft>.input(
         bodies: B
     ): Endpoint<P, Q, H, BodyInput<B>, O, Draft> {
-        require(bodies.values.isNotEmpty()) { "Request body alternatives must not be empty" }
+        val validBodies = validatedBodies(bodies)
         return Endpoint(
             method = method,
             uri = uri,
             headers = headers,
-            input = BodyInput(bodies),
+            input = BodyInput(validBodies),
             outputs = outputs,
             documentation = documentation,
             tags = tags,
