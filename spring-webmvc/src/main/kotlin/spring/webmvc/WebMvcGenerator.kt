@@ -17,6 +17,7 @@ internal class WebMvcGenerator(
             appendLine("package ${model.packageName}")
             appendLine()
             appendLine("import dev.akif.tapik.spring.toSpringMediaType")
+            appendLine("import dev.akif.tapik.spring.selectResponseMediaType")
             appendLine()
             appendLine("public interface ${model.serverName} {")
             appendLine("    public val ${model.apiProperty}: ${model.apiType}")
@@ -154,7 +155,8 @@ private fun WebMvcEndpointModel.mappingAnnotation(): String {
         attributes += "consumes = ${consumes.stringArray()}"
     }
     val produces = outputs.flatMap { output -> output.bodies.map(WebMvcOutputBody::mediaType) }.distinct()
-    if (produces.isNotEmpty()) attributes += "produces = ${produces.stringArray()}"
+    val allowsBodylessResponse = outputs.any { output -> output.bodies.isEmpty() || output.allowsNoBody }
+    if (produces.isNotEmpty() && !allowsBodylessResponse) attributes += "produces = ${produces.stringArray()}"
     val annotation =
         when (method) {
             Method.GET -> "GetMapping"
@@ -301,18 +303,14 @@ private fun StringBuilder.appendBodyEncoding(
     bodyExpression: String,
     indentation: String
 ) {
-    if (output.bodies.size == 1) {
-        val body = output.bodies.single()
-        appendLine(
-            "$indentation${body.definitionAccess}.mediaType to ${body.definitionAccess}.format.encode($bodyExpression)"
-        )
-        return
-    }
     val accept = requireNotNull(endpoint.acceptParameter)
-    appendLine("${indentation}when {")
+    val offered = output.bodies.joinToString { body -> "${body.definitionAccess}.mediaType" }
+    appendLine(
+        "${indentation}when (selectResponseMediaType($accept, kotlin.collections.listOf($offered))) {"
+    )
     output.bodies.forEach { body ->
         appendLine(
-            "$indentation    accepts($accept, ${body.definitionAccess}.mediaType) -> ${body.definitionAccess}.mediaType to ${body.definitionAccess}.format.encode($bodyExpression)"
+            "$indentation    ${body.definitionAccess}.mediaType -> ${body.definitionAccess}.mediaType to ${body.definitionAccess}.format.encode($bodyExpression)"
         )
     }
     appendLine("$indentation    else -> notAcceptable($accept, ${endpoint.id.kotlinString()})")
@@ -353,19 +351,6 @@ private fun StringBuilder.appendHelpers() {
     appendLine("            actual != null && org.springframework.http.MediaType.parseMediaType(actual).isCompatibleWith(expected.toSpringMediaType())")
     appendLine("        } catch (_: org.springframework.http.InvalidMediaTypeException) {")
     appendLine("            false")
-    appendLine("        }")
-    appendLine()
-    appendLine("    private fun accepts(accept: kotlin.String?, offered: dev.akif.tapik.MediaType): kotlin.Boolean =")
-    appendLine("        if (accept.isNullOrBlank()) {")
-    appendLine("            true")
-    appendLine("        } else {")
-    appendLine("            try {")
-    appendLine("                org.springframework.http.MediaType.parseMediaTypes(accept).any { requested ->")
-    appendLine("                    requested.isCompatibleWith(offered.toSpringMediaType())")
-    appendLine("                }")
-    appendLine("            } catch (_: org.springframework.http.InvalidMediaTypeException) {")
-    appendLine("                false")
-    appendLine("            }")
     appendLine("        }")
     appendLine()
     appendLine("    private fun responseEntity(")

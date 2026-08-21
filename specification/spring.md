@@ -62,10 +62,16 @@ alternative remains supported; an unmatched content type produces `415 Unsupport
 alternative, an absent request body is decoded as `null`.
 
 Generated mapping methods encode handler responses through the selected output definition and return Spring
-`ResponseEntity<ByteArray>`. When an output has multiple encoded body representations, the first representation
-compatible with the request's `Accept` values is selected in declaration order. Missing or wildcard `Accept` values
-select the first representation, while no compatible representation produces `406 Not Acceptable`. Statuses and
-headers come from the selected response variant and endpoint definition.
+`ResponseEntity<ByteArray>`. Every selected output containing a body is negotiated against the request's `Accept`
+values, including outputs with only one representation. The compatible representation with the highest effective
+quality is selected; a more specific media range wins ties, followed by body declaration order. A media range with
+quality zero excludes the representation when it is the most specific match. Non-quality parameters on an `Accept`
+range must match parameters offered by the representation. Missing or wildcard `Accept` values select the first
+representation, while an invalid header or no compatible representation produces `406 Not Acceptable`.
+
+An output selected without a body is not constrained by `Accept`. When any endpoint output can be bodyless, its Spring
+mapping omits an aggregate `produces` condition so routing cannot reject a request before the handler selects that
+output. Statuses and headers come from the selected response variant and endpoint definition.
 
 A defaulted output header is exposed as a nullable response field defaulting to `null`. When a handler leaves that
 field unset, the mapping method encodes the default carried by the endpoint definition.

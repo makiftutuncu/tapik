@@ -89,6 +89,30 @@ class MavenUsageSpec : FunSpec({
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().string("""[{"id":"author-1","name":"Ursula K. Le Guin"}]"""))
+
+        mvc
+            .perform(
+                get("/authors")
+                    .queryParam("name", "Ursula")
+                    .header("X-Request-Id", "request-1")
+                    .accept(MediaType.APPLICATION_XML)
+            ).andExpect(status().isNotAcceptable)
+
+        mvc
+            .perform(
+                get("/authors")
+                    .queryParam("name", "Ursula")
+                    .header("X-Request-Id", "request-1")
+                    .header("Accept", "application/json;q=0, application/xml;q=1")
+            ).andExpect(status().isNotAcceptable)
+
+        mvc
+            .perform(
+                get("/authors")
+                    .queryParam("name", "none")
+                    .header("X-Request-Id", "request-1")
+                    .accept(MediaType.TEXT_PLAIN)
+            ).andExpect(status().isNoContent)
     }
 })
 
@@ -100,9 +124,13 @@ private class AuthorsController : AuthorsServer {
         xRequestId: String,
         name: String?
     ): AuthorsServer.ListResponse =
-        AuthorsServer.ListResponse.Ok(
-            body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
-        )
+        if (name == "none") {
+            AuthorsServer.ListResponse.NoContent
+        } else {
+            AuthorsServer.ListResponse.Ok(
+                body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
+            )
+        }
 }
 
 private fun generated(api: String): String =

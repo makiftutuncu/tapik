@@ -50,13 +50,28 @@ class WebMvcTargetSpec : FunSpec({
         source shouldContain
             "mediaTypeCompatible(contentType, bodyAlternativesApi.echo.input.bodies._2.mediaType)"
         source shouldContain
-            "accepts(accept, bodyAlternativesApi.echo.outputs._1.bodies._1.mediaType)"
-        source shouldContain
-            "accepts(accept, bodyAlternativesApi.echo.outputs._1.bodies._2.mediaType)"
+            "selectResponseMediaType(accept, kotlin.collections.listOf(bodyAlternativesApi.echo.outputs._1.bodies._1.mediaType, bodyAlternativesApi.echo.outputs._1.bodies._2.mediaType))"
         source shouldContain
             "@org.springframework.web.bind.annotation.RequestBody(required = false) bodyBytes: kotlin.ByteArray? = null"
         source shouldContain "public fun optionalEcho("
         source shouldContain "body: kotlin.String? = null"
+
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
+    test("negotiate the body of the selected output") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(StatusBodyAlternatives)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain
+            "selectResponseMediaType(accept, kotlin.collections.listOf(statusBodyAlternativesApi.find.outputs._1.bodies._1.mediaType))"
+        source shouldContain
+            "selectResponseMediaType(accept, kotlin.collections.listOf(statusBodyAlternativesApi.find.outputs._2.bodies._1.mediaType))"
+        source shouldContain "@org.springframework.web.bind.annotation.GetMapping(path = [\"/optional\"])"
 
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
@@ -147,6 +162,29 @@ public object BinaryResponses : Api() {
     public val download by
         get(root / "download")
             .output(Status.Ok with body(MediaType.OctetStream, bytes))
+}
+
+public object StatusBodyAlternatives : Api() {
+    private val bytes: ByteArrayFormat<String> =
+        Format(
+            codec =
+                Codec(
+                    decoder = Decoder { value -> DecodeResult.Success(value.decodeToString()) },
+                    encoder = Encoder(String::encodeToByteArray)
+                ),
+            schema = ScalarSchema(SchemaType.STRING)
+        )
+    private val json = body(MediaType.Json, bytes)
+    private val xml = body(MediaType.Xml, bytes)
+
+    public val find by
+        get(root / "find")
+            .output(Status.Ok with json)
+            .output(Status.NotFound with xml)
+
+    public val optional by
+        get(root / "optional")
+            .output(Status.Ok with bodiesOf(json, noBody))
 }
 
 public object ConnectEndpoints : Api() {

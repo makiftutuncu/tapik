@@ -1,6 +1,7 @@
 package dev.akif.tapik.generated
 
 import dev.akif.tapik.spring.toSpringMediaType
+import dev.akif.tapik.spring.selectResponseMediaType
 
 public interface BooksServer {
     public val booksApi: dev.akif.tapik.fixtures.library.Books
@@ -22,7 +23,8 @@ public interface BooksServer {
     public fun listHttp(
         @org.springframework.web.bind.annotation.RequestHeader(name = "X-Request-Id", required = true) xRequestIdRaw: kotlin.String,
         @org.springframework.web.bind.annotation.RequestParam(name = "page", required = false) pageRaw: kotlin.String? = null,
-        @org.springframework.web.bind.annotation.RequestParam(name = "authorId", required = false) authorIdRaw: kotlin.collections.List<kotlin.String>? = null
+        @org.springframework.web.bind.annotation.RequestParam(name = "authorId", required = false) authorIdRaw: kotlin.collections.List<kotlin.String>? = null,
+        @org.springframework.web.bind.annotation.RequestHeader(name = org.springframework.http.HttpHeaders.ACCEPT, required = false) accept: kotlin.String? = null
     ): org.springframework.http.ResponseEntity<kotlin.ByteArray> {
         val page = pageRaw?.let { raw -> decodeString(booksApi.list.uri.queries._1.format, raw, "Books.list query page") } ?: booksApi.list.uri.queries._1.presence.value
         val authorId = authorIdRaw?.let { raw -> decodeStrings(booksApi.list.uri.queries._2.format, raw, "Books.list query authorId") }
@@ -38,7 +40,10 @@ public interface BooksServer {
             is ListResponse.Ok -> {
                 val headers = kotlin.collections.emptyMap<kotlin.String, kotlin.collections.List<kotlin.String>>()
                 val encodedBody =
-                    booksApi.list.outputs._1.bodies._1.mediaType to booksApi.list.outputs._1.bodies._1.format.encode(response.body)
+                    when (selectResponseMediaType(accept, kotlin.collections.listOf(booksApi.list.outputs._1.bodies._1.mediaType))) {
+                        booksApi.list.outputs._1.bodies._1.mediaType -> booksApi.list.outputs._1.bodies._1.mediaType to booksApi.list.outputs._1.bodies._1.format.encode(response.body)
+                        else -> notAcceptable(accept, "Books.list")
+                    }
                 responseEntity(200, headers, encodedBody)
             }
         }
@@ -57,10 +62,11 @@ public interface BooksServer {
         xRequestId: java.util.UUID
     ): GetResponse
 
-    @org.springframework.web.bind.annotation.GetMapping(path = ["/books/{bookId}"], produces = ["application/json"])
+    @org.springframework.web.bind.annotation.GetMapping(path = ["/books/{bookId}"])
     public fun getHttp(
         @org.springframework.web.bind.annotation.PathVariable(name = "bookId") bookIdRaw: kotlin.String,
-        @org.springframework.web.bind.annotation.RequestHeader(name = "X-Request-Id", required = true) xRequestIdRaw: kotlin.String
+        @org.springframework.web.bind.annotation.RequestHeader(name = "X-Request-Id", required = true) xRequestIdRaw: kotlin.String,
+        @org.springframework.web.bind.annotation.RequestHeader(name = org.springframework.http.HttpHeaders.ACCEPT, required = false) accept: kotlin.String? = null
     ): org.springframework.http.ResponseEntity<kotlin.ByteArray> {
         val bookId = decodeString(booksApi.get.uri.paths._1.format, bookIdRaw, "Books.get path bookId")
         val xRequestId = decodeString(booksApi.get.headers._1.format, xRequestIdRaw, "Books.get header X-Request-Id")
@@ -74,7 +80,10 @@ public interface BooksServer {
             is GetResponse.Ok -> {
                 val headers = kotlin.collections.emptyMap<kotlin.String, kotlin.collections.List<kotlin.String>>()
                 val encodedBody =
-                    booksApi.get.outputs._1.bodies._1.mediaType to booksApi.get.outputs._1.bodies._1.format.encode(response.body)
+                    when (selectResponseMediaType(accept, kotlin.collections.listOf(booksApi.get.outputs._1.bodies._1.mediaType))) {
+                        booksApi.get.outputs._1.bodies._1.mediaType -> booksApi.get.outputs._1.bodies._1.mediaType to booksApi.get.outputs._1.bodies._1.format.encode(response.body)
+                        else -> notAcceptable(accept, "Books.get")
+                    }
                 responseEntity(200, headers, encodedBody)
             }
             is GetResponse.NotFound -> {
@@ -99,11 +108,12 @@ public interface BooksServer {
         body: dev.akif.tapik.fixtures.library.CreateBook
     ): CreateResponse
 
-    @org.springframework.web.bind.annotation.PostMapping(path = ["/books"], consumes = ["application/json"], produces = ["application/json"])
+    @org.springframework.web.bind.annotation.PostMapping(path = ["/books"], consumes = ["application/json"])
     public fun createHttp(
         @org.springframework.web.bind.annotation.RequestHeader(name = "X-Request-Id", required = true) xRequestIdRaw: kotlin.String,
         @org.springframework.web.bind.annotation.RequestBody(required = true) bodyBytes: kotlin.ByteArray,
-        @org.springframework.web.bind.annotation.RequestHeader(name = org.springframework.http.HttpHeaders.CONTENT_TYPE, required = true) contentType: kotlin.String
+        @org.springframework.web.bind.annotation.RequestHeader(name = org.springframework.http.HttpHeaders.CONTENT_TYPE, required = true) contentType: kotlin.String,
+        @org.springframework.web.bind.annotation.RequestHeader(name = org.springframework.http.HttpHeaders.ACCEPT, required = false) accept: kotlin.String? = null
     ): org.springframework.http.ResponseEntity<kotlin.ByteArray> {
         val xRequestId = decodeString(booksApi.create.headers._1.format, xRequestIdRaw, "Books.create header X-Request-Id")
         val body =
@@ -123,7 +133,10 @@ public interface BooksServer {
                     put("Location", listOf(booksApi.create.outputs._1.headers._1.format.encode(response.location)))
                 }
                 val encodedBody =
-                    booksApi.create.outputs._1.bodies._1.mediaType to booksApi.create.outputs._1.bodies._1.format.encode(response.body)
+                    when (selectResponseMediaType(accept, kotlin.collections.listOf(booksApi.create.outputs._1.bodies._1.mediaType))) {
+                        booksApi.create.outputs._1.bodies._1.mediaType -> booksApi.create.outputs._1.bodies._1.mediaType to booksApi.create.outputs._1.bodies._1.format.encode(response.body)
+                        else -> notAcceptable(accept, "Books.create")
+                    }
                 responseEntity(201, headers, encodedBody)
             }
             is CreateResponse.BadRequest -> {
@@ -167,19 +180,6 @@ public interface BooksServer {
             actual != null && org.springframework.http.MediaType.parseMediaType(actual).isCompatibleWith(expected.toSpringMediaType())
         } catch (_: org.springframework.http.InvalidMediaTypeException) {
             false
-        }
-
-    private fun accepts(accept: kotlin.String?, offered: dev.akif.tapik.MediaType): kotlin.Boolean =
-        if (accept.isNullOrBlank()) {
-            true
-        } else {
-            try {
-                org.springframework.http.MediaType.parseMediaTypes(accept).any { requested ->
-                    requested.isCompatibleWith(offered.toSpringMediaType())
-                }
-            } catch (_: org.springframework.http.InvalidMediaTypeException) {
-                false
-            }
         }
 
     private fun responseEntity(

@@ -136,7 +136,7 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): WebMvc
         }
     val outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id)
     val acceptParameter =
-        if (outputs.any { it.bodies.size > 1 }) uniqueName("accept", usedRawNames) else null
+        if (outputs.any { it.bodies.isNotEmpty() }) uniqueName("accept", usedRawNames) else null
 
     return WebMvcEndpointModel(
         id = value.id,
