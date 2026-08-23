@@ -8,6 +8,7 @@ import dev.akif.tapik.plugin.core.targetConfigurationOf
 import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.string.shouldContain
 import org.jetbrains.kotlin.cli.common.ExitCode
 
@@ -76,6 +77,42 @@ class RestClientTargetSpec : FunSpec({
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
+
+    test("disambiguate generated declarations and preserve endpoint property names") {
+        val source =
+            RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientNamingCollisions)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "restClientNamingCollisionsApi.`find-book`"
+        source shouldContain "public fun findBook(): FindBookResponse"
+        source shouldContain "public fun findBook2(): FindBookResponse2"
+        source shouldContain "public fun decodeBody2(): DecodeBodyResponse"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
+    test("disambiguate generated types and artifact paths for equal API simple names") {
+        val result =
+            RestClientTarget.generate(
+                GenerationRequest(
+                    apis = listOf(RestClientNamespace1.Catalog(), RestClientNamespace2.Catalog())
+                )
+            )
+
+        result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
+            listOf(
+                "dev/akif/tapik/generated/CatalogClient.kt",
+                "dev/akif/tapik/generated/CatalogClient2.kt"
+            )
+        result.artifacts.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
+            listOf("CatalogClient", "CatalogClient2")
+        result.artifacts.forEach { artifact ->
+            val compilation = compileKotlin(artifact.content)
+            withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        }
+    }
 })
 
 public typealias BinaryContent = ByteArray
@@ -124,4 +161,18 @@ public object ResponseConformance : Api() {
     public val empty by
         get(root / "empty")
             .output(Status.NoContent with noBody)
+}
+
+public object RestClientNamingCollisions : Api() {
+    public val `find-book` by get(root / "hyphen")
+    public val findBook by get(root / "camel")
+    public val decodeBody by get(root / "decode")
+}
+
+public class RestClientNamespace1 {
+    public class Catalog : Api("RestClientCatalog1")
+}
+
+public class RestClientNamespace2 {
+    public class Catalog : Api("RestClientCatalog2")
 }

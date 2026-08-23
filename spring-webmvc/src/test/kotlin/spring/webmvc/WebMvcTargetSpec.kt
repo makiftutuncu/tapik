@@ -9,6 +9,7 @@ import io.kotest.assertions.withClue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.string.shouldContain
 import org.jetbrains.kotlin.cli.common.ExitCode
 
@@ -115,6 +116,44 @@ class WebMvcTargetSpec : FunSpec({
             requireNotNull(failure.message) shouldContain "Spring WebMVC cannot map"
         }
     }
+
+    test("disambiguate handlers mappings responses and endpoint property names") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcNamingCollisions)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "webMvcNamingCollisionsApi.`find-book`"
+        source shouldContain "public fun findBook("
+        source shouldContain "public fun findBook2(): FindBookResponse2"
+        source shouldContain "public fun findBookHttp2(): FindBookHttpResponse"
+        source shouldContain "public fun findBookHttp("
+        source shouldContain "public fun decodeStrings2(): DecodeStringsResponse"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
+    test("disambiguate generated types and artifact paths for equal API simple names") {
+        val result =
+            WebMvcTarget.generate(
+                GenerationRequest(
+                    apis = listOf(WebMvcNamespace1.Catalog(), WebMvcNamespace2.Catalog())
+                )
+            )
+
+        result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
+            listOf(
+                "dev/akif/tapik/generated/CatalogServer.kt",
+                "dev/akif/tapik/generated/CatalogServer2.kt"
+            )
+        result.artifacts.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
+            listOf("CatalogServer", "CatalogServer2")
+        result.artifacts.forEach { artifact ->
+            val compilation = compileKotlin(artifact.content)
+            withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        }
+    }
 })
 
 public typealias BinaryContent = ByteArray
@@ -196,4 +235,19 @@ public object ConnectEndpoints : Api() {
 
 public object QueryEndpoints : Api() {
     public val inspect by query(root / "inspect")
+}
+
+public object WebMvcNamingCollisions : Api() {
+    public val `find-book` by get(root / "hyphen" + query.string("q"))
+    public val findBook by get(root / "camel")
+    public val findBookHttp by get(root / "http")
+    public val decodeStrings by get(root / "decode")
+}
+
+public class WebMvcNamespace1 {
+    public class Catalog : Api("WebMvcCatalog1")
+}
+
+public class WebMvcNamespace2 {
+    public class Catalog : Api("WebMvcCatalog2")
 }

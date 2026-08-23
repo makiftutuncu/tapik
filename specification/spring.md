@@ -52,6 +52,12 @@ with the API and endpoint ID.
 interface-name suffix and defaults to `Client`. Each source artifact follows the package path and uses the concrete API
 type name plus that suffix.
 
+Generated declaration names are allocated deterministically in API, endpoint, and output declaration order. A
+normalized name collision keeps the first name unchanged and appends `2`, `3`, and so on to later declarations.
+Endpoint functions and nested response types use separate namespaces. API types with the same simple name are
+disambiguated together with their artifact paths. Original endpoint properties are accessed with their actual Kotlin
+names, including backtick-escaped names.
+
 The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its RestClient
 client during `generate-sources`, compiles the generated source, and executes a typed request and response through
 Spring's mock HTTP server.
@@ -90,6 +96,10 @@ field unset, the mapping method encodes the default carried by the endpoint defi
 `packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `serverSuffix` selects the
 interface-name suffix and defaults to `Server`. Generated Spring mapping method names append `Http` to the corresponding
 typed handler method name.
+
+WebMVC uses the same deterministic declaration-name allocation as RestClient. Handler and Spring mapping functions
+share one generated interface namespace, so a mapping name cannot collide with another endpoint's handler. Nested
+response types, top-level server types, and artifact paths follow the same numeric disambiguation rule.
 
 The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its WebMVC
 server during `generate-sources`, compiles an implementation of the generated interface, and serves a typed response

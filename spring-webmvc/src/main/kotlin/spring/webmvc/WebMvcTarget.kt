@@ -8,13 +8,14 @@ object WebMvcTarget : GenerationTarget {
 
     override fun generate(request: GenerationRequest): GenerationResult {
         val configuration = WebMvcTargetConfiguration.from(request.configuration)
+        val usedServerNames = mutableSetOf<String>()
         return GenerationResult(
             request.apis.map { api ->
                 val apiTypeName = api.javaClass.simpleName
                 require(apiTypeName.isWebMvcKotlinIdentifier()) {
                     "Spring WebMVC generation requires a valid API type name, but was '$apiTypeName'"
                 }
-                val serverName = apiTypeName + configuration.serverSuffix
+                val serverName = uniqueName(apiTypeName + configuration.serverSuffix, usedServerNames)
                 GeneratedArtifact(
                     relativePath = configuration.packageName.replace('.', '/') + "/$serverName.kt",
                     mediaType = "text/x-kotlin",

@@ -16,13 +16,14 @@ object RestClientTarget : GenerationTarget {
      */
     override fun generate(request: GenerationRequest): GenerationResult {
         val configuration = RestClientTargetConfiguration.from(request.configuration)
+        val usedClientNames = mutableSetOf<String>()
         val artifacts =
             request.apis.map { api ->
                 val apiTypeName = api.javaClass.simpleName
                 require(apiTypeName.isKotlinIdentifier()) {
                     "Spring RestClient generation requires a valid API type name, but was '$apiTypeName'"
                 }
-                val clientName = apiTypeName + configuration.clientSuffix
+                val clientName = uniqueName(apiTypeName + configuration.clientSuffix, usedClientNames)
                 GeneratedArtifact(
                     relativePath =
                         configuration.packageName.replace('.', '/') + "/" + clientName + ".kt",

@@ -99,19 +99,34 @@ internal fun restClientApiModel(
         "Spring RestClient generation requires a canonical API type for '${api.id}'"
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
+    val methodNames = mutableSetOf("decodeBody", "decodeHeader", "requireFixedHeader")
+    val responseNames = mutableSetOf<String>()
     return RestClientApiModel(
         packageName = packageName,
         clientName = clientName,
         apiType = apiType,
         apiProperty = apiProperty,
-        endpoints = compiled.endpoints.map { endpoint -> endpoint.toModel(api.id, apiProperty) }
+        endpoints =
+            compiled.endpoints.map { endpoint ->
+                val propertyName = endpoint.value.id.removePrefix("${api.id}.")
+                endpoint.toModel(
+                    apiId = api.id,
+                    apiProperty = apiProperty,
+                    methodName = uniqueName(propertyName.kotlinIdentifier("endpoint"), methodNames),
+                    responseName = uniqueName(propertyName.upperCamel() + "Response", responseNames)
+                )
+            }
     )
 }
 
-private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): RestClientEndpointModel {
+private fun CompiledEndpoint.toModel(
+    apiId: String,
+    apiProperty: String,
+    methodName: String,
+    responseName: String
+): RestClientEndpointModel {
     val propertyName = value.id.removePrefix("$apiId.")
-    val propertyIdentifier = propertyName.kotlinIdentifier("endpoint")
-    val endpointAccess = "$apiProperty.$propertyIdentifier"
+    val endpointAccess = "$apiProperty.${propertyName.kotlinReferenceIdentifier()}"
     val usedNames = mutableSetOf<String>()
 
     val pathTypes = type.argument(0, value.id).tupleElements("${value.id} paths")
@@ -218,9 +233,9 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): RestCl
         id = value.id,
         propertyName = propertyName,
         endpointAccess = endpointAccess,
-        methodName = propertyIdentifier,
+        methodName = methodName,
         summary = value.documentation.summary,
-        responseName = propertyName.upperCamel() + "Response",
+        responseName = responseName,
         pathTemplate = value.uri.pathTemplate(),
         paths = paths.map(Pair<RestClientUriParameter, RestClientParameter>::first),
         queries = queries.map(Pair<RestClientUriParameter, RestClientParameter>::first),
@@ -359,14 +374,3 @@ private fun Status.variantName(): String =
         Status.InternalServerError -> "InternalServerError"
         else -> "Status$code"
     }
-
-private fun uniqueName(
-    requested: String,
-    used: MutableSet<String>
-): String {
-    if (used.add(requested)) return requested
-    val raw = requested.removeSurrounding("`")
-    var suffix = 2
-    while (!used.add(raw + suffix)) suffix++
-    return raw + suffix
-}

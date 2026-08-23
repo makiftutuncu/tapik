@@ -18,22 +18,51 @@ internal fun webMvcApiModel(
         "Spring WebMVC generation requires a canonical API type for '${api.id}'"
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
+    val functionNames =
+        mutableSetOf(
+            "decodeString",
+            "decodeStrings",
+            "decodeBody",
+            "decode",
+            "mediaTypeCompatible",
+            "responseEntity",
+            "badRequest",
+            "unsupportedMediaType",
+            "notAcceptable"
+        )
+    val responseNames = mutableSetOf<String>()
     return WebMvcApiModel(
         packageName = packageName,
         serverName = serverName,
         apiType = apiType,
         apiProperty = apiProperty,
-        endpoints = compiled.endpoints.map { endpoint -> endpoint.toModel(api.id, apiProperty) }
+        endpoints =
+            compiled.endpoints.map { endpoint ->
+                val propertyName = endpoint.value.id.removePrefix("${api.id}.")
+                val handlerName = uniqueName(propertyName.kotlinIdentifier("endpoint"), functionNames)
+                endpoint.toModel(
+                    apiId = api.id,
+                    apiProperty = apiProperty,
+                    handlerName = handlerName,
+                    mappingName = uniqueName(handlerName.removeSurrounding("`") + "Http", functionNames),
+                    responseName = uniqueName(propertyName.upperCamel() + "Response", responseNames)
+                )
+            }
     )
 }
 
-private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): WebMvcEndpointModel {
+private fun CompiledEndpoint.toModel(
+    apiId: String,
+    apiProperty: String,
+    handlerName: String,
+    mappingName: String,
+    responseName: String
+): WebMvcEndpointModel {
     require(value.method != Method.CONNECT && value.method != Method.QUERY) {
         "${value.id} uses ${value.method}, which Spring WebMVC cannot map"
     }
     val propertyName = value.id.removePrefix("$apiId.")
-    val propertyIdentifier = propertyName.kotlinIdentifier("endpoint")
-    val endpointAccess = "$apiProperty.$propertyIdentifier"
+    val endpointAccess = "$apiProperty.${propertyName.kotlinReferenceIdentifier()}"
     val usedNames = mutableSetOf<String>()
     val usedRawNames = mutableSetOf<String>()
 
@@ -154,11 +183,11 @@ private fun CompiledEndpoint.toModel(apiId: String, apiProperty: String): WebMvc
     return WebMvcEndpointModel(
         id = value.id,
         endpointAccess = endpointAccess,
-        handlerName = propertyIdentifier,
-        mappingName = uniqueName(propertyIdentifier.removeSurrounding("`") + "Http", mutableSetOf()),
+        handlerName = handlerName,
+        mappingName = mappingName,
         summary = value.documentation.summary,
         method = value.method,
-        responseName = propertyName.upperCamel() + "Response",
+        responseName = responseName,
         pathTemplate = value.uri.pathTemplate(),
         paths = paths.map { it.first },
         queries = queries.map { it.first },
@@ -319,11 +348,3 @@ private fun Status.variantName(): String =
         Status.InternalServerError -> "InternalServerError"
         else -> "Status$code"
     }
-
-private fun uniqueName(requested: String, used: MutableSet<String>): String {
-    if (used.add(requested)) return requested
-    val raw = requested.removeSurrounding("`")
-    var suffix = 2
-    while (!used.add(raw + suffix)) suffix++
-    return raw + suffix
-}

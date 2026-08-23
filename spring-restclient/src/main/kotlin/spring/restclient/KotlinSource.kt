@@ -42,6 +42,9 @@ internal fun String.kotlinIdentifier(fallback: String): String {
     return if (candidate in KOTLIN_KEYWORDS) "`$candidate`" else candidate
 }
 
+internal fun String.kotlinReferenceIdentifier(): String =
+    if (isKotlinIdentifier()) this else "`$this`"
+
 internal fun String.upperCamel(): String =
     kotlinIdentifier("Value")
         .removeSurrounding("`")
