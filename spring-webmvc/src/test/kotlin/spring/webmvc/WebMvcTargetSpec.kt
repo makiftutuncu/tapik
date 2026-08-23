@@ -93,6 +93,31 @@ class WebMvcTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
+    test("reject response headers owned by Spring WebMVC") {
+        listOf(
+            BodyContentTypeResponse to "Content-Type, which is derived from its selected body representation",
+            ContentLengthResponse to "Content-Length, which is managed by Spring WebMVC"
+        ).forEach { (api, expected) ->
+            val failure = shouldThrow<IllegalArgumentException> {
+                WebMvcTarget.generate(GenerationRequest(apis = listOf(api)))
+            }
+
+            requireNotNull(failure.message) shouldContain expected
+        }
+    }
+
+    test("preserve Content-Type on bodyless responses") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(BodylessContentTypeResponse)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "put(\"Content-Type\", listOf("
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("generate content equality for aliased ByteArray response fields") {
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(BinaryResponses)))
@@ -188,6 +213,39 @@ public object DefaultResponseHeaders : Api() {
     public val poll by
         get(root / "poll")
             .output(Status.Ok with noBody with headersOf(retryAfter))
+}
+
+public object BodyContentTypeResponse : Api() {
+    private val contentType = header.string("cOnTeNt-TyPe").fixed("application/octet-stream")
+    private val bytes: ByteArrayFormat<ByteArray> =
+        Format(
+            codec =
+                Codec(
+                    decoder = Decoder { value -> DecodeResult.Success(value) },
+                    encoder = Encoder { value -> value }
+                ),
+            schema = ScalarSchema(SchemaType.STRING, format = "binary")
+        )
+
+    public val download by
+        get(root / "download")
+            .output(Status.Ok with body(MediaType.OctetStream, bytes) with headersOf(contentType))
+}
+
+public object ContentLengthResponse : Api() {
+    private val contentLength = header.long("content-length").fixed(0)
+
+    public val empty by
+        get(root / "empty")
+            .output(Status.NoContent with noBody with headersOf(contentLength))
+}
+
+public object BodylessContentTypeResponse : Api() {
+    private val contentType = header.string("Content-Type").fixed("application/json")
+
+    public val metadata by
+        head(root / "metadata")
+            .output(Status.Ok with noBody with headersOf(contentType))
 }
 
 public object BinaryResponses : Api() {

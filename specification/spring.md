@@ -93,6 +93,11 @@ output. Statuses and headers come from the selected response variant and endpoin
 A defaulted output header is exposed as a nullable response field defaulting to `null`. When a handler leaves that
 field unset, the mapping method encodes the default carried by the endpoint definition.
 
+Spring WebMVC derives `Content-Type` from the selected response body representation and owns `Content-Length` for the
+encoded response bytes. Generation fails when an output that can carry a body also declares `Content-Type`, or when any
+output declares `Content-Length`; header names are compared case-insensitively. A bodyless output may declare
+`Content-Type`, which is emitted as an ordinary contract header.
+
 `packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `serverSuffix` selects the
 interface-name suffix and defaults to `Server`. Generated Spring mapping method names append `Http` to the corresponding
 typed handler method name.

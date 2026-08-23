@@ -287,6 +287,12 @@ private fun outputs(
         require(bodies.map { body -> body.type.source }.distinct().size <= 1) {
             "$endpointId output ${index + 1} body alternatives must encode one value type"
         }
+        validateResponseHeaders(
+            endpointId = endpointId,
+            outputNumber = index + 1,
+            hasBody = bodies.isNotEmpty(),
+            headers = output.headers
+        )
         val usedHeaderNames = mutableSetOf<String>().apply { if (bodies.isNotEmpty()) add("body") }
         val headers =
             output.headers.values.mapIndexed { headerIndex, header ->
