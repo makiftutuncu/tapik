@@ -30,12 +30,14 @@ Registry providers are generated during Kotlin compilation and exposed through a
 Maven, Gradle, and command-line adapters consume the same providers.
 
 For Kotlin/JVM, `plugin-compiler` inspects resolved compiler IR and selects every concrete public named class or object
-whose type extends `Api`. Objects are referenced directly; classes must expose a public no-argument constructor and
-are instantiated once per generated registry. The provider retains these instances in source declaration order and
-is exposed through the standard service-provider mechanism. Abstract API base classes are ignored. Unsupported API
-visibility or construction fails compilation. The plugin does not execute endpoint expressions, discover APIs
-reflectively, or create a second contract representation. Compilations without a concrete API type do not publish a
-registry.
+whose type extends `Api`. Objects are referenced directly. API classes may be top-level or statically nested, must not
+be `inner`, must not declare type parameters, and must expose a public constructor that lowers to JVM `()V`. A concrete
+subclass may close type parameters inherited from an abstract API base class. Classes are instantiated once per
+generated registry. The provider retains these instances in source declaration order and is exposed through the
+standard service-provider mechanism. Abstract API base classes are ignored. Unsupported API visibility, generic shape,
+or construction fails compilation with a targeted diagnostic. The plugin does not execute endpoint expressions,
+discover APIs reflectively, or create a second contract representation. Compilations without a concrete API type do
+not publish a registry.
 
 Every delegated endpoint property reachable from a registered API, including properties declared by API base classes,
 must be public. Private, protected, and internal endpoint properties fail contract compilation because generated

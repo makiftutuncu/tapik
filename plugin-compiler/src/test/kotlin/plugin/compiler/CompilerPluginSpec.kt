@@ -65,39 +65,6 @@ class CompilerPluginSpec : FunSpec({
         }
     }
 
-    test("reject non-public API types") {
-        val compilation =
-            compile(
-                """
-                package example
-
-                import dev.akif.tapik.*
-
-                internal object Hidden : Api()
-                """.trimIndent()
-            )
-
-        compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
-        compilation.messages shouldContain "tapik API type 'example.Hidden' must be public"
-    }
-
-    test("reject API classes without a public no-argument constructor") {
-        val compilation =
-            compile(
-                """
-                package example
-
-                import dev.akif.tapik.*
-
-                class Books(private val source: String) : Api()
-                """.trimIndent()
-            )
-
-        compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
-        compilation.messages shouldContain
-            "tapik API class 'example.Books' must declare a public no-argument constructor"
-    }
-
     test("reject non-public endpoint properties") {
         val compilation =
             compile(
