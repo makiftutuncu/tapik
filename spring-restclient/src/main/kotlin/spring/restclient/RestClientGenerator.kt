@@ -163,7 +163,11 @@ private fun StringBuilder.appendOutput(
 ) {
     appendLine("            ${output.definitionAccess}.matcher.matches(response.status) -> {")
     output.fixedHeaders.forEach { header -> appendFixedHeader(endpoint, header) }
-    if (output.bodies.isNotEmpty()) appendDecodedBody(endpoint, output)
+    if (output.bodies.isNotEmpty()) {
+        appendDecodedBody(endpoint, output)
+    } else if (output.allowsNoBody) {
+        appendLine("                ${output.bodyMediaTypeSelection(endpoint)}")
+    }
     output.headers.forEach { header -> appendDecodedHeader(endpoint, header) }
     val arguments =
         buildList {
@@ -197,24 +201,20 @@ private fun StringBuilder.appendDecodedBody(
     endpoint: RestClientEndpointModel,
     output: RestClientOutput
 ) {
+    val selection = output.bodyMediaTypeSelection(endpoint)
     if (output.bodies.size == 1) {
         val body = output.bodies.single()
         if (output.allowsNoBody) {
             appendLine("                val decodedBody =")
-            appendLine("                    if (response.body.isEmpty() && response.mediaType == null) {")
+            appendLine("                    if ($selection == null) {")
             appendLine("                        null")
             appendLine("                    } else {")
-            appendLine(
-                "                        requireMediaType(response, ${body.definitionAccess}.mediaType, ${endpoint.id.kotlinString()})"
-            )
             appendLine(
                 "                        decodeBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
             )
             appendLine("                    }")
         } else {
-            appendLine(
-                "                requireMediaType(response, ${body.definitionAccess}.mediaType, ${endpoint.id.kotlinString()})"
-            )
+            appendLine("                $selection")
             appendLine(
                 "                val decodedBody = decodeBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
             )
@@ -223,7 +223,7 @@ private fun StringBuilder.appendDecodedBody(
     }
 
     appendLine("                val decodedBody =")
-    appendLine("                    when (response.mediaType) {")
+    appendLine("                    when ($selection) {")
     output.bodies.forEach { body ->
         appendLine(
             "                        ${body.definitionAccess}.mediaType -> decodeBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
@@ -234,6 +234,19 @@ private fun StringBuilder.appendDecodedBody(
         "                        else -> kotlin.error(\"Unexpected response media type \${response.mediaType} for ${endpoint.id}\")"
     )
     appendLine("                    }")
+}
+
+private fun RestClientOutput.bodyMediaTypeSelection(endpoint: RestClientEndpointModel): String {
+    val offered =
+        if (bodies.isEmpty()) {
+            "kotlin.collections.emptyList()"
+        } else {
+            bodies.joinToString(
+                prefix = "kotlin.collections.listOf(",
+                postfix = ")"
+            ) { body -> "${body.definitionAccess}.mediaType" }
+        }
+    return "dev.akif.tapik.spring.restclient.selectResponseBodyMediaType(response = response, offered = $offered, allowsNoBody = $allowsNoBody, endpointId = ${endpoint.id.kotlinString()})"
 }
 
 private fun StringBuilder.appendDecodedHeader(
@@ -285,17 +298,6 @@ private fun StringBuilder.appendDecodeHelpers(includeFixedHeaders: Boolean) {
     appendLine("        }")
     appendLine()
     if (includeFixedHeaders) appendFixedHeaderHelper()
-    appendLine("    private fun requireMediaType(")
-    appendLine("        response: dev.akif.tapik.spring.restclient.RestClientResponse,")
-    appendLine("        expected: dev.akif.tapik.MediaType,")
-    appendLine("        endpointId: kotlin.String")
-    appendLine("    ) {")
-    appendLine("        if (response.mediaType != expected) {")
-    appendLine(
-        "            kotlin.error(\"Unexpected response media type \${response.mediaType} for \$endpointId, expected \$expected\")"
-    )
-    appendLine("        }")
-    appendLine("    }")
 }
 
 private fun StringBuilder.appendFixedHeaderHelper() {

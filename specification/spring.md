@@ -32,6 +32,13 @@ Fixed output headers are contract checks rather than public response fields. For
 client encodes the fixed value through its header format and requires the transport response to contain exactly one
 value with that encoding. A missing header, a different value, or repeated values fail response decoding.
 
+For the selected status output, generated clients match a received `Content-Type` to body representations using parsed
+compatible media types in declaration order. Parameters such as a response charset do not make an otherwise compatible
+representation fail. A response without `Content-Type` represents `noBody` only when its bytes are empty and that
+alternative is declared. Bytes without `Content-Type`, a `Content-Type` on a bodyless-only output, a missing body
+alternative, or an incompatible media type fail response decoding. Empty bytes with a compatible `Content-Type` are
+passed to the selected format because an empty encoded value may be valid for that format.
+
 Generated method inputs are derived from the endpoint's compiled Kotlin type. Required path variables, queries,
 headers, and request bodies precede optional or defaulted values. Runtime endpoint values supply names, formats,
 defaults, media types, matchers, and codecs. Generated code performs URI construction, request encoding, output

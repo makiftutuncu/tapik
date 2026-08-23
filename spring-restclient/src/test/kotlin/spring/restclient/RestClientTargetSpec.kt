@@ -62,6 +62,20 @@ class RestClientTargetSpec : FunSpec({
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
+
+    test("generate uniform response body conformance checks") {
+        val source =
+            RestClientTarget.generate(GenerationRequest(apis = listOf(ResponseConformance)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "selectResponseBodyMediaType("
+        source shouldContain "offered = kotlin.collections.emptyList()"
+        source shouldContain "offered = kotlin.collections.listOf("
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
 })
 
 public typealias BinaryContent = ByteArray
@@ -88,4 +102,26 @@ public object BinaryDownloads : Api() {
     public val download by
         get(root / "download")
             .output(Status.Ok with body(MediaType.OctetStream, binaryFormat))
+}
+
+public object ResponseConformance : Api() {
+    private val stringFormat: ByteArrayFormat<String> =
+        Format(
+            codec =
+                Codec(
+                    decoder = Decoder { bytes -> DecodeResult.Success(bytes.decodeToString()) },
+                    encoder = Encoder(String::encodeToByteArray)
+                ),
+            schema = ScalarSchema(SchemaType.STRING)
+        )
+    private val json = body(MediaType.Json, stringFormat)
+    private val xml = body(MediaType.Xml, stringFormat)
+
+    public val optional by
+        get(root / "optional")
+            .output(Status.Ok with bodiesOf(json, xml, noBody))
+
+    public val empty by
+        get(root / "empty")
+            .output(Status.NoContent with noBody)
 }
