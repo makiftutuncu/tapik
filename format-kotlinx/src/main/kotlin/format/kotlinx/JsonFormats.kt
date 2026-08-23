@@ -4,21 +4,9 @@ import dev.akif.tapik.*
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import java.util.concurrent.ConcurrentHashMap
-
-private class JsonFormatKey(
-    val format: Json,
-    val serializer: KSerializer<*>
-) {
-    override fun equals(other: Any?): Boolean =
-        other is JsonFormatKey && format === other.format && serializer === other.serializer
-
-    override fun hashCode(): Int =
-        31 * System.identityHashCode(format) + System.identityHashCode(serializer)
-}
 
 private object JsonFormatCache {
-    val formats: ConcurrentHashMap<JsonFormatKey, ByteArrayFormat<*>> = ConcurrentHashMap()
+    val formats: WeakIdentityPairCache<Json, KSerializer<*>, ByteArrayFormat<*>> = WeakIdentityPairCache()
 }
 
 /**
@@ -31,7 +19,7 @@ fun <Value : Any> jsonFormat(
     format: Json,
     serializer: KSerializer<Value>
 ): ByteArrayFormat<Value> =
-    JsonFormatCache.formats.computeIfAbsent(JsonFormatKey(format, serializer)) {
+    JsonFormatCache.formats.getOrPut(format, serializer) {
         Format(
             codec =
                 Codec(

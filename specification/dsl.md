@@ -172,9 +172,11 @@ val configuredJson = jsonBody<Book>(format = applicationJson)
 ```
 
 Every body is attached to its concrete format when built. Body builders take the serialization format directly and
-do not consult API or Tapik-global configuration. Derived core formats are cached per serialization-format and
-serializer pair, so repeated body construction does not recreate them. `Json.Default` is the default argument for
-the Kotlin serialization JSON builder.
+do not consult API or Tapik-global configuration. Derived core formats are cached by serialization-format and
+serializer identity. Concurrent lookups reuse the same live format instance. Cache keys and values are weakly held, so
+the cache does not retain an otherwise unreachable serialization format, serializer, derived format, or its defining
+classloader; a collected format may be recreated by a later lookup. `Json.Default` is the default argument for the
+Kotlin serialization JSON builder.
 
 Kotlin serialization schema derivation initially covers primitives, enums, lists, maps, nullable properties,
 objects, and value classes. Recursive object references are retained as schema references. Unsupported descriptor
