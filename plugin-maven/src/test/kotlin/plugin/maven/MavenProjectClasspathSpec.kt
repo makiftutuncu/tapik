@@ -5,6 +5,8 @@ import dev.akif.tapik.ApiRegistry
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
+import org.apache.maven.artifact.DefaultArtifact
+import org.apache.maven.artifact.handler.DefaultArtifactHandler
 import org.apache.maven.project.MavenProject
 import java.nio.file.Files
 import java.nio.file.Path
@@ -41,11 +43,30 @@ class MavenProjectClasspathSpec : FunSpec({
                 override fun getRuntimeClasspathElements(): List<String> = listOf(runtime.toString())
             }
 
-        ProjectApis.use(project.generationClasspath(), MavenProjectClasspathSpec::class.java.classLoader) { apis ->
+        ProjectApis.use(project.generationClasspath(), MavenProjectClasspathSpec::class.java.classLoader) { apis, _ ->
             apis.map(Api::id) shouldContain "RuntimeOnly"
         }
     }
+
+    test("collect versions from Tapik project dependencies") {
+        val project = MavenProject()
+        project.artifacts =
+            setOf(
+                artifact("dev.akif", "tapik-core", "0.6.0"),
+                artifact("dev.akif", "tapik-format-kotlinx", "0.5.0"),
+                artifact("dev.akif", "unrelated", "1.0.0"),
+                artifact("example", "tapik-extension", "2.0.0")
+            )
+
+        project.tapikDependencyVersions() shouldContainExactly setOf("0.5.0", "0.6.0")
+    }
 })
+
+private fun artifact(
+    groupId: String,
+    artifactId: String,
+    version: String
+) = DefaultArtifact(groupId, artifactId, version, "compile", "jar", null, DefaultArtifactHandler("jar"))
 
 class RuntimeOnlyApiRegistry : ApiRegistry {
     override val apis: List<Api> = listOf(object : Api("RuntimeOnly") {})

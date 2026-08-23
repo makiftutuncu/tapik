@@ -61,6 +61,17 @@ dependency of Kotlin's Maven plugin and enables the `tapik` compiler plugin, the
 more `generate` executions. Its Maven-specific compiler adapter only activates the host-neutral compiler plugin; it
 does not own discovery or generation behavior and does not introduce compiler options.
 
+The Maven adapter loads API registries from the project's compile/runtime classpath and generation-target registries
+from the Maven plugin realm. A custom target artifact must therefore be declared in `tapik-plugin-maven`'s
+`<plugin><dependencies>`; adding it as an ordinary project dependency does not make it executable. An unknown-target
+diagnostic lists targets visible in the plugin realm, and a target found only on the project classpath is diagnosed as
+a misplaced plugin dependency. Generation-target service-provider or linkage failures identify the classpath side that
+failed and point to target placement and Tapik version alignment.
+
+Before generation, the Maven adapter compares the Maven plugin version with every resolved `dev.akif:tapik-*` project
+dependency. An empty project-side set is tolerated for hosts supplying APIs through the plugin realm, but every
+discovered project Tapik version must equal the plugin version. Version skew fails before registry or target loading.
+
 Generated registries travel with compiled contract artifacts. A consuming Maven project discovers registries from
 its own output and its compile classpath, combines every API deterministically, and applies the configured target to
 all of them by default. Consuming a contract dependency therefore behaves like compiling its API definitions in the

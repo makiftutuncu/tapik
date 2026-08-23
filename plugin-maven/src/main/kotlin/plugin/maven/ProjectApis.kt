@@ -9,12 +9,12 @@ internal object ProjectApis {
     fun <Result> use(
         classpath: List<Path>,
         parentClassLoader: ClassLoader,
-        block: (List<Api>) -> Result
+        block: (List<Api>, ClassLoader) -> Result
     ): Result {
         val urls = classpath.map { path -> path.toUri().toURL() }.toTypedArray()
         return URLClassLoader(urls, parentClassLoader).use { classLoader ->
             withContextClassLoader(classLoader) {
-                block(ApiCatalog.load(classLoader).apis)
+                block(ApiCatalog.load(classLoader).apis, classLoader)
             }
         }
     }

@@ -47,7 +47,12 @@ class GenerateMojo : AbstractMojo() {
                     targetConfiguration = targetConfiguration,
                     outputDirectory = outputDirectory.toPath(),
                     executionId = mojoExecution.executionId,
-                    parentClassLoader = requireNotNull(javaClass.classLoader)
+                    parentClassLoader = requireNotNull(javaClass.classLoader),
+                    pluginVersion =
+                        requireNotNull(mojoExecution.mojoDescriptor.pluginDescriptor.version) {
+                            "Tapik Maven plugin version is unavailable"
+                        },
+                    projectTapikVersions = project.tapikDependencyVersions()
                 )
             if (generation.containsSources) {
                 project.addCompileSourceRoot(outputDirectory.absolutePath)

@@ -3,9 +3,11 @@ package dev.akif.tapik.plugin.maven
 import dev.akif.tapik.fixtures.library.Books
 import dev.akif.tapik.plugin.openapi.OpenApi
 import dev.akif.tapik.plugin.openapi.toJson
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import java.nio.file.Files
 
 class MavenGeneratorSpec : FunSpec({
@@ -19,7 +21,9 @@ class MavenGeneratorSpec : FunSpec({
                 targetConfiguration = mapOf("version" to "0.6.0"),
                 outputDirectory = output,
                 executionId = "openapi",
-                parentClassLoader = MavenGeneratorSpec::class.java.classLoader
+                parentClassLoader = MavenGeneratorSpec::class.java.classLoader,
+                pluginVersion = "0.6.0",
+                projectTapikVersions = setOf("0.6.0")
             )
 
         generation.containsSources shouldBe false
@@ -34,7 +38,7 @@ class MavenGeneratorSpec : FunSpec({
         ProjectApis.use(
             classpath = emptyList(),
             parentClassLoader = MavenGeneratorSpec::class.java.classLoader
-        ) { apis ->
+        ) { apis, _ ->
             apis.single() shouldBe Books
             Thread.currentThread().contextClassLoader shouldNotBe previous
         }
@@ -53,7 +57,9 @@ class MavenGeneratorSpec : FunSpec({
             targetConfiguration = mapOf("version" to "0.6.0", "output" to "old/{api}.json"),
             outputDirectory = output,
             executionId = "documentation",
-            parentClassLoader = parentClassLoader
+            parentClassLoader = parentClassLoader,
+            pluginVersion = "0.6.0",
+            projectTapikVersions = setOf("0.6.0")
         )
         generator.generate(
             classpath = emptyList(),
@@ -61,10 +67,32 @@ class MavenGeneratorSpec : FunSpec({
             targetConfiguration = mapOf("version" to "0.6.0", "output" to "new/{api}.json"),
             outputDirectory = output,
             executionId = "documentation",
-            parentClassLoader = parentClassLoader
+            parentClassLoader = parentClassLoader,
+            pluginVersion = "0.6.0",
+            projectTapikVersions = setOf("0.6.0")
         )
 
         Files.exists(output.resolve("old/Books.json")) shouldBe false
         Files.exists(output.resolve("new/Books.json")) shouldBe true
+    }
+
+    test("reject version skew before loading APIs or targets") {
+        val output = Files.createTempDirectory("tapik-maven-").apply { toFile().deleteOnExit() }
+
+        val error =
+            shouldThrow<IllegalArgumentException> {
+                MavenGenerator().generate(
+                    classpath = listOf(output.resolve("missing-project-classpath")),
+                    targetId = "missing",
+                    targetConfiguration = emptyMap(),
+                    outputDirectory = output,
+                    executionId = "version-check",
+                    parentClassLoader = MavenGeneratorSpec::class.java.classLoader,
+                    pluginVersion = "0.6.0",
+                    projectTapikVersions = setOf("0.5.0")
+                )
+            }
+
+        error.message shouldContain "Tapik version mismatch"
     }
 })
