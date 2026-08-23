@@ -56,10 +56,12 @@ data class ArraySchema(
  *
  * @throws IllegalArgumentException when [values] is empty, contains blanks or duplicates, or [name] is blank.
  */
-data class EnumSchema(
-    val values: List<String>,
+class EnumSchema(
+    values: List<String>,
     override val name: String? = null
 ) : Schema {
+    val values: List<String> = values.snapshotList()
+
     init {
         require(values.isNotEmpty()) { "Enum schema values must not be empty" }
         require(values.none(String::isBlank)) { "Enum schema values must not be blank" }
@@ -68,6 +70,22 @@ data class EnumSchema(
     }
 
     override fun named(name: String): EnumSchema = copy(name = name)
+
+    operator fun component1(): List<String> = values
+
+    operator fun component2(): String? = name
+
+    fun copy(
+        values: List<String> = this.values,
+        name: String? = this.name
+    ): EnumSchema = EnumSchema(values, name)
+
+    override fun equals(other: Any?): Boolean =
+        this === other || other is EnumSchema && values == other.values && name == other.name
+
+    override fun hashCode(): Int = 31 * values.hashCode() + name.hashCode()
+
+    override fun toString(): String = "EnumSchema(values=$values, name=$name)"
 }
 
 /**
@@ -88,16 +106,34 @@ data class SchemaProperty(
  *
  * @throws IllegalArgumentException when a property name or [name] is blank.
  */
-data class ObjectSchema(
-    val properties: Map<String, SchemaProperty>,
+class ObjectSchema(
+    properties: Map<String, SchemaProperty>,
     override val name: String? = null
 ) : Schema {
+    val properties: Map<String, SchemaProperty> = properties.snapshotMap()
+
     init {
         require(properties.keys.none(String::isBlank)) { "Object schema property names must not be blank" }
         require(name == null || name.isNotBlank()) { "Schema name must not be blank" }
     }
 
     override fun named(name: String): ObjectSchema = copy(name = name)
+
+    operator fun component1(): Map<String, SchemaProperty> = properties
+
+    operator fun component2(): String? = name
+
+    fun copy(
+        properties: Map<String, SchemaProperty> = this.properties,
+        name: String? = this.name
+    ): ObjectSchema = ObjectSchema(properties, name)
+
+    override fun equals(other: Any?): Boolean =
+        this === other || other is ObjectSchema && properties == other.properties && name == other.name
+
+    override fun hashCode(): Int = 31 * properties.hashCode() + name.hashCode()
+
+    override fun toString(): String = "ObjectSchema(properties=$properties, name=$name)"
 }
 
 /** A map whose keys and values use [keys] and [values] schemas. */

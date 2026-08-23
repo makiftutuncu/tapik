@@ -51,6 +51,18 @@ class EndpointSpec : FunSpec({
         books.endpoints[2] shouldBeSameInstanceAs books.remove
     }
 
+    test("expose registered endpoints as snapshots") {
+        val books =
+            object : Api("Books") {
+                val list by get(root / "books")
+                val create by post(root / "books")
+            }
+
+        (books.endpoints as MutableList).clear()
+
+        books.endpoints shouldContainExactly listOf(books.list, books.create)
+    }
+
     test("provide every supported standard method builder") {
         val api =
             object : Api("Methods") {

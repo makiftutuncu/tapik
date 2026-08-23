@@ -46,4 +46,22 @@ class SchemaSpec : FunSpec({
         }
         shouldThrow<IllegalArgumentException> { ReferenceSchema("") }
     }
+
+    test("snapshot schema collections") {
+        val values = mutableListOf("FICTION", "HISTORY")
+        val properties =
+            linkedMapOf(
+                "genre" to SchemaProperty(EnumSchema(values), required = true)
+            )
+        val genre = EnumSchema(values)
+        val book = ObjectSchema(properties)
+
+        values.clear()
+        properties.clear()
+        runCatching { (genre.values as MutableList).clear() }
+        runCatching { (book.properties as MutableMap).clear() }
+
+        genre.values shouldBe listOf("FICTION", "HISTORY")
+        book.properties.keys shouldBe setOf("genre")
+    }
 })

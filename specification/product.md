@@ -19,6 +19,11 @@ Kotlin definitions are the sole source of truth. OpenAPI is an output and will n
 6. Arbitrary Kotlin composition is supported; Tapik does not define a statically analyzable subset of Kotlin.
 7. Published contract artifacts behave like contract definitions on a consumer's classpath.
 
+Tapik-owned structural values have shallow snapshot semantics. Public collection inputs are copied before they are
+stored, and exposed collections cannot mutate the stored structure. Encoded byte arrays crossing a Tapik transport
+value boundary are copied on ingress and access. Tapik does not copy user-owned domain objects, formats, codecs, or
+values carried by those abstractions.
+
 ## Initial targets
 
 Targets are developed in this order:

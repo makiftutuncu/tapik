@@ -17,21 +17,49 @@ data class ScalarConfigurationValue(
  *
  * @property values list elements in declaration order.
  */
-data class ListConfigurationValue(
-    val values: List<ConfigurationValue>
-) : ConfigurationValue
+class ListConfigurationValue(
+    values: List<ConfigurationValue>
+) : ConfigurationValue {
+    val values: List<ConfigurationValue> = values.snapshotList()
+
+    operator fun component1(): List<ConfigurationValue> = values
+
+    fun copy(values: List<ConfigurationValue> = this.values): ListConfigurationValue =
+        ListConfigurationValue(values)
+
+    override fun equals(other: Any?): Boolean =
+        this === other || other is ListConfigurationValue && values == other.values
+
+    override fun hashCode(): Int = values.hashCode()
+
+    override fun toString(): String = "ListConfigurationValue(values=$values)"
+}
 
 /**
  * A named target configuration object.
  *
  * @property values child values keyed by name in declaration order.
  */
-data class ObjectConfigurationValue(
-    val values: Map<String, ConfigurationValue>
+class ObjectConfigurationValue(
+    values: Map<String, ConfigurationValue>
 ) : ConfigurationValue {
+    val values: Map<String, ConfigurationValue> = values.snapshotMap()
+
     init {
         require(values.keys.none(String::isBlank)) { "Configuration names must not be blank" }
     }
+
+    operator fun component1(): Map<String, ConfigurationValue> = values
+
+    fun copy(values: Map<String, ConfigurationValue> = this.values): ObjectConfigurationValue =
+        ObjectConfigurationValue(values)
+
+    override fun equals(other: Any?): Boolean =
+        this === other || other is ObjectConfigurationValue && values == other.values
+
+    override fun hashCode(): Int = values.hashCode()
+
+    override fun toString(): String = "ObjectConfigurationValue(values=$values)"
 }
 
 /**
@@ -40,15 +68,29 @@ data class ObjectConfigurationValue(
  * @property values root configuration values keyed by name.
  * @throws IllegalArgumentException when a configuration name is blank.
  */
-data class TargetConfiguration(
-    val values: Map<String, ConfigurationValue> = emptyMap()
+class TargetConfiguration(
+    values: Map<String, ConfigurationValue> = emptyMap()
 ) {
+    val values: Map<String, ConfigurationValue> = values.snapshotMap()
+
     init {
         require(values.keys.none(String::isBlank)) { "Configuration names must not be blank" }
     }
 
     /** Returns the value named [name], or `null` when it is absent. */
     operator fun get(name: String): ConfigurationValue? = values[name]
+
+    operator fun component1(): Map<String, ConfigurationValue> = values
+
+    fun copy(values: Map<String, ConfigurationValue> = this.values): TargetConfiguration =
+        TargetConfiguration(values)
+
+    override fun equals(other: Any?): Boolean =
+        this === other || other is TargetConfiguration && values == other.values
+
+    override fun hashCode(): Int = values.hashCode()
+
+    override fun toString(): String = "TargetConfiguration(values=$values)"
 }
 
 /**

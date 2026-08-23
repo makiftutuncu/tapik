@@ -12,6 +12,9 @@ including `CONNECT` and `QUERY`, remain representable even when Spring does not 
 method, a Spring URI builder function, encoded headers, and an optional encoded body. It returns the raw Tapik status,
 headers, media type, and bytes for every HTTP response, including error statuses.
 
+Encoded request and response values snapshot byte arrays on construction and return a copy when their bytes are read.
+Response header maps and their value lists are structural snapshots.
+
 Request bodies and responses compare encoded byte arrays by content and derive hash codes from that content. Equal
 transport values therefore remain equal when their bytes come from different array instances.
 

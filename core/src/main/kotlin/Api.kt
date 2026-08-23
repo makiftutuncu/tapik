@@ -17,9 +17,11 @@ abstract class Api(
         require(this.id.isNotBlank()) { "API ID must not be blank" }
     }
 
+    private val registeredEndpoints: MutableList<Endpoint<*, *, *, *, *, Ready>> = mutableListOf()
+
     /** Ready endpoints in property declaration order. */
     val endpoints: List<Endpoint<*, *, *, *, *, Ready>>
-        field: MutableList<Endpoint<*, *, *, *, *, Ready>> = mutableListOf()
+        get() = registeredEndpoints.toList()
 
     /** Starts a draft `GET` endpoint for [uri]. */
     protected fun <P : Paths, Q : Queries> get(
@@ -102,10 +104,10 @@ abstract class Api(
     ) = endpoint(Method.QUERY, uri, summary, description, tags)
 
     internal fun register(endpoint: Endpoint<*, *, *, *, *, Ready>) {
-        require(endpoints.none { it.id == endpoint.id }) {
+        require(registeredEndpoints.none { it.id == endpoint.id }) {
             "Endpoint ID '${endpoint.id}' is already registered"
         }
-        endpoints.add(endpoint)
+        registeredEndpoints.add(endpoint)
     }
 
     private fun <P : Paths, Q : Queries> endpoint(

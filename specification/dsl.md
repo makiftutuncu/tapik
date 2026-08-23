@@ -13,8 +13,9 @@ object Books : Api() {
 
 Delegation registers endpoints in declaration order without package scanning. An implementation should use Kotlin's
 `provideDelegate` convention so registration occurs during API initialization rather than on first property access.
-`Api.endpoints` exposes a read-only ordered `List<Endpoint<*, *, *, *, *, Ready>>` for discovery. This view is
-necessarily star-projected, while each delegated endpoint property retains its complete inferred generic type.
+`Api.endpoints` exposes an ordered snapshot `List<Endpoint<*, *, *, *, *, Ready>>` for discovery. Mutating a castable
+returned list cannot change the API's registered endpoints. This snapshot is necessarily star-projected, while each
+delegated endpoint property retains its complete inferred generic type.
 
 ## Endpoint structure
 

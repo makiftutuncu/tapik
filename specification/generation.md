@@ -16,6 +16,8 @@ mechanism. Build-tool adapters and future command-line applications load the sam
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
 
 Generated artifact paths are relative and normalized. A generation result cannot contain the same path twice.
+Configuration lists and maps and generation-result artifact lists are structural snapshots: later caller mutation and
+mutation attempts through exposed collection values cannot change the validated configuration or result.
 
 ## API registries
 

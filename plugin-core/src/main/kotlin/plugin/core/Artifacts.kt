@@ -54,11 +54,25 @@ private val WINDOWS_ABSOLUTE_PATH: Regex = Regex("^[A-Za-z]:/")
  * @property artifacts generated artifacts in deterministic order.
  * @throws IllegalArgumentException when two artifacts have the same relative path.
  */
-data class GenerationResult(
-    val artifacts: List<GeneratedArtifact>
+class GenerationResult(
+    artifacts: List<GeneratedArtifact>
 ) {
+    val artifacts: List<GeneratedArtifact> = artifacts.snapshotList()
+
     init {
         val paths = artifacts.map(GeneratedArtifact::relativePath)
         require(paths.distinct().size == paths.size) { "Generated artifact paths must be unique" }
     }
+
+    operator fun component1(): List<GeneratedArtifact> = artifacts
+
+    fun copy(artifacts: List<GeneratedArtifact> = this.artifacts): GenerationResult =
+        GenerationResult(artifacts)
+
+    override fun equals(other: Any?): Boolean =
+        this === other || other is GenerationResult && artifacts == other.artifacts
+
+    override fun hashCode(): Int = artifacts.hashCode()
+
+    override fun toString(): String = "GenerationResult(artifacts=$artifacts)"
 }
