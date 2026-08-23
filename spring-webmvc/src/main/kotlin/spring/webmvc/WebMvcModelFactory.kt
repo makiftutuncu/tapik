@@ -177,6 +177,8 @@ private fun CompiledEndpoint.toModel(
             }
         }
     val outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id)
+    val repeatedQueriesParameter =
+        if (queries.any { (query, _) -> query.repeated }) uniqueName("queryParameters", usedRawNames) else null
     val acceptParameter =
         if (outputs.any { it.bodies.isNotEmpty() }) uniqueName("accept", usedRawNames) else null
 
@@ -195,6 +197,7 @@ private fun CompiledEndpoint.toModel(
         body = body,
         handlerParameters = requiredParameters + optionalParameters,
         outputs = outputs,
+        repeatedQueriesParameter = repeatedQueriesParameter,
         acceptParameter = acceptParameter
     )
 }

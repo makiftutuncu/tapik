@@ -72,7 +72,7 @@ class MavenUsageSpec : FunSpec({
                 ).header("x-api-version", "1")
             )
 
-        client.list(xRequestId = "request-1", name = "Ursula") shouldBe
+        client.list(xRequestId = "request-1", name = listOf("Ursula")) shouldBe
             AuthorsClient.ListResponse.Ok(
                 body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
             )
@@ -105,7 +105,8 @@ class MavenUsageSpec : FunSpec({
     }
 
     test("serve a response through a generated WebMVC interface") {
-        val mvc = MockMvcBuilders.standaloneSetup(AuthorsController()).build()
+        val controller = AuthorsController()
+        val mvc = MockMvcBuilders.standaloneSetup(controller).build()
 
         mvc
             .perform(
@@ -116,6 +117,23 @@ class MavenUsageSpec : FunSpec({
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().string("""[{"id":"author-1","name":"Ursula K. Le Guin"}]"""))
+        controller.names shouldBe listOf("Ursula")
+
+        mvc
+            .perform(
+                get("/authors")
+                    .queryParam("name", "Ursula,Octavia")
+                    .header("X-Request-Id", "request-1")
+            ).andExpect(status().isOk)
+        controller.names shouldBe listOf("Ursula,Octavia")
+
+        mvc
+            .perform(
+                get("/authors")
+                    .queryParam("name", "Ursula", "Octavia")
+                    .header("X-Request-Id", "request-1")
+            ).andExpect(status().isOk)
+        controller.names shouldBe listOf("Ursula", "Octavia")
 
         mvc
             .perform(
@@ -146,14 +164,16 @@ class MavenUsageSpec : FunSpec({
 @RestController
 private class AuthorsController : AuthorsServer {
     override val authorsApi: Authors = Authors()
+    var names: List<String>? = null
 
     override fun list(
         xRequestId: String,
-        name: String?
+        name: List<String>?
     ): AuthorsServer.ListResponse =
-        if (name == "none") {
+        if (name == listOf("none")) {
             AuthorsServer.ListResponse.NoContent
         } else {
+            names = name
             AuthorsServer.ListResponse.Ok(
                 body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
             )

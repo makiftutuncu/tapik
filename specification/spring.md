@@ -77,6 +77,9 @@ path variables, query parameters, headers, and bodies through the formats attach
 fixed-header mismatches produce `400 Bad Request`. `CONNECT` and `QUERY` fail generation because Spring WebMVC cannot
 map them.
 
+Repeated query parameters preserve raw query occurrences independently of Spring conversion rules. A request containing
+`?tag=a,b` decodes from the single value `"a,b"`, while `?tag=a&tag=b` decodes from the two values `"a"` and `"b"`.
+
 Request body alternatives are selected by a compatible request `Content-Type` in declaration order. Every encoded
 alternative remains supported; an unmatched content type produces `415 Unsupported Media Type`. When `noBody` is an
 alternative, an absent request body is decoded as `null`.

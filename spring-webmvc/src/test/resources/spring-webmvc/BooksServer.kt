@@ -23,9 +23,10 @@ public interface BooksServer {
     public fun listHttp(
         @org.springframework.web.bind.annotation.RequestHeader(name = "X-Request-Id", required = true) xRequestIdRaw: kotlin.String,
         @org.springframework.web.bind.annotation.RequestParam(name = "page", required = false) pageRaw: kotlin.String? = null,
-        @org.springframework.web.bind.annotation.RequestParam(name = "authorId", required = false) authorIdRaw: kotlin.collections.List<kotlin.String>? = null,
+        @org.springframework.web.bind.annotation.RequestParam queryParameters: org.springframework.util.MultiValueMap<kotlin.String, kotlin.String>,
         @org.springframework.web.bind.annotation.RequestHeader(name = org.springframework.http.HttpHeaders.ACCEPT, required = false) accept: kotlin.String? = null
     ): org.springframework.http.ResponseEntity<kotlin.ByteArray> {
+        val authorIdRaw = queryParameters["authorId"]
         val page = pageRaw?.let { raw -> decodeString(booksApi.list.uri.queries._1.format, raw, "Books.list query page") } ?: booksApi.list.uri.queries._1.presence.value
         val authorId = authorIdRaw?.let { raw -> decodeStrings(booksApi.list.uri.queries._2.format, raw, "Books.list query authorId") }
         val xRequestId = decodeString(booksApi.list.headers._1.format, xRequestIdRaw, "Books.list header X-Request-Id")

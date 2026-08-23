@@ -69,6 +69,18 @@ private fun StringBuilder.appendMapping(endpoint: WebMvcEndpointModel) {
         appendLine("    ): org.springframework.http.ResponseEntity<kotlin.ByteArray> {")
     }
     endpoint.paths.forEach { parameter -> appendDecodedParameter(endpoint, parameter, "path") }
+    endpoint.repeatedQueriesParameter?.let { queryParameters ->
+        endpoint.queries.filter(WebMvcWireParameter::repeated).forEach { parameter ->
+            val access = "$queryParameters[${parameter.wireName.kotlinString()}]"
+            val value =
+                if (parameter.presence === Required) {
+                    "$access ?: badRequest(${"${endpoint.id} query ${parameter.wireName} is required".kotlinString()})"
+                } else {
+                    access
+                }
+            appendLine("        val ${parameter.rawName} = $value")
+        }
+    }
     endpoint.queries.forEach { parameter -> appendDecodedParameter(endpoint, parameter, "query") }
     endpoint.headers.forEach { parameter -> appendDecodedParameter(endpoint, parameter, "header") }
     endpoint.body?.let { body -> appendDecodedBody(endpoint, body) }
@@ -105,13 +117,20 @@ private fun WebMvcEndpointModel.mappingParameters(): List<MappingParameter> =
                 )
             )
         }
-        queries.forEach { parameter ->
+        queries.filterNot(WebMvcWireParameter::repeated).forEach { parameter ->
             val required = parameter.presence === Required
-            val rawType = if (parameter.repeated) "kotlin.collections.List<kotlin.String>" else "kotlin.String"
             add(
                 MappingParameter(
-                    "@org.springframework.web.bind.annotation.RequestParam(name = ${parameter.wireName.kotlinString()}, required = $required) ${parameter.rawName}: $rawType${if (required) "" else "? = null"}",
+                    "@org.springframework.web.bind.annotation.RequestParam(name = ${parameter.wireName.kotlinString()}, required = $required) ${parameter.rawName}: kotlin.String${if (required) "" else "? = null"}",
                     required
+                )
+            )
+        }
+        repeatedQueriesParameter?.let { name ->
+            add(
+                MappingParameter(
+                    "@org.springframework.web.bind.annotation.RequestParam $name: org.springframework.util.MultiValueMap<kotlin.String, kotlin.String>",
+                    required = false
                 )
             )
         }

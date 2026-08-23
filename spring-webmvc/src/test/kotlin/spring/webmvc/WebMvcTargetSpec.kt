@@ -11,6 +11,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import org.jetbrains.kotlin.cli.common.ExitCode
 
 class WebMvcTargetSpec : FunSpec({
@@ -35,6 +36,11 @@ class WebMvcTargetSpec : FunSpec({
             val compilation = compileKotlin(content)
             withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
             content shouldBe expected
+            content shouldContain
+                "@org.springframework.web.bind.annotation.RequestParam queryParameters: org.springframework.util.MultiValueMap<kotlin.String, kotlin.String>"
+            content shouldContain "val authorIdRaw = queryParameters[\"authorId\"]"
+            content shouldNotContain
+                "@org.springframework.web.bind.annotation.RequestParam(name = \"authorId\""
         }
     }
 

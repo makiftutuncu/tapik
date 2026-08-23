@@ -27,6 +27,7 @@ internal data class WebMvcEndpointModel(
     val body: WebMvcRequestBody?,
     val handlerParameters: List<WebMvcParameter>,
     val outputs: List<WebMvcOutput>,
+    val repeatedQueriesParameter: String?,
     val acceptParameter: String?
 )
 

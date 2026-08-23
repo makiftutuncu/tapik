@@ -29,7 +29,7 @@ class Authors : Api() {
         )
 
     val list by
-        get(root / "authors" + query.string("name").optional())
+        get(root / "authors" + query.string("name").repeated().optional())
             .header(requestId)
             .output(Status.Ok with jsonBody<List<Author>>() with headersOf(apiVersion))
             .output(Status.NotFound with xmlError)
