@@ -22,6 +22,13 @@ Every observable behavior follows this sequence:
 Compile-failure behavior should eventually use a dedicated Kotlin compilation-test harness. Selecting that harness is
 itself deferred until the first compile-failure behavior is implemented.
 
+## Continuous integration
+
+Pull requests targeting `main` and pushes to `main` run a clean `./mvnw verify` on Linux with Temurin Java 25. CI uses
+the Maven Wrapper and the Kotlin version declared by the parent build, so it verifies the minimum supported toolchain
+without maintaining an independent version configuration. The workflow has read-only repository permissions, includes
+every production and `test-` reactor module, and receives no publication credentials.
+
 ## Modules
 
 The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification
