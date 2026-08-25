@@ -1,6 +1,6 @@
 package dev.akif.tapik.plugin.maven
 
-import dev.akif.tapik.fixtures.library.Books
+import dev.akif.tapik.test.fixtures.library.Books
 import dev.akif.tapik.plugin.openapi.OpenApi
 import dev.akif.tapik.plugin.openapi.toJson
 import io.kotest.assertions.throwables.shouldThrow

@@ -15,7 +15,7 @@ Generation targets are contributed through host-neutral target registries discov
 mechanism. Build-tool adapters and future command-line applications load the same registries instead of hard-coding
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
 
-`plugin-core` provides target-neutral Kotlin source helpers for reading compiled type arguments and Tapik tuples,
+`common-plugin` provides target-neutral Kotlin source helpers for reading compiled type arguments and Tapik tuples,
 allocating and sanitizing Kotlin declaration names, and escaping Kotlin string literals. Source-generating targets use
 these shared rules rather than maintaining target-specific copies; target-specific model and emission decisions remain
 inside each target.
@@ -124,7 +124,7 @@ same execution removes its previously owned paths that are absent from the new r
 executions and unowned files remain untouched. Two executions cannot own the same path. Ownership is updated only after
 target generation succeeds, so a failed generation leaves the last successful result available. Maven configuration is
 translated into the host-neutral configuration model before target selection; Maven types do not cross into
-`plugin-core` or target modules.
+`common-plugin` or target modules.
 
 When an execution returns `SOURCE` artifacts, the adapter adds that execution's output directory as a project compile
 source root. Source targets may run in `generate-sources` when their APIs come from compiled contract dependencies.

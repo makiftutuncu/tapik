@@ -1,7 +1,7 @@
 package dev.akif.tapik.plugin.openapi
 
 import dev.akif.tapik.*
-import dev.akif.tapik.fixtures.library.Books
+import dev.akif.tapik.test.fixtures.library.Books
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -174,12 +174,12 @@ class OpenApiSpec : FunSpec({
         qualified.components.schemas.keys shouldBe
             setOf(
                 "AuthorId",
-                "dev.akif.tapik.fixtures.library.BookId",
-                "dev.akif.tapik.fixtures.library.AuthorId",
-                "dev.akif.tapik.fixtures.library.Author",
-                "dev.akif.tapik.fixtures.library.Book",
+                "dev.akif.tapik.test.fixtures.library.BookId",
+                "dev.akif.tapik.test.fixtures.library.AuthorId",
+                "dev.akif.tapik.test.fixtures.library.Author",
+                "dev.akif.tapik.test.fixtures.library.Book",
                 "BookId",
-                "dev.akif.tapik.fixtures.library.CreateBook"
+                "dev.akif.tapik.test.fixtures.library.CreateBook"
             )
     }
 

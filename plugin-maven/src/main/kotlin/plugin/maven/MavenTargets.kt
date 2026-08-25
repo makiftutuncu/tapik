@@ -1,7 +1,7 @@
 package dev.akif.tapik.plugin.maven
 
-import dev.akif.tapik.plugin.core.GenerationTarget
-import dev.akif.tapik.plugin.core.GenerationTargetCatalog
+import dev.akif.tapik.common.plugin.GenerationTarget
+import dev.akif.tapik.common.plugin.GenerationTargetCatalog
 import java.util.ServiceConfigurationError
 
 internal object MavenTargets {

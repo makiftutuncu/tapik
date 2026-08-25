@@ -1,9 +1,9 @@
 package dev.akif.tapik.plugin.maven
 
-import dev.akif.tapik.plugin.core.GenerationRequest
-import dev.akif.tapik.plugin.core.GenerationResult
-import dev.akif.tapik.plugin.core.GenerationTarget
-import dev.akif.tapik.plugin.core.GenerationTargetRegistry
+import dev.akif.tapik.common.plugin.GenerationRequest
+import dev.akif.tapik.common.plugin.GenerationResult
+import dev.akif.tapik.common.plugin.GenerationTarget
+import dev.akif.tapik.common.plugin.GenerationTargetRegistry
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.string.shouldContain
@@ -73,7 +73,7 @@ private fun targetProviderDirectory(providerName: String): java.nio.file.Path {
     val directory = Files.createTempDirectory("tapik-target-provider-").apply { toFile().deleteOnExit() }
     val service =
         directory.resolve(
-            "META-INF/services/dev.akif.tapik.plugin.core.GenerationTargetRegistry"
+            "META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry"
         )
     Files.createDirectories(service.parent)
     Files.writeString(service, "$providerName\n")

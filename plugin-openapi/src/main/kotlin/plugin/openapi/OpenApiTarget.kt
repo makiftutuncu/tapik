@@ -1,6 +1,6 @@
 package dev.akif.tapik.plugin.openapi
 
-import dev.akif.tapik.plugin.core.*
+import dev.akif.tapik.common.plugin.*
 
 /** Host-neutral OpenAPI generation target. */
 object OpenApiTarget : GenerationTarget {

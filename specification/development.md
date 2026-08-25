@@ -26,8 +26,9 @@ itself deferred until the first compile-failure behavior is implemented.
 
 The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification
 needs an independently consumable boundary. Maven module folders are flat beneath the repository root, omit the
-`tapik-` artifact prefix, and use role prefixes such as `format-` and `plugin-`. The Kotlin serialization integration
-is `dev.akif:tapik-format-kotlinx` with packages under `dev.akif.tapik.format.kotlinx`.
+`tapik-` artifact prefix, and, except for `core`, begin with exactly one role prefix: `plugin-`, `format-`, `common-`,
+or `test-`. Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization integration is
+therefore `dev.akif:tapik-format-kotlinx` with packages under `dev.akif.tapik.format.kotlinx`.
 
 Kotlin source paths omit the common `dev/akif/tapik` package directories. A declaration in `dev.akif.tapik` lives
 directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin after that common package.
@@ -35,39 +36,44 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | Module folder | Maven artifact |
 | --- | --- |
 | `core` | `dev.akif:tapik-core` |
+| `common-plugin` | `dev.akif:tapik-common-plugin` |
+| `common-spring` | `dev.akif:tapik-common-spring` |
 | `format-kotlinx` | `dev.akif:tapik-format-kotlinx` |
-| `fixtures` | `dev.akif:tapik-fixtures` |
 | `plugin-compiler` | `dev.akif:tapik-plugin-compiler` |
-| `plugin-core` | `dev.akif:tapik-plugin-core` |
-| `plugin-openapi` | `dev.akif:tapik-plugin-openapi` |
 | `plugin-maven` | `dev.akif:tapik-plugin-maven` |
-| `plugin-maven-contract-integration` | `dev.akif:tapik-plugin-maven-contract-integration` |
-| `plugin-maven-integration` | `dev.akif:tapik-plugin-maven-integration` |
-| `spring` | `dev.akif:tapik-spring` |
-| `spring-restclient` | `dev.akif:tapik-spring-restclient` |
-| `spring-webmvc` | `dev.akif:tapik-spring-webmvc` |
+| `plugin-openapi` | `dev.akif:tapik-plugin-openapi` |
+| `plugin-spring-restclient` | `dev.akif:tapik-plugin-spring-restclient` |
+| `plugin-spring-webmvc` | `dev.akif:tapik-plugin-spring-webmvc` |
+| `test-fixtures` | `dev.akif:tapik-test-fixtures` |
+| `test-maven-contract` | `dev.akif:tapik-test-maven-contract` |
+| `test-maven-integration` | `dev.akif:tapik-test-maven-integration` |
 
 `core` remains dependency-free. `format-kotlinx` depends on Kotlin serialization and converts its serializers into
 core codecs and schemas without leaking Kotlin serialization types into endpoint contracts.
 
-`core` exposes the minimal API registry provider contract needed by compiler-generated code. The `plugin-core` module
+`core` exposes the minimal API registry provider contract needed by compiler-generated code. The `common-plugin` module
 defines host-neutral registry loading, target configuration, target execution, and generated artifact contracts.
-Target modules and adapters for Maven, Gradle, or command-line use depend on `plugin-core`; it must not depend on any
+Target modules and adapters for Maven, Gradle, or command-line use depend on `common-plugin`; it must not depend on any
 build-tool API.
 
-Spring integration packages mirror their module folders: `spring` uses `dev.akif.tapik.spring`, `spring-restclient`
-uses `dev.akif.tapik.spring.restclient`, and `spring-webmvc` uses `dev.akif.tapik.spring.webmvc`.
+Shared Spring integration code lives in `common-spring` under `dev.akif.tapik.common.spring`. The
+`plugin-spring-restclient` and `plugin-spring-webmvc` packages are respectively
+`dev.akif.tapik.plugin.spring.restclient` and `dev.akif.tapik.plugin.spring.webmvc`.
 
-Plugin module packages mirror their folder names: `plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `plugin-core`
-uses `dev.akif.tapik.plugin.core`, `plugin-openapi` uses `dev.akif.tapik.plugin.openapi`, and `plugin-maven` uses
-`dev.akif.tapik.plugin.maven`. The non-production `plugin-maven-contract-integration` and `plugin-maven-integration`
-modules verify the complete Maven user workflow against the reactor-built artifacts, including APIs supplied by a
-separate contract artifact.
+Other module packages follow the same folder-name hierarchy: `common-plugin` uses `dev.akif.tapik.common.plugin`,
+`plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `plugin-openapi` uses `dev.akif.tapik.plugin.openapi`, and
+`plugin-maven` uses `dev.akif.tapik.plugin.maven`. The non-production `test-maven-contract` and
+`test-maven-integration` modules use `dev.akif.tapik.test.maven.contract` and
+`dev.akif.tapik.test.maven.integration`. Together they verify the complete Maven user workflow against the
+reactor-built artifacts, including APIs supplied by a separate contract artifact.
 
-The non-production `fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
-`dev.akif.tapik.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact in
-their tests so every interpreter is verified against the same contract instead of maintaining target-specific
+The non-production `test-fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
+`dev.akif.tapik.test.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact
+in their tests so every interpreter is verified against the same contract instead of maintaining target-specific
 fixtures.
+
+Non-production modules remain installable so reactor and local integration builds can resolve them, but they must be
+excluded from deployment. This applies to every `test-` module; release deployment publishes only production modules.
 
 The `plugin-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy contracts
 into a neutral metadata model. Its public document model represents the OpenAPI output itself, and deterministic JSON

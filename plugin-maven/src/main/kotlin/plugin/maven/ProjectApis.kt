@@ -1,7 +1,7 @@
 package dev.akif.tapik.plugin.maven
 
 import dev.akif.tapik.Api
-import dev.akif.tapik.plugin.core.ApiCatalog
+import dev.akif.tapik.common.plugin.ApiCatalog
 import java.net.URLClassLoader
 import java.nio.file.Path
 

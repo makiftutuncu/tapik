@@ -1,10 +1,10 @@
 package dev.akif.tapik.plugin.maven
 
-import dev.akif.tapik.plugin.core.ArtifactWriter
-import dev.akif.tapik.plugin.core.ArtifactKind
-import dev.akif.tapik.plugin.core.GenerationEngine
-import dev.akif.tapik.plugin.core.ScalarConfigurationValue
-import dev.akif.tapik.plugin.core.TargetConfiguration
+import dev.akif.tapik.common.plugin.ArtifactWriter
+import dev.akif.tapik.common.plugin.ArtifactKind
+import dev.akif.tapik.common.plugin.GenerationEngine
+import dev.akif.tapik.common.plugin.ScalarConfigurationValue
+import dev.akif.tapik.common.plugin.TargetConfiguration
 import java.nio.file.Path
 
 internal class MavenGenerator {

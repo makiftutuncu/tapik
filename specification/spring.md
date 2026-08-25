@@ -2,15 +2,16 @@
 
 ## Shared Spring boundary
 
-`tapik-spring` contains only conversions needed by more than one Spring integration. It maps Tapik methods, statuses,
-media types, and headers to and from Spring's HTTP model without interpreting endpoints. All standard Tapik methods,
-including `CONNECT` and `QUERY`, remain representable even when Spring does not expose named constants for them.
+`tapik-common-spring` contains only conversions needed by more than one Spring integration. It maps Tapik methods,
+statuses, media types, and headers to and from Spring's HTTP model without interpreting endpoints. All standard Tapik
+methods, including `CONNECT` and `QUERY`, remain representable even when Spring does not expose named constants for
+them.
 
 ## RestClient transport
 
-`tapik-spring-restclient` executes already-resolved requests with Spring `RestClient`. The transport accepts a Tapik
-method, a Spring URI builder function, encoded headers, and an optional encoded body. It returns the raw Tapik status,
-headers, media type, and bytes for every HTTP response, including error statuses.
+`tapik-plugin-spring-restclient` executes already-resolved requests with Spring `RestClient`. The transport accepts a
+Tapik method, a Spring URI builder function, encoded headers, and an optional encoded body. It returns the raw Tapik
+status, headers, media type, and bytes for every HTTP response, including error statuses.
 
 Encoded request and response values snapshot byte arrays on construction and return a copy when their bytes are read.
 Response header maps and their value lists are structural snapshots.

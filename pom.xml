@@ -16,16 +16,16 @@
     <modules>
         <module>core</module>
         <module>plugin-compiler</module>
-        <module>plugin-core</module>
+        <module>common-plugin</module>
         <module>format-kotlinx</module>
-        <module>fixtures</module>
-        <module>spring</module>
-        <module>spring-restclient</module>
-        <module>spring-webmvc</module>
+        <module>test-fixtures</module>
+        <module>common-spring</module>
+        <module>plugin-spring-restclient</module>
+        <module>plugin-spring-webmvc</module>
         <module>plugin-openapi</module>
         <module>plugin-maven</module>
-        <module>plugin-maven-contract-integration</module>
-        <module>plugin-maven-integration</module>
+        <module>test-maven-contract</module>
+        <module>test-maven-integration</module>
     </modules>
 
     <properties>

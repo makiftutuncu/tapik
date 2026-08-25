@@ -303,7 +303,7 @@ declaration-order semantics, reject blank values, and are mutable only while the
 
 ## Design fixture
 
-The `fixtures` module's `dev.akif.tapik.fixtures.library` package covers books, authors, and rentals. Its first
+The `test-fixtures` module's `dev.akif.tapik.test.fixtures.library` package covers books, authors, and rentals. Its first
 endpoints are:
 
 ```text

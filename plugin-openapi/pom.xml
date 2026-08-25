@@ -21,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>dev.akif</groupId>
-            <artifactId>tapik-plugin-core</artifactId>
+            <artifactId>tapik-common-plugin</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>dev.akif</groupId>
-            <artifactId>tapik-fixtures</artifactId>
+            <artifactId>tapik-test-fixtures</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

@@ -1,8 +1,8 @@
 package dev.akif.tapik.plugin.openapi
 
 import dev.akif.tapik.Api
-import dev.akif.tapik.plugin.core.*
-import dev.akif.tapik.fixtures.library.Books
+import dev.akif.tapik.common.plugin.*
+import dev.akif.tapik.test.fixtures.library.Books
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
