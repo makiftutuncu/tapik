@@ -23,7 +23,7 @@ object RestClientTarget : GenerationTarget {
                 require(apiTypeName.isKotlinIdentifier()) {
                     "Spring RestClient generation requires a valid API type name, but was '$apiTypeName'"
                 }
-                val clientName = uniqueName(apiTypeName + configuration.clientSuffix, usedClientNames)
+                val clientName = uniqueKotlinName(apiTypeName + configuration.clientSuffix, usedClientNames)
                 GeneratedArtifact(
                     relativePath =
                         configuration.packageName.replace('.', '/') + "/" + clientName + ".kt",

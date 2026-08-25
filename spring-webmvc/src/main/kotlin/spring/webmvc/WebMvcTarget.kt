@@ -12,10 +12,10 @@ object WebMvcTarget : GenerationTarget {
         return GenerationResult(
             request.apis.map { api ->
                 val apiTypeName = api.javaClass.simpleName
-                require(apiTypeName.isWebMvcKotlinIdentifier()) {
+                require(apiTypeName.isKotlinIdentifier()) {
                     "Spring WebMVC generation requires a valid API type name, but was '$apiTypeName'"
                 }
-                val serverName = uniqueName(apiTypeName + configuration.serverSuffix, usedServerNames)
+                val serverName = uniqueKotlinName(apiTypeName + configuration.serverSuffix, usedServerNames)
                 GeneratedArtifact(
                     relativePath = configuration.packageName.replace('.', '/') + "/$serverName.kt",
                     mediaType = "text/x-kotlin",
@@ -42,11 +42,11 @@ private data class WebMvcTargetConfiguration(
                 "Unknown Spring WebMVC target configuration: ${unknown.sorted().joinToString()}"
             }
             val packageName = configuration.scalar("packageName") ?: DEFAULT_PACKAGE
-            require(packageName.split('.').all(String::isWebMvcKotlinIdentifier)) {
+            require(packageName.split('.').all(String::isKotlinIdentifier)) {
                 "Spring WebMVC target 'packageName' must be a valid Kotlin package, but was '$packageName'"
             }
             val serverSuffix = configuration.scalar("serverSuffix") ?: DEFAULT_SERVER_SUFFIX
-            require(serverSuffix.isWebMvcKotlinIdentifier()) {
+            require(serverSuffix.isKotlinIdentifier()) {
                 "Spring WebMVC target 'serverSuffix' must be a valid Kotlin identifier, but was '$serverSuffix'"
             }
             return WebMvcTargetConfiguration(packageName, serverSuffix)
@@ -61,19 +61,6 @@ private fun TargetConfiguration.scalar(name: String): String? =
         else -> throw IllegalArgumentException("Spring WebMVC target '$name' must be a scalar value")
     }
 
-private fun String.isWebMvcKotlinIdentifier(): Boolean =
-    isNotEmpty() &&
-        first().let { character -> character == '_' || character.isLetter() } &&
-        drop(1).all { character -> character == '_' || character.isLetterOrDigit() } &&
-        this !in WEBMVC_KOTLIN_KEYWORDS
-
 private val SUPPORTED_CONFIGURATION: Set<String> = setOf("packageName", "serverSuffix")
 private const val DEFAULT_PACKAGE: String = "dev.akif.tapik.generated"
 private const val DEFAULT_SERVER_SUFFIX: String = "Server"
-
-private val WEBMVC_KOTLIN_KEYWORDS: Set<String> =
-    setOf(
-        "as", "break", "class", "continue", "do", "else", "false", "for", "if", "in", "interface",
-        "is", "null", "object", "package", "return", "super", "this", "throw", "true", "try", "typealias",
-        "typeof", "val", "var", "when", "while"
-    )

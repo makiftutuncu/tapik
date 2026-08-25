@@ -15,6 +15,11 @@ Generation targets are contributed through host-neutral target registries discov
 mechanism. Build-tool adapters and future command-line applications load the same registries instead of hard-coding
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
 
+`plugin-core` provides target-neutral Kotlin source helpers for reading compiled type arguments and Tapik tuples,
+allocating and sanitizing Kotlin declaration names, and escaping Kotlin string literals. Source-generating targets use
+these shared rules rather than maintaining target-specific copies; target-specific model and emission decisions remain
+inside each target.
+
 Generated artifact paths are relative and normalized. A generation result cannot contain the same path twice.
 Configuration lists and maps and generation-result artifact lists are structural snapshots: later caller mutation and
 mutation attempts through exposed collection values cannot change the validated configuration or result.

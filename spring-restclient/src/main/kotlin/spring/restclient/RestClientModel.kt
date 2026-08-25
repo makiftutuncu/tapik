@@ -6,7 +6,14 @@ import dev.akif.tapik.plugin.core.CompiledEndpoint
 import dev.akif.tapik.plugin.core.KotlinClassClassifier
 import dev.akif.tapik.plugin.core.KotlinSourceType
 import dev.akif.tapik.plugin.core.KotlinType
+import dev.akif.tapik.plugin.core.argument
+import dev.akif.tapik.plugin.core.kotlinIdentifier
+import dev.akif.tapik.plugin.core.kotlinReferenceIdentifier
+import dev.akif.tapik.plugin.core.lowerCamel
 import dev.akif.tapik.plugin.core.toKotlinSourceType
+import dev.akif.tapik.plugin.core.tupleElements
+import dev.akif.tapik.plugin.core.uniqueKotlinName
+import dev.akif.tapik.plugin.core.upperCamel
 
 internal data class RestClientApiModel(
     val packageName: String,
@@ -112,8 +119,8 @@ internal fun restClientApiModel(
                 endpoint.toModel(
                     apiId = api.id,
                     apiProperty = apiProperty,
-                    methodName = uniqueName(propertyName.kotlinIdentifier("endpoint"), methodNames),
-                    responseName = uniqueName(propertyName.upperCamel() + "Response", responseNames)
+                    methodName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), methodNames),
+                    responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", responseNames)
                 )
             }
     )
@@ -136,7 +143,7 @@ private fun CompiledEndpoint.toModel(
     val paths =
         value.uri.paths.values.mapIndexed { index, path ->
             val pathType = pathTypes[index].argument(0, "${value.id} path '${path.name}'")
-            val name = uniqueName(path.name.kotlinIdentifier("path${index + 1}"), usedNames)
+            val name = uniqueKotlinName(path.name.kotlinIdentifier("path${index + 1}"), usedNames)
             RestClientUriParameter(
                 name = name,
                 wireName = path.name,
@@ -165,7 +172,7 @@ private fun CompiledEndpoint.toModel(
                     is QueryParameter<*, *> -> query.presence
                     is RepeatedQueryParameter<*, *> -> query.presence
                 }
-            val name = uniqueName(query.name.kotlinIdentifier("query${index + 1}"), usedNames)
+            val name = uniqueKotlinName(query.name.kotlinIdentifier("query${index + 1}"), usedNames)
             val access = "$endpointAccess.uri.queries._${index + 1}"
             val parameter =
                 when (presence) {
@@ -195,7 +202,7 @@ private fun CompiledEndpoint.toModel(
                     .toKotlinSourceType("${value.id} header '${header.name}'")
                     .source
             val access = "$endpointAccess.headers._${index + 1}"
-            val parameterName = uniqueName(header.name.kotlinIdentifier("header${index + 1}"), usedNames)
+            val parameterName = uniqueKotlinName(header.name.kotlinIdentifier("header${index + 1}"), usedNames)
             val parameter =
                 when (header.presence) {
                     Required -> RestClientParameter(parameterName, valueType)
@@ -268,7 +275,7 @@ private fun requestBody(
             .toKotlinSourceType("$endpointId request body")
             .source
     return RestClientRequestBodyModel(
-        parameterName = uniqueName("body", usedNames),
+        parameterName = uniqueKotlinName("body", usedNames),
         type = valueType,
         definitionAccess = "$endpointAccess.input.bodies._${indexed.index + 1}",
         optional = input.bodies.values.any { body -> body is NoBody }
@@ -335,7 +342,7 @@ private fun outputs(
                         .toKotlinSourceType("$endpointId output header '${header.name}'")
                 val renderedType = if (header.presence === Optional) rawType.asNullable() else rawType
                 headers += RestClientOutputHeader(
-                    name = uniqueName(header.name.lowerCamel("header${headerIndex + 1}"), usedHeaderNames),
+                    name = uniqueKotlinName(header.name.lowerCamel("header${headerIndex + 1}"), usedHeaderNames),
                     wireName = header.name,
                     type = renderedType,
                     definitionAccess = definitionAccess,

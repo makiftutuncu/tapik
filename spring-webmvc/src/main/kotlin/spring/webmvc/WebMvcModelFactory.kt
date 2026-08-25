@@ -5,7 +5,14 @@ import dev.akif.tapik.plugin.core.CompiledApi
 import dev.akif.tapik.plugin.core.CompiledEndpoint
 import dev.akif.tapik.plugin.core.KotlinClassClassifier
 import dev.akif.tapik.plugin.core.KotlinType
+import dev.akif.tapik.plugin.core.argument
+import dev.akif.tapik.plugin.core.kotlinIdentifier
+import dev.akif.tapik.plugin.core.kotlinReferenceIdentifier
+import dev.akif.tapik.plugin.core.lowerCamel
 import dev.akif.tapik.plugin.core.toKotlinSourceType
+import dev.akif.tapik.plugin.core.tupleElements
+import dev.akif.tapik.plugin.core.uniqueKotlinName
+import dev.akif.tapik.plugin.core.upperCamel
 
 internal fun webMvcApiModel(
     compiled: CompiledApi,
@@ -39,13 +46,13 @@ internal fun webMvcApiModel(
         endpoints =
             compiled.endpoints.map { endpoint ->
                 val propertyName = endpoint.value.id.removePrefix("${api.id}.")
-                val handlerName = uniqueName(propertyName.kotlinIdentifier("endpoint"), functionNames)
+                val handlerName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), functionNames)
                 endpoint.toModel(
                     apiId = api.id,
                     apiProperty = apiProperty,
                     handlerName = handlerName,
-                    mappingName = uniqueName(handlerName.removeSurrounding("`") + "Http", functionNames),
-                    responseName = uniqueName(propertyName.upperCamel() + "Response", responseNames)
+                    mappingName = uniqueKotlinName(handlerName.removeSurrounding("`") + "Http", functionNames),
+                    responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", responseNames)
                 )
             }
     )
@@ -77,8 +84,8 @@ private fun CompiledEndpoint.toModel(
                     .argument(0, "${value.id} path '${path.name}'")
                     .toKotlinSourceType("${value.id} path '${path.name}'")
                     .source
-            val name = uniqueName(path.name.kotlinIdentifier("path${index + 1}"), usedNames)
-            val rawName = uniqueName(name.removeSurrounding("`") + "Raw", usedRawNames)
+            val name = uniqueKotlinName(path.name.kotlinIdentifier("path${index + 1}"), usedNames)
+            val rawName = uniqueKotlinName(name.removeSurrounding("`") + "Raw", usedRawNames)
             WebMvcWireParameter(
                 name = name,
                 rawName = rawName,
@@ -108,8 +115,8 @@ private fun CompiledEndpoint.toModel(
                     is QueryParameter<*, *> -> query.presence
                     is RepeatedQueryParameter<*, *> -> query.presence
                 }
-            val name = uniqueName(query.name.kotlinIdentifier("query${index + 1}"), usedNames)
-            val rawName = uniqueName(name.removeSurrounding("`") + "Raw", usedRawNames)
+            val name = uniqueKotlinName(query.name.kotlinIdentifier("query${index + 1}"), usedNames)
+            val rawName = uniqueKotlinName(name.removeSurrounding("`") + "Raw", usedRawNames)
             val access = "$endpointAccess.uri.queries._${index + 1}"
             val parameter =
                 when (presence) {
@@ -141,8 +148,8 @@ private fun CompiledEndpoint.toModel(
                     .toKotlinSourceType("${value.id} header '${header.name}'")
                     .source
             val access = "$endpointAccess.headers._${index + 1}"
-            val name = uniqueName(header.name.kotlinIdentifier("header${index + 1}"), usedNames)
-            val rawName = uniqueName(name.removeSurrounding("`") + "Raw", usedRawNames)
+            val name = uniqueKotlinName(header.name.kotlinIdentifier("header${index + 1}"), usedNames)
+            val rawName = uniqueKotlinName(name.removeSurrounding("`") + "Raw", usedRawNames)
             val parameter =
                 when (header.presence) {
                     Required -> WebMvcParameter(name, valueType)
@@ -178,9 +185,9 @@ private fun CompiledEndpoint.toModel(
         }
     val outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id)
     val repeatedQueriesParameter =
-        if (queries.any { (query, _) -> query.repeated }) uniqueName("queryParameters", usedRawNames) else null
+        if (queries.any { (query, _) -> query.repeated }) uniqueKotlinName("queryParameters", usedRawNames) else null
     val acceptParameter =
-        if (outputs.any { it.bodies.isNotEmpty() }) uniqueName("accept", usedRawNames) else null
+        if (outputs.any { it.bodies.isNotEmpty() }) uniqueKotlinName("accept", usedRawNames) else null
 
     return WebMvcEndpointModel(
         id = value.id,
@@ -226,11 +233,11 @@ private fun requestBody(
                 .source
         }
     require(types.distinct().size == 1) { "$endpointId request body alternatives must decode to one value type" }
-    val name = uniqueName("body", usedNames)
+    val name = uniqueKotlinName("body", usedNames)
     return WebMvcRequestBody(
         name = name,
-        rawName = uniqueName("bodyBytes", usedRawNames),
-        contentTypeName = uniqueName("contentType", usedRawNames),
+        rawName = uniqueKotlinName("bodyBytes", usedRawNames),
+        contentTypeName = uniqueKotlinName("contentType", usedRawNames),
         type = types.first(),
         alternatives =
             encoded.map { (index, alternative) ->
@@ -314,7 +321,7 @@ private fun outputs(
                 WebMvcOutputHeader(
                     name =
                         if (header.presence is Fixed<*>) null
-                        else uniqueName(header.name.lowerCamel("header${headerIndex + 1}"), usedHeaderNames),
+                        else uniqueKotlinName(header.name.lowerCamel("header${headerIndex + 1}"), usedHeaderNames),
                     wireName = header.name,
                     type = renderedType,
                     definitionAccess = "$outputAccess.headers._${headerIndex + 1}",

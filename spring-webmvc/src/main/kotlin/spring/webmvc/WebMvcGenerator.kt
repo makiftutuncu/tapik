@@ -6,6 +6,7 @@ import dev.akif.tapik.Method
 import dev.akif.tapik.Optional
 import dev.akif.tapik.Required
 import dev.akif.tapik.plugin.core.CompiledApi
+import dev.akif.tapik.plugin.core.kotlinString
 
 internal class WebMvcGenerator(
     private val packageName: String,
