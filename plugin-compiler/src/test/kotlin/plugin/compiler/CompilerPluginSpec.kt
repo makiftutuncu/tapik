@@ -4,7 +4,6 @@ import dev.akif.tapik.ApiRegistry
 import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -13,7 +12,7 @@ import java.net.URLClassLoader
 import java.util.ServiceLoader
 
 class CompilerPluginSpec : FunSpec({
-    test("generate a registry referencing every public API class and object in declaration order") {
+    test("generate a registry referencing every public API class and object") {
         val compilation =
             compile(
                 """
@@ -37,7 +36,7 @@ class CompilerPluginSpec : FunSpec({
             CompilerPluginSpec::class.java.classLoader
         ).use { classLoader ->
             val registry = ServiceLoader.load(ApiRegistry::class.java, classLoader).single()
-            registry.apis.map { api -> api.id } shouldContainExactly listOf("Authors", "Books")
+            registry.apis.map { api -> api.id }.toSet() shouldBe setOf("Authors", "Books")
             registry.apis shouldBeSameInstanceAs registry.apis
         }
     }

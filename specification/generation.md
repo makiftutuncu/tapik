@@ -28,8 +28,9 @@ mutation attempts through exposed collection values cannot change the validated 
 
 A compiled contract contributes an `ApiRegistry` containing all concrete Kotlin classes and objects extending `Api`.
 Registration is automatic by default; generation-time include and exclude filters may narrow the resulting catalog
-later. Generated registries retain source declaration order internally, while a catalog orders APIs by ID to remain
-deterministic across multiple artifacts and rejects duplicate API IDs.
+later. Registry-provider order and the order inside an individual registry are not generation contracts. A catalog
+orders APIs canonically by ID across all artifacts and rejects duplicate API IDs. Endpoint order remains property
+declaration order within each API.
 
 Registry providers are generated during Kotlin compilation and exposed through a shared runtime discovery mechanism.
 Maven, Gradle, and command-line adapters consume the same providers.
@@ -38,11 +39,11 @@ For Kotlin/JVM, `plugin-compiler` inspects resolved compiler IR and selects ever
 whose type extends `Api`. Objects are referenced directly. API classes may be top-level or statically nested, must not
 be `inner`, must not declare type parameters, and must expose a public constructor that lowers to JVM `()V`. A concrete
 subclass may close type parameters inherited from an abstract API base class. Classes are instantiated once per
-generated registry. The provider retains these instances in source declaration order and is exposed through the
-standard service-provider mechanism. Abstract API base classes are ignored. Unsupported API visibility, generic shape,
-or construction fails compilation with a targeted diagnostic. The plugin does not execute endpoint expressions,
-discover APIs reflectively, or create a second contract representation. Compilations without a concrete API type do
-not publish a registry.
+generated registry. The provider retains these instances and is exposed through the standard service-provider
+mechanism; consumers do not rely on their internal order. Abstract API base classes are ignored. Unsupported API
+visibility, generic shape, or construction fails compilation with a targeted diagnostic. The plugin does not execute
+endpoint expressions, discover APIs reflectively, or create a second contract representation. Compilations without a
+concrete API type do not publish a registry.
 
 Every delegated endpoint property reachable from a registered API, including properties declared by API base classes,
 must be public. Private, protected, and internal endpoint properties fail contract compilation because generated

@@ -10,15 +10,16 @@ class ApiCatalogSpec : FunSpec({
     test("collect all registered APIs in deterministic order") {
         val books = object : Api("Books") {}
         val authors = object : Api("Authors") {}
+        val rentals = object : Api("Rentals") {}
         val catalog =
             ApiCatalog.from(
                 listOf(
-                    registryOf(books),
-                    registryOf(authors)
+                    registryOf(books, authors),
+                    registryOf(rentals)
                 )
             )
 
-        catalog.apis shouldContainExactly listOf(authors, books)
+        catalog.apis shouldContainExactly listOf(authors, books, rentals)
     }
 
     test("reject duplicate API IDs across registries") {
