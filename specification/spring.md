@@ -116,3 +116,16 @@ response types, top-level server types, and artifact paths follow the same numer
 The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its WebMVC
 server during `generate-sources`, compiles an implementation of the generated interface, and serves a typed response
 through Spring's mock MVC runtime.
+
+## Target runtime conformance
+
+The Maven integration fixture is the shared black-box conformance boundary for generated Spring clients and servers.
+One compiled contract dependency supplies both generated targets so their protocol behavior is exercised from the same
+endpoint values rather than from target-specific copies. Generated-source snapshots remain useful structural tests,
+but they do not replace requests and responses executed through Spring's mock HTTP transports.
+
+The conformance contract's create operation verifies an encoded JSON request body, a successful body response with a
+required `Location` header, and a bodyless error alternative. RestClient tests assert the complete request and decode
+both response alternatives. MockMVC tests assert successful response encoding, malformed-body rejection as `400 Bad
+Request`, unsupported request media rejection as `415 Unsupported Media Type`, required response-header encoding, and
+the bodyless error response.

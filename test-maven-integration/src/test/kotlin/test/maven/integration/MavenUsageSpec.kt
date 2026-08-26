@@ -3,6 +3,7 @@ package dev.akif.tapik.test.maven.integration
 import dev.akif.tapik.ApiRegistry
 import dev.akif.tapik.test.maven.contract.Author
 import dev.akif.tapik.test.maven.contract.Authors
+import dev.akif.tapik.test.maven.contract.CreateAuthor
 import dev.akif.tapik.test.maven.integration.generated.AuthorsClient
 import dev.akif.tapik.test.maven.integration.generated.AuthorsServer
 import dev.akif.tapik.plugin.spring.restclient.RestClientTransport
@@ -13,14 +14,19 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.content as requestContent
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header as responseHeader
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.client.RestClient
@@ -104,6 +110,47 @@ class MavenUsageSpec : FunSpec({
         }
     }
 
+    test("execute create response alternatives through a generated client") {
+        val builder = RestClient.builder().baseUrl("https://library.example")
+        val server = MockRestServiceServer.bindTo(builder).build()
+        val client =
+            object : AuthorsClient {
+                override val authorsApi = Authors()
+                override val restClientTransport = RestClientTransport(builder.build())
+            }
+
+        server
+            .expect(requestTo("https://library.example/authors"))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header("X-Request-Id", "request-1"))
+            .andExpect(requestContent().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(requestContent().string("""{"name":"Octavia E. Butler"}"""))
+            .andRespond(
+                withStatus(HttpStatus.CREATED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Location", "/authors/author-2")
+                    .body("""{"id":"author-2","name":"Octavia E. Butler"}""")
+            )
+        server
+            .expect(requestTo("https://library.example/authors"))
+            .andRespond(withStatus(HttpStatus.BAD_REQUEST))
+
+        client.create(
+            xRequestId = "request-1",
+            body = CreateAuthor(name = "Octavia E. Butler")
+        ) shouldBe
+            AuthorsClient.CreateResponse.Created(
+                body = Author(id = "author-2", name = "Octavia E. Butler"),
+                location = "/authors/author-2"
+            )
+
+        client.create(
+            xRequestId = "request-1",
+            body = CreateAuthor(name = "invalid")
+        ) shouldBe AuthorsClient.CreateResponse.BadRequest
+        server.verify()
+    }
+
     test("serve a response through a generated WebMVC interface") {
         val controller = AuthorsController()
         val mvc = MockMvcBuilders.standaloneSetup(controller).build()
@@ -159,12 +206,58 @@ class MavenUsageSpec : FunSpec({
                     .accept(MediaType.TEXT_PLAIN)
             ).andExpect(status().isNoContent)
     }
+
+    test("execute create requests through a generated WebMVC interface") {
+        val controller = AuthorsController()
+        val mvc = MockMvcBuilders.standaloneSetup(controller).build()
+
+        mvc
+            .perform(
+                post("/authors")
+                    .header("X-Request-Id", "request-1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content("""{"name":"Octavia E. Butler"}""")
+            )
+            .andExpect(status().isCreated)
+            .andExpect(responseHeader().string("Location", "/authors/author-2"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().string("""{"id":"author-2","name":"Octavia E. Butler"}"""))
+        controller.created shouldBe CreateAuthor(name = "Octavia E. Butler")
+
+        mvc
+            .perform(
+                post("/authors")
+                    .header("X-Request-Id", "request-1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("not-json")
+            ).andExpect(status().isBadRequest)
+
+        mvc
+            .perform(
+                post("/authors")
+                    .header("X-Request-Id", "request-1")
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .content("Octavia E. Butler")
+            ).andExpect(status().isUnsupportedMediaType)
+
+        mvc
+            .perform(
+                post("/authors")
+                    .header("X-Request-Id", "request-1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""{"name":"invalid"}""")
+            )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().bytes(byteArrayOf()))
+    }
 })
 
 @RestController
 private class AuthorsController : AuthorsServer {
     override val authorsApi: Authors = Authors()
     var names: List<String>? = null
+    var created: CreateAuthor? = null
 
     override fun list(
         xRequestId: String,
@@ -176,6 +269,20 @@ private class AuthorsController : AuthorsServer {
             names = name
             AuthorsServer.ListResponse.Ok(
                 body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
+            )
+        }
+
+    override fun create(
+        xRequestId: String,
+        body: CreateAuthor
+    ): AuthorsServer.CreateResponse =
+        if (body.name == "invalid") {
+            AuthorsServer.CreateResponse.BadRequest
+        } else {
+            created = body
+            AuthorsServer.CreateResponse.Created(
+                body = Author(id = "author-2", name = body.name),
+                location = "/authors/author-2"
             )
         }
 }

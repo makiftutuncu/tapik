@@ -15,6 +15,7 @@ data class Author(
 class Authors : Api() {
     private val requestId = header.string("X-Request-Id")
     private val apiVersion = header.string("X-API-Version").fixed("1")
+    private val location = header.string("Location")
     private val xmlError =
         body(
             MediaType.Xml,
@@ -34,4 +35,11 @@ class Authors : Api() {
             .output(Status.Ok with jsonBody<List<Author>>() with headersOf(apiVersion))
             .output(Status.NotFound with xmlError)
             .output(Status.NoContent with noBody)
+
+    val create by
+        post(root / "authors")
+            .header(requestId)
+            .input(jsonBody<CreateAuthor>())
+            .output(Status.Created with jsonBody<Author>() with headersOf(location))
+            .output(Status.BadRequest with noBody)
 }
