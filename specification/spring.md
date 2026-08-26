@@ -129,3 +129,7 @@ required `Location` header, and a bodyless error alternative. RestClient tests a
 both response alternatives. MockMVC tests assert successful response encoding, malformed-body rejection as `400 Bad
 Request`, unsupported request media rejection as `415 Unsupported Media Type`, required response-header encoding, and
 the bodyless error response.
+
+The list operation verifies optional and defaulted query inputs, a fixed request header, and a fixed response header.
+RestClient must supply defaulted and fixed values when callers omit them. WebMVC must supply defaults to implementations,
+reject malformed scalar values and mismatched fixed values as `400 Bad Request`, and emit fixed response headers.

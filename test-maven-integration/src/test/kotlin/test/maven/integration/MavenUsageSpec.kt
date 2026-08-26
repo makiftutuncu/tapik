@@ -23,8 +23,8 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header as responseHeader
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -68,9 +68,10 @@ class MavenUsageSpec : FunSpec({
             }
 
         server
-            .expect(requestTo("https://library.example/authors?name=Ursula"))
+            .expect(requestTo("https://library.example/authors?name=Ursula&page=1"))
             .andExpect(method(HttpMethod.GET))
             .andExpect(header("X-Request-Id", "request-1"))
+            .andExpect(header("X-Client", "tapik"))
             .andRespond(
                 withSuccess(
                     """[{"id":"author-1","name":"Ursula K. Le Guin"}]""",
@@ -102,7 +103,7 @@ class MavenUsageSpec : FunSpec({
             if (apiVersions.isNotEmpty()) {
                 response.header("X-API-Version", *apiVersions.toTypedArray())
             }
-            server.expect(requestTo("https://library.example/authors")).andRespond(response)
+            server.expect(requestTo("https://library.example/authors?page=1")).andRespond(response)
 
             shouldThrow<IllegalStateException> { client.list(xRequestId = "request-1") }
                 .message shouldContain "X-API-Version"
@@ -160,17 +161,21 @@ class MavenUsageSpec : FunSpec({
                 get("/authors")
                     .queryParam("name", "Ursula")
                     .header("X-Request-Id", "request-1")
+                    .header("X-Client", "tapik")
             )
             .andExpect(status().isOk)
+            .andExpect(responseHeader().string("X-API-Version", "1"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().string("""[{"id":"author-1","name":"Ursula K. Le Guin"}]"""))
         controller.names shouldBe listOf("Ursula")
+        controller.page shouldBe 1
 
         mvc
             .perform(
                 get("/authors")
                     .queryParam("name", "Ursula,Octavia")
                     .header("X-Request-Id", "request-1")
+                    .header("X-Client", "tapik")
             ).andExpect(status().isOk)
         controller.names shouldBe listOf("Ursula,Octavia")
 
@@ -179,6 +184,7 @@ class MavenUsageSpec : FunSpec({
                 get("/authors")
                     .queryParam("name", "Ursula", "Octavia")
                     .header("X-Request-Id", "request-1")
+                    .header("X-Client", "tapik")
             ).andExpect(status().isOk)
         controller.names shouldBe listOf("Ursula", "Octavia")
 
@@ -187,6 +193,7 @@ class MavenUsageSpec : FunSpec({
                 get("/authors")
                     .queryParam("name", "Ursula")
                     .header("X-Request-Id", "request-1")
+                    .header("X-Client", "tapik")
                     .accept(MediaType.APPLICATION_XML)
             ).andExpect(status().isNotAcceptable)
 
@@ -195,6 +202,7 @@ class MavenUsageSpec : FunSpec({
                 get("/authors")
                     .queryParam("name", "Ursula")
                     .header("X-Request-Id", "request-1")
+                    .header("X-Client", "tapik")
                     .header("Accept", "application/json;q=0, application/xml;q=1")
             ).andExpect(status().isNotAcceptable)
 
@@ -203,8 +211,24 @@ class MavenUsageSpec : FunSpec({
                 get("/authors")
                     .queryParam("name", "none")
                     .header("X-Request-Id", "request-1")
+                    .header("X-Client", "tapik")
                     .accept(MediaType.TEXT_PLAIN)
             ).andExpect(status().isNoContent)
+
+        mvc
+            .perform(
+                get("/authors")
+                    .queryParam("page", "not-an-integer")
+                    .header("X-Request-Id", "request-1")
+                    .header("X-Client", "tapik")
+            ).andExpect(status().isBadRequest)
+
+        mvc
+            .perform(
+                get("/authors")
+                    .header("X-Request-Id", "request-1")
+                    .header("X-Client", "another-client")
+            ).andExpect(status().isBadRequest)
     }
 
     test("execute create requests through a generated WebMVC interface") {
@@ -257,16 +281,19 @@ class MavenUsageSpec : FunSpec({
 private class AuthorsController : AuthorsServer {
     override val authorsApi: Authors = Authors()
     var names: List<String>? = null
+    var page: Int? = null
     var created: CreateAuthor? = null
 
     override fun list(
         xRequestId: String,
-        name: List<String>?
+        name: List<String>?,
+        page: Int
     ): AuthorsServer.ListResponse =
         if (name == listOf("none")) {
             AuthorsServer.ListResponse.NoContent
         } else {
             names = name
+            this.page = page
             AuthorsServer.ListResponse.Ok(
                 body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
             )
