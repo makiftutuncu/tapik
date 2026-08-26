@@ -13,6 +13,10 @@
     <artifactId>tapik-plugin-spring-webmvc</artifactId>
     <name>tapik Spring WebMVC plugin</name>
 
+    <properties>
+        <release.artifacts.skip>false</release.artifacts.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>dev.akif</groupId>

@@ -13,6 +13,10 @@
     <artifactId>tapik-format-kotlinx</artifactId>
     <name>tapik Kotlin serialization formats</name>
 
+    <properties>
+        <release.artifacts.skip>false</release.artifacts.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>dev.akif</groupId>

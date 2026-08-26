@@ -13,6 +13,10 @@
     <artifactId>tapik-common-plugin</artifactId>
     <name>tapik common plugin</name>
 
+    <properties>
+        <release.artifacts.skip>false</release.artifacts.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>dev.akif</groupId>

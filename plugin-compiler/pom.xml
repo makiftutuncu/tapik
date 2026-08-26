@@ -13,6 +13,10 @@
     <artifactId>tapik-plugin-compiler</artifactId>
     <name>tapik compiler plugin</name>
 
+    <properties>
+        <release.artifacts.skip>false</release.artifacts.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>

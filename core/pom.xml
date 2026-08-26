@@ -13,6 +13,10 @@
     <artifactId>tapik-core</artifactId>
     <name>tapik core</name>
 
+    <properties>
+        <release.artifacts.skip>false</release.artifacts.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>

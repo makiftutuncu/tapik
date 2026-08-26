@@ -13,6 +13,10 @@
     <artifactId>tapik-common-spring</artifactId>
     <name>tapik common Spring</name>
 
+    <properties>
+        <release.artifacts.skip>false</release.artifacts.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>dev.akif</groupId>

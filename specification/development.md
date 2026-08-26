@@ -29,6 +29,25 @@ the Maven Wrapper and the Kotlin version declared by the parent build, so it ver
 without maintaining an independent version configuration. The workflow has read-only repository permissions, includes
 every production and `test-` reactor module, and receives no publication credentials.
 
+## Publication
+
+Tapik releases are published to Maven Central under `dev.akif`. The parent and every production module inherit the
+project name, description, URL, MIT license, developer, and source-control metadata required by Central. Production
+JARs include their Kotlin sources and a per-module `javadoc`-classifier JAR containing Dokka's standard HTML output.
+The classifier satisfies repository conventions without switching Dokka to its experimental Javadoc renderer. The
+parent POM and every production artifact, including attached source and documentation artifacts, are signed during a
+release build.
+
+Publication is opt-in through the Maven `release` profile. Ordinary builds, including CI's `./mvnw verify`, neither
+load signing credentials nor contact Central. `./mvnw -Prelease -Dgpg.skip=true verify` is the credential-free local
+check for release packaging; it must attach a `sources` JAR and a `javadoc` JAR to every production JAR module. An
+authenticated `./mvnw -Prelease clean deploy` creates one reactor-wide Central deployment, publishes it automatically,
+and waits for publication to finish.
+
+Modules whose folder begins with `test-` remain installable for reactor and local integration builds, but release
+packaging does not attach publication artifacts to them and Central deployment excludes them. The parent POM remains
+publishable because published module POMs inherit their shared project metadata and build coordinates from it.
+
 ## Modules
 
 The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification
