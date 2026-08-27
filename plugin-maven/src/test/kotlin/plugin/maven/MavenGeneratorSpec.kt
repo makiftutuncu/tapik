@@ -1,8 +1,8 @@
 package dev.akif.tapik.plugin.maven
 
 import dev.akif.tapik.test.fixtures.library.Books
-import dev.akif.tapik.plugin.openapi.OpenApi
-import dev.akif.tapik.plugin.openapi.toJson
+import dev.akif.tapik.target.openapi.OpenApi
+import dev.akif.tapik.target.openapi.toJson
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe

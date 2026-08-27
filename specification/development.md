@@ -52,9 +52,13 @@ publishable because published module POMs inherit their shared project metadata 
 
 The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification
 needs an independently consumable boundary. Maven module folders are flat beneath the repository root, omit the
-`tapik-` artifact prefix, and, except for `core`, begin with exactly one role prefix: `plugin-`, `format-`, `common-`,
-or `test-`. Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization integration is
-therefore `dev.akif:tapik-format-kotlinx` with packages under `dev.akif.tapik.format.kotlinx`.
+`tapik-` artifact prefix, and, except for `core`, begin with exactly one role prefix: `common-`, `format-`, `plugin-`,
+`target-`, or `test-`. Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization
+integration is therefore `dev.akif:tapik-format-kotlinx` with packages under `dev.akif.tapik.format.kotlinx`.
+
+`plugin-` is reserved for integrations invoked by a compiler or build tool. Modules implementing the host-neutral
+generation target SPI use `target-`, even when their generated artifacts integrate with a framework. Target IDs used
+in generation configuration do not include this module-role prefix.
 
 Kotlin source paths omit the common `dev/akif/tapik` package directories. A declaration in `dev.akif.tapik` lives
 directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin after that common package.
@@ -67,9 +71,9 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `format-kotlinx` | `dev.akif:tapik-format-kotlinx` |
 | `plugin-compiler` | `dev.akif:tapik-plugin-compiler` |
 | `plugin-maven` | `dev.akif:tapik-plugin-maven` |
-| `plugin-openapi` | `dev.akif:tapik-plugin-openapi` |
-| `plugin-spring-restclient` | `dev.akif:tapik-plugin-spring-restclient` |
-| `plugin-spring-webmvc` | `dev.akif:tapik-plugin-spring-webmvc` |
+| `target-openapi` | `dev.akif:tapik-target-openapi` |
+| `target-spring-restclient` | `dev.akif:tapik-target-spring-restclient` |
+| `target-spring-webmvc` | `dev.akif:tapik-target-spring-webmvc` |
 | `test-fixtures` | `dev.akif:tapik-test-fixtures` |
 | `test-maven-contract` | `dev.akif:tapik-test-maven-contract` |
 | `test-maven-integration` | `dev.akif:tapik-test-maven-integration` |
@@ -83,11 +87,11 @@ Target modules and adapters for Maven, Gradle, or command-line use depend on `co
 build-tool API.
 
 Shared Spring integration code lives in `common-spring` under `dev.akif.tapik.common.spring`. The
-`plugin-spring-restclient` and `plugin-spring-webmvc` packages are respectively
-`dev.akif.tapik.plugin.spring.restclient` and `dev.akif.tapik.plugin.spring.webmvc`.
+`target-spring-restclient` and `target-spring-webmvc` packages are respectively
+`dev.akif.tapik.target.spring.restclient` and `dev.akif.tapik.target.spring.webmvc`.
 
 Other module packages follow the same folder-name hierarchy: `common-plugin` uses `dev.akif.tapik.common.plugin`,
-`plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `plugin-openapi` uses `dev.akif.tapik.plugin.openapi`, and
+`plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `target-openapi` uses `dev.akif.tapik.target.openapi`, and
 `plugin-maven` uses `dev.akif.tapik.plugin.maven`. The non-production `test-maven-contract` and
 `test-maven-integration` modules use `dev.akif.tapik.test.maven.contract` and
 `dev.akif.tapik.test.maven.integration`. Together they verify the complete Maven user workflow against the
@@ -101,6 +105,6 @@ fixtures.
 Non-production modules remain installable so reactor and local integration builds can resolve them, but they must be
 excluded from deployment. This applies to every `test-` module; release deployment publishes only production modules.
 
-The `plugin-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy contracts
+The `target-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy contracts
 into a neutral metadata model. Its public document model represents the OpenAPI output itself, and deterministic JSON
 is the first rendering format.

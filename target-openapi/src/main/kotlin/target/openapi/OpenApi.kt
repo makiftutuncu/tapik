@@ -1,0 +1,244 @@
+package dev.akif.tapik.target.openapi
+
+import dev.akif.tapik.*
+
+/** Programmatic OpenAPI 3.2 interpreter for compiled Tapik API values. */
+object OpenApi {
+    /**
+     * Interprets [api] using explicit document [info].
+     *
+     * @param api compiled Tapik API value to interpret.
+     * @param info identifying information for the generated document.
+     * @param componentNaming policy for converting schema names to component names.
+     * @return an OpenAPI document preserving endpoint declaration order.
+     * @throws OpenApiGenerationException when the API cannot be represented faithfully.
+     */
+    fun from(
+        api: Api,
+        info: OpenApiInfo,
+        componentNaming: OpenApiComponentNaming = OpenApiComponentNaming.Simple
+    ): OpenApiDocument = Interpreter(info, componentNaming).interpret(api)
+
+    /**
+     * Interprets [api], using its ID as the title and [version] as the document version.
+     *
+     * @param api compiled Tapik API value to interpret.
+     * @param version version of the API document.
+     * @param title human-readable API title, defaulting to [Api.id].
+     * @param componentNaming policy for converting schema names to component names.
+     * @return an OpenAPI document preserving endpoint declaration order.
+     * @throws IllegalArgumentException when [title] or [version] is blank.
+     * @throws OpenApiGenerationException when the API cannot be represented faithfully.
+     */
+    fun from(
+        api: Api,
+        version: String,
+        title: String = api.id,
+        componentNaming: OpenApiComponentNaming = OpenApiComponentNaming.Simple
+    ): OpenApiDocument =
+        from(
+            api = api,
+            info = OpenApiInfo(title = title, version = version),
+            componentNaming = componentNaming
+        )
+}
+
+private class Interpreter(
+    private val info: OpenApiInfo,
+    componentNaming: OpenApiComponentNaming
+) {
+    private val schemas = SchemaRegistry(componentNaming)
+
+    fun interpret(api: Api): OpenApiDocument {
+        val paths = linkedMapOf<String, MutableMap<Method, OpenApiOperation>>()
+        val templatedPaths = mutableMapOf<String, String>()
+
+        api.endpoints.forEach { endpoint ->
+            val path = endpoint.pathTemplate()
+            val shape = endpoint.pathShape()
+            val existingPath = templatedPaths.putIfAbsent(shape, path)
+            if (existingPath != null && existingPath != path) {
+                throw OpenApiGenerationException(
+                    "OpenAPI paths '$existingPath' and '$path' have the same templated hierarchy"
+                )
+            }
+            val operations = paths.getOrPut(path, ::linkedMapOf)
+            if (endpoint.method in operations) {
+                throw OpenApiGenerationException(
+                    "OpenAPI path '$path' already contains a ${endpoint.method} operation"
+                )
+            }
+            operations[endpoint.method] = operation(endpoint)
+        }
+
+        schemas.requireResolvedReferences()
+
+        return OpenApiDocument(
+            info = info,
+            paths = paths.mapValues { OpenApiPathItem(it.value.toMap()) },
+            components = OpenApiComponents(schemas.components.toMap())
+        )
+    }
+
+    private fun operation(endpoint: Endpoint<*, *, *, *, *, Ready>): OpenApiOperation =
+        OpenApiOperation(
+            operationId = endpoint.id,
+            tags = endpoint.tags.sorted(),
+            summary = endpoint.documentation.summary,
+            description = endpoint.documentation.description,
+            parameters = parameters(endpoint),
+            requestBody = requestBody(endpoint.input),
+            responses = responses(endpoint.outputs)
+        )
+
+    private fun parameters(endpoint: Endpoint<*, *, *, *, *, Ready>): List<OpenApiParameter> =
+        buildList {
+            endpoint.uri.paths.values.forEach { variable ->
+                add(
+                    OpenApiParameter(
+                        name = variable.name,
+                        location = OpenApiParameterLocation.PATH,
+                        required = true,
+                        deprecated = false,
+                        schema = schemas.schema(variable.format.schema)
+                    )
+                )
+            }
+
+            endpoint.uri.queries.values.forEach { query -> add(query.parameter()) }
+            endpoint.headers.values.forEach { header -> add(header.parameter()) }
+        }
+
+    private fun Query.parameter(): OpenApiParameter =
+        when (this) {
+            is QueryParameter<*, *> -> parameter()
+            is RepeatedQueryParameter<*, *> -> parameter()
+        }
+
+    private fun <Value : Any> QueryParameter<Value, *>.parameter(): OpenApiParameter =
+        OpenApiParameter(
+            name = name,
+            location = OpenApiParameterLocation.QUERY,
+            required = presence.required,
+            deprecated = false,
+            schema = schemas.schema(format.schema).withPresence(presence, format),
+            style = null,
+            explode = null
+        )
+
+    private fun <Value : Any> RepeatedQueryParameter<Value, *>.parameter(): OpenApiParameter =
+        OpenApiParameter(
+            name = name,
+            location = OpenApiParameterLocation.QUERY,
+            required = presence.required,
+            deprecated = false,
+            schema = schemas.schema(format.schema).withPresence(presence, format),
+            style = "form",
+            explode = true
+        )
+
+    private fun <Value : Any> Header<Value, *>.parameter(): OpenApiParameter =
+        OpenApiParameter(
+            name = name,
+            location = OpenApiParameterLocation.HEADER,
+            required = presence.required,
+            deprecated = false,
+            schema = schemas.schema(format.schema).withPresence(presence, format),
+            style = null,
+            explode = null
+        )
+
+    private fun requestBody(input: Input): OpenApiRequestBody? =
+        when (input) {
+            NoInput -> null
+            is BodyInput<*> -> {
+                val content = input.bodies.content()
+                if (content.isEmpty()) {
+                    throw OpenApiGenerationException(
+                        "An OpenAPI request body must contain at least one media type"
+                    )
+                }
+                OpenApiRequestBody(
+                    required = input.bodies.values.none { it === NoBody },
+                    content = content
+                )
+            }
+        }
+
+    private fun responses(outputs: Tuple<OutputAlternative>): Map<String, OpenApiResponse> =
+        buildMap {
+            outputs.values.forEach { alternative ->
+                val output = alternative as? Output<*, *, *>
+                    ?: throw OpenApiGenerationException(
+                        "Unsupported endpoint output '${alternative::class.qualifiedName}'"
+                    )
+                val status =
+                    when (val matcher = output.matcher) {
+                        is ExactStatus -> matcher.status
+                        else ->
+                            throw OpenApiGenerationException(
+                                "Unsupported OpenAPI status matcher '${matcher::class.qualifiedName}'"
+                            )
+                    }
+
+                put(
+                    status.code.toString(),
+                    OpenApiResponse(
+                        description = status.description,
+                        headers = output.headers.values.associate { it.name to it.responseHeader() },
+                        content = output.bodies.content()
+                    )
+                )
+            }
+        }
+
+    private fun <Value : Any> Header<Value, *>.responseHeader(): OpenApiHeader =
+        OpenApiHeader(
+            required = presence.required,
+            deprecated = false,
+            schema = schemas.schema(format.schema).withPresence(presence, format)
+        )
+
+    private fun Bodies.content(): Map<String, OpenApiMediaType> =
+        values
+            .filterIsInstance<Body<*>>()
+            .associate { body ->
+                body.mediaType.value to OpenApiMediaType(schemas.schema(body.format.schema))
+            }
+}
+
+private val Presence<*>.required: Boolean
+    get() = this === Required || this is Fixed<*>
+
+private fun Endpoint<*, *, *, *, *, Ready>.pathTemplate(): String {
+    if (uri.segments.isEmpty()) return "/"
+    return uri.segments.joinToString(separator = "/", prefix = "/") { segment ->
+        when (segment) {
+            is PathSegment.Literal -> segment.value
+            is PathVariable<*> -> "{${segment.name}}"
+        }
+    }
+}
+
+private fun Endpoint<*, *, *, *, *, Ready>.pathShape(): String {
+    if (uri.segments.isEmpty()) return "/"
+    return uri.segments.joinToString(separator = "/", prefix = "/") { segment ->
+        when (segment) {
+            is PathSegment.Literal -> segment.value
+            is PathVariable<*> -> "{}"
+        }
+    }
+}
+
+private val Status.description: String
+    get() =
+        when (code) {
+            200 -> "OK"
+            201 -> "Created"
+            204 -> "No Content"
+            400 -> "Bad Request"
+            404 -> "Not Found"
+            409 -> "Conflict"
+            500 -> "Internal Server Error"
+            else -> "HTTP $code response"
+        }

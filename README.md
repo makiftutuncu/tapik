@@ -167,7 +167,7 @@ Add the runtime needed by the selected generated target and the contract depende
 ```xml
 <dependency>
     <groupId>dev.akif</groupId>
-    <artifactId>tapik-plugin-spring-restclient</artifactId>
+    <artifactId>tapik-target-spring-restclient</artifactId>
     <version>0.6.0</version>
 </dependency>
 <dependency>
@@ -197,7 +197,7 @@ Then run the target during `generate-sources`:
 </execution>
 ```
 
-Use `spring-webmvc` with `tapik-plugin-spring-webmvc` for Spring Boot server generation. Its optional suffix settings are
+Use `spring-webmvc` with `tapik-target-spring-webmvc` for Spring Boot server generation. Its optional suffix settings are
 `serverSuffix` and `controllerSuffix`, defaulting to `Server` and `GeneratedController`; both Spring targets default to
 package `dev.akif.tapik.generated`. Source output directories are added to Maven's Kotlin compile roots automatically,
 and generated runtime registration resources are packaged by Maven.

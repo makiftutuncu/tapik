@@ -30,9 +30,8 @@
 
 ## More
 
-- [ ] i wonder if changing `plugin-` prefix of modules that are about generation targets to `target-` is a good idea.
-  that means we'll have core, common-, format-, plugin-, target- and test-. what do you think? right now openapi,
-  spring-restclient and spring-webmvc would need renaming with this logic.
+- [x] Reserve `plugin-` for compiler and build-tool integrations, and use `target-` for host-neutral generation target
+  implementations. OpenAPI, Spring RestClient, and Spring WebMVC now use `target-` module, artifact, and package names.
 
 - [ ] a lot of spring code can/should be shared between restclient and webmvc. in fact this applies to the entire
   codebase

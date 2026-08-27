@@ -1,4 +1,4 @@
 .idea/
 .mvn/timing.properties
-target/
-**/target/
+/target/
+/*/target/

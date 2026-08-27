@@ -30,12 +30,12 @@
         </dependency>
         <dependency>
             <groupId>dev.akif</groupId>
-            <artifactId>tapik-plugin-spring-restclient</artifactId>
+            <artifactId>tapik-target-spring-restclient</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>dev.akif</groupId>
-            <artifactId>tapik-plugin-spring-webmvc</artifactId>
+            <artifactId>tapik-target-spring-webmvc</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

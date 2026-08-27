@@ -9,7 +9,7 @@ them.
 
 ## RestClient transport
 
-`tapik-plugin-spring-restclient` executes already-resolved requests with Spring `RestClient`. The transport accepts a
+`tapik-target-spring-restclient` executes already-resolved requests with Spring `RestClient`. The transport accepts a
 Tapik method, a Spring URI builder function, encoded headers, and an optional encoded body. It returns the raw Tapik
 status, headers, media type, and bytes for every HTTP response, including error statuses.
 

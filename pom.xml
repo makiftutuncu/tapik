@@ -51,9 +51,9 @@
         <module>format-kotlinx</module>
         <module>test-fixtures</module>
         <module>common-spring</module>
-        <module>plugin-spring-restclient</module>
-        <module>plugin-spring-webmvc</module>
-        <module>plugin-openapi</module>
+        <module>target-spring-restclient</module>
+        <module>target-spring-webmvc</module>
+        <module>target-openapi</module>
         <module>plugin-maven</module>
         <module>test-maven-contract</module>
         <module>test-maven-integration</module>

@@ -8,7 +8,7 @@ import dev.akif.tapik.test.maven.contract.CreateAuthor
 import dev.akif.tapik.test.maven.integration.generated.AuthorsClient
 import dev.akif.tapik.test.maven.integration.generated.AuthorsServer
 import dev.akif.tapik.test.maven.integration.generated.CatalogServer
-import dev.akif.tapik.plugin.spring.restclient.RestClientTransport
+import dev.akif.tapik.target.spring.restclient.RestClientTransport
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
