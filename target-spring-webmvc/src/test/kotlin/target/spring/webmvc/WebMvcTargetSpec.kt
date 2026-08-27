@@ -31,12 +31,15 @@ class WebMvcTargetSpec : FunSpec({
                     ArtifactKind.RESOURCE
             )
         val source = result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content
-        val handler = source.substringBefore("\n@org.springframework.boot")
+        val handler =
+            source
+                .substringAfter("public interface BooksServer")
+                .substringBefore("\n}\n\n@ConditionalOnSingleCandidate")
         handler shouldNotContain "org.springframework"
         handler shouldNotContain "Http("
         source shouldContain
-            "@org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate(BooksServer::class)"
-        source shouldContain "@org.springframework.web.bind.annotation.RestController"
+            "@ConditionalOnSingleCandidate(BooksServer::class)"
+        source shouldContain "@RestController"
         source shouldContain "internal class BooksGeneratedController("
         source shouldContain "private val handler: BooksServer"
         source shouldContain "public fun list("
@@ -91,10 +94,10 @@ class WebMvcTargetSpec : FunSpec({
             withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
             content shouldBe expected
             content shouldContain
-                "@org.springframework.web.bind.annotation.RequestParam queryParameters: org.springframework.util.MultiValueMap<kotlin.String, kotlin.String>"
+                "@RequestParam queryParameters: MultiValueMap<String, String>"
             content shouldContain "val authorIdRaw = queryParameters[\"authorId\"]"
             content shouldNotContain
-                "@org.springframework.web.bind.annotation.RequestParam(name = \"authorId\""
+                "@RequestParam(name = \"authorId\""
         }
     }
 
@@ -111,11 +114,11 @@ class WebMvcTargetSpec : FunSpec({
         source shouldContain
             "mediaTypeCompatible(contentType, bodyAlternativesApi.echo.input.bodies._2.mediaType)"
         source shouldContain
-            "selectResponseMediaType(accept, kotlin.collections.listOf(bodyAlternativesApi.echo.outputs._1.bodies._1.mediaType, bodyAlternativesApi.echo.outputs._1.bodies._2.mediaType))"
+            "selectResponseMediaType(accept, listOf(bodyAlternativesApi.echo.outputs._1.bodies._1.mediaType, bodyAlternativesApi.echo.outputs._1.bodies._2.mediaType))"
         source shouldContain
-            "@org.springframework.web.bind.annotation.RequestBody(required = false) bodyBytes: kotlin.ByteArray? = null"
+            "@RequestBody(required = false) bodyBytes: ByteArray? = null"
         source shouldContain "public fun optionalEcho("
-        source shouldContain "body: kotlin.String? = null"
+        source shouldContain "body: String? = null"
 
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
@@ -129,10 +132,10 @@ class WebMvcTargetSpec : FunSpec({
                 .content
 
         source shouldContain
-            "selectResponseMediaType(accept, kotlin.collections.listOf(statusBodyAlternativesApi.find.outputs._1.bodies._1.mediaType))"
+            "selectResponseMediaType(accept, listOf(statusBodyAlternativesApi.find.outputs._1.bodies._1.mediaType))"
         source shouldContain
-            "selectResponseMediaType(accept, kotlin.collections.listOf(statusBodyAlternativesApi.find.outputs._2.bodies._1.mediaType))"
-        source shouldContain "@org.springframework.web.bind.annotation.GetMapping(path = [\"/optional\"])"
+            "selectResponseMediaType(accept, listOf(statusBodyAlternativesApi.find.outputs._2.bodies._1.mediaType))"
+        source shouldContain "@GetMapping(path = [\"/optional\"])"
 
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
@@ -145,7 +148,7 @@ class WebMvcTargetSpec : FunSpec({
                 .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
-        source shouldContain "public val retryAfter: kotlin.Int? = null"
+        source shouldContain "public val retryAfter: Int? = null"
         source shouldContain
             "response.retryAfter ?: defaultResponseHeadersApi.poll.outputs._1.headers._1.presence.value"
 
@@ -185,7 +188,8 @@ class WebMvcTargetSpec : FunSpec({
                 .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
-        source shouldContain "body: dev.akif.tapik.target.spring.webmvc.BinaryContent"
+        source shouldContain "import dev.akif.tapik.target.spring.webmvc.BinaryContent"
+        source shouldContain "body: BinaryContent"
         source shouldContain "body.contentEquals(other.body)"
         source shouldContain "body.contentHashCode()"
         val compilation = compileKotlin(source)

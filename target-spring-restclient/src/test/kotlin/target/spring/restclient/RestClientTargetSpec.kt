@@ -44,7 +44,8 @@ class RestClientTargetSpec : FunSpec({
                 .single()
                 .content
 
-        source shouldContain "body: dev.akif.tapik.target.spring.restclient.BinaryContent"
+        source shouldContain "import dev.akif.tapik.target.spring.restclient.BinaryContent"
+        source shouldContain "body: BinaryContent"
         source shouldContain "body.contentEquals(other.body)"
         source shouldContain "body.contentHashCode()"
         val compilation = compileKotlin(source)
@@ -72,8 +73,8 @@ class RestClientTargetSpec : FunSpec({
                 .content
 
         source shouldContain "selectResponseBodyMediaType("
-        source shouldContain "offered = kotlin.collections.emptyList()"
-        source shouldContain "offered = kotlin.collections.listOf("
+        source shouldContain "offered = emptyList()"
+        source shouldContain "offered = listOf("
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }

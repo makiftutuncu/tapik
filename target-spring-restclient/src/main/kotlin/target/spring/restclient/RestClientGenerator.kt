@@ -6,6 +6,7 @@ import dev.akif.tapik.Optional
 import dev.akif.tapik.Required
 import dev.akif.tapik.common.plugin.CompiledApi
 import dev.akif.tapik.common.plugin.kotlinString
+import dev.akif.tapik.common.plugin.optimizeKotlinImports
 
 internal class RestClientGenerator(
     private val packageName: String,
@@ -15,6 +16,8 @@ internal class RestClientGenerator(
         val model = restClientApiModel(compiled, packageName, clientName)
         return buildString {
             appendLine("package ${model.packageName}")
+            appendLine()
+            appendLine("import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType")
             appendLine()
             appendLine("public interface ${model.clientName} {")
             appendLine("    public val ${model.apiProperty}: ${model.apiType}")
@@ -37,7 +40,7 @@ internal class RestClientGenerator(
                 )
             }
             append('}')
-        }
+        }.optimizeKotlinImports(model.packageName)
     }
 }
 
@@ -247,7 +250,7 @@ private fun RestClientOutput.bodyMediaTypeSelection(endpoint: RestClientEndpoint
                 postfix = ")"
             ) { body -> "${body.definitionAccess}.mediaType" }
         }
-    return "dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType(response = response, offered = $offered, allowsNoBody = $allowsNoBody, endpointId = ${endpoint.id.kotlinString()})"
+    return "selectResponseBodyMediaType(response = response, offered = $offered, allowsNoBody = $allowsNoBody, endpointId = ${endpoint.id.kotlinString()})"
 }
 
 private fun StringBuilder.appendDecodedHeader(

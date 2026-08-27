@@ -22,6 +22,13 @@ targets use these shared rules rather than maintaining target-specific copies. T
 interpretation, wire decoding and encoding, and target-specific model decisions remain inside each target instead of
 introducing a parallel neutral metadata model.
 
+Generated Kotlin files shorten qualified declarations and add deterministic, lexicographically ordered imports.
+Declarations from Kotlin/JVM default-import packages and the generated file's own package are shortened without an
+explicit import. When a simple name conflicts with a generated declaration or another qualified declaration, the
+conflicting reference remains qualified. Existing explicit imports, including imported top-level functions, are
+retained and participate in collision detection. Import optimization only examines Kotlin code; string and character
+literals and comments are preserved verbatim.
+
 Generated artifact paths are relative and normalized. A generation result cannot contain the same path twice.
 Configuration lists and maps and generation-result artifact lists are structural snapshots: later caller mutation and
 mutation attempts through exposed collection values cannot change the validated configuration or result.

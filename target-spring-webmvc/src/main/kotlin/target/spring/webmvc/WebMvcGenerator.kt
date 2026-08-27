@@ -7,6 +7,7 @@ import dev.akif.tapik.Optional
 import dev.akif.tapik.Required
 import dev.akif.tapik.common.plugin.CompiledApi
 import dev.akif.tapik.common.plugin.kotlinString
+import dev.akif.tapik.common.plugin.optimizeKotlinImports
 
 internal class WebMvcGenerator(
     private val packageName: String,
@@ -47,7 +48,7 @@ internal class WebMvcGenerator(
                 appendHelpers()
             }
             append('}')
-        }
+        }.optimizeKotlinImports(model.packageName)
     }
 }
 

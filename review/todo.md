@@ -37,7 +37,8 @@
   hierarchies, byte-array value semantics, URI path templates, and status variant names are now defined once, while
   target compatibility and endpoint interpretation remain target-specific.
 
-- [ ] generated files should be import optimized because in many places they use FQNs
+- [x] Optimize imports in generated Kotlin files. Qualified references are shortened deterministically where safe,
+  while name collisions remain qualified and strings, characters, and comments are left untouched.
 
 - [ ] kotlinx format by default was a good idea but it should also be pluggable, ideally tapik core should only provide
   an abstraction for format and users should be required to pick their formatting dependency as well. otherwise someone

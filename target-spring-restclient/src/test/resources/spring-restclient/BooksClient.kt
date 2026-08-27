@@ -1,21 +1,34 @@
 package dev.akif.tapik.generated
 
-public interface BooksClient {
-    public val booksApi: dev.akif.tapik.test.fixtures.library.Books
+import dev.akif.tapik.ByteArrayFormat
+import dev.akif.tapik.DecodeResult
+import dev.akif.tapik.StringFormat
+import dev.akif.tapik.target.spring.restclient.RestClientRequestBody
+import dev.akif.tapik.target.spring.restclient.RestClientTransport
+import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType
+import dev.akif.tapik.test.fixtures.library.AuthorId
+import dev.akif.tapik.test.fixtures.library.Book
+import dev.akif.tapik.test.fixtures.library.BookId
+import dev.akif.tapik.test.fixtures.library.Books
+import dev.akif.tapik.test.fixtures.library.CreateBook
+import java.util.UUID
 
-    public val restClientTransport: dev.akif.tapik.target.spring.restclient.RestClientTransport
+public interface BooksClient {
+    public val booksApi: Books
+
+    public val restClientTransport: RestClientTransport
 
     public sealed interface ListResponse {
         public data class Ok(
-            public val body: kotlin.collections.List<dev.akif.tapik.test.fixtures.library.Book>
+            public val body: List<Book>
         ) : ListResponse
     }
 
     /** List books */
     public fun list(
-        xRequestId: java.util.UUID,
-        page: kotlin.Int = booksApi.list.uri.queries._1.presence.value,
-        authorId: kotlin.collections.List<dev.akif.tapik.test.fixtures.library.AuthorId>? = null
+        xRequestId: UUID,
+        page: Int = booksApi.list.uri.queries._1.presence.value,
+        authorId: List<AuthorId>? = null
     ): ListResponse {
         val endpoint = booksApi.list
         val response =
@@ -36,25 +49,25 @@ public interface BooksClient {
 
         return when {
             booksApi.list.outputs._1.matcher.matches(response.status) -> {
-                dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType(response = response, offered = kotlin.collections.listOf(booksApi.list.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.list")
+                selectResponseBodyMediaType(response = response, offered = listOf(booksApi.list.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.list")
                 val decodedBody = decodeBody(booksApi.list.outputs._1.bodies._1.format, response.body, "Books.list")
                 ListResponse.Ok(decodedBody)
             }
-            else -> kotlin.error("Unexpected status ${response.status.code} for Books.list")
+            else -> error("Unexpected status ${response.status.code} for Books.list")
         }
     }
 
     public sealed interface GetResponse {
         public data class Ok(
-            public val body: dev.akif.tapik.test.fixtures.library.Book
+            public val body: Book
         ) : GetResponse
         public data object NotFound : GetResponse
     }
 
     /** Get a book */
     public fun get(
-        bookId: dev.akif.tapik.test.fixtures.library.BookId,
-        xRequestId: java.util.UUID
+        bookId: BookId,
+        xRequestId: UUID
     ): GetResponse {
         val endpoint = booksApi.get
         val response =
@@ -77,30 +90,30 @@ public interface BooksClient {
 
         return when {
             booksApi.get.outputs._1.matcher.matches(response.status) -> {
-                dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType(response = response, offered = kotlin.collections.listOf(booksApi.get.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.get")
+                selectResponseBodyMediaType(response = response, offered = listOf(booksApi.get.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.get")
                 val decodedBody = decodeBody(booksApi.get.outputs._1.bodies._1.format, response.body, "Books.get")
                 GetResponse.Ok(decodedBody)
             }
             booksApi.get.outputs._2.matcher.matches(response.status) -> {
-                dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType(response = response, offered = kotlin.collections.emptyList(), allowsNoBody = true, endpointId = "Books.get")
+                selectResponseBodyMediaType(response = response, offered = emptyList(), allowsNoBody = true, endpointId = "Books.get")
                 GetResponse.NotFound
             }
-            else -> kotlin.error("Unexpected status ${response.status.code} for Books.get")
+            else -> error("Unexpected status ${response.status.code} for Books.get")
         }
     }
 
     public sealed interface CreateResponse {
         public data class Created(
-            public val body: dev.akif.tapik.test.fixtures.library.Book,
-            public val location: kotlin.String
+            public val body: Book,
+            public val location: String
         ) : CreateResponse
         public data object BadRequest : CreateResponse
     }
 
     /** Create a book */
     public fun create(
-        xRequestId: java.util.UUID,
-        body: dev.akif.tapik.test.fixtures.library.CreateBook
+        xRequestId: UUID,
+        body: CreateBook
     ): CreateResponse {
         val endpoint = booksApi.create
         val response =
@@ -114,42 +127,42 @@ public interface BooksClient {
                 headers = buildMap {
                     put("X-Request-Id", listOf(booksApi.create.headers._1.format.encode(xRequestId)))
                 },
-                body = dev.akif.tapik.target.spring.restclient.RestClientRequestBody(booksApi.create.input.bodies._1.mediaType, booksApi.create.input.bodies._1.format.encode(body))
+                body = RestClientRequestBody(booksApi.create.input.bodies._1.mediaType, booksApi.create.input.bodies._1.format.encode(body))
             )
 
         return when {
             booksApi.create.outputs._1.matcher.matches(response.status) -> {
-                dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType(response = response, offered = kotlin.collections.listOf(booksApi.create.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.create")
+                selectResponseBodyMediaType(response = response, offered = listOf(booksApi.create.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.create")
                 val decodedBody = decodeBody(booksApi.create.outputs._1.bodies._1.format, response.body, "Books.create")
-                val location = decodeHeader(booksApi.create.outputs._1.headers._1.format, response.headers.entries.firstOrNull { (name, _) -> name.equals("Location", ignoreCase = true) }?.value?.firstOrNull() ?: kotlin.error("Missing response header Location for Books.create"), "Books.create")
+                val location = decodeHeader(booksApi.create.outputs._1.headers._1.format, response.headers.entries.firstOrNull { (name, _) -> name.equals("Location", ignoreCase = true) }?.value?.firstOrNull() ?: error("Missing response header Location for Books.create"), "Books.create")
                 CreateResponse.Created(decodedBody, location)
             }
             booksApi.create.outputs._2.matcher.matches(response.status) -> {
-                dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType(response = response, offered = kotlin.collections.emptyList(), allowsNoBody = true, endpointId = "Books.create")
+                selectResponseBodyMediaType(response = response, offered = emptyList(), allowsNoBody = true, endpointId = "Books.create")
                 CreateResponse.BadRequest
             }
-            else -> kotlin.error("Unexpected status ${response.status.code} for Books.create")
+            else -> error("Unexpected status ${response.status.code} for Books.create")
         }
     }
 
-    private fun <Value : kotlin.Any> decodeBody(
-        format: dev.akif.tapik.ByteArrayFormat<Value>,
-        bytes: kotlin.ByteArray,
-        endpointId: kotlin.String
+    private fun <Value : Any> decodeBody(
+        format: ByteArrayFormat<Value>,
+        bytes: ByteArray,
+        endpointId: String
     ): Value =
         when (val result = format.decode(bytes)) {
-            is dev.akif.tapik.DecodeResult.Success -> result.value
-            is dev.akif.tapik.DecodeResult.Failure -> kotlin.error("Cannot decode response body for $endpointId: " + result.errors.joinToString { it.message })
+            is DecodeResult.Success -> result.value
+            is DecodeResult.Failure -> error("Cannot decode response body for $endpointId: " + result.errors.joinToString { it.message })
         }
 
-    private fun <Value : kotlin.Any> decodeHeader(
-        format: dev.akif.tapik.StringFormat<Value>,
-        value: kotlin.String,
-        endpointId: kotlin.String
+    private fun <Value : Any> decodeHeader(
+        format: StringFormat<Value>,
+        value: String,
+        endpointId: String
     ): Value =
         when (val result = format.decode(value)) {
-            is dev.akif.tapik.DecodeResult.Success -> result.value
-            is dev.akif.tapik.DecodeResult.Failure -> kotlin.error("Cannot decode response header for $endpointId: " + result.errors.joinToString { it.message })
+            is DecodeResult.Success -> result.value
+            is DecodeResult.Failure -> error("Cannot decode response header for $endpointId: " + result.errors.joinToString { it.message })
         }
 
 }
