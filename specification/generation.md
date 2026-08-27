@@ -16,9 +16,11 @@ mechanism. Build-tool adapters and future command-line applications load the sam
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
 
 `common-plugin` provides target-neutral Kotlin source helpers for reading compiled type arguments and Tapik tuples,
-allocating and sanitizing Kotlin declaration names, and escaping Kotlin string literals. Source-generating targets use
-these shared rules rather than maintaining target-specific copies; target-specific model and emission decisions remain
-inside each target.
+allocating and sanitizing Kotlin declaration names, escaping Kotlin string literals, deriving HTTP path templates and
+status variant names, and rendering sealed data hierarchies with correct byte-array value semantics. Source-generating
+targets use these shared rules rather than maintaining target-specific copies. Target compatibility, compiled-contract
+interpretation, wire decoding and encoding, and target-specific model decisions remain inside each target instead of
+introducing a parallel neutral metadata model.
 
 Generated artifact paths are relative and normalized. A generation result cannot contain the same path twice.
 Configuration lists and maps and generation-result artifact lists are structural snapshots: later caller mutation and

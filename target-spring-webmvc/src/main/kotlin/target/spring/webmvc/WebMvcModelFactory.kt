@@ -8,7 +8,9 @@ import dev.akif.tapik.common.plugin.KotlinType
 import dev.akif.tapik.common.plugin.argument
 import dev.akif.tapik.common.plugin.kotlinIdentifier
 import dev.akif.tapik.common.plugin.kotlinReferenceIdentifier
+import dev.akif.tapik.common.plugin.kotlinVariantName
 import dev.akif.tapik.common.plugin.lowerCamel
+import dev.akif.tapik.common.plugin.pathTemplate
 import dev.akif.tapik.common.plugin.toKotlinSourceType
 import dev.akif.tapik.common.plugin.tupleElements
 import dev.akif.tapik.common.plugin.uniqueKotlinName
@@ -337,7 +339,7 @@ private fun outputs(
                 )
             }
         WebMvcOutput(
-            variantName = exact.status.variantName(),
+            variantName = exact.status.kotlinVariantName(),
             statusCode = exact.status.code,
             definitionAccess = outputAccess,
             bodies = bodies,
@@ -346,24 +348,3 @@ private fun outputs(
         )
     }
 }
-
-private fun Uri<*, *>.pathTemplate(): String =
-    if (segments.isEmpty()) "/" else
-        segments.joinToString(separator = "/", prefix = "/") { segment ->
-            when (segment) {
-                is PathSegment.Literal -> segment.value
-                is PathVariable<*> -> "{${segment.name}}"
-            }
-        }
-
-private fun Status.variantName(): String =
-    when (this) {
-        Status.Ok -> "Ok"
-        Status.Created -> "Created"
-        Status.NoContent -> "NoContent"
-        Status.BadRequest -> "BadRequest"
-        Status.NotFound -> "NotFound"
-        Status.Conflict -> "Conflict"
-        Status.InternalServerError -> "InternalServerError"
-        else -> "Status$code"
-    }

@@ -33,8 +33,9 @@
 - [x] Reserve `plugin-` for compiler and build-tool integrations, and use `target-` for host-neutral generation target
   implementations. OpenAPI, Spring RestClient, and Spring WebMVC now use `target-` module, artifact, and package names.
 
-- [ ] a lot of spring code can/should be shared between restclient and webmvc. in fact this applies to the entire
-  codebase
+- [x] Share target-neutral source generation used by the Spring targets through `common-plugin`. Sealed response
+  hierarchies, byte-array value semantics, URI path templates, and status variant names are now defined once, while
+  target compatibility and endpoint interpretation remain target-specific.
 
 - [ ] generated files should be import optimized because in many places they use FQNs
 
