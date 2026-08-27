@@ -183,6 +183,26 @@ objects, and value classes. Recursive object references are retained as schema r
 kinds fail while the format is built. Object schema properties retain separate `required` and `deprecated` flags;
 derivers set each flag only when their source metadata can express it reliably.
 
+Jackson 3 body builders are provided independently by `dev.akif:tapik-format-jackson`:
+
+```kotlin
+import dev.akif.tapik.format.jackson.jsonBody
+
+val defaultJson = jsonBody<Book>()
+val configuredJson = jsonBody<Book>(format = applicationObjectMapper)
+```
+
+The default Jackson format uses an `ObjectMapper` with the Jackson Kotlin module registered. A supplied mapper controls
+wire encoding, decoding, property visibility, JSON names, and property order. Jackson formats are cached by mapper
+identity and Kotlin type; custom mappers remain isolated from the default and from one another. Cache entries do not
+retain otherwise unreachable mappers, types, formats, or their defining classloaders.
+
+Jackson schema derivation has the same initial structural coverage as Kotlin serialization: primitives, enums, lists,
+maps, nullable properties, objects, value classes, recursive references, constructor defaults, and deprecation flags.
+The derived object shape follows Jackson's effective serialization properties, including configured names, ignored
+properties, and order. Polymorphic and sealed types fail format construction until the core schema algebra can
+represent their alternatives.
+
 ## Request headers and input
 
 Request headers belong directly to an endpoint and append in declaration order:

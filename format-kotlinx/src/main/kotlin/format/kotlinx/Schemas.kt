@@ -1,17 +1,13 @@
 package dev.akif.tapik.format.kotlinx
 
 import dev.akif.tapik.*
+import dev.akif.tapik.common.format.SchemaDerivationException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
-
-/** A Kotlin serialization descriptor that cannot be represented by the current schema derivation. */
-class SchemaDerivationException(
-    message: String
-) : IllegalArgumentException(message)
 
 /** Derives a Tapik schema from [serializer]. */
 fun deriveSchema(serializer: KSerializer<*>): Schema = deriveSchema(serializer.descriptor)

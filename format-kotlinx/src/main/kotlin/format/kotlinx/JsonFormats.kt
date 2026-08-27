@@ -1,12 +1,17 @@
 package dev.akif.tapik.format.kotlinx
 
 import dev.akif.tapik.*
+import dev.akif.tapik.common.format.FormatCacheKeyEquality
+import dev.akif.tapik.common.format.SchemaDerivationException
+import dev.akif.tapik.common.format.WeakFormatCache
+import dev.akif.tapik.common.format.decodeCatching
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
 private object JsonFormatCache {
-    val formats: WeakIdentityPairCache<Json, KSerializer<*>, ByteArrayFormat<*>> = WeakIdentityPairCache()
+    val formats: WeakFormatCache<Json, KSerializer<*>, ByteArrayFormat<*>> =
+        WeakFormatCache(FormatCacheKeyEquality.IDENTITY)
 }
 
 /**
@@ -25,15 +30,8 @@ fun <Value : Any> jsonFormat(
                 Codec(
                     decoder =
                         Decoder { bytes ->
-                            try {
-                                DecodeResult.Success(format.decodeFromString(serializer, bytes.decodeToString()))
-                            } catch (cause: Exception) {
-                                DecodeResult.Failure(
-                                    DecodeError(
-                                        message = cause.message ?: "JSON decoding failed",
-                                        cause = cause
-                                    )
-                                )
+                            decodeCatching("JSON decoding failed") {
+                                format.decodeFromString(serializer, bytes.decodeToString())
                             }
                         },
                     encoder = Encoder { value -> format.encodeToString(serializer, value).encodeToByteArray() }

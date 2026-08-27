@@ -48,6 +48,8 @@
         <module>core</module>
         <module>plugin-compiler</module>
         <module>common-plugin</module>
+        <module>common-format</module>
+        <module>format-jackson</module>
         <module>format-kotlinx</module>
         <module>test-fixtures</module>
         <module>common-spring</module>
@@ -106,6 +108,11 @@
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-reflect</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
             <dependency>

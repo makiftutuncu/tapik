@@ -10,8 +10,8 @@
         <version>0.6.0</version>
     </parent>
 
-    <artifactId>tapik-format-kotlinx</artifactId>
-    <name>tapik Kotlin serialization formats</name>
+    <artifactId>tapik-common-format</artifactId>
+    <name>tapik common formats</name>
 
     <properties>
         <release.artifacts.skip>false</release.artifacts.skip>
@@ -20,12 +20,8 @@
     <dependencies>
         <dependency>
             <groupId>dev.akif</groupId>
-            <artifactId>tapik-common-format</artifactId>
+            <artifactId>tapik-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-serialization-json</artifactId>
         </dependency>
         <dependency>
             <groupId>io.kotest</groupId>
@@ -44,18 +40,6 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <configuration>
-                    <compilerPlugins>
-                        <plugin>kotlinx-serialization</plugin>
-                    </compilerPlugins>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-maven-serialization</artifactId>
-                        <version>${kotlin.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

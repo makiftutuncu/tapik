@@ -83,6 +83,17 @@ selects Kotlin serialization for `jsonBody`; projects using another integration 
 </dependencies>
 ```
 
+For Jackson 3 contracts, select the Jackson integration instead; it includes a Kotlin-enabled default `ObjectMapper`
+and accepts an application mapper when custom Jackson behavior is required:
+
+```xml
+<dependency>
+    <groupId>dev.akif</groupId>
+    <artifactId>tapik-format-jackson</artifactId>
+    <version>0.6.0</version>
+</dependency>
+```
+
 Enable Tapik in Kotlin's Maven compiler plugin. The Kotlin serialization entries are needed only by contracts that
 explicitly select `tapik-format-kotlinx` and use `@Serializable` models:
 

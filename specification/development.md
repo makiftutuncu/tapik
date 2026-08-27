@@ -66,8 +66,10 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | Module folder | Maven artifact |
 | --- | --- |
 | `core` | `dev.akif:tapik-core` |
+| `common-format` | `dev.akif:tapik-common-format` |
 | `common-plugin` | `dev.akif:tapik-common-plugin` |
 | `common-spring` | `dev.akif:tapik-common-spring` |
+| `format-jackson` | `dev.akif:tapik-format-jackson` |
 | `format-kotlinx` | `dev.akif:tapik-format-kotlinx` |
 | `plugin-compiler` | `dev.akif:tapik-plugin-compiler` |
 | `plugin-maven` | `dev.akif:tapik-plugin-maven` |
@@ -83,10 +85,20 @@ targets select a serialization library for the user. A contract may use one inte
 or construct core `Format` values directly; targets consume only the concrete formats already attached to the endpoint
 values.
 
-`format-kotlinx` depends on Kotlin serialization and converts its serializers into core codecs and schemas without
-leaking Kotlin serialization types into endpoint contracts. Projects that choose another integration do not depend on
-`format-kotlinx` or enable the Kotlin serialization compiler plugin. Dependencies used internally to render a target's
-own artifact are separate from contract format integrations and do not choose how endpoint values are encoded.
+`common-format` provides the independently consumable provider-authoring boundary shared by format integrations. It
+depends only on `core` and contains weak format caching, consistent decoding-failure conversion, and the common
+schema-derivation exception. Serialization-library introspection, configuration, codecs, and user-facing builders
+remain in their respective `format-` modules.
+
+`format-kotlinx` depends on `common-format` and Kotlin serialization, and converts its serializers into core codecs and
+schemas without leaking Kotlin serialization types into endpoint contracts. Projects that choose another integration
+do not depend on `format-kotlinx` or enable the Kotlin serialization compiler plugin. Dependencies used internally to
+render a target's own artifact are separate from contract format integrations and do not choose how endpoint values are
+encoded.
+
+`format-jackson` depends on `common-format`, Jackson 3 databind, and its Kotlin module. It converts configured
+`ObjectMapper` behavior and Kotlin types into the same core codec and schema contracts without depending on
+`format-kotlinx`.
 
 `core` exposes the minimal API registry provider contract needed by compiler-generated code. The `common-plugin` module
 defines host-neutral registry loading, target configuration, target execution, and generated artifact contracts.
@@ -97,9 +109,10 @@ Shared Spring integration code lives in `common-spring` under `dev.akif.tapik.co
 `target-spring-restclient` and `target-spring-webmvc` packages are respectively
 `dev.akif.tapik.target.spring.restclient` and `dev.akif.tapik.target.spring.webmvc`.
 
-Other module packages follow the same folder-name hierarchy: `common-plugin` uses `dev.akif.tapik.common.plugin`,
-`plugin-compiler` uses `dev.akif.tapik.plugin.compiler`, `target-openapi` uses `dev.akif.tapik.target.openapi`, and
-`plugin-maven` uses `dev.akif.tapik.plugin.maven`. The non-production `test-maven-contract` and
+Other module packages follow the same folder-name hierarchy: `common-format` uses `dev.akif.tapik.common.format`,
+`common-plugin` uses `dev.akif.tapik.common.plugin`, `plugin-compiler` uses `dev.akif.tapik.plugin.compiler`,
+`target-openapi` uses `dev.akif.tapik.target.openapi`, and `plugin-maven` uses `dev.akif.tapik.plugin.maven`. The
+non-production `test-maven-contract` and
 `test-maven-integration` modules use `dev.akif.tapik.test.maven.contract` and
 `dev.akif.tapik.test.maven.integration`. Together they verify the complete Maven user workflow against the
 reactor-built artifacts, including APIs supplied by a separate contract artifact.
