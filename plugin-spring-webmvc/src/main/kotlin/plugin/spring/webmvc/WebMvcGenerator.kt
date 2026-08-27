@@ -10,10 +10,11 @@ import dev.akif.tapik.common.plugin.kotlinString
 
 internal class WebMvcGenerator(
     private val packageName: String,
-    private val serverName: String
+    private val serverName: String,
+    private val controllerName: String
 ) {
     fun generate(compiled: CompiledApi): String {
-        val model = webMvcApiModel(compiled, packageName, serverName)
+        val model = webMvcApiModel(compiled, packageName, serverName, controllerName)
         return buildString {
             appendLine("package ${model.packageName}")
             appendLine()
@@ -27,8 +28,19 @@ internal class WebMvcGenerator(
                 appendResponses(endpoint)
                 appendLine()
                 appendHandler(endpoint)
+            }
+            appendLine("}")
+            appendLine()
+            appendLine("@org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate(${model.serverName}::class)")
+            appendLine("@org.springframework.web.bind.annotation.RestController")
+            appendLine("internal class ${model.controllerName}(")
+            appendLine("    private val handler: ${model.serverName}")
+            appendLine(") {")
+            appendLine("    private val ${model.apiProperty}: ${model.apiType}")
+            appendLine("        get() = handler.${model.apiProperty}")
+            model.endpoints.forEach { endpoint ->
                 appendLine()
-                appendMapping(endpoint)
+                appendMapping(endpoint, model.serverName)
             }
             if (model.endpoints.isNotEmpty()) {
                 appendLine()
@@ -54,7 +66,10 @@ private fun StringBuilder.appendHandler(endpoint: WebMvcEndpointModel) {
     appendLine("    ): ${endpoint.responseName}")
 }
 
-private fun StringBuilder.appendMapping(endpoint: WebMvcEndpointModel) {
+private fun StringBuilder.appendMapping(
+    endpoint: WebMvcEndpointModel,
+    serverName: String
+) {
     appendLine("    ${endpoint.mappingAnnotation()}")
     val parameters = endpoint.mappingParameters()
     if (parameters.isEmpty()) {
@@ -87,9 +102,9 @@ private fun StringBuilder.appendMapping(endpoint: WebMvcEndpointModel) {
     endpoint.body?.let { body -> appendDecodedBody(endpoint, body) }
     appendLine("        val response =")
     if (endpoint.handlerParameters.isEmpty()) {
-        appendLine("            ${endpoint.handlerName}()")
+        appendLine("            handler.${endpoint.handlerName}()")
     } else {
-        appendLine("            ${endpoint.handlerName}(")
+        appendLine("            handler.${endpoint.handlerName}(")
         endpoint.handlerParameters.forEachIndexed { index, parameter ->
             val suffix = if (index == endpoint.handlerParameters.lastIndex) "" else ","
             appendLine("                ${parameter.name} = ${parameter.name}$suffix")
@@ -98,7 +113,7 @@ private fun StringBuilder.appendMapping(endpoint: WebMvcEndpointModel) {
     }
     appendLine()
     appendLine("        return when (response) {")
-    endpoint.outputs.forEach { output -> appendEncodedOutput(endpoint, output) }
+    endpoint.outputs.forEach { output -> appendEncodedOutput(endpoint, output, serverName) }
     appendLine("        }")
     appendLine("    }")
 }
@@ -266,9 +281,10 @@ private fun StringBuilder.appendBodySelection(
 
 private fun StringBuilder.appendEncodedOutput(
     endpoint: WebMvcEndpointModel,
-    output: WebMvcOutput
+    output: WebMvcOutput,
+    serverName: String
 ) {
-    appendLine("            is ${endpoint.responseName}.${output.variantName} -> {")
+    appendLine("            is $serverName.${endpoint.responseName}.${output.variantName} -> {")
     if (output.headers.isEmpty()) {
         appendLine("                val headers = kotlin.collections.emptyMap<kotlin.String, kotlin.collections.List<kotlin.String>>()")
     } else {

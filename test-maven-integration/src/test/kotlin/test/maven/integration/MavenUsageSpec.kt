@@ -3,9 +3,11 @@ package dev.akif.tapik.test.maven.integration
 import dev.akif.tapik.ApiRegistry
 import dev.akif.tapik.test.maven.contract.Author
 import dev.akif.tapik.test.maven.contract.Authors
+import dev.akif.tapik.test.maven.contract.Catalog
 import dev.akif.tapik.test.maven.contract.CreateAuthor
 import dev.akif.tapik.test.maven.integration.generated.AuthorsClient
 import dev.akif.tapik.test.maven.integration.generated.AuthorsServer
+import dev.akif.tapik.test.maven.integration.generated.CatalogServer
 import dev.akif.tapik.plugin.spring.restclient.RestClientTransport
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
@@ -16,6 +18,10 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.context.annotation.AnnotationConfigApplicationContext
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content as requestContent
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
@@ -36,9 +42,12 @@ import java.nio.file.Path
 import java.util.ServiceLoader
 
 class MavenUsageSpec : FunSpec({
+    val webMvc = webMvcFixture()
+    afterSpec { webMvc.close() }
+
     test("compile API definitions and generate OpenAPI through one Tapik Maven plugin") {
         val apis = ServiceLoader.load(ApiRegistry::class.java).flatMap(ApiRegistry::apis)
-        apis.map { api -> api.id }.sorted() shouldContainExactly listOf("Authors", "Books")
+        apis.map { api -> api.id }.sorted() shouldContainExactly listOf("Authors", "Books", "Catalog")
         apis.single { api -> api.id == "Authors" }.shouldBeInstanceOf<Authors>()
 
         Files.isRegularFile(
@@ -56,6 +65,7 @@ class MavenUsageSpec : FunSpec({
 
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
+        generated("Catalog") shouldBe expected("Catalog")
     }
 
     test("execute a client generated from a contract dependency") {
@@ -153,8 +163,8 @@ class MavenUsageSpec : FunSpec({
     }
 
     test("serve a response through a generated WebMVC interface") {
-        val controller = AuthorsController()
-        val mvc = MockMvcBuilders.standaloneSetup(controller).build()
+        val controller = webMvc.controller
+        val mvc = webMvc.mvc
 
         mvc
             .perform(
@@ -232,8 +242,8 @@ class MavenUsageSpec : FunSpec({
     }
 
     test("execute create requests through a generated WebMVC interface") {
-        val controller = AuthorsController()
-        val mvc = MockMvcBuilders.standaloneSetup(controller).build()
+        val controller = webMvc.controller
+        val mvc = webMvc.mvc
 
         mvc
             .perform(
@@ -275,11 +285,17 @@ class MavenUsageSpec : FunSpec({
             .andExpect(status().isBadRequest)
             .andExpect(content().bytes(byteArrayOf()))
     }
+
+    test("auto-register generated adapters for one multi-API handler") {
+        webMvc.adapters.map { adapter -> adapter.javaClass.simpleName }.sorted() shouldContainExactly
+            listOf("AuthorsGeneratedController", "CatalogGeneratedController")
+        webMvc.mvc.perform(get("/catalog")).andExpect(status().isOk)
+    }
 })
 
-@RestController
-private class AuthorsController : AuthorsServer {
+private class LibraryController : AuthorsServer, CatalogServer {
     override val authorsApi: Authors = Authors()
+    override val catalogApi: Catalog = Catalog()
     var names: List<String>? = null
     var page: Int? = null
     var created: CreateAuthor? = null
@@ -312,6 +328,35 @@ private class AuthorsController : AuthorsServer {
                 location = "/authors/author-2"
             )
         }
+
+    override fun list(): CatalogServer.ListResponse = CatalogServer.ListResponse.Ok
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAutoConfiguration
+private class WebMvcTestApplication {
+    @Bean
+    fun libraryController(): LibraryController = LibraryController()
+}
+
+private class WebMvcFixture(
+    private val context: AnnotationConfigApplicationContext,
+    val controller: LibraryController,
+    val adapters: List<Any>,
+    val mvc: org.springframework.test.web.servlet.MockMvc
+) : AutoCloseable {
+    override fun close() = context.close()
+}
+
+private fun webMvcFixture(): WebMvcFixture {
+    val context = AnnotationConfigApplicationContext(WebMvcTestApplication::class.java)
+    val adapters = context.getBeansWithAnnotation(RestController::class.java).values.toList()
+    return WebMvcFixture(
+        context = context,
+        controller = context.getBean(LibraryController::class.java),
+        adapters = adapters,
+        mvc = MockMvcBuilders.standaloneSetup(*adapters.toTypedArray()).build()
+    )
 }
 
 private fun generated(api: String): String =

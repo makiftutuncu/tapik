@@ -54,9 +54,7 @@ class GenerateMojo : AbstractMojo() {
                         },
                     projectTapikVersions = project.tapikDependencyVersions()
                 )
-            if (generation.containsSources) {
-                project.addCompileSourceRoot(outputDirectory.absolutePath)
-            }
+            project.registerGeneratedArtifacts(outputDirectory.toPath(), generation)
             generation.written.forEach { path -> log.info("Generated ${projectRelativePath(path)}") }
         } catch (cause: Exception) {
             throw MojoExecutionException("Tapik generation failed: ${cause.message}", cause)

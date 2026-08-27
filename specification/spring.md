@@ -68,12 +68,24 @@ Spring's mock HTTP server.
 
 ## WebMVC generation target
 
-The `spring-webmvc` target generates one Kotlin server interface for each selected API. The interface exposes a
-uniquely named property for the concrete API value, a typed abstract handler method for every endpoint, nested sealed
-response types, and Spring-mapped default methods that adapt HTTP requests to those handlers. Users decide how server
-implementations become Spring controllers; annotating an implementation with `@RestController` is sufficient.
+The `spring-webmvc` target generates one public Kotlin handler interface and one internal Spring adapter for each
+selected API. The handler interface exposes a uniquely named property for the concrete API value, a typed abstract
+handler method for every endpoint, and nested sealed response types. It contains no Spring mapping annotations, raw
+wire parameters, `ResponseEntity` values, or adapter methods.
 
-Generated Spring mapping methods receive wire values rather than asking Spring to convert contract values. They decode
+The internal adapter is a Spring `@RestController` with constructor injection of the handler interface. Its public
+mapping methods use the same allocated endpoint names as the handler methods because the types have separate
+namespaces; no `Http` suffix is added. The adapter calls the handler, and the handler's API property supplies every
+runtime endpoint value used for decoding and encoding. Injecting the handler by interface keeps ordinary Spring proxies
+compatible, while the internal adapter keeps its framework methods out of the consumer's Kotlin API.
+
+This separation is also the server-integration boundary. User implementations depend on the pure typed handler
+contract, while wire adaptation and framework annotations belong to generated target-specific controllers. Future
+server targets should preserve that boundary and provide their own adapters without requiring application handlers to
+adopt framework types or annotations. The WebMVC target currently emits both types in one source artifact; extracting a
+shared server-contract generator is deferred until another server target needs to consume the same generated contract.
+
+Generated Spring adapter methods receive wire values rather than asking Spring to convert contract values. They decode
 path variables, query parameters, headers, and bodies through the formats attached to the endpoint. Decode failures and
 fixed-header mismatches produce `400 Bad Request`. `CONNECT` and `QUERY` fail generation because Spring WebMVC cannot
 map them.
@@ -106,16 +118,35 @@ output declares `Content-Length`; header names are compared case-insensitively. 
 `Content-Type`, which is emitted as an ordinary contract header.
 
 `packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `serverSuffix` selects the
-interface-name suffix and defaults to `Server`. Generated Spring mapping method names append `Http` to the corresponding
-typed handler method name.
+handler-interface suffix and defaults to `Server`. `controllerSuffix` selects the internal generated-controller suffix
+and defaults to `GeneratedController`, producing pairs such as `BooksServer` and `BooksGeneratedController`. Users may
+name their implementation independently; a `Handler` suffix, such as `BooksHandler`, is the conventional arrangement.
 
-WebMVC uses the same deterministic declaration-name allocation as RestClient. Handler and Spring mapping functions
-share one generated interface namespace, so a mapping name cannot collide with another endpoint's handler. Nested
-response types, top-level server types, and artifact paths follow the same numeric disambiguation rule.
+WebMVC uses the same deterministic declaration-name allocation as RestClient. Handler methods share one interface
+namespace, adapter mappings share a separate adapter namespace, and nested response types retain their own namespace.
+Top-level handler and adapter names and source artifact paths follow the same numeric disambiguation rule.
+
+### Spring Boot registration
+
+Automatic adapter registration initially targets Spring Boot; plain Spring registration is deferred. The runtime
+WebMVC artifact contributes one public Boot auto-configuration entry. That auto-configuration imports only adapters
+listed by generated Tapik WebMVC registration resources, so it neither scans arbitrary packages nor reflects over API
+classes.
+
+Each generated adapter is conditional on a single candidate handler bean. No handler leaves that API unregistered;
+one candidate registers the adapter; multiple candidates register it only when Spring can select a primary candidate.
+Qualifiers alone do not select a generated adapter because the adapter declares no generated qualifier. A single user
+bean may implement several generated handler interfaces and receives one adapter for each interface.
+
+The target emits one source and one uniquely named registration resource per API. Resource identity includes the
+generated adapter's qualified name, and registration order is canonical by that name. The Maven host packages generated
+runtime resources in addition to compiling generated source. Users provide only ordinary Spring beans implementing the
+handler interfaces; they do not write per-API adapter configuration.
 
 The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its WebMVC
-server during `generate-sources`, compiles an implementation of the generated interface, and serves a typed response
-through Spring's mock MVC runtime.
+handler, adapter, and registration resource during `generate-sources`, and compiles an implementation of the generated
+interface. A Boot application context discovers the adapter automatically and serves a typed response through Spring's
+mock MVC runtime without user-written adapter configuration.
 
 ## Target runtime conformance
 

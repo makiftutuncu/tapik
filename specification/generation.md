@@ -130,3 +130,8 @@ When an execution returns `SOURCE` artifacts, the adapter adds that execution's 
 source root. Source targets may run in `generate-sources` when their APIs come from compiled contract dependencies.
 Targets consuming APIs declared in the current project continue to run after those contracts are compiled until a
 compiler-integrated source-generation path is implemented.
+
+When an execution returns `RESOURCE` artifacts, the Maven adapter adds exactly those relative paths beneath the
+execution output directory as project resources. Source and documentation artifacts in the same directory are not
+copied into runtime classes. Generated resources participate in the ordinary Maven resource lifecycle and are packaged
+with the consumer artifact.

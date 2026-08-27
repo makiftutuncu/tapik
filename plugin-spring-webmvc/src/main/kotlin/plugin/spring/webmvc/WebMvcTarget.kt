@@ -8,23 +8,34 @@ object WebMvcTarget : GenerationTarget {
 
     override fun generate(request: GenerationRequest): GenerationResult {
         val configuration = WebMvcTargetConfiguration.from(request.configuration)
-        val usedServerNames = mutableSetOf<String>()
+        val usedTypeNames = mutableSetOf<String>()
         return GenerationResult(
-            request.apis.map { api ->
+            request.apis.flatMap { api ->
                 val apiTypeName = api.javaClass.simpleName
                 require(apiTypeName.isKotlinIdentifier()) {
                     "Spring WebMVC generation requires a valid API type name, but was '$apiTypeName'"
                 }
-                val serverName = uniqueKotlinName(apiTypeName + configuration.serverSuffix, usedServerNames)
-                GeneratedArtifact(
-                    relativePath = configuration.packageName.replace('.', '/') + "/$serverName.kt",
-                    mediaType = "text/x-kotlin",
-                    kind = ArtifactKind.SOURCE,
-                    content =
-                        WebMvcGenerator(
-                            packageName = configuration.packageName,
-                            serverName = serverName
-                        ).generate(CompiledApiReader.read(api))
+                val serverName = uniqueKotlinName(apiTypeName + configuration.serverSuffix, usedTypeNames)
+                val controllerName = uniqueKotlinName(apiTypeName + configuration.controllerSuffix, usedTypeNames)
+                val controllerType = "${configuration.packageName}.$controllerName"
+                listOf(
+                    GeneratedArtifact(
+                        relativePath = configuration.packageName.replace('.', '/') + "/$serverName.kt",
+                        mediaType = "text/x-kotlin",
+                        kind = ArtifactKind.SOURCE,
+                        content =
+                            WebMvcGenerator(
+                                packageName = configuration.packageName,
+                                serverName = serverName,
+                                controllerName = controllerName
+                            ).generate(CompiledApiReader.read(api))
+                    ),
+                    GeneratedArtifact(
+                        relativePath = "META-INF/tapik/spring/webmvc/$controllerType.imports",
+                        mediaType = "text/plain",
+                        kind = ArtifactKind.RESOURCE,
+                        content = "$controllerType\n"
+                    )
                 )
             }
         )
@@ -33,7 +44,8 @@ object WebMvcTarget : GenerationTarget {
 
 private data class WebMvcTargetConfiguration(
     val packageName: String,
-    val serverSuffix: String
+    val serverSuffix: String,
+    val controllerSuffix: String
 ) {
     companion object {
         fun from(configuration: TargetConfiguration): WebMvcTargetConfiguration {
@@ -49,7 +61,11 @@ private data class WebMvcTargetConfiguration(
             require(serverSuffix.isKotlinIdentifier()) {
                 "Spring WebMVC target 'serverSuffix' must be a valid Kotlin identifier, but was '$serverSuffix'"
             }
-            return WebMvcTargetConfiguration(packageName, serverSuffix)
+            val controllerSuffix = configuration.scalar("controllerSuffix") ?: DEFAULT_CONTROLLER_SUFFIX
+            require(controllerSuffix.isKotlinIdentifier()) {
+                "Spring WebMVC target 'controllerSuffix' must be a valid Kotlin identifier, but was '$controllerSuffix'"
+            }
+            return WebMvcTargetConfiguration(packageName, serverSuffix, controllerSuffix)
         }
     }
 }
@@ -61,6 +77,7 @@ private fun TargetConfiguration.scalar(name: String): String? =
         else -> throw IllegalArgumentException("Spring WebMVC target '$name' must be a scalar value")
     }
 
-private val SUPPORTED_CONFIGURATION: Set<String> = setOf("packageName", "serverSuffix")
+private val SUPPORTED_CONFIGURATION: Set<String> = setOf("packageName", "serverSuffix", "controllerSuffix")
 private const val DEFAULT_PACKAGE: String = "dev.akif.tapik.generated"
 private const val DEFAULT_SERVER_SUFFIX: String = "Server"
+private const val DEFAULT_CONTROLLER_SUFFIX: String = "GeneratedController"

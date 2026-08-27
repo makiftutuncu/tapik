@@ -197,13 +197,21 @@ Then run the target during `generate-sources`:
 </execution>
 ```
 
-Use `spring-webmvc` with `tapik-plugin-spring-webmvc` for server generation. Its optional suffix setting is
-`serverSuffix`; both Spring targets default to package `dev.akif.tapik.generated`. Source output directories are added
-to Maven's Kotlin compile roots automatically.
+Use `spring-webmvc` with `tapik-plugin-spring-webmvc` for Spring Boot server generation. Its optional suffix settings are
+`serverSuffix` and `controllerSuffix`, defaulting to `Server` and `GeneratedController`; both Spring targets default to
+package `dev.akif.tapik.generated`. Source output directories are added to Maven's Kotlin compile roots automatically,
+and generated runtime registration resources are packaged by Maven.
 
 The RestClient target generates composable client interfaces backed by `RestClientTransport`. The WebMVC target
-generates server interfaces with public typed handler methods and Spring-mapped adapter methods. A server
-implementation can become a controller by annotating it with `@RestController`.
+generates public interfaces containing only typed handler methods and response types. It also generates internal Spring
+adapters that Boot registers automatically when exactly one matching handler bean is available, including a primary
+bean among multiple candidates. A user supplies an ordinary `@Bean` or component implementing the generated interface;
+no `@RestController` annotation or per-API adapter configuration is required. One bean may implement several generated
+API interfaces. Automatic plain Spring registration is not supported yet.
+
+The pure handler/generated-controller boundary is intended to extend to future server stacks: application handlers can
+remain framework-free while each target supplies its own generated transport adapter. WebMVC currently generates both
+parts together; a shared cross-framework server-contract target has not been extracted yet.
 
 Generation includes every API registry visible in the project output and compile/runtime dependencies by default.
 Include and exclude filters are planned but not implemented.

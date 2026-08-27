@@ -66,7 +66,7 @@
         <kotlin.version>2.4.10</kotlin.version>
         <kotest.version>6.2.4</kotest.version>
         <kotlinx-serialization.version>1.11.0</kotlinx-serialization.version>
-        <spring-framework.version>7.0.8</spring-framework.version>
+        <spring-boot.version>4.0.8</spring-boot.version>
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
         <maven.enforcer.version>3.6.2</maven.enforcer.version>
         <maven.surefire.version>3.5.5</maven.surefire.version>
@@ -85,9 +85,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <version>${spring-framework.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

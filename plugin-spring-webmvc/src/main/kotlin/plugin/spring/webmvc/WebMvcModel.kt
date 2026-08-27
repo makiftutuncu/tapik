@@ -7,6 +7,7 @@ import dev.akif.tapik.common.plugin.KotlinSourceType
 internal data class WebMvcApiModel(
     val packageName: String,
     val serverName: String,
+    val controllerName: String,
     val apiType: String,
     val apiProperty: String,
     val endpoints: List<WebMvcEndpointModel>

@@ -17,7 +17,8 @@ import dev.akif.tapik.common.plugin.upperCamel
 internal fun webMvcApiModel(
     compiled: CompiledApi,
     packageName: String,
-    serverName: String
+    serverName: String,
+    controllerName: String
 ): WebMvcApiModel {
     val api = compiled.value
     val apiSimpleName = api.javaClass.simpleName
@@ -25,7 +26,8 @@ internal fun webMvcApiModel(
         "Spring WebMVC generation requires a canonical API type for '${api.id}'"
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
-    val functionNames =
+    val handlerNames = mutableSetOf<String>()
+    val mappingNames =
         mutableSetOf(
             "decodeString",
             "decodeStrings",
@@ -41,17 +43,18 @@ internal fun webMvcApiModel(
     return WebMvcApiModel(
         packageName = packageName,
         serverName = serverName,
+        controllerName = controllerName,
         apiType = apiType,
         apiProperty = apiProperty,
         endpoints =
             compiled.endpoints.map { endpoint ->
                 val propertyName = endpoint.value.id.removePrefix("${api.id}.")
-                val handlerName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), functionNames)
+                val handlerName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), handlerNames)
                 endpoint.toModel(
                     apiId = api.id,
                     apiProperty = apiProperty,
                     handlerName = handlerName,
-                    mappingName = uniqueKotlinName(handlerName.removeSurrounding("`") + "Http", functionNames),
+                    mappingName = uniqueKotlinName(handlerName.removeSurrounding("`"), mappingNames),
                     responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", responseNames)
                 )
             }

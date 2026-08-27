@@ -15,6 +15,60 @@ import io.kotest.matchers.string.shouldNotContain
 import org.jetbrains.kotlin.cli.common.ExitCode
 
 class WebMvcTargetSpec : FunSpec({
+    test("separate public handlers from automatically registered Spring adapters") {
+        val result =
+            WebMvcTarget.generate(
+                GenerationRequest(
+                    apis = listOf(Books),
+                    configuration = targetConfigurationOf("packageName" to "dev.akif.tapik.generated")
+                )
+            )
+
+        result.artifacts.map { artifact -> artifact.relativePath to artifact.kind } shouldContainExactly
+            listOf(
+                "dev/akif/tapik/generated/BooksServer.kt" to ArtifactKind.SOURCE,
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.imports" to
+                    ArtifactKind.RESOURCE
+            )
+        val source = result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content
+        val handler = source.substringBefore("\n@org.springframework.boot")
+        handler shouldNotContain "org.springframework"
+        handler shouldNotContain "Http("
+        source shouldContain
+            "@org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate(BooksServer::class)"
+        source shouldContain "@org.springframework.web.bind.annotation.RestController"
+        source shouldContain "internal class BooksGeneratedController("
+        source shouldContain "private val handler: BooksServer"
+        source shouldContain "public fun list("
+        source shouldNotContain "public fun listHttp("
+        result.artifacts.single { artifact -> artifact.kind == ArtifactKind.RESOURCE }.content shouldBe
+            "dev.akif.tapik.generated.BooksGeneratedController\n"
+    }
+
+    test("configure generated type suffixes independently") {
+        val result =
+            WebMvcTarget.generate(
+                GenerationRequest(
+                    apis = listOf(Books),
+                    configuration =
+                        targetConfigurationOf(
+                            "serverSuffix" to "Contract",
+                            "controllerSuffix" to "SpringController"
+                        )
+                )
+            )
+
+        result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
+            listOf(
+                "dev/akif/tapik/generated/BooksContract.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksSpringController.imports"
+            )
+        result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content.run {
+            shouldContain("public interface BooksContract")
+            shouldContain("internal class BooksSpringController(")
+        }
+    }
+
     test("generate a complete server from the Books API") {
         val expected =
             requireNotNull(WebMvcTargetSpec::class.java.getResource("/spring-webmvc/BooksServer.kt"))
@@ -29,7 +83,7 @@ class WebMvcTargetSpec : FunSpec({
                 )
             )
 
-        result.artifacts.single().run {
+        result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.run {
             relativePath shouldBe "dev/akif/tapik/generated/BooksServer.kt"
             mediaType shouldBe "text/x-kotlin"
             kind shouldBe ArtifactKind.SOURCE
@@ -48,7 +102,7 @@ class WebMvcTargetSpec : FunSpec({
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(BodyAlternatives)))
                 .artifacts
-                .single()
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
         source shouldContain "consumes = [\"application/json\", \"application/xml\"]"
@@ -71,7 +125,7 @@ class WebMvcTargetSpec : FunSpec({
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(StatusBodyAlternatives)))
                 .artifacts
-                .single()
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
         source shouldContain
@@ -88,7 +142,7 @@ class WebMvcTargetSpec : FunSpec({
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(DefaultResponseHeaders)))
                 .artifacts
-                .single()
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
         source shouldContain "public val retryAfter: kotlin.Int? = null"
@@ -116,7 +170,7 @@ class WebMvcTargetSpec : FunSpec({
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(BodylessContentTypeResponse)))
                 .artifacts
-                .single()
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
         source shouldContain "put(\"Content-Type\", listOf("
@@ -128,7 +182,7 @@ class WebMvcTargetSpec : FunSpec({
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(BinaryResponses)))
                 .artifacts
-                .single()
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
         source shouldContain "body: dev.akif.tapik.plugin.spring.webmvc.BinaryContent"
@@ -152,15 +206,16 @@ class WebMvcTargetSpec : FunSpec({
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcNamingCollisions)))
                 .artifacts
-                .single()
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
                 .content
 
         source shouldContain "webMvcNamingCollisionsApi.`find-book`"
         source shouldContain "public fun findBook("
         source shouldContain "public fun findBook2(): FindBookResponse2"
-        source shouldContain "public fun findBookHttp2(): FindBookHttpResponse"
-        source shouldContain "public fun findBookHttp("
-        source shouldContain "public fun decodeStrings2(): DecodeStringsResponse"
+        source shouldContain "public fun findBookHttp(): FindBookHttpResponse"
+        source shouldContain "public fun decodeStrings(): DecodeStringsResponse"
+        source shouldContain "public fun decodeStrings2("
+        source shouldNotContain "public fun findBookHttp2("
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
@@ -173,14 +228,15 @@ class WebMvcTargetSpec : FunSpec({
                 )
             )
 
-        result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
+        val sources = result.artifacts.filter { artifact -> artifact.kind == ArtifactKind.SOURCE }
+        sources.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
                 "dev/akif/tapik/generated/CatalogServer.kt",
                 "dev/akif/tapik/generated/CatalogServer2.kt"
             )
-        result.artifacts.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
+        sources.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
             listOf("CatalogServer", "CatalogServer2")
-        result.artifacts.forEach { artifact ->
+        sources.forEach { artifact ->
             val compilation = compileKotlin(artifact.content)
             withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
         }

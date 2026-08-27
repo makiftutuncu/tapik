@@ -1,0 +1,19 @@
+{
+    "openapi": "3.2.0",
+    "info": {
+        "title": "Catalog",
+        "version": "0.6.0"
+    },
+    "paths": {
+        "/catalog": {
+            "get": {
+                "operationId": "Catalog.list",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

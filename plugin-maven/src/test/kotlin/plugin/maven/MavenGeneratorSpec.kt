@@ -7,6 +7,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.string.shouldContain
 import java.nio.file.Files
 
@@ -30,6 +31,26 @@ class MavenGeneratorSpec : FunSpec({
         generation.written.single() shouldBe output.resolve("Books.openapi.json")
         Files.readString(generation.written.single()) shouldBe
             OpenApi.from(Books, version = "0.6.0").toJson()
+    }
+
+    test("retain generated runtime resource paths for the Maven host") {
+        val output = Files.createTempDirectory("tapik-maven-").apply { toFile().deleteOnExit() }
+
+        val generation =
+            MavenGenerator().generate(
+                classpath = emptyList(),
+                targetId = "spring-webmvc",
+                targetConfiguration = mapOf("packageName" to "dev.akif.tapik.generated"),
+                outputDirectory = output,
+                executionId = "webmvc",
+                parentClassLoader = MavenGeneratorSpec::class.java.classLoader,
+                pluginVersion = "0.6.0",
+                projectTapikVersions = setOf("0.6.0")
+            )
+
+        generation.containsSources shouldBe true
+        generation.resourcePaths shouldContainExactly
+            listOf("META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.imports")
     }
 
     test("keep the project class loader active while APIs are consumed") {
