@@ -40,11 +40,8 @@
 - [x] Optimize imports in generated Kotlin files. Qualified references are shortened deterministically where safe,
   while name collisions remain qualified and strings, characters, and comments are left untouched.
 
-- [ ] kotlinx format by default was a good idea but it should also be pluggable, ideally tapik core should only provide
-  an abstraction for format and users should be required to pick their formatting dependency as well. otherwise someone
-  wanting to use tapik for a spring project with jackson and doesn't need kotlinx serialization dependency would need to
-  jump through hoops to exclude that dependency. in the case kotlinx is a separate module, they would simply not get
-  that dependency and will be able to add (a future) tapik jackson format dependency to their project.
+- [x] Keep format integrations opt-in. Core and generation targets consume only core format abstractions;
+  `format-kotlinx` is a separately selected dependency and other integrations can replace or coexist with it.
 
 - [ ] there should be a jackson 3 format module, implementing all and same functionality that kotlinx module has
 

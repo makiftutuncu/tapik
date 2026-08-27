@@ -78,8 +78,15 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `test-maven-contract` | `dev.akif:tapik-test-maven-contract` |
 | `test-maven-integration` | `dev.akif:tapik-test-maven-integration` |
 
-`core` remains dependency-free. `format-kotlinx` depends on Kotlin serialization and converts its serializers into
-core codecs and schemas without leaking Kotlin serialization types into endpoint contracts.
+`core` remains dependency-free. Format integrations are opt-in contract dependencies: neither core nor generation
+targets select a serialization library for the user. A contract may use one integration, combine multiple integrations,
+or construct core `Format` values directly; targets consume only the concrete formats already attached to the endpoint
+values.
+
+`format-kotlinx` depends on Kotlin serialization and converts its serializers into core codecs and schemas without
+leaking Kotlin serialization types into endpoint contracts. Projects that choose another integration do not depend on
+`format-kotlinx` or enable the Kotlin serialization compiler plugin. Dependencies used internally to render a target's
+own artifact are separate from contract format integrations and do not choose how endpoint values are encoded.
 
 `core` exposes the minimal API registry provider contract needed by compiler-generated code. The `common-plugin` module
 defines host-neutral registry loading, target configuration, target execution, and generated artifact contracts.

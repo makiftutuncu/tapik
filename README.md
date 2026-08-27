@@ -65,7 +65,8 @@ See the [DSL specification](specification/dsl.md) for the complete currently imp
 
 ## Maven setup
 
-Add the dependency-free core DSL. Add the Kotlin serialization integration when using `jsonBody`:
+Add the dependency-free core DSL, then explicitly choose the format integrations used by the contract. This example
+selects Kotlin serialization for `jsonBody`; projects using another integration omit `tapik-format-kotlinx`:
 
 ```xml
 <dependencies>
@@ -82,8 +83,8 @@ Add the dependency-free core DSL. Add the Kotlin serialization integration when 
 </dependencies>
 ```
 
-Enable Tapik in Kotlin's Maven compiler plugin. The Kotlin serialization entries are needed only by contracts using
-`@Serializable` models:
+Enable Tapik in Kotlin's Maven compiler plugin. The Kotlin serialization entries are needed only by contracts that
+explicitly select `tapik-format-kotlinx` and use `@Serializable` models:
 
 ```xml
 <plugin>
