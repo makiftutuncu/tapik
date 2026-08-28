@@ -142,6 +142,26 @@
                             </targetConfiguration>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-filtered-openapi</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <target>openapi</target>
+                            <includeApis>
+                                <includeApi>Authors</includeApi>
+                                <includeApi>Catalog</includeApi>
+                            </includeApis>
+                            <excludeApis>
+                                <excludeApi>Authors</excludeApi>
+                            </excludeApis>
+                            <targetConfiguration>
+                                <version>0.6.0</version>
+                                <output>filtered/{api}.yml</output>
+                            </targetConfiguration>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

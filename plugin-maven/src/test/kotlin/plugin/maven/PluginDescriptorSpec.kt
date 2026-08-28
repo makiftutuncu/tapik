@@ -23,7 +23,15 @@ class PluginDescriptorSpec : FunSpec({
         document.text("/plugin/mojos/mojo[goal='generate']/requiresDependencyResolution") shouldBe "compile+runtime"
         document.text("/plugin/mojos/mojo[goal='generate']/threadSafe") shouldBe "true"
         document.texts("/plugin/mojos/mojo[goal='generate']/parameters/parameter/name") shouldContainExactlyInAnyOrder
-            listOf("project", "mojoExecution", "target", "outputDirectory", "targetConfiguration")
+            listOf(
+                "project",
+                "mojoExecution",
+                "target",
+                "outputDirectory",
+                "includeApis",
+                "excludeApis",
+                "targetConfiguration"
+            )
     }
 
     test("publish the Tapik Kotlin Maven compiler extension") {

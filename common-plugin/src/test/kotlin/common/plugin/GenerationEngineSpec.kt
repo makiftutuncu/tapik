@@ -25,6 +25,20 @@ class GenerationEngineSpec : FunSpec({
         result.artifacts.single().relativePath shouldBe "result.txt"
     }
 
+    test("select APIs before target execution") {
+        val authors = object : Api("Authors") {}
+        val books = object : Api("Books") {}
+        val target = RecordingTarget()
+
+        GenerationEngine(listOf(target)).generate(
+            targetId = "recording",
+            apis = listOf(authors, books),
+            selection = ApiSelection(includes = setOf("Books"))
+        )
+
+        target.request?.apis shouldContainExactly listOf(books)
+    }
+
     test("reject invalid target selection and input") {
         val api = object : Api("Books") {}
 

@@ -175,7 +175,19 @@ Add one execution of the same Maven plugin:
 
 The goal runs in `process-classes` by default, so it can discover APIs compiled in the same module. It generates one
 YAML document per API under `target/generated/tapik`, such as `Books.openapi.yml`. Set `format` to `json` when JSON is
-preferred.
+preferred. Every discovered API is selected by default. An execution can narrow generation by exact API ID:
+
+```xml
+<includeApis>
+    <includeApi>Books</includeApi>
+    <includeApi>Authors</includeApi>
+</includeApis>
+<excludeApis>
+    <excludeApi>Authors</excludeApi>
+</excludeApis>
+```
+
+Exclusions are applied after inclusions. Unknown API IDs fail the build.
 
 OpenAPI target configuration:
 

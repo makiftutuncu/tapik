@@ -28,17 +28,19 @@ class GenerationEngine(
      * @param targetId ID of the target to invoke.
      * @param apis all APIs selected for this execution.
      * @param configuration host-neutral target configuration.
+     * @param selection exact API-ID filters applied before target execution.
      * @return artifacts returned by the selected target.
      * @throws IllegalArgumentException when the target is unknown, no APIs are supplied, or API IDs are duplicated.
      */
     fun generate(
         targetId: String,
         apis: List<Api>,
-        configuration: TargetConfiguration = TargetConfiguration()
+        configuration: TargetConfiguration = TargetConfiguration(),
+        selection: ApiSelection = ApiSelection()
     ): GenerationResult {
         val target = requireNotNull(targetsById[targetId]) { "Unknown generation target '$targetId'" }
         require(apis.isNotEmpty()) { "Generation requires at least one API" }
         requireUniqueApiIds(apis)
-        return target.generate(GenerationRequest(apis, configuration))
+        return target.generate(GenerationRequest(selection.select(apis), configuration))
     }
 }

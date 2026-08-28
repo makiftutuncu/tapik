@@ -11,6 +11,12 @@ Every target has a unique non-blank ID. Selecting an unknown target, registering
 APIs, or supplying APIs with duplicate IDs fails before target execution. Target-specific configuration is parsed and
 validated by the target so every host observes the same behavior.
 
+Each host-neutral generation execution may select APIs by exact ID with include and exclude sets. An empty include set
+selects every discovered API; otherwise only included IDs are eligible. Exclusions are applied afterward and therefore
+win when an ID is present in both sets. Selection preserves the catalog's canonical order. Blank filter values, unknown
+IDs, and a selection that leaves no APIs fail before target execution so configuration mistakes cannot silently omit
+artifacts.
+
 Generation targets are contributed through host-neutral target registries discovered with Java's service-provider
 mechanism. Build-tool adapters and future command-line applications load the same registries instead of hard-coding
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
@@ -127,7 +133,9 @@ Compile-classpath entries retain Maven's order and precede runtime-only entries.
 entries are passed to generation only once.
 
 The adapter loads every compiler-generated API registry visible to the project classpath. Conflicting API IDs fail
-generation.
+generation. Each execution exposes `includeApis` and `excludeApis` collections outside `targetConfiguration`; these
+are translated to the host-neutral API selection while target configuration remains target-owned. With neither
+collection configured, every discovered API is generated.
 
 `outputDirectory` defaults to `${project.build.directory}/generated/tapik`. Target artifact paths are resolved below
 that directory and written as UTF-8. Each Maven execution owns the paths it generated there. A later invocation of the

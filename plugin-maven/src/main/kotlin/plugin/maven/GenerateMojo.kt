@@ -36,6 +36,12 @@ class GenerateMojo : AbstractMojo() {
     private lateinit var outputDirectory: File
 
     @field:Parameter
+    private var includeApis: Set<String> = emptySet()
+
+    @field:Parameter
+    private var excludeApis: Set<String> = emptySet()
+
+    @field:Parameter
     private var targetConfiguration: Map<String, String> = emptyMap()
 
     override fun execute() {
@@ -45,6 +51,8 @@ class GenerateMojo : AbstractMojo() {
                     classpath = project.generationClasspath(),
                     targetId = target,
                     targetConfiguration = targetConfiguration,
+                    includeApis = includeApis,
+                    excludeApis = excludeApis,
                     outputDirectory = outputDirectory.toPath(),
                     executionId = mojoExecution.executionId,
                     parentClassLoader = requireNotNull(javaClass.classLoader),

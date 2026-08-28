@@ -64,7 +64,7 @@
 - [x] Complete the shared library fixture with author and rental operations. Use the expanded fixture in every target
   so new behavior is exercised against one representative contract.
 
-- [ ] Add deterministic API include and exclude filters to host-neutral generation requests and expose them through
+- [x] Add deterministic API include and exclude filters to host-neutral generation requests and expose them through
   the Maven plugin. Generation should continue to select every discovered API when no filters are configured.
 
 - [ ] Allow source targets to consume APIs declared in the same Maven module without creating a compile/generate

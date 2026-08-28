@@ -72,6 +72,9 @@ class MavenUsageSpec : FunSpec({
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
         generated("Catalog") shouldBe expected("Catalog")
+        Files.exists(Path.of("target/generated/tapik/filtered/Catalog.yml")) shouldBe true
+        Files.exists(Path.of("target/generated/tapik/filtered/Authors.yml")) shouldBe false
+        Files.exists(Path.of("target/generated/tapik/filtered/Books.yml")) shouldBe false
         Files.exists(Path.of("target/generated/tapik/Books.openapi.json")) shouldBe false
     }
 
