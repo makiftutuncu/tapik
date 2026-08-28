@@ -135,17 +135,24 @@ WebMVC uses the same deterministic declaration-name allocation as RestClient. Ha
 namespace, adapter mappings share a separate adapter namespace, and nested response types retain their own namespace.
 Top-level handler and adapter names and source artifact paths follow the same numeric disambiguation rule.
 
-### Spring Boot registration
+### Adapter registration
 
-Automatic adapter registration initially targets Spring Boot; plain Spring registration is deferred. The runtime
-WebMVC artifact contributes one public Boot auto-configuration entry. That auto-configuration imports only adapters
-listed by generated Tapik WebMVC registration resources, so it neither scans arbitrary packages nor reflects over API
-classes.
+The runtime WebMVC artifact provides `@EnableTapikWebMvc` for plain Spring applications. Adding it to one application
+configuration registers only adapters listed by generated Tapik WebMVC registration resources, so it neither scans
+arbitrary packages nor reflects over API classes. It registers Tapik adapters only; configuring Spring MVC itself
+remains the application's responsibility.
 
-Each generated adapter is conditional on a single candidate handler bean. No handler leaves that API unregistered;
-one candidate registers the adapter; multiple candidates register it only when Spring can select a primary candidate.
-Qualifiers alone do not select a generated adapter because the adapter declares no generated qualifier. A single user
-bean may implement several generated handler interfaces and receives one adapter for each interface.
+Spring Boot applications need no annotation or user configuration. The runtime artifact contributes one public Boot
+auto-configuration entry that applies `@EnableTapikWebMvc` and therefore uses the same generated descriptors and
+selection behavior as plain Spring. The Boot dependency is optional for the runtime artifact so plain Spring consumers
+do not receive Boot transitively.
+
+Each generated descriptor names both its pure handler interface and generated adapter. After application bean
+definitions are available, Tapik registers an adapter only when Spring can select a single candidate handler bean. No
+handler leaves that API unregistered; one candidate registers the adapter; multiple candidates register it only when
+exactly one candidate is primary. Qualifiers alone do not select a generated adapter because the adapter declares no
+generated qualifier. A single user bean may implement several generated handler interfaces and receives one adapter
+for each interface.
 
 The target emits one source and one uniquely named registration resource per API. Resource identity includes the
 generated adapter's qualified name, and registration order is canonical by that name. The Maven host packages generated
@@ -154,8 +161,8 @@ handler interfaces; they do not write per-API adapter configuration.
 
 The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its WebMVC
 handler, adapter, and registration resource during `generate-sources`, and compiles an implementation of the generated
-interface. A Boot application context discovers the adapter automatically and serves a typed response through Spring's
-mock MVC runtime without user-written adapter configuration.
+interface. Boot and plain Spring application contexts discover the same adapters and serve typed responses through
+Spring's mock MVC runtime without per-API adapter configuration.
 
 ## Target runtime conformance
 

@@ -17,6 +17,7 @@ object WebMvcTarget : GenerationTarget {
                 }
                 val serverName = uniqueKotlinName(apiTypeName + configuration.serverSuffix, usedTypeNames)
                 val controllerName = uniqueKotlinName(apiTypeName + configuration.controllerSuffix, usedTypeNames)
+                val serverType = "${configuration.packageName}.$serverName"
                 val controllerType = "${configuration.packageName}.$controllerName"
                 listOf(
                     GeneratedArtifact(
@@ -31,10 +32,10 @@ object WebMvcTarget : GenerationTarget {
                             ).generate(CompiledApiReader.read(api))
                     ),
                     GeneratedArtifact(
-                        relativePath = "META-INF/tapik/spring/webmvc/$controllerType.imports",
+                        relativePath = "META-INF/tapik/spring/webmvc/$controllerType.properties",
                         mediaType = "text/plain",
                         kind = ArtifactKind.RESOURCE,
-                        content = "$controllerType\n"
+                        content = "handler=$serverType\nadapter=$controllerType\n"
                     )
                 )
             }

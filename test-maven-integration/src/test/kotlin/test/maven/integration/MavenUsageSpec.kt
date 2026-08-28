@@ -9,6 +9,7 @@ import dev.akif.tapik.test.maven.integration.generated.AuthorsClient
 import dev.akif.tapik.test.maven.integration.generated.AuthorsServer
 import dev.akif.tapik.test.maven.integration.generated.CatalogServer
 import dev.akif.tapik.target.spring.restclient.RestClientTransport
+import dev.akif.tapik.target.spring.webmvc.EnableTapikWebMvc
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -44,7 +45,11 @@ import java.util.ServiceLoader
 
 class MavenUsageSpec : FunSpec({
     val webMvc = webMvcFixture()
-    afterSpec { webMvc.close() }
+    val plainWebMvc = webMvcFixture(PlainWebMvcTestApplication::class.java)
+    afterSpec {
+        webMvc.close()
+        plainWebMvc.close()
+    }
 
     test("compile API definitions and generate OpenAPI through one Tapik Maven plugin") {
         val apis = ServiceLoader.load(ApiRegistry::class.java).flatMap(ApiRegistry::apis)
@@ -293,6 +298,12 @@ class MavenUsageSpec : FunSpec({
             listOf("AuthorsGeneratedController", "CatalogGeneratedController")
         webMvc.mvc.perform(get("/catalog")).andExpect(status().isOk)
     }
+
+    test("register the same generated adapters in plain Spring") {
+        plainWebMvc.adapters.map { adapter -> adapter.javaClass.simpleName }.sorted() shouldContainExactly
+            listOf("AuthorsGeneratedController", "CatalogGeneratedController")
+        plainWebMvc.mvc.perform(get("/catalog")).andExpect(status().isOk)
+    }
 })
 
 private class LibraryController : AuthorsServer, CatalogServer {
@@ -341,6 +352,13 @@ private class WebMvcTestApplication {
     fun libraryController(): LibraryController = LibraryController()
 }
 
+@Configuration(proxyBeanMethods = false)
+@EnableTapikWebMvc
+private class PlainWebMvcTestApplication {
+    @Bean
+    fun libraryController(): LibraryController = LibraryController()
+}
+
 private class WebMvcFixture(
     private val context: AnnotationConfigApplicationContext,
     val controller: LibraryController,
@@ -350,8 +368,10 @@ private class WebMvcFixture(
     override fun close() = context.close()
 }
 
-private fun webMvcFixture(): WebMvcFixture {
-    val context = AnnotationConfigApplicationContext(WebMvcTestApplication::class.java)
+private fun webMvcFixture(
+    configuration: Class<*> = WebMvcTestApplication::class.java
+): WebMvcFixture {
+    val context = AnnotationConfigApplicationContext(configuration)
     val adapters = context.getBeansWithAnnotation(RestController::class.java).values.toList()
     return WebMvcFixture(
         context = context,

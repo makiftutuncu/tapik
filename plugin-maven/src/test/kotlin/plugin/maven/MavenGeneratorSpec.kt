@@ -50,7 +50,7 @@ class MavenGeneratorSpec : FunSpec({
 
         generation.containsSources shouldBe true
         generation.resourcePaths shouldContainExactly
-            listOf("META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.imports")
+            listOf("META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.properties")
     }
 
     test("keep the project class loader active while APIs are consumed") {

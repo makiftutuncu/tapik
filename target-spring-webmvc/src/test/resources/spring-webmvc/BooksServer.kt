@@ -13,7 +13,6 @@ import dev.akif.tapik.test.fixtures.library.BookId
 import dev.akif.tapik.test.fixtures.library.Books
 import dev.akif.tapik.test.fixtures.library.CreateBook
 import java.util.UUID
-import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.util.MultiValueMap
@@ -69,7 +68,6 @@ public interface BooksServer {
     ): CreateResponse
 }
 
-@ConditionalOnSingleCandidate(BooksServer::class)
 @RestController
 internal class BooksGeneratedController(
     private val handler: BooksServer

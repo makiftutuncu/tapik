@@ -53,7 +53,6 @@ internal class WebMvcGenerator(
             }
             appendLine("}")
             appendLine()
-            appendLine("@org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate(${model.serverName}::class)")
             appendLine("@org.springframework.web.bind.annotation.RestController")
             appendLine("internal class ${model.controllerName}(")
             appendLine("    private val handler: ${model.serverName}")

@@ -15,10 +15,10 @@ class GeneratedArtifactsSpec : FunSpec({
                 written =
                     listOf(
                         output.resolve("generated/BooksServer.kt"),
-                        output.resolve("META-INF/tapik/spring/webmvc/BooksGeneratedController.imports")
+                        output.resolve("META-INF/tapik/spring/webmvc/BooksGeneratedController.properties")
                     ),
                 containsSources = true,
-                resourcePaths = listOf("META-INF/tapik/spring/webmvc/BooksGeneratedController.imports")
+                resourcePaths = listOf("META-INF/tapik/spring/webmvc/BooksGeneratedController.properties")
             )
 
         project.registerGeneratedArtifacts(output, generation)

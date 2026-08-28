@@ -27,25 +27,24 @@ class WebMvcTargetSpec : FunSpec({
         result.artifacts.map { artifact -> artifact.relativePath to artifact.kind } shouldContainExactly
             listOf(
                 "dev/akif/tapik/generated/BooksServer.kt" to ArtifactKind.SOURCE,
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.imports" to
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.properties" to
                     ArtifactKind.RESOURCE
             )
         val source = result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content
         val handler =
             source
                 .substringAfter("public interface BooksServer")
-                .substringBefore("\n}\n\n@ConditionalOnSingleCandidate")
+                .substringBefore("\n}\n\n@RestController")
         handler shouldNotContain "org.springframework"
         handler shouldNotContain "Http("
-        source shouldContain
-            "@ConditionalOnSingleCandidate(BooksServer::class)"
         source shouldContain "@RestController"
         source shouldContain "internal class BooksGeneratedController("
         source shouldContain "private val handler: BooksServer"
         source shouldContain "public fun list("
         source shouldNotContain "public fun listHttp("
         result.artifacts.single { artifact -> artifact.kind == ArtifactKind.RESOURCE }.content shouldBe
-            "dev.akif.tapik.generated.BooksGeneratedController\n"
+            "handler=dev.akif.tapik.generated.BooksServer\n" +
+            "adapter=dev.akif.tapik.generated.BooksGeneratedController\n"
     }
 
     test("configure generated type suffixes independently") {
@@ -64,7 +63,7 @@ class WebMvcTargetSpec : FunSpec({
         result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
                 "dev/akif/tapik/generated/BooksContract.kt",
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksSpringController.imports"
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksSpringController.properties"
             )
         result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content.run {
             shouldContain("public interface BooksContract")
