@@ -50,7 +50,7 @@
 - [x] Move stable RestClient response handling and WebMVC request/response helpers into their corresponding runtime
   modules. Generated files now contain only API-specific wiring and refer to these shared functions.
 
-- [ ] tapik should provide a BOM because it ships many modules and their version management will be much easier that way
+- [x] tapik should provide a BOM because it ships many modules and their version management will be much easier that way
   for the tapik users
 
 - [ ] openapi target should also support yaml format with yml extension, in fact make it configurable and make yml the

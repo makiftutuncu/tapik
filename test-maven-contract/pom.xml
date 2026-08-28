@@ -17,16 +17,26 @@
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>dev.akif</groupId>
+                <artifactId>tapik-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-format-kotlinx</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -45,6 +45,7 @@
     </issueManagement>
 
     <modules>
+        <module>bom</module>
         <module>core</module>
         <module>plugin-compiler</module>
         <module>common-plugin</module>

@@ -65,20 +65,35 @@ See the [DSL specification](specification/dsl.md) for the complete currently imp
 
 ## Maven setup
 
-Add the dependency-free core DSL, then explicitly choose the format integrations used by the contract. This example
-selects Kotlin serialization for `jsonBody`; projects using another integration omit `tapik-format-kotlinx`:
+Import the Tapik BOM once so every Tapik dependency uses the same release:
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>dev.akif</groupId>
+            <artifactId>tapik-bom</artifactId>
+            <version>0.6.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+Then add the dependency-free core DSL and explicitly choose the format integrations used by the contract. This
+example selects Kotlin serialization for `jsonBody`; projects using another integration omit
+`tapik-format-kotlinx`:
 
 ```xml
 <dependencies>
     <dependency>
         <groupId>dev.akif</groupId>
         <artifactId>tapik-core</artifactId>
-        <version>0.6.0</version>
     </dependency>
     <dependency>
         <groupId>dev.akif</groupId>
         <artifactId>tapik-format-kotlinx</artifactId>
-        <version>0.6.0</version>
     </dependency>
 </dependencies>
 ```
@@ -90,9 +105,11 @@ and accepts an application mapper when custom Jackson behavior is required:
 <dependency>
     <groupId>dev.akif</groupId>
     <artifactId>tapik-format-jackson</artifactId>
-    <version>0.6.0</version>
 </dependency>
 ```
+
+The BOM manages ordinary Tapik project dependencies. Maven still requires explicit versions for build plugins and
+for dependencies nested inside a plugin declaration, as shown below.
 
 Enable Tapik in Kotlin's Maven compiler plugin. The Kotlin serialization entries are needed only by contracts that
 explicitly select `tapik-format-kotlinx` and use `@Serializable` models:
@@ -180,7 +197,6 @@ Add the runtime needed by the selected generated target and the contract depende
 <dependency>
     <groupId>dev.akif</groupId>
     <artifactId>tapik-target-spring-restclient</artifactId>
-    <version>0.6.0</version>
 </dependency>
 <dependency>
     <groupId>com.example</groupId>

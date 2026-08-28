@@ -35,8 +35,8 @@ Tapik releases are published to Maven Central under `dev.akif`. The parent and e
 project name, description, URL, MIT license, developer, and source-control metadata required by Central. Production
 JARs include their Kotlin sources and a per-module `javadoc`-classifier JAR containing Dokka's standard HTML output.
 The classifier satisfies repository conventions without switching Dokka to its experimental Javadoc renderer. The
-parent POM and every production artifact, including attached source and documentation artifacts, are signed during a
-release build.
+parent POM, the BOM POM, and every production artifact, including attached source and documentation artifacts, are
+signed during a release build. POM-packaged artifacts do not attach empty source or documentation JARs.
 
 Publication is opt-in through the Maven `release` profile. Ordinary builds, including CI's `./mvnw verify`, neither
 load signing credentials nor contact Central. `./mvnw -Prelease -Dgpg.skip=true verify` is the credential-free local
@@ -51,9 +51,10 @@ publishable because published module POMs inherit their shared project metadata 
 ## Modules
 
 The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification
-needs an independently consumable boundary. Maven module folders are flat beneath the repository root, omit the
-`tapik-` artifact prefix, and, except for `core`, begin with exactly one role prefix: `common-`, `format-`, `plugin-`,
-`target-`, or `test-`. Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization
+needs an independently consumable boundary. Maven module folders are flat beneath the repository root and omit the
+`tapik-` artifact prefix. Runtime and integration modules, except for `core`, begin with exactly one role prefix:
+`common-`, `format-`, `plugin-`, `target-`, or `test-`. The structural `bom` module is the other unprefixed exception.
+Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization
 integration is therefore `dev.akif:tapik-format-kotlinx` with packages under `dev.akif.tapik.format.kotlinx`.
 
 `plugin-` is reserved for integrations invoked by a compiler or build tool. Modules implementing the host-neutral
@@ -65,6 +66,7 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 
 | Module folder | Maven artifact |
 | --- | --- |
+| `bom` | `dev.akif:tapik-bom` |
 | `core` | `dev.akif:tapik-core` |
 | `common-format` | `dev.akif:tapik-common-format` |
 | `common-plugin` | `dev.akif:tapik-common-plugin` |
@@ -79,6 +81,11 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `test-fixtures` | `dev.akif:tapik-test-fixtures` |
 | `test-maven-contract` | `dev.akif:tapik-test-maven-contract` |
 | `test-maven-integration` | `dev.akif:tapik-test-maven-integration` |
+
+`tapik-bom` is a published Maven BOM that manages one release version for every published Tapik production artifact.
+It excludes all non-production `test-` artifacts. Users import the BOM in project `dependencyManagement` and omit
+versions from their ordinary Tapik dependencies. Maven build-plugin versions and dependencies declared inside a
+build plugin remain explicitly versioned because project dependency management does not govern those scopes.
 
 `core` remains dependency-free. Format integrations are opt-in contract dependencies: neither core nor generation
 targets select a serialization library for the user. A contract may use one integration, combine multiple integrations,
