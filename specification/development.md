@@ -134,4 +134,4 @@ excluded from deployment. This applies to every `test-` module; release deployme
 
 The `target-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy contracts
 into a neutral metadata model. Its public document model represents the OpenAPI output itself, and deterministic JSON
-is the first rendering format.
+and YAML renderers expose the same document values.

@@ -2,7 +2,7 @@ package dev.akif.tapik.plugin.maven
 
 import dev.akif.tapik.test.fixtures.library.Books
 import dev.akif.tapik.target.openapi.OpenApi
-import dev.akif.tapik.target.openapi.toJson
+import dev.akif.tapik.target.openapi.toYaml
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
@@ -28,9 +28,9 @@ class MavenGeneratorSpec : FunSpec({
             )
 
         generation.containsSources shouldBe false
-        generation.written.single() shouldBe output.resolve("Books.openapi.json")
+        generation.written.single() shouldBe output.resolve("Books.openapi.yml")
         Files.readString(generation.written.single()) shouldBe
-            OpenApi.from(Books, version = "0.6.0").toJson()
+            OpenApi.from(Books, version = "0.6.0").toYaml()
     }
 
     test("retain generated runtime resource paths for the Maven host") {
@@ -75,7 +75,8 @@ class MavenGeneratorSpec : FunSpec({
         generator.generate(
             classpath = emptyList(),
             targetId = "openapi",
-            targetConfiguration = mapOf("version" to "0.6.0", "output" to "old/{api}.json"),
+            targetConfiguration =
+                mapOf("version" to "0.6.0", "format" to "json", "output" to "old/{api}.json"),
             outputDirectory = output,
             executionId = "documentation",
             parentClassLoader = parentClassLoader,
@@ -85,7 +86,8 @@ class MavenGeneratorSpec : FunSpec({
         generator.generate(
             classpath = emptyList(),
             targetId = "openapi",
-            targetConfiguration = mapOf("version" to "0.6.0", "output" to "new/{api}.json"),
+            targetConfiguration =
+                mapOf("version" to "0.6.0", "format" to "json", "output" to "new/{api}.json"),
             outputDirectory = output,
             executionId = "documentation",
             parentClassLoader = parentClassLoader,

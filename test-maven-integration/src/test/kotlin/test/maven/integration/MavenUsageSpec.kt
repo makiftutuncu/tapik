@@ -37,6 +37,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.client.RestClient
 import org.springframework.web.bind.annotation.RestController
+import org.yaml.snakeyaml.Yaml
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.ServiceLoader
@@ -66,6 +67,7 @@ class MavenUsageSpec : FunSpec({
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
         generated("Catalog") shouldBe expected("Catalog")
+        Files.exists(Path.of("target/generated/tapik/Books.openapi.json")) shouldBe false
     }
 
     test("execute a client generated from a contract dependency") {
@@ -359,10 +361,11 @@ private fun webMvcFixture(): WebMvcFixture {
     )
 }
 
-private fun generated(api: String): String =
-    Files.readString(Path.of("target/generated/tapik/$api.openapi.json"))
+private fun generated(api: String): Any =
+    Yaml().load(Files.readString(Path.of("target/generated/tapik/$api.openapi.yml")))
 
-private fun expected(api: String): String =
-    requireNotNull(MavenUsageSpec::class.java.getResource("/openapi/${api.lowercase()}.json"))
-        .readText()
-        .trimEnd()
+private fun expected(api: String): Any =
+    Yaml().load(
+        requireNotNull(MavenUsageSpec::class.java.getResource("/openapi/${api.lowercase()}.json"))
+            .readText()
+    )

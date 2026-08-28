@@ -11,11 +11,6 @@ import io.kotest.matchers.shouldBe
 class OpenApiTargetSpec : FunSpec({
     test("generate one complete document artifact for every API") {
         val empty = object : Api("Empty") {}
-        val expected =
-            requireNotNull(OpenApiTargetSpec::class.java.getResource("/openapi/books-api.json"))
-                .readText()
-                .trimEnd()
-
         val result =
             OpenApiTarget.generate(
                 GenerationRequest(
@@ -25,10 +20,10 @@ class OpenApiTargetSpec : FunSpec({
             )
 
         result.artifacts.map { it.relativePath } shouldContainExactly
-            listOf("Books.openapi.json", "Empty.openapi.json")
+            listOf("Books.openapi.yml", "Empty.openapi.yml")
         result.artifacts.first().kind shouldBe ArtifactKind.DOCUMENTATION
-        result.artifacts.first().mediaType shouldBe "application/json"
-        result.artifacts.first().content shouldBe expected
+        result.artifacts.first().mediaType shouldBe "application/yaml"
+        result.artifacts.first().content shouldBe OpenApi.from(Books, version = "0.6.0").toYaml()
     }
 
     test("apply host-neutral OpenAPI target configuration") {
@@ -39,6 +34,7 @@ class OpenApiTargetSpec : FunSpec({
                     configuration =
                         targetConfigurationOf(
                             "version" to "1.2.3",
+                            "format" to "json",
                             "pretty" to "false",
                             "componentNaming" to "qualified",
                             "output" to "contracts/{api}.json"
@@ -47,6 +43,7 @@ class OpenApiTargetSpec : FunSpec({
             )
 
         result.artifacts.single().relativePath shouldBe "contracts/Books.json"
+        result.artifacts.single().mediaType shouldBe "application/json"
         result.artifacts.single().content.contains('\n') shouldBe false
         result.artifacts.single().content shouldBe
             OpenApi.from(
@@ -65,6 +62,14 @@ class OpenApiTargetSpec : FunSpec({
                 GenerationRequest(
                     listOf(Books),
                     targetConfigurationOf("version" to "1", "unknown" to "value")
+                )
+            )
+        }
+        shouldThrow<IllegalArgumentException> {
+            OpenApiTarget.generate(
+                GenerationRequest(
+                    listOf(Books),
+                    targetConfigurationOf("version" to "1", "format" to "xml")
                 )
             )
         }

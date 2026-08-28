@@ -27,8 +27,15 @@ policy. The default `OpenApiComponentNaming.Simple` policy keeps the final dot-s
 Schemas that resolve to the same component name and the same OpenAPI shape share one component. Different shapes
 resolving to the same name fail generation instead of allowing one definition to overwrite another.
 
-## JSON rendering
+## Rendering
 
 `OpenApiDocument.toJson()` produces pretty, deterministic JSON. Passing `pretty = false` produces compact JSON with
-the same content and ordering. The complete library fixture document is maintained as a golden test resource so any
-observable output change requires an explicit expected-document update.
+the same content and ordering. `OpenApiDocument.toYaml()` produces deterministic block-style YAML containing the same
+document structure and scalar values. The complete library fixture JSON document is maintained as a golden test
+resource so any observable document change requires an explicit expected-document update; focused renderer tests keep
+the JSON and YAML representations semantically aligned.
+
+The generation target accepts `format` values `yaml` and `json`, defaulting to `yaml`. YAML artifacts use media type
+`application/yaml` and default to `{api}.openapi.yml`; JSON artifacts use `application/json` and default to
+`{api}.openapi.json`. An explicit `output` template replaces either format-specific default without changing the
+selected renderer.

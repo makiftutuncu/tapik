@@ -19,7 +19,7 @@ import kotlinx.serialization.json.put
 fun OpenApiDocument.toJson(pretty: Boolean = true): String =
     Json { prettyPrint = pretty }.encodeToString(JsonElement.serializer(), json())
 
-private fun OpenApiDocument.json(): JsonObject =
+internal fun OpenApiDocument.json(): JsonObject =
     buildJsonObject {
         put("openapi", specificationVersion)
         put("info", info.json())

@@ -53,7 +53,7 @@
 - [x] tapik should provide a BOM because it ships many modules and their version management will be much easier that way
   for the tapik users
 
-- [ ] openapi target should also support yaml format with yml extension, in fact make it configurable and make yml the
+- [x] openapi target should also support yaml format with yml extension, in fact make it configurable and make yml the
   default format
 
 ## Remaining rewrite increments

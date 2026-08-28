@@ -113,8 +113,10 @@ reproduce them without losing information.
 ## OpenAPI target
 
 The OpenAPI target accepts all APIs in one execution and generates one document artifact per API. Its host-neutral
-configuration requires a document version and supports pretty JSON, component naming, and a relative output template.
-The `{api}` placeholder expands to the API ID, and the default template is `{api}.openapi.json`.
+configuration requires a document version and supports YAML or JSON format, pretty JSON, component naming, and a
+relative output template. YAML is the default format and uses `{api}.openapi.yml`; JSON uses `{api}.openapi.json`.
+The `{api}` placeholder expands to the API ID, and an explicit output template overrides either format-specific
+default.
 
 ## Maven adapter
 

@@ -174,16 +174,18 @@ Add one execution of the same Maven plugin:
 ```
 
 The goal runs in `process-classes` by default, so it can discover APIs compiled in the same module. It generates one
-document per API under `target/generated/tapik`, such as `Books.openapi.json`.
+YAML document per API under `target/generated/tapik`, such as `Books.openapi.yml`. Set `format` to `json` when JSON is
+preferred.
 
 OpenAPI target configuration:
 
 | Setting | Required | Default | Meaning |
 | --- | --- | --- | --- |
 | `version` | yes | — | Document `info.version` |
+| `format` | no | `yaml` | `yaml` or `json` document rendering |
 | `pretty` | no | `true` | Pretty or compact JSON |
 | `componentNaming` | no | `simple` | `simple` or `qualified` schema names |
-| `output` | no | `{api}.openapi.json` | Relative output template |
+| `output` | no | format-specific | `{api}.openapi.yml` or `{api}.openapi.json` |
 
 ## Generate Spring clients and servers
 
