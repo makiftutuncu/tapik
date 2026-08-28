@@ -8,3 +8,9 @@ data class Author(
     val id: AuthorId,
     val name: String
 )
+
+/** Request model for a new author with [name]. */
+@Serializable
+data class CreateAuthor(
+    val name: String
+)

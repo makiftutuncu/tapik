@@ -126,7 +126,7 @@ reactor-built artifacts, including APIs supplied by a separate contract artifact
 
 The non-production `test-fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
 `dev.akif.tapik.test.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact
-in their tests so every interpreter is verified against the same contract instead of maintaining target-specific
+in their tests so every interpreter is verified against the same contracts instead of maintaining target-specific
 fixtures.
 
 Non-production modules remain installable so reactor and local integration builds can resolve them, but they must be

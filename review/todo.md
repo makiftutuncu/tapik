@@ -61,7 +61,7 @@
 - [x] Add a plain Spring registration mechanism for generated WebMVC adapters without relying on component scanning.
   Keep Spring Boot auto-configuration as the zero-configuration path and reuse the same generated adapter descriptors.
 
-- [ ] Complete the shared library fixture with author and rental operations. Use the expanded fixture in every target
+- [x] Complete the shared library fixture with author and rental operations. Use the expanded fixture in every target
   so new behavior is exercised against one representative contract.
 
 - [ ] Add deterministic API include and exclude filters to host-neutral generation requests and expose them through

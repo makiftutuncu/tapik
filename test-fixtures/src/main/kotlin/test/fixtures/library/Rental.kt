@@ -18,3 +18,11 @@ data class Rental(
     val dueDate: String,
     val status: RentalStatus
 )
+
+/** Request model for renting [bookId] to [borrower] until the encoded [dueDate]. */
+@Serializable
+data class CreateRental(
+    val bookId: BookId,
+    val borrower: String,
+    val dueDate: String
+)

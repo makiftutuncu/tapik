@@ -323,14 +323,23 @@ declaration-order semantics, reject blank values, and are mutable only while the
 
 ## Design fixture
 
-The `test-fixtures` module's `dev.akif.tapik.test.fixtures.library` package covers books, authors, and rentals. Its first
-endpoints are:
+The `test-fixtures` module's `dev.akif.tapik.test.fixtures.library` package defines separate `Books`, `Authors`, and
+`Rentals` APIs so operation IDs remain domain-qualified. Its representative endpoints are:
 
 ```text
 GET  /books
 GET  /books/{bookId}
 POST /books
+GET  /authors
+GET  /authors/{authorId}
+POST /authors
+GET  /rentals
+GET  /rentals/{rentalId}
+POST /rentals
+POST /rentals/{rentalId}/return
 ```
 
-It includes a transformed `BookId` format, a defaulted page query, a required request ID header, Kotlin-serialization
-JSON inputs and outputs, multiple status alternatives, and a response `Location` header.
+It includes transformed domain identifier formats, defaulted and repeated queries, an optional `LocalDate` query, a
+required request ID header, Kotlin-serialization JSON inputs and outputs, multiple status alternatives, and response
+`Location` headers. OpenAPI, RestClient, and WebMVC target tests generate all three APIs while retaining focused golden
+coverage for the Books contract.

@@ -1,7 +1,9 @@
 package dev.akif.tapik.target.spring.webmvc
 
 import dev.akif.tapik.*
+import dev.akif.tapik.test.fixtures.library.Authors
 import dev.akif.tapik.test.fixtures.library.Books
+import dev.akif.tapik.test.fixtures.library.Rentals
 import dev.akif.tapik.common.plugin.ArtifactKind
 import dev.akif.tapik.common.plugin.GenerationRequest
 import dev.akif.tapik.common.plugin.targetConfigurationOf
@@ -15,6 +17,30 @@ import io.kotest.matchers.string.shouldNotContain
 import org.jetbrains.kotlin.cli.common.ExitCode
 
 class WebMvcTargetSpec : FunSpec({
+    test("generate every shared library API") {
+        val result =
+            WebMvcTarget.generate(
+                GenerationRequest(
+                    apis = listOf(Books, Authors, Rentals),
+                    configuration = targetConfigurationOf("packageName" to "dev.akif.tapik.generated")
+                )
+            )
+
+        result.artifacts.map { it.relativePath } shouldContainExactly
+            listOf(
+                "dev/akif/tapik/generated/BooksServer.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.properties",
+                "dev/akif/tapik/generated/AuthorsServer.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.AuthorsGeneratedController.properties",
+                "dev/akif/tapik/generated/RentalsServer.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.RentalsGeneratedController.properties"
+            )
+        result.artifacts.filter { it.kind == ArtifactKind.SOURCE }.forEach { artifact ->
+            val compilation = compileKotlin(artifact.content)
+            withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        }
+    }
+
     test("separate public handlers from automatically registered Spring adapters") {
         val result =
             WebMvcTarget.generate(

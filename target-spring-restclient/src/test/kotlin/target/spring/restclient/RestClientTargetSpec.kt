@@ -1,7 +1,9 @@
 package dev.akif.tapik.target.spring.restclient
 
 import dev.akif.tapik.*
+import dev.akif.tapik.test.fixtures.library.Authors
 import dev.akif.tapik.test.fixtures.library.Books
+import dev.akif.tapik.test.fixtures.library.Rentals
 import dev.akif.tapik.common.plugin.ArtifactKind
 import dev.akif.tapik.common.plugin.GenerationRequest
 import dev.akif.tapik.common.plugin.targetConfigurationOf
@@ -14,6 +16,27 @@ import io.kotest.matchers.string.shouldNotContain
 import org.jetbrains.kotlin.cli.common.ExitCode
 
 class RestClientTargetSpec : FunSpec({
+    test("generate every shared library API") {
+        val result =
+            RestClientTarget.generate(
+                GenerationRequest(
+                    apis = listOf(Books, Authors, Rentals),
+                    configuration = targetConfigurationOf("packageName" to "dev.akif.tapik.generated")
+                )
+            )
+
+        result.artifacts.map { it.relativePath } shouldContainExactly
+            listOf(
+                "dev/akif/tapik/generated/BooksClient.kt",
+                "dev/akif/tapik/generated/AuthorsClient.kt",
+                "dev/akif/tapik/generated/RentalsClient.kt"
+            )
+        result.artifacts.forEach { artifact ->
+            val compilation = compileKotlin(artifact.content)
+            withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        }
+    }
+
     test("generate a complete client from the Books API") {
         val expected =
             requireNotNull(RestClientTargetSpec::class.java.getResource("/spring-restclient/BooksClient.kt"))

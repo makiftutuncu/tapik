@@ -31,9 +31,10 @@ resolving to the same name fail generation instead of allowing one definition to
 
 `OpenApiDocument.toJson()` produces pretty, deterministic JSON. Passing `pretty = false` produces compact JSON with
 the same content and ordering. `OpenApiDocument.toYaml()` produces deterministic block-style YAML containing the same
-document structure and scalar values. The complete library fixture JSON document is maintained as a golden test
-resource so any observable document change requires an explicit expected-document update; focused renderer tests keep
-the JSON and YAML representations semantically aligned.
+document structure and scalar values. The complete Books fixture JSON document is maintained as a golden test resource
+so any observable document change requires an explicit expected-document update. The Authors and Rentals fixtures are
+also converted by the target suite, while focused renderer tests keep the JSON and YAML representations semantically
+aligned.
 
 The generation target accepts `format` values `yaml` and `json`, defaulting to `yaml`. YAML artifacts use media type
 `application/yaml` and default to `{api}.openapi.yml`; JSON artifacts use `application/json` and default to
