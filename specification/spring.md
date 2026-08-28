@@ -48,6 +48,10 @@ headers, and request bodies precede optional or defaulted values. Runtime endpoi
 defaults, media types, matchers, and codecs. Generated code performs URI construction, request encoding, output
 matching, and response decoding without a parallel endpoint model.
 
+Generated clients contain only API-specific request construction, output matching, and response construction. Stable
+response body and header decoding and fixed-header conformance live once in `tapik-target-spring-restclient`; generated
+sources call that runtime support instead of copying private helper functions into every client interface.
+
 The initial target supports at most one encoded request-body representation. Multiple output body representations
 remain distinguishable by response media type. Unsupported compiled shapes or endpoint capabilities fail generation
 with the API and endpoint ID.
@@ -111,6 +115,11 @@ output. Statuses and headers come from the selected response variant and endpoin
 
 A defaulted output header is exposed as a nullable response field defaulting to `null`. When a handler leaves that
 field unset, the mapping method encodes the default carried by the endpoint definition.
+
+Generated adapters contain only API-specific Spring mappings and handler adaptation. Stable request decoding, request
+media-type matching, HTTP error construction, and `ResponseEntity` construction live once in
+`tapik-target-spring-webmvc`; generated adapters call that runtime support instead of repeating private helpers in every
+controller.
 
 Spring WebMVC derives `Content-Type` from the selected response body representation and owns `Content-Length` for the
 encoded response bytes. Generation fails when an output that can carry a body also declares `Content-Type`, or when any

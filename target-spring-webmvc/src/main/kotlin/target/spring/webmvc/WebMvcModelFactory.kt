@@ -29,18 +29,7 @@ internal fun webMvcApiModel(
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
     val handlerNames = mutableSetOf<String>()
-    val mappingNames =
-        mutableSetOf(
-            "decodeString",
-            "decodeStrings",
-            "decodeBody",
-            "decode",
-            "mediaTypeCompatible",
-            "responseEntity",
-            "badRequest",
-            "unsupportedMediaType",
-            "notAcceptable"
-        )
+    val mappingNames = mutableSetOf<String>()
     val responseNames = mutableSetOf<String>()
     return WebMvcApiModel(
         packageName = packageName,

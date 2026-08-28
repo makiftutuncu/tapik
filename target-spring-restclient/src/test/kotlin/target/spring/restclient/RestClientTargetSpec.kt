@@ -10,6 +10,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import org.jetbrains.kotlin.cli.common.ExitCode
 
 class RestClientTargetSpec : FunSpec({
@@ -60,7 +61,7 @@ class RestClientTargetSpec : FunSpec({
                 .content
 
         source shouldContain "public data object Ok : CheckResponse"
-        source shouldContain "requireFixedHeader("
+        source shouldContain "requireFixedResponseHeader("
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
@@ -89,7 +90,9 @@ class RestClientTargetSpec : FunSpec({
         source shouldContain "restClientNamingCollisionsApi.`find-book`"
         source shouldContain "public fun findBook(): FindBookResponse"
         source shouldContain "public fun findBook2(): FindBookResponse2"
-        source shouldContain "public fun decodeBody2(): DecodeBodyResponse"
+        source shouldContain "public fun decodeResponseBody(): DecodeResponseBodyResponse"
+        source shouldNotContain "public fun decodeResponseBody2("
+        source shouldNotContain "private fun <Value : Any> decodeResponseBody("
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
@@ -165,9 +168,21 @@ public object ResponseConformance : Api() {
 }
 
 public object RestClientNamingCollisions : Api() {
+    private val stringBody: ByteArrayFormat<String> =
+        Format(
+            codec =
+                Codec(
+                    decoder = Decoder { value -> DecodeResult.Success(value.decodeToString()) },
+                    encoder = Encoder(String::encodeToByteArray)
+                ),
+            schema = ScalarSchema(SchemaType.STRING)
+        )
+
     public val `find-book` by get(root / "hyphen")
     public val findBook by get(root / "camel")
-    public val decodeBody by get(root / "decode")
+    public val decodeResponseBody by
+        get(root / "decode")
+            .output(Status.Ok with body(MediaType.Json, stringBody))
 }
 
 public class RestClientNamespace1 {

@@ -1,11 +1,12 @@
 package dev.akif.tapik.generated
 
-import dev.akif.tapik.ByteArrayFormat
-import dev.akif.tapik.DecodeResult
-import dev.akif.tapik.Format
-import dev.akif.tapik.StringFormat
+import dev.akif.tapik.MediaType
 import dev.akif.tapik.common.spring.selectResponseMediaType
-import dev.akif.tapik.common.spring.toSpringMediaType
+import dev.akif.tapik.target.spring.webmvc.decodeRequest
+import dev.akif.tapik.target.spring.webmvc.matchesRequestMediaType
+import dev.akif.tapik.target.spring.webmvc.webMvcNotAcceptable
+import dev.akif.tapik.target.spring.webmvc.webMvcResponse
+import dev.akif.tapik.target.spring.webmvc.webMvcUnsupportedMediaType
 import dev.akif.tapik.test.fixtures.library.AuthorId
 import dev.akif.tapik.test.fixtures.library.Book
 import dev.akif.tapik.test.fixtures.library.BookId
@@ -14,8 +15,6 @@ import dev.akif.tapik.test.fixtures.library.CreateBook
 import java.util.UUID
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.InvalidMediaTypeException
 import org.springframework.http.ResponseEntity
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 
 public interface BooksServer {
     public val booksApi: Books
@@ -87,9 +85,9 @@ internal class BooksGeneratedController(
         @RequestHeader(name = HttpHeaders.ACCEPT, required = false) accept: String? = null
     ): ResponseEntity<ByteArray> {
         val authorIdRaw = queryParameters["authorId"]
-        val page = pageRaw?.let { raw -> decodeString(booksApi.list.uri.queries._1.format, raw, "Books.list query page") } ?: booksApi.list.uri.queries._1.presence.value
-        val authorId = authorIdRaw?.let { raw -> decodeStrings(booksApi.list.uri.queries._2.format, raw, "Books.list query authorId") }
-        val xRequestId = decodeString(booksApi.list.headers._1.format, xRequestIdRaw, "Books.list header X-Request-Id")
+        val page = pageRaw?.let { raw -> decodeRequest(booksApi.list.uri.queries._1.format, raw, "Books.list query page") } ?: booksApi.list.uri.queries._1.presence.value
+        val authorId = authorIdRaw?.let { raw -> decodeRequest(booksApi.list.uri.queries._2.format, raw, "Books.list query authorId") }
+        val xRequestId = decodeRequest(booksApi.list.headers._1.format, xRequestIdRaw, "Books.list header X-Request-Id")
         val response =
             handler.list(
                 xRequestId = xRequestId,
@@ -103,9 +101,9 @@ internal class BooksGeneratedController(
                 val encodedBody =
                     when (selectResponseMediaType(accept, listOf(booksApi.list.outputs._1.bodies._1.mediaType))) {
                         booksApi.list.outputs._1.bodies._1.mediaType -> booksApi.list.outputs._1.bodies._1.mediaType to booksApi.list.outputs._1.bodies._1.format.encode(response.body)
-                        else -> notAcceptable(accept, "Books.list")
+                        else -> webMvcNotAcceptable(accept, "Books.list")
                     }
-                responseEntity(200, headers, encodedBody)
+                webMvcResponse(200, headers, encodedBody)
             }
         }
     }
@@ -116,8 +114,8 @@ internal class BooksGeneratedController(
         @RequestHeader(name = "X-Request-Id", required = true) xRequestIdRaw: String,
         @RequestHeader(name = HttpHeaders.ACCEPT, required = false) accept: String? = null
     ): ResponseEntity<ByteArray> {
-        val bookId = decodeString(booksApi.get.uri.paths._1.format, bookIdRaw, "Books.get path bookId")
-        val xRequestId = decodeString(booksApi.get.headers._1.format, xRequestIdRaw, "Books.get header X-Request-Id")
+        val bookId = decodeRequest(booksApi.get.uri.paths._1.format, bookIdRaw, "Books.get path bookId")
+        val xRequestId = decodeRequest(booksApi.get.headers._1.format, xRequestIdRaw, "Books.get header X-Request-Id")
         val response =
             handler.get(
                 bookId = bookId,
@@ -130,14 +128,14 @@ internal class BooksGeneratedController(
                 val encodedBody =
                     when (selectResponseMediaType(accept, listOf(booksApi.get.outputs._1.bodies._1.mediaType))) {
                         booksApi.get.outputs._1.bodies._1.mediaType -> booksApi.get.outputs._1.bodies._1.mediaType to booksApi.get.outputs._1.bodies._1.format.encode(response.body)
-                        else -> notAcceptable(accept, "Books.get")
+                        else -> webMvcNotAcceptable(accept, "Books.get")
                     }
-                responseEntity(200, headers, encodedBody)
+                webMvcResponse(200, headers, encodedBody)
             }
             is BooksServer.GetResponse.NotFound -> {
                 val headers = emptyMap<String, List<String>>()
-                val encodedBody: Pair<dev.akif.tapik.MediaType, ByteArray>? = null
-                responseEntity(404, headers, encodedBody)
+                val encodedBody: Pair<MediaType, ByteArray>? = null
+                webMvcResponse(404, headers, encodedBody)
             }
         }
     }
@@ -149,11 +147,11 @@ internal class BooksGeneratedController(
         @RequestHeader(name = HttpHeaders.CONTENT_TYPE, required = true) contentType: String,
         @RequestHeader(name = HttpHeaders.ACCEPT, required = false) accept: String? = null
     ): ResponseEntity<ByteArray> {
-        val xRequestId = decodeString(booksApi.create.headers._1.format, xRequestIdRaw, "Books.create header X-Request-Id")
+        val xRequestId = decodeRequest(booksApi.create.headers._1.format, xRequestIdRaw, "Books.create header X-Request-Id")
         val body =
             when {
-                mediaTypeCompatible(contentType, booksApi.create.input.bodies._1.mediaType) -> decodeBody(booksApi.create.input.bodies._1.format, bodyBytes, "Books.create body")
-                else -> unsupportedMediaType(contentType, "Books.create")
+                matchesRequestMediaType(contentType, booksApi.create.input.bodies._1.mediaType) -> decodeRequest(booksApi.create.input.bodies._1.format, bodyBytes, "Books.create body")
+                else -> webMvcUnsupportedMediaType(contentType, "Books.create")
             }
         val response =
             handler.create(
@@ -169,70 +167,15 @@ internal class BooksGeneratedController(
                 val encodedBody =
                     when (selectResponseMediaType(accept, listOf(booksApi.create.outputs._1.bodies._1.mediaType))) {
                         booksApi.create.outputs._1.bodies._1.mediaType -> booksApi.create.outputs._1.bodies._1.mediaType to booksApi.create.outputs._1.bodies._1.format.encode(response.body)
-                        else -> notAcceptable(accept, "Books.create")
+                        else -> webMvcNotAcceptable(accept, "Books.create")
                     }
-                responseEntity(201, headers, encodedBody)
+                webMvcResponse(201, headers, encodedBody)
             }
             is BooksServer.CreateResponse.BadRequest -> {
                 val headers = emptyMap<String, List<String>>()
-                val encodedBody: Pair<dev.akif.tapik.MediaType, ByteArray>? = null
-                responseEntity(400, headers, encodedBody)
+                val encodedBody: Pair<MediaType, ByteArray>? = null
+                webMvcResponse(400, headers, encodedBody)
             }
         }
     }
-
-    private fun <Value : Any> decodeString(
-        format: StringFormat<Value>,
-        raw: String,
-        location: String
-    ): Value = decode(format.decode(raw), location)
-
-    private fun <Value : Any> decodeStrings(
-        format: Format<Value, List<String>>,
-        raw: List<String>,
-        location: String
-    ): Value = decode(format.decode(raw), location)
-
-    private fun <Value : Any> decodeBody(
-        format: ByteArrayFormat<Value>,
-        raw: ByteArray,
-        location: String
-    ): Value = decode(format.decode(raw), location)
-
-    private fun <Value : Any> decode(
-        result: DecodeResult<Value>,
-        location: String
-    ): Value =
-        when (result) {
-            is DecodeResult.Success -> result.value
-            is DecodeResult.Failure ->
-                badRequest("Cannot decode $location: " + result.errors.joinToString { it.message })
-        }
-
-    private fun mediaTypeCompatible(actual: String?, expected: dev.akif.tapik.MediaType): Boolean =
-        try {
-            actual != null && org.springframework.http.MediaType.parseMediaType(actual).isCompatibleWith(expected.toSpringMediaType())
-        } catch (_: InvalidMediaTypeException) {
-            false
-        }
-
-    private fun responseEntity(
-        status: Int,
-        headers: Map<String, List<String>>,
-        body: Pair<dev.akif.tapik.MediaType, ByteArray>?
-    ): ResponseEntity<ByteArray> {
-        val springHeaders = HttpHeaders()
-        headers.forEach { (name, values) -> springHeaders.addAll(name, values) }
-        body?.let { (mediaType, _) -> springHeaders.contentType = mediaType.toSpringMediaType() }
-        return ResponseEntity(body?.second, springHeaders, status)
-    }
-
-    private fun badRequest(message: String): Nothing =
-        throw ResponseStatusException(HttpStatus.BAD_REQUEST, message)
-
-    private fun unsupportedMediaType(actual: String?, endpointId: String): Nothing =
-        throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported Content-Type $actual for $endpointId")
-
-    private fun notAcceptable(accept: String?, endpointId: String): Nothing =
-        throw ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "No response body matches Accept $accept for $endpointId")
 }

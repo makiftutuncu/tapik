@@ -47,8 +47,8 @@
   configured mapper behavior, and weak format caching. Shared provider mechanics now live in `common-format` and are
   reused by both Jackson and Kotlinx integrations.
 
-- [ ] a lot of the utilities and private methods that are included in the generated files can be defined once in real
-  code in corresponding modules so that generated code can refer to them. that will make generated files much cleaner.
+- [x] Move stable RestClient response handling and WebMVC request/response helpers into their corresponding runtime
+  modules. Generated files now contain only API-specific wiring and refer to these shared functions.
 
 - [ ] tapik should provide a BOM because it ships many modules and their version management will be much easier that way
   for the tapik users

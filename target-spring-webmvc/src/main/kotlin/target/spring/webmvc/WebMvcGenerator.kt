@@ -19,8 +19,29 @@ internal class WebMvcGenerator(
         return buildString {
             appendLine("package ${model.packageName}")
             appendLine()
-            appendLine("import dev.akif.tapik.common.spring.toSpringMediaType")
-            appendLine("import dev.akif.tapik.common.spring.selectResponseMediaType")
+            if (model.endpoints.any { endpoint -> endpoint.outputs.any { output -> output.bodies.isNotEmpty() } }) {
+                appendLine("import dev.akif.tapik.common.spring.selectResponseMediaType")
+                appendLine("import dev.akif.tapik.target.spring.webmvc.webMvcNotAcceptable")
+            }
+            if (model.endpoints.any { endpoint -> endpoint.paths.isNotEmpty() || endpoint.queries.isNotEmpty() || endpoint.headers.isNotEmpty() || endpoint.body != null }) {
+                appendLine("import dev.akif.tapik.target.spring.webmvc.decodeRequest")
+            }
+            if (model.endpoints.any { endpoint -> endpoint.body != null }) {
+                appendLine("import dev.akif.tapik.target.spring.webmvc.matchesRequestMediaType")
+                appendLine("import dev.akif.tapik.target.spring.webmvc.webMvcUnsupportedMediaType")
+            }
+            if (
+                model.endpoints.any { endpoint ->
+                    endpoint.queries.any { query -> query.repeated && query.presence === Required } ||
+                        endpoint.queries.any { query -> query.presence is Fixed<*> } ||
+                        endpoint.headers.any { header -> header.presence is Fixed<*> }
+                }
+            ) {
+                appendLine("import dev.akif.tapik.target.spring.webmvc.webMvcBadRequest")
+            }
+            if (model.endpoints.isNotEmpty()) {
+                appendLine("import dev.akif.tapik.target.spring.webmvc.webMvcResponse")
+            }
             appendLine()
             appendLine("public interface ${model.serverName} {")
             appendLine("    public val ${model.apiProperty}: ${model.apiType}")
@@ -42,10 +63,6 @@ internal class WebMvcGenerator(
             model.endpoints.forEach { endpoint ->
                 appendLine()
                 appendMapping(endpoint, model.serverName)
-            }
-            if (model.endpoints.isNotEmpty()) {
-                appendLine()
-                appendHelpers()
             }
             append('}')
         }.optimizeKotlinImports(model.packageName)
@@ -91,7 +108,7 @@ private fun StringBuilder.appendMapping(
             val access = "$queryParameters[${parameter.wireName.kotlinString()}]"
             val value =
                 if (parameter.presence === Required) {
-                    "$access ?: badRequest(${"${endpoint.id} query ${parameter.wireName} is required".kotlinString()})"
+                    "$access ?: webMvcBadRequest(${"${endpoint.id} query ${parameter.wireName} is required".kotlinString()})"
                 } else {
                     access
                 }
@@ -219,9 +236,9 @@ private fun StringBuilder.appendDecodedParameter(
     val location = "${endpoint.id} $kind ${parameter.wireName}".kotlinString()
     val decode =
         if (parameter.repeated) {
-            "decodeStrings(${parameter.definitionAccess}.format, ${parameter.rawName}, $location)"
+            "decodeRequest(${parameter.definitionAccess}.format, ${parameter.rawName}, $location)"
         } else {
-            "decodeString(${parameter.definitionAccess}.format, ${parameter.rawName}, $location)"
+            "decodeRequest(${parameter.definitionAccess}.format, ${parameter.rawName}, $location)"
         }
     when (val presence = parameter.presence) {
         Required -> appendLine("        val ${parameter.name} = $decode")
@@ -237,7 +254,7 @@ private fun StringBuilder.appendDecodedParameter(
             appendLine("        val ${parameter.name} = $decode")
             appendLine("        if (${parameter.name} != ${parameter.definitionAccess}.presence.value) {")
             appendLine(
-                "            badRequest(${"${endpoint.id} $kind ${parameter.wireName} does not match its fixed value".kotlinString()})"
+                "            webMvcBadRequest(${"${endpoint.id} $kind ${parameter.wireName} does not match its fixed value".kotlinString()})"
             )
             appendLine("        }")
         }
@@ -271,11 +288,11 @@ private fun StringBuilder.appendBodySelection(
     appendLine("${indentation}when {")
     body.alternatives.forEach { alternative ->
         appendLine(
-            "$indentation    mediaTypeCompatible(${body.contentTypeName}, ${alternative.definitionAccess}.mediaType) -> decodeBody(${alternative.definitionAccess}.format, ${body.rawName}, $location)"
+            "$indentation    matchesRequestMediaType(${body.contentTypeName}, ${alternative.definitionAccess}.mediaType) -> decodeRequest(${alternative.definitionAccess}.format, ${body.rawName}, $location)"
         )
     }
     appendLine(
-        "$indentation    else -> unsupportedMediaType(${body.contentTypeName}, ${endpoint.id.kotlinString()})"
+        "$indentation    else -> webMvcUnsupportedMediaType(${body.contentTypeName}, ${endpoint.id.kotlinString()})"
     )
     appendLine("$indentation}")
 }
@@ -311,7 +328,7 @@ private fun StringBuilder.appendEncodedOutput(
         appendLine("                }")
     }
     appendEncodedBody(endpoint, output)
-    appendLine("                responseEntity(${output.statusCode}, headers, encodedBody)")
+    appendLine("                webMvcResponse(${output.statusCode}, headers, encodedBody)")
     appendLine("            }")
 }
 
@@ -350,63 +367,6 @@ private fun StringBuilder.appendBodyEncoding(
             "$indentation    ${body.definitionAccess}.mediaType -> ${body.definitionAccess}.mediaType to ${body.definitionAccess}.format.encode($bodyExpression)"
         )
     }
-    appendLine("$indentation    else -> notAcceptable($accept, ${endpoint.id.kotlinString()})")
+    appendLine("$indentation    else -> webMvcNotAcceptable($accept, ${endpoint.id.kotlinString()})")
     appendLine("$indentation}")
-}
-
-private fun StringBuilder.appendHelpers() {
-    appendLine("    private fun <Value : kotlin.Any> decodeString(")
-    appendLine("        format: dev.akif.tapik.StringFormat<Value>,")
-    appendLine("        raw: kotlin.String,")
-    appendLine("        location: kotlin.String")
-    appendLine("    ): Value = decode(format.decode(raw), location)")
-    appendLine()
-    appendLine("    private fun <Value : kotlin.Any> decodeStrings(")
-    appendLine("        format: dev.akif.tapik.Format<Value, kotlin.collections.List<kotlin.String>>,")
-    appendLine("        raw: kotlin.collections.List<kotlin.String>,")
-    appendLine("        location: kotlin.String")
-    appendLine("    ): Value = decode(format.decode(raw), location)")
-    appendLine()
-    appendLine("    private fun <Value : kotlin.Any> decodeBody(")
-    appendLine("        format: dev.akif.tapik.ByteArrayFormat<Value>,")
-    appendLine("        raw: kotlin.ByteArray,")
-    appendLine("        location: kotlin.String")
-    appendLine("    ): Value = decode(format.decode(raw), location)")
-    appendLine()
-    appendLine("    private fun <Value : kotlin.Any> decode(")
-    appendLine("        result: dev.akif.tapik.DecodeResult<Value>,")
-    appendLine("        location: kotlin.String")
-    appendLine("    ): Value =")
-    appendLine("        when (result) {")
-    appendLine("            is dev.akif.tapik.DecodeResult.Success -> result.value")
-    appendLine("            is dev.akif.tapik.DecodeResult.Failure ->")
-    appendLine("                badRequest(\"Cannot decode \$location: \" + result.errors.joinToString { it.message })")
-    appendLine("        }")
-    appendLine()
-    appendLine("    private fun mediaTypeCompatible(actual: kotlin.String?, expected: dev.akif.tapik.MediaType): kotlin.Boolean =")
-    appendLine("        try {")
-    appendLine("            actual != null && org.springframework.http.MediaType.parseMediaType(actual).isCompatibleWith(expected.toSpringMediaType())")
-    appendLine("        } catch (_: org.springframework.http.InvalidMediaTypeException) {")
-    appendLine("            false")
-    appendLine("        }")
-    appendLine()
-    appendLine("    private fun responseEntity(")
-    appendLine("        status: kotlin.Int,")
-    appendLine("        headers: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,")
-    appendLine("        body: kotlin.Pair<dev.akif.tapik.MediaType, kotlin.ByteArray>?")
-    appendLine("    ): org.springframework.http.ResponseEntity<kotlin.ByteArray> {")
-    appendLine("        val springHeaders = org.springframework.http.HttpHeaders()")
-    appendLine("        headers.forEach { (name, values) -> springHeaders.addAll(name, values) }")
-    appendLine("        body?.let { (mediaType, _) -> springHeaders.contentType = mediaType.toSpringMediaType() }")
-    appendLine("        return org.springframework.http.ResponseEntity(body?.second, springHeaders, status)")
-    appendLine("    }")
-    appendLine()
-    appendLine("    private fun badRequest(message: kotlin.String): kotlin.Nothing =")
-    appendLine("        throw org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, message)")
-    appendLine()
-    appendLine("    private fun unsupportedMediaType(actual: kotlin.String?, endpointId: kotlin.String): kotlin.Nothing =")
-    appendLine("        throw org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE, \"Unsupported Content-Type \$actual for \$endpointId\")")
-    appendLine()
-    appendLine("    private fun notAcceptable(accept: kotlin.String?, endpointId: kotlin.String): kotlin.Nothing =")
-    appendLine("        throw org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_ACCEPTABLE, \"No response body matches Accept \$accept for \$endpointId\")")
 }

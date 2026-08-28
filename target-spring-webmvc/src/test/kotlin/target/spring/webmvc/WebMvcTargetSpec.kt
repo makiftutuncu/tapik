@@ -110,9 +110,9 @@ class WebMvcTargetSpec : FunSpec({
 
         source shouldContain "consumes = [\"application/json\", \"application/xml\"]"
         source shouldContain
-            "mediaTypeCompatible(contentType, bodyAlternativesApi.echo.input.bodies._1.mediaType)"
+            "matchesRequestMediaType(contentType, bodyAlternativesApi.echo.input.bodies._1.mediaType)"
         source shouldContain
-            "mediaTypeCompatible(contentType, bodyAlternativesApi.echo.input.bodies._2.mediaType)"
+            "matchesRequestMediaType(contentType, bodyAlternativesApi.echo.input.bodies._2.mediaType)"
         source shouldContain
             "selectResponseMediaType(accept, listOf(bodyAlternativesApi.echo.outputs._1.bodies._1.mediaType, bodyAlternativesApi.echo.outputs._1.bodies._2.mediaType))"
         source shouldContain
@@ -217,8 +217,10 @@ class WebMvcTargetSpec : FunSpec({
         source shouldContain "public fun findBook("
         source shouldContain "public fun findBook2(): FindBookResponse2"
         source shouldContain "public fun findBookHttp(): FindBookHttpResponse"
-        source shouldContain "public fun decodeStrings(): DecodeStringsResponse"
-        source shouldContain "public fun decodeStrings2("
+        source shouldContain "public fun decodeRequest(): DecodeRequestResponse"
+        source shouldContain "public fun decodeRequest("
+        source shouldNotContain "public fun decodeRequest2("
+        source shouldNotContain "private fun <Value : Any> decodeRequest("
         source shouldNotContain "public fun findBookHttp2("
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
@@ -365,7 +367,7 @@ public object WebMvcNamingCollisions : Api() {
     public val `find-book` by get(root / "hyphen" + query.string("q"))
     public val findBook by get(root / "camel")
     public val findBookHttp by get(root / "http")
-    public val decodeStrings by get(root / "decode")
+    public val decodeRequest by get(root / "decode")
 }
 
 public class WebMvcNamespace1 {

@@ -1,10 +1,9 @@
 package dev.akif.tapik.generated
 
-import dev.akif.tapik.ByteArrayFormat
-import dev.akif.tapik.DecodeResult
-import dev.akif.tapik.StringFormat
 import dev.akif.tapik.target.spring.restclient.RestClientRequestBody
 import dev.akif.tapik.target.spring.restclient.RestClientTransport
+import dev.akif.tapik.target.spring.restclient.decodeResponseBody
+import dev.akif.tapik.target.spring.restclient.decodeResponseHeader
 import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType
 import dev.akif.tapik.test.fixtures.library.AuthorId
 import dev.akif.tapik.test.fixtures.library.Book
@@ -50,7 +49,7 @@ public interface BooksClient {
         return when {
             booksApi.list.outputs._1.matcher.matches(response.status) -> {
                 selectResponseBodyMediaType(response = response, offered = listOf(booksApi.list.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.list")
-                val decodedBody = decodeBody(booksApi.list.outputs._1.bodies._1.format, response.body, "Books.list")
+                val decodedBody = decodeResponseBody(booksApi.list.outputs._1.bodies._1.format, response.body, "Books.list")
                 ListResponse.Ok(decodedBody)
             }
             else -> error("Unexpected status ${response.status.code} for Books.list")
@@ -91,7 +90,7 @@ public interface BooksClient {
         return when {
             booksApi.get.outputs._1.matcher.matches(response.status) -> {
                 selectResponseBodyMediaType(response = response, offered = listOf(booksApi.get.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.get")
-                val decodedBody = decodeBody(booksApi.get.outputs._1.bodies._1.format, response.body, "Books.get")
+                val decodedBody = decodeResponseBody(booksApi.get.outputs._1.bodies._1.format, response.body, "Books.get")
                 GetResponse.Ok(decodedBody)
             }
             booksApi.get.outputs._2.matcher.matches(response.status) -> {
@@ -133,8 +132,8 @@ public interface BooksClient {
         return when {
             booksApi.create.outputs._1.matcher.matches(response.status) -> {
                 selectResponseBodyMediaType(response = response, offered = listOf(booksApi.create.outputs._1.bodies._1.mediaType), allowsNoBody = false, endpointId = "Books.create")
-                val decodedBody = decodeBody(booksApi.create.outputs._1.bodies._1.format, response.body, "Books.create")
-                val location = decodeHeader(booksApi.create.outputs._1.headers._1.format, response.headers.entries.firstOrNull { (name, _) -> name.equals("Location", ignoreCase = true) }?.value?.firstOrNull() ?: error("Missing response header Location for Books.create"), "Books.create")
+                val decodedBody = decodeResponseBody(booksApi.create.outputs._1.bodies._1.format, response.body, "Books.create")
+                val location = decodeResponseHeader(booksApi.create.outputs._1.headers._1.format, response.headers.entries.firstOrNull { (name, _) -> name.equals("Location", ignoreCase = true) }?.value?.firstOrNull() ?: error("Missing response header Location for Books.create"), "Books.create")
                 CreateResponse.Created(decodedBody, location)
             }
             booksApi.create.outputs._2.matcher.matches(response.status) -> {
@@ -144,25 +143,4 @@ public interface BooksClient {
             else -> error("Unexpected status ${response.status.code} for Books.create")
         }
     }
-
-    private fun <Value : Any> decodeBody(
-        format: ByteArrayFormat<Value>,
-        bytes: ByteArray,
-        endpointId: String
-    ): Value =
-        when (val result = format.decode(bytes)) {
-            is DecodeResult.Success -> result.value
-            is DecodeResult.Failure -> error("Cannot decode response body for $endpointId: " + result.errors.joinToString { it.message })
-        }
-
-    private fun <Value : Any> decodeHeader(
-        format: StringFormat<Value>,
-        value: String,
-        endpointId: String
-    ): Value =
-        when (val result = format.decode(value)) {
-            is DecodeResult.Success -> result.value
-            is DecodeResult.Failure -> error("Cannot decode response header for $endpointId: " + result.errors.joinToString { it.message })
-        }
-
 }

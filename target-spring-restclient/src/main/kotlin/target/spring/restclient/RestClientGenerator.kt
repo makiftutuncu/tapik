@@ -17,7 +17,18 @@ internal class RestClientGenerator(
         return buildString {
             appendLine("package ${model.packageName}")
             appendLine()
-            appendLine("import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType")
+            if (model.endpoints.any { endpoint -> endpoint.outputs.any { output -> output.bodies.isNotEmpty() } }) {
+                appendLine("import dev.akif.tapik.target.spring.restclient.decodeResponseBody")
+            }
+            if (model.endpoints.any { endpoint -> endpoint.outputs.any { output -> output.headers.isNotEmpty() } }) {
+                appendLine("import dev.akif.tapik.target.spring.restclient.decodeResponseHeader")
+            }
+            if (model.endpoints.any { endpoint -> endpoint.outputs.any { output -> output.fixedHeaders.isNotEmpty() } }) {
+                appendLine("import dev.akif.tapik.target.spring.restclient.requireFixedResponseHeader")
+            }
+            if (model.endpoints.isNotEmpty()) {
+                appendLine("import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType")
+            }
             appendLine()
             appendLine("public interface ${model.clientName} {")
             appendLine("    public val ${model.apiProperty}: ${model.apiType}")
@@ -30,14 +41,6 @@ internal class RestClientGenerator(
                 appendResponse(endpoint)
                 appendLine()
                 appendMethod(endpoint)
-            }
-            if (model.endpoints.isNotEmpty()) {
-                appendLine()
-                appendDecodeHelpers(
-                    includeFixedHeaders = model.endpoints.any { endpoint ->
-                        endpoint.outputs.any { output -> output.fixedHeaders.isNotEmpty() }
-                    }
-                )
             }
             append('}')
         }.optimizeKotlinImports(model.packageName)
@@ -192,7 +195,7 @@ private fun StringBuilder.appendFixedHeader(
     endpoint: RestClientEndpointModel,
     header: RestClientFixedOutputHeader
 ) {
-    appendLine("                requireFixedHeader(")
+    appendLine("                requireFixedResponseHeader(")
     appendLine("                    response = response,")
     appendLine("                    name = ${header.wireName.kotlinString()},")
     appendLine("                    format = ${header.definitionAccess}.format,")
@@ -214,13 +217,13 @@ private fun StringBuilder.appendDecodedBody(
             appendLine("                        null")
             appendLine("                    } else {")
             appendLine(
-                "                        decodeBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
+                "                        decodeResponseBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
             )
             appendLine("                    }")
         } else {
             appendLine("                $selection")
             appendLine(
-                "                val decodedBody = decodeBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
+                "                val decodedBody = decodeResponseBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
             )
         }
         return
@@ -230,7 +233,7 @@ private fun StringBuilder.appendDecodedBody(
     appendLine("                    when ($selection) {")
     output.bodies.forEach { body ->
         appendLine(
-            "                        ${body.definitionAccess}.mediaType -> decodeBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
+            "                        ${body.definitionAccess}.mediaType -> decodeResponseBody(${body.definitionAccess}.format, response.body, ${endpoint.id.kotlinString()})"
         )
     }
     if (output.allowsNoBody) appendLine("                        null -> null")
@@ -262,66 +265,16 @@ private fun StringBuilder.appendDecodedHeader(
     when (header.presence) {
         Required ->
             appendLine(
-                "                val ${header.name} = decodeHeader(${header.definitionAccess}.format, $raw ?: kotlin.error(\"Missing response header ${header.wireName} for ${endpoint.id}\"), ${endpoint.id.kotlinString()})"
+                "                val ${header.name} = decodeResponseHeader(${header.definitionAccess}.format, $raw ?: kotlin.error(\"Missing response header ${header.wireName} for ${endpoint.id}\"), ${endpoint.id.kotlinString()})"
             )
         Optional ->
             appendLine(
-                "                val ${header.name} = $raw?.let { value -> decodeHeader(${header.definitionAccess}.format, value, ${endpoint.id.kotlinString()}) }"
+                "                val ${header.name} = $raw?.let { value -> decodeResponseHeader(${header.definitionAccess}.format, value, ${endpoint.id.kotlinString()}) }"
             )
         is Default<*> ->
             appendLine(
-                "                val ${header.name} = $raw?.let { value -> decodeHeader(${header.definitionAccess}.format, value, ${endpoint.id.kotlinString()}) } ?: ${header.definitionAccess}.presence.value"
+                "                val ${header.name} = $raw?.let { value -> decodeResponseHeader(${header.definitionAccess}.format, value, ${endpoint.id.kotlinString()}) } ?: ${header.definitionAccess}.presence.value"
             )
         is Fixed<*> -> Unit
     }
-}
-
-private fun StringBuilder.appendDecodeHelpers(includeFixedHeaders: Boolean) {
-    appendLine("    private fun <Value : kotlin.Any> decodeBody(")
-    appendLine("        format: dev.akif.tapik.ByteArrayFormat<Value>,")
-    appendLine("        bytes: kotlin.ByteArray,")
-    appendLine("        endpointId: kotlin.String")
-    appendLine("    ): Value =")
-    appendLine("        when (val result = format.decode(bytes)) {")
-    appendLine("            is dev.akif.tapik.DecodeResult.Success -> result.value")
-    appendLine(
-        "            is dev.akif.tapik.DecodeResult.Failure -> kotlin.error(\"Cannot decode response body for \$endpointId: \" + result.errors.joinToString { it.message })"
-    )
-    appendLine("        }")
-    appendLine()
-    appendLine("    private fun <Value : kotlin.Any> decodeHeader(")
-    appendLine("        format: dev.akif.tapik.StringFormat<Value>,")
-    appendLine("        value: kotlin.String,")
-    appendLine("        endpointId: kotlin.String")
-    appendLine("    ): Value =")
-    appendLine("        when (val result = format.decode(value)) {")
-    appendLine("            is dev.akif.tapik.DecodeResult.Success -> result.value")
-    appendLine(
-        "            is dev.akif.tapik.DecodeResult.Failure -> kotlin.error(\"Cannot decode response header for \$endpointId: \" + result.errors.joinToString { it.message })"
-    )
-    appendLine("        }")
-    appendLine()
-    if (includeFixedHeaders) appendFixedHeaderHelper()
-}
-
-private fun StringBuilder.appendFixedHeaderHelper() {
-    appendLine("    private fun <Value : kotlin.Any> requireFixedHeader(")
-    appendLine("        response: dev.akif.tapik.target.spring.restclient.RestClientResponse,")
-    appendLine("        name: kotlin.String,")
-    appendLine("        format: dev.akif.tapik.StringFormat<Value>,")
-    appendLine("        expected: Value,")
-    appendLine("        endpointId: kotlin.String")
-    appendLine("    ) {")
-    appendLine("        val actual =")
-    appendLine("            response.headers.entries")
-    appendLine("                .filter { (headerName, _) -> headerName.equals(name, ignoreCase = true) }")
-    appendLine("                .flatMap { (_, values) -> values }")
-    appendLine("        val encoded = format.encode(expected)")
-    appendLine("        if (actual != listOf(encoded)) {")
-    appendLine(
-        "            kotlin.error(\"Unexpected fixed response header \$name for \$endpointId: expected exactly [\$encoded], got \$actual\")"
-    )
-    appendLine("        }")
-    appendLine("    }")
-    appendLine()
 }

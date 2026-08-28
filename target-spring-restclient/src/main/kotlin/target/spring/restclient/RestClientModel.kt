@@ -108,7 +108,7 @@ internal fun restClientApiModel(
         "Spring RestClient generation requires a canonical API type for '${api.id}'"
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
-    val methodNames = mutableSetOf("decodeBody", "decodeHeader", "requireFixedHeader")
+    val methodNames = mutableSetOf<String>()
     val responseNames = mutableSetOf<String>()
     return RestClientApiModel(
         packageName = packageName,
