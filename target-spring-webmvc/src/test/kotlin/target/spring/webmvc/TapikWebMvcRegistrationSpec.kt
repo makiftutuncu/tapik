@@ -2,6 +2,7 @@ package dev.akif.tapik.target.spring.webmvc
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -30,6 +31,18 @@ class TapikWebMvcRegistrationSpec : FunSpec({
         }
     }
 
+    test("replace a component-scanned adapter with its canonical registration") {
+        context(OneHandler::class.java, scannedAdapter = true).use { context ->
+            context.getBeansOfType(TestAdapter::class.java).keys shouldBe setOf(TestAdapter::class.java.name)
+        }
+    }
+
+    test("remove a component-scanned adapter without a handler") {
+        context(NoHandler::class.java, scannedAdapter = true).use { context ->
+            context.getBeansOfType(TestAdapter::class.java).isEmpty() shouldBe true
+        }
+    }
+
     test("leave an adapter unregistered without a handler") {
         context(NoHandler::class.java).use { context ->
             context.getBeansOfType(TestAdapter::class.java).isEmpty() shouldBe true
@@ -50,7 +63,24 @@ class TapikWebMvcRegistrationSpec : FunSpec({
 })
 
 private fun context(configuration: Class<*>): AnnotationConfigApplicationContext =
-    AnnotationConfigApplicationContext(configuration)
+    context(configuration, scannedAdapter = false)
+
+private fun context(
+    configuration: Class<*>,
+    scannedAdapter: Boolean
+): AnnotationConfigApplicationContext =
+    AnnotationConfigApplicationContext().apply {
+        if (scannedAdapter) {
+            registerBeanDefinition(
+                "testAdapter",
+                RootBeanDefinition(TestAdapter::class.java).apply {
+                    autowireMode = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR
+                }
+            )
+        }
+        register(configuration)
+        refresh()
+    }
 
 private interface TestHandler {
     val id: String

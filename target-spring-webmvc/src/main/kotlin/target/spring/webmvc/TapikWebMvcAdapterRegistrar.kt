@@ -28,6 +28,17 @@ private fun ConfigurableListableBeanFactory.register(
     registry: BeanDefinitionRegistry
 ) {
     val handlerType = ClassUtils.forName(descriptor.handlerType, beanClassLoader)
+    val adapterType = ClassUtils.forName(descriptor.adapterType, beanClassLoader)
+    BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+        this,
+        adapterType,
+        true,
+        false
+    )
+        .filter(registry::containsBeanDefinition)
+        .filterNot { beanName -> beanName == descriptor.adapterType }
+        .forEach(registry::removeBeanDefinition)
+
     val candidates =
         BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
             this,
@@ -42,13 +53,14 @@ private fun ConfigurableListableBeanFactory.register(
         }
     if (selected == null) return
 
-    val adapterType = ClassUtils.forName(descriptor.adapterType, beanClassLoader)
-    registry.registerBeanDefinition(
-        descriptor.adapterType,
-        RootBeanDefinition(adapterType).apply {
-            autowireMode = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR
-        }
-    )
+    if (!registry.containsBeanDefinition(descriptor.adapterType)) {
+        registry.registerBeanDefinition(
+            descriptor.adapterType,
+            RootBeanDefinition(adapterType).apply {
+                autowireMode = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR
+            }
+        )
+    }
 }
 
 private fun ConfigurableListableBeanFactory.isPrimary(beanName: String): Boolean =

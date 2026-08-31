@@ -152,7 +152,9 @@ definitions are available, Tapik registers an adapter only when Spring can selec
 handler leaves that API unregistered; one candidate registers the adapter; multiple candidates register it only when
 exactly one candidate is primary. Qualifiers alone do not select a generated adapter because the adapter declares no
 generated qualifier. A single user bean may implement several generated handler interfaces and receives one adapter
-for each interface.
+for each interface. If an adapter's generated package is inside the application's component-scan tree, Tapik replaces
+the implicitly scanned definition with its canonical descriptor-based definition so each mapping is registered once
+and the same handler-selection rules still apply.
 
 The target emits one source and one uniquely named registration resource per API. Resource identity includes the
 generated adapter's qualified name, and registration order is canonical by that name. The Maven host packages generated
