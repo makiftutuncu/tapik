@@ -65,6 +65,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-compiler-embeddable</artifactId>
+        </dependency>
+        <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-test-fixtures</artifactId>
             <version>${project.version}</version>

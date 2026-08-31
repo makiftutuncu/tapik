@@ -35,9 +35,13 @@ internal class MavenGenerator {
                     configuration = configuration,
                     selection = ApiSelection(includes = includeApis, excludes = excludeApis)
                 )
+            val written = ArtifactWriter.write(result, outputDirectory, owner = executionId)
             MavenGeneration(
-                written = ArtifactWriter.write(result, outputDirectory, owner = executionId),
-                containsSources = result.artifacts.any { artifact -> artifact.kind == ArtifactKind.SOURCE },
+                written = written,
+                sourcePaths =
+                    result.artifacts
+                        .filter { artifact -> artifact.kind == ArtifactKind.SOURCE }
+                        .map { artifact -> outputDirectory.resolve(artifact.relativePath).toAbsolutePath().normalize() },
                 resourcePaths =
                     result.artifacts
                         .filter { artifact -> artifact.kind == ArtifactKind.RESOURCE }
@@ -49,6 +53,9 @@ internal class MavenGenerator {
 
 internal data class MavenGeneration(
     val written: List<Path>,
-    val containsSources: Boolean,
+    val sourcePaths: List<Path>,
     val resourcePaths: List<String>
-)
+) {
+    val containsSources: Boolean
+        get() = sourcePaths.isNotEmpty()
+}

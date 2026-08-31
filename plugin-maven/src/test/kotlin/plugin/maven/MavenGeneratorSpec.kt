@@ -77,6 +77,12 @@ class MavenGeneratorSpec : FunSpec({
             )
 
         generation.containsSources shouldBe true
+        generation.sourcePaths.map(output::relativize).map { path -> path.toString() } shouldContainExactly
+            listOf(
+                "dev/akif/tapik/generated/AuthorsServer.kt",
+                "dev/akif/tapik/generated/BooksServer.kt",
+                "dev/akif/tapik/generated/RentalsServer.kt"
+            )
         generation.resourcePaths shouldContainExactly
             listOf(
                 "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.AuthorsGeneratedController.properties",

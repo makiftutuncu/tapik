@@ -67,7 +67,7 @@
 - [x] Add deterministic API include and exclude filters to host-neutral generation requests and expose them through
   the Maven plugin. Generation should continue to select every discovered API when no filters are configured.
 
-- [ ] Allow source targets to consume APIs declared in the same Maven module without creating a compile/generate
+- [x] Allow source targets to consume APIs declared in the same Maven module without creating a compile/generate
   lifecycle cycle. Keep the existing compiled-contract dependency workflow available for separately published contracts.
 
 - [ ] Support incremental Kotlin compilation and target regeneration without retaining stale API registry entries,

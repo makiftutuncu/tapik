@@ -146,11 +146,27 @@ translated into the host-neutral configuration model before target selection; Ma
 `common-plugin` or target modules.
 
 When an execution returns `SOURCE` artifacts, the adapter adds that execution's output directory as a project compile
-source root. Source targets may run in `generate-sources` when their APIs come from compiled contract dependencies.
-Targets consuming APIs declared in the current project continue to run after those contracts are compiled until a
-compiler-integrated source-generation path is implemented.
+source root. Source targets may therefore use either of two workflows:
+
+- An execution in `generate-sources` consumes already compiled contract dependencies. Generated source is available to
+  the project's ordinary main compilation, preserving the existing workflow for client and handler implementations.
+- An execution in `process-classes` consumes APIs declared by the current module after their endpoint values and
+  compiler registry exist. The adapter compiles only those generated Kotlin files into the same main output without
+  recompiling user sources or starting a nested Maven lifecycle.
+
+The second workflow packages generated types alongside same-module contracts, but ordinary main sources compiled
+earlier in the lifecycle cannot reference those newly generated types. Such implementations remain in a downstream
+module or a later source set until compiler-integrated declaration generation exists. Each generated Kotlin compilation
+uses the project's resolved classpath, Java 25 bytecode target, and a distinct module name so it does not replace the
+main compilation's Kotlin module metadata.
+
+Lifecycle phase selection is part of the host configuration, not target behavior. Maven's default `process-classes`
+phase applies when the `generate` goal is bound as an execution and the build reaches that phase. Invoking the goal
+directly does not first execute the lifecycle phases needed to compile a same-module registry. A `compile` build reaches
+dependency-contract executions explicitly bound to `generate-sources`, but intentionally does not reach a same-module
+execution bound to `process-classes`.
 
 When an execution returns `RESOURCE` artifacts, the Maven adapter adds exactly those relative paths beneath the
-execution output directory as project resources. Source and documentation artifacts in the same directory are not
-copied into runtime classes. Generated resources participate in the ordinary Maven resource lifecycle and are packaged
-with the consumer artifact.
+execution output directory as project resources. For a late `process-classes` execution it also materializes those
+resources in the project's main output, keeping them packageable after Maven's normal resources phase has passed.
+Source and documentation artifacts in the same directory are not copied into runtime classes.

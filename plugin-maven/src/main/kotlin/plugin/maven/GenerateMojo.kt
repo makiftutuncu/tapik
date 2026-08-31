@@ -62,6 +62,16 @@ class GenerateMojo : AbstractMojo() {
                         },
                     projectTapikVersions = project.tapikDependencyVersions()
                 )
+            if (mojoExecution.lifecyclePhase != "generate-sources") {
+                val classesDirectory = Path.of(project.build.outputDirectory)
+                GeneratedKotlinCompiler.compile(
+                    sources = generation.sourcePaths,
+                    classpath = project.generationClasspath(),
+                    outputDirectory = classesDirectory,
+                    moduleName = generatedModuleName()
+                )
+                copyGeneratedResources(outputDirectory.toPath(), generation.resourcePaths, classesDirectory)
+            }
             project.registerGeneratedArtifacts(outputDirectory.toPath(), generation)
             generation.written.forEach { path -> log.info("Generated ${projectRelativePath(path)}") }
         } catch (cause: Exception) {
@@ -71,4 +81,8 @@ class GenerateMojo : AbstractMojo() {
 
     private fun projectRelativePath(path: Path): Path =
         runCatching { project.basedir.toPath().toAbsolutePath().normalize().relativize(path) }.getOrDefault(path)
+
+    private fun generatedModuleName(): String =
+        "tapik-${project.artifactId}-${mojoExecution.executionId}"
+            .replace(Regex("[^A-Za-z0-9_.-]"), "_")
 }

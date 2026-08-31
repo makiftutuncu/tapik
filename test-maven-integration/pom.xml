@@ -111,6 +111,10 @@
                         <configuration>
                             <target>spring-restclient</target>
                             <outputDirectory>${project.build.directory}/generated-sources/tapik-restclient</outputDirectory>
+                            <includeApis>
+                                <includeApi>Authors</includeApi>
+                                <includeApi>Catalog</includeApi>
+                            </includeApis>
                             <targetConfiguration>
                                 <packageName>dev.akif.tapik.test.maven.integration.generated</packageName>
                             </targetConfiguration>
@@ -125,8 +129,44 @@
                         <configuration>
                             <target>spring-webmvc</target>
                             <outputDirectory>${project.build.directory}/generated-sources/tapik-webmvc</outputDirectory>
+                            <includeApis>
+                                <includeApi>Authors</includeApi>
+                                <includeApi>Catalog</includeApi>
+                            </includeApis>
                             <targetConfiguration>
                                 <packageName>dev.akif.tapik.test.maven.integration.generated</packageName>
+                            </targetConfiguration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-same-module-restclient</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <target>spring-restclient</target>
+                            <outputDirectory>${project.build.directory}/generated-sources/tapik-same-module-restclient</outputDirectory>
+                            <includeApis>
+                                <includeApi>Books</includeApi>
+                            </includeApis>
+                            <targetConfiguration>
+                                <packageName>dev.akif.tapik.test.maven.integration.generated.samemodule</packageName>
+                            </targetConfiguration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-same-module-webmvc</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <target>spring-webmvc</target>
+                            <outputDirectory>${project.build.directory}/generated-sources/tapik-same-module-webmvc</outputDirectory>
+                            <includeApis>
+                                <includeApi>Books</includeApi>
+                            </includeApis>
+                            <targetConfiguration>
+                                <packageName>dev.akif.tapik.test.maven.integration.generated.samemodule</packageName>
                             </targetConfiguration>
                         </configuration>
                     </execution>

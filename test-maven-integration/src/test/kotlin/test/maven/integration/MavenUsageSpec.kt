@@ -8,6 +8,8 @@ import dev.akif.tapik.test.maven.contract.CreateAuthor
 import dev.akif.tapik.test.maven.integration.generated.AuthorsClient
 import dev.akif.tapik.test.maven.integration.generated.AuthorsServer
 import dev.akif.tapik.test.maven.integration.generated.CatalogServer
+import dev.akif.tapik.test.maven.integration.generated.samemodule.BooksClient as SameModuleBooksClient
+import dev.akif.tapik.test.maven.integration.generated.samemodule.BooksServer as SameModuleBooksServer
 import dev.akif.tapik.target.spring.restclient.RestClientTransport
 import dev.akif.tapik.target.spring.webmvc.EnableTapikWebMvc
 import io.kotest.assertions.throwables.shouldThrow
@@ -68,6 +70,23 @@ class MavenUsageSpec : FunSpec({
             )
         ) shouldBe true
         Class.forName("dev.akif.tapik.test.maven.integration.generated.AuthorsServer").isInterface shouldBe true
+        Files.isRegularFile(
+            Path.of(
+                "target/generated-sources/tapik-same-module-restclient/dev/akif/tapik/test/maven/integration/generated/samemodule/BooksClient.kt"
+            )
+        ) shouldBe true
+        SameModuleBooksClient::class.java.isInterface shouldBe true
+        Files.isRegularFile(
+            Path.of(
+                "target/generated-sources/tapik-same-module-webmvc/dev/akif/tapik/test/maven/integration/generated/samemodule/BooksServer.kt"
+            )
+        ) shouldBe true
+        SameModuleBooksServer::class.java.isInterface shouldBe true
+        Files.isRegularFile(
+            Path.of(
+                "target/classes/META-INF/tapik/spring/webmvc/dev.akif.tapik.test.maven.integration.generated.samemodule.BooksGeneratedController.properties"
+            )
+        ) shouldBe true
 
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
@@ -298,13 +317,15 @@ class MavenUsageSpec : FunSpec({
 
     test("auto-register generated adapters for one multi-API handler") {
         webMvc.adapters.map { adapter -> adapter.javaClass.simpleName }.sorted() shouldContainExactly
-            listOf("AuthorsGeneratedController", "CatalogGeneratedController")
+            listOf("AuthorsGeneratedController", "BooksGeneratedController", "CatalogGeneratedController")
+        webMvc.mvc.perform(get("/books")).andExpect(status().isOk)
         webMvc.mvc.perform(get("/catalog")).andExpect(status().isOk)
     }
 
     test("register the same generated adapters in plain Spring") {
         plainWebMvc.adapters.map { adapter -> adapter.javaClass.simpleName }.sorted() shouldContainExactly
-            listOf("AuthorsGeneratedController", "CatalogGeneratedController")
+            listOf("AuthorsGeneratedController", "BooksGeneratedController", "CatalogGeneratedController")
+        plainWebMvc.mvc.perform(get("/books")).andExpect(status().isOk)
         plainWebMvc.mvc.perform(get("/catalog")).andExpect(status().isOk)
     }
 })
@@ -348,11 +369,20 @@ private class LibraryController : AuthorsServer, CatalogServer {
     override fun list(): CatalogServer.ListResponse = CatalogServer.ListResponse.Ok
 }
 
+private class BooksHandler : SameModuleBooksServer {
+    override val booksApi: Books = Books
+
+    override fun list(): SameModuleBooksServer.ListResponse = SameModuleBooksServer.ListResponse.Ok
+}
+
 @Configuration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 private class WebMvcTestApplication {
     @Bean
     fun libraryController(): LibraryController = LibraryController()
+
+    @Bean
+    fun booksHandler(): BooksHandler = BooksHandler()
 }
 
 @Configuration(proxyBeanMethods = false)
@@ -360,6 +390,9 @@ private class WebMvcTestApplication {
 private class PlainWebMvcTestApplication {
     @Bean
     fun libraryController(): LibraryController = LibraryController()
+
+    @Bean
+    fun booksHandler(): BooksHandler = BooksHandler()
 }
 
 private class WebMvcFixture(
