@@ -65,6 +65,16 @@ See the [DSL specification](specification/dsl.md) for the complete currently imp
 
 ## Maven setup
 
+Define the versions once:
+
+```xml
+<properties>
+    <java.version>25</java.version>
+    <kotlin.version>2.4.10</kotlin.version>
+    <tapik.version>0.6.0</tapik.version>
+</properties>
+```
+
 Import the Tapik BOM once so every Tapik dependency uses the same release:
 
 ```xml
@@ -73,7 +83,7 @@ Import the Tapik BOM once so every Tapik dependency uses the same release:
         <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-bom</artifactId>
-            <version>0.6.0</version>
+            <version>${tapik.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -111,14 +121,15 @@ and accepts an application mapper when custom Jackson behavior is required:
 The BOM manages ordinary Tapik project dependencies. Maven still requires explicit versions for build plugins and
 for dependencies nested inside a plugin declaration, as shown below.
 
-Enable Tapik in Kotlin's Maven compiler plugin. The Kotlin serialization entries are needed only by contracts that
-explicitly select `tapik-format-kotlinx` and use `@Serializable` models:
+In every module that declares `Api` values, enable Tapik in Kotlin's Maven compiler plugin. A module that only consumes
+a compiled Tapik contract does not need the `tapik` compiler plugin. The Kotlin serialization entries are needed only
+by contracts that explicitly select `tapik-format-kotlinx` and use `@Serializable` models:
 
 ```xml
 <plugin>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-maven-plugin</artifactId>
-    <version>2.4.10</version>
+    <version>${kotlin.version}</version>
     <extensions>true</extensions>
     <configuration>
         <compilerPlugins>
@@ -130,12 +141,12 @@ explicitly select `tapik-format-kotlinx` and use `@Serializable` models:
         <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-plugin-maven</artifactId>
-            <version>0.6.0</version>
+            <version>${tapik.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-maven-serialization</artifactId>
-            <version>2.4.10</version>
+            <version>${kotlin.version}</version>
         </dependency>
     </dependencies>
 </plugin>
@@ -147,6 +158,57 @@ the compiler, and downstream generation does not reflect over arbitrary project 
 All `dev.akif:tapik-*` dependencies in a generation project must use the same version as `tapik-plugin-maven`. Version
 skew fails before target or registry loading.
 
+## Choose a generation mode
+
+The `generate` goal reads compiled API registries; it never scans Kotlin source. The location of the API definitions
+therefore determines the Maven phase and whether the current module can use the generated types:
+
+| API definitions read from | Generation phase | Current main source can use generated types | Minimum lifecycle command |
+| --- | --- | --- | --- |
+| A compiled contract dependency | `generate-sources` | yes | `./mvnw compile` |
+| The current module | `process-classes` (default) | no | `./mvnw process-classes` |
+
+Use a **compiled contract dependency** for a client or server application. Put the API definitions and their model
+types in a contract module, compile that module, and let the application generate sources from that dependency during
+`generate-sources`. The generated types then exist before the application's ordinary Kotlin compilation, so application
+source can implement `UsersServer` or invoke `UsersClient`.
+
+Use **same-module generation** for OpenAPI or when the generated source should be packaged with the contract for a
+downstream module. The execution runs during `process-classes`, after the current module has compiled and published its
+registry. Tapik compiles the generated Kotlin separately into `target/classes`, but it does not and cannot recompile the
+module's earlier main source.
+
+> [!WARNING]
+> A clean build cannot compile `src/main/kotlin` in the same module when it imports a type that Tapik generates during
+> `process-classes`. For example, a module containing both `object Users : Api()` and
+> `class UsersHandler : UsersServer` must be split into a contract module and an application module. A non-clean build
+> may appear to work because an old `UsersServer.class` remains in `target`; do not rely on that state.
+
+### Maven phases and commands
+
+| Command | Compiled-contract execution at `generate-sources` | Same-module execution at `process-classes` |
+| --- | --- | --- |
+| `./mvnw generate-sources` | generates targets | does not run |
+| `./mvnw compile` | generates targets, then compiles the project | compiles the registry, but does not generate targets |
+| `./mvnw process-classes` | generates targets and compiles the project | generates targets |
+| `./mvnw package`, `verify`, or `install` | runs | runs |
+
+The default phase belongs to a lifecycle-bound plugin execution. Invoking `./mvnw tapik:generate` directly does not
+first compile the current project and does not reliably select an execution's configuration. Prefer the lifecycle
+commands in the table. To start a Spring Boot application after a clean build, use
+`./mvnw process-classes spring-boot:run`; `spring-boot:run` alone should not be treated as a replacement for the Maven
+lifecycle that generates sources.
+
+Each generated file is logged at `INFO`, for example:
+
+```text
+[INFO] --- tapik:0.6.0:generate (generate-webmvc) @ application ---
+[INFO] Generated target/generated-sources/tapik-webmvc/com/example/generated/UsersServer.kt
+```
+
+If the Kotlin registry appears but no target files or Tapik generation log appears, the selected command most likely
+stopped at `compile` while the execution was using the default `process-classes` phase.
+
 ## Generate OpenAPI
 
 Add one execution of the same Maven plugin:
@@ -155,7 +217,7 @@ Add one execution of the same Maven plugin:
 <plugin>
     <groupId>dev.akif</groupId>
     <artifactId>tapik-plugin-maven</artifactId>
-    <version>0.6.0</version>
+    <version>${tapik.version}</version>
     <executions>
         <execution>
             <id>generate-openapi</id>
@@ -165,7 +227,7 @@ Add one execution of the same Maven plugin:
             <configuration>
                 <target>openapi</target>
                 <targetConfiguration>
-                    <version>0.6.0</version>
+                    <version>${project.version}</version>
                 </targetConfiguration>
             </configuration>
         </execution>
@@ -173,9 +235,14 @@ Add one execution of the same Maven plugin:
 </plugin>
 ```
 
-The goal runs in `process-classes` by default, so it can discover APIs compiled in the same module. It generates one
-YAML document per API under `target/generated/tapik`, such as `Books.openapi.yml`. Set `format` to `json` when JSON is
-preferred. Every discovered API is selected by default. An execution can narrow generation by exact API ID:
+This example is same-module generation: no `<phase>` is specified, so the goal uses its default `process-classes`
+phase and can read APIs compiled from the current module. Run `./mvnw process-classes` or any later lifecycle phase; a
+plain `./mvnw compile` does not invoke this execution. It generates one YAML document per API under
+`target/generated/tapik`, such as `Books.openapi.yml`. Set `format` to `json` when JSON is preferred.
+
+OpenAPI can instead be generated from a compiled contract dependency by adding `<phase>generate-sources</phase>` to
+the execution. In either mode every discovered API is selected by default. An execution can narrow generation by exact
+API ID:
 
 ```xml
 <includeApis>
@@ -201,48 +268,97 @@ OpenAPI target configuration:
 
 ## Generate Spring clients and servers
 
-Generated Spring source currently works best from a separate consumer module that depends on a compiled contract
-artifact. This avoids a Maven lifecycle cycle: `generate-sources` needs the contract registry, while that registry is
-created when the contract is compiled.
+For an application that implements or invokes generated Spring types, use two modules:
 
-Add the runtime needed by the selected generated target and the contract dependency:
+```text
+library-contract                  library-server
+API values and models      -->    depends on library-contract
+Tapik compiler registry           generates during generate-sources
+                                  implements generated server interfaces
+```
+
+Build the contract module with the compiler-plugin setup shown above. It needs no `generate` execution unless it also
+wants same-module OpenAPI or wants to package generated types. In the application module, add the contract dependency
+and the runtime for the selected target:
 
 ```xml
-<dependency>
-    <groupId>dev.akif</groupId>
-    <artifactId>tapik-target-spring-restclient</artifactId>
-</dependency>
 <dependency>
     <groupId>com.example</groupId>
     <artifactId>library-contract</artifactId>
     <version>${library.version}</version>
 </dependency>
+<dependency>
+    <groupId>dev.akif</groupId>
+    <artifactId>tapik-target-spring-webmvc</artifactId>
+</dependency>
 ```
 
-Then run the target during `generate-sources`:
+Then generate the WebMVC server before the application's Kotlin compilation:
 
 ```xml
-<execution>
-    <id>generate-restclient</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <target>spring-restclient</target>
-        <outputDirectory>${project.build.directory}/generated-sources/tapik-restclient</outputDirectory>
-        <targetConfiguration>
-            <packageName>com.example.library.client</packageName>
-            <clientSuffix>Client</clientSuffix>
-        </targetConfiguration>
-    </configuration>
-</execution>
+<plugin>
+    <groupId>dev.akif</groupId>
+    <artifactId>tapik-plugin-maven</artifactId>
+    <version>${tapik.version}</version>
+    <executions>
+        <execution>
+            <id>generate-webmvc</id>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <target>spring-webmvc</target>
+                <outputDirectory>${project.build.directory}/generated-sources/tapik-webmvc</outputDirectory>
+                <targetConfiguration>
+                    <packageName>com.example.library.generated</packageName>
+                </targetConfiguration>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
 ```
+
+Keep the application's ordinary `kotlin-maven-plugin` setup so Maven compiles Kotlin and the generated source root.
+Do not enable its `tapik` compiler plugin unless this application module also declares its own `Api` values.
+
+The application can now implement the generated interface from ordinary main source:
+
+```kotlin
+@Component
+class BooksHandler : BooksServer {
+    override val booksApi: Books = Books
+
+    override fun list(): BooksServer.ListResponse =
+        BooksServer.ListResponse.Ok(emptyList())
+}
+```
+
+Run `./mvnw clean verify` from the multi-module root, or `./mvnw -pl library-server -am clean verify` to build the
+application and its contract dependency. Running `./mvnw compile` in the application is also enough to generate and
+compile its server types once the contract artifact is available.
+
+For a RestClient, replace the runtime dependency with `tapik-target-spring-restclient` and configure an otherwise
+identical execution as follows:
+
+```xml
+<target>spring-restclient</target>
+<outputDirectory>${project.build.directory}/generated-sources/tapik-restclient</outputDirectory>
+<targetConfiguration>
+    <packageName>com.example.library.client</packageName>
+    <clientSuffix>Client</clientSuffix>
+</targetConfiguration>
+```
+
+Spring targets may also use same-module generation by omitting `<phase>generate-sources</phase>`. In that mode the
+generated source and registration resources are compiled and packaged with the current artifact during
+`process-classes`; only downstream modules can refer to those generated types from their main source.
 
 Use `spring-webmvc` with `tapik-target-spring-webmvc` for Spring Boot server generation. Its optional suffix settings are
 `serverSuffix` and `controllerSuffix`, defaulting to `Server` and `GeneratedController`; both Spring targets default to
-package `dev.akif.tapik.generated`. Source output directories are added to Maven's Kotlin compile roots automatically,
-and generated runtime registration resources are packaged by Maven.
+package `dev.akif.tapik.generated`. Source output directories are added to Maven's Kotlin compile roots automatically.
+Generated runtime registration resources are also copied into the main output when generation happens after Maven's
+normal resources phase.
 
 The RestClient target generates composable client interfaces backed by `RestClientTransport`. The WebMVC target
 generates public interfaces containing only typed handler methods and response types. It also generates internal Spring
@@ -257,7 +373,24 @@ remain framework-free while each target supplies its own generated transport ada
 parts together; a shared cross-framework server-contract target has not been extracted yet.
 
 Generation includes every API registry visible in the project output and compile/runtime dependencies by default.
-Include and exclude filters are planned but not implemented.
+Use the `includeApis` and `excludeApis` execution settings shown in the OpenAPI section to select exact API IDs for any
+target.
+
+## Maven troubleshooting
+
+- **`Generation requires at least one API` during `generate-sources`:** the execution is trying to read APIs from the
+  current module before that module has compiled. Remove the explicit phase to use `process-classes`, or move the APIs
+  to a compiled contract dependency.
+- **Registry files exist but target files do not:** `compile` ran the Kotlin compiler plugin, but Maven never reached a
+  same-module execution's `process-classes` phase. Run `./mvnw process-classes` or a later phase and look for the
+  `Generated ...` log lines.
+- **A generated server or client is unresolved from current main source:** same-module generation is too late for that
+  source set. Use a separate compiled contract module and generate in the consumer during `generate-sources`.
+- **An IDE build behaves differently from Maven:** delegate the build to Maven or run the appropriate lifecycle command
+  before importing generated sources. Confirm the setup with a clean Maven build; stale files under `target` can hide
+  an invalid lifecycle arrangement.
+- **A target is unknown:** built-in targets come from `tapik-plugin-maven`; custom targets must be plugin dependencies,
+  not only ordinary project dependencies.
 
 ## Generation failures
 
