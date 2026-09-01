@@ -70,7 +70,7 @@
 - [x] Allow source targets to consume APIs declared in the same Maven module without creating a compile/generate
   lifecycle cycle. Keep the existing compiled-contract dependency workflow available for separately published contracts.
 
-- [ ] Support incremental Kotlin compilation and target regeneration without retaining stale API registry entries,
+- [x] Support incremental Kotlin compilation and target regeneration without retaining stale API registry entries,
   generated classes, or runtime registration resources. Registry aggregation and generated outputs must remain
   deterministic and must not require users to run a clean build, including after target naming changes.
 

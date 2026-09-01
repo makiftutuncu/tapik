@@ -64,13 +64,21 @@ class GenerateMojo : AbstractMojo() {
                 )
             if (mojoExecution.lifecyclePhase != "generate-sources") {
                 val classesDirectory = Path.of(project.build.outputDirectory)
+                val buildDirectory = Path.of(project.build.directory)
+                val stagingDirectory = buildDirectory.resolve("tapik-generated-classes").resolve(generatedModuleName())
                 GeneratedKotlinCompiler.compile(
                     sources = generation.sourcePaths,
                     classpath = project.generationClasspath(),
-                    outputDirectory = classesDirectory,
+                    outputDirectory = stagingDirectory,
                     moduleName = generatedModuleName()
                 )
-                copyGeneratedResources(outputDirectory.toPath(), generation.resourcePaths, classesDirectory)
+                copyGeneratedResources(outputDirectory.toPath(), generation.resourcePaths, stagingDirectory)
+                GeneratedOutputSynchronizer.synchronize(
+                    stagingDirectory = stagingDirectory,
+                    outputDirectory = classesDirectory,
+                    stateDirectory = buildDirectory.resolve("tapik-state"),
+                    owner = mojoExecution.executionId
+                )
             }
             project.registerGeneratedArtifacts(outputDirectory.toPath(), generation)
             generation.written.forEach { path -> log.info("Generated ${projectRelativePath(path)}") }

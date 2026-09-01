@@ -15,9 +15,9 @@ internal object GeneratedKotlinCompiler {
         outputDirectory: Path,
         moduleName: String
     ) {
+        recreateDirectory(outputDirectory)
         if (sources.isEmpty()) return
         require(moduleName.isNotBlank()) { "Generated Kotlin module name must not be blank" }
-        Files.createDirectories(outputDirectory)
         val compilerOutput = ByteArrayOutputStream()
         val arguments =
             buildList {
@@ -45,4 +45,13 @@ internal object GeneratedKotlinCompiler {
             "Generated Kotlin compilation failed:\n${compilerOutput.toString().trim()}"
         }
     }
+}
+
+private fun recreateDirectory(directory: Path) {
+    if (Files.exists(directory)) {
+        Files.walk(directory).use { paths ->
+            paths.sorted(Comparator.reverseOrder()).forEach(Files::deleteIfExists)
+        }
+    }
+    Files.createDirectories(directory)
 }

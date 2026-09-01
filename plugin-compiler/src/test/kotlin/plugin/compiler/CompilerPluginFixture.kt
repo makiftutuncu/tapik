@@ -18,24 +18,23 @@ internal data class Compilation(
 
 internal fun compile(
     sourceText: String,
-    workspace: Path = compilerWorkspace()
+    workspace: Path = compilerWorkspace(),
+    incremental: Boolean = false
 ): Compilation {
     val source = workspace.resolve("Fixture.kt").apply { Files.writeString(this, sourceText) }
     val output = Files.createDirectories(workspace.resolve("classes"))
     val pluginJar = pluginJar(workspace.resolve("tapik-plugin-compiler.jar"))
     val compilerOutput = ByteArrayOutputStream()
-    val exitCode =
-        K2JVMCompiler().exec(
-            PrintStream(compilerOutput),
-            source.toString(),
-            "-d",
-            output.toString(),
-            "-classpath",
-            System.getProperty("java.class.path"),
-            "-Xplugin=${pluginJar}",
-            "-module-name",
-            "compiler-plugin-fixture"
-        )
+    val arguments =
+        buildList {
+            add(source.toString())
+            addAll(listOf("-d", output.toString()))
+            addAll(listOf("-classpath", System.getProperty("java.class.path")))
+            add("-Xplugin=${pluginJar}")
+            addAll(listOf("-module-name", "compiler-plugin-fixture"))
+            if (incremental) add("-Xenable-incremental-compilation")
+        }
+    val exitCode = K2JVMCompiler().exec(PrintStream(compilerOutput), *arguments.toTypedArray())
     return Compilation(exitCode, output, compilerOutput.toString())
 }
 

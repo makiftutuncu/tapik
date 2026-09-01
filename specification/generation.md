@@ -72,8 +72,12 @@ recompilations: changed APIs replace the generated class, while a compilation wi
 generated class and its service entry. Other provider entries in the shared service descriptor are preserved, so a
 manually supplied registry can coexist with the compiler-owned registry.
 
-Incremental Kotlin compilation is rejected initially because a partial IR view cannot safely produce a complete
-registry. Supporting incremental aggregation remains required future work.
+Incremental compilation maintains a compiler-owned per-source API index beside, rather than inside, the compiler output
+directory. A partial IR compilation replaces the entries for compiled source files, retains entries for active but
+unchanged source files, and removes entries whose source files no longer belong to the compilation. The complete index
+is sorted deterministically before the single registry class is regenerated. A full compilation replaces the index,
+and an empty index removes both its build state and generated registry artifacts. The index is build state and is never
+packaged in the contract artifact.
 
 ### Maven activation
 
@@ -159,6 +163,13 @@ earlier in the lifecycle cannot reference those newly generated types. Such impl
 module or a later source set until compiler-integrated declaration generation exists. Each generated Kotlin compilation
 uses the project's resolved classpath, Java 25 bytecode target, and a distinct module name so it does not replace the
 main compilation's Kotlin module metadata.
+
+Late generated Kotlin is compiled into a fresh per-execution staging directory. The Maven adapter then synchronizes
+that execution's staged class files and runtime resources into the main output using build-state ownership outside the
+packaged classes directory. Outputs absent from the latest successful execution are removed, including nested classes,
+Kotlin module metadata, and registration descriptors after generated package or suffix changes. Outputs owned by other
+executions and unowned application classes or resources are preserved, and conflicting execution ownership fails the
+build.
 
 Lifecycle phase selection is part of the host configuration, not target behavior. Maven's default `process-classes`
 phase applies when the `generate` goal is bound as an execution and the build reaches that phase. Invoking the goal

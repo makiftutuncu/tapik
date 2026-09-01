@@ -24,4 +24,19 @@ class GeneratedKotlinCompilerSpec : FunSpec({
         }
         Files.isRegularFile(output.resolve("META-INF/generated-compiler-spec.kotlin_module")) shouldBe true
     }
+
+    test("start each generated compilation with an empty output") {
+        val workspace = Files.createTempDirectory("tapik-generated-compiler-empty-").apply { toFile().deleteOnExit() }
+        val output = Files.createDirectories(workspace.resolve("classes"))
+        Files.writeString(output.resolve("Stale.class"), "stale")
+
+        GeneratedKotlinCompiler.compile(
+            sources = emptyList(),
+            classpath = emptyList(),
+            outputDirectory = output,
+            moduleName = "generated-compiler-empty-spec"
+        )
+
+        Files.exists(output.resolve("Stale.class")) shouldBe false
+    }
 })

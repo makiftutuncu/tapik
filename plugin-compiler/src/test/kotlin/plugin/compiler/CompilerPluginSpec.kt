@@ -64,6 +64,22 @@ class CompilerPluginSpec : FunSpec({
         }
     }
 
+    test("accept incremental Kotlin compilation") {
+        val compilation =
+            compile(
+                """
+                package example
+
+                import dev.akif.tapik.*
+
+                object Books : Api()
+                """.trimIndent(),
+                incremental = true
+            )
+
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("reject non-public endpoint properties") {
         val compilation =
             compile(

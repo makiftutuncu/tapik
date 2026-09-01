@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -23,7 +24,9 @@ import java.nio.file.Path
 
 internal class ApiRegistryGenerationExtension(
     private val outputDirectory: Path,
-    private val messages: MessageCollector
+    private val messages: MessageCollector,
+    private val incremental: Boolean,
+    private val sourceRoots: List<Path>
 ) : IrGenerationExtension {
     override fun generate(
         moduleFragment: IrModuleFragment,
@@ -34,34 +37,42 @@ internal class ApiRegistryGenerationExtension(
         val apiClass = declarations?.findClass(API_CLASS_ID)?.owner
         val endpointClass = declarations?.findClass(ENDPOINT_CLASS_ID)?.owner
         if (apiClass == null || endpointClass == null) {
-            RegistryClassWriter.synchronize(outputDirectory, emptyList())
+            synchronize(moduleFragment, emptyMap())
             return
         }
-        val apiTypes = mutableListOf<IrClass>()
-        moduleFragment.acceptChildrenVoid(
-            object : IrVisitorVoid() {
-                override fun visitElement(element: IrElement) {
-                    element.acceptChildrenVoid(this)
-                }
-
-                override fun visitClass(declaration: IrClass) {
-                    if (declaration.isConcreteApi(apiClass)) {
-                        apiTypes += declaration
-                    }
-                    super.visitClass(declaration)
-                }
-            }
-        )
+        val apiTypesBySource =
+            moduleFragment.files.associate { file -> file.sourcePath() to file.concreteApiTypes(apiClass) }
+        val apiTypes = apiTypesBySource.values.flatten()
         if (!validateEndpointProperties(apiTypes, apiClass, endpointClass)) {
             RegistryClassWriter.synchronize(outputDirectory, emptyList())
             return
         }
-        val registeredTypes = apiTypes.mapNotNull { apiType -> apiType.registeredApiType(messages) }
-        if (registeredTypes.size != apiTypes.size) {
+        val registeredBySource =
+            apiTypesBySource.mapValues { (_, types) -> types.mapNotNull { type -> type.registeredApiType(messages) } }
+        if (registeredBySource.values.sumOf(List<RegisteredApiType>::size) != apiTypes.size) {
             RegistryClassWriter.synchronize(outputDirectory, emptyList())
             return
         }
 
+        synchronize(moduleFragment, registeredBySource)
+    }
+
+    private fun synchronize(
+        moduleFragment: IrModuleFragment,
+        registeredBySource: Map<Path, List<RegisteredApiType>>
+    ) {
+        val compiledSources =
+            moduleFragment.files.associate { file ->
+                val source = file.sourcePath()
+                source to registeredBySource[source].orEmpty()
+            }
+        val activeSources = activeKotlinSources(sourceRoots) + compiledSources.keys
+        val registeredTypes =
+            ApiRegistryIndex(registryIndexPath(outputDirectory)).synchronize(
+                incremental = incremental,
+                activeSources = activeSources,
+                compiledSources = compiledSources
+            )
         RegistryClassWriter.synchronize(outputDirectory, registeredTypes)
     }
 
@@ -92,6 +103,25 @@ internal class ApiRegistryGenerationExtension(
         return valid
     }
 }
+
+private fun IrFile.concreteApiTypes(apiClass: IrClass): List<IrClass> {
+    val apiTypes = mutableListOf<IrClass>()
+    acceptChildrenVoid(
+        object : IrVisitorVoid() {
+            override fun visitElement(element: IrElement) {
+                element.acceptChildrenVoid(this)
+            }
+
+            override fun visitClass(declaration: IrClass) {
+                if (declaration.isConcreteApi(apiClass)) apiTypes += declaration
+                super.visitClass(declaration)
+            }
+        }
+    )
+    return apiTypes
+}
+
+private fun IrFile.sourcePath(): Path = Path.of(fileEntry.name).toAbsolutePath().normalize()
 
 private fun IrClass.apiHierarchy(apiClass: IrClass): Sequence<IrClass> =
     sequence {
