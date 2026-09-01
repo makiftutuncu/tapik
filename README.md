@@ -353,6 +353,14 @@ Run `./mvnw clean verify` from the multi-module root, or `./mvnw -pl library-ser
 application and its contract dependency. Running `./mvnw compile` in the application is also enough to generate and
 compile its server types once the contract artifact is available.
 
+A complete runnable version of this arrangement lives in
+[`example-contract`](example-contract) and
+[`example-application`](example-application). Its Jackson-backed contract generates OpenAPI,
+a RestClient interface, and a WebMVC server interface in every reactor build. The application implements and exercises
+both generated Spring interfaces. See the
+[example instructions](example-application/README.md) for its layout, generated artifacts, and run
+command.
+
 For a RestClient, replace the runtime dependency with `tapik-target-spring-restclient` and configure an otherwise
 identical execution as follows:
 
@@ -447,5 +455,5 @@ The 0.6 rewrite replaces the previous implementation rather than preserving its 
 ./mvnw clean verify
 ```
 
-The build requires Java 25 and runs every production, fixture, and cross-artifact integration module. Product and
-architecture decisions live under [`specification`](specification/README.md).
+The build requires Java 25 and runs every production, fixture, and runnable example module. Product and architecture
+decisions live under [`specification`](specification/README.md).

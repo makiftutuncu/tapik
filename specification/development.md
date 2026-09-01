@@ -27,7 +27,7 @@ itself deferred until the first compile-failure behavior is implemented.
 Pull requests targeting `main` and pushes to `main` run a clean `./mvnw verify` on Linux with Temurin Java 25. CI uses
 the Maven Wrapper and the Kotlin version declared by the parent build, so it verifies the minimum supported toolchain
 without maintaining an independent version configuration. The workflow has read-only repository permissions, includes
-every production and `test-` reactor module, and receives no publication credentials.
+every production, `test-`, and `example-` reactor module, and receives no publication credentials.
 
 ## Publication
 
@@ -44,17 +44,17 @@ check for release packaging; it must attach a `sources` JAR and a `javadoc` JAR 
 authenticated `./mvnw -Prelease clean deploy` creates one reactor-wide Central deployment, publishes it automatically,
 and waits for publication to finish.
 
-Modules whose folder begins with `test-` remain installable for reactor and local integration builds, but release
-packaging does not attach publication artifacts to them and Central deployment excludes them. The parent POM remains
-publishable because published module POMs inherit their shared project metadata and build coordinates from it.
+Modules whose folder begins with `test-` or `example-` remain installable for reactor and local integration builds, but
+release packaging does not attach publication artifacts to them and Central deployment excludes them. The parent POM
+remains publishable because published module POMs inherit their shared project metadata and build coordinates from it.
 
 ## Modules
 
 The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification
 needs an independently consumable boundary. Maven module folders are flat beneath the repository root and omit the
 `tapik-` artifact prefix. Runtime and integration modules, except for `core`, begin with exactly one role prefix:
-`common-`, `format-`, `plugin-`, `target-`, or `test-`. The structural `bom` module is the other unprefixed exception.
-Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization
+`common-`, `example-`, `format-`, `plugin-`, `target-`, or `test-`. The structural `bom` module is the other unprefixed
+exception. Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization
 integration is therefore `dev.akif:tapik-format-kotlinx` with packages under `dev.akif.tapik.format.kotlinx`.
 
 `plugin-` is reserved for integrations invoked by a compiler or build tool. Modules implementing the host-neutral
@@ -79,13 +79,14 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `target-spring-restclient` | `dev.akif:tapik-target-spring-restclient` |
 | `target-spring-webmvc` | `dev.akif:tapik-target-spring-webmvc` |
 | `test-fixtures` | `dev.akif:tapik-test-fixtures` |
-| `test-maven-contract` | `dev.akif:tapik-test-maven-contract` |
-| `test-maven-integration` | `dev.akif:tapik-test-maven-integration` |
+| `example-contract` | `dev.akif:tapik-example-contract` |
+| `example-application` | `dev.akif:tapik-example-application` |
 
 `tapik-bom` is a published Maven BOM that manages one release version for every published Tapik production artifact.
-It excludes all non-production `test-` artifacts. Users import the BOM in project `dependencyManagement` and omit
-versions from their ordinary Tapik dependencies. Maven build-plugin versions and dependencies declared inside a
-build plugin remain explicitly versioned because project dependency management does not govern those scopes.
+It excludes all non-production `test-` and `example-` artifacts. Users import the BOM in project
+`dependencyManagement` and omit versions from their ordinary Tapik dependencies. Maven build-plugin versions and
+dependencies declared inside a build plugin remain explicitly versioned because project dependency management does
+not govern those scopes.
 
 `core` remains dependency-free. Format integrations are opt-in contract dependencies: neither core nor generation
 targets select a serialization library for the user. A contract may use one integration, combine multiple integrations,
@@ -122,11 +123,10 @@ Shared Spring integration code lives in `common-spring` under `dev.akif.tapik.co
 
 Other module packages follow the same folder-name hierarchy: `common-format` uses `dev.akif.tapik.common.format`,
 `common-plugin` uses `dev.akif.tapik.common.plugin`, `plugin-compiler` uses `dev.akif.tapik.plugin.compiler`,
-`target-openapi` uses `dev.akif.tapik.target.openapi`, and `plugin-maven` uses `dev.akif.tapik.plugin.maven`. The
-non-production `test-maven-contract` and
-`test-maven-integration` modules use `dev.akif.tapik.test.maven.contract` and
-`dev.akif.tapik.test.maven.integration`. Together they verify the complete Maven user workflow against the
-reactor-built artifacts, including APIs supplied by a separate contract artifact.
+`target-openapi` uses `dev.akif.tapik.target.openapi`, and `plugin-maven` uses `dev.akif.tapik.plugin.maven`. Example
+packages describe their domain instead of the build mechanism. The library example uses
+`com.example.library.contract` and `com.example.library.application` so its source can be copied into an ordinary
+project without carrying Tapik's internal test naming.
 
 The non-production `test-fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
 `dev.akif.tapik.test.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact
@@ -134,7 +134,17 @@ in their tests so every interpreter is verified against the same contracts inste
 fixtures.
 
 Non-production modules remain installable so reactor and local integration builds can resolve them, but they must be
-excluded from deployment. This applies to every `test-` module; release deployment publishes only production modules.
+excluded from deployment. This applies to every `test-` and `example-` module; release deployment publishes only
+production modules.
+
+The `example-contract` and `example-application` modules form the runnable Maven example and own the end-to-end Maven
+coverage. The contract publishes ordinary API values, Jackson-backed formats, and a compiler-generated registry; its
+OpenAPI execution also verifies the same-module `process-classes` workflow. The application consumes that compiled
+contract and runs OpenAPI, Spring RestClient, and Spring WebMVC generation during `generate-sources`, allowing its main
+source to implement generated servers and construct a generated client backed by Spring's `RestClient`. API selection,
+BOM coverage, generated-source compilation, Spring runtime behavior, and golden OpenAPI artifacts are verified here
+rather than in parallel Maven-only fixture modules. The example is built and tested in the normal reactor so its
+documented configuration cannot drift from supported behavior.
 
 The `target-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy contracts
 into a neutral metadata model. Its public document model represents the OpenAPI output itself, and deterministic JSON

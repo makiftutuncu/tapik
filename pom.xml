@@ -58,8 +58,8 @@
         <module>target-spring-webmvc</module>
         <module>target-openapi</module>
         <module>plugin-maven</module>
-        <module>test-maven-contract</module>
-        <module>test-maven-integration</module>
+        <module>example-contract</module>
+        <module>example-application</module>
     </modules>
 
     <properties>
@@ -358,8 +358,8 @@
                             <skipPublishing>${central.skipPublishing}</skipPublishing>
                             <excludeArtifacts>
                                 <excludeArtifact>tapik-test-fixtures</excludeArtifact>
-                                <excludeArtifact>tapik-test-maven-contract</excludeArtifact>
-                                <excludeArtifact>tapik-test-maven-integration</excludeArtifact>
+                                <excludeArtifact>tapik-example-contract</excludeArtifact>
+                                <excludeArtifact>tapik-example-application</excludeArtifact>
                             </excludeArtifacts>
                         </configuration>
                     </plugin>

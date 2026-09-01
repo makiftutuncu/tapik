@@ -1,0 +1,48 @@
+{
+    "openapi": "3.2.0",
+    "info": {
+        "title": "Books",
+        "version": "0.6.0"
+    },
+    "paths": {
+        "/books": {
+            "get": {
+                "operationId": "Books.list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Book"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Book": {
+                "type": "object",
+                "properties": {
+                    "isbn": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "isbn",
+                    "title"
+                ]
+            }
+        }
+    }
+}

@@ -98,7 +98,7 @@
 - [x] Introduce explicit API composition and nesting while preserving endpoint identity, inferred endpoint types, and
   declaration order. Separate API values must remain valid and require no migration.
 
-- [ ] Add a small runnable Maven example that defines a contract artifact and consumes it for OpenAPI, RestClient, and
+- [x] Add a small runnable Maven example that defines a contract artifact and consumes it for OpenAPI, RestClient, and
   WebMVC generation. Keep it aligned with the real plugin configuration through an automated build check.
 
 - [ ] Restore the Tapik website and publish one unified multi-module Dokka API reference at `tapik.akif.dev`. Keep the
