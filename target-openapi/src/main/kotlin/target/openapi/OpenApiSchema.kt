@@ -17,6 +17,8 @@ import kotlinx.serialization.json.JsonElement
  * @property propertyNames schema constraining object property names.
  * @property additionalProperties schema of dynamically named object properties.
  * @property anyOf alternative schemas, at least one of which must match.
+ * @property oneOf alternative schemas, exactly one of which must match.
+ * @property discriminator optional hint for selecting a composed-schema alternative.
  * @property deprecated whether consumers should avoid the described value.
  * @property defaultValue documented receiver behavior when a value is absent.
  * @property constantValue the only accepted value.
@@ -32,6 +34,8 @@ data class OpenApiSchema(
     val propertyNames: OpenApiSchema? = null,
     val additionalProperties: OpenApiSchema? = null,
     val anyOf: List<OpenApiSchema> = emptyList(),
+    val oneOf: List<OpenApiSchema> = emptyList(),
+    val discriminator: OpenApiDiscriminator? = null,
     val deprecated: Boolean = false,
     val defaultValue: JsonElement? = null,
     val constantValue: JsonElement? = null

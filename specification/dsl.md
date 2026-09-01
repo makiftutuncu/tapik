@@ -169,6 +169,14 @@ val bookIdFormat =
 exception as their cause. `transformOrThrow` provides the explicit propagating variant. Both reuse the original wire
 representation and schema. `named` immutably assigns the schema name.
 
+`UnionSchema` describes a value that must match exactly one of at least two alternatives. Alternative order is
+preserved. An optional `SchemaDiscriminator` names the wire property used to select an alternative and may define
+explicit value-to-schema mappings plus a default mapping. Discriminator mappings target `ReferenceSchema` values so
+component names remain neutral and are interpreted consistently by each target's naming policy.
+
+Union alternatives and discriminator mappings are immutable snapshots. Blank discriminator property names or
+discriminating values are rejected while building the schema, before a target runs.
+
 Kotlin serialization body builders are enabled by:
 
 ```kotlin

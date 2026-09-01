@@ -41,6 +41,15 @@ policy. The default `OpenApiComponentNaming.Simple` policy keeps the final dot-s
 Schemas that resolve to the same component name and the same OpenAPI shape share one component. Different shapes
 resolving to the same name fail generation instead of allowing one definition to overwrite another.
 
+Tapik union schemas become JSON Schema `oneOf` arrays in declaration order. Their discriminators become OpenAPI
+Discriminator Objects with `propertyName`, optional `mapping`, and optional `defaultMapping`. Explicit and default
+mapping references pass through the configured component-naming policy and participate in unresolved-reference
+validation.
+
+OpenAPI requires discriminator alternatives to be addressable schemas. Generation therefore rejects a discriminated
+union containing an inline alternative, or a discriminator mapping whose target is not one of the union alternatives.
+An undiscriminated union may freely contain inline or referenced alternatives.
+
 ## Rendering
 
 `OpenApiDocument.toJson()` produces pretty, deterministic JSON. Passing `pretty = false` produces compact JSON with

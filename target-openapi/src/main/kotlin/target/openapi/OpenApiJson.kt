@@ -121,9 +121,20 @@ private fun OpenApiSchema.json(): JsonObject =
         propertyNames?.let { put("propertyNames", it.json()) }
         additionalProperties?.let { put("additionalProperties", it.json()) }
         if (anyOf.isNotEmpty()) put("anyOf", JsonArray(anyOf.map(OpenApiSchema::json)))
+        if (oneOf.isNotEmpty()) put("oneOf", JsonArray(oneOf.map(OpenApiSchema::json)))
+        discriminator?.let { put("discriminator", it.json()) }
         if (deprecated) put("deprecated", true)
         defaultValue?.let { put("default", it) }
         constantValue?.let { put("const", it) }
+    }
+
+private fun OpenApiDiscriminator.json(): JsonObject =
+    buildJsonObject {
+        put("propertyName", propertyName)
+        if (mapping.isNotEmpty()) {
+            put("mapping", jsonObject(mapping.mapValues { (_, reference) -> JsonPrimitive(reference) }))
+        }
+        defaultMapping?.let { put("defaultMapping", it) }
     }
 
 private fun jsonObject(values: Map<String, JsonElement>): JsonObject = JsonObject(values)

@@ -53,6 +53,10 @@ private fun Any?.jsonValue(schema: Schema): JsonElement {
                 }
             )
         is NullableSchema -> jsonValue(schema.schema)
+        is UnionSchema ->
+            throw OpenApiGenerationException(
+                "OpenAPI default values do not support union schemas"
+            )
         is ReferenceSchema ->
             throw OpenApiGenerationException(
                 "OpenAPI default values require a structural schema, but '${schema.reference}' is reference-only"

@@ -89,7 +89,7 @@
 - [x] Let parameters, request bodies, and response alternatives carry their own OpenAPI-aligned documentation. Add
   these concepts incrementally without turning documentation into generic type noise on `Endpoint`.
 
-- [ ] Extend the neutral schema algebra with union and discriminator concepts. Map them to OpenAPI before adding
+- [x] Extend the neutral schema algebra with union and discriminator concepts. Map them to OpenAPI before adding
   integration-specific derivation so unsupported polymorphism continues to fail early.
 
 - [ ] Derive sealed and polymorphic Kotlin serialization models into the new union schema forms. Add shared schema and

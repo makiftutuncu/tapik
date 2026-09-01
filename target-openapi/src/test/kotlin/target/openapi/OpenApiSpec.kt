@@ -127,6 +127,109 @@ class OpenApiSpec : FunSpec({
             "#/components/schemas/Author"
     }
 
+    test("interpret union schemas and discriminators") {
+        val cat = ObjectSchema(emptyMap(), name = "animals.Cat")
+        val dog = ObjectSchema(emptyMap(), name = "animals.Dog")
+        val animal =
+            UnionSchema(
+                alternatives = listOf(cat, dog),
+                discriminator =
+                    SchemaDiscriminator(
+                        propertyName = "kind",
+                        mapping =
+                            linkedMapOf(
+                                "cat" to ReferenceSchema("animals.Cat"),
+                                "dog" to ReferenceSchema("animals.Dog")
+                            ),
+                        defaultMapping = ReferenceSchema("animals.Dog")
+                    ),
+                name = "animals.Animal"
+            )
+        val animals =
+            object : Api("Animals") {
+                val get by get(root / "animal").output(Status.Ok with openApiBody(animal))
+                val choose by
+                    get(root / "choice")
+                        .output(
+                            Status.Ok with
+                                openApiBody(
+                                    UnionSchema(
+                                        listOf(
+                                            ScalarSchema(SchemaType.STRING),
+                                            ScalarSchema(SchemaType.INTEGER)
+                                        )
+                                    )
+                                )
+                        )
+            }
+
+        val generated = OpenApi.from(animals, version = "1")
+        val schema = generated.components.schemas.getValue("Animal")
+
+        schema.oneOf.map(OpenApiSchema::reference) shouldContainExactly
+            listOf("#/components/schemas/Cat", "#/components/schemas/Dog")
+        schema.discriminator shouldBe
+            OpenApiDiscriminator(
+                propertyName = "kind",
+                mapping =
+                    linkedMapOf(
+                        "cat" to "#/components/schemas/Cat",
+                        "dog" to "#/components/schemas/Dog"
+                    ),
+                defaultMapping = "#/components/schemas/Dog"
+            )
+        generated.paths
+            .getValue("/choice")
+            .operations
+            .getValue(Method.GET)
+            .responses
+            .getValue("200")
+            .content
+            .getValue("application/json")
+            .schema
+            .oneOf
+            .map(OpenApiSchema::types) shouldContainExactly listOf(listOf("string"), listOf("integer"))
+
+        val json = generated.toJson(pretty = false)
+        json shouldContain "\"oneOf\":[{\"${'$'}ref\":\"#/components/schemas/Cat\"}"
+        json shouldContain "\"discriminator\":{\"propertyName\":\"kind\""
+        json shouldContain "\"defaultMapping\":\"#/components/schemas/Dog\""
+    }
+
+    test("reject OpenAPI discriminators with inline or unlisted alternatives") {
+        val cat = ObjectSchema(emptyMap(), name = "Cat")
+        val dog = ObjectSchema(emptyMap(), name = "Dog")
+        val inline =
+            UnionSchema(
+                alternatives = listOf(ScalarSchema(SchemaType.STRING), dog),
+                discriminator = SchemaDiscriminator("kind")
+            )
+        val unlisted =
+            UnionSchema(
+                alternatives = listOf(cat, dog),
+                discriminator =
+                    SchemaDiscriminator(
+                        "kind",
+                        mapping = mapOf("bird" to ReferenceSchema("Bird"))
+                    )
+            )
+
+        val inlineApi =
+            object : Api("Inline") {
+                val get by get(root / "animal").output(Status.Ok with openApiBody(inline))
+            }
+        val unlistedApi =
+            object : Api("Unlisted") {
+                val get by get(root / "animal").output(Status.Ok with openApiBody(unlisted))
+            }
+
+        val inlineFailure = shouldThrow<OpenApiGenerationException> { OpenApi.from(inlineApi, version = "1") }
+        val unlistedFailure = shouldThrow<OpenApiGenerationException> { OpenApi.from(unlistedApi, version = "1") }
+
+        requireNotNull(inlineFailure.message) shouldContain "named or referenced"
+        requireNotNull(unlistedFailure.message) shouldContain "must be a union alternative"
+    }
+
     test("render deterministic OpenAPI 3.2 JSON") {
         val rendered = document.toJson(pretty = false)
         val root = Json.parseToJsonElement(rendered).jsonObject
@@ -301,6 +404,9 @@ class OpenApiSpec : FunSpec({
 })
 
 private val openApiDocumentedBody: Body<String> =
+    openApiBody(format.string.schema)
+
+private fun openApiBody(schema: Schema): Body<String> =
     body(
         mediaType = MediaType.Json,
         format =
@@ -310,6 +416,6 @@ private val openApiDocumentedBody: Body<String> =
                         decoder = Decoder { value -> DecodeResult.Success(value.decodeToString()) },
                         encoder = Encoder(String::encodeToByteArray)
                     ),
-                schema = format.string.schema
+                schema = schema
             )
     )
