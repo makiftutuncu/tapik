@@ -92,7 +92,7 @@
 - [x] Extend the neutral schema algebra with union and discriminator concepts. Map them to OpenAPI before adding
   integration-specific derivation so unsupported polymorphism continues to fail early.
 
-- [ ] Derive sealed and polymorphic Kotlin serialization models into the new union schema forms. Add shared schema and
+- [x] Derive sealed and polymorphic Kotlin serialization models into the new union schema forms. Add shared schema and
   codec conformance cases that the Jackson integration can later reuse for behavioral parity.
 
 - [ ] Introduce explicit API composition and nesting while preserving endpoint identity, inferred endpoint types, and

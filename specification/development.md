@@ -97,6 +97,10 @@ depends only on `core` and contains weak format caching, consistent decoding-fai
 schema-derivation exception. Serialization-library introspection, configuration, codecs, and user-facing builders
 remain in their respective `format-` modules.
 
+`common-format` also attaches a test fixture containing provider-neutral byte-array codec and schema conformance
+cases. Format integrations supply their own model, expected wire representation, and expected core schema to the same
+cases. This keeps behavioral parity testable without introducing a production dependency between integrations.
+
 `format-kotlinx` depends on `common-format` and Kotlin serialization, and converts its serializers into core codecs and
 schemas without leaking Kotlin serialization types into endpoint contracts. Projects that choose another integration
 do not depend on `format-kotlinx` or enable the Kotlin serialization compiler plugin. Dependencies used internally to

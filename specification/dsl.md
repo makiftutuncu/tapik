@@ -193,10 +193,23 @@ the cache does not retain an otherwise unreachable serialization format, seriali
 classloader; a collected format may be recreated by a later lookup. `Json.Default` is the default argument for the
 Kotlin serialization JSON builder.
 
-Kotlin serialization schema derivation initially covers primitives, enums, lists, maps, nullable properties,
-objects, and value classes. Recursive object references are retained as schema references. Unsupported descriptor
-kinds fail while the format is built. Object schema properties retain separate `required` and `deprecated` flags;
-derivers set each flag only when their source metadata can express it reliably.
+Kotlin serialization schema derivation covers primitives, enums, lists, maps, nullable properties, objects, value
+classes, sealed hierarchies, and finitely registered open polymorphic hierarchies. Recursive object and polymorphic
+references are retained as schema references. Object schema properties retain separate `required` and `deprecated`
+flags; derivers set each flag only when their source metadata can express it reliably.
+
+JSON polymorphism is derived from both the serializer and the selected `Json` instance. Sealed alternatives retain
+their serializer declaration order. Kotlin serialization does not expose open serializer-module registration order,
+so open alternatives are ordered by serialized type name to keep generated schemas deterministic. Each alternative is
+a named object schema containing the required discriminator property with its exact serialized type name, and the
+enclosing `UnionSchema` maps those values to the alternatives. `@JsonClassDiscriminator` overrides the selected `Json`
+instance's global discriminator name just as it does for the codec.
+
+Format construction fails when a polymorphic descriptor has no finite alternatives, uses a default polymorphic
+provider, has a non-object alternative, conflicts with the discriminator property, disables discriminators, or uses
+array polymorphism. `ClassDiscriminatorMode.ALL_JSON_OBJECTS` also fails until ordinary object schemas can represent
+that mode faithfully. Descriptor-only schema derivation uses `Json.Default`; callers needing configured polymorphism
+must provide their `Json` instance.
 
 Jackson 3 body builders are provided independently by `dev.akif:tapik-format-jackson`:
 
@@ -215,8 +228,8 @@ retain otherwise unreachable mappers, types, formats, or their defining classloa
 Jackson schema derivation has the same initial structural coverage as Kotlin serialization: primitives, enums, lists,
 maps, nullable properties, objects, value classes, recursive references, constructor defaults, and deprecation flags.
 The derived object shape follows Jackson's effective serialization properties, including configured names, ignored
-properties, and order. Polymorphic and sealed types fail format construction until the core schema algebra can
-represent their alternatives.
+properties, and order. Polymorphic and sealed types still fail format construction until Jackson-specific derivation
+is implemented against the neutral union algebra and shared conformance cases.
 
 ## Request headers and input
 

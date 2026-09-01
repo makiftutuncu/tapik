@@ -28,6 +28,14 @@
             <artifactId>kotlinx-serialization-json</artifactId>
         </dependency>
         <dependency>
+            <groupId>dev.akif</groupId>
+            <artifactId>tapik-common-format</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
             <scope>test</scope>

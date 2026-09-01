@@ -1,8 +1,6 @@
 package dev.akif.tapik.format.kotlinx
 
 import dev.akif.tapik.*
-import dev.akif.tapik.common.format.SchemaDerivationException
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -74,9 +72,6 @@ class JsonFormatSpec : FunSpec({
         children.items shouldBe ReferenceSchema("dev.akif.tapik.format.kotlinx.Category")
     }
 
-    test("fail format construction for unsupported descriptor kinds") {
-        shouldThrow<SchemaDerivationException> { jsonFormat<LibraryItem>() }
-    }
 })
 
 @Serializable
@@ -113,14 +108,6 @@ private data class Category(
     val name: String,
     val children: List<Category>
 )
-
-@Serializable
-private sealed interface LibraryItem {
-    @Serializable
-    data class Book(
-        val title: String
-    ) : LibraryItem
-}
 
 private fun libraryBook(): LibraryBook =
     LibraryBook(

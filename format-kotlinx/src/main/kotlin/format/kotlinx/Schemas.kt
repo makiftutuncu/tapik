@@ -7,93 +7,121 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.json.ClassDiscriminatorMode
+import kotlinx.serialization.json.Json
 
-/** Derives a Tapik schema from [serializer]. */
-fun deriveSchema(serializer: KSerializer<*>): Schema = deriveSchema(serializer.descriptor)
+/** Derives a Tapik schema from [serializer] using [Json.Default]. */
+fun deriveSchema(serializer: KSerializer<*>): Schema = deriveSchema(Json.Default, serializer)
 
-/** Derives a Tapik schema from [descriptor]. */
-fun deriveSchema(descriptor: SerialDescriptor): Schema =
-    deriveSchema(descriptor, activeObjects = emptySet(), includeNullability = true)
+/** Derives a Tapik schema from [descriptor] using [Json.Default]. */
+fun deriveSchema(descriptor: SerialDescriptor): Schema = deriveSchema(Json.Default, descriptor)
 
-@OptIn(ExperimentalSerializationApi::class)
-private fun deriveSchema(
-    descriptor: SerialDescriptor,
-    activeObjects: Set<String>,
-    includeNullability: Boolean
-): Schema {
-    if (includeNullability && descriptor.isNullable) {
-        return NullableSchema(deriveSchema(descriptor, activeObjects, includeNullability = false))
-    }
+/** Derives a Tapik schema from [serializer] and the selected JSON [format]. */
+fun deriveSchema(
+    format: Json,
+    serializer: KSerializer<*>
+): Schema = deriveSchema(format, serializer.descriptor)
 
-    if (descriptor.isInline) {
-        require(descriptor.elementsCount == 1) {
-            "Inline descriptor '${descriptor.serialName}' must contain exactly one element"
+/** Derives a Tapik schema from [descriptor] and the selected JSON [format]. */
+fun deriveSchema(
+    format: Json,
+    descriptor: SerialDescriptor
+): Schema = KotlinxSchemaDeriver(format).derive(descriptor)
+
+internal class KotlinxSchemaDeriver(
+    val format: Json
+) {
+    fun derive(
+        descriptor: SerialDescriptor,
+        activeSchemas: Set<String> = emptySet(),
+        includeNullability: Boolean = true
+    ): Schema = deriveDescriptor(descriptor, activeSchemas, includeNullability)
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun deriveDescriptor(
+        descriptor: SerialDescriptor,
+        activeSchemas: Set<String>,
+        includeNullability: Boolean
+    ): Schema {
+        if (includeNullability && descriptor.isNullable) {
+            return NullableSchema(derive(descriptor, activeSchemas, includeNullability = false))
         }
-        return deriveSchema(descriptor.getElementDescriptor(0), activeObjects, includeNullability = true)
-            .named(descriptor.serialName)
+
+        if (descriptor.isInline) {
+            require(descriptor.elementsCount == 1) {
+                "Inline descriptor '${descriptor.serialName}' must contain exactly one element"
+            }
+            return derive(descriptor.getElementDescriptor(0), activeSchemas)
+                .named(descriptor.serialName)
+        }
+
+        val schemaName = schemaName(descriptor)
+        val isReferenceable =
+                descriptor.kind == StructureKind.CLASS ||
+                descriptor.kind == StructureKind.OBJECT ||
+                descriptor.kind is PolymorphicKind
+        if (isReferenceable && schemaName in activeSchemas) {
+            return ReferenceSchema(schemaName)
+        }
+
+        return when (descriptor.kind) {
+            PrimitiveKind.BOOLEAN -> ScalarSchema(SchemaType.BOOLEAN)
+            PrimitiveKind.BYTE,
+            PrimitiveKind.SHORT,
+            PrimitiveKind.INT -> ScalarSchema(SchemaType.INTEGER, format = "int32")
+            PrimitiveKind.LONG -> ScalarSchema(SchemaType.INTEGER, format = "int64")
+            PrimitiveKind.FLOAT -> ScalarSchema(SchemaType.NUMBER, format = "float")
+            PrimitiveKind.DOUBLE -> ScalarSchema(SchemaType.NUMBER, format = "double")
+            PrimitiveKind.CHAR,
+            PrimitiveKind.STRING -> ScalarSchema(SchemaType.STRING)
+            StructureKind.LIST ->
+                ArraySchema(items = derive(descriptor.getElementDescriptor(0), activeSchemas))
+            StructureKind.MAP ->
+                MapSchema(
+                    keys = derive(descriptor.getElementDescriptor(0), activeSchemas),
+                    values = derive(descriptor.getElementDescriptor(1), activeSchemas)
+                )
+            StructureKind.CLASS,
+            StructureKind.OBJECT -> deriveObjectSchema(descriptor, activeSchemas)
+            SerialKind.ENUM ->
+                EnumSchema(
+                    values = List(descriptor.elementsCount, descriptor::getElementName),
+                    name = descriptor.serialName
+                )
+            PolymorphicKind.OPEN,
+            PolymorphicKind.SEALED -> derivePolymorphicSchema(descriptor, activeSchemas)
+            SerialKind.CONTEXTUAL ->
+                throw SchemaDerivationException(
+                    "Unsupported Kotlin serialization descriptor kind '${descriptor.kind}' for '${descriptor.serialName}'"
+                )
+        }
     }
 
-    val isObject = descriptor.kind == StructureKind.CLASS || descriptor.kind == StructureKind.OBJECT
-    if (isObject && descriptor.serialName in activeObjects) {
-        return ReferenceSchema(descriptor.serialName)
-    }
-
-    return when (descriptor.kind) {
-        PrimitiveKind.BOOLEAN -> ScalarSchema(SchemaType.BOOLEAN)
-        PrimitiveKind.BYTE,
-        PrimitiveKind.SHORT,
-        PrimitiveKind.INT -> ScalarSchema(SchemaType.INTEGER, format = "int32")
-        PrimitiveKind.LONG -> ScalarSchema(SchemaType.INTEGER, format = "int64")
-        PrimitiveKind.FLOAT -> ScalarSchema(SchemaType.NUMBER, format = "float")
-        PrimitiveKind.DOUBLE -> ScalarSchema(SchemaType.NUMBER, format = "double")
-        PrimitiveKind.CHAR,
-        PrimitiveKind.STRING -> ScalarSchema(SchemaType.STRING)
-        StructureKind.LIST ->
-            ArraySchema(
-                items = deriveSchema(descriptor.getElementDescriptor(0), activeObjects, includeNullability = true)
-            )
-        StructureKind.MAP ->
-            MapSchema(
-                keys = deriveSchema(descriptor.getElementDescriptor(0), activeObjects, includeNullability = true),
-                values = deriveSchema(descriptor.getElementDescriptor(1), activeObjects, includeNullability = true)
-            )
-        StructureKind.CLASS,
-        StructureKind.OBJECT -> deriveObjectSchema(descriptor, activeObjects)
-        kotlinx.serialization.descriptors.SerialKind.ENUM ->
-            EnumSchema(
-                values = List(descriptor.elementsCount, descriptor::getElementName),
-                name = descriptor.serialName
-            )
-        PolymorphicKind.OPEN,
-        PolymorphicKind.SEALED,
-        kotlinx.serialization.descriptors.SerialKind.CONTEXTUAL ->
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun deriveObjectSchema(
+        descriptor: SerialDescriptor,
+        activeSchemas: Set<String>
+    ): ObjectSchema {
+        if (format.configuration.classDiscriminatorMode == ClassDiscriminatorMode.ALL_JSON_OBJECTS) {
             throw SchemaDerivationException(
-                "Unsupported Kotlin serialization descriptor kind '${descriptor.kind}' for '${descriptor.serialName}'"
+                "Kotlin serialization ClassDiscriminatorMode.ALL_JSON_OBJECTS is unsupported for '${descriptor.serialName}'"
             )
+        }
+
+        val properties = linkedMapOf<String, SchemaProperty>()
+        val nestedActiveSchemas = activeSchemas + descriptor.serialName
+
+        repeat(descriptor.elementsCount) { index ->
+            properties[descriptor.getElementName(index)] =
+                SchemaProperty(
+                    schema = derive(descriptor.getElementDescriptor(index), nestedActiveSchemas),
+                    required = !descriptor.isElementOptional(index),
+                    deprecated = false
+                )
+        }
+
+        return ObjectSchema(properties = properties, name = descriptor.serialName)
     }
-}
-
-private fun deriveObjectSchema(
-    descriptor: SerialDescriptor,
-    activeObjects: Set<String>
-): ObjectSchema {
-    val properties = linkedMapOf<String, SchemaProperty>()
-    val nestedActiveObjects = activeObjects + descriptor.serialName
-
-    repeat(descriptor.elementsCount) { index ->
-        properties[descriptor.getElementName(index)] =
-            SchemaProperty(
-                schema =
-                    deriveSchema(
-                        descriptor.getElementDescriptor(index),
-                        nestedActiveObjects,
-                        includeNullability = true
-                    ),
-                required = !descriptor.isElementOptional(index),
-                deprecated = false
-            )
-    }
-
-    return ObjectSchema(properties = properties, name = descriptor.serialName)
 }

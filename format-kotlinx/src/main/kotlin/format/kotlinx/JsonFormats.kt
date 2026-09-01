@@ -36,7 +36,7 @@ fun <Value : Any> jsonFormat(
                         },
                     encoder = Encoder { value -> format.encodeToString(serializer, value).encodeToByteArray() }
                 ),
-            schema = deriveSchema(serializer)
+            schema = deriveSchema(format, serializer)
         )
     } as ByteArrayFormat<Value>
 
