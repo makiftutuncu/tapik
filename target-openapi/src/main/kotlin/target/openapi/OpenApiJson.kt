@@ -66,6 +66,7 @@ private fun OpenApiParameter.json(): JsonObject =
     buildJsonObject {
         put("name", name)
         put("in", location.value)
+        description?.let { put("description", it) }
         if (required) put("required", true)
         if (deprecated) put("deprecated", true)
         style?.let { put("style", it) }
@@ -75,6 +76,7 @@ private fun OpenApiParameter.json(): JsonObject =
 
 private fun OpenApiRequestBody.json(): JsonObject =
     buildJsonObject {
+        description?.let { put("description", it) }
         if (required) put("required", true)
         put("content", jsonObject(content.mapValues { (_, mediaType) -> mediaType.json() }))
     }
@@ -88,6 +90,7 @@ private fun OpenApiResponse.json(): JsonObject =
 
 private fun OpenApiHeader.json(): JsonObject =
     buildJsonObject {
+        description?.let { put("description", it) }
         if (required) put("required", true)
         if (deprecated) put("deprecated", true)
         put("schema", schema.json())

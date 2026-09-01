@@ -334,13 +334,25 @@ val create by post(
     .document(summary = "Create a book", description = "Adds a book.")
 ```
 
-`EndpointDocumentation` initially owns the optional summary and description without adding generic parameters to
-`Endpoint`. Blank present values are invalid. Omitting one value from `.document(...)` retains its current value.
-Documentation modifiers are available only on draft endpoints.
+`EndpointDocumentation` owns the optional summary and description without adding generic parameters to `Endpoint`.
+Blank present values are invalid. Omitting one value from `.document(...)` retains its current value. Documentation
+modifiers are available only on draft endpoints.
 
-Inputs and outputs can later carry their applicable summaries and descriptions. Endpoint builders accept an initial
-tag set. `.tag(value)` appends; `.tags(set)` replaces. Tags intentionally use set semantics rather than
-declaration-order semantics, reject blank values, and are mutable only while the endpoint is a draft.
+Parameter definitions carry `ParameterDocumentation`, containing OpenAPI-aligned `description` and `deprecated`
+values. This applies uniformly to path variables, query parameters, and headers; the same header documentation is used
+when a header appears on a response. Immutable `.description(...)` and `.deprecated(...)` modifiers retain the
+definition's concrete generic type, and presence or repetition modifiers preserve its documentation.
+
+A `BodyInput` carries `RequestBodyDocumentation` because OpenAPI documents the request body as a whole rather than an
+individual media representation. Both `.input(body, description = ...)` and `.input(bodies, description = ...)`
+initialize it, while `.requestBodyDescription(...)` replaces it without changing the input's generic type. An `Output`
+carries `ResponseDocumentation`; `(Status.Created with noBody).description(...)` sets the OpenAPI response description.
+When absent, targets may use their standard status description. Blank parameter, request-body, and response
+descriptions are invalid. None of these documentation values participate in `Endpoint` generic parameters.
+
+Endpoint builders accept an initial tag set. `.tag(value)` appends; `.tags(set)` replaces. Tags intentionally use set
+semantics rather than declaration-order semantics, reject blank values, and are mutable only while the endpoint is a
+draft.
 
 ## Design fixture
 

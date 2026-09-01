@@ -86,7 +86,7 @@
 - [x] Add `path.remaining("name")` for required wildcard paths without weakening ordinary path-variable typing. Define
   its rendering and encoding once, then add explicit compatibility checks to each target.
 
-- [ ] Let parameters, request bodies, and response alternatives carry their own OpenAPI-aligned documentation. Add
+- [x] Let parameters, request bodies, and response alternatives carry their own OpenAPI-aligned documentation. Add
   these concepts incrementally without turning documentation into generic type noise on `Endpoint`.
 
 - [ ] Extend the neutral schema algebra with union and discriminator concepts. Map them to OpenAPI before adding

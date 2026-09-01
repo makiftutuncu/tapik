@@ -27,6 +27,11 @@ OpenAPI path templates cannot distinguish a single path variable from Tapik's re
 An endpoint containing `RemainingPath` therefore fails generation with its endpoint ID and wildcard name instead of
 silently publishing a weaker ordinary path parameter.
 
+Path, query, and request-header parameters expose their own descriptions and deprecation flags. Response headers use
+the same header documentation. Request-body descriptions are emitted on the Request Body Object rather than its media
+representations. An explicit response-alternative description replaces the standard HTTP status description; an
+undocumented response retains that standard fallback.
+
 ## Schema components
 
 Every named Tapik schema becomes an OpenAPI schema component and every reference follows the same component-naming

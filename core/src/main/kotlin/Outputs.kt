@@ -12,13 +12,19 @@ sealed interface OutputAlternative
  * @property matcher statuses represented by this output.
  * @property bodies alternative body representations.
  * @property headers headers produced with this output.
+ * @property documentation human-readable response documentation.
  */
 @ConsistentCopyVisibility
 data class Output<out M : StatusMatcher, out B : Bodies, out H : Headers> internal constructor(
     val matcher: M,
     val bodies: B,
-    val headers: H
-) : OutputAlternative
+    val headers: H,
+    val documentation: ResponseDocumentation = ResponseDocumentation()
+) : OutputAlternative {
+    /** Replaces this response alternative's description. */
+    fun description(description: String): Output<M, B, H> =
+        copy(documentation = documentation.copy(description = description))
+}
 
 /** An ordered, non-empty heterogeneous tuple of endpoint output alternatives. */
 typealias Outputs = NonEmptyTuple<OutputAlternative>
@@ -89,7 +95,7 @@ infix fun <M : StatusMatcher, B : Bodies> M.with(bodies: B): Output<M, B, Header
 /** Attaches [headers] after this output's status and bodies. */
 infix fun <M : StatusMatcher, B : Bodies, H : NonEmptyTuple<Header<*, *>>> Output<M, B, Headers0>.with(
     headers: H
-): Output<M, B, H> = Output(matcher, bodies, validatedHeaders(headers))
+): Output<M, B, H> = Output(matcher, bodies, validatedHeaders(headers), documentation)
 
 private fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
     Endpoint<P, Q, H, I, *, Draft>.withOutputs(

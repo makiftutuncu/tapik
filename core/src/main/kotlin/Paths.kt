@@ -37,6 +37,9 @@ sealed interface PathValue<Value : Any> : PathSegment {
 
     /** String format used on the wire. */
     val format: StringFormat<Value>
+
+    /** Human-readable parameter documentation. */
+    val documentation: ParameterDocumentation
 }
 
 /**
@@ -45,15 +48,25 @@ sealed interface PathValue<Value : Any> : PathSegment {
  * @param Value decoded Kotlin value type.
  * @property name URI-template variable name.
  * @property format string format used on the wire.
+ * @property documentation human-readable parameter documentation.
  * @throws IllegalArgumentException if [name] is not a valid URI-template variable name.
  */
 data class PathVariable<Value : Any>(
     override val name: String,
-    override val format: StringFormat<Value>
+    override val format: StringFormat<Value>,
+    override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : PathValue<Value> {
     init {
         requireValidPathValueName(name)
     }
+
+    /** Replaces this path variable's description. */
+    fun description(description: String): PathVariable<Value> =
+        copy(documentation = documentation.copy(description = description))
+
+    /** Replaces this path variable's deprecation flag. */
+    fun deprecated(deprecated: Boolean = true): PathVariable<Value> =
+        copy(documentation = documentation.copy(deprecated = deprecated))
 
     /** Built-in path-variable factories backed by Tapik's default formats. */
     companion object :
@@ -114,7 +127,8 @@ data class PathVariable<Value : Any>(
  */
 @ConsistentCopyVisibility
 data class RemainingPath internal constructor(
-    override val name: String
+    override val name: String,
+    override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : PathValue<List<String>> {
     override val format: StringFormat<List<String>>
         get() = remainingPathFormat
@@ -122,6 +136,14 @@ data class RemainingPath internal constructor(
     init {
         requireValidPathValueName(name)
     }
+
+    /** Replaces this remaining path's description. */
+    fun description(description: String): RemainingPath =
+        copy(documentation = documentation.copy(description = description))
+
+    /** Replaces this remaining path's deprecation flag. */
+    fun deprecated(deprecated: Boolean = true): RemainingPath =
+        copy(documentation = documentation.copy(deprecated = deprecated))
 }
 
 private const val INVALID_PATH_VARIABLE_NAME_CHARACTERS: String = "/{}?#"

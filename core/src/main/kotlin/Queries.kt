@@ -16,6 +16,9 @@ import java.util.UUID
 sealed interface Query {
     /** Query-string parameter name. */
     val name: String
+
+    /** Human-readable parameter documentation. */
+    val documentation: ParameterDocumentation
 }
 
 /**
@@ -26,23 +29,33 @@ sealed interface Query {
  * @property name query-string parameter name.
  * @property format string format used on the wire.
  * @property presence required, optional, or defaulted presence information.
+ * @property documentation human-readable parameter documentation.
  * @throws IllegalArgumentException if [name] is not a valid query parameter name.
  */
 data class QueryParameter<Value : Any, out P : Presence<Value>>(
     override val name: String,
     val format: StringFormat<Value>,
-    val presence: P
+    val presence: P,
+    override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : Query {
     init {
         requireValidQueryParameterName(name)
     }
 
     /** Returns this query parameter as optional without a default value. */
-    fun optional(): QueryParameter<Value, Optional> = QueryParameter(name, format, Optional)
+    fun optional(): QueryParameter<Value, Optional> = QueryParameter(name, format, Optional, documentation)
 
     /** Returns this query parameter as optional with [default] used when it is absent. */
     fun optional(default: Value): QueryParameter<Value, Default<Value>> =
-        QueryParameter(name, format, Default(default))
+        QueryParameter(name, format, Default(default), documentation)
+
+    /** Replaces this query parameter's description. */
+    fun description(description: String): QueryParameter<Value, P> =
+        copy(documentation = documentation.copy(description = description))
+
+    /** Replaces this query parameter's deprecation flag. */
+    fun deprecated(deprecated: Boolean = true): QueryParameter<Value, P> =
+        copy(documentation = documentation.copy(deprecated = deprecated))
 
     /** Built-in query-parameter factories backed by Tapik's default formats. */
     companion object :
@@ -105,33 +118,44 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
  * @property name query-string parameter name.
  * @property format list format used for all wire occurrences.
  * @property presence required, optional, or defaulted presence information.
+ * @property documentation human-readable parameter documentation.
  * @throws IllegalArgumentException if [name] is not a valid query parameter name.
  */
 data class RepeatedQueryParameter<Value : Any, out P : Presence<List<Value>>>(
     override val name: String,
     val format: Format<List<Value>, List<String>>,
-    val presence: P
+    val presence: P,
+    override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : Query {
     init {
         requireValidQueryParameterName(name)
     }
 
     /** Returns this repeated query parameter as optional without a default value. */
-    fun optional(): RepeatedQueryParameter<Value, Optional> = RepeatedQueryParameter(name, format, Optional)
+    fun optional(): RepeatedQueryParameter<Value, Optional> =
+        RepeatedQueryParameter(name, format, Optional, documentation)
 
     /** Returns this repeated query parameter as optional with [default] used when it is absent. */
     fun optional(default: List<Value>): RepeatedQueryParameter<Value, Default<List<Value>>> =
-        RepeatedQueryParameter(name, format, Default(default))
+        RepeatedQueryParameter(name, format, Default(default), documentation)
+
+    /** Replaces this repeated query parameter's description. */
+    fun description(description: String): RepeatedQueryParameter<Value, P> =
+        copy(documentation = documentation.copy(description = description))
+
+    /** Replaces this repeated query parameter's deprecation flag. */
+    fun deprecated(deprecated: Boolean = true): RepeatedQueryParameter<Value, P> =
+        copy(documentation = documentation.copy(deprecated = deprecated))
 }
 
 /** Returns this required scalar query parameter as a required repeated parameter. */
 fun <Value : Any> QueryParameter<Value, Required>.repeated(): RepeatedQueryParameter<Value, Required> =
-    RepeatedQueryParameter(name, format.repeated(), Required)
+    RepeatedQueryParameter(name, format.repeated(), Required, documentation)
 
 /** Returns this optional scalar query parameter as an optional repeated parameter. */
 @JvmName("optionalQueryRepeated")
 fun <Value : Any> QueryParameter<Value, Optional>.repeated(): RepeatedQueryParameter<Value, Optional> =
-    RepeatedQueryParameter(name, format.repeated(), Optional)
+    RepeatedQueryParameter(name, format.repeated(), Optional, documentation)
 
 private const val INVALID_QUERY_PARAMETER_NAME_CHARACTERS: String = "&=#?{}"
 

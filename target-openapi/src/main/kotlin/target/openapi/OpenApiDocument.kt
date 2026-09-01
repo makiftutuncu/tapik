@@ -91,6 +91,7 @@ enum class OpenApiParameterLocation(
  *
  * @property name parameter name.
  * @property location parameter location.
+ * @property description optional detailed description.
  * @property required whether callers must provide the parameter.
  * @property deprecated whether consumers should avoid the parameter.
  * @property schema parameter value schema.
@@ -100,6 +101,7 @@ enum class OpenApiParameterLocation(
 data class OpenApiParameter(
     val name: String,
     val location: OpenApiParameterLocation,
+    val description: String? = null,
     val required: Boolean,
     val deprecated: Boolean,
     val schema: OpenApiSchema,
@@ -110,10 +112,12 @@ data class OpenApiParameter(
 /**
  * A request body and its media representations.
  *
+ * @property description optional detailed description.
  * @property required whether callers must provide a body.
  * @property content representations keyed by media type in declaration order.
  */
 data class OpenApiRequestBody(
+    val description: String? = null,
     val required: Boolean,
     val content: Map<String, OpenApiMediaType>
 )
@@ -134,11 +138,13 @@ data class OpenApiResponse(
 /**
  * A response header.
  *
+ * @property description optional detailed description.
  * @property required whether the response always contains the header.
  * @property deprecated whether consumers should avoid the header.
  * @property schema header value schema.
  */
 data class OpenApiHeader(
+    val description: String? = null,
     val required: Boolean,
     val deprecated: Boolean,
     val schema: OpenApiSchema

@@ -68,6 +68,48 @@ class OpenApiSpec : FunSpec({
         create.responses.getValue("400").content shouldBe emptyMap()
     }
 
+    test("interpret documentation owned by parameters request bodies and responses") {
+        val requestId = header.string("X-Request-Id").description("Request trace").deprecated()
+        val location = header.string("Location").description("Created resource").deprecated()
+        val documented =
+            object : Api("Documented") {
+                val create by
+                    post(
+                        root /
+                            path.uuid("bookId").description("Book identifier").deprecated() +
+                            query.string("view").description("Requested view")
+                    )
+                        .header(requestId)
+                        .input(openApiDocumentedBody, description = "Book changes")
+                        .output(
+                            (Status.Created with noBody with headersOf(location))
+                                .description("Book updated")
+                        )
+            }
+
+        val operation =
+            OpenApi.from(documented, version = "1")
+                .paths
+                .getValue("/{bookId}")
+                .operations
+                .getValue(Method.POST)
+
+        operation.parameters.map(OpenApiParameter::description) shouldContainExactly
+            listOf("Book identifier", "Requested view", "Request trace")
+        operation.parameters.map(OpenApiParameter::deprecated) shouldContainExactly listOf(true, false, true)
+        requireNotNull(operation.requestBody).description shouldBe "Book changes"
+        operation.responses.getValue("201").description shouldBe "Book updated"
+        operation.responses.getValue("201").headers.getValue("Location").let { responseHeader ->
+            responseHeader.description shouldBe "Created resource"
+            responseHeader.deprecated shouldBe true
+        }
+
+        val json = OpenApi.from(documented, version = "1").toJson(pretty = false)
+        json shouldContain "\"description\":\"Book identifier\""
+        json shouldContain "\"description\":\"Book changes\""
+        json shouldContain "\"description\":\"Book updated\""
+    }
+
     test("hoist every named schema and preserve property flags") {
         document.components.schemas.keys.toList() shouldContainExactly
             listOf(
@@ -257,3 +299,17 @@ class OpenApiSpec : FunSpec({
         shouldThrow<OpenApiGenerationException> { OpenApi.from(unresolved, version = "1") }
     }
 })
+
+private val openApiDocumentedBody: Body<String> =
+    body(
+        mediaType = MediaType.Json,
+        format =
+            Format(
+                codec =
+                    Codec(
+                        decoder = Decoder { value -> DecodeResult.Success(value.decodeToString()) },
+                        encoder = Encoder(String::encodeToByteArray)
+                    ),
+                schema = format.string.schema
+            )
+    )

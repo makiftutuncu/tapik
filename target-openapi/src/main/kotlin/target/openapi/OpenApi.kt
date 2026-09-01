@@ -103,8 +103,9 @@ private class Interpreter(
                     OpenApiParameter(
                         name = variable.name,
                         location = OpenApiParameterLocation.PATH,
+                        description = variable.documentation.description,
                         required = true,
-                        deprecated = false,
+                        deprecated = variable.documentation.deprecated,
                         schema = schemas.schema(variable.format.schema)
                     )
                 )
@@ -124,8 +125,9 @@ private class Interpreter(
         OpenApiParameter(
             name = name,
             location = OpenApiParameterLocation.QUERY,
+            description = documentation.description,
             required = presence.required,
-            deprecated = false,
+            deprecated = documentation.deprecated,
             schema = schemas.schema(format.schema).withPresence(presence, format),
             style = null,
             explode = null
@@ -135,8 +137,9 @@ private class Interpreter(
         OpenApiParameter(
             name = name,
             location = OpenApiParameterLocation.QUERY,
+            description = documentation.description,
             required = presence.required,
-            deprecated = false,
+            deprecated = documentation.deprecated,
             schema = schemas.schema(format.schema).withPresence(presence, format),
             style = "form",
             explode = true
@@ -146,8 +149,9 @@ private class Interpreter(
         OpenApiParameter(
             name = name,
             location = OpenApiParameterLocation.HEADER,
+            description = documentation.description,
             required = presence.required,
-            deprecated = false,
+            deprecated = documentation.deprecated,
             schema = schemas.schema(format.schema).withPresence(presence, format),
             style = null,
             explode = null
@@ -164,6 +168,7 @@ private class Interpreter(
                     )
                 }
                 OpenApiRequestBody(
+                    description = input.documentation.description,
                     required = input.bodies.values.none { it === NoBody },
                     content = content
                 )
@@ -184,7 +189,7 @@ private class Interpreter(
                     put(
                         status.key,
                         OpenApiResponse(
-                            description = status.description,
+                            description = output.documentation.description ?: status.description,
                             headers = output.headers.values.associate { it.name to it.responseHeader() },
                             content = output.bodies.content()
                         )
@@ -195,8 +200,9 @@ private class Interpreter(
 
     private fun <Value : Any> Header<Value, *>.responseHeader(): OpenApiHeader =
         OpenApiHeader(
+            description = documentation.description,
             required = presence.required,
-            deprecated = false,
+            deprecated = documentation.deprecated,
             schema = schemas.schema(format.schema).withPresence(presence, format)
         )
 

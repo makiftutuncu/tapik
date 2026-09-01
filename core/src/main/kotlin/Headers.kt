@@ -20,12 +20,14 @@ import java.util.UUID
  * @property name HTTP field name.
  * @property format string format used on the wire.
  * @property presence required, optional, defaulted, or fixed presence information.
+ * @property documentation human-readable parameter documentation.
  * @throws IllegalArgumentException if [name] is not a valid HTTP field name.
  */
 data class Header<Value : Any, out P : Presence<Value>>(
     val name: String,
     val format: StringFormat<Value>,
-    val presence: P
+    val presence: P,
+    val documentation: ParameterDocumentation = ParameterDocumentation()
 ) {
     init {
         require(name.isNotEmpty() && name.all(::isHttpTokenCharacter)) {
@@ -34,13 +36,21 @@ data class Header<Value : Any, out P : Presence<Value>>(
     }
 
     /** Returns this header as optional without a default value. */
-    fun optional(): Header<Value, Optional> = Header(name, format, Optional)
+    fun optional(): Header<Value, Optional> = Header(name, format, Optional, documentation)
 
     /** Returns this header as optional with [default] used when it is absent. */
-    fun optional(default: Value): Header<Value, Default<Value>> = Header(name, format, Default(default))
+    fun optional(default: Value): Header<Value, Default<Value>> = Header(name, format, Default(default), documentation)
 
     /** Returns this header fixed to [value]. */
-    fun fixed(value: Value): Header<Value, Fixed<Value>> = Header(name, format, Fixed(value))
+    fun fixed(value: Value): Header<Value, Fixed<Value>> = Header(name, format, Fixed(value), documentation)
+
+    /** Replaces this header's description. */
+    fun description(description: String): Header<Value, P> =
+        copy(documentation = documentation.copy(description = description))
+
+    /** Replaces this header's deprecation flag. */
+    fun deprecated(deprecated: Boolean = true): Header<Value, P> =
+        copy(documentation = documentation.copy(deprecated = deprecated))
 
     /** Built-in header factories backed by Tapik's default formats. */
     companion object :
