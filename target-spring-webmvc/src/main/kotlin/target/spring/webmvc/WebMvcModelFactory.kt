@@ -7,7 +7,8 @@ import dev.akif.tapik.common.plugin.KotlinClassClassifier
 import dev.akif.tapik.common.plugin.KotlinType
 import dev.akif.tapik.common.plugin.argument
 import dev.akif.tapik.common.plugin.kotlinIdentifier
-import dev.akif.tapik.common.plugin.kotlinReferenceIdentifier
+import dev.akif.tapik.common.plugin.kotlinNameSource
+import dev.akif.tapik.common.plugin.kotlinPropertyAccess
 import dev.akif.tapik.common.plugin.kotlinVariantName
 import dev.akif.tapik.common.plugin.lowerCamel
 import dev.akif.tapik.common.plugin.pathTemplate
@@ -39,10 +40,9 @@ internal fun webMvcApiModel(
         apiProperty = apiProperty,
         endpoints =
             compiled.endpoints.map { endpoint ->
-                val propertyName = endpoint.value.id.removePrefix("${api.id}.")
+                val propertyName = endpoint.kotlinNameSource()
                 val handlerName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), handlerNames)
                 endpoint.toModel(
-                    apiId = api.id,
                     apiProperty = apiProperty,
                     handlerName = handlerName,
                     mappingName = uniqueKotlinName(handlerName.removeSurrounding("`"), mappingNames),
@@ -53,7 +53,6 @@ internal fun webMvcApiModel(
 }
 
 private fun CompiledEndpoint.toModel(
-    apiId: String,
     apiProperty: String,
     handlerName: String,
     mappingName: String,
@@ -62,8 +61,7 @@ private fun CompiledEndpoint.toModel(
     require(value.method != Method.CONNECT && value.method != Method.QUERY) {
         "${value.id} uses ${value.method}, which Spring WebMVC cannot map"
     }
-    val propertyName = value.id.removePrefix("$apiId.")
-    val endpointAccess = "$apiProperty.${propertyName.kotlinReferenceIdentifier()}"
+    val endpointAccess = kotlinPropertyAccess(apiProperty)
     val usedNames = mutableSetOf<String>()
     val usedRawNames = mutableSetOf<String>()
 

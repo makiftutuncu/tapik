@@ -95,7 +95,7 @@
 - [x] Derive sealed and polymorphic Kotlin serialization models into the new union schema forms. Add shared schema and
   codec conformance cases that the Jackson integration can later reuse for behavioral parity.
 
-- [ ] Introduce explicit API composition and nesting while preserving endpoint identity, inferred endpoint types, and
+- [x] Introduce explicit API composition and nesting while preserving endpoint identity, inferred endpoint types, and
   declaration order. Separate API values must remain valid and require no migration.
 
 - [ ] Add a small runnable Maven example that defines a contract artifact and consumes it for OpenAPI, RestClient, and

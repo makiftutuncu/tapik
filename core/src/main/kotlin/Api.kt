@@ -17,11 +17,24 @@ abstract class Api(
         require(this.id.isNotBlank()) { "API ID must not be blank" }
     }
 
-    private val registeredEndpoints: MutableList<Endpoint<*, *, *, *, *, Ready>> = mutableListOf()
+    private val registeredEntries: MutableList<ApiEntry> = mutableListOf()
 
-    /** Ready endpoints in property declaration order. */
+    /** Ready endpoints flattened recursively in declaration order. */
     val endpoints: List<Endpoint<*, *, *, *, *, Ready>>
-        get() = registeredEndpoints.toList()
+        get() =
+            registeredEntries.flatMap { entry ->
+                when (entry) {
+                    is EndpointEntry -> listOf(entry.endpoint)
+                    is InclusionEntry -> entry.inclusion.api.endpoints
+                }
+            }.also(::requireUniqueEndpointIds)
+
+    /** Direct API inclusions in inclusion declaration order. */
+    val includedApis: List<ApiInclusion<*>>
+        get() = registeredEntries.filterIsInstance<InclusionEntry>().map(InclusionEntry::inclusion)
+
+    /** Starts a delegated inclusion of [api] at the property's declaration position. */
+    protected fun <Included : Api> including(api: Included): ApiInclusion<Included> = ApiInclusion(api)
 
     /** Starts a draft `GET` endpoint for [uri]. */
     protected fun <P : Paths, Q : Queries> get(
@@ -104,11 +117,40 @@ abstract class Api(
     ) = endpoint(Method.QUERY, uri, summary, description, tags)
 
     internal fun register(endpoint: Endpoint<*, *, *, *, *, Ready>) {
-        require(registeredEndpoints.none { it.id == endpoint.id }) {
+        require(endpoints.none { it.id == endpoint.id }) {
             "Endpoint ID '${endpoint.id}' is already registered"
         }
-        registeredEndpoints.add(endpoint)
+        registeredEntries.add(EndpointEntry(endpoint))
     }
+
+    internal fun register(
+        inclusion: ApiInclusion<*>,
+        propertyName: String
+    ) {
+        val includedTree = inclusion.api.apiTree()
+        require(includedTree.none { api -> api === this }) {
+            "API '${id}' cannot include itself directly or transitively"
+        }
+        val currentTree = apiTree()
+        val repeated = includedTree.firstOrNull { included -> currentTree.any { current -> current === included } }
+        require(repeated == null) { "API '${requireNotNull(repeated).id}' is already included in API '$id'" }
+        val currentIds = currentTree.mapTo(mutableSetOf(), Api::id)
+        val duplicateId = includedTree.firstOrNull { included -> included.id in currentIds }
+        require(duplicateId == null) {
+            "API ID '${requireNotNull(duplicateId).id}' is already present in API '$id'"
+        }
+        require(includedApis.none { existing -> existing.propertyName == propertyName }) {
+            "API inclusion property '$propertyName' is already registered"
+        }
+        inclusion.bind(this, propertyName)
+        registeredEntries.add(InclusionEntry(inclusion))
+    }
+
+    private fun apiTree(): List<Api> =
+        buildList {
+            add(this@Api)
+            includedApis.forEach { inclusion -> addAll(inclusion.api.apiTree()) }
+        }
 
     private fun <P : Paths, Q : Queries> endpoint(
         method: Method,
@@ -127,4 +169,11 @@ abstract class Api(
             tags = validatedTags(tags),
             state = Draft
         )
+}
+
+private fun requireUniqueEndpointIds(endpoints: List<Endpoint<*, *, *, *, *, Ready>>) {
+    val ids = mutableSetOf<String>()
+    endpoints.forEach { endpoint ->
+        require(ids.add(endpoint.id)) { "Endpoint ID '${endpoint.id}' is already registered" }
+    }
 }

@@ -17,6 +17,31 @@ Delegation registers endpoints in declaration order without package scanning. An
 returned list cannot change the API's registered endpoints. This snapshot is necessarily star-projected, while each
 delegated endpoint property retains its complete inferred generic type.
 
+APIs compose explicitly through the same property-delegation mechanism:
+
+```kotlin
+object Library : Api() {
+    val authors by including(Authors)
+    val health by get(root / "health")
+    val books by including(Books)
+}
+```
+
+`including` is available only inside an `Api`. The delegated property evaluates to the original included API value and
+retains its concrete Kotlin type; it does not copy the API or its endpoints. Included endpoints therefore keep their
+original identities, so `Library.authors.list` is the same endpoint value with ID `Authors.list` as `Authors.list`.
+The included API remains independently usable and requires no migration.
+
+`Api.endpoints` recursively flattens inclusions at their declaration positions. In the example, all author endpoints
+precede `Library.health`, which precedes all book endpoints. Nested inclusions apply the same rule at every level, so
+declaration order and endpoint identity survive arbitrary nesting. `Api.includedApis` exposes an ordered snapshot of
+the API's direct inclusions and their delegated property names; it does not duplicate endpoint definitions.
+
+An API cannot include itself directly or transitively. Each API ID and qualified endpoint ID must be unique within a
+composed tree, so including the same API twice or combining distinct APIs with colliding IDs fails while the composed
+API initializes. Inclusion properties used by compiled source targets must be public and retain the included API's
+concrete type so generated code can follow the delegated property path without reflection.
+
 ## Endpoint structure
 
 The conceptual endpoint type is:

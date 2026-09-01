@@ -77,6 +77,11 @@ Endpoint functions and nested response types use separate namespaces. API types 
 disambiguated together with their artifact paths. Original endpoint properties are accessed with their actual Kotlin
 names, including backtick-escaped names.
 
+For a composed API, generated clients retain one property for the selected root API and follow each endpoint's
+delegated inclusion path to its original definition. Inclusion and endpoint property names form the generated method
+and response stem, so `libraryApi.authors.list` becomes `authorsList()` and `AuthorsListResponse`. This keeps equal
+endpoint property names from different included APIs meaningful before ordinary collision suffixing is needed.
+
 The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its RestClient
 client during `generate-sources`, compiles the generated source, and executes a typed request and response through
 Spring's mock HTTP server.
@@ -149,6 +154,8 @@ name their implementation independently; a `Handler` suffix, such as `BooksHandl
 
 WebMVC uses the same deterministic declaration-name allocation as RestClient. Handler methods share one interface
 namespace, adapter mappings share a separate adapter namespace, and nested response types retain their own namespace.
+Composed handlers also use the root API property and inclusion-path naming defined for RestClient, while generated
+adapters decode and encode through the original nested endpoint values.
 Top-level handler and adapter names and source artifact paths follow the same numeric disambiguation rule.
 
 ### Adapter registration

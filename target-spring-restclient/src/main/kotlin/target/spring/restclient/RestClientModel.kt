@@ -8,7 +8,8 @@ import dev.akif.tapik.common.plugin.KotlinSourceType
 import dev.akif.tapik.common.plugin.KotlinType
 import dev.akif.tapik.common.plugin.argument
 import dev.akif.tapik.common.plugin.kotlinIdentifier
-import dev.akif.tapik.common.plugin.kotlinReferenceIdentifier
+import dev.akif.tapik.common.plugin.kotlinNameSource
+import dev.akif.tapik.common.plugin.kotlinPropertyAccess
 import dev.akif.tapik.common.plugin.kotlinVariantName
 import dev.akif.tapik.common.plugin.lowerCamel
 import dev.akif.tapik.common.plugin.pathTemplateBeforeRemaining
@@ -112,9 +113,8 @@ internal fun restClientApiModel(
         apiProperty = apiProperty,
         endpoints =
             compiled.endpoints.map { endpoint ->
-                val propertyName = endpoint.value.id.removePrefix("${api.id}.")
+                val propertyName = endpoint.kotlinNameSource()
                 endpoint.toModel(
-                    apiId = api.id,
                     apiProperty = apiProperty,
                     methodName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), methodNames),
                     responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", nestedTypeNames),
@@ -125,14 +125,13 @@ internal fun restClientApiModel(
 }
 
 private fun CompiledEndpoint.toModel(
-    apiId: String,
     apiProperty: String,
     methodName: String,
     responseName: String,
     nestedTypeNames: MutableSet<String>
 ): RestClientEndpointModel {
-    val propertyName = value.id.removePrefix("$apiId.")
-    val endpointAccess = "$apiProperty.${propertyName.kotlinReferenceIdentifier()}"
+    val propertyName = kotlinNameSource()
+    val endpointAccess = kotlinPropertyAccess(apiProperty)
     val usedNames = mutableSetOf<String>()
 
     val pathTypes = type.argument(0, value.id).tupleElements("${value.id} paths")

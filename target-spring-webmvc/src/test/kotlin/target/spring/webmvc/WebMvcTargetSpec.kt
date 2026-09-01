@@ -4,6 +4,7 @@ import dev.akif.tapik.*
 import dev.akif.tapik.test.fixtures.library.Authors
 import dev.akif.tapik.test.fixtures.library.Books
 import dev.akif.tapik.test.fixtures.library.Rentals
+import dev.akif.tapik.test.fixtures.library.Library
 import dev.akif.tapik.common.plugin.ArtifactKind
 import dev.akif.tapik.common.plugin.GenerationRequest
 import dev.akif.tapik.common.plugin.targetConfigurationOf
@@ -124,6 +125,24 @@ class WebMvcTargetSpec : FunSpec({
             content shouldNotContain
                 "@RequestParam(name = \"authorId\""
         }
+    }
+
+    test("generate nested endpoint access and names for a composed API") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(Library)))
+                .artifacts
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
+                .content
+
+        source shouldContain "public fun authorsList("
+        source shouldContain "public sealed interface AuthorsListResponse"
+        source shouldContain "libraryApi.authors.list"
+        source shouldContain "public fun booksList("
+        source shouldContain "libraryApi.books.list"
+        source shouldContain "public fun rentalsReturnBook("
+        source shouldContain "libraryApi.rentals.returnBook"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
     test("preserve every request and response body representation") {

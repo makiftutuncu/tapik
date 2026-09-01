@@ -1,6 +1,8 @@
 package dev.akif.tapik.common.plugin
 
 import dev.akif.tapik.Api
+import dev.akif.tapik.Endpoint
+import dev.akif.tapik.Ready
 import dev.akif.tapik.id
 import kotlin.metadata.KmClassifier
 import kotlin.metadata.KmType
@@ -22,35 +24,78 @@ object CompiledApiReader {
      * @throws CompiledApiInspectionException when metadata is unavailable, unreadable, or inconsistent with [api].
      */
     fun read(api: Api): CompiledApi {
-        val properties = properties(api)
-        val prefix = "${api.id}."
+        val locations = locations(api, emptyList())
         val endpoints =
             api.endpoints.map { endpoint ->
-                if (!endpoint.id.startsWith(prefix)) {
-                    throw CompiledApiInspectionException(
-                        "Endpoint '${endpoint.id}' does not belong to API '${api.id}'"
-                    )
-                }
-                val propertyName = endpoint.id.removePrefix(prefix)
-                val property =
-                    properties[propertyName]
+                val location =
+                    locations.singleOrNull { candidate -> candidate.endpoint === endpoint }
                         ?: throw CompiledApiInspectionException(
-                            "Cannot find compiled property '$propertyName' for endpoint '${endpoint.id}'"
+                            "Cannot locate endpoint '${endpoint.id}' from API '${api.id}'"
                         )
-                if (property.visibility != Visibility.PUBLIC) {
-                    throw CompiledApiInspectionException(
-                        "Endpoint property '${endpoint.id}' must be public for generated targets"
-                    )
-                }
-                val type = property.type
-                if (type.classifier != ENDPOINT_CLASSIFIER) {
-                    throw CompiledApiInspectionException(
-                        "Compiled property '$propertyName' for endpoint '${endpoint.id}' has type '${type.classifier}'"
-                    )
-                }
-                CompiledEndpoint(endpoint, type)
+                CompiledEndpoint(endpoint, location.type, location.propertyPath)
             }
         return CompiledApi(api, endpoints)
+    }
+
+    private fun locations(
+        api: Api,
+        parentPath: List<String>
+    ): List<EndpointLocation> {
+        val properties = properties(api)
+        val nested =
+            api.includedApis.flatMap { inclusion ->
+                val property = requiredProperty(api, inclusion.propertyName, properties, "Inclusion")
+                val actualType = (property.type.classifier as? KotlinClassClassifier)?.name
+                val expectedType = inclusion.api.javaClass.canonicalName
+                if (actualType != expectedType) {
+                    throw CompiledApiInspectionException(
+                        "Inclusion property '${api.id}.${inclusion.propertyName}' must retain concrete type " +
+                            "'$expectedType', but has type '${property.type.classifier}'"
+                    )
+                }
+                locations(inclusion.api, parentPath + inclusion.propertyName)
+            }
+        val nestedEndpoints = nested.map(EndpointLocation::endpoint)
+        val prefix = "${api.id}."
+        val direct =
+            api.endpoints
+                .filter { endpoint -> nestedEndpoints.none { nestedEndpoint -> nestedEndpoint === endpoint } }
+                .map { endpoint ->
+                    if (!endpoint.id.startsWith(prefix)) {
+                        throw CompiledApiInspectionException(
+                            "Endpoint '${endpoint.id}' does not belong to API '${api.id}'"
+                        )
+                    }
+                    val propertyName = endpoint.id.removePrefix(prefix)
+                    val property = requiredProperty(api, propertyName, properties, "Endpoint")
+                    if (property.type.classifier != ENDPOINT_CLASSIFIER) {
+                        throw CompiledApiInspectionException(
+                            "Compiled property '$propertyName' for endpoint '${endpoint.id}' has type " +
+                                "'${property.type.classifier}'"
+                        )
+                    }
+                    EndpointLocation(endpoint, property.type, parentPath + propertyName)
+                }
+        return direct + nested
+    }
+
+    private fun requiredProperty(
+        api: Api,
+        propertyName: String,
+        properties: Map<String, CompiledProperty>,
+        kind: String
+    ): CompiledProperty {
+        val property =
+            properties[propertyName]
+                ?: throw CompiledApiInspectionException(
+                    "Cannot find compiled property '$propertyName' in API '${api.id}'"
+                )
+        if (property.visibility != Visibility.PUBLIC) {
+            throw CompiledApiInspectionException(
+                "$kind property '${api.id}.$propertyName' must be public for generated targets"
+            )
+        }
+        return property
     }
 
     private fun properties(api: Api): Map<String, CompiledProperty> =
@@ -84,6 +129,12 @@ object CompiledApiReader {
         }
     }
 }
+
+private data class EndpointLocation(
+    val endpoint: Endpoint<*, *, *, *, *, Ready>,
+    val type: KotlinType,
+    val propertyPath: List<String>
+)
 
 private data class CompiledProperty(
     val type: KotlinType,

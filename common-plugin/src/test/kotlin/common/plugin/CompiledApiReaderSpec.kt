@@ -35,6 +35,19 @@ private class InaccessibleApi : Api() {
     internal val hidden by get(root / "hidden")
 }
 
+private class NestedApi : Api() {
+    val typed by including(TypedApi())
+}
+
+private class ComposedApi : Api() {
+    val health by get(root / "health")
+    val nested by including(NestedApi())
+}
+
+private class WidenedInclusionApi : Api() {
+    val typed: Api by including(TypedApi())
+}
+
 class CompiledApiReaderSpec : FunSpec({
     test("pair runtime endpoints with their exact compiled Kotlin types") {
         val compiled = CompiledApiReader.read(TypedApi())
@@ -64,6 +77,30 @@ class CompiledApiReaderSpec : FunSpec({
         val outputs = endpointType.argumentType(4)
 
         outputs.abbreviation?.classifier shouldBe KotlinTypeAliasClassifier("dev.akif.tapik.Outputs1")
+    }
+
+    test("read included endpoint types through their delegated property paths") {
+        val compiled = CompiledApiReader.read(ComposedApi())
+
+        compiled.endpoints.map { endpoint -> endpoint.value.id } shouldContainExactly
+            listOf("ComposedApi.health", "TypedApi.inherited", "TypedApi.items")
+        compiled.endpoints.map { endpoint -> endpoint.propertyPath } shouldContainExactly
+            listOf(
+                listOf("health"),
+                listOf("nested", "typed", "inherited"),
+                listOf("nested", "typed", "items")
+            )
+        compiled.endpoints[2].type.argumentType(4).classifier shouldBe
+            KotlinClassClassifier("dev.akif.tapik.Tuple1")
+    }
+
+    test("reject widened inclusion properties that generated targets cannot follow") {
+        val failure = shouldThrow<CompiledApiInspectionException> {
+            CompiledApiReader.read(WidenedInclusionApi())
+        }
+
+        requireNotNull(failure.message) shouldContain
+            "Inclusion property 'WidenedInclusionApi.typed' must retain concrete type"
     }
 
     test("reject endpoint properties that generated targets cannot access") {

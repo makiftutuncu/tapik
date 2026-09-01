@@ -13,9 +13,11 @@ import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.IrTypeProjection
 import org.jetbrains.kotlin.ir.types.classOrNull
-import org.jetbrains.kotlin.ir.util.isSubclassOf
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
+import org.jetbrains.kotlin.ir.util.isSubclassOf
 import org.jetbrains.kotlin.ir.visitors.IrVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.name.ClassId
@@ -36,14 +38,15 @@ internal class ApiRegistryGenerationExtension(
         val declarations = sourceFile?.let(pluginContext::finderForSource)
         val apiClass = declarations?.findClass(API_CLASS_ID)?.owner
         val endpointClass = declarations?.findClass(ENDPOINT_CLASS_ID)?.owner
-        if (apiClass == null || endpointClass == null) {
+        val apiInclusionClass = declarations?.findClass(API_INCLUSION_CLASS_ID)?.owner
+        if (apiClass == null || endpointClass == null || apiInclusionClass == null) {
             synchronize(moduleFragment, emptyMap())
             return
         }
         val apiTypesBySource =
             moduleFragment.files.associate { file -> file.sourcePath() to file.concreteApiTypes(apiClass) }
         val apiTypes = apiTypesBySource.values.flatten()
-        if (!validateEndpointProperties(apiTypes, apiClass, endpointClass)) {
+        if (!validateContractProperties(apiTypes, apiClass, endpointClass, apiInclusionClass)) {
             RegistryClassWriter.synchronize(outputDirectory, emptyList())
             return
         }
@@ -76,10 +79,11 @@ internal class ApiRegistryGenerationExtension(
         RegistryClassWriter.synchronize(outputDirectory, registeredTypes)
     }
 
-    private fun validateEndpointProperties(
+    private fun validateContractProperties(
         apiTypes: List<IrClass>,
         apiClass: IrClass,
-        endpointClass: IrClass
+        endpointClass: IrClass,
+        apiInclusionClass: IrClass
     ): Boolean {
         var valid = true
         val inspected = mutableSetOf<IrProperty>()
@@ -87,21 +91,54 @@ internal class ApiRegistryGenerationExtension(
             apiType.apiHierarchy(apiClass).forEach { declaringType ->
                 declaringType.declarations
                     .filterIsInstance<IrProperty>()
-                    .filter { property -> property.getter?.returnType?.classOrNull?.owner == endpointClass }
                     .filter(inspected::add)
-                    .filter { property -> property.visibility != DescriptorVisibilities.PUBLIC }
                     .forEach { property ->
                         val owner = declaringType.fqNameWhenAvailable?.asString() ?: declaringType.name.asString()
-                        messages.report(
-                            ERROR,
-                            "Tapik endpoint property '$owner.${property.name}' must be public for generated targets"
-                        )
-                        valid = false
+                        when {
+                            property.getter?.returnType?.classOrNull?.owner == endpointClass -> {
+                                if (property.visibility != DescriptorVisibilities.PUBLIC) {
+                                    messages.report(
+                                        ERROR,
+                                        "Tapik endpoint property '$owner.${property.name}' must be public for generated targets"
+                                    )
+                                    valid = false
+                                }
+                            }
+                            property.isApiInclusion(apiInclusionClass) -> {
+                                if (property.visibility != DescriptorVisibilities.PUBLIC) {
+                                    messages.report(
+                                        ERROR,
+                                        "Tapik inclusion property '$owner.${property.name}' must be public for generated targets"
+                                    )
+                                    valid = false
+                                }
+                                if (!property.retainsIncludedApiType()) {
+                                    messages.report(
+                                        ERROR,
+                                        "Tapik inclusion property '$owner.${property.name}' must retain the included API's concrete type"
+                                    )
+                                    valid = false
+                                }
+                            }
+                        }
                     }
             }
         }
         return valid
     }
+}
+
+private fun IrProperty.isApiInclusion(apiInclusionClass: IrClass): Boolean =
+    isDelegated && backingField?.type?.classOrNull?.owner == apiInclusionClass
+
+private fun IrProperty.retainsIncludedApiType(): Boolean {
+    val includedType =
+        ((backingField?.type as? IrSimpleType)?.arguments?.singleOrNull() as? IrTypeProjection)
+            ?.type
+            ?.classOrNull
+            ?.owner
+    val propertyType = getter?.returnType?.classOrNull?.owner
+    return includedType != null && propertyType == includedType
 }
 
 private fun IrFile.concreteApiTypes(apiClass: IrClass): List<IrClass> {
@@ -140,4 +177,5 @@ private fun IrClass.apiHierarchy(apiClass: IrClass): Sequence<IrClass> =
     }
 
 private val API_CLASS_ID: ClassId = ClassId.topLevel(FqName("dev.akif.tapik.Api"))
+private val API_INCLUSION_CLASS_ID: ClassId = ClassId.topLevel(FqName("dev.akif.tapik.ApiInclusion"))
 private val ENDPOINT_CLASS_ID: ClassId = ClassId.topLevel(FqName("dev.akif.tapik.Endpoint"))

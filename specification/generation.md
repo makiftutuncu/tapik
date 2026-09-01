@@ -61,10 +61,12 @@ endpoint expressions, discover APIs reflectively, or create a second contract re
 concrete API type do not publish a registry.
 
 Every delegated endpoint property reachable from a registered API, including properties declared by API base classes,
-must be public. Private, protected, and internal endpoint properties fail contract compilation because generated
-targets access them from another package and potentially another module. Kotlin's public-signature visibility rules
-likewise reject inaccessible model types exposed by a public endpoint property. Metadata inspection repeats the
-endpoint-property check so contracts produced without the current compiler plugin fail before target source emission.
+must be public. The same requirement applies to delegated API inclusion properties because generated targets follow
+those properties to reach the original endpoint values. Private, protected, and internal properties fail contract
+compilation because generated targets access them from another package and potentially another module. Kotlin's
+public-signature visibility rules likewise reject inaccessible model types exposed by a public endpoint or inclusion
+property. Metadata inspection repeats these checks so contracts produced without the current compiler plugin fail
+before target source emission.
 
 Each compiler output directory has one deterministic compiler-owned registry class and one corresponding entry in the
 standard `ApiRegistry` service descriptor. Every compilation synchronizes those artifacts, including non-clean
@@ -105,14 +107,21 @@ current project.
 ## Compiled contract types
 
 Targets that generate typed source use a compiled view pairing each runtime `Api` and endpoint value with the
-endpoint property's actual Kotlin return type. The type is read from Kotlin class metadata, including classifiers,
-generic projections, nullability, type-alias abbreviations, outer types, flexible upper bounds, and definitely
-non-null types. Tapik does not infer model types from schemas, execute reflective endpoint discovery, or serialize a
-second endpoint metadata model.
+endpoint property's actual Kotlin return type and its property path from the selected root API. The type is read from
+Kotlin class metadata, including classifiers, generic projections, nullability, type-alias abbreviations, outer types,
+flexible upper bounds, and definitely non-null types. Tapik does not infer model types from schemas, execute reflective
+endpoint discovery, or serialize a second endpoint metadata model.
 
 Runtime endpoint order remains authoritative. Declared properties from the concrete API and its API base classes are
-matched to those endpoint values by their delegated property names. Missing, incompatible, or unreadable Kotlin
-metadata fails generation with the API and endpoint location in the diagnostic.
+matched to those endpoint values by their delegated property names. A composed API is traversed only through its
+explicit inclusion values; the compiled property path for `Library.authors.list` is `authors`, `list`, while the
+endpoint remains the original `Authors.list` value and its exact type is read from `Authors`. Missing, inaccessible,
+widened, incompatible, or unreadable Kotlin metadata fails generation with the API and endpoint location in the
+diagnostic.
+
+Including an API does not remove that concrete API from generated registries or implicitly change generation
+selection. The standalone and composed APIs are both ordinary selectable values; include/exclude filters determine
+which artifacts an execution produces.
 
 Typed source targets derive a neutral source type that keeps emitted spelling separate from the expanded classifier
 identity. Type aliases are emitted by their source names while target semantics continue to use their expanded types;

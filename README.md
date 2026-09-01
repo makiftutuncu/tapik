@@ -61,6 +61,21 @@ header.string("X-Source").fixed("catalog")
 .output(Status.Created with jsonBody<Book>() with headersOf(location))
 ```
 
+APIs can be composed explicitly without changing the included endpoint values or IDs:
+
+```kotlin
+object Library : Api() {
+    val authors by including(Authors)
+    val books by including(Books)
+}
+```
+
+`Library.authors.list` is the same typed endpoint value as `Authors.list`, still identified as `Authors.list`.
+Inclusions may be nested, and `Library.endpoints` flattens them in the position where each inclusion property is
+declared. Inclusion properties must be public and should use inferred concrete types, as shown above, so generated
+sources can follow paths such as `libraryApi.authors.list`. The standalone `Authors` and `Books` APIs remain selectable
+for generation; use `includeApis` when an execution should generate only `Library`.
+
 See the [DSL specification](specification/dsl.md) for the complete currently implemented grammar.
 
 ## Maven setup

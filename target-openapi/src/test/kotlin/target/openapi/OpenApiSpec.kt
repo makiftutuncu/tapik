@@ -2,6 +2,7 @@ package dev.akif.tapik.target.openapi
 
 import dev.akif.tapik.*
 import dev.akif.tapik.test.fixtures.library.Books
+import dev.akif.tapik.test.fixtures.library.Library
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -25,6 +26,24 @@ class OpenApiSpec : FunSpec({
         books.operations.getValue(Method.POST).operationId shouldBe "Books.create"
         document.paths.getValue("/books/{bookId}").operations.getValue(Method.GET).operationId shouldBe
             "Books.get"
+    }
+
+    test("interpret composed APIs without changing endpoint identity or order") {
+        val composed = OpenApi.from(Library, version = "0.6.0")
+
+        composed.paths.keys.toList() shouldContainExactly
+            listOf(
+                "/authors",
+                "/authors/{authorId}",
+                "/books",
+                "/books/{bookId}",
+                "/rentals",
+                "/rentals/{rentalId}",
+                "/rentals/{rentalId}/return"
+            )
+        composed.paths.getValue("/authors").operations.getValue(Method.GET).operationId shouldBe "Authors.list"
+        composed.paths.getValue("/books").operations.getValue(Method.GET).operationId shouldBe "Books.list"
+        composed.paths.getValue("/rentals").operations.getValue(Method.GET).operationId shouldBe "Rentals.list"
     }
 
     test("interpret parameters in contract order") {

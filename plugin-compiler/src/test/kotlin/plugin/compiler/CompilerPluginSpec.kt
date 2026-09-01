@@ -27,6 +27,10 @@ class CompilerPluginSpec : FunSpec({
                 object Books : Api() {
                     val list by get(root / "books")
                 }
+
+                object Library : Api() {
+                    val books by including(Books)
+                }
                 """.trimIndent()
             )
 
@@ -36,7 +40,7 @@ class CompilerPluginSpec : FunSpec({
             CompilerPluginSpec::class.java.classLoader
         ).use { classLoader ->
             val registry = ServiceLoader.load(ApiRegistry::class.java, classLoader).single()
-            registry.apis.map { api -> api.id }.toSet() shouldBe setOf("Authors", "Books")
+            registry.apis.map { api -> api.id }.toSet() shouldBe setOf("Authors", "Books", "Library")
             registry.apis shouldBeSameInstanceAs registry.apis
         }
     }
@@ -124,6 +128,48 @@ class CompilerPluginSpec : FunSpec({
         compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
         compilation.messages shouldContain
             "tapik endpoint property 'example.LibraryApi.health' must be public for generated targets"
+    }
+
+    test("reject non-public API inclusion properties") {
+        val compilation =
+            compile(
+                """
+                package example
+
+                import dev.akif.tapik.*
+
+                object Authors : Api()
+
+                class Library : Api() {
+                    private val authors by including(Authors)
+                }
+                """.trimIndent()
+            )
+
+        compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
+        compilation.messages shouldContain
+            "tapik inclusion property 'example.Library.authors' must be public for generated targets"
+    }
+
+    test("reject API inclusion properties widened from their concrete type") {
+        val compilation =
+            compile(
+                """
+                package example
+
+                import dev.akif.tapik.*
+
+                object Authors : Api()
+
+                class Library : Api() {
+                    val authors: Api by including(Authors)
+                }
+                """.trimIndent()
+            )
+
+        compilation.exitCode shouldBe ExitCode.COMPILATION_ERROR
+        compilation.messages shouldContain
+            "tapik inclusion property 'example.Library.authors' must retain the included API's concrete type"
     }
 
     test("let Kotlin reject inaccessible types in public endpoint signatures") {
