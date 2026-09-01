@@ -3,6 +3,7 @@ package dev.akif.tapik.target.spring.restclient
 import dev.akif.tapik.MediaType
 import dev.akif.tapik.Method
 import dev.akif.tapik.Status
+import dev.akif.tapik.path
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.maps.shouldContain
 import io.kotest.matchers.shouldBe
@@ -15,9 +16,22 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withCreatedEntity
 import org.springframework.web.client.RestClient
+import org.springframework.web.util.DefaultUriBuilderFactory
 import java.net.URI
 
 class RestClientTransportSpec : FunSpec({
+    test("append every remaining-path value as one encoded URI segment") {
+        val remaining = path.remaining("path")
+        val uri =
+            DefaultUriBuilderFactory("https://library.example")
+                .builder()
+                .path("/files")
+                .pathSegment(*remaining.format.encode(listOf("draft reports", "a+b")).split('/').toTypedArray())
+                .build()
+
+        uri.toASCIIString() shouldBe "https://library.example/files/draft%20reports/a+b"
+    }
+
     test("exchange encoded request and return raw response") {
         val builder = RestClient.builder().baseUrl("https://library.example")
         val server = MockRestServiceServer.bindTo(builder).build()

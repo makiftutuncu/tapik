@@ -199,6 +199,22 @@ class WebMvcTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
+    test("decode a terminal Spring remaining-path mapping") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRemainingPaths)))
+                .artifacts
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
+                .content
+
+        source shouldContain "path: List<String>"
+        source shouldContain "@GetMapping(path = [\"/files/{ownerId}/{*path}\"])"
+        source shouldContain "@PathVariable(name = \"path\") pathRaw: String"
+        source shouldContain
+            "decodeRequest(webMvcRemainingPathsApi.download.uri.paths._2.format, pathRaw, \"WebMvcRemainingPaths.download path path\")"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("reject response headers owned by Spring WebMVC") {
         listOf(
             BodyContentTypeResponse to "Content-Type, which is derived from its selected body representation",
@@ -330,6 +346,11 @@ public object WebMvcStatusMatchers : Api() {
     public val extensionSuccess by
         get(root / "extension-success")
             .output(statusMatching("successful extension status") { it.code in 290..299 } with noBody)
+}
+
+public object WebMvcRemainingPaths : Api() {
+    public val download by
+        get(root / "files" / path.uuid("ownerId") / path.remaining("path"))
 }
 
 public object DefaultResponseHeaders : Api() {

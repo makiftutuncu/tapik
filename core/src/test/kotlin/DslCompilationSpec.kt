@@ -22,6 +22,36 @@ class DslCompilationSpec : FunSpec({
         ) shouldBe ExitCode.OK
     }
 
+    test("compile a remaining path followed by a query") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val valid = root / "files" / path.remaining("path") + query.string("download")
+            """
+        ) shouldBe ExitCode.OK
+    }
+
+    test("not compile a literal after a remaining path") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = root / "files" / path.remaining("path") / "metadata"
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
+    test("not compile a path variable after a remaining path") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            val invalid = root / "files" / path.remaining("path") / path.string("name")
+            """
+        ) shouldBe ExitCode.COMPILATION_ERROR
+    }
+
     test("not compile a literal path after a query") {
         compile(
             """

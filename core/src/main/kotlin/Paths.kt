@@ -30,6 +30,15 @@ sealed interface PathSegment {
     }
 }
 
+/** A required value captured from a [Uri] path. */
+sealed interface PathValue<Value : Any> : PathSegment {
+    /** URI-template variable name. */
+    val name: String
+
+    /** String format used on the wire. */
+    val format: StringFormat<Value>
+}
+
 /**
  * A required, typed URI path variable.
  *
@@ -39,14 +48,11 @@ sealed interface PathSegment {
  * @throws IllegalArgumentException if [name] is not a valid URI-template variable name.
  */
 data class PathVariable<Value : Any>(
-    val name: String,
-    val format: StringFormat<Value>
-) : PathSegment {
+    override val name: String,
+    override val format: StringFormat<Value>
+) : PathValue<Value> {
     init {
-        require(name.isNotBlank()) { "Path variable name must not be blank" }
-        require(name.none(Char::isWhitespace) && name.none { it in INVALID_PATH_VARIABLE_NAME_CHARACTERS }) {
-            "Path variable name contains an invalid character: '$name'"
-        }
+        requireValidPathValueName(name)
     }
 
     /** Built-in path-variable factories backed by Tapik's default formats. */
@@ -95,39 +101,101 @@ data class PathVariable<Value : Any>(
         override fun instant(name: String): PathVariable<Instant> = invoke(name, format.instant)
         override fun duration(name: String): PathVariable<Duration> = invoke(name, format.duration)
         override fun period(name: String): PathVariable<Period> = invoke(name, format.period)
+
+        /** Builds a required wildcard capturing one or more final path segments. */
+        fun remaining(name: String): RemainingPath = RemainingPath(name)
+    }
+}
+
+/**
+ * A required wildcard capturing one or more final URI path segments.
+ *
+ * Its endpoint value is a non-empty `List<String>` retaining segment boundaries.
+ */
+@ConsistentCopyVisibility
+data class RemainingPath internal constructor(
+    override val name: String
+) : PathValue<List<String>> {
+    override val format: StringFormat<List<String>>
+        get() = remainingPathFormat
+
+    init {
+        requireValidPathValueName(name)
     }
 }
 
 private const val INVALID_PATH_VARIABLE_NAME_CHARACTERS: String = "/{}?#"
 
+private fun requireValidPathValueName(name: String) {
+    require(name.isNotBlank()) { "Path variable name must not be blank" }
+    require(name.none(Char::isWhitespace) && name.none { it in INVALID_PATH_VARIABLE_NAME_CHARACTERS }) {
+        "Path variable name contains an invalid character: '$name'"
+    }
+}
+
+private val remainingPathFormat: StringFormat<List<String>> =
+    Format(
+        codec =
+            Codec(
+                decoder =
+                    Decoder { value ->
+                        val normalized = value.removePrefix("/")
+                        val segments = normalized.split('/')
+                        when {
+                            normalized.isEmpty() ->
+                                DecodeResult.Failure(
+                                    DecodeError("A remaining path must contain at least one segment")
+                                )
+                            segments.any(String::isEmpty) ->
+                                DecodeResult.Failure(
+                                    DecodeError("A remaining path must not contain empty segments")
+                                )
+                            else -> DecodeResult.Success(segments)
+                        }
+                    },
+                encoder =
+                    Encoder { segments ->
+                        require(segments.isNotEmpty()) { "A remaining path must contain at least one segment" }
+                        require(segments.none(String::isEmpty)) {
+                            "A remaining path must not contain empty segments"
+                        }
+                        require(segments.none { segment -> '/' in segment }) {
+                            "A remaining path segment must not contain '/'"
+                        }
+                        segments.joinToString("/")
+                    }
+            ),
+        schema = ArraySchema(format.string.schema)
+    )
+
 /** Shortcut to the built-in factories on [PathVariable.Companion]. */
 val path: PathVariable.Companion
     get() = PathVariable.Companion
 
-/** An ordered, heterogeneous tuple of path variables. */
-typealias Paths = Tuple<PathVariable<*>>
+/** An ordered, heterogeneous tuple of path values. */
+typealias Paths = Tuple<PathValue<*>>
 
 /** A path-variable tuple with no values. */
 typealias Paths0 = Tuple0
 
 /** A path-variable tuple with one value. */
-typealias Paths1<Value1> = Tuple1<PathVariable<*>, PathVariable<Value1>>
+typealias Paths1<Value1> = Tuple1<PathValue<*>, PathVariable<Value1>>
 
 /** A path-variable tuple with two values. */
-typealias Paths2<Value1, Value2> = Tuple2<PathVariable<*>, PathVariable<Value1>, PathVariable<Value2>>
+typealias Paths2<Value1, Value2> = Tuple2<PathValue<*>, PathVariable<Value1>, PathVariable<Value2>>
 
 /** A path-variable tuple with three values. */
 typealias Paths3<Value1, Value2, Value3> =
-    Tuple3<PathVariable<*>, PathVariable<Value1>, PathVariable<Value2>, PathVariable<Value3>>
+    Tuple3<PathValue<*>, PathVariable<Value1>, PathVariable<Value2>, PathVariable<Value3>>
 
 /** A path-variable tuple with four values. */
 typealias Paths4<Value1, Value2, Value3, Value4> =
-    Tuple4<PathVariable<*>, PathVariable<Value1>, PathVariable<Value2>, PathVariable<Value3>, PathVariable<Value4>>
+    Tuple4<PathValue<*>, PathVariable<Value1>, PathVariable<Value2>, PathVariable<Value3>, PathVariable<Value4>>
 
 /** A path-variable tuple with five values. */
 typealias Paths5<Value1, Value2, Value3, Value4, Value5> =
     Tuple5<
-        PathVariable<*>,
+        PathValue<*>,
         PathVariable<Value1>,
         PathVariable<Value2>,
         PathVariable<Value3>,
@@ -138,7 +206,7 @@ typealias Paths5<Value1, Value2, Value3, Value4, Value5> =
 /** A path-variable tuple with six values. */
 typealias Paths6<Value1, Value2, Value3, Value4, Value5, Value6> =
     Tuple6<
-        PathVariable<*>,
+        PathValue<*>,
         PathVariable<Value1>,
         PathVariable<Value2>,
         PathVariable<Value3>,
@@ -150,7 +218,7 @@ typealias Paths6<Value1, Value2, Value3, Value4, Value5, Value6> =
 /** A path-variable tuple with seven values. */
 typealias Paths7<Value1, Value2, Value3, Value4, Value5, Value6, Value7> =
     Tuple7<
-        PathVariable<*>,
+        PathValue<*>,
         PathVariable<Value1>,
         PathVariable<Value2>,
         PathVariable<Value3>,
@@ -163,7 +231,7 @@ typealias Paths7<Value1, Value2, Value3, Value4, Value5, Value6, Value7> =
 /** A path-variable tuple with eight values. */
 typealias Paths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value8> =
     Tuple8<
-        PathVariable<*>,
+        PathValue<*>,
         PathVariable<Value1>,
         PathVariable<Value2>,
         PathVariable<Value3>,
@@ -174,8 +242,71 @@ typealias Paths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value8>
         PathVariable<Value8>
     >
 
-/** Appends the non-empty segments in an already-encoded [fragment]. */
-operator fun <P : Paths> Uri<P, Queries0>.div(fragment: String): Uri<P, Queries0> {
+/** One final remaining path after no ordinary variables. */
+typealias RemainingPaths1 = Tuple1<PathValue<*>, RemainingPath>
+
+/** One final remaining path after one ordinary variable. */
+typealias RemainingPaths2<Value1> = Tuple2<PathValue<*>, PathVariable<Value1>, RemainingPath>
+
+/** One final remaining path after two ordinary variables. */
+typealias RemainingPaths3<Value1, Value2> =
+    Tuple3<PathValue<*>, PathVariable<Value1>, PathVariable<Value2>, RemainingPath>
+
+/** One final remaining path after three ordinary variables. */
+typealias RemainingPaths4<Value1, Value2, Value3> =
+    Tuple4<PathValue<*>, PathVariable<Value1>, PathVariable<Value2>, PathVariable<Value3>, RemainingPath>
+
+/** One final remaining path after four ordinary variables. */
+typealias RemainingPaths5<Value1, Value2, Value3, Value4> =
+    Tuple5<
+        PathValue<*>,
+        PathVariable<Value1>,
+        PathVariable<Value2>,
+        PathVariable<Value3>,
+        PathVariable<Value4>,
+        RemainingPath
+    >
+
+/** One final remaining path after five ordinary variables. */
+typealias RemainingPaths6<Value1, Value2, Value3, Value4, Value5> =
+    Tuple6<
+        PathValue<*>,
+        PathVariable<Value1>,
+        PathVariable<Value2>,
+        PathVariable<Value3>,
+        PathVariable<Value4>,
+        PathVariable<Value5>,
+        RemainingPath
+    >
+
+/** One final remaining path after six ordinary variables. */
+typealias RemainingPaths7<Value1, Value2, Value3, Value4, Value5, Value6> =
+    Tuple7<
+        PathValue<*>,
+        PathVariable<Value1>,
+        PathVariable<Value2>,
+        PathVariable<Value3>,
+        PathVariable<Value4>,
+        PathVariable<Value5>,
+        PathVariable<Value6>,
+        RemainingPath
+    >
+
+/** One final remaining path after seven ordinary variables. */
+typealias RemainingPaths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7> =
+    Tuple8<
+        PathValue<*>,
+        PathVariable<Value1>,
+        PathVariable<Value2>,
+        PathVariable<Value3>,
+        PathVariable<Value4>,
+        PathVariable<Value5>,
+        PathVariable<Value6>,
+        PathVariable<Value7>,
+        RemainingPath
+    >
+
+private fun <P : Paths> Uri<P, Queries0>.appendFragment(fragment: String): Uri<P, Queries0> {
     val normalizedFragment = fragment.trim('/')
 
     require(normalizedFragment.isNotEmpty()) { "URI path fragment must contain at least one segment" }
@@ -192,8 +323,72 @@ operator fun <P : Paths> Uri<P, Queries0>.div(fragment: String): Uri<P, Queries0
     )
 }
 
+/** Appends an already-encoded [fragment] after no path variables. */
+@JvmName("div")
+operator fun Uri<Paths0, Queries0>.div(fragment: String): Uri<Paths0, Queries0> = appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after one ordinary path variable. */
+@JvmName("uriWithOnePathDivFragment")
+operator fun <Value1 : Any> Uri<Paths1<Value1>, Queries0>.div(fragment: String): Uri<Paths1<Value1>, Queries0> =
+    appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after two ordinary path variables. */
+@JvmName("uriWithTwoPathsDivFragment")
+operator fun <Value1 : Any, Value2 : Any> Uri<Paths2<Value1, Value2>, Queries0>.div(
+    fragment: String
+): Uri<Paths2<Value1, Value2>, Queries0> = appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after three ordinary path variables. */
+@JvmName("uriWithThreePathsDivFragment")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any> Uri<Paths3<Value1, Value2, Value3>, Queries0>.div(
+    fragment: String
+): Uri<Paths3<Value1, Value2, Value3>, Queries0> = appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after four ordinary path variables. */
+@JvmName("uriWithFourPathsDivFragment")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any>
+    Uri<Paths4<Value1, Value2, Value3, Value4>, Queries0>.div(
+        fragment: String
+    ): Uri<Paths4<Value1, Value2, Value3, Value4>, Queries0> = appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after five ordinary path variables. */
+@JvmName("uriWithFivePathsDivFragment")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value5 : Any>
+    Uri<Paths5<Value1, Value2, Value3, Value4, Value5>, Queries0>.div(
+        fragment: String
+    ): Uri<Paths5<Value1, Value2, Value3, Value4, Value5>, Queries0> = appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after six ordinary path variables. */
+@JvmName("uriWithSixPathsDivFragment")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value5 : Any, Value6 : Any>
+    Uri<Paths6<Value1, Value2, Value3, Value4, Value5, Value6>, Queries0>.div(
+        fragment: String
+    ): Uri<Paths6<Value1, Value2, Value3, Value4, Value5, Value6>, Queries0> = appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after seven ordinary path variables. */
+@JvmName("uriWithSevenPathsDivFragment")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value5 : Any, Value6 : Any, Value7 : Any>
+    Uri<Paths7<Value1, Value2, Value3, Value4, Value5, Value6, Value7>, Queries0>.div(
+        fragment: String
+    ): Uri<Paths7<Value1, Value2, Value3, Value4, Value5, Value6, Value7>, Queries0> = appendFragment(fragment)
+
+/** Appends an already-encoded [fragment] after eight ordinary path variables. */
+@JvmName("uriWithEightPathsDivFragment")
+operator fun <
+    Value1 : Any,
+    Value2 : Any,
+    Value3 : Any,
+    Value4 : Any,
+    Value5 : Any,
+    Value6 : Any,
+    Value7 : Any,
+    Value8 : Any
+> Uri<Paths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value8>, Queries0>.div(
+    fragment: String
+): Uri<Paths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value8>, Queries0> = appendFragment(fragment)
+
 private fun <P : Paths> Uri<*, Queries0>.append(
-    variable: PathVariable<*>,
+    variable: PathValue<*>,
     newPaths: P
 ): Uri<P, Queries0> {
     require(paths.values.none { it.name == variable.name }) {
@@ -274,3 +469,66 @@ operator fun <
     variable: PathVariable<Value>
 ): Uri<Paths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value>, Queries0> =
     append(variable, Paths8(paths._1, paths._2, paths._3, paths._4, paths._5, paths._6, paths._7, variable))
+
+/** Appends a remaining path after no ordinary path variables. */
+@JvmName("uriWithNoPathsDivRemainingPath")
+operator fun Uri<Paths0, Queries0>.div(variable: RemainingPath): Uri<RemainingPaths1, Queries0> =
+    append(variable, RemainingPaths1(variable))
+
+/** Appends a remaining path after one ordinary path variable. */
+@JvmName("uriWithOnePathDivRemainingPath")
+operator fun <Value1 : Any> Uri<Paths1<Value1>, Queries0>.div(
+    variable: RemainingPath
+): Uri<RemainingPaths2<Value1>, Queries0> = append(variable, RemainingPaths2(paths._1, variable))
+
+/** Appends a remaining path after two ordinary path variables. */
+@JvmName("uriWithTwoPathsDivRemainingPath")
+operator fun <Value1 : Any, Value2 : Any> Uri<Paths2<Value1, Value2>, Queries0>.div(
+    variable: RemainingPath
+): Uri<RemainingPaths3<Value1, Value2>, Queries0> = append(variable, RemainingPaths3(paths._1, paths._2, variable))
+
+/** Appends a remaining path after three ordinary path variables. */
+@JvmName("uriWithThreePathsDivRemainingPath")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any> Uri<Paths3<Value1, Value2, Value3>, Queries0>.div(
+    variable: RemainingPath
+): Uri<RemainingPaths4<Value1, Value2, Value3>, Queries0> =
+    append(variable, RemainingPaths4(paths._1, paths._2, paths._3, variable))
+
+/** Appends a remaining path after four ordinary path variables. */
+@JvmName("uriWithFourPathsDivRemainingPath")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any>
+    Uri<Paths4<Value1, Value2, Value3, Value4>, Queries0>.div(
+        variable: RemainingPath
+    ): Uri<RemainingPaths5<Value1, Value2, Value3, Value4>, Queries0> =
+        append(variable, RemainingPaths5(paths._1, paths._2, paths._3, paths._4, variable))
+
+/** Appends a remaining path after five ordinary path variables. */
+@JvmName("uriWithFivePathsDivRemainingPath")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value5 : Any>
+    Uri<Paths5<Value1, Value2, Value3, Value4, Value5>, Queries0>.div(
+        variable: RemainingPath
+    ): Uri<RemainingPaths6<Value1, Value2, Value3, Value4, Value5>, Queries0> =
+        append(variable, RemainingPaths6(paths._1, paths._2, paths._3, paths._4, paths._5, variable))
+
+/** Appends a remaining path after six ordinary path variables. */
+@JvmName("uriWithSixPathsDivRemainingPath")
+operator fun <Value1 : Any, Value2 : Any, Value3 : Any, Value4 : Any, Value5 : Any, Value6 : Any>
+    Uri<Paths6<Value1, Value2, Value3, Value4, Value5, Value6>, Queries0>.div(
+        variable: RemainingPath
+    ): Uri<RemainingPaths7<Value1, Value2, Value3, Value4, Value5, Value6>, Queries0> =
+        append(variable, RemainingPaths7(paths._1, paths._2, paths._3, paths._4, paths._5, paths._6, variable))
+
+/** Appends a remaining path after seven ordinary path variables. */
+@JvmName("uriWithSevenPathsDivRemainingPath")
+operator fun <
+    Value1 : Any,
+    Value2 : Any,
+    Value3 : Any,
+    Value4 : Any,
+    Value5 : Any,
+    Value6 : Any,
+    Value7 : Any
+> Uri<Paths7<Value1, Value2, Value3, Value4, Value5, Value6, Value7>, Queries0>.div(
+    variable: RemainingPath
+): Uri<RemainingPaths8<Value1, Value2, Value3, Value4, Value5, Value6, Value7>, Queries0> =
+    append(variable, RemainingPaths8(paths._1, paths._2, paths._3, paths._4, paths._5, paths._6, paths._7, variable))

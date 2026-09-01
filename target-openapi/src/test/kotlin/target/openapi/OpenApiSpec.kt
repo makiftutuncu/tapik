@@ -143,6 +143,18 @@ class OpenApiSpec : FunSpec({
         shouldThrow<OpenApiGenerationException> { OpenApi.from(ambiguous, version = "1") }
     }
 
+    test("reject remaining paths with their endpoint and wildcard name") {
+        val files =
+            object : Api("Files") {
+                val download by get(root / "files" / path.remaining("path"))
+            }
+
+        val failure = shouldThrow<OpenApiGenerationException> { OpenApi.from(files, version = "1") }
+
+        requireNotNull(failure.message) shouldContain "Files.download"
+        requireNotNull(failure.message) shouldContain "path"
+    }
+
     test("translate request and response headers literally") {
         val requestHeader =
             object : Api("RequestHeader") {

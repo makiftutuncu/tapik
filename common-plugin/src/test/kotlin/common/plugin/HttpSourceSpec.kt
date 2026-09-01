@@ -12,6 +12,13 @@ class HttpSourceSpec : FunSpec({
         root.pathTemplate() shouldBe "/"
     }
 
+    test("render a remaining path and its ordinary prefix") {
+        val uri = root / "authors" / path.uuid("authorId") / path.remaining("document")
+
+        uri.pathTemplate() shouldBe "/authors/{authorId}/{*document}"
+        uri.pathTemplateBeforeRemaining() shouldBe "/authors/{authorId}"
+    }
+
     test("derive stable Kotlin status variant names") {
         Status.Ok.kotlinVariantName() shouldBe "Ok"
         Status.Created.kotlinVariantName() shouldBe "Created"

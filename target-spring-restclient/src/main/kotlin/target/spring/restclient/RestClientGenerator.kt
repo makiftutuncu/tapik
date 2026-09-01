@@ -91,6 +91,11 @@ private fun StringBuilder.appendUri(endpoint: RestClientEndpointModel) {
     appendLine("                uri = { uriBuilder ->")
     appendLine("                    uriBuilder")
     appendLine("                        .path(${endpoint.pathTemplate.kotlinString()})")
+    endpoint.paths.singleOrNull(RestClientUriParameter::remaining)?.let { remaining ->
+        appendLine(
+            "                        .pathSegment(*${remaining.definitionAccess}.format.encode(${remaining.name}).split('/').toTypedArray())"
+        )
+    }
     endpoint.queries.forEach { query ->
         val encoded = "${query.definitionAccess}.format.encode(${query.name})"
         when {
@@ -110,13 +115,14 @@ private fun StringBuilder.appendUri(endpoint: RestClientEndpointModel) {
                 appendLine("                        .queryParam(${query.wireName.kotlinString()}, $encoded)")
         }
     }
-    if (endpoint.paths.isEmpty()) {
+    val ordinaryPaths = endpoint.paths.filterNot(RestClientUriParameter::remaining)
+    if (ordinaryPaths.isEmpty()) {
         append("                        .build()")
     } else {
         appendLine("                        .build(")
         appendLine("                            mapOf(")
-        endpoint.paths.forEachIndexed { index, path ->
-            val suffix = if (index == endpoint.paths.lastIndex) "" else ","
+        ordinaryPaths.forEachIndexed { index, path ->
+            val suffix = if (index == ordinaryPaths.lastIndex) "" else ","
             appendLine(
                 "                                ${path.wireName.kotlinString()} to ${path.definitionAccess}.format.encode(${path.name})$suffix"
             )

@@ -1,9 +1,10 @@
 package dev.akif.tapik.common.plugin
 
-import dev.akif.tapik.PathSegment
-import dev.akif.tapik.PathVariable
 import dev.akif.tapik.CustomStatus
 import dev.akif.tapik.ExactStatus
+import dev.akif.tapik.PathSegment
+import dev.akif.tapik.PathVariable
+import dev.akif.tapik.RemainingPath
 import dev.akif.tapik.Status
 import dev.akif.tapik.StatusMatcher
 import dev.akif.tapik.StatusRange
@@ -12,13 +13,21 @@ import dev.akif.tapik.Uri
 
 /** Returns this URI's path template without its query parameters. */
 fun Uri<*, *>.pathTemplate(): String =
-    if (segments.isEmpty()) {
+    segments.renderPathTemplate()
+
+/** Returns this URI's ordinary path template before its terminal remaining path. */
+fun Uri<*, *>.pathTemplateBeforeRemaining(): String =
+    segments.takeWhile { segment -> segment !is RemainingPath }.renderPathTemplate()
+
+private fun List<PathSegment>.renderPathTemplate(): String =
+    if (isEmpty()) {
         "/"
     } else {
-        segments.joinToString(separator = "/", prefix = "/") { segment ->
+        joinToString(separator = "/", prefix = "/") { segment ->
             when (segment) {
                 is PathSegment.Literal -> segment.value
                 is PathVariable<*> -> "{${segment.name}}"
+                is RemainingPath -> "{*${segment.name}}"
             }
         }
     }

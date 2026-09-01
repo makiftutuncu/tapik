@@ -5,9 +5,19 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.http.HttpStatus
+import org.springframework.http.server.PathContainer
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.util.pattern.PathPatternParser
 
 class RequestDecodingSpec : FunSpec({
+    test("decode Spring's terminal wildcard as remaining path segments") {
+        val pattern = PathPatternParser.defaultInstance.parse("/files/{*path}")
+        val match = requireNotNull(pattern.matchAndExtract(PathContainer.parsePath("/files/draft/reports")))
+
+        decodeRequest(path.remaining("path").format, match.uriVariables.getValue("path"), "Files.download path path") shouldBe
+            listOf("draft", "reports")
+    }
+
     test("decode scalar repeated and body request values") {
         decodeRequest(stringFormat, "book", "Books.get query title") shouldBe "book"
         decodeRequest(stringsFormat, listOf("fiction", "history"), "Books.list query tag") shouldBe

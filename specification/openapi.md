@@ -23,6 +23,10 @@ declared order. A range covering one complete status-code hundred uses OpenAPI's
 expanded into concrete response-code entries. Described custom predicates fail generation with the endpoint ID and
 matcher description because executable Kotlin predicates cannot be represented faithfully in an OpenAPI document.
 
+OpenAPI path templates cannot distinguish a single path variable from Tapik's required remaining-segments wildcard.
+An endpoint containing `RemainingPath` therefore fails generation with its endpoint ID and wildcard name instead of
+silently publishing a weaker ordinary path parameter.
+
 ## Schema components
 
 Every named Tapik schema becomes an OpenAPI schema component and every reference follows the same component-naming

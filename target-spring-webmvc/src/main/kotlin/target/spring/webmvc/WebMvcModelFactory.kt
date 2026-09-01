@@ -73,11 +73,20 @@ private fun CompiledEndpoint.toModel(
     }
     val paths =
         value.uri.paths.values.mapIndexed { index, path ->
+            val compiledPathType = pathTypes[index]
+            val remaining = path is RemainingPath
             val valueType =
-                pathTypes[index]
-                    .argument(0, "${value.id} path '${path.name}'")
-                    .toKotlinSourceType("${value.id} path '${path.name}'")
-                    .source
+                if (remaining) {
+                    require((compiledPathType.classifier as? KotlinClassClassifier)?.name == "dev.akif.tapik.RemainingPath") {
+                        "${value.id} remaining path '${path.name}' does not match its compiled type"
+                    }
+                    "kotlin.collections.List<kotlin.String>"
+                } else {
+                    compiledPathType
+                        .argument(0, "${value.id} path '${path.name}'")
+                        .toKotlinSourceType("${value.id} path '${path.name}'")
+                        .source
+                }
             val name = uniqueKotlinName(path.name.kotlinIdentifier("path${index + 1}"), usedNames)
             val rawName = uniqueKotlinName(name.removeSurrounding("`") + "Raw", usedRawNames)
             WebMvcWireParameter(

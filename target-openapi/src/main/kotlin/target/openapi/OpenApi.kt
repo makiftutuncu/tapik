@@ -54,6 +54,11 @@ private class Interpreter(
         val templatedPaths = mutableMapOf<String, String>()
 
         api.endpoints.forEach { endpoint ->
+            endpoint.uri.paths.values.filterIsInstance<RemainingPath>().firstOrNull()?.let { remaining ->
+                throw OpenApiGenerationException(
+                    "${endpoint.id} uses remaining path '${remaining.name}', which OpenAPI cannot represent faithfully"
+                )
+            }
             val path = endpoint.pathTemplate()
             val shape = endpoint.pathShape()
             val existingPath = templatedPaths.putIfAbsent(shape, path)
@@ -236,6 +241,7 @@ private fun Endpoint<*, *, *, *, *, Ready>.pathTemplate(): String {
         when (segment) {
             is PathSegment.Literal -> segment.value
             is PathVariable<*> -> "{${segment.name}}"
+            is RemainingPath -> "{*${segment.name}}"
         }
     }
 }
@@ -246,6 +252,7 @@ private fun Endpoint<*, *, *, *, *, Ready>.pathShape(): String {
         when (segment) {
             is PathSegment.Literal -> segment.value
             is PathVariable<*> -> "{}"
+            is RemainingPath -> "{*}"
         }
     }
 }

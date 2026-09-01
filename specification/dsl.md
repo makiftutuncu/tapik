@@ -74,14 +74,20 @@ or with an empty segment caused by repeated internal separators, is rejected. Th
 trailing slashes do not distinguish otherwise equal URIs.
 
 Static fragments do not consume typed tuple arity. Declaration order is preserved. Path variables are always
-required. `Paths` and `Queries` alias tuples of `PathVariable` and query definitions respectively; their concrete
-arity aliases are `Paths0` through `Paths8` and `Queries0` through `Queries8`. Domain APIs use these aliases instead
-of exposing the underlying tuple types. Wildcard paths will use `path.remaining("path")` when introduced.
+required. `Paths` and `Queries` alias tuples of path values and query definitions respectively; their concrete arity
+aliases are `Paths0` through `Paths8` and `Queries0` through `Queries8`. Domain APIs use these aliases instead of
+exposing the underlying tuple types.
 
 `Uri.segments` is a list of `PathSegment` values. A literal fragment contributes one literal segment per `/`-separated
 part; a `PathVariable<Value>` is both a path segment and the exact value stored in the URI's `Paths` tuple. Variable
 names are non-blank URI-template names and unique within a URI. `Uri.toString()` joins literal segments and variable
 names such as `{bookId}` into the complete path template.
+
+`path.remaining("path")` defines a required wildcard consuming one or more final path segments as a `List<String>`.
+It is represented by the distinct `RemainingPath` type, consumes one path-tuple position, and renders as `{*path}`.
+Its format converts between the list and one slash-separated wire value while rejecting empty lists, empty segments,
+and segments containing `/`. A remaining path must be the final path definition: Kotlin overload resolution prevents
+appending another literal or path variable, while query parameters may still follow it.
 
 Generic and convenient path-variable builders coexist:
 
@@ -89,6 +95,7 @@ Generic and convenient path-variable builders coexist:
 path<BookId>(name = "bookId", format = bookIdFormat)
 path.string("slug")
 path.uuid("bookId")
+path.remaining("path")
 ```
 
 `path` is an alias of `PathVariable.Companion`, where all built-in builders live. The companion implements a shared

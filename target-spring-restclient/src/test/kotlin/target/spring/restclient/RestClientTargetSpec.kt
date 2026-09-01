@@ -150,6 +150,22 @@ class RestClientTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
+    test("append a remaining path as individually encoded segments") {
+        val source =
+            RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientRemainingPaths)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "path: List<String>"
+        source shouldContain ".path(\"/files/{ownerId}\")"
+        source shouldContain
+            ".pathSegment(*restClientRemainingPathsApi.download.uri.paths._2.format.encode(path).split('/').toTypedArray())"
+        source shouldNotContain "{*path}"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("disambiguate generated declarations and preserve endpoint property names") {
         val source =
             RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientNamingCollisions)))
@@ -249,6 +265,11 @@ public object RestClientStatusMatchers : Api() {
     public val extensionSuccess by
         get(root / "extension-success")
             .output(statusMatching("successful extension status") { it.code in 290..299 } with noBody)
+}
+
+public object RestClientRemainingPaths : Api() {
+    public val download by
+        get(root / "files" / path.uuid("ownerId") / path.remaining("path"))
 }
 
 public object RequestBodyAlternatives : Api() {

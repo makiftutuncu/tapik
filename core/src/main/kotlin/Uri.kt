@@ -1,12 +1,12 @@
 package dev.akif.tapik
 
 /**
- * An immutable URI definition with exact path-variable and query-parameter tuple types.
+ * An immutable URI definition with exact path-value and query-parameter tuple types.
  *
- * @param P path-variable tuple type.
+ * @param P path-value tuple type.
  * @param Q query-parameter tuple type.
- * @property segments normalized, already-encoded path segments.
- * @property paths path variables in declaration order.
+ * @property segments normalized path segments, whose literal values are already encoded.
+ * @property paths path values in declaration order.
  * @property queries query parameters in declaration order.
  */
 @ConsistentCopyVisibility
@@ -25,6 +25,7 @@ data class Uri<out P : Paths, out Q : Queries> internal constructor(
                     when (segment) {
                         is PathSegment.Literal -> segment.value
                         is PathVariable<*> -> "{${segment.name}}"
+                        is RemainingPath -> "{*${segment.name}}"
                     }
                 }
             }

@@ -83,7 +83,7 @@
 - [x] Interpret each new status matcher in OpenAPI, RestClient, and WebMVC after its core representation is stable.
   A target that cannot represent a matcher must fail generation with the endpoint and matcher in its diagnostic.
 
-- [ ] Add `path.remaining("name")` for required wildcard paths without weakening ordinary path-variable typing. Define
+- [x] Add `path.remaining("name")` for required wildcard paths without weakening ordinary path-variable typing. Define
   its rendering and encoding once, then add explicit compatibility checks to each target.
 
 - [ ] Let parameters, request bodies, and response alternatives carry their own OpenAPI-aligned documentation. Add

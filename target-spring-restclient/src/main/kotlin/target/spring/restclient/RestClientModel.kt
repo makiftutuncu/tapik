@@ -11,7 +11,7 @@ import dev.akif.tapik.common.plugin.kotlinIdentifier
 import dev.akif.tapik.common.plugin.kotlinReferenceIdentifier
 import dev.akif.tapik.common.plugin.kotlinVariantName
 import dev.akif.tapik.common.plugin.lowerCamel
-import dev.akif.tapik.common.plugin.pathTemplate
+import dev.akif.tapik.common.plugin.pathTemplateBeforeRemaining
 import dev.akif.tapik.common.plugin.toKotlinSourceType
 import dev.akif.tapik.common.plugin.tupleElements
 import dev.akif.tapik.common.plugin.uniqueKotlinName
@@ -52,7 +52,8 @@ internal data class RestClientUriParameter(
     val wireName: String,
     val definitionAccess: String,
     val repeated: Boolean,
-    val optional: Boolean
+    val optional: Boolean,
+    val remaining: Boolean = false
 )
 
 internal data class RestClientHeader(
@@ -140,15 +141,29 @@ private fun CompiledEndpoint.toModel(
     }
     val paths =
         value.uri.paths.values.mapIndexed { index, path ->
-            val pathType = pathTypes[index].argument(0, "${value.id} path '${path.name}'")
+            val compiledPathType = pathTypes[index]
+            val remaining = path is RemainingPath
+            val pathType =
+                if (remaining) {
+                    require((compiledPathType.classifier as? KotlinClassClassifier)?.name == "dev.akif.tapik.RemainingPath") {
+                        "${value.id} remaining path '${path.name}' does not match its compiled type"
+                    }
+                    "kotlin.collections.List<kotlin.String>"
+                } else {
+                    compiledPathType
+                        .argument(0, "${value.id} path '${path.name}'")
+                        .toKotlinSourceType("${value.id} path '${path.name}'")
+                        .source
+                }
             val name = uniqueKotlinName(path.name.kotlinIdentifier("path${index + 1}"), usedNames)
             RestClientUriParameter(
                 name = name,
                 wireName = path.name,
                 definitionAccess = "$endpointAccess.uri.paths._${index + 1}",
                 repeated = false,
-                optional = false
-            ) to RestClientParameter(name, pathType.toKotlinSourceType("${value.id} path '${path.name}'").source)
+                optional = false,
+                remaining = remaining
+            ) to RestClientParameter(name, pathType)
         }
 
     val queryTypes = type.argument(1, value.id).tupleElements("${value.id} queries")
@@ -250,7 +265,7 @@ private fun CompiledEndpoint.toModel(
         methodName = methodName,
         summary = value.documentation.summary,
         responseName = responseName,
-        pathTemplate = value.uri.pathTemplate(),
+        pathTemplate = value.uri.pathTemplateBeforeRemaining(),
         paths = paths.map(Pair<RestClientUriParameter, RestClientParameter>::first),
         queries = queries.map(Pair<RestClientUriParameter, RestClientParameter>::first),
         headers = headers.map(Pair<RestClientHeader, RestClientParameter?>::first),

@@ -49,6 +49,9 @@ headers, and request bodies precede optional or defaulted values. Runtime endpoi
 defaults, media types, matchers, and codecs. Generated code performs URI construction, request encoding, output
 matching, and response decoding without a parallel endpoint model.
 
+A remaining path is exposed as `List<String>`. Generated clients encode each element as one URI path segment and
+append those segments after the ordinary path template, so a segment cannot accidentally become multiple segments.
+
 Generated clients contain only API-specific request construction, output matching, and response construction. Stable
 response body and header decoding and fixed-header conformance live once in `tapik-target-spring-restclient`; generated
 sources call that runtime support instead of copying private helper functions into every client interface.
@@ -101,6 +104,9 @@ Generated Spring adapter methods receive wire values rather than asking Spring t
 path variables, query parameters, headers, and bodies through the formats attached to the endpoint. Decode failures and
 fixed-header mismatches produce `400 Bad Request`. `CONNECT` and `QUERY` fail generation because Spring WebMVC cannot
 map them.
+
+A remaining path uses Spring's terminal `{*name}` mapping and is exposed to handlers as `List<String>`. Its one-or-more
+and segment-shape rules are decoded through the format attached to `RemainingPath`, like every ordinary path value.
 
 Repeated query parameters preserve raw query occurrences independently of Spring conversion rules. A request containing
 `?tag=a,b` decodes from the single value `"a,b"`, while `?tag=a&tag=b` decodes from the two values `"a"` and `"b"`.

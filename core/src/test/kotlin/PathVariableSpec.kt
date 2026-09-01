@@ -44,6 +44,8 @@ class PathVariableSpec : FunSpec({
         shouldThrow<IllegalArgumentException> { path.string("book/id") }
         shouldThrow<IllegalArgumentException> { path.string("{bookId}") }
         shouldThrow<IllegalArgumentException> { path.string("book id") }
+        shouldThrow<IllegalArgumentException> { path.remaining("") }
+        shouldThrow<IllegalArgumentException> { path.remaining("book/archive") }
     }
 
     test("append variables while retaining their exact types and positions") {
@@ -65,10 +67,41 @@ class PathVariableSpec : FunSpec({
         uri.toString() shouldBe "/books/{bookId}/authors/{authorId}"
     }
 
+    test("append a typed remaining path as the final path value") {
+        val archive = path.remaining("archive")
+        val uri: Uri<RemainingPaths2<UUID>, Queries0> =
+            root / "books" / path.uuid("bookId") / archive
+
+        uri.segments shouldBe
+            listOf(
+                PathSegment.Literal("books"),
+                uri.paths._1,
+                archive
+            )
+        uri.paths._2 shouldBe archive
+        uri.toString() shouldBe "/books/{bookId}/{*archive}"
+        (uri + query.boolean("download")).toString() shouldBe "/books/{bookId}/{*archive}?download={download}"
+    }
+
+    test("encode and decode one or more remaining path segments") {
+        val archive = path.remaining("archive")
+
+        archive.format.encode(listOf("covers", "2026", "report")) shouldBe "covers/2026/report"
+        archive.format.decode("/covers/2026/report") shouldBe
+            DecodeResult.Success(listOf("covers", "2026", "report"))
+        archive.format.decode("") shouldBe
+            DecodeResult.Failure(DecodeError("A remaining path must contain at least one segment"))
+        archive.format.decode("/covers//report") shouldBe
+            DecodeResult.Failure(DecodeError("A remaining path must not contain empty segments"))
+        shouldThrow<IllegalArgumentException> { archive.format.encode(emptyList()) }
+        shouldThrow<IllegalArgumentException> { archive.format.encode(listOf("covers/archive")) }
+    }
+
     test("reject duplicate variable names") {
         val uri = root / "books" / path.uuid("id") / "authors"
 
         shouldThrow<IllegalArgumentException> { uri / path.uuid("id") }
+        shouldThrow<IllegalArgumentException> { uri / path.remaining("id") }
     }
 
     test("support eight path variables") {
@@ -83,9 +116,26 @@ class PathVariableSpec : FunSpec({
                 path.string("seven") /
                 path.string("eight")
 
-        uri.paths.values.map(PathVariable<*>::name) shouldBe
+        uri.paths.values.map(PathValue<*>::name) shouldBe
             listOf("one", "two", "three", "four", "five", "six", "seven", "eight")
         uri.toString() shouldBe "/{one}/{two}/{three}/{four}/{five}/{six}/{seven}/{eight}"
+    }
+
+    test("support a remaining path as the eighth path value") {
+        val uri: Uri<RemainingPaths8<String, String, String, String, String, String, String>, Queries0> =
+            root /
+                path.string("one") /
+                path.string("two") /
+                path.string("three") /
+                path.string("four") /
+                path.string("five") /
+                path.string("six") /
+                path.string("seven") /
+                path.remaining("rest")
+
+        uri.paths.values.map(PathValue<*>::name) shouldBe
+            listOf("one", "two", "three", "four", "five", "six", "seven", "rest")
+        uri.toString() shouldBe "/{one}/{two}/{three}/{four}/{five}/{six}/{seven}/{*rest}"
     }
 })
 
