@@ -74,7 +74,7 @@
   generated classes, or runtime registration resources. Registry aggregation and generated outputs must remain
   deterministic and must not require users to run a clean build, including after target naming changes.
 
-- [ ] Support multiple request-body media representations in generated RestClient clients. The generated API should
+- [x] Support multiple request-body media representations in generated RestClient clients. The generated API should
   make the selected representation explicit while retaining the single logical Kotlin body type.
 
 - [ ] Add set, range, default, and described custom status matchers to the core DSL one matcher kind at a time. Preserve

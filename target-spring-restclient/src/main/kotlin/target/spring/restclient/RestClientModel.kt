@@ -63,13 +63,6 @@ internal data class RestClientHeader(
     val presence: Presence<*>
 )
 
-internal data class RestClientRequestBodyModel(
-    val parameterName: String,
-    val type: String,
-    val definitionAccess: String,
-    val optional: Boolean
-)
-
 internal data class RestClientOutput(
     val variantName: String,
     val definitionAccess: String,
@@ -109,7 +102,7 @@ internal fun restClientApiModel(
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
     val methodNames = mutableSetOf<String>()
-    val responseNames = mutableSetOf<String>()
+    val nestedTypeNames = mutableSetOf<String>()
     return RestClientApiModel(
         packageName = packageName,
         clientName = clientName,
@@ -122,7 +115,8 @@ internal fun restClientApiModel(
                     apiId = api.id,
                     apiProperty = apiProperty,
                     methodName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), methodNames),
-                    responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", responseNames)
+                    responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", nestedTypeNames),
+                    nestedTypeNames = nestedTypeNames
                 )
             }
     )
@@ -132,7 +126,8 @@ private fun CompiledEndpoint.toModel(
     apiId: String,
     apiProperty: String,
     methodName: String,
-    responseName: String
+    responseName: String,
+    nestedTypeNames: MutableSet<String>
 ): RestClientEndpointModel {
     val propertyName = value.id.removePrefix("$apiId.")
     val endpointAccess = "$apiProperty.${propertyName.kotlinReferenceIdentifier()}"
@@ -221,20 +216,29 @@ private fun CompiledEndpoint.toModel(
             ) to parameter
         }
 
-    val body = requestBody(type.argument(3, value.id), value.input, endpointAccess, value.id, usedNames)
+    val body =
+        restClientRequestBody(
+            inputType = type.argument(3, value.id),
+            input = value.input,
+            endpointAccess = endpointAccess,
+            endpointId = value.id,
+            parameterNames = usedNames,
+            requestedTypeName = propertyName.upperCamel() + "RequestBody",
+            nestedTypeNames = nestedTypeNames
+        )
     val requiredParameters =
         buildList {
             addAll(paths.map(Pair<RestClientUriParameter, RestClientParameter>::second))
             addAll(queries.map(Pair<RestClientUriParameter, RestClientParameter>::second).filter { it.defaultExpression == null })
             addAll(headers.mapNotNull(Pair<RestClientHeader, RestClientParameter?>::second).filter { it.defaultExpression == null })
-            body?.takeIf { !it.optional }?.let { add(RestClientParameter(it.parameterName, it.type)) }
+            body?.takeIf { !it.optional }?.let { add(RestClientParameter(it.parameterName, it.parameterType)) }
         }
     val optionalParameters =
         buildList {
             addAll(queries.map(Pair<RestClientUriParameter, RestClientParameter>::second).filter { it.defaultExpression != null })
             addAll(headers.mapNotNull(Pair<RestClientHeader, RestClientParameter?>::second).filter { it.defaultExpression != null })
             body?.takeIf(RestClientRequestBodyModel::optional)?.let {
-                add(RestClientParameter(it.parameterName, "${it.type}?", "null"))
+                add(RestClientParameter(it.parameterName, "${it.parameterType}?", "null"))
             }
         }
 
@@ -252,35 +256,6 @@ private fun CompiledEndpoint.toModel(
         body = body,
         parameters = requiredParameters + optionalParameters,
         outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id)
-    )
-}
-
-private fun requestBody(
-    inputType: KotlinType,
-    input: Input,
-    endpointAccess: String,
-    endpointId: String,
-    usedNames: MutableSet<String>
-): RestClientRequestBodyModel? {
-    if (input is NoInput) return null
-    require(input is BodyInput<*>) { "$endpointId has unsupported input '${input::class.simpleName}'" }
-    val bodyTypes = inputType.argument(0, "$endpointId input").tupleElements("$endpointId input bodies")
-    require(bodyTypes.size == input.bodies.values.size) {
-        "$endpointId compiled input body types do not match its runtime bodies"
-    }
-    val encoded = input.bodies.values.withIndex().filter { (_, body) -> body is Body<*> }
-    require(encoded.size <= 1) { "$endpointId has multiple request body representations, which are not supported" }
-    val indexed = encoded.singleOrNull() ?: return null
-    val valueType =
-        bodyTypes[indexed.index]
-            .argument(0, "$endpointId request body")
-            .toKotlinSourceType("$endpointId request body")
-            .source
-    return RestClientRequestBodyModel(
-        parameterName = uniqueKotlinName("body", usedNames),
-        type = valueType,
-        definitionAccess = "$endpointAccess.input.bodies._${indexed.index + 1}",
-        optional = input.bodies.values.any { body -> body is NoBody }
     )
 }
 

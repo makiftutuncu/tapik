@@ -52,9 +52,16 @@ Generated clients contain only API-specific request construction, output matchin
 response body and header decoding and fixed-header conformance live once in `tapik-target-spring-restclient`; generated
 sources call that runtime support instead of copying private helper functions into every client interface.
 
-The initial target supports at most one encoded request-body representation. Multiple output body representations
-remain distinguishable by response media type. Unsupported compiled shapes or endpoint capabilities fail generation
-with the API and endpoint ID.
+An endpoint with one encoded request-body representation exposes its logical Kotlin value directly, preserving the
+short call shape for the common case. An endpoint with multiple encoded representations instead exposes a generated
+sealed request-body type whose variants are named from the declared media types and each carry that same logical value.
+Callers therefore select the representation explicitly and exhaustively, and generated request encoding uses the
+format and media type belonging to the selected variant. Variant names are allocated deterministically in body
+declaration order. When `noBody` is also declared, the sealed request-body parameter is nullable and defaults to
+`null`; `null` sends no body.
+
+Multiple output body representations remain distinguishable by response media type. Unsupported compiled shapes or
+endpoint capabilities fail generation with the API and endpoint ID.
 
 `packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `clientSuffix` selects the
 interface-name suffix and defaults to `Client`. Each source artifact follows the package path and uses the concrete API

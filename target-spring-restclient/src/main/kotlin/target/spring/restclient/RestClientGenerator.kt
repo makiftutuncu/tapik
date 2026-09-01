@@ -37,6 +37,10 @@ internal class RestClientGenerator(
                 "    public val restClientTransport: dev.akif.tapik.target.spring.restclient.RestClientTransport"
             )
             model.endpoints.forEach { endpoint ->
+                endpoint.body?.choiceTypeName?.let {
+                    appendLine()
+                    appendRequestBodyType(endpoint.body)
+                }
                 appendLine()
                 appendResponse(endpoint)
                 appendLine()
@@ -70,7 +74,7 @@ private fun StringBuilder.appendMethod(endpoint: RestClientEndpointModel) {
     appendLine(",")
     appendHeaders(endpoint)
     appendLine(",")
-    appendBody(endpoint)
+    appendRequestBodyArgument(endpoint.body)
     appendLine()
     appendLine("            )")
     appendLine()
@@ -147,21 +151,6 @@ private fun StringBuilder.appendHeaders(endpoint: RestClientEndpointModel) {
         }
     }
     append("                }")
-}
-
-private fun StringBuilder.appendBody(endpoint: RestClientEndpointModel) {
-    val body = endpoint.body
-    when {
-        body == null -> append("                body = null")
-        body.optional ->
-            append(
-                "                body = ${body.parameterName}?.let { value -> dev.akif.tapik.target.spring.restclient.RestClientRequestBody(${body.definitionAccess}.mediaType, ${body.definitionAccess}.format.encode(value)) }"
-            )
-        else ->
-            append(
-                "                body = dev.akif.tapik.target.spring.restclient.RestClientRequestBody(${body.definitionAccess}.mediaType, ${body.definitionAccess}.format.encode(${body.parameterName}))"
-            )
-    }
 }
 
 private fun StringBuilder.appendOutput(

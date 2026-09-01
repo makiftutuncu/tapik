@@ -103,6 +103,35 @@ class RestClientTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
+    test("make a request body representation explicit when an input has multiple media types") {
+        val source =
+            RestClientTarget.generate(GenerationRequest(apis = listOf(RequestBodyAlternatives)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "public sealed interface SendRequestBody"
+        source shouldContain "public data class Json("
+        source shouldContain "public data class Json2("
+        source shouldContain "public data class Xml("
+        source shouldContain "public val body: String"
+        source shouldContain "body: SendRequestBody? = null"
+        source shouldContain "is SendRequestBody.Json -> RestClientRequestBody("
+        source shouldContain "requestBodyAlternativesApi.send.input.bodies._1.mediaType"
+        source shouldContain "requestBodyAlternativesApi.send.input.bodies._1.format.encode(requestBody.body)"
+        source shouldContain "is SendRequestBody.Json2 -> RestClientRequestBody("
+        source shouldContain "requestBodyAlternativesApi.send.input.bodies._2.mediaType"
+        source shouldContain "is SendRequestBody.Xml -> RestClientRequestBody("
+        source shouldContain "requestBodyAlternativesApi.send.input.bodies._3.mediaType"
+        source shouldContain "public sealed interface SendRequiredRequestBody"
+        source shouldContain "body: SendRequiredRequestBody"
+        source shouldNotContain "body: SendRequiredRequestBody? = null"
+        source shouldContain "when (body) {"
+        source shouldContain "requestBodyAlternativesApi.sendRequired.input.bodies._1.format.encode(body.body)"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("disambiguate generated declarations and preserve endpoint property names") {
         val source =
             RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientNamingCollisions)))
@@ -188,6 +217,38 @@ public object ResponseConformance : Api() {
     public val empty by
         get(root / "empty")
             .output(Status.NoContent with noBody)
+}
+
+public object RequestBodyAlternatives : Api() {
+    private val stringFormat: ByteArrayFormat<String> =
+        Format(
+            codec =
+                Codec(
+                    decoder = Decoder { bytes -> DecodeResult.Success(bytes.decodeToString()) },
+                    encoder = Encoder(String::encodeToByteArray)
+                ),
+            schema = ScalarSchema(SchemaType.STRING)
+        )
+
+    public val send by
+        post(root / "send")
+            .input(
+                bodiesOf(
+                    body(MediaType.Json, stringFormat),
+                    body(MediaType("text/json"), stringFormat),
+                    body(MediaType.Xml, stringFormat),
+                    noBody
+                )
+            )
+
+    public val sendRequired by
+        post(root / "send-required")
+            .input(
+                bodiesOf(
+                    body(MediaType.Json, stringFormat),
+                    body(MediaType.Xml, stringFormat)
+                )
+            )
 }
 
 public object RestClientNamingCollisions : Api() {
