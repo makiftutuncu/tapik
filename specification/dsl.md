@@ -261,8 +261,21 @@ integrations such as Kotlin serialization provide convenient builders including 
 
 ## Outputs
 
-`Status` is a validated value class, not an enum. Named constants cover standard statuses without excluding extension
-codes. A status becomes an exact matcher when combined with a body.
+`Status` is a validated data class, not an enum. Named constants cover standard statuses without excluding extension
+codes. Keeping it as a regular class also lets status-set builders expose Kotlin's natural vararg syntax. A status
+becomes an exact matcher when combined with a body. Other matcher values use the same output grammar:
+
+```kotlin
+statusesOf(Status.Ok, Status.Created) with noBody
+statusesIn(400..499) with noBody
+statusMatching("successful extension status") { status -> status.code in 290..299 } with noBody
+```
+
+`statusesOf` takes one required status followed by zero or more statuses and produces a `StatusSet`, normalizing
+duplicates. `statusesIn` requires a non-empty range contained by the valid HTTP status domain and produces a
+`StatusRange`. `statusMatching` requires a non-blank description and produces a `CustomStatus` retaining its runtime
+predicate. The description is the stable representation available to diagnostics and targets because predicate code
+itself is not portable.
 
 The output grammar is status matcher, body or bodies, then optional headers:
 
@@ -295,9 +308,10 @@ the first explicit output replaces that default with `Outputs1`; later calls app
 output is a compilation failure, and duplicate exact statuses are rejected. Bodyless explicit responses use
 `Status.NoContent with noBody`; no status-only special case exists.
 
-The initial DSL implements `ExactStatus`, produced by `Status with ...`. Set, range, default, and described predicate
-matchers may follow. Neutral matcher capabilities should be represented in types where useful; targets provide
-tailored diagnostics for unsupported matchers.
+Before an output is appended, Tapik evaluates it against existing alternatives over every valid HTTP status code. Any
+shared match is rejected with the conflicting status. A custom predicate that throws during this validation
+produces a contextual construction failure retaining the original cause. Custom predicates are required to be pure and
+deterministic. Targets provide tailored diagnostics for matcher kinds they cannot represent.
 
 ## Documentation and tags
 

@@ -77,7 +77,7 @@
 - [x] Support multiple request-body media representations in generated RestClient clients. The generated API should
   make the selected representation explicit while retaining the single logical Kotlin body type.
 
-- [ ] Add set, range, default, and described custom status matchers to the core DSL one matcher kind at a time. Preserve
+- [x] Add set, range, and described custom status matchers to the core DSL one matcher kind at a time. Preserve
   the concrete matcher kind in `Output` types and reject ambiguous alternatives while building the contract.
 
 - [ ] Interpret each new status matcher in OpenAPI, RestClient, and WebMVC after its core representation is stable.

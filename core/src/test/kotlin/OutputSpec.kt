@@ -39,6 +39,18 @@ class OutputSpec : FunSpec({
         empty.bodies.values shouldBe listOf(noBody)
     }
 
+    test("preserve each concrete status matcher type in outputs") {
+        val set: Output<StatusSet, Bodies1<NoBody>, Headers0> =
+            statusesOf(Status.Ok, Status.Created) with noBody
+        val range: Output<StatusRange, Bodies1<NoBody>, Headers0> = statusesIn(400..499) with noBody
+        val custom: Output<CustomStatus, Bodies1<NoBody>, Headers0> =
+            statusMatching("server errors") { status -> status.code >= 500 } with noBody
+
+        set.matcher.matches(Status.Created) shouldBe true
+        range.matcher.matches(Status.NotFound) shouldBe true
+        custom.matcher.matches(Status.InternalServerError) shouldBe true
+    }
+
     test("validate body alternatives at the output boundary") {
         val json = body(MediaType.Json, outputBookFormat())
         val invalid = Bodies2(json, json)
@@ -85,6 +97,21 @@ class OutputSpec : FunSpec({
             }
         }
     }
+
+    test("reject overlapping non-default status matchers") {
+        val failure =
+            shouldThrow<IllegalArgumentException> {
+                object : Api("Books") {
+                    val invalid by
+                        get(root / "books")
+                            .output(statusesIn(200..299) with noBody)
+                            .output(statusesOf(Status.Created, Status.BadRequest) with noBody)
+                }
+            }
+
+        failure.message shouldBe "Output status matchers overlap at status 201"
+    }
+
 })
 
 private fun outputBookFormat(): ByteArrayFormat<OutputBook> =

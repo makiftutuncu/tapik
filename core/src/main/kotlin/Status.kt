@@ -9,8 +9,7 @@ package dev.akif.tapik
  * @property code numeric status code between 100 and 599.
  * @throws IllegalArgumentException when [code] is outside the HTTP status domain.
  */
-@JvmInline
-value class Status(
+data class Status(
     val code: Int
 ) {
     init {

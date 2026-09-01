@@ -17,7 +17,7 @@ Tapik provides feedback at the earliest layer capable of expressing a rule.
 - Duplicate header names, compared case-insensitively
 - Duplicate media types within one body collection
 - More than one `noBody` alternative
-- Overlapping output status matchers
+- Overlapping output status matchers over the complete `100..599` domain
 - Duplicate qualified endpoint IDs
 
 Matcher overlap is checked over the complete valid HTTP status domain. Custom predicates must be pure and

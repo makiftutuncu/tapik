@@ -1,18 +1,5 @@
 package dev.akif.tapik
 
-/** A matcher selecting the HTTP statuses represented by an output. */
-sealed interface StatusMatcher {
-    /** Returns whether this matcher accepts [status]. */
-    fun matches(status: Status): Boolean
-}
-
-/** A matcher selecting exactly [status]. */
-data class ExactStatus(
-    val status: Status
-) : StatusMatcher {
-    override fun matches(status: Status): Boolean = this.status == status
-}
-
 /** A typed endpoint output alternative. */
 sealed interface OutputAlternative
 
@@ -76,15 +63,28 @@ data object DefaultOutput : Outputs {
 /** Combines this exact status with one required [body]. */
 infix fun <Value : Any> Status.with(
     body: Body<Value>
-): Output<ExactStatus, Bodies1<Body<Value>>, Headers0> = with(bodiesOf(body))
+): Output<ExactStatus, Bodies1<Body<Value>>, Headers0> = ExactStatus(this) with body
 
 /** Combines this exact status with an explicitly absent body. */
 infix fun Status.with(noBody: NoBody): Output<ExactStatus, Bodies1<NoBody>, Headers0> =
-    with(Bodies1(noBody))
+    ExactStatus(this) with noBody
 
 /** Combines this exact status with alternative [bodies]. */
 infix fun <B : Bodies> Status.with(bodies: B): Output<ExactStatus, B, Headers0> =
-    Output(ExactStatus(this), validatedBodies(bodies), noHeaders)
+    ExactStatus(this) with bodies
+
+/** Combines this status matcher with one required [body]. */
+infix fun <M : StatusMatcher, Value : Any> M.with(
+    body: Body<Value>
+): Output<M, Bodies1<Body<Value>>, Headers0> = with(bodiesOf(body))
+
+/** Combines this status matcher with an explicitly absent body. */
+infix fun <M : StatusMatcher> M.with(noBody: NoBody): Output<M, Bodies1<NoBody>, Headers0> =
+    with(Bodies1(noBody))
+
+/** Combines this status matcher with alternative [bodies]. */
+infix fun <M : StatusMatcher, B : Bodies> M.with(bodies: B): Output<M, B, Headers0> =
+    Output(this, validatedBodies(bodies), noHeaders)
 
 /** Attaches [headers] after this output's status and bodies. */
 infix fun <M : StatusMatcher, B : Bodies, H : NonEmptyTuple<Header<*, *>>> Output<M, B, Headers0>.with(
@@ -106,14 +106,36 @@ private fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
             state = state
         )
 
-private fun Outputs.requireDistinct(output: Output<*, *, *>) {
-    val status = (output.matcher as? ExactStatus)?.status ?: return
-    require(
-        values
-            .filterIsInstance<Output<*, *, *>>()
-            .none { (it.matcher as? ExactStatus)?.status == status }
-    ) { "An output for status ${status.code} is already defined" }
+private fun Outputs.requireUnambiguous(output: Output<*, *, *>) {
+    val existing = values.filterIsInstance<Output<*, *, *>>()
+    val overlap =
+        (100..599).firstOrNull { code ->
+            val status = Status(code)
+            existing.any { alternative ->
+                alternative.matcher.matchesForValidation(status) &&
+                    output.matcher.matchesForValidation(status)
+            }
+        }
+    require(overlap == null) { "Output status matchers overlap at status $overlap" }
 }
+
+private fun StatusMatcher.matchesForValidation(status: Status): Boolean =
+    try {
+        matches(status)
+    } catch (cause: Exception) {
+        throw IllegalArgumentException(
+            "Status matcher '${validationDescription()}' failed while evaluating status ${status.code}",
+            cause
+        )
+    }
+
+private fun StatusMatcher.validationDescription(): String =
+    when (this) {
+        is ExactStatus -> "exact status ${status.code}"
+        is StatusSet -> "status set ${statuses.joinToString { status -> status.code.toString() }}"
+        is StatusRange -> "status range $range"
+        is CustomStatus -> description
+    }
 
 /** Replaces the implicit default with the first explicit [output]. */
 fun <P : Paths, Q : Queries, H : Headers, I : Input, OutputType : Output<*, *, *>>
@@ -127,7 +149,7 @@ fun <P : Paths, Q : Queries, H : Headers, I : Input, Output1 : Output<*, *, *>, 
     Endpoint<P, Q, H, I, Outputs1<Output1>, Draft>.output(
         output: OutputType
     ): Endpoint<P, Q, H, I, Outputs2<Output1, OutputType>, Draft> {
-        outputs.requireDistinct(output)
+        outputs.requireUnambiguous(output)
         return withOutputs(Outputs2(outputs._1, output))
     }
 
@@ -144,7 +166,7 @@ fun <
 > Endpoint<P, Q, H, I, Outputs2<Output1, Output2>, Draft>.output(
     output: OutputType
 ): Endpoint<P, Q, H, I, Outputs3<Output1, Output2, OutputType>, Draft> {
-    outputs.requireDistinct(output)
+    outputs.requireUnambiguous(output)
     return withOutputs(Outputs3(outputs._1, outputs._2, output))
 }
 
@@ -162,7 +184,7 @@ fun <
 > Endpoint<P, Q, H, I, Outputs3<Output1, Output2, Output3>, Draft>.output(
     output: OutputType
 ): Endpoint<P, Q, H, I, Outputs4<Output1, Output2, Output3, OutputType>, Draft> {
-    outputs.requireDistinct(output)
+    outputs.requireUnambiguous(output)
     return withOutputs(Outputs4(outputs._1, outputs._2, outputs._3, output))
 }
 
@@ -181,7 +203,7 @@ fun <
 > Endpoint<P, Q, H, I, Outputs4<Output1, Output2, Output3, Output4>, Draft>.output(
     output: OutputType
 ): Endpoint<P, Q, H, I, Outputs5<Output1, Output2, Output3, Output4, OutputType>, Draft> {
-    outputs.requireDistinct(output)
+    outputs.requireUnambiguous(output)
     return withOutputs(Outputs5(outputs._1, outputs._2, outputs._3, outputs._4, output))
 }
 
@@ -201,7 +223,7 @@ fun <
 > Endpoint<P, Q, H, I, Outputs5<Output1, Output2, Output3, Output4, Output5>, Draft>.output(
     output: OutputType
 ): Endpoint<P, Q, H, I, Outputs6<Output1, Output2, Output3, Output4, Output5, OutputType>, Draft> {
-    outputs.requireDistinct(output)
+    outputs.requireUnambiguous(output)
     return withOutputs(Outputs6(outputs._1, outputs._2, outputs._3, outputs._4, outputs._5, output))
 }
 
@@ -222,7 +244,7 @@ fun <
 > Endpoint<P, Q, H, I, Outputs6<Output1, Output2, Output3, Output4, Output5, Output6>, Draft>.output(
     output: OutputType
 ): Endpoint<P, Q, H, I, Outputs7<Output1, Output2, Output3, Output4, Output5, Output6, OutputType>, Draft> {
-    outputs.requireDistinct(output)
+    outputs.requireUnambiguous(output)
     return withOutputs(
         Outputs7(outputs._1, outputs._2, outputs._3, outputs._4, outputs._5, outputs._6, output)
     )
@@ -246,7 +268,7 @@ fun <
 > Endpoint<P, Q, H, I, Outputs7<Output1, Output2, Output3, Output4, Output5, Output6, Output7>, Draft>.output(
     output: OutputType
 ): Endpoint<P, Q, H, I, Outputs8<Output1, Output2, Output3, Output4, Output5, Output6, Output7, OutputType>, Draft> {
-    outputs.requireDistinct(output)
+    outputs.requireUnambiguous(output)
     return withOutputs(
         Outputs8(
             outputs._1,
