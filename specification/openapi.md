@@ -18,6 +18,11 @@ Default and fixed parameter values are encoded through their format before becom
 value-class formats, custom enum codecs, nullable schemas, and repeated formats retain their actual wire values and
 JSON types.
 
+Exact status matchers produce one response-code entry. Status sets produce one entry per concrete status in their
+declared order. A range covering one complete status-code hundred uses OpenAPI's `nXX` response key; other ranges are
+expanded into concrete response-code entries. Described custom predicates fail generation with the endpoint ID and
+matcher description because executable Kotlin predicates cannot be represented faithfully in an OpenAPI document.
+
 ## Schema components
 
 Every named Tapik schema becomes an OpenAPI schema component and every reference follows the same component-naming

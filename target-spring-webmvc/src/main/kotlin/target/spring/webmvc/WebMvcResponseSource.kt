@@ -3,6 +3,7 @@ package dev.akif.tapik.target.spring.webmvc
 import dev.akif.tapik.common.plugin.KotlinDataField
 import dev.akif.tapik.common.plugin.KotlinSealedVariant
 import dev.akif.tapik.common.plugin.appendSealedInterface
+import dev.akif.tapik.common.plugin.statusKotlinSourceType
 
 internal fun StringBuilder.appendResponses(endpoint: WebMvcEndpointModel) {
     appendSealedInterface(
@@ -20,6 +21,7 @@ internal fun StringBuilder.appendResponses(endpoint: WebMvcEndpointModel) {
 
 private fun WebMvcOutput.fields(): List<KotlinDataField> =
     buildList {
+        if (statusCode == null) add(KotlinDataField("status", statusKotlinSourceType))
         bodies.firstOrNull()?.let { body ->
             val type = if (allowsNoBody) body.type.asNullable() else body.type
             add(KotlinDataField("body", type, if (allowsNoBody) "null" else null))

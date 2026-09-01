@@ -27,7 +27,8 @@ Kotlin type to perform those operations and fail generation when an endpoint fea
 The `spring-restclient` target generates one Kotlin interface for each selected API. Interfaces share a
 `restClientTransport` property so one implementation may compose multiple API clients, and each interface exposes a
 uniquely named property for its concrete API value. Every endpoint becomes a default interface method and a nested
-sealed response type. Exact-status output alternatives become response variants in declaration order.
+sealed response type. Output alternatives become response variants in declaration order. Exact variants imply their
+status, while set, range, and custom variants carry the actual response `Status` selected by the runtime matcher.
 
 Generated response data classes containing byte-array fields compare those fields by content and derive their hash
 codes from the byte content.
@@ -118,7 +119,9 @@ representation, while an invalid header or no compatible representation produces
 
 An output selected without a body is not constrained by `Accept`. When any endpoint output can be bodyless, its Spring
 mapping omits an aggregate `produces` condition so routing cannot reject a request before the handler selects that
-output. Statuses and headers come from the selected response variant and endpoint definition.
+output. Exact response variants imply their status. Set, range, and custom response variants require handlers to
+supply a `Status`; the generated adapter validates it with the endpoint's matcher before returning it. Headers come
+from the selected response variant and endpoint definition.
 
 A defaulted output header is exposed as a nullable response field defaulting to `null`. When a handler leaves that
 field unset, the mapping method encodes the default carried by the endpoint definition.

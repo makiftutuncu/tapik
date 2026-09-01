@@ -1,11 +1,6 @@
 package dev.akif.tapik.common.plugin
 
-import dev.akif.tapik.Status
-import dev.akif.tapik.div
-import dev.akif.tapik.path
-import dev.akif.tapik.plus
-import dev.akif.tapik.query
-import dev.akif.tapik.root
+import dev.akif.tapik.*
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 
@@ -26,5 +21,13 @@ class HttpSourceSpec : FunSpec({
         Status.Conflict.kotlinVariantName() shouldBe "Conflict"
         Status.InternalServerError.kotlinVariantName() shouldBe "InternalServerError"
         Status(418).kotlinVariantName() shouldBe "Status418"
+    }
+
+    test("derive stable Kotlin status matcher variant names") {
+        ExactStatus(Status.Ok).kotlinVariantName() shouldBe "Ok"
+        statusesOf(Status.Ok, Status.Created).kotlinVariantName() shouldBe "OkOrCreated"
+        statusesIn(400..499).kotlinVariantName() shouldBe "Status400To499"
+        statusMatching("successful extension status") { true }.kotlinVariantName() shouldBe
+            "SuccessfulExtensionStatus"
     }
 })

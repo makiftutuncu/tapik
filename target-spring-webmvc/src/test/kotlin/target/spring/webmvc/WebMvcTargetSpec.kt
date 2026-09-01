@@ -181,6 +181,24 @@ class WebMvcTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
+    test("generate responses for every status matcher") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcStatusMatchers)))
+                .artifacts
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
+                .content
+
+        source shouldContain "public data class OkOrCreated("
+        source shouldContain "public data class Status400To499("
+        source shouldContain "public data class SuccessfulExtensionStatus("
+        source shouldContain "public val status: Status"
+        source shouldContain
+            "require(webMvcStatusMatchersApi.selected.outputs._1.matcher.matches(response.status))"
+        source shouldContain "webMvcResponse(response.status.code, headers, encodedBody)"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("reject response headers owned by Spring WebMVC") {
         listOf(
             BodyContentTypeResponse to "Content-Type, which is derived from its selected body representation",
@@ -298,6 +316,20 @@ public object BodyAlternatives : Api() {
         post(root / "optional-echo")
             .input(bodiesOf(json, noBody))
             .output(Status.Ok with json)
+}
+
+public object WebMvcStatusMatchers : Api() {
+    public val selected by
+        get(root / "selected")
+            .output(statusesOf(Status.Ok, Status.Created) with noBody)
+
+    public val clientErrors by
+        get(root / "client-errors")
+            .output(statusesIn(400..499) with noBody)
+
+    public val extensionSuccess by
+        get(root / "extension-success")
+            .output(statusMatching("successful extension status") { it.code in 290..299 } with noBody)
 }
 
 public object DefaultResponseHeaders : Api() {

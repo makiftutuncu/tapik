@@ -259,11 +259,10 @@ private fun outputs(
     require(compiledTypes.isEmpty() || compiledTypes.size == outputs.values.size) {
         "$endpointId compiled output types do not match its runtime outputs"
     }
+    val variantNames = mutableSetOf<String>()
     return outputs.values.mapIndexed { index, alternative ->
         val output = alternative as? Output<*, *, *>
             ?: throw IllegalArgumentException("$endpointId has unsupported output '${alternative::class.simpleName}'")
-        val exact = output.matcher as? ExactStatus
-            ?: throw IllegalArgumentException("$endpointId has an unsupported non-exact status matcher")
         val outputAccess =
             if (compiledTypes.isEmpty()) {
                 "($endpointAccess.outputs.values[$index] as dev.akif.tapik.Output<*, *, *>)"
@@ -297,7 +296,12 @@ private fun outputs(
             hasBody = bodies.isNotEmpty(),
             headers = output.headers
         )
-        val usedHeaderNames = mutableSetOf<String>().apply { if (bodies.isNotEmpty()) add("body") }
+        val exact = output.matcher as? ExactStatus
+        val usedHeaderNames =
+            mutableSetOf<String>().apply {
+                if (exact == null) add("status")
+                if (bodies.isNotEmpty()) add("body")
+            }
         val headers =
             output.headers.values.mapIndexed { headerIndex, header ->
                 val headerType = requireNotNull(headerTypes?.getOrNull(headerIndex)) {
@@ -328,8 +332,8 @@ private fun outputs(
                 )
             }
         WebMvcOutput(
-            variantName = exact.status.kotlinVariantName(),
-            statusCode = exact.status.code,
+            variantName = uniqueKotlinName(output.matcher.kotlinVariantName(), variantNames),
+            statusCode = exact?.status?.code,
             definitionAccess = outputAccess,
             bodies = bodies,
             allowsNoBody = output.bodies.values.any { body -> body is NoBody },

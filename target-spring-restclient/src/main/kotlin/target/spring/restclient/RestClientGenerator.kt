@@ -167,6 +167,7 @@ private fun StringBuilder.appendOutput(
     output.headers.forEach { header -> appendDecodedHeader(endpoint, header) }
     val arguments =
         buildList {
+            if (output.carriesStatus) add("response.status")
             if (output.bodies.isNotEmpty()) add("decodedBody")
             addAll(output.headers.map(RestClientOutputHeader::name))
         }

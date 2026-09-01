@@ -66,6 +66,7 @@ internal data class RestClientHeader(
 internal data class RestClientOutput(
     val variantName: String,
     val definitionAccess: String,
+    val carriesStatus: Boolean,
     val bodies: List<RestClientOutputBody>,
     val allowsNoBody: Boolean,
     val headers: List<RestClientOutputHeader>,
@@ -274,11 +275,10 @@ private fun outputs(
     require(compiledTypes.isEmpty() || compiledTypes.size == outputs.values.size) {
         "$endpointId compiled output types do not match its runtime outputs"
     }
+    val variantNames = mutableSetOf<String>()
     return outputs.values.mapIndexed { index, alternative ->
         val output = alternative as? Output<*, *, *>
             ?: throw IllegalArgumentException("$endpointId has unsupported output '${alternative::class.simpleName}'")
-        val exact = output.matcher as? ExactStatus
-            ?: throw IllegalArgumentException("$endpointId has an unsupported non-exact status matcher")
         val outputAccess =
             if (compiledTypes.isEmpty()) {
                 "($endpointAccess.outputs.values[$index] as dev.akif.tapik.Output<*, *, *>)"
@@ -302,7 +302,8 @@ private fun outputs(
                     definitionAccess = "$outputAccess.bodies._${bodyIndex + 1}"
                 )
             }
-        val usedHeaderNames = mutableSetOf<String>()
+        val carriesStatus = output.matcher !is ExactStatus
+        val usedHeaderNames = mutableSetOf<String>().apply { if (carriesStatus) add("status") }
         val headers = mutableListOf<RestClientOutputHeader>()
         val fixedHeaders = mutableListOf<RestClientFixedOutputHeader>()
         output.headers.values.forEachIndexed { headerIndex, header ->
@@ -328,8 +329,9 @@ private fun outputs(
             }
         }
         RestClientOutput(
-            variantName = exact.status.kotlinVariantName(),
+            variantName = uniqueKotlinName(output.matcher.kotlinVariantName(), variantNames),
             definitionAccess = outputAccess,
+            carriesStatus = carriesStatus,
             bodies = bodies,
             allowsNoBody = output.bodies.values.any { body -> body is NoBody },
             headers = headers,

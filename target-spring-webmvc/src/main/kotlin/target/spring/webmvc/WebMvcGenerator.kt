@@ -302,6 +302,13 @@ private fun StringBuilder.appendEncodedOutput(
     serverName: String
 ) {
     appendLine("            is $serverName.${endpoint.responseName}.${output.variantName} -> {")
+    if (output.statusCode == null) {
+        appendLine("                require(${output.definitionAccess}.matcher.matches(response.status)) {")
+        appendLine(
+            "                    \"Status \${response.status.code} does not match ${endpoint.id} output ${output.variantName}\""
+        )
+        appendLine("                }")
+    }
     if (output.headers.isEmpty()) {
         appendLine("                val headers = kotlin.collections.emptyMap<kotlin.String, kotlin.collections.List<kotlin.String>>()")
     } else {
@@ -327,7 +334,8 @@ private fun StringBuilder.appendEncodedOutput(
         appendLine("                }")
     }
     appendEncodedBody(endpoint, output)
-    appendLine("                webMvcResponse(${output.statusCode}, headers, encodedBody)")
+    val statusCode = output.statusCode?.toString() ?: "response.status.code"
+    appendLine("                webMvcResponse($statusCode, headers, encodedBody)")
     appendLine("            }")
 }
 

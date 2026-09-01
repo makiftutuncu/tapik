@@ -6,6 +6,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -161,6 +162,37 @@ class OpenApiSpec : FunSpec({
 
         requestOperation.parameters.single().name shouldBe "Authorization"
         response.responses.getValue("200").headers.keys shouldBe setOf("Content-Type")
+    }
+
+    test("interpret portable status matchers") {
+        val statuses =
+            object : Api("Statuses") {
+                val selected by get(root / "selected").output(statusesOf(Status.Ok, Status.Created) with noBody)
+                val clientErrors by get(root / "client-errors").output(statusesIn(400..499) with noBody)
+                val extensionErrors by get(root / "extension-errors").output(statusesIn(590..592) with noBody)
+            }
+        val paths = OpenApi.from(statuses, version = "1").paths
+
+        paths.getValue("/selected").operations.getValue(Method.GET).responses.keys.toList() shouldContainExactly
+            listOf("200", "201")
+        paths.getValue("/client-errors").operations.getValue(Method.GET).responses.keys.toList() shouldContainExactly
+            listOf("4XX")
+        paths.getValue("/extension-errors").operations.getValue(Method.GET).responses.keys.toList() shouldContainExactly
+            listOf("590", "591", "592")
+    }
+
+    test("reject a custom status matcher with its endpoint and description") {
+        val custom =
+            object : Api("CustomStatuses") {
+                val response by
+                    get(root / "response")
+                        .output(statusMatching("successful extension status") { it.code in 290..299 } with noBody)
+            }
+
+        val failure = shouldThrow<OpenApiGenerationException> { OpenApi.from(custom, version = "1") }
+
+        requireNotNull(failure.message) shouldContain "CustomStatuses.response"
+        requireNotNull(failure.message) shouldContain "successful extension status"
     }
 
     test("allow qualified component naming") {

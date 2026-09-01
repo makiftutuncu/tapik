@@ -80,7 +80,7 @@
 - [x] Add set, range, and described custom status matchers to the core DSL one matcher kind at a time. Preserve
   the concrete matcher kind in `Output` types and reject ambiguous alternatives while building the contract.
 
-- [ ] Interpret each new status matcher in OpenAPI, RestClient, and WebMVC after its core representation is stable.
+- [x] Interpret each new status matcher in OpenAPI, RestClient, and WebMVC after its core representation is stable.
   A target that cannot represent a matcher must fail generation with the endpoint and matcher in its diagnostic.
 
 - [ ] Add `path.remaining("name")` for required wildcard paths without weakening ordinary path-variable typing. Define

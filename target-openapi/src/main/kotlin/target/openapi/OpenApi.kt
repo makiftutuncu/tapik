@@ -88,7 +88,7 @@ private class Interpreter(
             description = endpoint.documentation.description,
             parameters = parameters(endpoint),
             requestBody = requestBody(endpoint.input),
-            responses = responses(endpoint.outputs)
+            responses = responses(endpoint.id, endpoint.outputs)
         )
 
     private fun parameters(endpoint: Endpoint<*, *, *, *, *, Ready>): List<OpenApiParameter> =
@@ -165,30 +165,26 @@ private class Interpreter(
             }
         }
 
-    private fun responses(outputs: Tuple<OutputAlternative>): Map<String, OpenApiResponse> =
+    private fun responses(
+        endpointId: String,
+        outputs: Tuple<OutputAlternative>
+    ): Map<String, OpenApiResponse> =
         buildMap {
             outputs.values.forEach { alternative ->
                 val output = alternative as? Output<*, *, *>
                     ?: throw OpenApiGenerationException(
                         "Unsupported endpoint output '${alternative::class.qualifiedName}'"
                     )
-                val status =
-                    when (val matcher = output.matcher) {
-                        is ExactStatus -> matcher.status
-                        else ->
-                            throw OpenApiGenerationException(
-                                "Unsupported OpenAPI status matcher '${matcher::class.qualifiedName}'"
-                            )
-                    }
-
-                put(
-                    status.code.toString(),
-                    OpenApiResponse(
-                        description = status.description,
-                        headers = output.headers.values.associate { it.name to it.responseHeader() },
-                        content = output.bodies.content()
+                output.matcher.openApiStatuses(endpointId).forEach { status ->
+                    put(
+                        status.key,
+                        OpenApiResponse(
+                            description = status.description,
+                            headers = output.headers.values.associate { it.name to it.responseHeader() },
+                            content = output.bodies.content()
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -206,6 +202,30 @@ private class Interpreter(
                 body.mediaType.value to OpenApiMediaType(schemas.schema(body.format.schema))
             }
 }
+
+private data class OpenApiStatus(
+    val key: String,
+    val description: String
+)
+
+private fun StatusMatcher.openApiStatuses(endpointId: String): List<OpenApiStatus> =
+    when (this) {
+        is ExactStatus -> listOf(status.openApiStatus())
+        is StatusSet -> statuses.map(Status::openApiStatus)
+        is StatusRange -> {
+            if (range.first % 100 == 0 && range.last == range.first + 99) {
+                listOf(OpenApiStatus("${range.first / 100}XX", "HTTP ${range.first / 100}XX responses"))
+            } else {
+                range.map { code -> Status(code).openApiStatus() }
+            }
+        }
+        is CustomStatus ->
+            throw OpenApiGenerationException(
+                "$endpointId has an unsupported OpenAPI custom status matcher '$description'"
+            )
+    }
+
+private fun Status.openApiStatus(): OpenApiStatus = OpenApiStatus(code.toString(), description)
 
 private val Presence<*>.required: Boolean
     get() = this === Required || this is Fixed<*>

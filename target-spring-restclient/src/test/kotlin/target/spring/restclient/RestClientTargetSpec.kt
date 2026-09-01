@@ -132,6 +132,24 @@ class RestClientTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
+    test("generate responses for every status matcher") {
+        val source =
+            RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientStatusMatchers)))
+                .artifacts
+                .single()
+                .content
+
+        source shouldContain "public data class OkOrCreated("
+        source shouldContain "public data class Status400To499("
+        source shouldContain "public data class SuccessfulExtensionStatus("
+        source shouldContain "public val status: Status"
+        source shouldContain "OkOrCreated(response.status)"
+        source shouldContain "Status400To499(response.status)"
+        source shouldContain "SuccessfulExtensionStatus(response.status)"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("disambiguate generated declarations and preserve endpoint property names") {
         val source =
             RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientNamingCollisions)))
@@ -217,6 +235,20 @@ public object ResponseConformance : Api() {
     public val empty by
         get(root / "empty")
             .output(Status.NoContent with noBody)
+}
+
+public object RestClientStatusMatchers : Api() {
+    public val selected by
+        get(root / "selected")
+            .output(statusesOf(Status.Ok, Status.Created) with noBody)
+
+    public val clientErrors by
+        get(root / "client-errors")
+            .output(statusesIn(400..499) with noBody)
+
+    public val extensionSuccess by
+        get(root / "extension-success")
+            .output(statusMatching("successful extension status") { it.code in 290..299 } with noBody)
 }
 
 public object RequestBodyAlternatives : Api() {

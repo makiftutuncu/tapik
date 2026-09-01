@@ -64,7 +64,7 @@ internal data class WebMvcBodyAlternative(
 
 internal data class WebMvcOutput(
     val variantName: String,
-    val statusCode: Int,
+    val statusCode: Int?,
     val definitionAccess: String,
     val bodies: List<WebMvcOutputBody>,
     val allowsNoBody: Boolean,
