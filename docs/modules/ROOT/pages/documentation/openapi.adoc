@@ -2,14 +2,90 @@
 :description: Produce OpenAPI 3.2 documents from tapik API values.
 :page-aliases: generation/openapi.adoc, code-generation/documentation.adoc
 
-The `openapi` target converts each selected API into one OpenAPI 3.2 document. YAML with a `.yml` extension is the
-default; JSON is also available through target configuration.
+The `openapi` target converts each selected API into one OpenAPI 3.2 document. OpenAPI is generated output, never the
+contract source: change the Kotlin API and regenerate rather than editing the document.
 
-The target reads the same ordered URI, input, output, documentation, and schema structures used by source generators.
-OpenAPI remains an output: tapik does not consume OpenAPI documents as contract definitions.
+== Before you start
 
-Same-module generation is a useful first setup because the generated document does not need to be referenced by the
-module's Kotlin source. The runnable `example-contract` module demonstrates that workflow.
+The module that declares an API must enable tapik's Kotlin compiler plugin so its compiled artifact contains an API
+registry. Body formats must provide schemas for values that OpenAPI needs to describe. The runnable contract uses the
+Jackson integration:
 
-A task-oriented guide with source-backed Maven configuration will follow. For now, use the root README and
-xref:reference/maven.adoc[Maven reference] together.
+[source,kotlin]
+----
+include::example$contract/Books.kt[]
+----
+
+This definition supplies the method, path, success status, JSON media type, and derived `Book` schema. The target uses
+the API ID as the document title and the endpoint ID as `operationId`.
+
+== Generate beside the contract
+
+Documentation does not need to be compiled into application source, so same-module generation is the shortest setup.
+Configure an `openapi` execution without a phase; the goal's default `process-classes` phase runs after the current
+module and its registry exist:
+
+[source,xml]
+----
+include::example$contract/pom.xml[tag=same-module-openapi]
+----
+
+Run a lifecycle that reaches `process-classes`:
+
+[,shell]
+----
+./mvnw -pl example-contract -am process-classes
+----
+
+The example produces one default YAML document for each registered API:
+
+[,text]
+----
+example-contract/target/generated/tapik/Authors.openapi.yml
+example-contract/target/generated/tapik/Books.openapi.yml
+example-contract/target/generated/tapik/Catalog.openapi.yml
+----
+
+`compile` alone is too early in this mode. `package`, `verify`, and `install` also reach the configured execution.
+
+== Generate from a contract dependency
+
+An application can instead depend on an already compiled contract and bind the same target to `generate-sources`.
+This is useful when documentation belongs to a consuming or publishing module, although OpenAPI itself does not need
+the early phase. The xref:getting-started.adoc#_generate_from_a_compiled_contract[compiled-contract quickstart] shows
+the complete dependency and execution.
+
+== Select and name documents
+
+By default every visible API gets its own document. `includeApis` and `excludeApis` can select exact API IDs, while the
+target's `output` template controls the relative path. This tested execution includes `Authors` and `Catalog`, excludes
+`Authors`, and therefore writes only `filtered/Catalog.yml`:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=api-selection]
+----
+
+YAML with a `.yml` extension is the default. Set `format` to `json` for JSON, use `pretty` to control JSON formatting,
+and choose `simple` or `qualified` component naming. The `version` option is required and becomes `info.version`.
+See xref:reference/generation-options.adoc#_openapi[OpenAPI target options] for the complete table.
+
+== What the target translates
+
+The target preserves endpoint declaration order and interprets the contract's paths, methods, parameters, headers,
+request bodies, response alternatives, media representations, schemas, tags, and documentation. Schema references
+become reusable components. Optional and repeated query shapes, defaults, fixed values, unions, discriminators, and
+deprecation metadata are represented where OpenAPI supports them.
+
+Generation fails if translating a contract would lose meaning—for example, when schema references cannot be resolved,
+two endpoints become the same OpenAPI path and method, or a wildcard remaining path has no faithful representation.
+The diagnostic identifies the relevant API or endpoint.
+
+== Ownership boundary
+
+You own the Kotlin APIs, models, format configuration, documentation, and the Maven execution. tapik owns generated
+documents below the execution output directory. They may be validated, packaged, or published by later build steps,
+but hand edits will be replaced on regeneration.
+
+Continue with xref:reference/maven.adoc[Maven reference] for lifecycle and selection behavior or
+xref:reference/troubleshooting.adoc[Troubleshooting] when generation fails.

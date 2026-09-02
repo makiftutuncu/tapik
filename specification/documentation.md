@@ -121,6 +121,22 @@ target discovery, API selection, target compatibility, conflicting output owners
 Successful executions log every generated path. Regeneration removes stale paths owned by the same execution while
 preserving other executions' and user-owned files, and a failed execution leaves its last successful artifacts intact.
 
+## Integration guide requirements
+
+Each integration page is a task-oriented path from a compiled tapik contract to a usable result. OpenAPI documents the
+same-module and compiled-contract choices, generated document ownership, schema inputs, per-API output, configuration,
+and validation. Source integrations lead with compiled-contract generation during `generate-sources` so application
+source can compile against the generated types.
+
+The Spring RestClient guide distinguishes the generated client interface and wire implementation from the user-owned
+Spring component, API instance, transport, base URL, authentication, and other runtime policy. The Spring WebMVC guide
+distinguishes the generated pure server interface and internal controller from user-owned handler behavior, and
+explains both Spring Boot auto-configuration and explicit plain Spring registration, including handler bean selection.
+
+Runnable configuration and application snippets are collected from the reactor-built example modules. Every guide
+links to the shared Maven and target-option references rather than silently redefining lifecycle, selection, naming,
+output synchronization, or diagnostic rules.
+
 ## Preview and publication
 
 Pull requests build the current worktree documentation and unified API reference as a validation preview. They do not

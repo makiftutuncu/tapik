@@ -2,12 +2,81 @@
 :description: Generate a typed Spring RestClient interface from a tapik contract.
 :page-aliases: generation/spring-restclient.adoc, code-generation/client.adoc
 
-The `spring-restclient` target generates a pure Kotlin client interface for each selected API. Endpoint methods accept
-decoded Kotlin values and return generated response alternatives; a shared `RestClientTransport` performs the Spring
-HTTP exchange.
+The `spring-restclient` target generates a Kotlin client interface for every selected API. Its endpoint methods accept
+the contract's Kotlin values, perform the HTTP exchange through Spring `RestClient`, and return typed response
+alternatives.
 
-Applications normally use compiled-contract generation during `generate-sources`. Generated types then exist before
-the application's Kotlin compilation, so application code can implement the interface and provide its transport.
+== Use a compiled contract
 
-See the runnable `example-application` module for a Jackson-backed client that is called under test. A complete guide
-will document naming, configuration, and media representation selection in a later increment.
+The application must see generated source before its Kotlin compilation, so put APIs in a compiled contract artifact
+and bind generation to `generate-sources`. Add that contract plus the generated client's runtime support and Spring
+starter. The example imports dependency versions through the tapik BOM:
+
+[source,xml]
+----
+<dependencies>
+include::example$application/pom.xml[tag=compiled-contract-dependency,indent=4]
+include::example$application/pom.xml[tag=restclient-dependencies,indent=4]
+</dependencies>
+----
+
+Configure the target in `tapik-plugin-maven`:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=restclient-execution]
+----
+
+Then run at least `compile`:
+
+[,shell]
+----
+./mvnw -pl example-application -am compile
+----
+
+The example writes `AuthorsClient.kt`, `BooksClient.kt`, and `CatalogClient.kt` below
+`target/generated-sources/tapik-restclient/com/example/library/generated/` and registers that directory as a compile
+source root.
+
+== Supply the runtime client
+
+For `Books`, tapik generates a `BooksClient` interface with:
+
+* a `booksApi` property containing the contract value;
+* a `restClientTransport` property containing the configured Spring transport;
+* a `list()` implementation that constructs, sends, and decodes the request;
+* a sealed `ListResponse` hierarchy containing `ListResponse.Ok(body: List<Book>)`.
+
+Application code supplies the actual API instance and transport. The runnable example wraps them in a normal Spring
+component:
+
+[source,kotlin]
+----
+include::example$application/BooksRestClient.kt[]
+----
+
+Inject `BooksRestClient` and call `list()` like an ordinary typed function. The generated implementation encodes path,
+query, header, and body arguments with their contract formats; then it matches the response status, checks fixed
+headers and media type, decodes values, and returns the corresponding sealed response. An undeclared status or invalid
+wire value fails at the client boundary rather than becoming an untyped response.
+
+For a request body with multiple media representations, the generated method requires the caller to select the
+representation explicitly. A single representation remains a direct Kotlin body parameter.
+
+== Ownership boundary
+
+tapik generates the interface, endpoint method implementations, response alternatives, and wire conversion. Your
+application owns how the client is exposed, the `RestClient.Builder`, base URL, authentication, interceptors, timeouts,
+observability, and Spring bean lifecycle. Regeneration may replace generated source; place application behavior in the
+user-owned component.
+
+The default generated package is `dev.akif.tapik.generated`, and the default type suffix is `Client`. The example
+configures only `packageName`. See
+xref:reference/generation-options.adoc#_spring_restclient[Spring RestClient target options] for naming configuration.
+
+Same-module generation at `process-classes` can package generated clients for downstream consumers, but source in that
+same module has already compiled and cannot implement or call them. Use the compiled-contract layout above when the
+current application needs the generated client.
+
+Continue with xref:reference/troubleshooting.adoc#a_generated_type_is_missing_during_kotlin_compilation[generated type
+troubleshooting] if the interface is unavailable during compilation.

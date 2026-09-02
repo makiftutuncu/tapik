@@ -15,6 +15,9 @@ ext:
       - dir: example-application
         files: pom.xml
         into: modules/ROOT/examples/application
+      - dir: example-application/src/main/kotlin/com/example/library/application
+        files: '*.kt'
+        into: modules/ROOT/examples/application
       - dir: test-fixtures/src/main/kotlin/test/fixtures/library
         files: Identifiers.kt
         into: modules/ROOT/examples/dsl/library

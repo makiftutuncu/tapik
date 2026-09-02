@@ -2,17 +2,105 @@
 :description: Generate pure server interfaces and automatically registered Spring WebMVC controllers from tapik contracts.
 :page-aliases: generation/spring-webmvc.adoc, code-generation/server.adoc
 
-The `spring-webmvc` target generates two responsibilities separately:
+The `spring-webmvc` target turns each selected API into two deliberately separate responsibilities:
 
 * a pure Kotlin `Server` interface implemented by application handlers;
-* a generated Spring controller that owns mapping annotations, wire conversion, and delegation.
+* an internal generated Spring controller that owns mapping annotations, wire conversion, and delegation.
 
-In a Spring Boot application, tapik's generated auto-configuration imports controller descriptors and injects the
-corresponding user-provided handler beans. Application code does not declare adapter beans or inherit Spring mapping
-annotations. Plain Spring applications can enable the same deterministic registration mechanism explicitly.
+This separation keeps user behavior free of Spring HTTP details and lets future server targets place another framework
+adapter around the same contract information.
 
-Keeping the user-owned handler contract separate from the framework adapter lets future server stacks reuse the same
-conceptual boundary while generating their own integration code.
+== Use a compiled contract
 
-The runnable `example-application` contains handlers and starts the resulting application. A later guide will cover
-bean selection, generated naming, and response mapping in detail.
+The application must implement generated interfaces in its ordinary Kotlin source, so generate from an already
+compiled contract during `generate-sources`. Add the contract, WebMVC target runtime, and Spring Boot WebMVC starter.
+The example imports dependency versions through the tapik BOM:
+
+[source,xml]
+----
+<dependencies>
+include::example$application/pom.xml[tag=compiled-contract-dependency,indent=4]
+include::example$application/pom.xml[tag=webmvc-dependencies,indent=4]
+</dependencies>
+----
+
+Configure the target:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=webmvc-execution]
+----
+
+Run at least `compile`:
+
+[,shell]
+----
+./mvnw -pl example-application -am compile
+----
+
+For `Books`, generation writes `BooksServer.kt` below the configured package and a registration descriptor below
+`META-INF/tapik/spring/webmvc/`. The Kotlin file contains the public `BooksServer` interface and internal
+`BooksGeneratedController` adapter.
+
+== Implement the handler
+
+The generated interface exposes the original API value, one abstract method per endpoint, and a sealed response type
+for each method. The user-owned handler deals only with decoded Kotlin inputs and typed outputs:
+
+[source,kotlin]
+----
+include::example$application/BooksHandler.kt[]
+----
+
+`BooksHandler` has no mapping annotations, `ResponseEntity`, encoded bytes, content negotiation, or adapter bean
+configuration. A more complex endpoint would expose path variables, query parameters, headers, and a decoded body as
+method parameters. The handler chooses one generated response alternative and supplies its body and headers.
+
+== Let Spring Boot register the controller
+
+`tapik-target-spring-webmvc` publishes Spring Boot auto-configuration through Spring's standard
+`AutoConfiguration.imports` resource. On startup, the auto-configuration reads tapik's generated adapter descriptors,
+finds a handler bean for each generated `Server` interface, and registers the matching internal controller bean. This
+is deterministic descriptor discovery, not package scanning of APIs or controllers.
+
+The example only needs an ordinary Spring Boot application and the `@Component` handler shown above:
+
+[source,kotlin]
+----
+include::example$application/LibraryApplication.kt[]
+----
+
+For a server interface, registration uses the sole matching handler bean. If multiple beans implement it, mark exactly
+one `@Primary`; with no unambiguous handler the corresponding controller is not registered. One handler bean may
+implement several generated server interfaces and receive a controller adapter for each one.
+
+== Use plain Spring
+
+In a non-Boot Spring application, annotate a configuration class with
+`@dev.akif.tapik.target.spring.webmvc.EnableTapikWebMvc`. It activates the same descriptor registrar and bean-selection
+rules. The annotation registers generated adapters only; it does not enable or configure Spring WebMVC itself.
+
+== Request and response boundary
+
+The internal controller owns routes and Spring mapping annotations. It decodes path, query, and header strings with the
+contract formats, validates required and fixed inputs, selects request-body media representations, and calls the
+handler with Kotlin values. It converts decoding and media-type failures into the appropriate HTTP response before the
+handler is invoked.
+
+After the handler returns, the controller matches the selected response alternative, encodes its body and headers,
+negotiates the response representation, and constructs the Spring response. The handler cannot return a status or body
+shape outside the generated sealed hierarchy.
+
+== Ownership and naming
+
+tapik owns the generated `Server` interface, internal controller, registration descriptor, and wire conversion. Your
+application owns handler behavior, Spring bean annotations, dependencies, persistence, transactions, authorization,
+and other application policy.
+
+The defaults are `dev.akif.tapik.generated`, `Server`, and `GeneratedController`; all three are configurable. See
+xref:reference/generation-options.adoc#_spring_webmvc[Spring WebMVC target options]. Use the compiled-contract layout
+when the current application's handlers need to implement generated interfaces; same-module generation happens after
+its ordinary source compilation.
+
+Continue with xref:reference/troubleshooting.adoc#a_spring_handler_is_not_found[Spring handler troubleshooting] if a
+mapping is absent at runtime.

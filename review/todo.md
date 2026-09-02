@@ -118,7 +118,7 @@
 - [x] Document the host-neutral generation model, compiler registry, and Maven plugin configuration. Keep lifecycle,
   selection, naming, generated output, and failure behavior easy to find as reference material.
 
-- [ ] Add task-oriented guides for OpenAPI, Spring RestClient, and Spring WebMVC. Build each guide from the runnable
+- [x] Add task-oriented guides for OpenAPI, Spring RestClient, and Spring WebMVC. Build each guide from the runnable
   examples and explain the boundary between generated code and user-owned code.
 
 - [ ] Integrate one unified production-only Dokka reference into the Antora website with navigation in both directions.
