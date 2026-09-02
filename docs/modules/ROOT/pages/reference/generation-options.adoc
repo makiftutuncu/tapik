@@ -1,0 +1,121 @@
+= Targets and generated output
+:description: Built-in target IDs, configuration keys, naming defaults, and artifact locations.
+
+Every Maven execution selects one host-neutral target and passes string values under `targetConfiguration`. A target
+rejects unknown keys and validates its values before producing artifacts. Relative artifact paths are resolved below
+the execution's `outputDirectory`, which defaults to `target/generated/tapik`.
+
+== OpenAPI
+
+Target ID: `openapi`
+
+The target produces one `DOCUMENTATION` artifact per selected API.
+
+[cols="2,2,4", options="header"]
+|===
+|Option |Default |Meaning
+
+|`version`
+|Required
+|Non-blank version written to the OpenAPI document's `info.version`.
+
+|`format`
+|`yaml`
+|`yaml` or `json`.
+
+|`pretty`
+|`true`
+|Whether JSON output is pretty-printed. Accepts only `true` or `false`.
+
+|`componentNaming`
+|`simple`
+|`simple` uses an unqualified schema name; `qualified` derives the component name from its qualified schema name.
+
+|`output`
+|`\{api}.openapi.yml` for YAML; `\{api}.openapi.json` for JSON
+|Relative output template. Every `\{api}` occurrence is replaced by the exact API ID.
+|===
+
+An explicit `output` overrides the format-specific default. When multiple APIs are selected, the template must still
+produce unique paths or generation fails.
+
+== Spring RestClient
+
+Target ID: `spring-restclient`
+
+The target produces one Kotlin `SOURCE` artifact per selected API. The tested application binds it to
+`generate-sources` and chooses a dedicated output directory:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=restclient-execution]
+----
+
+[cols="2,2,4", options="header"]
+|===
+|Option |Default |Meaning
+
+|`packageName`
+|`dev.akif.tapik.generated`
+|Valid Kotlin package for generated clients.
+
+|`clientSuffix`
+|`Client`
+|Valid Kotlin identifier appended to the API type name, such as `BooksClient`.
+|===
+
+With the example configuration, generated sources begin below
+`target/generated-sources/tapik-restclient/com/example/library/generated/`.
+
+== Spring WebMVC
+
+Target ID: `spring-webmvc`
+
+The target produces Kotlin `SOURCE` artifacts plus runtime `RESOURCE` descriptors used to register generated
+controllers. The tested application uses:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=webmvc-execution]
+----
+
+[cols="2,2,4", options="header"]
+|===
+|Option |Default |Meaning
+
+|`packageName`
+|`dev.akif.tapik.generated`
+|Valid Kotlin package for generated types.
+
+|`serverSuffix`
+|`Server`
+|Valid Kotlin identifier appended to the API type name for the pure handler interface, such as `BooksServer`.
+
+|`controllerSuffix`
+|`GeneratedController`
+|Valid Kotlin identifier appended to the API type name for the Spring adapter, such as `BooksGeneratedController`.
+|===
+
+With the example configuration, Kotlin sources begin below
+`target/generated-sources/tapik-webmvc/com/example/library/generated/`. Registration descriptors use
+`META-INF/tapik/spring/webmvc/` beneath the execution output and are packaged as runtime resources by the Maven host.
+
+== Naming and collisions
+
+Source targets start with the concrete API type's simple name, not `Api.id`, then apply the configured suffix. Names
+must be valid Kotlin identifiers. When multiple selected API types would produce the same generated name, tapik assigns
+a deterministic unique name rather than overwriting an artifact.
+
+OpenAPI file templates use `Api.id`. API filters also use `Api.id`. This distinction lets a Kotlin type name determine
+source declarations while the contract's stable API identity determines selection and documentation filenames.
+
+== Artifact synchronization
+
+All artifact paths are normalized relative paths; absolute paths, `.` or `..` segments, empty segments, backslashes,
+and duplicate result paths are rejected. The Maven host writes them below `outputDirectory`, records execution
+ownership outside packaged output, and logs each path.
+
+After a successful regeneration, files no longer returned by that execution are removed, including generated nested
+classes and registration descriptors after a package or suffix change. A failed generation keeps the previous
+successful files and ownership state intact. See xref:reference/troubleshooting.adoc[Troubleshooting] for failure
+stages and diagnostics.

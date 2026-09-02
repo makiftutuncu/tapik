@@ -100,6 +100,27 @@ Examples must compile in the normal Maven reactor. Pages should collect complete
 library fixture and its documentation-specific test sources so endpoint syntax, inferred types, ordering, defaults,
 presence, media alternatives, status matching, and composition cannot silently diverge from the implementation.
 
+## Generation reference requirements
+
+Generation documentation must separate tapik's host-neutral pipeline from Maven's responsibility as one build-tool
+host. It explains how compiler-generated registries, exact API selection, target discovery, target-owned validation,
+generated artifacts, and host materialization fit together without implying that a target depends on Maven.
+
+The compiler registry reference states which `Api` classes and objects are eligible, which endpoint and inclusion
+properties must be public, what compilation produces, and how incremental compilation synchronizes registry entries.
+It also states what registry generation deliberately does not do: execute endpoint expressions, scan packages,
+reflect over arbitrary user classes, or duplicate contracts into a metadata model.
+
+The Maven reference is the canonical catalogue for compiler activation and the `generate` goal. It documents every
+host parameter, the same-module and compiled-contract lifecycle matrix, exact include/exclude behavior, built-in target
+IDs and options, naming defaults, output locations, generated source/resource registration, and the meaning of direct
+goal invocation. Configuration fragments come from reactor-built example POMs wherever a runnable example exists.
+
+Failure behavior is documented by stage, including compiler eligibility diagnostics, version alignment, registry and
+target discovery, API selection, target compatibility, conflicting output ownership, and late Kotlin compilation.
+Successful executions log every generated path. Regeneration removes stale paths owned by the same execution while
+preserving other executions' and user-owned files, and a failed execution leaves its last successful artifacts intact.
+
 ## Preview and publication
 
 Pull requests build the current worktree documentation and unified API reference as a validation preview. They do not

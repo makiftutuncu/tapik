@@ -1,28 +1,128 @@
-= Maven setup
-:description: Understand tapik's Maven artifacts, compiler plugin, generation plugin, and lifecycle phases.
+= Maven reference
+:description: Configure tapik registry compilation and host-neutral target generation with Maven.
 :page-aliases: reference/configuration.adoc
 
-tapik 0.6 uses one Maven plugin, `dev.akif:tapik-plugin-maven`, for compiler integration and every generation target.
-Import `dev.akif:tapik-bom:0.6.0` to align ordinary tapik dependencies; Maven still requires explicit versions for
-build plugins and their nested dependencies.
+`dev.akif:tapik-plugin-maven:0.6.0` is tapik's one Maven plugin. It has two roles: it activates the host-neutral tapik
+Kotlin compiler plugin, and its `generate` goal hosts any tapik generation target. Use separate Maven executions when a
+project needs multiple targets or configurations.
 
-Modules declaring `Api` values enable tapik inside `kotlin-maven-plugin` so compilation produces a registry. Generation
-executions configure a `target`, optional API filters, an output directory, and target-specific options.
+Import `dev.akif:tapik-bom:0.6.0` to align ordinary tapik dependencies. Maven build plugins and dependencies nested
+inside a build plugin still require explicit versions.
+
+== Enable registry generation
+
+A module that declares APIs adds tapik as a dependency of `kotlin-maven-plugin` and enables the `tapik` compiler plugin:
+
+[source,xml]
+----
+include::example$contract/pom.xml[tag=compiler-plugin]
+----
+
+This step compiles the xref:reference/compiler-registry.adoc[registry]. A module that only consumes a compiled contract
+dependency does not need to enable the compiler plugin unless it also declares APIs of its own.
+
+== Configure the `generate` goal
+
+Each execution requires one target. This same-module OpenAPI execution relies on the goal's default `process-classes`
+phase:
+
+[source,xml]
+----
+include::example$contract/pom.xml[tag=same-module-openapi]
+----
+
+The execution-level parameters are:
+
+[cols="2,2,4", options="header"]
+|===
+|Parameter |Default |Meaning
+
+|`target`
+|Required
+|Stable generation target ID. Built-ins are `openapi`, `spring-restclient`, and `spring-webmvc`.
+
+|`outputDirectory`
+|`${project.build.directory}/generated/tapik`
+|Base directory below which the execution's relative artifact paths are written.
+
+|`includeApis`
+|Empty
+|Exact API IDs eligible for generation. Empty means all visible APIs.
+
+|`excludeApis`
+|Empty
+|Exact API IDs removed after inclusion; exclusions win.
+
+|`targetConfiguration`
+|Empty
+|String options parsed and validated by the selected target. Unknown options fail generation.
+|===
+
+`target` and `outputDirectory` can also be supplied as the `tapik.target` and `tapik.outputDirectory` Maven properties.
+Target-specific options are listed in xref:reference/generation-options.adoc[Targets and generated output].
+
+== Select APIs
+
+Selection uses the exact `Api.id` values reported by the compiler registries. It does not use package or wildcard
+matching. This tested execution includes `Authors` and `Catalog`, then excludes `Authors`, so only `Catalog` remains:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=api-selection]
+----
+
+With no includes, all visible APIs are selected. Every configured ID must exist, and at least one API must remain.
+Standalone and composed APIs are independently selectable; including an API inside another API does not hide either
+one from the catalog.
+
+== Choose the lifecycle
 
 [cols="2,2,2,2", options="header"]
 |===
-|Contract location |Typical phase |Main source can use output |Minimum lifecycle command
+|Contract location |Execution phase |Minimum lifecycle command |Can main source use generated Kotlin?
 
 |Compiled dependency
-|`generate-sources`
-|Yes
+|`generate-sources` (explicit)
 |`./mvnw compile`
+|Yes
 
 |Current module
-|`process-classes`
-|No
+|`process-classes` (default)
 |`./mvnw process-classes`
+|No; main compilation has already finished
 |===
 
-The root README currently contains the complete tested plugin blocks. This reference will become the canonical,
-source-backed option and lifecycle catalogue in a later increment.
+In compiled-contract mode, bind the execution to `generate-sources`. Its registry already exists in the dependency, so
+generated client and server types are registered as source roots before ordinary Kotlin compilation.
+
+In same-module mode, leave the default `process-classes` phase or bind it explicitly. tapik first loads the registry
+from the current module, generates source, and compiles that late source into the main output. It does not recompile
+the module's earlier user source, so that source cannot refer to the late-generated declarations. Put implementations
+that need those types in a downstream module, or use a separately compiled contract.
+
+`./mvnw tapik:generate` invokes only the goal. It does not first run the lifecycle phases needed to compile a
+same-module registry. Use `compile`, `process-classes`, `package`, `verify`, or `install` according to the table.
+
+== Target discovery and versions
+
+Built-in targets ship with `tapik-plugin-maven`. A custom target belongs in the tapik Maven plugin's
+`<dependencies>`, because targets are loaded from the plugin realm. An ordinary project dependency is intentionally not
+executable as a target. Unknown-target diagnostics list the target IDs visible to the plugin and identify a target
+found only on the project classpath as misplaced.
+
+Before loading registries and targets, the plugin verifies that every resolved `dev.akif:tapik-*` project dependency
+uses exactly the plugin's version. Version skew fails early; the BOM is the easiest way to keep project dependencies
+aligned.
+
+== Generated output and logs
+
+Every successful execution logs each generated project-relative path at Maven `INFO` level. `SOURCE` artifacts are
+registered as compile source roots. `RESOURCE` artifacts are registered as project resources; during late
+`process-classes` generation they are also copied into the main output so packaging does not miss them.
+
+An execution owns only the paths it generated. A later successful run removes its stale paths while preserving files
+owned by another execution and files tapik does not own. Two executions cannot own the same path, and a failed run does
+not replace or delete the last successful output.
+
+Continue with xref:reference/generation-options.adoc[the target option catalogue] or
+xref:reference/troubleshooting.adoc[troubleshooting].

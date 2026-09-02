@@ -10,7 +10,7 @@ fun interface OpenApiComponentNaming {
     /**
      * Returns the component name for [schemaName].
      *
-     * @param schemaName name supplied by a Tapik schema.
+     * @param schemaName name supplied by a tapik schema.
      * @return name to use under `components.schemas`.
      */
     fun name(schemaName: String): String

@@ -115,7 +115,7 @@
 - [x] Document the core DSL from API and endpoint identity through URIs, inputs, outputs, formats, schemas,
   documentation, tags, and composition. Prefer focused examples that compile as part of the repository.
 
-- [ ] Document the host-neutral generation model, compiler registry, and Maven plugin configuration. Keep lifecycle,
+- [x] Document the host-neutral generation model, compiler registry, and Maven plugin configuration. Keep lifecycle,
   selection, naming, generated output, and failure behavior easy to find as reference material.
 
 - [ ] Add task-oriented guides for OpenAPI, Spring RestClient, and Spring WebMVC. Build each guide from the runnable

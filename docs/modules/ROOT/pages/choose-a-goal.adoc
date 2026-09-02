@@ -24,4 +24,4 @@ a separately generated controller owns Spring annotations and delegates to that 
 == Understand the build
 
 Read xref:generation/index.adoc[Generation model] for the contract registry and target boundary, then
-xref:reference/maven.adoc[Maven setup] for lifecycle placement and the two supported generation modes.
+xref:reference/maven.adoc[Maven reference] for lifecycle placement and the two supported generation modes.

@@ -22,7 +22,9 @@
 ** xref:servers/spring-webmvc.adoc[Spring WebMVC]
 * Reference
 ** xref:generation/index.adoc[Generation model]
-** xref:reference/maven.adoc[Maven setup]
+** xref:reference/compiler-registry.adoc[Compiler registry]
+** xref:reference/maven.adoc[Maven reference]
+** xref:reference/generation-options.adoc[Targets and generated output]
 ** xref:reference/troubleshooting.adoc[Troubleshooting]
 * Understand tapik
 ** xref:concepts/type-safety.adoc[Type safety]

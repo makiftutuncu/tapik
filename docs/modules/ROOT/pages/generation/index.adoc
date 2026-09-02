@@ -1,22 +1,66 @@
 = Generation model
-:description: How tapik turns compiler-generated API registries into host-neutral generation targets.
+:description: Follow an API from Kotlin compilation through a host-neutral target to generated artifacts.
 :page-aliases: code-generation/index.adoc
 
-tapik does not scan packages, reflect over arbitrary user classes, or evaluate endpoint expressions during Kotlin
-compilation. Its compiler plugin generates an explicit registry for every module that declares public `Api` types.
+tapik generation has three deliberately separate parts: Kotlin compilation records which APIs exist, a host-neutral
+target converts selected API values into artifacts, and a build-tool host writes those artifacts into a project.
 
-The Maven plugin loads compiled registries and submits each selected API to a named generation target. Targets are
-host-neutral implementations: the Maven plugin supplies build inputs and output locations, but OpenAPI and Spring
-generation logic is not coupled to Maven. A future build-tool integration can invoke the same targets.
+[source,text]
+----
+Kotlin Api values
+      │ compiler plugin
+      ▼
+ApiRegistry service providers
+      │ host loads and selects APIs
+      ▼
+GenerationTarget + target configuration
+      │ returns artifacts; performs no file I/O
+      ▼
+Maven, a future Gradle plugin, or another host materializes them
+----
 
-== Two generation modes
+The boundary matters. OpenAPI, Spring RestClient, and Spring WebMVC targets do not understand Maven projects or Maven
+lifecycle phases. A future build-tool plugin can load the same registries, invoke the same targets, and materialize the
+same results.
 
-Compiled contract:: A consuming module depends on a separately compiled contract artifact. Generation can run during
-`generate-sources`, allowing ordinary application source to use the generated client and server types.
-Same module:: Generation reads the registry produced by the current module and therefore runs after compilation,
-during `process-classes` by default. This works for artifacts such as OpenAPI and for generated code consumed by a
-downstream module.
+== Compilation records APIs
 
-See xref:reference/maven.adoc[Maven setup] for the lifecycle boundary. Then choose a
-xref:documentation/index.adoc[documentation], xref:clients/index.adoc[client], or xref:servers/index.adoc[server]
-integration.
+The tapik compiler plugin generates an explicit xref:reference/compiler-registry.adoc[API registry] for each Kotlin
+module with eligible `Api` declarations. It does not run endpoint initializers, scan packages, or copy endpoints into a
+parallel metadata model. The contract remains the ordinary, immutable Kotlin values written by the user.
+
+Registry service providers travel inside compiled contract artifacts. A consumer can therefore discover a dependency's
+APIs as if those definitions were on its own classpath. The host combines every visible registry, orders APIs
+canonically by exact `Api.id`, and rejects duplicate IDs.
+
+== The host selects APIs and a target
+
+One execution chooses a target by its stable ID and may narrow the catalog with exact include and exclude sets. An
+empty include set means every visible API. Exclusions are applied afterward and win; unknown IDs and a selection that
+retains no APIs are errors rather than silent empty builds.
+
+Targets are discovered through Java service providers. They receive the selected APIs and a host-neutral configuration
+tree, validate their own options and representational limits, and return an ordered `GenerationResult`. This is where,
+for example, Spring targets read the endpoint property's compiled Kotlin type without deriving it from a schema or
+creating another endpoint representation.
+
+== Targets return artifacts
+
+Every result contains normalized relative paths and complete textual content. An artifact also declares its role:
+
+`SOURCE`:: Source code which the host makes available for compilation.
+`RESOURCE`:: Runtime metadata which the host arranges to package with the application.
+`DOCUMENTATION`:: Documentation such as an OpenAPI document.
+
+Two artifacts in one result cannot use the same path. A target never writes files directly; ownership, cleanup,
+logging, source roots, resource registration, and lifecycle timing belong to the host.
+
+== Maven is one host
+
+The Maven plugin exposes this model through one `generate` goal and any number of executions. In same-module mode,
+generation must wait for the current module's registry and therefore defaults to `process-classes`. In
+compiled-contract mode, an execution can run during `generate-sources` because its dependency's registry already
+exists.
+
+Continue with the xref:reference/compiler-registry.adoc[compiler registry reference],
+xref:reference/maven.adoc[Maven reference], or xref:reference/generation-options.adoc[target and output reference].

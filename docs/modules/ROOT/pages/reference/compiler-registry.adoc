@@ -1,0 +1,73 @@
+= Compiler registry
+:description: Eligibility, visibility, generated service providers, and incremental behavior of tapik API registries.
+
+The tapik Kotlin compiler plugin turns a module's known `Api` declarations into an explicit Java service provider.
+Generation hosts load that provider; they do not discover contracts by scanning packages or reflecting over arbitrary
+classes.
+
+== Eligible API declarations
+
+Every concrete, public, named Kotlin class or object extending `Api` is registered automatically.
+
+[cols="2,3", options="header"]
+|===
+|Declaration |Requirement
+
+|Kotlin `object`
+|Public, concrete, named, and extending `Api`.
+
+|Kotlin `class`
+|The object requirements, plus no declared type parameters and a public zero-argument constructor. It may be top-level
+or statically nested, but not `inner`.
+
+|Abstract API base
+|Ignored. A concrete subclass is eligible and may close type parameters inherited from the abstract base.
+|===
+
+Unsupported visibility, generic shape, or construction fails Kotlin compilation with a targeted diagnostic. A module
+without an eligible concrete API simply publishes no tapik registry.
+
+== Public contract properties
+
+Every delegated endpoint property reachable from a registered API must be public. Delegated API inclusion properties
+must also be public because generation follows them when reading a composed API. Private, protected, and internal
+properties fail compilation, as do inaccessible model types exposed through Kotlin public signatures.
+
+The visibility requirement is not package scanning: generated targets need a stable property path that remains
+accessible from another package and, for a published contract, another module. For `Library.authors.list`, the path is
+`authors`, then `list`, while the endpoint stays the original `Authors.list` value and keeps its exact declared type.
+
+== What compilation produces
+
+A compiler output contains one deterministic, compiler-owned registry class and one provider entry for `ApiRegistry`.
+API classes are instantiated once by that registry; objects are referenced directly. The registry holds the actual API
+values rather than a copied metadata representation.
+
+The service descriptor is compatible with ordinary Java `ServiceLoader`, so it is packaged in a contract JAR and can
+coexist with manually supplied providers. Registry implementation names and provider order are internal details. A
+generation host combines all providers, sorts APIs by ID, and rejects duplicate IDs.
+
+== Incremental compilation
+
+The compiler keeps a per-source API index as build state beside the compiler output, never inside the published JAR.
+Partial compilations replace entries for changed sources, retain active unchanged entries, and remove sources no longer
+in the compilation. It then regenerates the single registry from the complete, sorted index.
+
+This synchronization means adding, renaming, or deleting an API does not require `clean`. When the last API disappears,
+tapik removes its generated registry class, its provider entry, and its private index. Non-tapik provider entries in the
+shared service descriptor are preserved.
+
+== Deliberate boundaries
+
+Registry compilation does not:
+
+* execute endpoint expressions;
+* scan packages or reflect over arbitrary classes;
+* serialize endpoints or duplicate them into a metadata model;
+* choose a generation target or write target output.
+
+Typed source targets later pair each runtime endpoint value with the exact return type of its delegated Kotlin
+property. Missing, widened, inaccessible, incompatible, or unreadable metadata fails generation with the API and
+endpoint location instead of losing type information.
+
+See xref:reference/maven.adoc#_enable_registry_generation[Enable registry generation] for Maven configuration.

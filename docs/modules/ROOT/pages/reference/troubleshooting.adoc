@@ -1,16 +1,51 @@
 = Troubleshooting
 :description: Diagnose common tapik compiler registry and Maven generation problems.
 
+tapik fails at the boundary where information becomes invalid or unavailable. The message is wrapped by Maven as
+`tapik generation failed`, with the stage-specific cause following it.
+
+== Contract compilation fails
+
+The compiler reports an ineligible `Api` declaration when it is non-public, generic, `inner`, or lacks the required
+public zero-argument constructor. It also rejects reachable endpoint or API inclusion properties that are not public.
+Fix the declaration named in the diagnostic; generation has not run yet.
+
 == Registry files exist but targets do not
 
-The `generate` goal loads compiled registries. Check that the configured lifecycle phase actually runs for the command
-you invoked and that the execution sees either a compiled contract dependency or the current module's compiled output.
+Registries are loaded from the project's compile and runtime classpath, while targets are loaded from the Maven plugin
+realm. A custom target must be placed under `tapik-plugin-maven`'s `<dependencies>`, not under the project's ordinary
+`<dependencies>`. Unknown-target errors list the targets actually visible to the plugin and diagnose the misplaced
+project dependency when possible.
+
+If no APIs are found, check that the contract enabled tapik inside `kotlin-maven-plugin`, the configured lifecycle phase
+actually runs for the command, and the execution sees either a compiled contract dependency or the current module's
+compiled output.
+
+== Registry or target linkage fails
+
+Every resolved `dev.akif:tapik-*` project dependency must have the same version as `tapik-plugin-maven`. Import the
+tapik BOM for project dependencies and set the build-plugin version explicitly. Service-provider and linkage errors
+identify whether the project classpath or plugin realm failed so version alignment and dependency placement can be
+checked on the correct side.
+
+== API selection fails
+
+`includeApis` and `excludeApis` use exact, case-sensitive `Api.id` values. Blank values, unknown IDs, duplicate API IDs
+across registries, and filters that leave no API are errors. With no includes, every API is selected; exclusions are
+then applied and win.
 
 == A generated type is missing during Kotlin compilation
 
 Source generated from a compiled contract can run during `generate-sources`. Source generated from the current module
 cannot exist until that module has compiled its registry, so main source in that same module cannot reference it on a
 clean build. Split the contract and application when source needs to implement a generated server or client.
+
+Running `tapik:generate` directly does not compile a same-module registry first. Use at least `process-classes` for
+same-module generation and at least `compile` for a compiled-contract execution bound to `generate-sources`.
+
+If generation succeeds during `process-classes` but late Kotlin compilation fails, inspect the compiler output in the
+Maven error. Generated source uses the project's resolved classpath and Java 25 target; missing target runtime modules
+or incompatible dependency versions usually surface at this stage.
 
 == A Spring handler is not found
 
@@ -22,3 +57,22 @@ explicitly.
 
 Targets validate their own representational limits. Diagnostics identify the API or endpoint and unsupported feature;
 change the contract or select a target that supports it rather than silently losing information.
+
+Targets also reject missing, unknown, or malformed target configuration. Compare the accepted keys and defaults in
+xref:reference/generation-options.adoc[Targets and generated output].
+
+== Generated files are stale or collide
+
+Each Maven execution owns its previously generated paths. A successful rerun removes paths it no longer produces, so
+renaming an API, package, or suffix does not require `clean`. It preserves files owned by other executions and files
+not owned by tapik. Two executions attempting to own the same output path fail instead of overwriting one another;
+choose distinct output directories or target output templates.
+
+A failed generation intentionally leaves the last successful files and ownership state intact. Those files are not
+evidence that the failed run succeeded; use the Maven result and the `INFO` log entries for the current execution.
+
+== Nothing is logged
+
+A successful execution logs every generated project-relative path at Maven `INFO`. If no such entries appear, verify
+that the Maven command reaches the configured execution phase and that Maven has not been run in quiet mode with `-q`.
+For same-module generation, `compile` is too early for the default `process-classes` execution.

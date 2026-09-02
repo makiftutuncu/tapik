@@ -3,7 +3,7 @@ package dev.akif.tapik.target.spring.webmvc
 import org.springframework.context.annotation.Import
 
 /**
- * Registers generated Tapik WebMVC adapters in a Spring application context.
+ * Registers generated tapik WebMVC adapters in a Spring application context.
  *
  * This does not enable or configure Spring WebMVC itself.
  */

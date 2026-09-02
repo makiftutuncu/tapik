@@ -16,7 +16,7 @@ internal class TapikWebMvcAdapterRegistrar(
 
     override fun postProcessBeanDefinitionRegistry(registry: BeanDefinitionRegistry) {
         val beanFactory = registry as? ConfigurableListableBeanFactory
-            ?: error("Tapik WebMVC registration requires a configurable bean factory")
+            ?: error("tapik WebMVC registration requires a configurable bean factory")
         descriptors().forEach { descriptor -> beanFactory.register(descriptor, registry) }
     }
 

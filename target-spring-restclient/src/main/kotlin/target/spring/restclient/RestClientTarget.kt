@@ -2,7 +2,7 @@ package dev.akif.tapik.target.spring.restclient
 
 import dev.akif.tapik.common.plugin.*
 
-/** Generates Spring RestClient Kotlin clients from compiled Tapik APIs. */
+/** Generates Spring RestClient Kotlin clients from compiled tapik APIs. */
 object RestClientTarget : GenerationTarget {
     override val id: String = "spring-restclient"
 

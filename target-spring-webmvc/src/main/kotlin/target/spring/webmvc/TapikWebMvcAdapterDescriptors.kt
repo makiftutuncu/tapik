@@ -18,7 +18,7 @@ internal fun tapikWebMvcAdapterDescriptors(): List<TapikWebMvcAdapterDescriptor>
 
 private fun Properties.required(name: String, resource: String): String =
     requireNotNull(getProperty(name)?.trim()?.takeIf(String::isNotEmpty)) {
-        "Tapik WebMVC adapter descriptor '$resource' requires '$name'"
+        "tapik WebMVC adapter descriptor '$resource' requires '$name'"
     }
 
 private const val ADAPTER_DESCRIPTORS: String = "classpath*:META-INF/tapik/spring/webmvc/*.properties"

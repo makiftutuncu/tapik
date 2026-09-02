@@ -12,4 +12,4 @@ Same-module generation is a useful first setup because the generated document do
 module's Kotlin source. The runnable `example-contract` module demonstrates that workflow.
 
 A task-oriented guide with source-backed Maven configuration will follow. For now, use the root README and
-xref:reference/maven.adoc[Maven setup] together.
+xref:reference/maven.adoc[Maven reference] together.

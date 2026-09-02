@@ -3,7 +3,7 @@ package dev.akif.tapik.target.openapi
 import kotlinx.serialization.json.JsonElement
 
 /**
- * The JSON Schema keywords currently emitted by Tapik's OpenAPI 3.2 target.
+ * The JSON Schema keywords currently emitted by tapik's OpenAPI 3.2 target.
  *
  * Empty properties represent absent keywords rather than empty values in rendered output.
  *

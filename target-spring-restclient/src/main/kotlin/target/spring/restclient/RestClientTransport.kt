@@ -12,7 +12,7 @@ import org.springframework.web.util.UriBuilder
 import java.net.URI
 
 /**
- * Executes encoded Tapik requests with Spring [RestClient].
+ * Executes encoded tapik requests with Spring [RestClient].
  *
  * @property client underlying Spring client.
  */

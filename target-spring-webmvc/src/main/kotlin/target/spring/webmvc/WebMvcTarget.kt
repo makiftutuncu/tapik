@@ -2,7 +2,7 @@ package dev.akif.tapik.target.spring.webmvc
 
 import dev.akif.tapik.common.plugin.*
 
-/** Generates Spring WebMVC Kotlin server interfaces from compiled Tapik APIs. */
+/** Generates Spring WebMVC Kotlin server interfaces from compiled tapik APIs. */
 object WebMvcTarget : GenerationTarget {
     override val id: String = "spring-webmvc"
 

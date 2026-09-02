@@ -5,7 +5,7 @@ import dev.akif.tapik.common.spring.toSpringMediaType
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 
-/** Builds a Spring response from encoded Tapik status, headers, and optional body values. */
+/** Builds a Spring response from encoded tapik status, headers, and optional body values. */
 fun webMvcResponse(
     status: Int,
     headers: Map<String, List<String>>,

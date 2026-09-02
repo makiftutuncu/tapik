@@ -102,6 +102,7 @@
                         </configuration>
                     </execution>
                     <!-- end::compiled-contract-openapi[] -->
+                    <!-- tag::api-selection[] -->
                     <execution>
                         <id>generate-filtered-openapi</id>
                         <phase>generate-sources</phase>
@@ -123,6 +124,8 @@
                             </targetConfiguration>
                         </configuration>
                     </execution>
+                    <!-- end::api-selection[] -->
+                    <!-- tag::restclient-execution[] -->
                     <execution>
                         <id>generate-restclient</id>
                         <phase>generate-sources</phase>
@@ -137,6 +140,8 @@
                             </targetConfiguration>
                         </configuration>
                     </execution>
+                    <!-- end::restclient-execution[] -->
+                    <!-- tag::webmvc-execution[] -->
                     <execution>
                         <id>generate-webmvc</id>
                         <phase>generate-sources</phase>
@@ -151,6 +156,7 @@
                             </targetConfiguration>
                         </configuration>
                     </execution>
+                    <!-- end::webmvc-execution[] -->
                 </executions>
             </plugin>
             <plugin>

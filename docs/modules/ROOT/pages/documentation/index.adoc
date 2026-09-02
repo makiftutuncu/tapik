@@ -9,4 +9,4 @@ The first documentation integration is xref:documentation/openapi.adoc[OpenAPI].
 alongside it in this section and can reuse the same compiler registry, API selection, lifecycle, and output controls.
 
 See xref:generation/index.adoc[Generation model] for the shared target boundary and
-xref:reference/maven.adoc[Maven setup] for execution configuration.
+xref:reference/maven.adoc[Maven reference] for execution configuration.
