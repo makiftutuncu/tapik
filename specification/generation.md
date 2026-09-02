@@ -21,7 +21,7 @@ Generation targets are contributed through host-neutral target registries discov
 mechanism. Build-tool adapters and future command-line applications load the same registries instead of hard-coding
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
 
-`common-plugin` provides target-neutral Kotlin source helpers for reading compiled type arguments and Tapik tuples,
+`common-plugin` provides target-neutral Kotlin source helpers for reading compiled type arguments and tapik tuples,
 allocating and sanitizing Kotlin declaration names, escaping Kotlin string literals, deriving HTTP path templates and
 status variant names, and rendering sealed data hierarchies with correct byte-array value semantics. Source-generating
 targets use these shared rules rather than maintaining target-specific copies. Target compatibility, compiled-contract
@@ -83,7 +83,7 @@ packaged in the contract artifact.
 
 ### Maven activation
 
-`tapik-plugin-maven` is the single user-facing Tapik build-plugin artifact. A Maven project adds that artifact as a
+`tapik-plugin-maven` is the single user-facing tapik build-plugin artifact. A Maven project adds that artifact as a
 dependency of Kotlin's Maven plugin and enables the `tapik` compiler plugin, then uses the same artifact for one or
 more `generate` executions. Its Maven-specific compiler adapter only activates the host-neutral compiler plugin; it
 does not own discovery or generation behavior and does not introduce compiler options.
@@ -93,11 +93,11 @@ from the Maven plugin realm. A custom target artifact must therefore be declared
 `<plugin><dependencies>`; adding it as an ordinary project dependency does not make it executable. An unknown-target
 diagnostic lists targets visible in the plugin realm, and a target found only on the project classpath is diagnosed as
 a misplaced plugin dependency. Generation-target service-provider or linkage failures identify the classpath side that
-failed and point to target placement and Tapik version alignment.
+failed and point to target placement and tapik version alignment.
 
 Before generation, the Maven adapter compares the Maven plugin version with every resolved `dev.akif:tapik-*` project
 dependency. An empty project-side set is tolerated for hosts supplying APIs through the plugin realm, but every
-discovered project Tapik version must equal the plugin version. Version skew fails before registry or target loading.
+discovered project tapik version must equal the plugin version. Version skew fails before registry or target loading.
 
 Generated registries travel with compiled contract artifacts. A consuming Maven project discovers registries from
 its own output and its compile classpath, combines every API deterministically, and applies the configured target to
@@ -109,7 +109,7 @@ current project.
 Targets that generate typed source use a compiled view pairing each runtime `Api` and endpoint value with the
 endpoint property's actual Kotlin return type and its property path from the selected root API. The type is read from
 Kotlin class metadata, including classifiers, generic projections, nullability, type-alias abbreviations, outer types,
-flexible upper bounds, and definitely non-null types. Tapik does not infer model types from schemas, execute reflective
+flexible upper bounds, and definitely non-null types. tapik does not infer model types from schemas, execute reflective
 endpoint discovery, or serialize a second endpoint metadata model.
 
 Runtime endpoint order remains authoritative. Declared properties from the concrete API and its API base classes are
@@ -126,7 +126,7 @@ which artifacts an execution produces.
 Typed source targets derive a neutral source type that keeps emitted spelling separate from the expanded classifier
 identity. Type aliases are emitted by their source names while target semantics continue to use their expanded types;
 containing types and generic projections are rendered without flattening their structure. Flexible platform types,
-definitely-non-null types, and unresolved type parameters are rejected with their contract location until Tapik can
+definitely-non-null types, and unresolved type parameters are rejected with their contract location until tapik can
 reproduce them without losing information.
 
 ## OpenAPI target

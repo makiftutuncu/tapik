@@ -48,7 +48,7 @@ class MavenProjectClasspathSpec : FunSpec({
         }
     }
 
-    test("collect versions from Tapik project dependencies") {
+    test("collect versions from tapik project dependencies") {
         val project = MavenProject()
         project.artifacts =
             setOf(

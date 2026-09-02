@@ -1,0 +1,27 @@
+= Development guide
+:description: Build, test, and document tapik itself.
+
+tapik is built with Java 25, Kotlin 2.4, Maven, and Kotest. The documentation toolchain additionally requires Node.js
+20 or newer. Use the Maven Wrapper for the complete build:
+
+[source,shell]
+----
+./mvnw verify
+----
+
+Public behavior is specified under `specification/` before implementation. Changes follow a red-green-refactor cycle
+and keep each coherent green increment small.
+
+To build a local documentation preview, first install the reactor artifacts needed by unified Dokka, build the website
+assets and API reference, then run Antora:
+
+[source,shell]
+----
+./mvnw -DskipTests install
+./mvnw -f site/pom.xml package
+npm ci
+npm run docs:preview
+----
+
+The complete site is written to `site/target/site`. Documentation publication is release-based; a push to `main` does
+not replace the stable site with unreleased content.

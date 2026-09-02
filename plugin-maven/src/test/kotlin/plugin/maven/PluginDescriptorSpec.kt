@@ -34,7 +34,7 @@ class PluginDescriptorSpec : FunSpec({
             )
     }
 
-    test("publish the Tapik Kotlin Maven compiler extension") {
+    test("publish the tapik Kotlin Maven compiler extension") {
         val descriptor =
             requireNotNull(PluginDescriptorSpec::class.java.getResourceAsStream("/META-INF/plexus/components.xml"))
         val document = descriptor.use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }

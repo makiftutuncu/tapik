@@ -1,0 +1,28 @@
+= Maven setup
+:description: Understand tapik's Maven artifacts, compiler plugin, generation plugin, and lifecycle phases.
+:page-aliases: reference/configuration.adoc
+
+tapik 0.6 uses one Maven plugin, `dev.akif:tapik-plugin-maven`, for compiler integration and every generation target.
+Import `dev.akif:tapik-bom:0.6.0` to align ordinary tapik dependencies; Maven still requires explicit versions for
+build plugins and their nested dependencies.
+
+Modules declaring `Api` values enable tapik inside `kotlin-maven-plugin` so compilation produces a registry. Generation
+executions configure a `target`, optional API filters, an output directory, and target-specific options.
+
+[cols="2,2,2,2", options="header"]
+|===
+|Contract location |Typical phase |Main source can use output |Minimum lifecycle command
+
+|Compiled dependency
+|`generate-sources`
+|Yes
+|`./mvnw compile`
+
+|Current module
+|`process-classes`
+|No
+|`./mvnw process-classes`
+|===
+
+The root README currently contains the complete tested plugin blocks. This reference will become the canonical,
+source-backed option and lifecycle catalogue in a later increment.

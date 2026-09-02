@@ -1,0 +1,28 @@
+site:
+  title: tapik
+  url: https://tapik.akif.dev
+urls:
+  latest_version_segment: ''
+  latest_version_segment_strategy: replace
+content:
+  edit_url: https://github.com/makiftutuncu/tapik/edit/{refname}/{path}
+  sources:
+    - url: .
+      branches: []
+      tags:
+        - v*
+        - '!v0.1.*'
+        - '!v0.2.0'
+      start_path: docs
+ui:
+  bundle:
+    url: ./site/target/antora-ui-bundle.zip
+    snapshot: true
+  supplemental_files: ./site/supplemental-ui
+antora:
+  extensions:
+    - require: '@antora/lunr-extension'
+      index_latest_only: true
+output:
+  clean: false
+  dir: site/target/site

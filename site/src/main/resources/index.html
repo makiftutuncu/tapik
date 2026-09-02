@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="tapik defines type-safe HTTP APIs as ordinary Kotlin values.">
+    <title>tapik — Type-safe APIs in Kotlin</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="navigation">
+    <a class="wordmark" href="/">tapik</a>
+    <nav aria-label="Primary navigation">
+        <a href="docs/">Documentation</a>
+        <a href="docs/api/">API reference</a>
+        <a href="https://github.com/makiftutuncu/tapik">GitHub</a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero">
+        <p class="eyebrow">Type-safe APIs in Kotlin</p>
+        <h1>Write the contract once.<br>Let the build prove the rest.</h1>
+        <p class="introduction">
+            tapik represents HTTP APIs as ordinary, immutable Kotlin values. Its DSL retains contract structure in
+            types, catches invalid definitions during compilation, and generates targets without making OpenAPI the
+            source of truth.
+        </p>
+        <div class="actions">
+            <a class="primary" href="docs/getting-started.html">Get started</a>
+            <a class="secondary" href="docs/api/">Browse the API</a>
+        </div>
+    </section>
+
+    <section class="principles" aria-label="tapik principles">
+        <article>
+            <span>01</span>
+            <h2>Kotlin first</h2>
+            <p>Contracts read like Kotlin, compose like Kotlin values, and keep their useful information in Kotlin types.</p>
+        </article>
+        <article>
+            <span>02</span>
+            <h2>Fail during the build</h2>
+            <p>Invalid contracts and unsupported target features stop compilation or generation before runtime.</p>
+        </article>
+        <article>
+            <span>03</span>
+            <h2>Generate many targets</h2>
+            <p>Produce OpenAPI, Spring RestClient clients, and Spring WebMVC servers from the same contract.</p>
+        </article>
+    </section>
+
+    <section class="example">
+        <div>
+            <p class="eyebrow">A small contract</p>
+            <h2>Ordinary values, precise types</h2>
+            <p>
+                Define an API in a contract artifact, then select targets in the consuming Maven build. tapik generates
+                source early enough for application code to implement servers or invoke clients.
+            </p>
+            <a href="https://github.com/makiftutuncu/tapik/tree/main/example-application">Open the runnable example →</a>
+        </div>
+        <pre><code>object Books : Api() {
+    val list by
+        get(root / "books")
+            .output(
+                Status.Ok with
+                    jsonBody&lt;List&lt;Book&gt;&gt;()
+            )
+}</code></pre>
+    </section>
+</main>
+
+<footer>
+    <span>tapik · MIT licensed</span>
+    <a href="https://github.com/makiftutuncu/tapik">Source and releases</a>
+</footer>
+</body>
+</html>

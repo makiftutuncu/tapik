@@ -1,4 +1,4 @@
-# Tapik specification
+# tapik specification
 
 These documents are the source of intent for the rewrite. They describe observable behavior before implementation
 details. When a design changes, update the relevant specification first and then drive implementation with tests.

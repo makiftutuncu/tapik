@@ -46,7 +46,7 @@ class MavenTargetLoadingSpec : FunSpec({
                 }
 
             error.message shouldContain "Failed to load generation targets from the Maven plugin classpath"
-            error.message shouldContain "compatible Tapik versions"
+            error.message shouldContain "compatible tapik versions"
         }
     }
 })

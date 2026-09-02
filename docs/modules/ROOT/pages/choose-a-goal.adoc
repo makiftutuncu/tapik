@@ -1,0 +1,27 @@
+= Choose a goal
+:description: Find the tapik documentation path for defining a contract, producing OpenAPI, or generating Spring clients and servers.
+:page-aliases: capabilities.adoc
+
+Start with the result you need. Every path begins with the same Kotlin contract and explicit compiler-generated API
+registry.
+
+== Describe an API
+
+Read xref:contracts/index.adoc[Contract DSL] to learn the model and the guarantees provided while definitions compile.
+Use xref:documentation/openapi.adoc[OpenAPI] when the first useful artifact is documentation or a contract for another
+toolchain.
+
+== Build an HTTP client
+
+Use xref:clients/spring-restclient.adoc[Spring RestClient]. A generated pure client interface keeps the endpoint
+surface typed while tapik's runtime transport handles the HTTP exchange.
+
+== Implement an HTTP server
+
+Use xref:servers/spring-webmvc.adoc[Spring WebMVC]. Application code implements a generated pure server interface;
+a separately generated controller owns Spring annotations and delegates to that handler.
+
+== Understand the build
+
+Read xref:generation/index.adoc[Generation model] for the contract registry and target boundary, then
+xref:reference/maven.adoc[Maven setup] for lifecycle placement and the two supported generation modes.

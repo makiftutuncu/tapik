@@ -35,5 +35,22 @@ jobs:
             pom.xml
             **/pom.xml
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
       - name: Verify
         run: ./mvnw --batch-mode --no-transfer-progress clean verify
+
+      - name: Install artifacts for site validation
+        run: ./mvnw --batch-mode --no-transfer-progress -DskipTests install
+
+      - name: Build website and API reference
+        run: ./mvnw --batch-mode --no-transfer-progress -f site/pom.xml package
+
+      - name: Build narrative documentation
+        run: |
+          npm ci
+          npm run docs:preview

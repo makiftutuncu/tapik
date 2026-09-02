@@ -1,7 +1,7 @@
 package dev.akif.tapik
 
 /**
- * Factory shape for named values backed by Tapik's default scalar formats.
+ * Factory shape for named values backed by tapik's default scalar formats.
  *
  * Kotlin cannot express a higher-kinded `Named<Value>` return type, so each concrete result type is retained as an
  * explicit type parameter. Implementations such as path variables, queries, and headers therefore preserve their

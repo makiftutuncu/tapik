@@ -7,7 +7,7 @@ public OpenAPI 3.2 document model without scanning the classpath, using reflecti
 target-neutral metadata model.
 
 Endpoint, parameter, response, media-type, and schema discovery order is preserved. Request headers and response
-headers are translated literally from the Tapik contract; the interpreter does not silently discard names that
+headers are translated literally from the tapik contract; the interpreter does not silently discard names that
 OpenAPI tooling might treat specially.
 
 Repeated query parameters use an array schema with `style: form` and `explode: true`, representing one query name
@@ -23,7 +23,7 @@ declared order. A range covering one complete status-code hundred uses OpenAPI's
 expanded into concrete response-code entries. Described custom predicates fail generation with the endpoint ID and
 matcher description because executable Kotlin predicates cannot be represented faithfully in an OpenAPI document.
 
-OpenAPI path templates cannot distinguish a single path variable from Tapik's required remaining-segments wildcard.
+OpenAPI path templates cannot distinguish a single path variable from tapik's required remaining-segments wildcard.
 An endpoint containing `RemainingPath` therefore fails generation with its endpoint ID and wildcard name instead of
 silently publishing a weaker ordinary path parameter.
 
@@ -34,14 +34,14 @@ undocumented response retains that standard fallback.
 
 ## Schema components
 
-Every named Tapik schema becomes an OpenAPI schema component and every reference follows the same component-naming
+Every named tapik schema becomes an OpenAPI schema component and every reference follows the same component-naming
 policy. The default `OpenApiComponentNaming.Simple` policy keeps the final dot-separated part of a schema name.
 `OpenApiComponentNaming.Qualified` keeps the provided name unchanged, and callers may supply their own policy.
 
 Schemas that resolve to the same component name and the same OpenAPI shape share one component. Different shapes
 resolving to the same name fail generation instead of allowing one definition to overwrite another.
 
-Tapik union schemas become JSON Schema `oneOf` arrays in declaration order. Their discriminators become OpenAPI
+tapik union schemas become JSON Schema `oneOf` arrays in declaration order. Their discriminators become OpenAPI
 Discriminator Objects with `propertyName`, optional `mapping`, and optional `defaultMapping`. Explicit and default
 mapping references pass through the configured component-naming policy and participate in unresolved-reference
 validation.

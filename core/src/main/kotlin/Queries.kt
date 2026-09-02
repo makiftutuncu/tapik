@@ -57,7 +57,7 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
     fun deprecated(deprecated: Boolean = true): QueryParameter<Value, P> =
         copy(documentation = documentation.copy(deprecated = deprecated))
 
-    /** Built-in query-parameter factories backed by Tapik's default formats. */
+    /** Built-in query-parameter factories backed by tapik's default formats. */
     companion object :
         NamedDefaults<
             QueryParameter<Boolean, Required>,

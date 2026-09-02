@@ -1,0 +1,363 @@
+:root {
+  --tapik-background: #101112;
+  --tapik-surface: #181a1c;
+  --tapik-surface-raised: #1e2022;
+  --tapik-line: #2b2e31;
+  --tapik-line-strong: #3a3e41;
+  --tapik-text: #f5f4ef;
+  --tapik-muted: #aaa9a3;
+  --tapik-accent: #c5ff4a;
+  --tapik-accent-ink: #172000;
+  --tapik-code: #0c0d0e;
+  --body-background: var(--tapik-background);
+  --body-font-color: var(--tapik-text);
+  --body-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --heading-font-color: var(--tapik-text);
+  --link-font-color: var(--tapik-accent);
+  --link_hover-font-color: #ddff94;
+  --navbar-background: var(--tapik-background);
+  --navbar-font-color: var(--tapik-muted);
+  --navbar_hover-background: transparent;
+  --navbar-button-background: var(--tapik-surface);
+  --navbar-menu-background: var(--tapik-surface);
+  --nav-background: var(--tapik-background);
+  --nav-font-color: var(--tapik-muted);
+  --nav-heading-font-color: var(--tapik-text);
+  --nav-muted-color: #777873;
+  --nav-panel-divider-color: var(--tapik-line);
+  --nav-mobile-menu-background: var(--tapik-surface);
+  --toolbar-background: var(--tapik-background);
+  --toolbar-border-color: var(--tapik-line);
+  --toc-font-color: var(--tapik-muted);
+  --panel-background: var(--tapik-surface);
+}
+
+html,
+body {
+  background: var(--tapik-background);
+  color: var(--tapik-text);
+}
+
+body {
+  font-feature-settings: "kern";
+  letter-spacing: -0.005em;
+}
+
+a {
+  color: var(--tapik-accent);
+}
+
+a:hover {
+  color: #ddff94;
+}
+
+.header {
+  border-bottom: 1px solid var(--tapik-line);
+  box-shadow: none;
+}
+
+.navbar {
+  width: min(1440px, calc(100% - 40px));
+  min-height: 4.75rem;
+  margin-inline: auto;
+  background: var(--tapik-background);
+}
+
+.navbar-brand .tapik-wordmark {
+  color: var(--tapik-accent);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+}
+
+.navbar-item,
+.navbar-item.has-dropdown {
+  color: var(--tapik-muted);
+}
+
+.navbar-item:hover,
+.navbar-link:hover {
+  background: transparent;
+  color: var(--tapik-accent);
+}
+
+.navbar-end > .navbar-item {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.navbar-burger span {
+  background: var(--tapik-text);
+}
+
+#search-input {
+  min-width: 15rem;
+  background: var(--tapik-surface);
+  border: 1px solid var(--tapik-line);
+  border-radius: 0.45rem;
+  color: var(--tapik-text);
+  box-shadow: none;
+}
+
+#search-input:focus {
+  border-color: var(--tapik-accent);
+  box-shadow: 0 0 0 1px var(--tapik-accent);
+}
+
+#search-input::placeholder {
+  color: #777873;
+}
+
+.search-result-dropdown-menu {
+  background: var(--tapik-surface-raised);
+  border-color: var(--tapik-line);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.search-result-item {
+  border-color: var(--tapik-line);
+}
+
+.body {
+  background: var(--tapik-background);
+}
+
+.nav-container,
+.nav,
+.nav-panel-menu {
+  background: var(--tapik-background);
+}
+
+.nav-container {
+  border-right: 1px solid var(--tapik-line);
+}
+
+.nav-panel-explore {
+  background: var(--tapik-surface);
+  border-bottom-color: var(--tapik-line);
+}
+
+.nav-menu h3.title,
+.nav .nav-list .nav-item-toggle,
+.nav .nav-list .nav-text,
+.nav .nav-list a.nav-link {
+  color: var(--tapik-muted);
+}
+
+.nav .nav-list a.nav-link:hover,
+.nav .nav-list a.nav-link.is-current-page {
+  color: var(--tapik-accent);
+}
+
+.nav .nav-list a.nav-link.is-current-page {
+  font-weight: 700;
+}
+
+.nav .nav-list .nav-item-toggle::before {
+  border-color: var(--tapik-muted);
+}
+
+.toolbar {
+  background: var(--tapik-background);
+  color: var(--tapik-muted);
+}
+
+.breadcrumbs a,
+.page-versions .version-menu-toggle {
+  color: var(--tapik-muted);
+}
+
+.page-versions .version-menu {
+  background: var(--tapik-surface-raised);
+  border-color: var(--tapik-line);
+}
+
+.doc {
+  color: var(--tapik-text);
+  font-size: 1.04rem;
+  line-height: 1.72;
+  max-width: 54rem;
+  padding-top: 2.75rem;
+  padding-bottom: 5rem;
+}
+
+.doc h1.page {
+  margin-bottom: 1.6rem;
+  color: var(--tapik-text);
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.doc h2 {
+  margin-top: 3.2rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--tapik-line);
+  color: var(--tapik-text);
+  font-size: 1.65rem;
+  letter-spacing: -0.025em;
+}
+
+.doc h3,
+.doc h4,
+.doc h5,
+.doc h6 {
+  color: var(--tapik-text);
+}
+
+.doc .paragraph.lead > p,
+.doc > .paragraph:first-of-type > p {
+  color: #cfcec7;
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+.doc a {
+  color: var(--tapik-accent);
+}
+
+.doc a:hover {
+  color: #ddff94;
+}
+
+.doc :not(pre) > code,
+.doc kbd {
+  padding: 0.08em 0.28em;
+  background: var(--tapik-surface-raised);
+  border-radius: 0.2rem;
+  color: #dcff91;
+}
+
+.doc pre,
+.doc .listingblock pre,
+.doc .literalblock pre {
+  background: var(--tapik-code);
+  border: 1px solid var(--tapik-line);
+  border-radius: 0.6rem;
+  color: var(--tapik-text);
+  box-shadow: none;
+}
+
+.doc .listingblock code[data-lang]::before {
+  color: #777873;
+}
+
+.doc .listingblock pre.highlightjs > code,
+.doc .literalblock pre > code {
+  background: transparent;
+  color: inherit;
+}
+
+.doc table.tableblock {
+  background: var(--tapik-surface);
+  border-color: var(--tapik-line);
+}
+
+.doc table.tableblock > thead {
+  background: var(--tapik-surface-raised);
+}
+
+.doc table.tableblock td,
+.doc table.tableblock th {
+  border-color: var(--tapik-line);
+}
+
+.doc .admonitionblock > table td.content {
+  background: var(--tapik-surface);
+  border: 1px solid var(--tapik-line);
+  border-left: 3px solid var(--tapik-accent);
+  color: var(--tapik-text);
+}
+
+.doc .admonitionblock td.icon i::before {
+  color: var(--tapik-accent);
+}
+
+.doc .dlist dt {
+  color: var(--tapik-text);
+}
+
+.toc.sidebar {
+  color: var(--tapik-muted);
+}
+
+.toc.sidebar .toc-menu h3,
+.toc.sidebar .toc-menu a {
+  color: var(--tapik-muted);
+}
+
+.toc.embedded,
+.toc.embedded .toc-menu,
+.toc.embedded .toc-list {
+  background: transparent;
+}
+
+.toc.embedded h3,
+.toc.embedded a {
+  color: var(--tapik-muted);
+}
+
+.toc.sidebar .toc-menu a:hover,
+.toc.sidebar .toc-menu a.is-active {
+  color: var(--tapik-accent);
+}
+
+.pagination {
+  border-top-color: var(--tapik-line);
+}
+
+.pagination .prev a,
+.pagination .next a {
+  color: var(--tapik-muted);
+}
+
+.pagination .prev a:hover,
+.pagination .next a:hover {
+  color: var(--tapik-accent);
+}
+
+.footer {
+  background: var(--tapik-background);
+  border-top: 1px solid var(--tapik-line);
+  color: var(--tapik-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.footer a {
+  color: var(--tapik-muted);
+}
+
+@media screen and (max-width: 1023.5px) {
+  .navbar {
+    width: calc(100% - 28px);
+  }
+
+  .navbar-menu {
+    background: var(--tapik-surface);
+  }
+
+  .nav-container {
+    background: var(--tapik-background);
+    border-right: 0;
+  }
+
+  .doc {
+    padding-top: 1.75rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .navbar-item.search {
+    display: none;
+  }
+
+  .doc h1.page {
+    font-size: 2.45rem;
+  }
+
+  .doc {
+    font-size: 1rem;
+    padding-bottom: 3rem;
+  }
+}

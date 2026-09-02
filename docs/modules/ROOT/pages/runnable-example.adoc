@@ -1,0 +1,17 @@
+= Runnable example
+:description: Explore tapik's tested contract and Spring application example.
+
+The repository includes a complete library API split across two Maven modules:
+
+`example-contract`:: Defines authors, books, and catalog APIs with the Jackson format integration. It also demonstrates
+same-module OpenAPI generation.
+`example-application`:: Depends on the compiled contract, generates OpenAPI, RestClient, and WebMVC outputs during
+`generate-sources`, implements generated server interfaces, and calls a generated client.
+
+The example is part of the normal Maven reactor, so `./mvnw verify` checks that its documented architecture still
+compiles and runs. Browse the
+https://github.com/makiftutuncu/tapik/tree/main/example-contract[contract module,window=_blank] and
+https://github.com/makiftutuncu/tapik/tree/main/example-application[application module,window=_blank].
+
+The quickstart will collect source directly from these modules in a later increment. Until then, the root README is the
+most complete configuration reference for experimenting with the rewrite.

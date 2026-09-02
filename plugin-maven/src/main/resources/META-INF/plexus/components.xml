@@ -5,7 +5,7 @@
             <role>org.jetbrains.kotlin.maven.KotlinMavenPluginExtension</role>
             <role-hint>tapik</role-hint>
             <implementation>dev.akif.tapik.plugin.maven.TapikKotlinMavenPluginExtension</implementation>
-            <description>Activates Tapik API registry generation during Kotlin compilation.</description>
+            <description>Activates tapik API registry generation during Kotlin compilation.</description>
             <isolated-realm>false</isolated-realm>
         </component>
     </components>

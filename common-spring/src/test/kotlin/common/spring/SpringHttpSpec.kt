@@ -9,13 +9,13 @@ import io.kotest.matchers.shouldBe
 import org.springframework.http.HttpHeaders
 
 class SpringHttpSpec : FunSpec({
-    test("round-trip every Tapik HTTP method") {
+    test("round-trip every tapik HTTP method") {
         Method.entries.forEach { method ->
             method.toHttpMethod().toMethod() shouldBe method
         }
     }
 
-    test("round-trip arbitrary Tapik statuses") {
+    test("round-trip arbitrary tapik statuses") {
         val status = Status(299)
 
         status.toHttpStatusCode().toStatus() shouldBe status

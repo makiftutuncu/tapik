@@ -54,7 +54,7 @@ fun StatusMatcher.kotlinVariantName(): String =
         is CustomStatus -> description.upperCamel()
     }
 
-/** The source-facing Tapik [Status] type used by Kotlin generation targets. */
+/** The source-facing tapik [Status] type used by Kotlin generation targets. */
 val statusKotlinSourceType: KotlinSourceType =
     KotlinSourceType(
         source = "dev.akif.tapik.Status",

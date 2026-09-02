@@ -15,7 +15,7 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.javaType
 
-/** Derives a Tapik schema from Jackson [format] and Kotlin [type]. */
+/** Derives a tapik schema from Jackson [format] and Kotlin [type]. */
 fun deriveSchema(
     format: ObjectMapper,
     type: KType

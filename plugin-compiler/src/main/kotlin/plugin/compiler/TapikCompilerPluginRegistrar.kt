@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import java.nio.file.Path
 
-/** Registers Tapik's JVM API-registry generation with the Kotlin compiler. */
+/** Registers tapik's JVM API-registry generation with the Kotlin compiler. */
 @OptIn(ExperimentalCompilerApi::class)
 class TapikCompilerPluginRegistrar : CompilerPluginRegistrar() {
     override val pluginId: String = "dev.akif.tapik"

@@ -2,18 +2,22 @@
 
 ## Purpose
 
-`tapik.akif.dev` is Tapik's user documentation, not only a project landing page or generated Kotlin reference. It must
+`tapik.akif.dev` is tapik's user documentation, not only a project landing page or generated Kotlin reference. It must
 help a prospective user understand the product, take a working first step, learn the DSL and generation workflow, and
-diagnose problems without reading Tapik's implementation or internal specifications.
+diagnose problems without reading tapik's implementation or internal specifications.
 
 The documentation has three complementary surfaces:
 
-- a concise, unversioned landing page introducing Tapik and directing readers to the appropriate documentation;
+- a concise, unversioned landing page introducing tapik and directing readers to the appropriate documentation;
 - versioned Antora documentation for user journeys, concepts, guides, configuration, and troubleshooting;
-- a generated Dokka reference for Tapik's public Kotlin API.
+- a generated Dokka reference for tapik's public Kotlin API.
 
 Dokka complements the narrative documentation. It does not replace quickstarts, explanations, integration guides, or
 reference pages that connect multiple public types into a working workflow.
+
+The project name is always written as lowercase `tapik` in public prose. This includes website pages, repository
+documentation, KDoc, generated plugin descriptions, and user-facing diagnostics; Kotlin identifiers keep their normal
+declaration spelling.
 
 ## Site and URL structure
 
@@ -21,11 +25,11 @@ The public site preserves the established Antora component path and uses these s
 
 | Location | Content |
 | --- | --- |
-| `/` | Unversioned Tapik landing page |
-| `/tapik/` | Latest stable narrative documentation |
-| `/tapik/api/` | Latest stable unified Kotlin API reference |
-| `/tapik/<version>/` | Narrative documentation for an older release |
-| `/tapik/<version>/api/` | Immutable Kotlin API reference for that release |
+| `/` | Unversioned tapik landing page |
+| `/docs/` | Latest stable narrative documentation |
+| `/docs/api/` | Latest stable unified Kotlin API reference |
+| `/docs/<version>/` | Narrative documentation for an older release |
+| `/docs/<version>/api/` | Immutable Kotlin API reference for that release |
 
 The latest stable version may omit its version segment, but its API output must also be archived under its explicit
 version before a later release replaces it. Existing public documentation URLs should remain valid where practical.
@@ -53,15 +57,18 @@ artifacts. A documentation-only Gradle build is not part of the architecture.
 
 ## Information architecture
 
-The narrative documentation is organized around user goals rather than Tapik's internal modules:
+The narrative documentation is organized around user goals rather than tapik's internal modules:
 
 1. Start here: product overview, choose a goal, quickstart, and runnable example.
 2. Define contracts: APIs, endpoints, URIs, inputs, outputs, formats, schemas, documentation, tags, and composition.
-3. Generate targets: generation model, same-module and compiled-contract modes, OpenAPI, RestClient, and WebMVC.
-4. Reference: artifacts and BOM, complete Maven configuration, lifecycle phases, target options, generated locations,
+3. Generate documentation: shared documentation-generation concepts followed by OpenAPI and future documentation
+   integrations.
+4. Generate clients: shared generated-client concepts followed by Spring RestClient and future client integrations.
+5. Implement servers: shared generated-server concepts followed by Spring WebMVC and future server integrations.
+6. Reference: generation model, registry, artifacts and BOM, complete Maven configuration, lifecycle phases, target options, generated locations,
    naming, diagnostics, and troubleshooting.
-5. Understand Tapik: type-level safety, compile-time boundaries, Kotlin as the source of truth, and target architecture.
-6. Contribute: repository layout, build workflow, documentation workflow, release process, and migration guidance.
+7. Understand tapik: type-level safety, compile-time boundaries, Kotlin as the source of truth, and target architecture.
+8. Contribute: repository layout, build workflow, documentation workflow, release process, and migration guidance.
 
 The 0.5 documentation on `main` is an information-architecture reference only. Pages must be rewritten and verified
 against the 0.6 Maven plugin, compiler-generated registry, DSL, formats, targets, generated code, and runnable examples.

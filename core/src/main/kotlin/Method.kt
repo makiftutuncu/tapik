@@ -1,6 +1,6 @@
 package dev.akif.tapik
 
-/** Standard HTTP methods supported by Tapik's endpoint DSL. */
+/** Standard HTTP methods supported by tapik's endpoint DSL. */
 enum class Method {
     GET,
     HEAD,

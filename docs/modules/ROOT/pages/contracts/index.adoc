@@ -1,0 +1,34 @@
+= Define contracts
+:description: An overview of tapik's Kotlin-first HTTP contract DSL.
+:page-aliases: user-guide.adoc, custom-types.adoc, project-layout-and-discovery.adoc
+
+A tapik contract consists of public `Api` values containing delegated endpoint properties. The API type and delegated
+property name produce a stable endpoint identity such as `Books.list`.
+
+[source,kotlin]
+----
+object Books : Api() {
+    val list by
+        get(root / "books")
+            .output(Status.Ok with jsonBody<List<Book>>())
+}
+----
+
+Endpoint types preserve their method, URI inputs, request headers and bodies, and ordered response alternatives. The
+DSL uses arity-specific tuples and state types so invalid modifier order, duplicate definitions, and incomplete
+contracts can be rejected before target generation.
+
+== Contract vocabulary
+
+APIs and endpoints:: APIs group endpoint values while explicit inclusion can compose existing APIs without changing
+endpoint identity.
+URIs:: Ordered path segments and path variables are followed by query parameters. The type prevents adding path parts
+after query parameters.
+Inputs:: Headers and zero or more body media alternatives describe values accepted by the endpoint.
+Outputs:: Each ordered alternative combines a status matcher, optional body alternatives, and response headers.
+Formats and schemas:: A format owns wire encoding and schema information. Integrations such as Jackson and Kotlin
+serialization remain opt-in.
+
+The complete 0.6 DSL guide will expand these concepts with compiling examples. Until then, see the
+https://github.com/makiftutuncu/tapik/blob/main/specification/dsl.md[DSL specification,window=_blank] for the exact
+implemented grammar.

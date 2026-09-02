@@ -12,12 +12,12 @@ class KotlinMavenPluginExtensionSpec : FunSpec({
     val project = MavenProject()
     val execution = MojoExecution(Plugin(), "compile", "compile")
 
-    test("activate Tapik for every Kotlin Maven compilation") {
+    test("activate tapik for every Kotlin Maven compilation") {
         extension.isApplicable(project, execution) shouldBe true
         extension.compilerPluginId shouldBe "dev.akif.tapik"
     }
 
-    test("leave Tapik compiler configuration empty") {
+    test("leave tapik compiler configuration empty") {
         extension.getPluginOptions(project, execution).shouldBeEmpty()
     }
 })

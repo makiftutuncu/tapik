@@ -2,18 +2,18 @@
 
 **Type-safe APIs in Kotlin**
 
-Tapik defines HTTP APIs as ordinary Kotlin values whose inferred types retain the complete contract structure. A
+tapik defines HTTP APIs as ordinary Kotlin values whose inferred types retain the complete contract structure. A
 single contract can be interpreted as OpenAPI documentation, a Spring RestClient client, or a Spring WebMVC server.
-Kotlin remains the source of truth; Tapik does not import OpenAPI documents or discover endpoints by scanning packages.
+Kotlin remains the source of truth; tapik does not import OpenAPI documents or discover endpoints by scanning packages.
 
 > [!IMPORTANT]
-> Tapik 0.6.0 is an experimental rewrite. Its API and generated source are not yet compatibility-stable.
+> tapik 0.6.0 is an experimental rewrite. Its API and generated source are not yet compatibility-stable.
 
 ## Requirements
 
 - Java 25
 - Kotlin 2.4.10 or a compatible Kotlin 2.4 release
-- Maven 3.9+, supplied by the included Maven Wrapper when developing Tapik itself
+- Maven 3.9+, supplied by the included Maven Wrapper when developing tapik itself
 
 ## Define an API
 
@@ -90,7 +90,7 @@ Define the versions once:
 </properties>
 ```
 
-Import the Tapik BOM once so every Tapik dependency uses the same release:
+Import the tapik BOM once so every tapik dependency uses the same release:
 
 ```xml
 <dependencyManagement>
@@ -133,11 +133,11 @@ and accepts an application mapper when custom Jackson behavior is required:
 </dependency>
 ```
 
-The BOM manages ordinary Tapik project dependencies. Maven still requires explicit versions for build plugins and
+The BOM manages ordinary tapik project dependencies. Maven still requires explicit versions for build plugins and
 for dependencies nested inside a plugin declaration, as shown below.
 
-In every module that declares `Api` values, enable Tapik in Kotlin's Maven compiler plugin. A module that only consumes
-a compiled Tapik contract does not need the `tapik` compiler plugin. The Kotlin serialization entries are needed only
+In every module that declares `Api` values, enable tapik in Kotlin's Maven compiler plugin. A module that only consumes
+a compiled tapik contract does not need the `tapik` compiler plugin. The Kotlin serialization entries are needed only
 by contracts that explicitly select `tapik-format-kotlinx` and use `@Serializable` models:
 
 ```xml
@@ -190,11 +190,11 @@ source can implement `UsersServer` or invoke `UsersClient`.
 
 Use **same-module generation** for OpenAPI or when the generated source should be packaged with the contract for a
 downstream module. The execution runs during `process-classes`, after the current module has compiled and published its
-registry. Tapik compiles the generated Kotlin separately into `target/classes`, but it does not and cannot recompile the
+registry. tapik compiles the generated Kotlin separately into `target/classes`, but it does not and cannot recompile the
 module's earlier main source.
 
 > [!WARNING]
-> A clean build cannot compile `src/main/kotlin` in the same module when it imports a type that Tapik generates during
+> A clean build cannot compile `src/main/kotlin` in the same module when it imports a type that tapik generates during
 > `process-classes`. For example, a module containing both `object Users : Api()` and
 > `class UsersHandler : UsersServer` must be split into a contract module and an application module. A non-clean build
 > may appear to work because an old `UsersServer.class` remains in `target`; do not rely on that state.
@@ -221,7 +221,7 @@ Each generated file is logged at `INFO`, for example:
 [INFO] Generated target/generated-sources/tapik-webmvc/com/example/generated/UsersServer.kt
 ```
 
-If the Kotlin registry appears but no target files or Tapik generation log appears, the selected command most likely
+If the Kotlin registry appears but no target files or tapik generation log appears, the selected command most likely
 stopped at `compile` while the execution was using the default `process-classes` phase.
 
 ## Generate OpenAPI
@@ -288,7 +288,7 @@ For an application that implements or invokes generated Spring types, use two mo
 ```text
 library-contract                  library-server
 API values and models      -->    depends on library-contract
-Tapik compiler registry           generates during generate-sources
+tapik compiler registry           generates during generate-sources
                                   implements generated server interfaces
 ```
 
@@ -417,11 +417,11 @@ target.
 
 ## Generation failures
 
-Tapik intentionally fails the build rather than silently weakening a contract. Common failure stages are:
+tapik intentionally fails the build rather than silently weakening a contract. Common failure stages are:
 
 - Kotlin compilation: an API is not public or constructible, an endpoint property is not public, or a DSL shape is
   invalid.
-- Registry loading: contract artifacts use incompatible Tapik versions or contain conflicting API IDs.
+- Registry loading: contract artifacts use incompatible tapik versions or contain conflicting API IDs.
 - Target validation: the selected target cannot represent an endpoint feature or its configuration is invalid.
 - Generated-source compilation: generated code and its required target runtime dependency are not aligned.
 
@@ -434,7 +434,7 @@ to remove ghost contracts or sources.
 Generation targets implement the host-neutral contracts in `tapik-common-plugin` and contribute a
 `GenerationTargetRegistry` through Java's service-provider mechanism. Maven loads target providers from its plugin
 realm, so a custom target artifact belongs in the dependencies of the `tapik-plugin-maven` plugin declaration. Adding
-it only as an ordinary project dependency does not make the target executable; Tapik reports that placement error and
+it only as an ordinary project dependency does not make the target executable; tapik reports that placement error and
 lists the targets visible to the plugin.
 
 See the [generation specification](specification/generation.md), [OpenAPI specification](specification/openapi.md), and
@@ -449,7 +449,7 @@ The 0.6 rewrite replaces the previous implementation rather than preserving its 
 - Kotlin contract values are authoritative; OpenAPI is generated output and cannot be consumed as an input contract.
 - Existing endpoint definitions and generated-build configuration require manual migration.
 
-## Build Tapik
+## Build tapik
 
 ```shell
 ./mvnw clean verify
@@ -457,3 +457,17 @@ The 0.6 rewrite replaces the previous implementation rather than preserving its 
 
 The build requires Java 25 and runs every production, fixture, and runnable example module. Product and architecture
 decisions live under [`specification`](specification/README.md).
+
+Build the landing page and unified API reference after installing the reactor artifacts locally, then generate the
+Antora documentation portal. The documentation toolchain requires Node.js 20 or newer:
+
+```shell
+./mvnw -DskipTests install
+./mvnw -f site/pom.xml package
+npm ci
+npm run docs:preview
+```
+
+The complete preview is written to `site/target/site`: the landing page is at `/`, narrative documentation at
+`/docs/`, and unified Kotlin API reference at `/docs/api/`. Stable documentation is published from release refs, not
+from unreleased `main` content. The public site lives at [tapik.akif.dev](https://tapik.akif.dev).

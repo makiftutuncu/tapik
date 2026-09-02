@@ -2,7 +2,7 @@
 
 ## Intent
 
-Tapik defines type-safe HTTP APIs as ordinary Kotlin values. Preserve complete structural information in inferred
+tapik defines type-safe HTTP APIs as ordinary Kotlin values. Preserve complete structural information in inferred
 types and favor compile-time feedback. OpenAPI is a generated target, never the source of truth.
 
 ## Development
@@ -13,6 +13,7 @@ types and favor compile-time feedback. OpenAPI is a generated target, never the 
 - Follow red-green-refactor: add a failing Kotest specification, implement the smallest coherent behavior, then
   refactor with the suite green.
 - Keep public packages under `dev.akif.tapik`; integration packages use `dev.akif.tapik.format.<integration>`.
+- Always write the project name as lowercase `tapik` in public prose, KDoc, and diagnostics.
 - Preserve declaration order in all ordered contract structures. Tags intentionally use set semantics.
 - Public APIs require KDoc once they move beyond an exploratory spike.
 

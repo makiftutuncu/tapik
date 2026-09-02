@@ -1,4 +1,4 @@
-# Tapik Rewrite TODO
+# tapik rewrite TODO
 
 ## WebMVC handler and adapter separation
 
@@ -106,7 +106,7 @@
 - [x] Define the documentation architecture, stable URL layout, preview behavior, and release publishing model. Treat
   narrative documentation and the Kotlin API reference as complementary parts of one versioned website.
 
-- [ ] Restore Antora and the documentation information architecture from `main`, rewritten for the 0.6 Maven-based
+- [x] Restore Antora and the documentation information architecture from `main`, rewritten for the 0.6 Maven-based
   implementation. Keep the new landing page and carry its visual language into a reproducible Antora UI.
 
 - [ ] Write a source-backed quickstart around the runnable examples. Cover same-module and compiled-contract modes,

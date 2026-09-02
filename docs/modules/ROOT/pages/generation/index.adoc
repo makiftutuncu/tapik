@@ -1,0 +1,22 @@
+= Generation model
+:description: How tapik turns compiler-generated API registries into host-neutral generation targets.
+:page-aliases: code-generation/index.adoc
+
+tapik does not scan packages, reflect over arbitrary user classes, or evaluate endpoint expressions during Kotlin
+compilation. Its compiler plugin generates an explicit registry for every module that declares public `Api` types.
+
+The Maven plugin loads compiled registries and submits each selected API to a named generation target. Targets are
+host-neutral implementations: the Maven plugin supplies build inputs and output locations, but OpenAPI and Spring
+generation logic is not coupled to Maven. A future build-tool integration can invoke the same targets.
+
+== Two generation modes
+
+Compiled contract:: A consuming module depends on a separately compiled contract artifact. Generation can run during
+`generate-sources`, allowing ordinary application source to use the generated client and server types.
+Same module:: Generation reads the registry produced by the current module and therefore runs after compilation,
+during `process-classes` by default. This works for artifacts such as OpenAPI and for generated code consumed by a
+downstream module.
+
+See xref:reference/maven.adoc[Maven setup] for the lifecycle boundary. Then choose a
+xref:documentation/index.adoc[documentation], xref:clients/index.adoc[client], or xref:servers/index.adoc[server]
+integration.

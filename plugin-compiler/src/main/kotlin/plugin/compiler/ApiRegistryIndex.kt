@@ -43,7 +43,7 @@ internal class ApiRegistryIndex(
         val entries = linkedMapOf<Path, MutableList<RegisteredApiType>>()
         Files.readAllLines(stateFile, UTF_8).forEach { line ->
             val fields = line.split('\t')
-            check(fields.size == 3) { "Invalid Tapik API registry index at '$stateFile'" }
+            check(fields.size == 3) { "Invalid tapik API registry index at '$stateFile'" }
             val source = Path.of(fields[0].decoded()).normalized()
             val type = RegisteredApiType(fields[1].decoded(), ApiInstantiation.valueOf(fields[2]))
             entries.getOrPut(source, ::mutableListOf).add(type)

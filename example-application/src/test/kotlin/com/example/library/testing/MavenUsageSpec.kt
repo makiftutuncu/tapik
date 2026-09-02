@@ -52,7 +52,7 @@ class MavenUsageSpec : FunSpec({
         plainWebMvc.close()
     }
 
-    test("compile API definitions and generate OpenAPI through one Tapik Maven plugin") {
+    test("compile API definitions and generate OpenAPI through one tapik Maven plugin") {
         val apis = ServiceLoader.load(ApiRegistry::class.java).flatMap(ApiRegistry::apis)
         apis.map { api -> api.id }.sorted() shouldContainExactly listOf("Authors", "Books", "Catalog")
         apis.single { api -> api.id == "Authors" }.shouldBeInstanceOf<Authors>()

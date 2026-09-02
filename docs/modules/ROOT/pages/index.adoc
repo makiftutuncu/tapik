@@ -1,0 +1,40 @@
+= Type-safe APIs in Kotlin
+:description: Define HTTP API contracts as ordinary, type-safe Kotlin values and generate OpenAPI, clients, and servers from them.
+
+tapik lets you define an HTTP API once as ordinary Kotlin values, then use that contract to generate OpenAPI documents,
+Spring RestClient clients, and Spring WebMVC servers.
+
+The Kotlin definition remains the source of truth. tapik's DSL retains contract structure in inferred types, the Kotlin
+compiler rejects invalid combinations, and every generation target checks whether it can faithfully implement the
+features it receives.
+
+[.cards]
+== Pick a starting point
+
+[cols="1,1,1", frame=none, grid=none]
+|===
+|xref:getting-started.adoc[Get a result]
+
+Build the runnable Maven example and generate an OpenAPI document.
+
+|xref:contracts/index.adoc[Learn the DSL]
+
+Understand APIs, endpoints, URIs, inputs, outputs, formats, and composition.
+
+|xref:choose-a-goal.adoc[Choose an output]
+
+See how compiler-generated registries feed host-neutral generation targets.
+|===
+
+TIP: tapik 0.6.0 is an experimental rewrite. Its API and generated source are not yet compatibility-stable.
+
+== What tapik optimizes for
+
+Compile-time feedback:: Invalid or incomplete definitions should fail while compiling or generating, not after an
+application starts.
+Kotlin-first contracts:: Contracts are immutable Kotlin values that can be named, shared, and composed without a
+parallel metadata representation.
+One contract, several uses:: Documentation, clients, and servers are outputs selected by the consuming build rather
+than separate definitions that can drift.
+
+Continue with xref:choose-a-goal.adoc[] or inspect the link:api/index.html[Kotlin API reference].

@@ -8,30 +8,30 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType as SpringMediaType
 
-/** Converts this Tapik method to Spring's HTTP method representation. */
+/** Converts this tapik method to Spring's HTTP method representation. */
 fun Method.toHttpMethod(): HttpMethod = HttpMethod.valueOf(name)
 
 /**
- * Converts this Spring HTTP method to Tapik's standard method representation.
+ * Converts this Spring HTTP method to tapik's standard method representation.
  *
- * @throws IllegalArgumentException when this is not a standard method supported by Tapik.
+ * @throws IllegalArgumentException when this is not a standard method supported by tapik.
  */
 fun HttpMethod.toMethod(): Method = Method.valueOf(name())
 
-/** Converts this Tapik status to Spring's complete HTTP status-code representation. */
+/** Converts this tapik status to Spring's complete HTTP status-code representation. */
 fun Status.toHttpStatusCode(): HttpStatusCode = HttpStatusCode.valueOf(code)
 
-/** Converts this Spring HTTP status code to a Tapik status. */
+/** Converts this Spring HTTP status code to a tapik status. */
 fun HttpStatusCode.toStatus(): Status = Status(value())
 
 /**
- * Parses this complete Tapik media type as a Spring media type.
+ * Parses this complete tapik media type as a Spring media type.
  *
  * @throws org.springframework.http.InvalidMediaTypeException when [MediaType.value] is invalid.
  */
 fun MediaType.toSpringMediaType(): SpringMediaType = SpringMediaType.parseMediaType(value)
 
-/** Converts this Spring media type to Tapik's complete string representation. */
+/** Converts this Spring media type to tapik's complete string representation. */
 fun SpringMediaType.toMediaType(): MediaType = MediaType(toString())
 
 /** Returns an immutable copy of every header name and value. */

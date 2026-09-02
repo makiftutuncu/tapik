@@ -1,0 +1,30 @@
+= Quickstart
+:description: Build tapik's runnable Maven example and inspect its generated OpenAPI, client, and server outputs.
+
+The quickest verified tour is the repository's two-module library example. `example-contract` owns the API values and
+models; `example-application` consumes that compiled contract and generates all three currently supported targets.
+
+== Requirements
+
+* Java 25
+* Maven 3.9 or the repository's Maven Wrapper
+* Kotlin 2.4 when configuring your own project
+
+From a tapik checkout, run:
+
+[source,shell]
+----
+./mvnw verify
+----
+
+The build compiles the contract, creates its explicit API registry, generates OpenAPI YAML and Spring source, compiles
+the generated code, and exercises the runnable Spring application.
+
+The generated OpenAPI documents are written below `example-application/target/generated/tapik`. Generated RestClient
+and WebMVC Kotlin source is written below `example-application/target/generated-sources`.
+
+This page intentionally gives only the shortest repository tour for now. The next documentation increment will turn
+it into a source-backed guide for adding tapik to another Maven project, including same-module and compiled-contract
+generation modes.
+
+Next, xref:runnable-example.adoc[see what the example proves] or xref:reference/maven.adoc[review the Maven model].

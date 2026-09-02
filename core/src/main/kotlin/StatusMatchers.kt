@@ -50,7 +50,7 @@ fun statusesIn(range: IntRange): StatusRange = StatusRange(range)
 /**
  * A custom status matcher with a stable human-readable [description].
  *
- * The [predicate] must be pure and deterministic because Tapik evaluates it during contract validation and targets
+ * The [predicate] must be pure and deterministic because tapik evaluates it during contract validation and targets
  * may evaluate it again at runtime.
  */
 data class CustomStatus(

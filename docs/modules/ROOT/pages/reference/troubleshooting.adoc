@@ -1,0 +1,24 @@
+= Troubleshooting
+:description: Diagnose common tapik compiler registry and Maven generation problems.
+
+== Registry files exist but targets do not
+
+The `generate` goal loads compiled registries. Check that the configured lifecycle phase actually runs for the command
+you invoked and that the execution sees either a compiled contract dependency or the current module's compiled output.
+
+== A generated type is missing during Kotlin compilation
+
+Source generated from a compiled contract can run during `generate-sources`. Source generated from the current module
+cannot exist until that module has compiled its registry, so main source in that same module cannot reference it on a
+clean build. Split the contract and application when source needs to implement a generated server or client.
+
+== A Spring handler is not found
+
+Provide exactly one suitable Spring bean implementing each generated `Server` interface. In Spring Boot, generated
+controller imports are activated through auto-configuration; in plain Spring, enable tapik WebMVC registration
+explicitly.
+
+== A target rejects an endpoint
+
+Targets validate their own representational limits. Diagnostics identify the API or endpoint and unsupported feature;
+change the contract or select a target that supports it rather than silently losing information.

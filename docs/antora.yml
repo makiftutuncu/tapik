@@ -1,0 +1,5 @@
+name: docs
+title: tapik
+version: v0.6.0
+nav:
+  - modules/ROOT/nav.adoc

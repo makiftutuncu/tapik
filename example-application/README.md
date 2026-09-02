@@ -5,14 +5,14 @@ This application demonstrates the recommended compiled-contract workflow using t
 ```text
 example-contract                         example-application
 Library APIs and models, Jackson    -->  depends on the compiled contract
-Tapik compiler registry                  generates OpenAPI, RestClient, and WebMVC
+tapik compiler registry                  generates OpenAPI, RestClient, and WebMVC
 same-module OpenAPI generation            implements generated servers and BooksClient
                                           runs with Spring Boot
 ```
 
-The contract module enables Tapik's compiler plugin and selects `tapik-format-jackson`, matching a typical Spring Boot
+The contract module enables tapik's compiler plugin and selects `tapik-format-jackson`, matching a typical Spring Boot
 application without requiring serializable annotations on its models. Its OpenAPI execution uses the plugin's default
-`process-classes` phase and therefore demonstrates same-module generation. The application does not enable the Tapik
+`process-classes` phase and therefore demonstrates same-module generation. The application does not enable the tapik
 compiler plugin because it declares no APIs of its own. Its target executions run during
 `generate-sources`, when the compiled contract dependency is already available and generated client/server types can
 still be used by ordinary application source.
@@ -43,7 +43,7 @@ Then request the generated WebMVC endpoint:
 curl http://localhost:8080/books
 ```
 
-`BooksHandler` implements the generated server interface. Tapik's generated controller is registered by Spring Boot
+`BooksHandler` implements the generated server interface. tapik's generated controller is registered by Spring Boot
 auto-configuration and delegates the decoded request to that handler. `BooksRestClient` implements the generated client
 interface with a `RestClientTransport`; set `library.books.base-url` to choose its remote server. The example test sends
 a real generated-client exchange through Spring's mock HTTP server and verifies Jackson decoding into `Book` values.

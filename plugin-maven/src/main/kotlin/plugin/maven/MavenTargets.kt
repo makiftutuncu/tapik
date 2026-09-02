@@ -46,7 +46,7 @@ internal object MavenTargets {
     ): IllegalStateException =
         IllegalStateException(
             "Failed to load generation targets from the $classpathSide classpath. " +
-                "Ensure custom targets are placed in Maven plugin dependencies and use compatible Tapik versions.",
+                "Ensure custom targets are placed in Maven plugin dependencies and use compatible tapik versions.",
             cause
         )
 }

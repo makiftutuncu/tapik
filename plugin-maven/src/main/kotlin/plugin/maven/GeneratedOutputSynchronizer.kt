@@ -63,7 +63,7 @@ internal object GeneratedOutputSynchronizer {
         val ownership = linkedMapOf<String, MutableSet<String>>()
         Files.readAllLines(stateFile, UTF_8).forEach { line ->
             val fields = line.split('\t')
-            check(fields.size == 2) { "Invalid Tapik generated-output ownership at '$stateFile'" }
+            check(fields.size == 2) { "Invalid tapik generated-output ownership at '$stateFile'" }
             ownership.getOrPut(fields[0].decoded(), ::linkedSetOf).add(fields[1].decoded())
         }
         return ownership

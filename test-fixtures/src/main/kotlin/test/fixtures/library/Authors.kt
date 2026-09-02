@@ -4,7 +4,7 @@ import dev.akif.tapik.*
 import dev.akif.tapik.format.kotlinx.jsonBody
 import kotlinx.serialization.json.Json
 
-/** Library author operations used by Tapik's shared target fixture. */
+/** Library author operations used by tapik's shared target fixture. */
 object Authors : Api() {
     private val requestId = header.uuid("X-Request-Id")
     private val location = header.string("Location")

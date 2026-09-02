@@ -68,7 +68,7 @@ data class PathVariable<Value : Any>(
     fun deprecated(deprecated: Boolean = true): PathVariable<Value> =
         copy(documentation = documentation.copy(deprecated = deprecated))
 
-    /** Built-in path-variable factories backed by Tapik's default formats. */
+    /** Built-in path-variable factories backed by tapik's default formats. */
     companion object :
         NamedDefaults<
             PathVariable<Boolean>,

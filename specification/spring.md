@@ -2,15 +2,15 @@
 
 ## Shared Spring boundary
 
-`tapik-common-spring` contains only conversions needed by more than one Spring integration. It maps Tapik methods,
-statuses, media types, and headers to and from Spring's HTTP model without interpreting endpoints. All standard Tapik
+`tapik-common-spring` contains only conversions needed by more than one Spring integration. It maps tapik methods,
+statuses, media types, and headers to and from Spring's HTTP model without interpreting endpoints. All standard tapik
 methods, including `CONNECT` and `QUERY`, remain representable even when Spring does not expose named constants for
 them.
 
 ## RestClient transport
 
 `tapik-target-spring-restclient` executes already-resolved requests with Spring `RestClient`. The transport accepts a
-Tapik method, a Spring URI builder function, encoded headers, and an optional encoded body. It returns the raw Tapik
+tapik method, a Spring URI builder function, encoded headers, and an optional encoded body. It returns the raw tapik
 status, headers, media type, and bytes for every HTTP response, including error statuses.
 
 Encoded request and response values snapshot byte arrays on construction and return a copy when their bytes are read.
@@ -161,8 +161,8 @@ Top-level handler and adapter names and source artifact paths follow the same nu
 ### Adapter registration
 
 The runtime WebMVC artifact provides `@EnableTapikWebMvc` for plain Spring applications. Adding it to one application
-configuration registers only adapters listed by generated Tapik WebMVC registration resources, so it neither scans
-arbitrary packages nor reflects over API classes. It registers Tapik adapters only; configuring Spring MVC itself
+configuration registers only adapters listed by generated tapik WebMVC registration resources, so it neither scans
+arbitrary packages nor reflects over API classes. It registers tapik adapters only; configuring Spring MVC itself
 remains the application's responsibility.
 
 Spring Boot applications need no annotation or user configuration. The runtime artifact contributes one public Boot
@@ -171,11 +171,11 @@ selection behavior as plain Spring. The Boot dependency is optional for the runt
 do not receive Boot transitively.
 
 Each generated descriptor names both its pure handler interface and generated adapter. After application bean
-definitions are available, Tapik registers an adapter only when Spring can select a single candidate handler bean. No
+definitions are available, tapik registers an adapter only when Spring can select a single candidate handler bean. No
 handler leaves that API unregistered; one candidate registers the adapter; multiple candidates register it only when
 exactly one candidate is primary. Qualifiers alone do not select a generated adapter because the adapter declares no
 generated qualifier. A single user bean may implement several generated handler interfaces and receives one adapter
-for each interface. If an adapter's generated package is inside the application's component-scan tree, Tapik replaces
+for each interface. If an adapter's generated package is inside the application's component-scan tree, tapik replaces
 the implicitly scanned definition with its canonical descriptor-based definition so each mapping is registered once
 and the same handler-selection rules still apply.
 

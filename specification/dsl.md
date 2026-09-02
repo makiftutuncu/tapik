@@ -161,7 +161,7 @@ One generic format combines a codec and schema:
 Format<Value, Representation>
 ```
 
-Both types are non-null. A codec uses Tapik's dependency-free `DecodeResult`, whose failure contains one or more
+Both types are non-null. A codec uses tapik's dependency-free `DecodeResult`, whose failure contains one or more
 `DecodeError` values. A decode error has a message and may retain a cause and a string location. Schemas are untyped;
 the enclosing `Format<Value, Representation>` establishes their relationship to the Kotlin type.
 
@@ -212,7 +212,7 @@ val configuredJson = jsonBody<Book>(format = applicationJson)
 ```
 
 Every body is attached to its concrete format when built. Body builders take the serialization format directly and
-do not consult API or Tapik-global configuration. Derived core formats are cached by serialization-format and
+do not consult API or tapik-global configuration. Derived core formats are cached by serialization-format and
 serializer identity. Concurrent lookups reuse the same live format instance. Cache keys and values are weakly held, so
 the cache does not retain an otherwise unreachable serialization format, serializer, derived format, or its defining
 classloader; a collected format may be recreated by a later lookup. `Json.Default` is the default argument for the
@@ -361,7 +361,7 @@ the first explicit output replaces that default with `Outputs1`; later calls app
 output is a compilation failure, and duplicate exact statuses are rejected. Bodyless explicit responses use
 `Status.NoContent with noBody`; no status-only special case exists.
 
-Before an output is appended, Tapik evaluates it against existing alternatives over every valid HTTP status code. Any
+Before an output is appended, tapik evaluates it against existing alternatives over every valid HTTP status code. Any
 shared match is rejected with the conflicting status. A custom predicate that throws during this validation
 produces a contextual construction failure retaining the original cause. Custom predicates are required to be pure and
 deterministic. Targets provide tailored diagnostics for matcher kinds they cannot represent.

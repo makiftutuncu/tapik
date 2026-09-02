@@ -52,7 +52,7 @@ data class Header<Value : Any, out P : Presence<Value>>(
     fun deprecated(deprecated: Boolean = true): Header<Value, P> =
         copy(documentation = documentation.copy(deprecated = deprecated))
 
-    /** Built-in header factories backed by Tapik's default formats. */
+    /** Built-in header factories backed by tapik's default formats. */
     companion object :
         NamedDefaults<
             Header<Boolean, Required>,

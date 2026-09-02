@@ -1,0 +1,15 @@
+= Generate OpenAPI
+:description: Produce OpenAPI 3.2 documents from tapik API values.
+:page-aliases: generation/openapi.adoc, code-generation/documentation.adoc
+
+The `openapi` target converts each selected API into one OpenAPI 3.2 document. YAML with a `.yml` extension is the
+default; JSON is also available through target configuration.
+
+The target reads the same ordered URI, input, output, documentation, and schema structures used by source generators.
+OpenAPI remains an output: tapik does not consume OpenAPI documents as contract definitions.
+
+Same-module generation is a useful first setup because the generated document does not need to be referenced by the
+module's Kotlin source. The runnable `example-contract` module demonstrates that workflow.
+
+A task-oriented guide with source-backed Maven configuration will follow. For now, use the root README and
+xref:reference/maven.adoc[Maven setup] together.

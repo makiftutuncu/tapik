@@ -1,0 +1,18 @@
+= Generate a Spring WebMVC server
+:description: Generate pure server interfaces and automatically registered Spring WebMVC controllers from tapik contracts.
+:page-aliases: generation/spring-webmvc.adoc, code-generation/server.adoc
+
+The `spring-webmvc` target generates two responsibilities separately:
+
+* a pure Kotlin `Server` interface implemented by application handlers;
+* a generated Spring controller that owns mapping annotations, wire conversion, and delegation.
+
+In a Spring Boot application, tapik's generated auto-configuration imports controller descriptors and injects the
+corresponding user-provided handler beans. Application code does not declare adapter beans or inherit Spring mapping
+annotations. Plain Spring applications can enable the same deterministic registration mechanism explicitly.
+
+Keeping the user-owned handler contract separate from the framework adapter lets future server stacks reuse the same
+conceptual boundary while generating their own integration code.
+
+The runnable `example-application` contains handlers and starts the resulting application. A later guide will cover
+bean selection, generated naming, and response mapping in detail.

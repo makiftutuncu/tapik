@@ -19,16 +19,16 @@ fun KotlinType.argument(
 }
 
 /**
- * Returns the value elements carried by a Tapik tuple type.
+ * Returns the value elements carried by a tapik tuple type.
  *
  * @param location contract location used in diagnostics.
- * @throws IllegalArgumentException when this is not a Tapik tuple or an element is star-projected.
+ * @throws IllegalArgumentException when this is not a tapik tuple or an element is star-projected.
  */
 fun KotlinType.tupleElements(location: String): List<KotlinType> {
     val name = (classifier as? KotlinClassClassifier)?.name
     if (name == "dev.akif.tapik.Tuple0") return emptyList()
     require(name != null && TUPLE_CLASSIFIER.matches(name)) {
-        "$location must be a Tapik tuple, but was '$classifier'"
+        "$location must be a tapik tuple, but was '$classifier'"
     }
     return arguments.drop(1).mapIndexed { index, projection ->
         (projection as? KotlinTypedProjection)?.type

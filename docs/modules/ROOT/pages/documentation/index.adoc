@@ -1,0 +1,12 @@
+= Generate documentation
+:description: Generate documentation artifacts from tapik contracts.
+
+Documentation targets turn a tapik contract into a description that people and tools can consume without changing the
+Kotlin source of truth. Each integration decides which document model and formats it supports, and generation fails
+when it cannot represent a contract faithfully.
+
+The first documentation integration is xref:documentation/openapi.adoc[OpenAPI]. Future documentation formats belong
+alongside it in this section and can reuse the same compiler registry, API selection, lifecycle, and output controls.
+
+See xref:generation/index.adoc[Generation model] for the shared target boundary and
+xref:reference/maven.adoc[Maven setup] for execution configuration.

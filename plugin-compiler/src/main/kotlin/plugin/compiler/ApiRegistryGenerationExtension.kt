@@ -99,7 +99,7 @@ internal class ApiRegistryGenerationExtension(
                                 if (property.visibility != DescriptorVisibilities.PUBLIC) {
                                     messages.report(
                                         ERROR,
-                                        "Tapik endpoint property '$owner.${property.name}' must be public for generated targets"
+                                        "tapik endpoint property '$owner.${property.name}' must be public for generated targets"
                                     )
                                     valid = false
                                 }
@@ -108,14 +108,14 @@ internal class ApiRegistryGenerationExtension(
                                 if (property.visibility != DescriptorVisibilities.PUBLIC) {
                                     messages.report(
                                         ERROR,
-                                        "Tapik inclusion property '$owner.${property.name}' must be public for generated targets"
+                                        "tapik inclusion property '$owner.${property.name}' must be public for generated targets"
                                     )
                                     valid = false
                                 }
                                 if (!property.retainsIncludedApiType()) {
                                     messages.report(
                                         ERROR,
-                                        "Tapik inclusion property '$owner.${property.name}' must retain the included API's concrete type"
+                                        "tapik inclusion property '$owner.${property.name}' must retain the included API's concrete type"
                                     )
                                     valid = false
                                 }

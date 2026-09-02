@@ -5,12 +5,12 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.string.shouldContain
 
 class TapikVersionCompatibilitySpec : FunSpec({
-    test("accept an empty or aligned project Tapik version set") {
+    test("accept an empty or aligned project tapik version set") {
         TapikVersionCompatibility.requireCompatible("0.6.0", emptySet())
         TapikVersionCompatibility.requireCompatible("0.6.0", setOf("0.6.0"))
     }
 
-    test("reject project Tapik versions different from the Maven plugin") {
+    test("reject project tapik versions different from the Maven plugin") {
         val error =
             shouldThrow<IllegalArgumentException> {
                 TapikVersionCompatibility.requireCompatible("0.6.0", setOf("0.5.0", "0.6.0"))

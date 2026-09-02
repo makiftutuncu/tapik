@@ -5,7 +5,7 @@ import org.apache.maven.project.MavenProject
 import org.jetbrains.kotlin.maven.KotlinMavenPluginExtension
 import org.jetbrains.kotlin.maven.PluginOption
 
-/** Activates Tapik's host-neutral compiler plugin from Kotlin's Maven plugin. */
+/** Activates tapik's host-neutral compiler plugin from Kotlin's Maven plugin. */
 class TapikKotlinMavenPluginExtension : KotlinMavenPluginExtension {
     override fun isApplicable(
         project: MavenProject,

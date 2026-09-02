@@ -15,7 +15,7 @@ internal class ArtifactOwnership(
 
     fun claimedPaths(owner: String, paths: List<String>): Set<String> {
         require(paths.none { path -> path == MANIFEST_NAME || path.startsWith("$MANIFEST_NAME/") }) {
-            "Generated artifact path '$MANIFEST_NAME' is reserved by Tapik"
+            "Generated artifact path '$MANIFEST_NAME' is reserved by tapik"
         }
         val ownership = read()
         val conflicts =
@@ -58,7 +58,7 @@ internal class ArtifactOwnership(
         val ownership = linkedMapOf<String, MutableSet<String>>()
         Files.readAllLines(manifest, UTF_8).forEach { line ->
             val fields = line.split('\t')
-            check(fields.size == 2) { "Invalid Tapik artifact ownership manifest at '$manifest'" }
+            check(fields.size == 2) { "Invalid tapik artifact ownership manifest at '$manifest'" }
             ownership.getOrPut(fields[0].decoded(), ::linkedSetOf).add(fields[1].decoded())
         }
         return ownership

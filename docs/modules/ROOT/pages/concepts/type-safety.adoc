@@ -1,0 +1,18 @@
+= Type safety
+:description: Where tapik provides compile-time guarantees and where target generation validates a contract.
+
+tapik uses Kotlin types to preserve the structure accumulated by its DSL. Adding a path variable, query parameter,
+header, body, or output changes the endpoint's inferred type instead of erasing the definition into an untyped metadata
+record.
+
+That structure supports three layers of early feedback:
+
+DSL construction:: State and tuple types make invalid or incomplete combinations unavailable or uncompilable.
+Contract compilation:: The compiler plugin validates discoverable public APIs and emits an explicit registry.
+Target generation:: Each target rejects contract features it cannot represent, with contextual diagnostics.
+
+Not every rule needs a distinct type parameter. tapik deliberately balances strong inferred information with a usable
+Kotlin API, while keeping runtime-only surprises out of supported generation paths.
+
+OpenAPI is never used to reconstruct the contract. The Kotlin values and their types are the source from which every
+target begins.

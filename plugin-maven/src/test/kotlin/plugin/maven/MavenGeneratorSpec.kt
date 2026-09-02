@@ -154,6 +154,6 @@ class MavenGeneratorSpec : FunSpec({
                 )
             }
 
-        error.message shouldContain "Tapik version mismatch"
+        error.message shouldContain "tapik version mismatch"
     }
 })

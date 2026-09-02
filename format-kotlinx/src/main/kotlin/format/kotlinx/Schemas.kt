@@ -12,19 +12,19 @@ import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.json.ClassDiscriminatorMode
 import kotlinx.serialization.json.Json
 
-/** Derives a Tapik schema from [serializer] using [Json.Default]. */
+/** Derives a tapik schema from [serializer] using [Json.Default]. */
 fun deriveSchema(serializer: KSerializer<*>): Schema = deriveSchema(Json.Default, serializer)
 
-/** Derives a Tapik schema from [descriptor] using [Json.Default]. */
+/** Derives a tapik schema from [descriptor] using [Json.Default]. */
 fun deriveSchema(descriptor: SerialDescriptor): Schema = deriveSchema(Json.Default, descriptor)
 
-/** Derives a Tapik schema from [serializer] and the selected JSON [format]. */
+/** Derives a tapik schema from [serializer] and the selected JSON [format]. */
 fun deriveSchema(
     format: Json,
     serializer: KSerializer<*>
 ): Schema = deriveSchema(format, serializer.descriptor)
 
-/** Derives a Tapik schema from [descriptor] and the selected JSON [format]. */
+/** Derives a tapik schema from [descriptor] and the selected JSON [format]. */
 fun deriveSchema(
     format: Json,
     descriptor: SerialDescriptor

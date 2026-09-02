@@ -1,0 +1,13 @@
+= Generate a Spring RestClient client
+:description: Generate a typed Spring RestClient interface from a tapik contract.
+:page-aliases: generation/spring-restclient.adoc, code-generation/client.adoc
+
+The `spring-restclient` target generates a pure Kotlin client interface for each selected API. Endpoint methods accept
+decoded Kotlin values and return generated response alternatives; a shared `RestClientTransport` performs the Spring
+HTTP exchange.
+
+Applications normally use compiled-contract generation during `generate-sources`. Generated types then exist before
+the application's Kotlin compilation, so application code can implement the interface and provide its transport.
+
+See the runnable `example-application` module for a Jackson-backed client that is called under test. A complete guide
+will document naming, configuration, and media representation selection in a later increment.

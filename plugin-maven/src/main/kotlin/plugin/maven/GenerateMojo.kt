@@ -11,7 +11,7 @@ import org.apache.maven.project.MavenProject
 import java.io.File
 import java.nio.file.Path
 
-/** Generates artifacts from the Tapik APIs compiled by the current Maven project. */
+/** Generates artifacts from the tapik APIs compiled by the current Maven project. */
 @Mojo(
     name = "generate",
     defaultPhase = LifecyclePhase.PROCESS_CLASSES,
@@ -58,7 +58,7 @@ class GenerateMojo : AbstractMojo() {
                     parentClassLoader = requireNotNull(javaClass.classLoader),
                     pluginVersion =
                         requireNotNull(mojoExecution.mojoDescriptor.pluginDescriptor.version) {
-                            "Tapik Maven plugin version is unavailable"
+                            "tapik Maven plugin version is unavailable"
                         },
                     projectTapikVersions = project.tapikDependencyVersions()
                 )
@@ -83,7 +83,7 @@ class GenerateMojo : AbstractMojo() {
             project.registerGeneratedArtifacts(outputDirectory.toPath(), generation)
             generation.written.forEach { path -> log.info("Generated ${projectRelativePath(path)}") }
         } catch (cause: Exception) {
-            throw MojoExecutionException("Tapik generation failed: ${cause.message}", cause)
+            throw MojoExecutionException("tapik generation failed: ${cause.message}", cause)
         }
     }
 

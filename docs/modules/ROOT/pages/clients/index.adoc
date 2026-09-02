@@ -1,0 +1,11 @@
+= Generate clients
+:description: Generate typed HTTP clients from tapik contracts.
+
+Client targets expose each selected API as generated Kotlin types. Application code supplies stack-specific runtime
+configuration while endpoint parameters, bodies, and response alternatives remain derived from the contract.
+
+The first client integration is xref:clients/spring-restclient.adoc[Spring RestClient]. Future client stacks belong
+alongside it rather than changing the contract DSL or Maven host integration.
+
+Applications usually generate clients from a compiled contract dependency during `generate-sources`, allowing their
+ordinary Kotlin source to use the generated types.

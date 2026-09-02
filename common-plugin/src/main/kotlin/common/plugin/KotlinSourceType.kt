@@ -26,7 +26,7 @@ data class KotlinSourceType(
 /**
  * Converts this compiled type to a lossless source-generation view at [location].
  *
- * @throws IllegalArgumentException when this type contains a shape Tapik cannot reproduce in Kotlin source.
+ * @throws IllegalArgumentException when this type contains a shape tapik cannot reproduce in Kotlin source.
  */
 fun KotlinType.toKotlinSourceType(location: String): KotlinSourceType {
     validateSourceShape(location)
@@ -35,10 +35,10 @@ fun KotlinType.toKotlinSourceType(location: String): KotlinSourceType {
 
 private fun KotlinType.validateSourceShape(location: String) {
     require(flexibleUpperBound == null) {
-        "$location has a flexible Kotlin type, which Tapik cannot reproduce in generated source"
+        "$location has a flexible Kotlin type, which tapik cannot reproduce in generated source"
     }
     require(!definitelyNonNull) {
-        "$location has a definitely-non-null Kotlin type, which Tapik cannot reproduce in generated source"
+        "$location has a definitely-non-null Kotlin type, which tapik cannot reproduce in generated source"
     }
     require(classifier !is KotlinTypeParameterClassifier) {
         val parameter = classifier as KotlinTypeParameterClassifier

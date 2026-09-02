@@ -23,7 +23,7 @@ internal fun IrClass.isConcreteApi(apiClass: IrClass): Boolean =
 internal fun IrClass.registeredApiType(messages: MessageCollector): RegisteredApiType? {
     val displayName = fqNameWhenAvailable?.asString() ?: name.asString()
     if (!isEffectivelyPublic()) {
-        messages.report(ERROR, "Tapik API type '$displayName' must be public")
+        messages.report(ERROR, "tapik API type '$displayName' must be public")
         return null
     }
     return when (kind) {
@@ -38,11 +38,11 @@ private fun IrClass.registeredApiClass(
     displayName: String
 ): RegisteredApiType? {
     if (isInner) {
-        messages.report(ERROR, "Tapik API class '$displayName' must not be inner")
+        messages.report(ERROR, "tapik API class '$displayName' must not be inner")
         return null
     }
     if (typeParameters.isNotEmpty()) {
-        messages.report(ERROR, "Tapik API class '$displayName' must not declare type parameters")
+        messages.report(ERROR, "tapik API class '$displayName' must not declare type parameters")
         return null
     }
     val constructor =
@@ -53,7 +53,7 @@ private fun IrClass.registeredApiClass(
     if (constructor == null) {
         messages.report(
             ERROR,
-            "Tapik API class '$displayName' must declare a public no-argument constructor"
+            "tapik API class '$displayName' must declare a public no-argument constructor"
         )
         return null
     }

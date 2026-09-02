@@ -9,7 +9,7 @@ sealed interface Schema {
     fun named(name: String): Schema
 }
 
-/** Scalar schema types needed by Tapik's built-in formats. */
+/** Scalar schema types needed by tapik's built-in formats. */
 enum class SchemaType {
     BOOLEAN,
     INTEGER,

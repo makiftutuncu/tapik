@@ -31,7 +31,7 @@ every production, `test-`, and `example-` reactor module, and receives no public
 
 ## Publication
 
-Tapik releases are published to Maven Central under `dev.akif`. The parent and every production module inherit the
+tapik releases are published to Maven Central under `dev.akif`. The parent and every production module inherit the
 project name, description, URL, MIT license, developer, and source-control metadata required by Central. Production
 JARs include their Kotlin sources and a per-module `javadoc`-classifier JAR containing Dokka's standard HTML output.
 The classifier satisfies repository conventions without switching Dokka to its experimental Javadoc renderer. The
@@ -82,9 +82,9 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `example-contract` | `dev.akif:tapik-example-contract` |
 | `example-application` | `dev.akif:tapik-example-application` |
 
-`tapik-bom` is a published Maven BOM that manages one release version for every published Tapik production artifact.
+`tapik-bom` is a published Maven BOM that manages one release version for every published tapik production artifact.
 It excludes all non-production `test-` and `example-` artifacts. Users import the BOM in project
-`dependencyManagement` and omit versions from their ordinary Tapik dependencies. Maven build-plugin versions and
+`dependencyManagement` and omit versions from their ordinary tapik dependencies. Maven build-plugin versions and
 dependencies declared inside a build plugin remain explicitly versioned because project dependency management does
 not govern those scopes.
 
@@ -126,9 +126,9 @@ Other module packages follow the same folder-name hierarchy: `common-format` use
 `target-openapi` uses `dev.akif.tapik.target.openapi`, and `plugin-maven` uses `dev.akif.tapik.plugin.maven`. Example
 packages describe their domain instead of the build mechanism. The library example uses
 `com.example.library.contract` and `com.example.library.application` so its source can be copied into an ordinary
-project without carrying Tapik's internal test naming.
+project without carrying tapik's internal test naming.
 
-The non-production `test-fixtures` module contains ordinary Tapik definitions grouped by domain package. Its initial
+The non-production `test-fixtures` module contains ordinary tapik definitions grouped by domain package. Its initial
 `dev.akif.tapik.test.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact
 in their tests so every interpreter is verified against the same contracts instead of maintaining target-specific
 fixtures.

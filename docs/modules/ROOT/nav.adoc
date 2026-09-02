@@ -1,0 +1,25 @@
+* xref:index.adoc[Home]
+* Start here
+** xref:getting-started.adoc[Quickstart]
+** xref:choose-a-goal.adoc[Choose a goal]
+** xref:runnable-example.adoc[Runnable example]
+* Define contracts
+** xref:contracts/index.adoc[Contract DSL]
+* Generate documentation
+** xref:documentation/index.adoc[Overview]
+** xref:documentation/openapi.adoc[OpenAPI]
+* Generate clients
+** xref:clients/index.adoc[Overview]
+** xref:clients/spring-restclient.adoc[Spring RestClient]
+* Implement servers
+** xref:servers/index.adoc[Overview]
+** xref:servers/spring-webmvc.adoc[Spring WebMVC]
+* Reference
+** xref:generation/index.adoc[Generation model]
+** xref:reference/maven.adoc[Maven setup]
+** xref:reference/troubleshooting.adoc[Troubleshooting]
+* Understand tapik
+** xref:concepts/type-safety.adoc[Type safety]
+* Contribute
+** xref:development.adoc[Development guide]
+* link:api/index.html[Kotlin API reference]

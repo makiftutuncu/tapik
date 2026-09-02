@@ -6,7 +6,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 
 class KotlinSourceSpec : FunSpec({
-    test("read compiled type arguments and Tapik tuple elements") {
+    test("read compiled type arguments and tapik tuple elements") {
         val string = KotlinType(KotlinClassClassifier("kotlin.String"))
         val integer = KotlinType(KotlinClassClassifier("kotlin.Int"))
         val tuple =

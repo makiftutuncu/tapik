@@ -9,7 +9,7 @@ import java.nio.file.Path
 import javax.xml.parsers.DocumentBuilderFactory
 
 class BomSpec : FunSpec({
-    test("manage every published Tapik module at the release version") {
+    test("manage every published tapik module at the release version") {
         val repository = repositoryRoot()
         val productionArtifacts =
             elements(repository.resolve("pom.xml"), "module")

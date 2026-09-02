@@ -4,7 +4,7 @@ import dev.akif.tapik.*
 import dev.akif.tapik.format.kotlinx.jsonBody
 import kotlinx.serialization.json.Json
 
-/** Library book operations used as Tapik's initial end-to-end contract fixture. */
+/** Library book operations used as tapik's initial end-to-end contract fixture. */
 object Books : Api() {
     private val requestId = header.uuid("X-Request-Id")
     private val location = header.string("Location")
