@@ -101,8 +101,37 @@
 - [x] Add a small runnable Maven example that defines a contract artifact and consumes it for OpenAPI, RestClient, and
   WebMVC generation. Keep it aligned with the real plugin configuration through an automated build check.
 
-- [ ] Restore the Tapik website and publish one unified multi-module Dokka API reference at `tapik.akif.dev`. Keep the
-  per-module HTML documentation artifacts required by Maven Central alongside the unified site output.
+### Documentation website
+
+- [x] Define the documentation architecture, stable URL layout, preview behavior, and release publishing model. Treat
+  narrative documentation and the Kotlin API reference as complementary parts of one versioned website.
+
+- [ ] Restore Antora and the documentation information architecture from `main`, rewritten for the 0.6 Maven-based
+  implementation. Keep the new landing page and carry its visual language into a reproducible Antora UI.
+
+- [ ] Write a source-backed quickstart around the runnable examples. Cover same-module and compiled-contract modes,
+  Maven phases and commands, generated locations, and the shortest path to a working OpenAPI result.
+
+- [ ] Document the core DSL from API and endpoint identity through URIs, inputs, outputs, formats, schemas,
+  documentation, tags, and composition. Prefer focused examples that compile as part of the repository.
+
+- [ ] Document the host-neutral generation model, compiler registry, and Maven plugin configuration. Keep lifecycle,
+  selection, naming, generated output, and failure behavior easy to find as reference material.
+
+- [ ] Add task-oriented guides for OpenAPI, Spring RestClient, and Spring WebMVC. Build each guide from the runnable
+  examples and explain the boundary between generated code and user-owned code.
+
+- [ ] Integrate one unified production-only Dokka reference into the Antora website with navigation in both directions.
+  Keep the per-module HTML `javadoc` artifacts required by Maven Central unchanged.
+
+- [ ] Make documentation examples source-backed with Antora Collector so displayed Kotlin and Maven fragments cannot
+  drift from the tested examples. Avoid copying substantial executable examples into narrative pages.
+
+- [ ] Restore release-based documentation versioning and immutable versioned API references. Pull requests should
+  build a preview, while releases publish stable docs without exposing unreleased `main` content as latest.
+
+- [ ] Add documentation quality gates for unresolved cross-references, broken internal links, missing expected pages,
+  source-snippet drift, and basic rendered-site navigation on desktop and mobile.
 
 - [ ] Audit the generated OpenAPI document model against OpenAPI 3.2 as new DSL concepts land. Protect each supported
   concept with the complete golden document and keep JSON and YAML renderers semantically identical.
