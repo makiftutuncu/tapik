@@ -109,7 +109,7 @@
 - [x] Restore Antora and the documentation information architecture from `main`, rewritten for the 0.6 Maven-based
   implementation. Keep the new landing page and carry its visual language into a reproducible Antora UI.
 
-- [ ] Write a source-backed quickstart around the runnable examples. Cover same-module and compiled-contract modes,
+- [x] Write a source-backed quickstart around the runnable examples. Cover same-module and compiled-contract modes,
   Maven phases and commands, generated locations, and the shortest path to a working OpenAPI result.
 
 - [ ] Document the core DSL from API and endpoint identity through URIs, inputs, outputs, formats, schemas,

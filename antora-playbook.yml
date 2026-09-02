@@ -21,6 +21,7 @@ ui:
   supplemental_files: ./site/supplemental-ui
 antora:
   extensions:
+    - require: '@antora/collector-extension'
     - require: '@antora/lunr-extension'
       index_latest_only: true
 output:

@@ -1,30 +1,153 @@
 = Quickstart
-:description: Build tapik's runnable Maven example and inspect its generated OpenAPI, client, and server outputs.
+:description: Generate OpenAPI from a tapik contract in the same module or from a compiled contract dependency.
 
-The quickest verified tour is the repository's two-module library example. `example-contract` owns the API values and
-models; `example-application` consumes that compiled contract and generates all three currently supported targets.
+This guide takes the shortest path from an ordinary Kotlin value to an OpenAPI document. It also explains the two
+Maven lifecycle modes so you can choose the right setup when adding generated clients or servers later.
+
+The snippets below are collected from the repository's tested
+https://github.com/makiftutuncu/tapik/tree/main/example-contract[`example-contract`^] and
+https://github.com/makiftutuncu/tapik/tree/main/example-application[`example-application`^] modules. They cannot drift
+from the examples exercised by `./mvnw verify`.
 
 == Requirements
 
 * Java 25
-* Maven 3.9 or the repository's Maven Wrapper
-* Kotlin 2.4 when configuring your own project
+* Maven 3.9, or the Maven Wrapper in the tapik repository
+* Kotlin 2.4 or newer
 
-From a tapik checkout, run:
+== Generate OpenAPI in the contract module
 
-[source,shell]
+Use this mode when the current Maven module owns the `Api` values. The compiler must first produce the module's API
+registry, so generation runs later in the same lifecycle at `process-classes`.
+
+=== 1. Add the contract dependencies
+
+Import the BOM to align tapik library versions:
+
+[source,xml]
 ----
-./mvnw verify
+include::example$contract/pom.xml[tag=contract-bom]
 ----
 
-The build compiles the contract, creates its explicit API registry, generates OpenAPI YAML and Spring source, compiles
-the generated code, and exercises the runnable Spring application.
+Then add core and one format integration. The runnable example uses Jackson 3:
 
-The generated OpenAPI documents are written below `example-application/target/generated/tapik`. Generated RestClient
-and WebMVC Kotlin source is written below `example-application/target/generated-sources`.
+[source,xml]
+----
+<dependencies>
+include::example$contract/pom.xml[tag=contract-dependencies,indent=4]
+</dependencies>
+----
 
-This page intentionally gives only the shortest repository tour for now. The next documentation increment will turn
-it into a source-backed guide for adding tapik to another Maven project, including same-module and compiled-contract
-generation modes.
+=== 2. Enable registry generation
 
-Next, xref:runnable-example.adoc[see what the example proves] or xref:reference/maven.adoc[review the Maven model].
+Add tapik to `kotlin-maven-plugin`. This compiler plugin records the module's public `Api` declarations in a
+deterministic registry; the generation plugin reads that registry rather than scanning classes.
+
+[source,xml]
+----
+include::example$contract/pom.xml[tag=compiler-plugin]
+----
+
+=== 3. Define an API
+
+An API is an ordinary Kotlin value. The delegated property name gives this endpoint its stable ID, `list`.
+
+[source,kotlin]
+----
+include::example$contract/Books.kt[]
+----
+
+=== 4. Configure the OpenAPI target
+
+Add one execution of the same tapik Maven plugin. Omitting `<phase>` is intentional: the `generate` goal defaults to
+`process-classes`, after the current module and its registry have compiled.
+
+[source,xml]
+----
+include::example$contract/pom.xml[tag=same-module-openapi]
+----
+
+=== 5. Run the lifecycle
+
+From the tapik repository, the smallest command that reaches that execution is:
+
+[,shell]
+----
+./mvnw -pl example-contract -am process-classes
+----
+
+The generated document is:
+
+[,text]
+----
+example-contract/target/generated/tapik/Books.openapi.yml
+----
+
+In your own standalone project, run `./mvnw process-classes`. `./mvnw compile` is too early for a same-module
+execution, while `package`, `verify`, and `install` all include `process-classes` and therefore also generate the file.
+
+== Generate from a compiled contract
+
+Use compiled-contract mode when an application consumes APIs from a separate Maven artifact. Because the dependency's
+registry already exists, the consumer can generate during `generate-sources`. This is the recommended mode when the
+consumer's ordinary Kotlin source needs to refer to generated client or server types.
+
+First, depend directly on the contract:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=compiled-contract-dependency]
+----
+
+Then bind the target execution explicitly to `generate-sources`:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=compiled-contract-openapi]
+----
+
+The runnable reactor example can be built with:
+
+[,shell]
+----
+./mvnw -pl example-application -am compile
+----
+
+`-am` builds the contract dependency first. Outside a reactor, publish the contract to a Maven repository or install it
+locally before compiling the consumer. The application document is written to:
+
+[,text]
+----
+example-application/target/generated/tapik/Books.openapi.yml
+----
+
+== Choose the lifecycle phase
+
+[cols="2,2,2,2", options="header"]
+|===
+|Where APIs are declared |Execution phase |Minimum command |Can main source use generated Kotlin?
+
+|The current module
+|`process-classes` (default)
+|`./mvnw process-classes`
+|No; main compilation has already finished
+
+|A compiled dependency
+|`generate-sources` (explicit)
+|`./mvnw compile`
+|Yes
+|===
+
+Running `./mvnw tapik:generate` directly is not a substitute for these lifecycle commands: it does not first compile a
+same-module registry or guarantee that generated source is registered at the right point. During generation, tapik logs
+every file it writes, making the selected APIs and output locations visible in the build.
+
+The default artifact output is `${project.build.directory}/generated/tapik`. Source targets in the runnable application
+use explicit directories:
+
+* Spring RestClient: `target/generated-sources/tapik-restclient`
+* Spring WebMVC: `target/generated-sources/tapik-webmvc`
+
+Next, xref:runnable-example.adoc[see the complete runnable example],
+xref:documentation/openapi.adoc[configure OpenAPI generation], or
+xref:reference/maven.adoc[review the Maven model].

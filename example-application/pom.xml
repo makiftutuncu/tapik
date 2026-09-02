@@ -30,11 +30,13 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- tag::compiled-contract-dependency[] -->
         <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-example-contract</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- end::compiled-contract-dependency[] -->
         <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-target-spring-restclient</artifactId>
@@ -85,6 +87,7 @@
                 <artifactId>tapik-plugin-maven</artifactId>
                 <version>${project.version}</version>
                 <executions>
+                    <!-- tag::compiled-contract-openapi[] -->
                     <execution>
                         <id>generate-openapi</id>
                         <phase>generate-sources</phase>
@@ -98,6 +101,7 @@
                             </targetConfiguration>
                         </configuration>
                     </execution>
+                    <!-- end::compiled-contract-openapi[] -->
                     <execution>
                         <id>generate-filtered-openapi</id>
                         <phase>generate-sources</phase>

@@ -3,3 +3,15 @@ title: tapik
 version: v0.6.0
 nav:
   - modules/ROOT/nav.adoc
+ext:
+  collector:
+    scan:
+      - dir: example-contract
+        files: pom.xml
+        into: modules/ROOT/examples/contract
+      - dir: example-contract/src/main/kotlin/com/example/library/contract
+        files: Books.kt
+        into: modules/ROOT/examples/contract
+      - dir: example-application
+        files: pom.xml
+        into: modules/ROOT/examples/application

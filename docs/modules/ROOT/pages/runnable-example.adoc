@@ -13,5 +13,5 @@ compiles and runs. Browse the
 https://github.com/makiftutuncu/tapik/tree/main/example-contract[contract module,window=_blank] and
 https://github.com/makiftutuncu/tapik/tree/main/example-application[application module,window=_blank].
 
-The quickstart will collect source directly from these modules in a later increment. Until then, the root README is the
-most complete configuration reference for experimenting with the rewrite.
+The xref:getting-started.adoc[quickstart] collects its Kotlin and Maven fragments directly from these tested modules.
+For the complete application wiring, inspect the modules themselves.

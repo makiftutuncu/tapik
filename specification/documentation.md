@@ -73,6 +73,22 @@ The narrative documentation is organized around user goals rather than tapik's i
 The 0.5 documentation on `main` is an information-architecture reference only. Pages must be rewritten and verified
 against the 0.6 Maven plugin, compiler-generated registry, DSL, formats, targets, generated code, and runnable examples.
 
+## Quickstart requirements
+
+The primary quickstart must lead with the shortest working OpenAPI workflow and explain both supported Maven lifecycle
+modes using the runnable examples as executable source:
+
+- In same-module mode, the contract module applies the tapik Kotlin compiler plugin and runs generation after its
+  classes exist. The tapik Maven plugin's default `process-classes` phase is the safe lifecycle binding; invoking only
+  `compile` cannot generate from the registry produced by that same compilation.
+- In compiled-contract mode, a consumer depends on an already compiled contract artifact. Generation may therefore
+  run in `generate-sources`, before the consumer's Kotlin compilation, so generated client and server source can be
+  compiled as ordinary application source.
+
+The guide must give exact Maven commands, lifecycle expectations, and generated OpenAPI and Kotlin source locations.
+Its Kotlin and Maven fragments must be collected from the tested `example-contract` and `example-application` source
+files rather than maintained as independent copies in the documentation.
+
 ## Preview and publication
 
 Pull requests build the current worktree documentation and unified API reference as a validation preview. They do not
