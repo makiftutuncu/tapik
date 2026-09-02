@@ -1,0 +1,50 @@
+= Documentation and composition
+:description: Attach OpenAPI-aligned documentation and compose tapik APIs without losing endpoint identity.
+
+Documentation is stored on the contract values that own it. It does not add generic noise to `Endpoint`, but immutable
+modifiers preserve every existing structural type.
+
+[source,kotlin]
+----
+include::example$dsl/DocumentationExamples.kt[tag=contract-documentation]
+----
+
+== Documentation fields
+
+Endpoint method builders accept `summary` and `description`. `.summary(...)`, `.description(...)`, and
+`.document(...)` replace values later; the last supplied value wins, while an omitted `.document` argument retains its
+current value.
+
+Path variables, queries, and headers carry parameter descriptions and deprecation flags. A header keeps the same
+documentation whether used on a request or response. Request-body documentation belongs to the complete input body
+group, while response documentation belongs to one output alternative.
+
+Present documentation strings must not be blank. This rejects unusable descriptions while constructing the contract,
+before a documentation target runs.
+
+== Tags
+
+Tags use set semantics. Initial `tags` may be passed to the method builder, `.tag("write")` appends one value, and
+`.tags(setOf(...))` replaces the set. Blank tags are invalid; tag ordering is intentionally not meaningful.
+
+== Compose APIs explicitly
+
+An API includes another API through a delegated property:
+
+[source,kotlin]
+----
+include::example$dsl/library/Library.kt[tag=api-composition]
+----
+
+`Library.authors` is the original `Authors` value with its concrete Kotlin type, not a copied metadata representation.
+Its endpoints therefore keep IDs such as `Authors.list` instead of becoming `Library.authors.list`.
+
+`Library.endpoints` recursively flattens each inclusion at its declaration position. In the example, all author
+endpoints come before all book endpoints, which come before rental endpoints. Nested composition follows the same rule,
+and every included API remains independently usable.
+
+tapik rejects direct or transitive inclusion cycles, repeated API instances, colliding API IDs, and duplicate qualified
+endpoint IDs. Composition is explicit and deterministic; it does not scan packages or reflect over arbitrary classes.
+
+Next, xref:documentation/index.adoc[generate documentation] or
+xref:generation/index.adoc[understand target generation].

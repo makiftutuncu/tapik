@@ -5,11 +5,13 @@ import dev.akif.tapik.format
 import kotlinx.serialization.Serializable
 
 /** A book identifier serialized as [value]. */
+// tag::book-id-type[]
 @JvmInline
 @Serializable
 value class BookId(
     val value: String
 )
+// end::book-id-type[]
 
 /** An author identifier serialized as [value]. */
 @JvmInline
@@ -26,10 +28,12 @@ value class RentalId(
 )
 
 /** String representation of [BookId] used by URI parameters. */
+// tag::book-id-format[]
 val bookIdFormat: StringFormat<BookId> =
     format.string
         .transform(decode = ::BookId, encode = BookId::value)
         .named("BookId")
+// end::book-id-format[]
 
 /** String representation of [AuthorId] used by URI parameters. */
 val authorIdFormat: StringFormat<AuthorId> =

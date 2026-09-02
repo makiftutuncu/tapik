@@ -112,7 +112,7 @@
 - [x] Write a source-backed quickstart around the runnable examples. Cover same-module and compiled-contract modes,
   Maven phases and commands, generated locations, and the shortest path to a working OpenAPI result.
 
-- [ ] Document the core DSL from API and endpoint identity through URIs, inputs, outputs, formats, schemas,
+- [x] Document the core DSL from API and endpoint identity through URIs, inputs, outputs, formats, schemas,
   documentation, tags, and composition. Prefer focused examples that compile as part of the repository.
 
 - [ ] Document the host-neutral generation model, compiler registry, and Maven plugin configuration. Keep lifecycle,

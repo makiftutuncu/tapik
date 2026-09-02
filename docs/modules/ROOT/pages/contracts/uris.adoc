@@ -1,0 +1,79 @@
+= URIs and parameters
+:description: Compose ordered URI paths and typed query parameters in tapik.
+
+Every URI starts at `root`. Append literal path fragments and path values with `/`, then append query definitions with
+`+`:
+
+[source,kotlin]
+----
+include::example$dsl/ApiAndUriExamples.kt[tag=uri-parameters]
+----
+
+The examples render as `/assets?name=\{name}&page=\{page}&ownerId=\{ownerId}` and `/assets/\{*path}`. A `Uri` retains its
+literal segments, path values, and query definitions separately, so generators do not have to parse the rendered
+string.
+
+== Literal paths
+
+`root / "authors/books"` appends two already-encoded literal segments. Leading and trailing slashes at a composition
+boundary are normalized away, but empty fragments and repeated internal separators such as `"authors//books"` are
+rejected. A trailing slash does not define a distinct URI.
+
+tapik does not encode or decode literal fragments. Pass the exact wire representation you intend.
+
+== Path values
+
+Path variables are always required. Built-in factories cover scalar Kotlin and Java time types:
+
+[source,kotlin]
+----
+path.string("slug")
+path.uuid("bookId")
+path.localDate("publicationDate")
+----
+
+Use the generic builder for a domain type:
+
+[source,kotlin]
+----
+path("authorId", authorIdFormat)
+----
+
+The provided `StringFormat` determines how the wire string becomes the Kotlin value. Variable names must be valid and
+unique within the URI.
+
+`path.remaining("path")` is a distinct required wildcard value. It captures one or more final segments as a
+`List<String>` and must be the last path definition, although query parameters may follow it.
+
+== Query presence and repetition
+
+A query parameter begins as required. Presence modifiers change both its value semantics and inferred type:
+
+[cols="2,2", options="header"]
+|===
+|Definition |Decoded value
+
+|`query.string("term")`
+|`String`
+
+|`query.string("term").optional()`
+|optional `String`
+
+|`query.int("page").optional(default = 1)`
+|`Int`, using `1` when absent
+
+|`query.uuid("ownerId").repeated()`
+|`List<UUID>` from repeated wire occurrences
+|===
+
+The generic form is `query("authorId", authorIdFormat)`. Repetition belongs to one query definition and does not use
+extra tuple positions. Query names remain unique within a URI even though a repeated parameter may occur multiple
+times on the wire.
+
+Paths and queries preserve declaration order. Once a query has been appended, Kotlin no longer offers `/` overloads
+for adding path literals or variables; the invalid HTTP ordering does not compile.
+
+Path variables and queries support `.description(...)` and `.deprecated()` without losing their format or presence
+type.
+
+Next, xref:contracts/requests.adoc[define request inputs].

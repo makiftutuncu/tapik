@@ -89,6 +89,17 @@ The guide must give exact Maven commands, lifecycle expectations, and generated 
 Its Kotlin and Maven fragments must be collected from the tested `example-contract` and `example-application` source
 files rather than maintained as independent copies in the documentation.
 
+## Core DSL guide requirements
+
+The contract guide is divided into focused pages for API and endpoint identity, URI parameters, request inputs,
+response outputs, formats and schemas, and documentation and composition. It teaches the public construction grammar
+before exposing the underlying generic types, while still explaining which structural information those types retain
+and which invalid states Kotlin prevents.
+
+Examples must compile in the normal Maven reactor. Pages should collect complete or tagged fragments from the shared
+library fixture and its documentation-specific test sources so endpoint syntax, inferred types, ordering, defaults,
+presence, media alternatives, status matching, and composition cannot silently diverge from the implementation.
+
 ## Preview and publication
 
 Pull requests build the current worktree documentation and unified API reference as a validation preview. They do not

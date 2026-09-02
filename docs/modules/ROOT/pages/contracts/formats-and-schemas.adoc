@@ -1,0 +1,57 @@
+= Formats and schemas
+:description: Connect Kotlin values to wire representations and neutral schemas with tapik formats.
+
+A `Format<Value, Representation>` combines a codec with a schema. The codec handles values on the wire; the schema
+describes the same value to targets that need structural information.
+
+== Transform a built-in format
+
+The default string formats cover booleans, numeric types, strings, UUIDs, and standard date and time types. The `format`
+namespace exposes them without recreating format instances.
+
+This compiling fixture turns the built-in string format into a domain value class:
+
+[source,kotlin]
+----
+include::example$dsl/library/Identifiers.kt[tag=book-id-type]
+
+include::example$dsl/library/Identifiers.kt[tag=book-id-format]
+----
+
+`transform` catches exceptions thrown while converting the decoded value and returns a structured `DecodeResult`
+failure. `transformOrThrow` is the explicit propagating variant. Both retain the original wire representation and
+schema. `.named("BookId")` gives schema-aware targets a stable reusable component name.
+
+Every format also has `.repeated()`, which produces a list format, preserves element order, and accumulates decoding
+errors. Repeated query parameters use this operation internally.
+
+== Parameter and body formats
+
+Path variables, query parameters, and headers use `StringFormat<Value>`, an alias for `Format<Value, String>`. Bodies
+use `ByteArrayFormat<Value>` and carry their media type separately.
+
+Body integrations are opt-in:
+
+* `dev.akif:tapik-format-kotlinx` provides Kotlin serialization JSON codecs and schema derivation.
+* `dev.akif:tapik-format-jackson` provides Jackson 3 JSON codecs and schema derivation.
+
+Both expose `jsonBody<Value>()` from their integration package. Pass the integration's configured `Json` or
+`ObjectMapper` to its `format` parameter, and override `mediaType` for vendor JSON while retaining the same format
+behavior.
+
+== Neutral schemas
+
+The core schema algebra is intentionally independent of OpenAPI and serialization libraries. It currently represents:
+
+* scalar, enum, array, object, map, nullable, and reference schemas;
+* required and deprecated object properties;
+* ordered union alternatives with an optional discriminator and reference mapping.
+
+Schemas themselves are untyped; the enclosing `Format<Value, Representation>` establishes the Kotlin relationship.
+Format integrations derive these neutral values from user-owned models. Derivation fails when the chosen integration
+cannot describe a type it must encode, rather than silently producing an incomplete schema.
+
+Names are optional. Use `.named(...)` for a type that should become a reusable component; target-specific naming policy
+decides the final external name and resolves unnamed derived types.
+
+Next, xref:contracts/documentation-and-composition.adoc[document and compose APIs].

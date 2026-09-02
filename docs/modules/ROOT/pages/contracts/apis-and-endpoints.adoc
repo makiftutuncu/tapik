@@ -1,0 +1,62 @@
+= APIs and endpoints
+:description: Give tapik APIs and endpoints stable identities while retaining their complete inferred types.
+
+An `Api` is a named, ordered collection of endpoints. Both classes and objects can extend it:
+
+[source,kotlin]
+----
+include::example$dsl/ApiAndUriExamples.kt[tag=api-and-endpoints]
+----
+
+`Api()` uses the concrete type's simple name as its ID. You may pass an explicit non-blank ID to the constructor when
+the Kotlin type name is not the contract name you want.
+
+== Endpoint identity
+
+Endpoints are declared inside an API using delegated properties. The API ID and property name form the stable endpoint
+ID, so the example defines `AuthorRoutes.list` and `AuthorRoutes.get`.
+
+Property delegation is the only endpoint-binding syntax. It registers the endpoint during API initialization, retains
+declaration order, and gives the property its precise inferred type. `Api.endpoints` exposes all ready endpoints as an
+ordered list for generation, while the property itself retains information hidden by that list's star projections.
+
+[IMPORTANT]
+====
+Contract APIs used by generation must be public. Keep endpoint properties public when generated source needs to follow
+them from an API instance.
+====
+
+== Start with a method
+
+Inside an API, `get`, `head`, `post`, `put`, `patch`, `delete`, `connect`, `options`, `trace`, and `query` start an
+endpoint. Each takes a `Uri` and optional summary, description, and initial tag set.
+
+A fresh endpoint has useful defaults:
+
+* no request headers;
+* no request body input;
+* one empty `200 OK` response.
+
+That makes `val list by get(root / "authors")` complete. Add only the parts that differ.
+
+== Draft and ready values
+
+Method builders produce an immutable draft endpoint. Every modifier returns another draft value, so ordinary Kotlin
+functions can receive and refine partial definitions. Delegating the final value creates a ready endpoint and records
+its ID; modifiers are no longer available after that boundary.
+
+Conceptually, Kotlin infers:
+
+[source,kotlin]
+----
+Endpoint<Paths, Queries, Headers, Input, Outputs, EndpointState>
+----
+
+The concrete type arguments are more specific than these bounds. Ordered structures use arity-specific tuples from
+zero through eight, preserving each element's concrete type and declaration position. A ninth path value, query
+definition, header, body representation, or output alternative does not have a DSL overload and therefore does not
+compile.
+
+These types are the contract tapik targets consume. There is no parallel metadata copy of the endpoint definition.
+
+Next, xref:contracts/uris.adoc[build typed URIs].

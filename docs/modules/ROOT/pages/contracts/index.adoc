@@ -1,34 +1,28 @@
 = Define contracts
-:description: An overview of tapik's Kotlin-first HTTP contract DSL.
+:description: Define type-safe HTTP contracts as ordinary Kotlin values with tapik.
 :page-aliases: user-guide.adoc, custom-types.adoc, project-layout-and-discovery.adoc
 
-A tapik contract consists of public `Api` values containing delegated endpoint properties. The API type and delegated
-property name produce a stable endpoint identity such as `Books.list`.
+tapik contracts are ordinary, immutable Kotlin values. You describe the structure of an HTTP API once, retain that
+structure in the inferred types, and let generation targets decide how to turn it into documentation, clients, or
+servers.
+
+The DSL follows the shape of an exchange:
 
 [source,kotlin]
 ----
-object Books : Api() {
-    val list by
-        get(root / "books")
-            .output(Status.Ok with jsonBody<List<Book>>())
-}
+include::example$dsl/DocumentationExamples.kt[tag=complete-endpoint]
 ----
 
-Endpoint types preserve their method, URI inputs, request headers and bodies, and ordered response alternatives. The
-DSL uses arity-specific tuples and state types so invalid modifier order, duplicate definitions, and incomplete
-contracts can be rejected before target generation.
+You normally do not write an `Endpoint` type explicitly. Kotlin infers a type containing the path and query values,
+headers, request body, every response alternative, and whether the endpoint has been bound to an API property.
 
-== Contract vocabulary
+== Learn the DSL
 
-APIs and endpoints:: APIs group endpoint values while explicit inclusion can compose existing APIs without changing
-endpoint identity.
-URIs:: Ordered path segments and path variables are followed by query parameters. The type prevents adding path parts
-after query parameters.
-Inputs:: Headers and zero or more body media alternatives describe values accepted by the endpoint.
-Outputs:: Each ordered alternative combines a status matcher, optional body alternatives, and response headers.
-Formats and schemas:: A format owns wire encoding and schema information. Integrations such as Jackson and Kotlin
-serialization remain opt-in.
+* xref:contracts/apis-and-endpoints.adoc[APIs and endpoints] — identity, methods, defaults, state, and inferred types
+* xref:contracts/uris.adoc[URIs and parameters] — paths, query parameters, presence, repetition, and wildcard paths
+* xref:contracts/requests.adoc[Request inputs] — headers, bodies, media alternatives, and optional bodies
+* xref:contracts/responses.adoc[Response outputs] — statuses, bodies, headers, alternatives, and matching
+* xref:contracts/formats-and-schemas.adoc[Formats and schemas] — codecs, wire representations, derivation, and names
+* xref:contracts/documentation-and-composition.adoc[Documentation and composition] — descriptions, tags, and nested APIs
 
-The complete 0.6 DSL guide will expand these concepts with compiling examples. Until then, see the
-https://github.com/makiftutuncu/tapik/blob/main/specification/dsl.md[DSL specification,window=_blank] for the exact
-implemented grammar.
+The examples in these pages compile and run as part of `./mvnw verify`.

@@ -1,0 +1,49 @@
+= Request inputs
+:description: Define request headers and typed body media alternatives in tapik.
+
+Request headers and body input are separate parts of an endpoint. This example exercises required, fixed, and optional
+headers plus two JSON media representations and an allowed bodyless request:
+
+[source,kotlin]
+----
+include::example$dsl/RequestAndOutputExamples.kt[tag=request-input]
+----
+
+== Request headers
+
+Create headers with the same generic and built-in factory style as URI parameters:
+
+[source,kotlin]
+----
+header<BookId>("X-Book-Id", bookIdFormat)
+header.uuid("X-Request-Id")
+header.string("X-Source").fixed("library")
+----
+
+Headers may be required, optional, optional with a default, or fixed to a value. Names are validated as HTTP field
+names and must be unique case-insensitively within an endpoint.
+
+`.headers(headersOf(...))` is a one-time bulk initializer available only while the endpoint has no headers. After the
+first header is present, `.header(...)` appends one definition at a time. Both preserve concrete types and declaration
+order. `headersOf` requires between one and eight values; `noHeaders` represents the empty group.
+
+== Request bodies
+
+`.input(...)` can be called only while the endpoint has `NoInput`, making a second request input a compilation error.
+One `Body<Value>` combines:
+
+* the media type used for content negotiation;
+* a `ByteArrayFormat<Value>` that decodes, encodes, and describes the value.
+
+Format integrations supply builders such as `jsonBody<CreateBook>()`. The generic `body(mediaType, format)` builder is
+available when defining another representation.
+
+`bodiesOf(...)` groups alternative media representations of one logical Kotlin type. Their media types must be
+distinct. Adding `noBody` as the final alternative makes the complete request body optional; an endpoint with only
+`noInput` has no request-body definition at all.
+
+The body group is non-empty and preserves representation order. `noBody` may appear at most once and only last. The
+request-body description belongs to the group as a whole, matching OpenAPI's model; set it in `.input(...,
+description = ...)` or replace it with `.requestBodyDescription(...)`.
+
+Next, xref:contracts/responses.adoc[define response outputs].

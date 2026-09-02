@@ -1,0 +1,51 @@
+= Response outputs
+:description: Define ordered, non-overlapping status and content alternatives in tapik.
+
+Without an explicit output, an endpoint returns one empty `200 OK` response. The first `.output(...)` replaces that
+default; later calls append alternatives in declaration order.
+
+The output grammar always reads status matcher, body or bodies, then headers:
+
+[source,kotlin]
+----
+include::example$dsl/RequestAndOutputExamples.kt[tag=response-output]
+----
+
+== Status matchers
+
+An exact `Status` is the common case. `Status` accepts every valid HTTP code from 100 through 599 and provides named
+values such as `Status.Ok`, `Status.Created`, and `Status.NotFound`.
+
+Broader matchers are explicit:
+
+[source,kotlin]
+----
+Status.Ok with noBody
+statusesOf(Status.Ok, Status.Created) with noBody
+statusesIn(400..499) with noBody
+statusMatching("server error") { status -> status.code in 500..599 } with noBody
+----
+
+A custom matcher requires a stable description because its predicate cannot be carried into every generated target.
+The predicate must be pure and deterministic.
+
+Response alternatives may not overlap. tapik checks their matchers across the HTTP status domain while the contract is
+built and reports the first conflicting status. A target also fails generation when it cannot represent a valid matcher
+kind.
+
+== Bodies and headers
+
+Use `noBody`, one `Body<Value>`, or `bodiesOf(...)` after the matcher. Multiple bodies are media alternatives for the
+same logical shape, and duplicate media types are rejected. A distinct shape for the same media type is a separate
+output alternative with a non-overlapping status matcher.
+
+Output headers follow the body group with another `with`, as in `Status.Created with jsonBody<Book>() with
+headersOf(location)`. Header types and order remain part of that output's inferred type.
+
+`.description(...)` on the complete output supplies its response description. When it is absent, documentation targets
+may use their standard description for an exact status.
+
+Endpoints retain between one and eight explicit output alternatives. The concrete matcher, body group, and headers of
+every alternative remain available to generators.
+
+Next, xref:contracts/formats-and-schemas.adoc[connect Kotlin values to wire formats].

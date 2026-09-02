@@ -5,6 +5,12 @@
 ** xref:runnable-example.adoc[Runnable example]
 * Define contracts
 ** xref:contracts/index.adoc[Contract DSL]
+** xref:contracts/apis-and-endpoints.adoc[APIs and endpoints]
+** xref:contracts/uris.adoc[URIs and parameters]
+** xref:contracts/requests.adoc[Request inputs]
+** xref:contracts/responses.adoc[Response outputs]
+** xref:contracts/formats-and-schemas.adoc[Formats and schemas]
+** xref:contracts/documentation-and-composition.adoc[Documentation and composition]
 * Generate documentation
 ** xref:documentation/index.adoc[Overview]
 ** xref:documentation/openapi.adoc[OpenAPI]

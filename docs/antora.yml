@@ -15,3 +15,12 @@ ext:
       - dir: example-application
         files: pom.xml
         into: modules/ROOT/examples/application
+      - dir: test-fixtures/src/main/kotlin/test/fixtures/library
+        files: Identifiers.kt
+        into: modules/ROOT/examples/dsl/library
+      - dir: test-fixtures/src/main/kotlin/test/fixtures/library
+        files: Library.kt
+        into: modules/ROOT/examples/dsl/library
+      - dir: test-fixtures/src/test/kotlin/test/fixtures/documentation
+        files: '*Examples.kt'
+        into: modules/ROOT/examples/dsl
