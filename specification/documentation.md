@@ -36,6 +36,13 @@ version before a later release replaces it. Existing public documentation URLs s
 Documentation and API reference navigation must link back to each other, and the landing page must link to the real
 quickstart and documentation rather than using the repository README as the primary manual.
 
+Historical release tags used `tapik` as their Antora component name. Tagged website builds normalize that legacy name
+to `docs` before content classification, without modifying the tags, so every release belongs to one version lineage
+and appears in the same version selector under `/docs/`. The publishing process preserves already deployed `/tapik/`
+paths for compatibility, but newly rendered historical pages use the canonical `/docs/<version>/` locations. Releases
+before 0.6 did not archive a versioned API reference, so their header links to the latest API reference instead of a
+nonexistent historical path.
+
 ## Documentation toolchain
 
 Antora is the narrative documentation generator. It retains the existing AsciiDoc content model, search, navigation,
@@ -148,14 +155,27 @@ output synchronization, or diagnostic rules.
 
 ## Preview and publication
 
-Pull requests build the current worktree documentation and unified API reference as a validation preview. They do not
-publish it as the latest stable manual. Local development must provide one documented preview workflow that rebuilds
-the landing page, Antora content, imported examples, and Dokka output.
+Pull requests build the current worktree documentation and unified API reference as a validation preview alongside
+the tagged documentation history. This exercises the version selector and canonical historical paths, but does not
+publish the worktree as the latest stable manual. Local development must provide one documented preview workflow that
+rebuilds the landing page, Antora content, imported examples, and Dokka output.
 
 Stable documentation is published from a release ref after the release build succeeds. Publishing updates the
 unversioned latest URLs, archives that release's narrative and API output under its explicit version, and preserves
 older immutable versions. A push to `main` alone must not replace the latest stable documentation with unreleased
 content.
+
+A documentation release has one version identity. Its Git tag is `v` followed by the root Maven project version and
+must equal the version declared by `docs/antora.yml`; publication fails before deployment when these values differ.
+The release build renders tagged Antora history, the current release at both `/docs/` and `/docs/<version>/`, and the
+integrated Dokka reference at both matching `api/` locations. Navigation from a versioned narrative page selects that
+version's API reference, and navigation from either API copy returns to the narrative root beside it.
+
+Only a published, non-prerelease GitHub release, or an explicit manual retry naming the latest stable release tag, may
+deploy the public site. Release publication checks out that exact tag with complete tag history. Deployment may
+replace the unversioned landing page and latest documentation, but it preserves previously published explicit-version
+API directories; rebuilding a later release must not mutate an older version's generated reference. Pull requests and
+pushes to `main` run the worktree preview as validation and never deploy its output.
 
 ## Quality requirements
 

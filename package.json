@@ -9,7 +9,7 @@
     "docs:test": "node --test site/scripts/*.test.mjs",
     "docs:integrate-api": "node site/scripts/integrate-dokka-reference.mjs",
     "docs:preview": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && antora antora-preview-playbook.yml",
-    "docs:build": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && antora antora-playbook.yml"
+    "docs:build": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && antora antora-release-playbook.yml && antora antora-playbook.yml && node site/scripts/stage-release-documentation.mjs"
   },
   "devDependencies": {
     "@antora/cli": "3.2.0",

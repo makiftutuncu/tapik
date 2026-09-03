@@ -10,6 +10,13 @@ content:
       branches: HEAD
       tags: []
       start_path: docs
+    - url: .
+      branches: []
+      tags:
+        - v*
+        - '!v0.1.*'
+        - '!v0.2.0'
+      start_path: docs
 ui:
   bundle:
     url: ./site/target/antora-ui-bundle.zip
@@ -17,6 +24,9 @@ ui:
   supplemental_files: ./site/supplemental-ui
 antora:
   extensions:
+    - require: ./site/scripts/normalize-documentation-components.cjs
+      legacy_component: tapik
+      component: docs
     - require: '@antora/collector-extension'
     - require: '@antora/lunr-extension'
       index_latest_only: true

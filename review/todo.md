@@ -127,7 +127,7 @@
 - [x] Make documentation examples source-backed with Antora Collector so displayed Kotlin and Maven fragments cannot
   drift from the tested examples. Avoid copying substantial executable examples into narrative pages.
 
-- [ ] Restore release-based documentation versioning and immutable versioned API references. Pull requests should
+- [x] Restore release-based documentation versioning and immutable versioned API references. Pull requests should
   build a preview, while releases publish stable docs without exposing unreleased `main` content as latest.
 
 - [ ] Add documentation quality gates for unresolved cross-references, broken internal links, missing expected pages,

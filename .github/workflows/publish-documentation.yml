@@ -1,0 +1,91 @@
+name: Publish documentation
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Stable release tag to publish, for example v0.6.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: documentation-${{ github.event.release.tag_name || inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name != 'release' || github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+          cache-dependency-path: |
+            pom.xml
+            **/pom.xml
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install documentation dependencies
+        run: npm ci
+
+      - name: Validate latest stable release
+        run: |
+          latest_release="$(gh release list --repo "${GITHUB_REPOSITORY}" --exclude-drafts --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName')"
+          if [ "${RELEASE_TAG}" != "${latest_release}" ]; then
+            echo "Documentation can only be published for the latest stable release."
+            echo "Requested: ${RELEASE_TAG}"
+            echo "Latest stable release: ${latest_release:-none}"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Validate release version
+        run: node site/scripts/stage-release-documentation.mjs --validate-only
+        env:
+          TAPIK_RELEASE_TAG: ${{ env.RELEASE_TAG }}
+
+      - name: Verify release
+        run: ./mvnw --batch-mode --no-transfer-progress clean verify
+
+      - name: Install artifacts for API reference
+        run: ./mvnw --batch-mode --no-transfer-progress -DskipTests install
+
+      - name: Build website and API reference
+        run: ./mvnw --batch-mode --no-transfer-progress -f site/pom.xml package
+
+      - name: Build stable and versioned documentation
+        run: npm run docs:build
+        env:
+          TAPIK_RELEASE_TAG: ${{ env.RELEASE_TAG }}
+
+      - name: Publish documentation
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site/target/site
+          cname: tapik.akif.dev
+          keep_files: true

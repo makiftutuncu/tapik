@@ -24,8 +24,37 @@ npm run docs:preview
 ----
 
 The preview command verifies the Dokka integration, adds version-relative links from every API reference page back to
-the user guide, and then renders Antora. It fails with the required Maven command when the unified API reference has
-not been built first.
+the user guide, and then renders the current worktree together with tagged documentation history. This makes the same
+version selector and canonical historical paths available locally. The command fails with the required Maven command
+when the unified API reference has not been built first.
 
 The complete site is written to `site/target/site`. Documentation publication is release-based; a push to `main` does
 not replace the stable site with unreleased content.
+
+== Publishing a release
+
+The `Publish documentation` GitHub Actions workflow is the only documentation publisher. It runs for a published,
+non-prerelease GitHub release, and it can be started manually with the latest stable release tag when its publication
+must be retried. It rejects an older, draft, or prerelease release so a retry cannot replace the latest API reference
+with mismatched output. In both cases it checks out that exact tag with complete tag history; pull requests and pushes
+to `main` only run the preview build.
+
+The release tag, root Maven version, and `docs/antora.yml` version must identify the same release. For example, tag
+`v0.6.0` requires Maven version `0.6.0` and Antora version `v0.6.0`. The workflow rejects a mismatch before building or
+publishing the site.
+
+The release build publishes the current guide and unified API reference at `/docs/` and `/docs/api/`. It also writes
+the same release to `/docs/v0.6.0/` and `/docs/v0.6.0/api/`, using the actual release version, so those explicit URLs
+remain available after a later release replaces the latest paths. Previously published versioned API references are
+preserved during deployment.
+
+After the Maven site build has produced the unified API reference, the production documentation build can be rehearsed
+from a release checkout with:
+
+[source,shell]
+----
+TAPIK_RELEASE_TAG=v0.6.0 npm run docs:build
+----
+
+The command validates the three version identities, renders the tagged Antora history and explicit current version,
+and copies the already integrated API reference into the matching version directory.

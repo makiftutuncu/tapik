@@ -17,8 +17,20 @@
     </div>
     <div id="topbar-nav" class="navbar-menu">
       <div class="navbar-end">
-        <a class="navbar-item" href="{{{siteRootPath}}}/docs/">Documentation</a>
+        {{#if page.componentVersion.activeVersionSegment}}
+        <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/{{{page.componentVersion.activeVersionSegment}}}/">Documentation</a>
+        {{else}}
+        <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/">Documentation</a>
+        {{/if}}
+        {{#if (eq page.origin.descriptor.name "tapik")}}
         <a class="navbar-item" href="{{{siteRootPath}}}/docs/api/">API reference</a>
+        {{else}}
+        {{#if page.componentVersion.activeVersionSegment}}
+        <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/{{{page.componentVersion.activeVersionSegment}}}/api/">API reference</a>
+        {{else}}
+        <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/api/">API reference</a>
+        {{/if}}
+        {{/if}}
         <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
     </div>
