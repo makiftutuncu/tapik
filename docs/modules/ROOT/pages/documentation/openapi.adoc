@@ -77,9 +77,25 @@ request bodies, response alternatives, media representations, schemas, tags, and
 become reusable components. Optional and repeated query shapes, defaults, fixed values, unions, discriminators, and
 deprecation metadata are represented where OpenAPI supports them.
 
-Generation fails if translating a contract would lose meaning—for example, when schema references cannot be resolved,
+Generation fails for unsupported mappings—for example, when schema references cannot be resolved,
 two endpoints become the same OpenAPI path and method, or a wildcard remaining path has no faithful representation.
-The diagnostic identifies the relevant API or endpoint.
+The diagnostic identifies the relevant path, component, or endpoint.
+
+Named reference aliases remain separate components when their normalized names differ. Discriminated unions must
+provide `defaultMapping` if any alternative does not require the discriminator property; the target checks this after
+resolving schema references. Discriminators are selection hints: the underlying schemas must still distinguish the
+alternatives correctly.
+
+== Current coverage boundaries
+
+OpenAPI 3.2 is the output version, not a claim that every OpenAPI feature has a tapik DSL equivalent. Servers, security
+schemes, callbacks, webhooks, links, examples, rich tag metadata, and extensions are not modeled yet. Nor are
+multipart/form encodings, streaming item schemas, or XML-specific schema metadata.
+
+Headers are translated literally. OpenAPI tooling may ignore request `Accept`, `Content-Type`, and `Authorization`
+parameters and response `Content-Type` headers; header declarations do not create security schemes. Define body
+media types through body formats. Unlike request bodies, OpenAPI responses have no body `required` flag, so an
+optional response body documents its possible media types without representing absence as JSON `null`.
 
 == Ownership boundary
 

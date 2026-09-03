@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.Yaml
  * Renders this document as deterministic block-style YAML.
  *
  * @return the complete OpenAPI document as YAML.
+ * @throws OpenApiGenerationException when a default or constant contains an invalid numeric literal.
  */
 fun OpenApiDocument.toYaml(): String = Yaml(dumperOptions()).dump(json().yamlValue())
 

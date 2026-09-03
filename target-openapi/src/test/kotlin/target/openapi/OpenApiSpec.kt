@@ -259,15 +259,6 @@ class OpenApiSpec : FunSpec({
         document.toJson(pretty = false) shouldBe rendered
     }
 
-    test("generate the complete Books API document") {
-        val expected =
-            requireNotNull(OpenApiSpec::class.java.getResource("/openapi/books-api.json"))
-                .readText()
-                .trimEnd()
-
-        document.toJson() shouldBe expected
-    }
-
     test("render CONNECT through OpenAPI 3.2 additional operations") {
         val connections =
             object : Api("Connections") {

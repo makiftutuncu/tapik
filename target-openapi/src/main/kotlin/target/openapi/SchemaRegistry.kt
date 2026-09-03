@@ -8,11 +8,14 @@ internal class SchemaRegistry(
     val components: LinkedHashMap<String, OpenApiSchema> = linkedMapOf()
     private val references: MutableSet<String> = linkedSetOf()
     private val active: MutableSet<String> = mutableSetOf()
+    private val discriminatedUnions: MutableList<OpenApiSchema> = mutableListOf()
 
     fun schema(schema: Schema): OpenApiSchema {
-        if (schema is ReferenceSchema) return schemaReference(schema.reference)
-
         val schemaName = schema.name
+        if (schema is ReferenceSchema &&
+            (schemaName == null || componentNaming.name(schemaName) == componentNaming.name(schema.reference))
+        ) return schemaReference(schema.reference)
+
         if (schemaName != null) {
             val name = componentNaming.name(schemaName)
             requireValidComponentName(name)
@@ -41,6 +44,30 @@ internal class SchemaRegistry(
                 "OpenAPI schemas contain unresolved references: ${unresolved.joinToString()}"
             )
         }
+        discriminatedUnions.forEach { union ->
+            val discriminator = requireNotNull(union.discriminator)
+            if (discriminator.defaultMapping == null) {
+                union.oneOf.forEach { alternative ->
+                    if (!requiresProperty(alternative, discriminator.propertyName)) {
+                        throw OpenApiGenerationException(
+                            "OpenAPI discriminator '${discriminator.propertyName}' needs defaultMapping because " +
+                                "alternative '${alternative.reference}' does not require the property"
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun requiresProperty(schema: OpenApiSchema, property: String, visited: Set<String> = emptySet()): Boolean {
+        if (property in schema.required) return true
+        schema.reference?.let { reference ->
+            if (reference in visited) return false
+            val target = components.getValue(reference.removePrefix("#/components/schemas/"))
+            return requiresProperty(target, property, visited + reference)
+        }
+        return (schema.oneOf.isNotEmpty() && schema.oneOf.all { requiresProperty(it, property, visited) }) ||
+            (schema.anyOf.isNotEmpty() && schema.anyOf.all { requiresProperty(it, property, visited) })
     }
 
     private fun inline(schema: Schema): OpenApiSchema =
@@ -100,7 +127,9 @@ internal class SchemaRegistry(
         }
 
         val discriminator = union.discriminator?.openApi(alternatives)
-        return OpenApiSchema(oneOf = alternatives, discriminator = discriminator)
+        return OpenApiSchema(oneOf = alternatives, discriminator = discriminator).also { schema ->
+            if (discriminator != null) discriminatedUnions += schema
+        }
     }
 
     private fun SchemaDiscriminator.openApi(alternatives: List<OpenApiSchema>): OpenApiDiscriminator {
@@ -131,7 +160,7 @@ internal class SchemaRegistry(
         target: ReferenceSchema,
         alternatives: List<String>
     ): String {
-        val reference = requireNotNull(schemaReference(target.reference).reference)
+        val reference = requireNotNull(schema(target).reference)
         if (reference !in alternatives) {
             throw OpenApiGenerationException(
                 "OpenAPI discriminator mapping target '${target.reference}' must be a union alternative"

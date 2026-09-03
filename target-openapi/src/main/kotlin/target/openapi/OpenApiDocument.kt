@@ -3,7 +3,7 @@ package dev.akif.tapik.target.openapi
 import dev.akif.tapik.Method
 
 /**
- * A complete OpenAPI document.
+ * The OpenAPI document subset emitted by tapik.
  *
  * @property specificationVersion OpenAPI specification version used by the document.
  * @property info identifying information about the API document.
@@ -125,7 +125,7 @@ data class OpenApiRequestBody(
 /**
  * A response with headers and media representations.
  *
- * @property description required response description.
+ * @property description response description, always supplied by tapik even though OpenAPI 3.2 permits omission.
  * @property headers response headers keyed by name in declaration order.
  * @property content representations keyed by media type in declaration order.
  */

@@ -133,7 +133,7 @@
 - [x] Add documentation quality gates for unresolved cross-references, broken internal links, missing expected pages,
   source-snippet drift, and basic rendered-site navigation on desktop and mobile.
 
-- [ ] Audit the generated OpenAPI document model against OpenAPI 3.2 as new DSL concepts land. Protect each supported
+- [x] Audit the generated OpenAPI document model against OpenAPI 3.2 as new DSL concepts land. Protect each supported
   concept with the complete golden document and keep JSON and YAML renderers semantically identical.
 
 - [ ] Perform a clean release-profile build and consume its staged artifacts from an external Maven fixture before the

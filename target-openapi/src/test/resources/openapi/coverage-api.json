@@ -1,0 +1,355 @@
+{
+    "openapi": "3.2.0",
+    "info": {
+        "title": "Coverage",
+        "summary": "OpenAPI 3.2 coverage",
+        "description": "Complete DSL interpretation fixture",
+        "version": "0.6.0"
+    },
+    "paths": {
+        "/records/{id}": {
+            "query": {
+                "tags": [
+                    "records",
+                    "search"
+                ],
+                "summary": "Search records",
+                "description": "Search by identifier.\nReturns the matching record.",
+                "operationId": "OpenApiCoverage.search",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record identifier",
+                        "required": true,
+                        "deprecated": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Identifier"
+                        }
+                    },
+                    {
+                        "name": "mode",
+                        "in": "query",
+                        "description": "Search mode",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "deprecated": true,
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "default": [
+                                "null",
+                                "200"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 42
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 123456789012345678901234567890
+                        }
+                    },
+                    {
+                        "name": "weight",
+                        "in": "query",
+                        "schema": {
+                            "type": "number",
+                            "format": "decimal",
+                            "default": 1234567890.1234567890123456789
+                        }
+                    },
+                    {
+                        "name": "X-Enabled",
+                        "in": "header",
+                        "description": "Feature switch",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    {
+                        "name": "X-Trace",
+                        "in": "header",
+                        "deprecated": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Optional search payload",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Record"
+                            }
+                        },
+                        "application/vnd.tapik.record+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Record"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Matching record",
+                        "headers": {
+                            "X-Rate": {
+                                "description": "Remaining allowance",
+                                "deprecated": true,
+                                "schema": {
+                                    "type": "number",
+                                    "format": "double",
+                                    "default": 0.5
+                                }
+                            },
+                            "X-Mode": {
+                                "required": true,
+                                "schema": {
+                                    "type": "string",
+                                    "const": "on"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Record"
+                                }
+                            },
+                            "application/vnd.tapik.record+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Record"
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "Matching record",
+                        "headers": {
+                            "X-Rate": {
+                                "description": "Remaining allowance",
+                                "deprecated": true,
+                                "schema": {
+                                    "type": "number",
+                                    "format": "double",
+                                    "default": 0.5
+                                }
+                            },
+                            "X-Mode": {
+                                "required": true,
+                                "schema": {
+                                    "type": "string",
+                                    "const": "on"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Record"
+                                }
+                            },
+                            "application/vnd.tapik.record+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Record"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "description": "Invalid search"
+                    },
+                    "590": {
+                        "description": "HTTP 590 response"
+                    },
+                    "591": {
+                        "description": "HTTP 591 response"
+                    }
+                }
+            }
+        },
+        "/tunnel": {
+            "head": {
+                "operationId": "OpenApiCoverage.probe",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "additionalOperations": {
+                "CONNECT": {
+                    "operationId": "OpenApiCoverage.tunnel",
+                    "responses": {
+                        "200": {
+                            "description": "OK"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Identifier": {
+                "type": "string"
+            },
+            "State": {
+                "type": "string",
+                "enum": [
+                    "open",
+                    "closed"
+                ]
+            },
+            "PreviousRecord": {
+                "$ref": "#/components/schemas/Record"
+            },
+            "Edited": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "edited"
+                        ]
+                    }
+                },
+                "required": [
+                    "kind"
+                ]
+            },
+            "Other": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "other"
+                        ]
+                    }
+                }
+            },
+            "Event": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/Edited"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Other"
+                    }
+                ],
+                "discriminator": {
+                    "propertyName": "kind",
+                    "mapping": {
+                        "edited": "#/components/schemas/Edited",
+                        "other": "#/components/schemas/Other"
+                    },
+                    "defaultMapping": "#/components/schemas/Other"
+                }
+            },
+            "Record": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/Identifier"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "state": {
+                        "$ref": "#/components/schemas/State"
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "deprecated": true
+                    },
+                    "previous": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PreviousRecord"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "scores": {
+                        "type": "object",
+                        "propertyNames": {
+                            "$ref": "#/components/schemas/State"
+                        },
+                        "additionalProperties": {
+                            "anyOf": [
+                                {
+                                    "type": "number"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    "events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Event"
+                        }
+                    },
+                    "choice": {
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "integer"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "active",
+                    "count",
+                    "state",
+                    "scores",
+                    "events"
+                ]
+            }
+        }
+    }
+}

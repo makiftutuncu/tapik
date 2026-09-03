@@ -15,6 +15,7 @@ import kotlinx.serialization.json.put
  *
  * @param pretty whether to indent the rendered JSON.
  * @return the complete OpenAPI document as JSON.
+ * @throws OpenApiGenerationException when a default or constant contains an invalid numeric literal.
  */
 fun OpenApiDocument.toJson(pretty: Boolean = true): String =
     Json { prettyPrint = pretty }.encodeToString(JsonElement.serializer(), json())
@@ -124,8 +125,8 @@ private fun OpenApiSchema.json(): JsonObject =
         if (oneOf.isNotEmpty()) put("oneOf", JsonArray(oneOf.map(OpenApiSchema::json)))
         discriminator?.let { put("discriminator", it.json()) }
         if (deprecated) put("deprecated", true)
-        defaultValue?.let { put("default", it) }
-        constantValue?.let { put("const", it) }
+        defaultValue?.let { put("default", it.withExactNumbers()) }
+        constantValue?.let { put("const", it.withExactNumbers()) }
     }
 
 private fun OpenApiDiscriminator.json(): JsonObject =
