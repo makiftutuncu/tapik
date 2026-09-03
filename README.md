@@ -471,3 +471,13 @@ npm run docs:preview
 The complete preview is written to `site/target/site`: the landing page is at `/`, narrative documentation at
 `/docs/`, and unified Kotlin API reference at `/docs/api/`. Stable documentation is published from release refs, not
 from unreleased `main` content. The public site lives at [tapik.akif.dev](https://tapik.akif.dev).
+
+The preview command also validates source snippets, Antora warnings, required pages, and generated internal links.
+Run the desktop and mobile browser checks after building the preview:
+
+```shell
+npx playwright install chromium
+npm run docs:smoke
+```
+
+Browser reports and failure traces are written under `site/target/`. CI runs these checks before publishing a release.

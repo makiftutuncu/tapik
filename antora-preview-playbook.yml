@@ -24,6 +24,7 @@ ui:
   supplemental_files: ./site/supplemental-ui
 antora:
   extensions:
+    - require: ./site/scripts/documentation-links.cjs
     - require: ./site/scripts/normalize-documentation-components.cjs
       legacy_component: tapik
       component: docs
@@ -33,3 +34,6 @@ antora:
 output:
   clean: false
   dir: site/target/site
+runtime:
+  log:
+    failure_level: warn

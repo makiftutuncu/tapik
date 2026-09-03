@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Java 25
         uses: actions/setup-java@v5
@@ -54,3 +56,20 @@ jobs:
         run: |
           npm ci
           npm run docs:preview
+
+      - name: Install documentation test browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Check desktop and mobile navigation
+        run: npm run docs:smoke
+
+      - name: Retain browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-browser-failures
+          path: |
+            site/target/browser-results
+            site/target/browser-report
+          if-no-files-found: ignore
+          retention-days: 7

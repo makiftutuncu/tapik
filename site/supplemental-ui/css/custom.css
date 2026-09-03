@@ -90,6 +90,10 @@ a:hover {
   background: var(--tapik-text);
 }
 
+#search-field {
+  position: relative;
+}
+
 #search-input {
   min-width: 15rem;
   background: var(--tapik-surface);
@@ -116,6 +120,27 @@ a:hover {
 
 .search-result-item {
   border-color: var(--tapik-line);
+}
+
+.search-result-dataset {
+  background: var(--tapik-surface-raised);
+  border-color: var(--tapik-line-strong);
+}
+
+.search-result-component-header,
+.search-result-document-title,
+.search-result-document-hit .search-result-section-title {
+  color: var(--tapik-text);
+  border-color: var(--tapik-line-strong);
+}
+
+.search-result-document-hit {
+  color: var(--tapik-muted);
+}
+
+.search-result-document-hit .search-result-highlight {
+  color: var(--tapik-accent);
+  background: var(--tapik-code);
 }
 
 .body {
@@ -337,6 +362,19 @@ a:hover {
     background: var(--tapik-surface);
   }
 
+  .search-result-dropdown-menu {
+    position: static;
+  }
+
+  #search-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #search-input {
+    order: -1;
+  }
+
   .nav-container {
     background: var(--tapik-background);
     border-right: 0;
@@ -349,7 +387,22 @@ a:hover {
 
 @media screen and (max-width: 600px) {
   .navbar-item.search {
-    display: none;
+    display: block;
+  }
+
+  #search-field,
+  #search-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-result-dropdown-menu {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-result-dataset {
+    max-height: calc(100dvh - 10rem);
   }
 
   .doc h1.page {

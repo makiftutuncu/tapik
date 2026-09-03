@@ -130,7 +130,7 @@
 - [x] Restore release-based documentation versioning and immutable versioned API references. Pull requests should
   build a preview, while releases publish stable docs without exposing unreleased `main` content as latest.
 
-- [ ] Add documentation quality gates for unresolved cross-references, broken internal links, missing expected pages,
+- [x] Add documentation quality gates for unresolved cross-references, broken internal links, missing expected pages,
   source-snippet drift, and basic rendered-site navigation on desktop and mobile.
 
 - [ ] Audit the generated OpenAPI document model against OpenAPI 3.2 as new DSL concepts land. Protect each supported

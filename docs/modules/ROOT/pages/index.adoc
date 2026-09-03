@@ -37,4 +37,4 @@ parallel metadata representation.
 One contract, several uses:: Documentation, clients, and servers are outputs selected by the consuming build rather
 than separate definitions that can drift.
 
-Continue with xref:choose-a-goal.adoc[] or inspect the link:api/index.html[Kotlin API reference].
+Continue with xref:choose-a-goal.adoc[] or inspect the link:{page-api-reference-url}[Kotlin API reference].

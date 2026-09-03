@@ -31,6 +31,29 @@ when the unified API reference has not been built first.
 The complete site is written to `site/target/site`. Documentation publication is release-based; a push to `main` does
 not replace the stable site with unreleased content.
 
+== Documentation checks
+
+`npm run docs:preview` and `npm run docs:build` both run source-example checks, fail on Antora warnings (including
+missing cross-references, include files, or snippet tags), and scan generated HTML for missing pages, internal links,
+anchors, and assets. Each build clears old narrative output while preserving the current unified API reference, so
+files left over from a previous build cannot hide a missing page. Run `npm run docs:check` to repeat only the HTML scan.
+
+To exercise the rendered site in Chromium at desktop and mobile sizes:
+
+[source,shell]
+----
+npx playwright install chromium
+npm run docs:smoke
+----
+
+The suite starts its own loopback server on port `4173`; stop any existing server on that port first. It checks the
+quickstart and API-reference round trip, version switching, search, sidebar navigation, and page width. Test output
+lives under `site/target/browser-results`, with an HTML report under `site/target/browser-report`. Failed tests retain
+screenshots and traces; CI uploads those diagnostics and requires the suite to pass before publishing documentation.
+
+The historical documentation is read from local Git tags, so a shallow checkout must fetch the release tags before
+building. CI checks out complete tag history automatically.
+
 == Publishing a release
 
 The `Publish documentation` GitHub Actions workflow is the only documentation publisher. It runs for a published,

@@ -30,4 +30,4 @@
 ** xref:concepts/type-safety.adoc[Type safety]
 * Contribute
 ** xref:development.adoc[Development guide]
-* link:api/index.html[Kotlin API reference]
+* link:{page-api-reference-url}[Kotlin API reference]

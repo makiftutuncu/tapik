@@ -186,3 +186,15 @@ part of the normal reactor and are the executable proof behind the primary user 
 Rendered smoke tests cover navigation from the landing page to the quickstart and API reference, navigation back from
 the reference, versioned paths, search availability, and usable desktop and mobile layouts. Documentation coverage is
 grown with public behavior: stable public APIs require KDoc, and supported user workflows require narrative guidance.
+
+Every Antora build treats warnings as failures, including unresolved cross-references, missing include files, and
+missing source snippet tags. The staged-site check parses generated HTML and validates same-site page links, fragment
+anchors, stylesheets, scripts, and images without making external HTTP requests. It requires the landing page, current
+narrative source pages, unified API entry point, and supported historical entry points; obsolete staged pages must not
+mask missing output from the current build.
+
+Desktop and mobile Chromium smoke tests run against a loopback server serving only the staged site. They exercise the
+landing-to-quickstart journey, API-reference round trip, version switching, search results, and responsive navigation,
+and reject horizontal page overflow or failed local resource requests. Browser failures retain screenshots and traces
+for diagnosis. CI runs these checks before accepting a preview or publishing a release; local users can run the static
+checks without installing Chromium and opt into the same browser smoke suite separately.

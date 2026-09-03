@@ -34,6 +34,7 @@ checked on the correct side.
 across registries, and filters that leave no API are errors. With no includes, every API is selected; exclusions are
 then applied and win.
 
+[#a_generated_type_is_missing_during_kotlin_compilation]
 == A generated type is missing during Kotlin compilation
 
 Source generated from a compiled contract can run during `generate-sources`. Source generated from the current module
@@ -47,6 +48,7 @@ If generation succeeds during `process-classes` but late Kotlin compilation fail
 Maven error. Generated source uses the project's resolved classpath and Java 25 target; missing target runtime modules
 or incompatible dependency versions usually surface at this stage.
 
+[#a_spring_handler_is_not_found]
 == A Spring handler is not found
 
 Provide exactly one suitable Spring bean implementing each generated `Server` interface. In Spring Boot, generated

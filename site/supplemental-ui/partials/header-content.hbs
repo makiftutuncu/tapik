@@ -2,13 +2,6 @@
   <nav class="navbar" aria-label="Primary navigation">
     <div class="navbar-brand">
       <a class="navbar-item tapik-wordmark" href="{{{siteRootPath}}}/">tapik</a>
-      {{#if env.SITE_SEARCH_PROVIDER}}
-      <div class="navbar-item search hide-for-print">
-        <div id="search-field" class="field">
-          <input id="search-input" type="text" placeholder="Search the docs" aria-label="Search the documentation"{{#if page.home}} autofocus{{/if}}>
-        </div>
-      </div>
-      {{/if}}
       <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
         <span></span>
         <span></span>
@@ -16,20 +9,24 @@
       </button>
     </div>
     <div id="topbar-nav" class="navbar-menu">
+      {{#if env.SITE_SEARCH_PROVIDER}}
+      <div class="navbar-item search hide-for-print">
+        <div id="search-field" class="field">
+          <input id="search-input" type="text" placeholder="Search the docs" aria-label="Search the documentation"{{#if page.home}} autofocus{{/if}}>
+        </div>
+      </div>
+      {{/if}}
       <div class="navbar-end">
+        {{#if page.componentVersion}}
         {{#if page.componentVersion.activeVersionSegment}}
         <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/{{{page.componentVersion.activeVersionSegment}}}/">Documentation</a>
         {{else}}
         <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/">Documentation</a>
         {{/if}}
-        {{#if (eq page.origin.descriptor.name "tapik")}}
+        <a class="navbar-item" href="{{{page.attributes.api-reference-url}}}">API reference</a>
+        {{else}}
+        <a class="navbar-item" href="{{{siteRootPath}}}/docs/">Documentation</a>
         <a class="navbar-item" href="{{{siteRootPath}}}/docs/api/">API reference</a>
-        {{else}}
-        {{#if page.componentVersion.activeVersionSegment}}
-        <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/{{{page.componentVersion.activeVersionSegment}}}/api/">API reference</a>
-        {{else}}
-        <a class="navbar-item" href="{{{siteRootPath}}}/{{{page.component.name}}}/api/">API reference</a>
-        {{/if}}
         {{/if}}
         <a class="navbar-item" href="https://github.com/makiftutuncu/tapik" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>

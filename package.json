@@ -8,13 +8,18 @@
     "docs:prepare-ui": "node site/scripts/prepare-antora-ui.mjs",
     "docs:test": "node --test site/scripts/*.test.mjs",
     "docs:integrate-api": "node site/scripts/integrate-dokka-reference.mjs",
-    "docs:preview": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && antora antora-preview-playbook.yml",
-    "docs:build": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && antora antora-release-playbook.yml && antora antora-playbook.yml && node site/scripts/stage-release-documentation.mjs"
+    "docs:prepare-site": "node site/scripts/prepare-documentation-site.mjs",
+    "docs:check": "node site/scripts/check-documentation.mjs",
+    "docs:smoke": "playwright test --config site/playwright.config.mjs",
+    "docs:preview": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && npm run docs:prepare-site && antora antora-preview-playbook.yml && npm run docs:check",
+    "docs:build": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && npm run docs:prepare-site && antora antora-release-playbook.yml && antora antora-playbook.yml && node site/scripts/stage-release-documentation.mjs && npm run docs:check -- --release"
   },
   "devDependencies": {
     "@antora/cli": "3.2.0",
     "@antora/collector-extension": "1.0.3",
     "@antora/lunr-extension": "1.0.0-alpha.13",
-    "@antora/site-generator": "3.2.0"
+    "@antora/site-generator": "3.2.0",
+    "@playwright/test": "1.62.1",
+    "htmlparser2": "9.1.0"
   }
 }
