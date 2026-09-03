@@ -24,3 +24,15 @@ class AssetRoutes : Api() {
     val download by get(root / "assets" / path.remaining("path"))
 }
 // end::uri-parameters[]
+
+private fun pathBuilderExamples() {
+    // tag::built-in-path-builders[]
+    path.string("slug")
+    path.uuid("bookId")
+    path.localDate("publicationDate")
+    // end::built-in-path-builders[]
+
+    // tag::custom-path-builder[]
+    path("authorId", authorIdFormat)
+    // end::custom-path-builder[]
+}

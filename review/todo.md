@@ -124,7 +124,7 @@
 - [x] Integrate one unified production-only Dokka reference into the Antora website with navigation in both directions.
   Keep the per-module HTML `javadoc` artifacts required by Maven Central unchanged.
 
-- [ ] Make documentation examples source-backed with Antora Collector so displayed Kotlin and Maven fragments cannot
+- [x] Make documentation examples source-backed with Antora Collector so displayed Kotlin and Maven fragments cannot
   drift from the tested examples. Avoid copying substantial executable examples into narrative pages.
 
 - [ ] Restore release-based documentation versioning and immutable versioned API references. Pull requests should

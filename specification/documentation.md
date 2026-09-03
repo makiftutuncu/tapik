@@ -45,6 +45,9 @@ reproducible inputs and may be customized to carry the landing page's visual lan
 Antora Collector imports example source from elsewhere in each documentation version's repository worktree. Kotlin,
 XML, and command examples shown in documentation should therefore come from tested `example-contract` and
 `example-application` files or from smaller compiling documentation fixtures rather than copied code blocks.
+Substantial executable Kotlin and Maven fragments use tagged or complete Collector imports. Documentation validation
+rejects multiline Kotlin or XML source blocks that duplicate executable source instead of importing it; short type
+signatures and other non-executable notation may remain inline.
 
 Dokka generates the Kotlin API reference. Because its Maven plugin does not aggregate Maven modules natively, the
 website build may present all production source roots as one documentation module with a complete installed-artifact

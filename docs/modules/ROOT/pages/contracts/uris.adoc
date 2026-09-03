@@ -27,16 +27,14 @@ Path variables are always required. Built-in factories cover scalar Kotlin and J
 
 [source,kotlin]
 ----
-path.string("slug")
-path.uuid("bookId")
-path.localDate("publicationDate")
+include::example$dsl/ApiAndUriExamples.kt[tag=built-in-path-builders,indent=0]
 ----
 
 Use the generic builder for a domain type:
 
 [source,kotlin]
 ----
-path("authorId", authorIdFormat)
+include::example$dsl/ApiAndUriExamples.kt[tag=custom-path-builder,indent=0]
 ----
 
 The provided `StringFormat` determines how the wire string becomes the Kotlin value. Variable names must be valid and

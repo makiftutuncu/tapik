@@ -20,10 +20,7 @@ Broader matchers are explicit:
 
 [source,kotlin]
 ----
-Status.Ok with noBody
-statusesOf(Status.Ok, Status.Created) with noBody
-statusesIn(400..499) with noBody
-statusMatching("server error") { status -> status.code in 500..599 } with noBody
+include::example$dsl/RequestAndOutputExamples.kt[tag=status-matchers,indent=0]
 ----
 
 A custom matcher requires a stable description because its predicate cannot be carried into every generated target.

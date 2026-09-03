@@ -3,7 +3,9 @@ package dev.akif.tapik.test.fixtures.documentation
 import dev.akif.tapik.*
 import dev.akif.tapik.format.kotlinx.jsonBody
 import dev.akif.tapik.test.fixtures.library.Book
+import dev.akif.tapik.test.fixtures.library.BookId
 import dev.akif.tapik.test.fixtures.library.CreateBook
+import dev.akif.tapik.test.fixtures.library.bookIdFormat
 import kotlinx.serialization.json.Json
 
 // tag::request-input[]
@@ -45,3 +47,20 @@ class BookResponses : Api() {
             )
 }
 // end::response-output[]
+
+private fun headerBuilderExamples() {
+    // tag::header-builders[]
+    header<BookId>("X-Book-Id", bookIdFormat)
+    header.uuid("X-Request-Id")
+    header.string("X-Source").fixed("library")
+    // end::header-builders[]
+}
+
+private fun statusMatcherExamples() {
+    // tag::status-matchers[]
+    Status.Ok with noBody
+    statusesOf(Status.Ok, Status.Created) with noBody
+    statusesIn(400..499) with noBody
+    statusMatching("server error") { status -> status.code in 500..599 } with noBody
+    // end::status-matchers[]
+}

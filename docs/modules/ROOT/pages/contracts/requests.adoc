@@ -15,9 +15,7 @@ Create headers with the same generic and built-in factory style as URI parameter
 
 [source,kotlin]
 ----
-header<BookId>("X-Book-Id", bookIdFormat)
-header.uuid("X-Request-Id")
-header.string("X-Source").fixed("library")
+include::example$dsl/RequestAndOutputExamples.kt[tag=header-builders,indent=0]
 ----
 
 Headers may be required, optional, optional with a default, or fixed to a value. Names are validated as HTTP field
