@@ -23,5 +23,9 @@ npm ci
 npm run docs:preview
 ----
 
+The preview command verifies the Dokka integration, adds version-relative links from every API reference page back to
+the user guide, and then renders Antora. It fails with the required Maven command when the unified API reference has
+not been built first.
+
 The complete site is written to `site/target/site`. Documentation publication is release-based; a push to `main` does
 not replace the stable site with unreleased content.

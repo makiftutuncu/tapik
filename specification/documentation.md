@@ -51,6 +51,12 @@ website build may present all production source roots as one documentation modul
 classpath. The reference must include every production package and exclude examples, fixtures, and test sources.
 Public declarations should link to their matching repository source at the documented release when supported.
 
+The unified reference is generated at `/docs/api/` inside the same staged site Antora uses. Antora navigation links to
+the reference, and every Dokka HTML page provides a version-relative link back to the matching narrative documentation
+root. Local and CI preview workflows fail when the unified reference has not been built, rather than silently
+publishing an Antora site with a dead API link. Navigation integration is idempotent so rebuilding Antora does not
+duplicate links or assets.
+
 The Maven `release` profile continues generating standard Dokka HTML independently for each published module and
 packaging it in that module's `javadoc` classifier. Website aggregation must not change or replace those Maven Central
 artifacts. A documentation-only Gradle build is not part of the architecture.

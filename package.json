@@ -6,8 +6,10 @@
   },
   "scripts": {
     "docs:prepare-ui": "node site/scripts/prepare-antora-ui.mjs",
-    "docs:preview": "npm run docs:prepare-ui && antora antora-preview-playbook.yml",
-    "docs:build": "npm run docs:prepare-ui && antora antora-playbook.yml"
+    "docs:test": "node --test site/scripts/*.test.mjs",
+    "docs:integrate-api": "node site/scripts/integrate-dokka-reference.mjs",
+    "docs:preview": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && antora antora-preview-playbook.yml",
+    "docs:build": "npm run docs:test && npm run docs:prepare-ui && npm run docs:integrate-api && antora antora-playbook.yml"
   },
   "devDependencies": {
     "@antora/cli": "3.2.0",
