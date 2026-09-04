@@ -449,6 +449,8 @@ The 0.6 rewrite replaces the previous implementation rather than preserving its 
 - Kotlin contract values are authoritative; OpenAPI is generated output and cannot be consumed as an input contract.
 - Existing endpoint definitions and generated-build configuration require manual migration.
 
+Follow the [migration guide](docs/modules/ROOT/pages/migration.adoc) when moving an older project to 0.6.
+
 ## Build tapik
 
 ```shell
@@ -457,6 +459,15 @@ The 0.6 rewrite replaces the previous implementation rather than preserving its 
 
 The build requires Java 25 and runs every production, fixture, and runnable example module. Product and architecture
 decisions live under [`specification`](specification/README.md).
+
+Before publication, run the unsigned packaging and external-consumer rehearsal:
+
+```shell
+./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install
+```
+
+This installs locally but does not publish. The [release procedure](docs/modules/ROOT/pages/releasing.adoc) explains
+the isolated consumer, retained diagnostics, signing, and the separate publication steps.
 
 Build the landing page and unified API reference after installing the reactor artifacts locally, then generate the
 Antora documentation portal. The documentation toolchain requires Node.js 20 or newer:

@@ -3,6 +3,7 @@
 ** xref:getting-started.adoc[Quickstart]
 ** xref:choose-a-goal.adoc[Choose a goal]
 ** xref:runnable-example.adoc[Runnable example]
+** xref:migration.adoc[Migrate to 0.6]
 * Define contracts
 ** xref:contracts/index.adoc[Contract DSL]
 ** xref:contracts/apis-and-endpoints.adoc[APIs and endpoints]
@@ -30,4 +31,5 @@
 ** xref:concepts/type-safety.adoc[Type safety]
 * Contribute
 ** xref:development.adoc[Development guide]
+** xref:releasing.adoc[Release procedure]
 * link:{page-api-reference-url}[Kotlin API reference]

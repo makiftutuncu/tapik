@@ -1,0 +1,26 @@
+= Migrate to 0.6
+:description: Move an earlier tapik contract to the Kotlin 2.4 and Maven-based rewrite.
+
+The 0.6 rewrite is not source- or binary-compatible with earlier tapik releases. There is no automatic converter, and
+the previous Gradle integration is not available. Migrate one small API first and retain the previous build separately
+until the replacement behaves as expected.
+
+. Move to Java 25, Kotlin 2.4, and Maven Wrapper-based builds. Start with the xref:getting-started.adoc[quickstart] or
+  copy the xref:runnable-example.adoc[runnable example]'s layout.
+. Import `dev.akif:tapik-bom:0.6.0`. Replace old dependencies with the current `tapik-core`, chosen `tapik-format-*`,
+  and required `tapik-target-*` artifacts. Build-plugin versions still need to be explicit.
+. Enable `tapik-plugin-maven` as the Kotlin compiler extension and configure its target executions. Remove old
+  discovery/reflection setup; the compiler now produces the registry. See xref:reference/maven.adoc[Maven reference].
+. Re-express endpoints as delegated properties of a public `Api` object or constructible class. Keep user-owned models
+  and explicitly attach their formats. Review paths, parameter presence, body alternatives, and outputs against the
+  xref:contracts/index.adoc[DSL guide]; do not assume previous DSL spelling or generated names still apply.
+. Choose the lifecycle deliberately: same-module output uses `process-classes`; main source implementing generated
+  interfaces should consume a compiled contract and generate during `generate-sources`.
+. Regenerate everything in a clean build. Implement generated `*Server` interfaces in handlers, let generated
+  `*GeneratedController` classes handle Spring mappings, and use the generated client interfaces with a transport.
+. Compare generated OpenAPI documents and run request/response tests against the previous application. Check status
+  alternatives, headers, defaults, content negotiation, and wire serialization before switching consumers.
+
+Publish the new contract and update its consumers together. Compile-time feedback protects typed usage after
+regeneration; it is not a semantic compatibility check against a previously deployed API. API versioning and rollout
+remain application responsibilities.

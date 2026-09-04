@@ -56,6 +56,9 @@ building. CI checks out complete tag history automatically.
 
 == Publishing a release
 
+For artifact packaging, the external-consumer rehearsal, signing, and Maven Central publication, follow the
+xref:releasing.adoc[release procedure]. The steps below cover documentation publication after the artifact release.
+
 The `Publish documentation` GitHub Actions workflow is the only documentation publisher. It runs for a published,
 non-prerelease GitHub release, and it can be started manually with the latest stable release tag when its publication
 must be retried. It rejects an older, draft, or prerelease release so a retry cannot replace the latest API reference

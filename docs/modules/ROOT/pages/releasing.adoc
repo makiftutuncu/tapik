@@ -1,0 +1,78 @@
+= Release procedure
+:description: Rehearse packaging, verify an external consumer, and publish an approved tapik release.
+
+== Rehearse without publication credentials
+
+Use Java 25 and run from the repository root:
+
+[source,shell]
+----
+./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install
+----
+
+This runs the full suite, builds production source and Dokka HTML `javadoc` JARs, and installs the reactor locally.
+It does not sign, deploy, create tags, or publish a GitHub release. The manually dispatched `Rehearse release` workflow
+runs the same command without publication secrets.
+
+The final example module stages only production artifacts into a fresh temporary Maven repository. It copies cached
+third-party POMs/JARs to reduce downloads, excluding every artifact under `dev/akif`, then adds this build's artifacts.
+Allow several gigabytes of temporary disk space. A custom local repository is taken from Maven settings; uncached
+dependencies still require network access.
+
+The external consumer copies the runnable example's source and tests, not its `target` directories. Its independent
+parent POM supplies Kotlin/Spring/Kotest configuration without inheriting tapik's development build. The nested Maven
+build verifies registries, OpenAPI generation, generated servers and clients, and their Spring behavior. `test-` and
+`example-` tapik artifacts are not staged or needed by that consumer.
+
+Inspect these files before approving the release:
+
+* `example-application/target/release-rehearsal.txt`: temporary workspace location.
+* `example-application/target/release-staged-artifacts.txt`: exact staged artifact inventory.
+* `example-application/target/release-consumer.log`: external Maven output and test results.
+
+The temporary workspace retains its consumer project, repository, and log after either success or failure; remove that
+specific directory manually when no longer needed. CI retains the small diagnostic files for seven days.
+Ordinary `./mvnw verify` runs the rehearsal helper tests but skips the expensive external build.
+
+== Approve the release candidate
+
+. Finish review and commit the intended changes. Run the clean rehearsal against that exact commit.
+. Check all module/BOM versions and migration notes. Maven `0.6.0`, Antora `v0.6.0`, and the eventual Git tag `v0.6.0`
+  must agree; use the actual release version when preparing later releases.
+. Build and check the documentation preview as described in xref:development.adoc[Development guide].
+. Confirm that the staged inventory contains the parent, BOM, production POMs/JARs, source JARs, and HTML documentation
+  JARs, but no non-production module artifacts.
+
+The unsigned rehearsal does not prove signing-key access, Central namespace permissions, or remote publication.
+
+== Sign and publish (release operator only)
+
+Configure the Central Portal token in a Maven settings server named `central`, following the
+https://central.sonatype.org/publish/publish-portal-maven/[Central publishing plugin instructions]. Configure a signing
+key and GPG agent using the https://maven.apache.org/plugins/maven-gpg-plugin/usage.html[Maven GPG instructions].
+Keep credentials out of repository files and command-line passphrases; tapik enables the plugin's best-practices mode.
+
+After explicit release approval, verify signing locally:
+
+[source,shell]
+----
+./mvnw -Prelease -Dcentral.skipPublishing=true clean verify
+----
+
+Inspect the signatures and confirm the version is unused. The following command is a real remote publication, not
+another rehearsal:
+
+[source,shell]
+----
+./mvnw -Prelease clean deploy
+----
+
+The profile automatically publishes the reactor-wide Central deployment and waits for completion. If the command
+fails after uploading, inspect its deployment status in Central before retrying; a timeout is not proof of failure.
+Published versions must not be overwritten. Fix a released defect in a new version.
+
+Once Central publication is confirmed, create and push the matching release tag for the tested commit, then publish
+the GitHub release. Its publication triggers the documentation workflow described in
+xref:development.adoc#_publishing_a_release[Publishing release documentation]. Verify the public artifact coordinates,
+latest documentation, and immutable version URLs before announcing the release. Do not publish a GitHub release while
+its Maven artifacts are still unavailable.

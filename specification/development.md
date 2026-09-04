@@ -48,6 +48,28 @@ Modules whose folder begins with `test-` or `example-` remain installable for re
 release packaging does not attach publication artifacts to them and Central deployment excludes them. The parent POM
 remains publishable because published module POMs inherit their shared project metadata and build coordinates from it.
 
+### Release rehearsal
+
+`./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install` is the
+credential-free packaging and external-consumption rehearsal. It never calls `deploy`. Normal `verify` builds do not
+run the nested Maven build.
+
+The opt-in Kotest rehearsal runs after production artifacts have been packaged. It stages the parent, BOM, production
+POMs and JARs from this build into a fresh temporary Maven repository and checks each production sources and HTML
+`javadoc` archive. No `test-` or `example-` artifacts enter this staged release. Third-party POM/JAR files may be copied
+from the local Maven cache, but the entire `dev/akif` subtree is excluded before staging to prevent stale tapik artifacts
+from hiding missing release files.
+
+The consumer is a temporary copy of the runnable library contract/application sources, with its own parent POM rather
+than tapik's parent. It exercises compiler registries, same-module OpenAPI, compiled-contract generation, generated
+server/client compilation, and Spring behavior. Only source/example assets are copied, never generated `target` output.
+The nested build uses the repository Maven Wrapper, an isolated local repository, and a bounded timeout. Its workspace,
+staged artifacts, and build log remain available for inspection after success or failure.
+
+Passing this unsigned local rehearsal does not validate GPG credentials, Central account permissions, or remote
+publication. Those remain explicit release-operator checks; no release tag, GitHub release, push, or deployment is
+performed by the rehearsal.
+
 ## Modules
 
 The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification

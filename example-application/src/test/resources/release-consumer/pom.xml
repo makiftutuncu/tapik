@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- Independent consumer: deliberately does not inherit tapik-parent. -->
+    <groupId>com.example.library</groupId>
+    <artifactId>release-consumer</artifactId>
+    <version>@version@</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>example-contract</module>
+        <module>example-application</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <kotlin.version>@kotlin.version@</kotlin.version>
+        <spring-boot.version>@spring-boot.version@</spring-boot.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.kotest</groupId>
+                <artifactId>kotest-bom</artifactId>
+                <version>@kotest.version@</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-maven-plugin</artifactId>
+                    <version>${kotlin.version}</version>
+                    <configuration>
+                        <jvmTarget>25</jvmTarget>
+                        <javaParameters>true</javaParameters>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>kotlin-compile</id>
+                            <phase>compile</phase>
+                            <goals><goal>compile</goal></goals>
+                            <configuration>
+                                <sourceDirs><sourceDir>${project.basedir}/src/main/kotlin</sourceDir></sourceDirs>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>kotlin-test-compile</id>
+                            <phase>test-compile</phase>
+                            <goals><goal>test-compile</goal></goals>
+                            <configuration>
+                                <sourceDirs><sourceDir>${project.basedir}/src/test/kotlin</sourceDir></sourceDirs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>@maven.surefire.version@</version>
+                    <configuration>
+                        <useModulePath>false</useModulePath>
+                        <includes><include>**/*Spec.*</include></includes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

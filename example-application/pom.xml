@@ -178,6 +178,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <tapik.release.cache>${settings.localRepository}</tapik.release.cache>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

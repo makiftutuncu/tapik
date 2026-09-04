@@ -136,5 +136,5 @@
 - [x] Audit the generated OpenAPI document model against OpenAPI 3.2 as new DSL concepts land. Protect each supported
   concept with the complete golden document and keep JSON and YAML renderers semantically identical.
 
-- [ ] Perform a clean release-profile build and consume its staged artifacts from an external Maven fixture before the
+- [x] Perform a clean release-profile build and consume its staged artifacts from an external Maven fixture before the
   first 0.6.0 publication. Document the release and migration procedure once that rehearsal is repeatable.
