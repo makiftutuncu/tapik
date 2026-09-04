@@ -145,6 +145,32 @@ class WebMvcTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
+    test("keep endpoint access intact when an optional parameter raw name overlaps it") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRawEndpointAccess)))
+                .artifacts
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
+                .content
+
+        source shouldContain
+            "pageRaw?.let { raw -> decodeRequest(webMvcRawEndpointAccessApi.pageRaw.uri.queries._1.format, raw, \"WebMvcRawEndpointAccess.pageRaw query page\") }"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
+    test("keep inclusion access intact when an optional parameter raw name overlaps it") {
+        val source =
+            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRawInclusionAccess)))
+                .artifacts
+                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
+                .content
+
+        source shouldContain
+            "pageRaw?.let { raw -> decodeRequest(webMvcRawInclusionAccessApi.pageRaw.list.uri.queries._1.format, raw, \"WebMvcRawIncluded.list query page\") }"
+        val compilation = compileKotlin(source)
+        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+    }
+
     test("preserve every request and response body representation") {
         val source =
             WebMvcTarget.generate(GenerationRequest(apis = listOf(BodyAlternatives)))
@@ -465,6 +491,18 @@ public object WebMvcNamingCollisions : Api() {
     public val findBook by get(root / "camel")
     public val findBookHttp by get(root / "http")
     public val decodeRequest by get(root / "decode")
+}
+
+public object WebMvcRawEndpointAccess : Api() {
+    public val pageRaw by get(root + query.int("page").optional())
+}
+
+public object WebMvcRawIncluded : Api() {
+    public val list by get(root + query.int("page").optional(default = 1))
+}
+
+public object WebMvcRawInclusionAccess : Api() {
+    public val pageRaw by including(WebMvcRawIncluded)
 }
 
 public class WebMvcNamespace1 {

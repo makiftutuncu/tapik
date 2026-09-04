@@ -233,24 +233,20 @@ private fun StringBuilder.appendDecodedParameter(
     kind: String
 ) {
     val location = "${endpoint.id} $kind ${parameter.wireName}".kotlinString()
-    val decode =
-        if (parameter.repeated) {
-            "decodeRequest(${parameter.definitionAccess}.format, ${parameter.rawName}, $location)"
-        } else {
-            "decodeRequest(${parameter.definitionAccess}.format, ${parameter.rawName}, $location)"
-        }
+    val decodedParameter = parameter.decodeExpression(parameter.rawName, location)
+    val decodedRaw = parameter.decodeExpression("raw", location)
     when (val presence = parameter.presence) {
-        Required -> appendLine("        val ${parameter.name} = $decode")
+        Required -> appendLine("        val ${parameter.name} = $decodedParameter")
         Optional ->
             appendLine(
-                "        val ${parameter.name} = ${parameter.rawName}?.let { raw -> ${decode.replace(parameter.rawName, "raw")} }"
+                "        val ${parameter.name} = ${parameter.rawName}?.let { raw -> $decodedRaw }"
             )
         is Default<*> ->
             appendLine(
-                "        val ${parameter.name} = ${parameter.rawName}?.let { raw -> ${decode.replace(parameter.rawName, "raw")} } ?: ${parameter.definitionAccess}.presence.value"
+                "        val ${parameter.name} = ${parameter.rawName}?.let { raw -> $decodedRaw } ?: ${parameter.definitionAccess}.presence.value"
             )
         is Fixed<*> -> {
-            appendLine("        val ${parameter.name} = $decode")
+            appendLine("        val ${parameter.name} = $decodedParameter")
             appendLine("        if (${parameter.name} != ${parameter.definitionAccess}.presence.value) {")
             appendLine(
                 "            webMvcBadRequest(${"${endpoint.id} $kind ${parameter.wireName} does not match its fixed value".kotlinString()})"
@@ -259,6 +255,9 @@ private fun StringBuilder.appendDecodedParameter(
         }
     }
 }
+
+private fun WebMvcWireParameter.decodeExpression(rawExpression: String, location: String): String =
+    "decodeRequest($definitionAccess.format, $rawExpression, $location)"
 
 private fun StringBuilder.appendDecodedBody(
     endpoint: WebMvcEndpointModel,

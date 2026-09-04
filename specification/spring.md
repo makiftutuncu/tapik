@@ -49,6 +49,10 @@ headers, and request bodies precede optional or defaulted values. Runtime endpoi
 defaults, media types, matchers, and codecs. Generated code performs URI construction, request encoding, output
 matching, and response decoding without a parallel endpoint model.
 
+WebMVC parameter decoder expressions are rendered structurally from the definition access and an explicit raw-value
+expression. Optional and defaulted parameters decode the lambda-local `raw` value without rewriting endpoint IDs,
+API inclusion paths, endpoint property access, locations, or any other generated source text.
+
 A remaining path is exposed as `List<String>`. Generated clients encode each element as one URI path segment and
 append those segments after the ordinary path template, so a segment cannot accidentally become multiple segments.
 
