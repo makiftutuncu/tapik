@@ -19,7 +19,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Generated source compiles when an inclusion path overlaps an allocated `*Raw` parameter name.
   - Required, fixed, scalar, and repeated parameter behavior remains unchanged.
 
-- [ ] Reject generated artifact collisions with unowned files.
+- [x] Reject generated artifact collisions with unowned files.
 
   Extend `ArtifactOwnership`/`ArtifactWriter` so a generated path may replace a destination only when that path is
   already owned by the same execution. An exact-path unowned file must cause generation to fail before any destination

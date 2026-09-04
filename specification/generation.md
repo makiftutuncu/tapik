@@ -153,10 +153,13 @@ collection configured, every discovered API is generated.
 `outputDirectory` defaults to `${project.build.directory}/generated/tapik`. Target artifact paths are resolved below
 that directory and written as UTF-8. Each Maven execution owns the paths it generated there. A later invocation of the
 same execution removes its previously owned paths that are absent from the new result, while paths owned by other
-executions and unowned files remain untouched. Two executions cannot own the same path. Ownership is updated only after
-target generation succeeds, so a failed generation leaves the last successful result available. Maven configuration is
-translated into the host-neutral configuration model before target selection; Maven types do not cross into
-`common-plugin` or target modules.
+executions and unowned files remain untouched. Two executions cannot own the same path. Before stale output is removed
+or new output is written, the host rejects any generated path already present on disk unless the same execution owns
+that exact path. A collision reports its relative path and requesting execution, and leaves destination bytes and the
+ownership manifest unchanged. Ownership is updated only after target generation and artifact materialization succeed,
+so a failed generation leaves the last successful result available. Maven configuration is translated into the
+host-neutral configuration model before target selection; Maven types do not cross into `common-plugin` or target
+modules.
 
 When an execution returns `SOURCE` artifacts, the adapter adds that execution's output directory as a project compile
 source root. Source targets may therefore use either of two workflows:

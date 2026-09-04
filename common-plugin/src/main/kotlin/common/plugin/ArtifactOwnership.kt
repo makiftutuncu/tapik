@@ -3,6 +3,7 @@ package dev.akif.tapik.common.plugin
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
+import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
@@ -28,7 +29,15 @@ internal class ArtifactOwnership(
                 transform = { (path, candidate) -> "'$path' by '$candidate'" }
             )
         }
-        return ownership[owner].orEmpty()
+        val claimed = ownership[owner].orEmpty()
+        val unowned = paths.filter { path -> path !in claimed && Files.exists(root.resolve(path), NOFOLLOW_LINKS) }
+        check(unowned.isEmpty()) {
+            unowned.joinToString(
+                prefix = "Generated artifact paths already exist without tapik ownership for execution '$owner': ",
+                transform = { path -> "'$path'" }
+            )
+        }
+        return claimed
     }
 
     fun update(owner: String, paths: Set<String>) {
