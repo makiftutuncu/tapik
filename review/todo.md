@@ -33,7 +33,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Regeneration still replaces paths already owned by the same execution.
   - Unrelated unowned files and paths owned by other non-conflicting executions remain untouched.
 
-- [ ] Reject late generated-output collisions with application classes and resources.
+- [x] Reject late generated-output collisions with application classes and resources.
 
   Apply the same exact-path ownership rule in `GeneratedOutputSynchronizer` before copying staged output into
   `target/classes`. Treat an existing path absent from all tapik ownership state as application-owned.

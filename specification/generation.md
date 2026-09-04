@@ -180,8 +180,11 @@ Late generated Kotlin is compiled into a fresh per-execution staging directory. 
 that execution's staged class files and runtime resources into the main output using build-state ownership outside the
 packaged classes directory. Outputs absent from the latest successful execution are removed, including nested classes,
 Kotlin module metadata, and registration descriptors after generated package or suffix changes. Outputs owned by other
-executions and unowned application classes or resources are preserved, and conflicting execution ownership fails the
-build.
+executions and unowned application classes or resources are preserved. Before stale deletion or copying begins, every
+staged path must either be absent from the main output or already belong to the same execution; an unowned exact-path
+collision fails with its relative path and requesting execution. Collision failure preserves application bytes, prior
+generated output, and build-state ownership. Conflicting execution ownership continues to fail with both the path and
+existing owner.
 
 Lifecycle phase selection is part of the host configuration, not target behavior. Maven's default `process-classes`
 phase applies when the `generate` goal is bound as an execution and the build reaches that phase. Invoking the goal

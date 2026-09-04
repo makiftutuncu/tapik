@@ -3,6 +3,7 @@ package dev.akif.tapik.plugin.maven
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
+import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
@@ -35,7 +36,19 @@ internal object GeneratedOutputSynchronizer {
             )
         }
 
-        val stalePaths = ownership[owner].orEmpty() - currentPaths
+        val claimedPaths = ownership[owner].orEmpty()
+        val unownedPaths =
+            currentPaths.filter { path ->
+                path !in claimedPaths && Files.exists(output.resolve(path), NOFOLLOW_LINKS)
+            }
+        check(unownedPaths.isEmpty()) {
+            unownedPaths.joinToString(
+                prefix = "Generated output paths already exist without tapik ownership for execution '$owner': ",
+                transform = { path -> "'$path'" }
+            )
+        }
+
+        val stalePaths = claimedPaths - currentPaths
         stalePaths.forEach { path -> Files.deleteIfExists(output.resolve(path)) }
         stalePaths.forEach { path -> deleteEmptyParents(output.resolve(path).parent, output) }
         currentPaths.forEach { path ->

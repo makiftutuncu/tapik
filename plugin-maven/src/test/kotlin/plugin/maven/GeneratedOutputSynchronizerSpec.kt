@@ -16,6 +16,7 @@ class GeneratedOutputSynchronizerSpec : FunSpec({
         Files.writeString(staging.resolve("example/OldServer.class"), "old")
         Files.createDirectories(staging.resolve("META-INF/tapik"))
         Files.writeString(staging.resolve("META-INF/tapik/old.properties"), "old")
+        Files.writeString(staging.resolve("example/Shared.class"), "shared-old")
 
         GeneratedOutputSynchronizer.synchronize(staging, output, state, "webmvc")
 
@@ -23,12 +24,14 @@ class GeneratedOutputSynchronizerSpec : FunSpec({
         Files.delete(staging.resolve("META-INF/tapik/old.properties"))
         Files.writeString(staging.resolve("example/NewServer.class"), "new")
         Files.writeString(staging.resolve("META-INF/tapik/new.properties"), "new")
+        Files.writeString(staging.resolve("example/Shared.class"), "shared-new")
         GeneratedOutputSynchronizer.synchronize(staging, output, state, "webmvc")
 
         Files.exists(output.resolve("example/OldServer.class")) shouldBe false
         Files.exists(output.resolve("META-INF/tapik/old.properties")) shouldBe false
         Files.readString(output.resolve("example/NewServer.class")) shouldBe "new"
         Files.readString(output.resolve("META-INF/tapik/new.properties")) shouldBe "new"
+        Files.readString(output.resolve("example/Shared.class")) shouldBe "shared-new"
     }
 
     test("preserve outputs belonging to other executions and the application") {
@@ -69,5 +72,46 @@ class GeneratedOutputSynchronizerSpec : FunSpec({
             GeneratedOutputSynchronizer.synchronize(workspace.resolve("second"), output, state, "second")
         }.message shouldContain "'example/Server.class' by 'first'"
         Files.readString(output.resolve("example/Server.class")) shouldBe "first"
+    }
+
+    test("reject unowned output paths before changing application or generated output") {
+        val workspace = Files.createTempDirectory("tapik-generated-output-unowned-").apply { toFile().deleteOnExit() }
+        val first = Files.createDirectories(workspace.resolve("first/example"))
+        val second = Files.createDirectories(workspace.resolve("second/example"))
+        val output = workspace.resolve("classes")
+        val state = workspace.resolve("state")
+        Files.writeString(first.resolve("Previous.class"), "previous")
+        Files.writeString(first.resolve("Shared.class"), "shared-old")
+        GeneratedOutputSynchronizer.synchronize(workspace.resolve("first"), output, state, "webmvc")
+        val stateFile = state.resolve("generated-output-ownership")
+        val stateBytes = Files.readAllBytes(stateFile)
+
+        Files.writeString(second.resolve("Shared.class"), "shared-new")
+        val collisions =
+            mapOf(
+                "example/Application.class" to "application-class",
+                "META-INF/generated.kotlin_module" to "application-module",
+                "META-INF/tapik/spring/webmvc/application.properties" to "application-resource"
+            )
+        collisions.forEach { (path, content) ->
+            val staged = workspace.resolve("second").resolve(path)
+            val existing = output.resolve(path)
+            Files.createDirectories(staged.parent)
+            Files.createDirectories(existing.parent)
+            Files.writeString(staged, "generated")
+            Files.writeString(existing, content)
+        }
+
+        val failure = shouldThrow<IllegalStateException> {
+            GeneratedOutputSynchronizer.synchronize(workspace.resolve("second"), output, state, "webmvc")
+        }
+
+        val message = requireNotNull(failure.message)
+        collisions.keys.forEach { path -> message shouldContain path }
+        message shouldContain "webmvc"
+        collisions.forEach { (path, content) -> Files.readString(output.resolve(path)) shouldBe content }
+        Files.readString(output.resolve("example/Previous.class")) shouldBe "previous"
+        Files.readString(output.resolve("example/Shared.class")) shouldBe "shared-old"
+        Files.readAllBytes(stateFile) shouldBe stateBytes
     }
 })
