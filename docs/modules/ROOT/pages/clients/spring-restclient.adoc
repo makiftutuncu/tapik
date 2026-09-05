@@ -60,6 +60,12 @@ query, header, and body arguments with their contract formats; then it matches t
 headers and media type, decodes values, and returns the corresponding sealed response. An undeclared status or invalid
 wire value fails at the client boundary rather than becoming an untyped response.
 
+Literal URI fragments in the DSL are already encoded: `root / "a%20b"` requests `/a%20b`. Pass ordinary Kotlin
+values for path and query arguments; the client applies their formats and percent-encodes the resulting data once.
+For example, a path-variable value `%20` is sent as `%2520`, because its percent sign is part of the value. Remaining
+path elements are encoded separately, and repeated query values keep their order. The endpoint path is appended to
+the configured base URI path, retaining its query and fragment.
+
 For a request body with multiple media representations, the generated method requires the caller to select the
 representation explicitly. A single representation remains a direct Kotlin body parameter.
 

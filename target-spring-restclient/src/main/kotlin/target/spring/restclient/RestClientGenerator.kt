@@ -28,6 +28,7 @@ internal class RestClientGenerator(
             }
             if (model.endpoints.isNotEmpty()) {
                 appendLine("import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType")
+                appendLine("import dev.akif.tapik.target.spring.restclient.restClientUri")
             }
             appendLine()
             appendLine("public interface ${model.clientName} {")
@@ -89,48 +90,36 @@ private fun StringBuilder.appendMethod(endpoint: RestClientEndpointModel) {
 
 private fun StringBuilder.appendUri(endpoint: RestClientEndpointModel) {
     appendLine("                uri = { uriBuilder ->")
-    appendLine("                    uriBuilder")
-    appendLine("                        .path(${endpoint.pathTemplate.kotlinString()})")
-    endpoint.paths.singleOrNull(RestClientUriParameter::remaining)?.let { remaining ->
-        appendLine(
-            "                        .pathSegment(*${remaining.definitionAccess}.format.encode(${remaining.name}).split('/').toTypedArray())"
-        )
-    }
-    endpoint.queries.forEach { query ->
-        val encoded = "${query.definitionAccess}.format.encode(${query.name})"
-        when {
-            query.optional && query.repeated ->
-                appendLine(
-                    "                        .apply { ${query.name}?.let { values -> queryParam(${query.wireName.kotlinString()}, *${query.definitionAccess}.format.encode(values).toTypedArray()) } }"
-                )
-            query.optional ->
-                appendLine(
-                    "                        .apply { ${query.name}?.let { value -> queryParam(${query.wireName.kotlinString()}, ${query.definitionAccess}.format.encode(value)) } }"
-                )
-            query.repeated ->
-                appendLine(
-                    "                        .queryParam(${query.wireName.kotlinString()}, *$encoded.toTypedArray())"
-                )
-            else ->
-                appendLine("                        .queryParam(${query.wireName.kotlinString()}, $encoded)")
+    appendLine("                    restClientUri(")
+    appendLine("                        builder = uriBuilder,")
+    append("                        uri = endpoint.uri")
+    if (endpoint.paths.isNotEmpty()) {
+        appendLine(",")
+        appendLine("                        pathValues = mapOf(")
+        endpoint.paths.forEachIndexed { index, path ->
+            val suffix = if (index == endpoint.paths.lastIndex) "" else ","
+            appendLine("                            ${path.wireName.kotlinString()} to ${path.definitionAccess}.format.encode(${path.name})$suffix")
         }
-    }
-    val ordinaryPaths = endpoint.paths.filterNot(RestClientUriParameter::remaining)
-    if (ordinaryPaths.isEmpty()) {
-        append("                        .build()")
-    } else {
-        appendLine("                        .build(")
-        appendLine("                            mapOf(")
-        ordinaryPaths.forEachIndexed { index, path ->
-            val suffix = if (index == ordinaryPaths.lastIndex) "" else ","
-            appendLine(
-                "                                ${path.wireName.kotlinString()} to ${path.definitionAccess}.format.encode(${path.name})$suffix"
-            )
-        }
-        appendLine("                            )")
         append("                        )")
     }
+    if (endpoint.queries.isNotEmpty()) {
+        appendLine(",")
+        appendLine("                        queryValues = buildMap {")
+        endpoint.queries.forEach { query ->
+            val value = if (query.optional) "value" else query.name
+            val encoded = "${query.definitionAccess}.format.encode($value)"
+            val values = if (query.repeated) encoded else "listOf($encoded)"
+            val put = "put(${query.wireName.kotlinString()}, $values)"
+            if (query.optional) {
+                appendLine("                            ${query.name}?.let { value -> $put }")
+            } else {
+                appendLine("                            $put")
+            }
+        }
+        append("                        }")
+    }
     appendLine()
+    appendLine("                    )")
     append("                }")
 }
 

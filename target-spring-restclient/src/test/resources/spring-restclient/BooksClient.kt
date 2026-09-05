@@ -4,6 +4,7 @@ import dev.akif.tapik.target.spring.restclient.RestClientRequestBody
 import dev.akif.tapik.target.spring.restclient.RestClientTransport
 import dev.akif.tapik.target.spring.restclient.decodeResponseBody
 import dev.akif.tapik.target.spring.restclient.decodeResponseHeader
+import dev.akif.tapik.target.spring.restclient.restClientUri
 import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType
 import dev.akif.tapik.test.fixtures.library.AuthorId
 import dev.akif.tapik.test.fixtures.library.Book
@@ -34,11 +35,14 @@ public interface BooksClient {
             restClientTransport.exchange(
                 method = endpoint.method,
                 uri = { uriBuilder ->
-                    uriBuilder
-                        .path("/books")
-                        .queryParam("page", booksApi.list.uri.queries._1.format.encode(page))
-                        .apply { authorId?.let { values -> queryParam("authorId", *booksApi.list.uri.queries._2.format.encode(values).toTypedArray()) } }
-                        .build()
+                    restClientUri(
+                        builder = uriBuilder,
+                        uri = endpoint.uri,
+                        queryValues = buildMap {
+                            put("page", listOf(booksApi.list.uri.queries._1.format.encode(page)))
+                            authorId?.let { value -> put("authorId", booksApi.list.uri.queries._2.format.encode(value)) }
+                        }
+                    )
                 },
                 headers = buildMap {
                     put("X-Request-Id", listOf(booksApi.list.headers._1.format.encode(xRequestId)))
@@ -73,13 +77,13 @@ public interface BooksClient {
             restClientTransport.exchange(
                 method = endpoint.method,
                 uri = { uriBuilder ->
-                    uriBuilder
-                        .path("/books/{bookId}")
-                        .build(
-                            mapOf(
-                                "bookId" to booksApi.get.uri.paths._1.format.encode(bookId)
-                            )
+                    restClientUri(
+                        builder = uriBuilder,
+                        uri = endpoint.uri,
+                        pathValues = mapOf(
+                            "bookId" to booksApi.get.uri.paths._1.format.encode(bookId)
                         )
+                    )
                 },
                 headers = buildMap {
                     put("X-Request-Id", listOf(booksApi.get.headers._1.format.encode(xRequestId)))
@@ -119,9 +123,10 @@ public interface BooksClient {
             restClientTransport.exchange(
                 method = endpoint.method,
                 uri = { uriBuilder ->
-                    uriBuilder
-                        .path("/books")
-                        .build()
+                    restClientUri(
+                        builder = uriBuilder,
+                        uri = endpoint.uri
+                    )
                 },
                 headers = buildMap {
                     put("X-Request-Id", listOf(booksApi.create.headers._1.format.encode(xRequestId)))

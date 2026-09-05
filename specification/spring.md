@@ -56,6 +56,14 @@ API inclusion paths, endpoint property access, locations, or any other generated
 A remaining path is exposed as `List<String>`. Generated clients encode each element as one URI path segment and
 append those segments after the ordinary path template, so a segment cannot accidentally become multiple segments.
 
+RestClient URI assembly preserves literal path segments byte-for-byte, including existing percent escapes and their
+case. Path-variable, remaining-path, and query values produced by formats are raw URI data: Spring percent-encodes
+them once with UTF-8, including reserved characters. Query names are encoded too. A percent escape supplied as a
+parameter value represents literal percent-sign data, unlike an escape in a DSL literal path fragment.
+The client's configured URI builder resolves the base URI first; its base path, query, and fragment are retained while
+the endpoint path and query values are appended. A shared RestClient helper assembles the encoded components without
+re-encoding them. Optional queries are omitted when absent and repeated query values retain declaration/value order.
+
 Generated clients contain only API-specific request construction, output matching, and response construction. Stable
 response body and header decoding and fixed-header conformance live once in `tapik-target-spring-restclient`; generated
 sources call that runtime support instead of copying private helper functions into every client interface.

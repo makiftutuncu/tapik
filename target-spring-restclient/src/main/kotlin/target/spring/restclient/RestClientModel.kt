@@ -12,7 +12,6 @@ import dev.akif.tapik.common.plugin.kotlinNameSource
 import dev.akif.tapik.common.plugin.kotlinPropertyAccess
 import dev.akif.tapik.common.plugin.kotlinVariantName
 import dev.akif.tapik.common.plugin.lowerCamel
-import dev.akif.tapik.common.plugin.pathTemplateBeforeRemaining
 import dev.akif.tapik.common.plugin.toKotlinSourceType
 import dev.akif.tapik.common.plugin.tupleElements
 import dev.akif.tapik.common.plugin.uniqueKotlinName
@@ -33,7 +32,6 @@ internal data class RestClientEndpointModel(
     val methodName: String,
     val summary: String?,
     val responseName: String,
-    val pathTemplate: String,
     val paths: List<RestClientUriParameter>,
     val queries: List<RestClientUriParameter>,
     val headers: List<RestClientHeader>,
@@ -53,8 +51,7 @@ internal data class RestClientUriParameter(
     val wireName: String,
     val definitionAccess: String,
     val repeated: Boolean,
-    val optional: Boolean,
-    val remaining: Boolean = false
+    val optional: Boolean
 )
 
 internal data class RestClientHeader(
@@ -160,8 +157,7 @@ private fun CompiledEndpoint.toModel(
                 wireName = path.name,
                 definitionAccess = "$endpointAccess.uri.paths._${index + 1}",
                 repeated = false,
-                optional = false,
-                remaining = remaining
+                optional = false
             ) to RestClientParameter(name, pathType)
         }
 
@@ -264,7 +260,6 @@ private fun CompiledEndpoint.toModel(
         methodName = methodName,
         summary = value.documentation.summary,
         responseName = responseName,
-        pathTemplate = value.uri.pathTemplateBeforeRemaining(),
         paths = paths.map(Pair<RestClientUriParameter, RestClientParameter>::first),
         queries = queries.map(Pair<RestClientUriParameter, RestClientParameter>::first),
         headers = headers.map(Pair<RestClientHeader, RestClientParameter?>::first),

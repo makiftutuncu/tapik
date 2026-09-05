@@ -46,7 +46,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Output previously owned by the same execution can still be replaced and removed as stale.
   - Conflicts with another execution continue to fail with both path and owner in the diagnostic.
 
-- [ ] Preserve already-encoded literal paths in generated RestClient requests.
+- [x] Preserve already-encoded literal paths in generated RestClient requests.
 
   Separate the DSL's already-encoded literal path structure from raw path-variable, remaining-path, and query values
   that Spring must encode. Do not pass an encoded template through a builder mode that escapes percent signs again.

@@ -177,9 +177,10 @@ class RestClientTargetSpec : FunSpec({
                 .content
 
         source shouldContain "path: List<String>"
-        source shouldContain ".path(\"/files/{ownerId}\")"
+        source shouldContain "restClientUri("
+        source shouldContain "uri = endpoint.uri"
         source shouldContain
-            ".pathSegment(*restClientRemainingPathsApi.download.uri.paths._2.format.encode(path).split('/').toTypedArray())"
+            "\"path\" to restClientRemainingPathsApi.download.uri.paths._2.format.encode(path)"
         source shouldNotContain "{*path}"
         val compilation = compileKotlin(source)
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
