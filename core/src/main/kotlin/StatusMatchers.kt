@@ -14,14 +14,33 @@ data class ExactStatus(
 }
 
 /** A matcher selecting any status in the non-empty [statuses] set. */
-@ConsistentCopyVisibility
-data class StatusSet internal constructor(
-    val statuses: Set<Status>
+class StatusSet internal constructor(
+    statuses: Set<Status>
 ) : StatusMatcher {
+    /** Accepted statuses, protected from caller mutation. */
+    val statuses: Set<Status> = statuses.snapshotSet()
+
     init {
-        require(statuses.isNotEmpty()) { "Status set must not be empty" }
+        require(this.statuses.isNotEmpty()) { "Status set must not be empty" }
     }
 
+    /** Returns [statuses] for destructuring. */
+    operator fun component1(): Set<Status> = statuses
+
+    /** Returns a copy, snapshotting structural collection inputs. */
+    internal fun copy(
+        statuses: Set<Status> = this.statuses
+    ): StatusSet = StatusSet(statuses)
+
+    override fun equals(other: Any?): Boolean =
+        this === other ||
+            (other is StatusSet &&
+                statuses == other.statuses)
+
+    override fun hashCode(): Int = statuses.hashCode()
+
+    override fun toString(): String =
+        "StatusSet(statuses=$statuses)"
     override fun matches(status: Status): Boolean = status in statuses
 }
 

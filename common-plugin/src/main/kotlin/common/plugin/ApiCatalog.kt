@@ -10,8 +10,10 @@ import java.util.ServiceLoader
  * @property apis all registered APIs ordered by [Api.id].
  */
 class ApiCatalog private constructor(
-    val apis: List<Api>
+    apis: List<Api>
 ) {
+    val apis: List<Api> = apis.snapshotList()
+
     /** Creates and discovers API catalogs. */
     companion object {
         /**

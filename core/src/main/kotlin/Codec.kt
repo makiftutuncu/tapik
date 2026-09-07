@@ -25,15 +25,36 @@ sealed interface DecodeResult<out Value : Any> {
      *
      * @throws IllegalArgumentException when [errors] is empty.
      */
-    data class Failure(
-        val errors: List<DecodeError>
+    class Failure(
+        errors: List<DecodeError>
     ) : DecodeResult<Nothing> {
+        /** Errors in decoding order, protected from caller mutation. */
+        val errors: List<DecodeError> = errors.snapshotList()
+
         init {
-            require(errors.isNotEmpty()) { "A decode failure must contain at least one error" }
+            require(this.errors.isNotEmpty()) { "A decode failure must contain at least one error" }
         }
 
         /** Creates a failure containing one [error]. */
         constructor(error: DecodeError) : this(listOf(error))
+
+        /** Returns [errors] for destructuring. */
+        operator fun component1(): List<DecodeError> = errors
+
+        /** Returns a copy, snapshotting structural collection inputs. */
+        fun copy(
+            errors: List<DecodeError> = this.errors
+        ): Failure = Failure(errors)
+
+        override fun equals(other: Any?): Boolean =
+            this === other ||
+                (other is Failure &&
+                    errors == other.errors)
+
+        override fun hashCode(): Int = errors.hashCode()
+
+        override fun toString(): String =
+            "Failure(errors=$errors)"
     }
 }
 

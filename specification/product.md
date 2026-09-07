@@ -24,6 +24,15 @@ stored, and exposed collections cannot mutate the stored structure. Encoded byte
 value boundary are copied on ingress and access. tapik does not copy user-owned domain objects, formats, codecs, or
 values carried by those abstractions.
 
+This boundary includes decode-error lists, URI segments, endpoint tags, status sets, generated API registries,
+discovery catalogs, generation requests, compiled types/endpoints, generated-source model collections, and every
+collection in the public OpenAPI model. Construction and `copy` both snapshot inputs; destructuring exposes only
+the protected values. JVM mutable casts (including map views and entries) cannot modify stored structure. Lists and
+maps retain declaration order and sets retain set semantics. Nested structural containers, such as response-header
+lists and OpenAPI JSON keyword values, are protected at each container boundary; domain values are not deep-copied.
+Generated registries retain their API instances but expose an unmodifiable list. User-supplied registry implementations
+remain responsible for their own getters; catalogs always snapshot what they read from those providers.
+
 ## Initial targets
 
 Targets are developed in this order:

@@ -31,11 +31,15 @@ class RestClientExchangeSpec : FunSpec({
     test("snapshot request body bytes") {
         val bytes = byteArrayOf(1, 2, 3)
         val body = RestClientRequestBody(MediaType.Json, bytes)
+        val copy = body.copy(bytes = bytes)
 
         bytes[0] = 9
         body.bytes[1] = 9
+        body.component2()[2] = 9
+        copy.component2()[2] = 9
 
         body.bytes.contentEquals(byteArrayOf(1, 2, 3)) shouldBe true
+        body shouldBe copy
     }
 
     test("snapshot response headers and body bytes") {
@@ -43,6 +47,7 @@ class RestClientExchangeSpec : FunSpec({
         val headers = linkedMapOf("X-Request-Id" to headerValues)
         val bytes = byteArrayOf(1, 2, 3)
         val response = RestClientResponse(Status.Ok, headers, MediaType.Json, bytes)
+        val copy = response.copy(headers = headers, body = bytes)
 
         headerValues.clear()
         headers.clear()
@@ -50,8 +55,12 @@ class RestClientExchangeSpec : FunSpec({
         runCatching { (response.headers as MutableMap).clear() }
         runCatching { (response.headers.getValue("X-Request-Id") as MutableList).clear() }
         response.body[1] = 9
+        response.component4()[2] = 9
+        copy.component4()[2] = 9
+        runCatching { (copy.component2().getValue("X-Request-Id") as MutableList).clear() }
 
         response.headers shouldBe mapOf("X-Request-Id" to listOf("request-1"))
         response.body.contentEquals(byteArrayOf(1, 2, 3)) shouldBe true
+        response shouldBe copy
     }
 })

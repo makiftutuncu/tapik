@@ -21,10 +21,39 @@ data class KotlinDataField(
  * @property name generated Kotlin variant name.
  * @property fields constructor fields in declaration order.
  */
-data class KotlinSealedVariant(
+class KotlinSealedVariant(
     val name: String,
-    val fields: List<KotlinDataField> = emptyList()
-)
+    fields: List<KotlinDataField> = emptyList()
+) {
+    val fields: List<KotlinDataField> = fields.snapshotList()
+
+    /** Returns [name] for destructuring. */
+    operator fun component1(): String = name
+
+    /** Returns [fields] for destructuring. */
+    operator fun component2(): List<KotlinDataField> = fields
+
+    /** Returns a copy, snapshotting structural collection inputs. */
+    fun copy(
+        name: String = this.name,
+        fields: List<KotlinDataField> = this.fields
+    ): KotlinSealedVariant = KotlinSealedVariant(name, fields)
+
+    override fun equals(other: Any?): Boolean =
+        this === other ||
+            (other is KotlinSealedVariant &&
+                name == other.name &&
+                fields == other.fields)
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + fields.hashCode()
+        return result
+    }
+
+    override fun toString(): String =
+        "KotlinSealedVariant(name=$name, fields=$fields)"
+}
 
 /**
  * Appends a public sealed interface and its [variants] using [indentation] before every top-level line.

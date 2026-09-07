@@ -14,8 +14,10 @@ interface GenerationTargetRegistry {
  * @property targets all registered targets ordered by [GenerationTarget.id].
  */
 class GenerationTargetCatalog private constructor(
-    val targets: List<GenerationTarget>
+    targets: List<GenerationTarget>
 ) {
+    val targets: List<GenerationTarget> = targets.snapshotList()
+
     /** Creates and discovers target catalogs. */
     companion object {
         /**

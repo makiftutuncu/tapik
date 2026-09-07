@@ -59,7 +59,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Every remaining-path element is encoded exactly once and remains one segment.
   - A black-box request test combines encoded literals, ordinary variables, remaining segments, and queries.
 
-- [ ] Complete shallow snapshot semantics across every public structural value.
+- [x] Complete shallow snapshot semantics across every public structural value.
 
   Audit all production modules for public collection and byte-array inputs/getters. Copy public collection inputs before
   storage and expose collections that cannot mutate stored structure, including through JVM/Kotlin mutable casts. Do not

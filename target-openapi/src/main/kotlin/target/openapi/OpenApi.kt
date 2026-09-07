@@ -81,7 +81,7 @@ private class Interpreter(
         return OpenApiDocument(
             info = info,
             paths = paths.mapValues { OpenApiPathItem(it.value.toMap()) },
-            components = OpenApiComponents(schemas.components.toMap())
+            components = OpenApiComponents(schemas.components)
         )
     }
 

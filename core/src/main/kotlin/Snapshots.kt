@@ -7,3 +7,6 @@ internal fun <Value> Iterable<Value>.snapshotList(): List<Value> =
 
 internal fun <Key, Value> Map<Key, Value>.snapshotMap(): Map<Key, Value> =
     Collections.unmodifiableMap(LinkedHashMap(this))
+
+internal fun <Value> Iterable<Value>.snapshotSet(): Set<Value> =
+    Collections.unmodifiableSet(toCollection(LinkedHashSet()))

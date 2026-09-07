@@ -5,7 +5,9 @@ import dev.akif.tapik.*
 internal class SchemaRegistry(
     private val componentNaming: OpenApiComponentNaming
 ) {
-    val components: LinkedHashMap<String, OpenApiSchema> = linkedMapOf()
+    val components: Map<String, OpenApiSchema>
+        field = linkedMapOf<String, OpenApiSchema>()
+
     private val references: MutableSet<String> = linkedSetOf()
     private val active: MutableSet<String> = mutableSetOf()
     private val discriminatedUnions: MutableList<OpenApiSchema> = mutableListOf()

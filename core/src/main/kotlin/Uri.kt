@@ -9,12 +9,43 @@ package dev.akif.tapik
  * @property paths path values in declaration order.
  * @property queries query parameters in declaration order.
  */
-@ConsistentCopyVisibility
-data class Uri<out P : Paths, out Q : Queries> internal constructor(
-    val segments: List<PathSegment>,
+class Uri<out P : Paths, out Q : Queries> internal constructor(
+    segments: List<PathSegment>,
     val paths: P,
     val queries: Q
 ) {
+    val segments: List<PathSegment> = segments.snapshotList()
+
+    /** Returns [segments] for destructuring. */
+    operator fun component1(): List<PathSegment> = segments
+
+    /** Returns [paths] for destructuring. */
+    operator fun component2(): P = paths
+
+    /** Returns [queries] for destructuring. */
+    operator fun component3(): Q = queries
+
+    /** Returns a copy, snapshotting structural collection inputs. */
+    internal fun copy(
+        segments: List<PathSegment> = this.segments,
+        paths: @UnsafeVariance P = this.paths,
+        queries: @UnsafeVariance Q = this.queries
+    ): Uri<P, Q> = Uri(segments, paths, queries)
+
+    override fun equals(other: Any?): Boolean =
+        this === other ||
+            (other is Uri<*, *> &&
+                segments == other.segments &&
+                paths == other.paths &&
+                queries == other.queries)
+
+    override fun hashCode(): Int {
+        var result = segments.hashCode()
+        result = 31 * result + paths.hashCode()
+        result = 31 * result + queries.hashCode()
+        return result
+    }
+
     /** Returns the complete URI template. */
     override fun toString(): String {
         val renderedPath =

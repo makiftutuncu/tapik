@@ -55,14 +55,20 @@ class SchemaSpec : FunSpec({
             )
         val genre = EnumSchema(values)
         val book = ObjectSchema(properties)
+        val genreCopy = genre.copy(values = values)
+        val bookCopy = book.copy(properties = properties)
 
         values.clear()
         properties.clear()
         runCatching { (genre.values as MutableList).clear() }
         runCatching { (book.properties as MutableMap).clear() }
+        runCatching { (genreCopy.component1() as MutableList).clear() }
+        runCatching { (bookCopy.component1() as MutableMap).clear() }
 
         genre.values shouldBe listOf("FICTION", "HISTORY")
         book.properties.keys shouldBe setOf("genre")
+        genreCopy shouldBe genre
+        bookCopy shouldBe book
     }
 
     test("represent union and discriminator schemas") {
@@ -81,16 +87,22 @@ class SchemaSpec : FunSpec({
                 defaultMapping = ReferenceSchema("types.Dog")
             )
         val animal = UnionSchema(alternatives, discriminator, name = "types.Animal")
+        val animalCopy = animal.copy(alternatives = alternatives)
+        val discriminatorCopy = discriminator.copy(mapping = mappings)
 
         alternatives.clear()
         mappings.clear()
         runCatching { (animal.alternatives as MutableList<*>).clear() }
         runCatching { (discriminator.mapping as MutableMap<*, *>).clear() }
+        runCatching { (animalCopy.component1() as MutableList).clear() }
+        runCatching { (discriminatorCopy.component2() as MutableMap).clear() }
 
         animal.alternatives shouldBe listOf(cat, dog)
         discriminator.mapping.keys.toList() shouldBe listOf("cat", "dog")
         discriminator.defaultMapping shouldBe ReferenceSchema("types.Dog")
         animal.named("Animal").name shouldBe "Animal"
+        animalCopy shouldBe animal
+        discriminatorCopy shouldBe discriminator
     }
 
     test("validate union and discriminator schemas") {

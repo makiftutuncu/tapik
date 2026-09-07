@@ -42,6 +42,10 @@ class CompilerPluginSpec : FunSpec({
             val registry = ServiceLoader.load(ApiRegistry::class.java, classLoader).single()
             registry.apis.map { api -> api.id }.toSet() shouldBe setOf("Authors", "Books", "Library")
             registry.apis shouldBeSameInstanceAs registry.apis
+            val original = registry.apis.toList()
+            runCatching { (registry.apis as MutableList)[0] = original[1] }
+            runCatching { (registry.apis as MutableList).clear() }
+            registry.apis shouldBe original
         }
     }
 

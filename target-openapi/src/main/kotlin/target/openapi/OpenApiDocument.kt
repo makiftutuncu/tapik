@@ -1,7 +1,5 @@
 package dev.akif.tapik.target.openapi
 
-import dev.akif.tapik.Method
-
 /**
  * The OpenAPI document subset emitted by tapik.
  *
@@ -10,160 +8,50 @@ import dev.akif.tapik.Method
  * @property paths operations grouped by URI path template in declaration order.
  * @property components reusable components referenced by operations.
  */
-data class OpenApiDocument(
+class OpenApiDocument(
     val specificationVersion: String = "3.2.0",
     val info: OpenApiInfo,
-    val paths: Map<String, OpenApiPathItem>,
+    paths: Map<String, OpenApiPathItem>,
     val components: OpenApiComponents = OpenApiComponents()
-)
-
-/**
- * Required identifying information for an OpenAPI document.
- *
- * @property title human-readable API title.
- * @property version version of the API document, independent of [OpenApiDocument.specificationVersion].
- * @property summary optional short summary.
- * @property description optional detailed description.
- * @throws IllegalArgumentException when [title] or [version] is blank.
- */
-data class OpenApiInfo(
-    val title: String,
-    val version: String,
-    val summary: String? = null,
-    val description: String? = null
 ) {
-    init {
-        require(title.isNotBlank()) { "OpenAPI title must not be blank" }
-        require(version.isNotBlank()) { "OpenAPI document version must not be blank" }
+    val paths: Map<String, OpenApiPathItem> = paths.snapshotMap()
+
+    /** Returns [specificationVersion] for destructuring. */
+    operator fun component1(): String = specificationVersion
+
+    /** Returns [info] for destructuring. */
+    operator fun component2(): OpenApiInfo = info
+
+    /** Returns [paths] for destructuring. */
+    operator fun component3(): Map<String, OpenApiPathItem> = paths
+
+    /** Returns [components] for destructuring. */
+    operator fun component4(): OpenApiComponents = components
+
+    /** Returns a copy, snapshotting structural collection inputs. */
+    fun copy(
+        specificationVersion: String = this.specificationVersion,
+        info: OpenApiInfo = this.info,
+        paths: Map<String, OpenApiPathItem> = this.paths,
+        components: OpenApiComponents = this.components
+    ): OpenApiDocument = OpenApiDocument(specificationVersion, info, paths, components)
+
+    override fun equals(other: Any?): Boolean =
+        this === other ||
+            (other is OpenApiDocument &&
+                specificationVersion == other.specificationVersion &&
+                info == other.info &&
+                paths == other.paths &&
+                components == other.components)
+
+    override fun hashCode(): Int {
+        var result = specificationVersion.hashCode()
+        result = 31 * result + info.hashCode()
+        result = 31 * result + paths.hashCode()
+        result = 31 * result + components.hashCode()
+        return result
     }
+
+    override fun toString(): String =
+        "OpenApiDocument(specificationVersion=$specificationVersion, info=$info, paths=$paths, components=$components)"
 }
-
-/**
- * Operations sharing one URI path template.
- *
- * @property operations operations keyed by HTTP method in declaration order.
- */
-data class OpenApiPathItem(
-    val operations: Map<Method, OpenApiOperation>
-)
-
-/**
- * One OpenAPI operation.
- *
- * @property operationId unique identifier derived from the delegated endpoint property.
- * @property tags endpoint tags.
- * @property summary optional short summary.
- * @property description optional detailed description.
- * @property parameters ordered path, query, and request-header parameters.
- * @property requestBody optional request body.
- * @property responses responses keyed by status matcher representation.
- */
-data class OpenApiOperation(
-    val operationId: String,
-    val tags: List<String>,
-    val summary: String?,
-    val description: String?,
-    val parameters: List<OpenApiParameter>,
-    val requestBody: OpenApiRequestBody?,
-    val responses: Map<String, OpenApiResponse>
-)
-
-/**
- * Supported OpenAPI parameter locations.
- *
- * @property value wire value used by OpenAPI.
- */
-enum class OpenApiParameterLocation(
-    val value: String
-) {
-    /** URI path-template parameter. */
-    PATH("path"),
-
-    /** URI query parameter. */
-    QUERY("query"),
-
-    /** HTTP request-header parameter. */
-    HEADER("header")
-}
-
-/**
- * A path, query, or request-header parameter.
- *
- * @property name parameter name.
- * @property location parameter location.
- * @property description optional detailed description.
- * @property required whether callers must provide the parameter.
- * @property deprecated whether consumers should avoid the parameter.
- * @property schema parameter value schema.
- * @property style optional OpenAPI serialization style.
- * @property explode optional OpenAPI serialization expansion behavior.
- */
-data class OpenApiParameter(
-    val name: String,
-    val location: OpenApiParameterLocation,
-    val description: String? = null,
-    val required: Boolean,
-    val deprecated: Boolean,
-    val schema: OpenApiSchema,
-    val style: String? = null,
-    val explode: Boolean? = null
-)
-
-/**
- * A request body and its media representations.
- *
- * @property description optional detailed description.
- * @property required whether callers must provide a body.
- * @property content representations keyed by media type in declaration order.
- */
-data class OpenApiRequestBody(
-    val description: String? = null,
-    val required: Boolean,
-    val content: Map<String, OpenApiMediaType>
-)
-
-/**
- * A response with headers and media representations.
- *
- * @property description response description, always supplied by tapik even though OpenAPI 3.2 permits omission.
- * @property headers response headers keyed by name in declaration order.
- * @property content representations keyed by media type in declaration order.
- */
-data class OpenApiResponse(
-    val description: String,
-    val headers: Map<String, OpenApiHeader>,
-    val content: Map<String, OpenApiMediaType>
-)
-
-/**
- * A response header.
- *
- * @property description optional detailed description.
- * @property required whether the response always contains the header.
- * @property deprecated whether consumers should avoid the header.
- * @property schema header value schema.
- */
-data class OpenApiHeader(
-    val description: String? = null,
-    val required: Boolean,
-    val deprecated: Boolean,
-    val schema: OpenApiSchema
-)
-
-/**
- * The schema applying to a complete media representation.
- *
- * @property schema schema of the complete representation.
- */
-data class OpenApiMediaType(
-    val schema: OpenApiSchema
-)
-
-/**
- * Reusable OpenAPI components.
- *
- * @property schemas schemas keyed by component name in first-use order.
- */
-data class OpenApiComponents(
-    val schemas: Map<String, OpenApiSchema> = emptyMap()
-)

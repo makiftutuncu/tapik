@@ -145,6 +145,13 @@ internal object RegistryClassWriter {
             "([Ljava/lang/Object;)Ljava/util/List;",
             false
         )
+        constructor.visitMethodInsn(
+            INVOKESTATIC,
+            "java/util/Collections",
+            "unmodifiableList",
+            "(Ljava/util/List;)Ljava/util/List;",
+            false
+        )
         constructor.visitFieldInsn(PUTFIELD, registryInternalName, APIS_FIELD, "Ljava/util/List;")
         constructor.visitInsn(RETURN)
         constructor.visitMaxs(0, 0)

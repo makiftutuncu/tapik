@@ -40,8 +40,7 @@ data class Ready(
  * @property tags endpoint tags using set semantics.
  * @property state binding state.
  */
-@ConsistentCopyVisibility
-data class Endpoint<
+class Endpoint<
     out P : Paths,
     out Q : Queries,
     out H : Headers,
@@ -55,9 +54,74 @@ data class Endpoint<
     val input: I,
     val outputs: O,
     val documentation: EndpointDocumentation,
-    val tags: Set<String>,
+    tags: Set<String>,
     val state: S
-)
+) {
+    val tags: Set<String> = tags.snapshotSet()
+
+    /** Returns [method] for destructuring. */
+    operator fun component1(): Method = method
+
+    /** Returns [uri] for destructuring. */
+    operator fun component2(): Uri<P, Q> = uri
+
+    /** Returns [headers] for destructuring. */
+    operator fun component3(): H = headers
+
+    /** Returns [input] for destructuring. */
+    operator fun component4(): I = input
+
+    /** Returns [outputs] for destructuring. */
+    operator fun component5(): O = outputs
+
+    /** Returns [documentation] for destructuring. */
+    operator fun component6(): EndpointDocumentation = documentation
+
+    /** Returns [tags] for destructuring. */
+    operator fun component7(): Set<String> = tags
+
+    /** Returns [state] for destructuring. */
+    operator fun component8(): S = state
+
+    /** Returns a copy, snapshotting structural collection inputs. */
+    internal fun copy(
+        method: Method = this.method,
+        uri: Uri<@UnsafeVariance P, @UnsafeVariance Q> = this.uri,
+        headers: @UnsafeVariance H = this.headers,
+        input: @UnsafeVariance I = this.input,
+        outputs: @UnsafeVariance O = this.outputs,
+        documentation: EndpointDocumentation = this.documentation,
+        tags: Set<String> = this.tags,
+        state: @UnsafeVariance S = this.state
+    ): Endpoint<P, Q, H, I, O, S> = Endpoint(method, uri, headers, input, outputs, documentation, tags, state)
+
+    override fun equals(other: Any?): Boolean =
+        this === other ||
+            (other is Endpoint<*, *, *, *, *, *> &&
+                method == other.method &&
+                uri == other.uri &&
+                headers == other.headers &&
+                input == other.input &&
+                outputs == other.outputs &&
+                documentation == other.documentation &&
+                tags == other.tags &&
+                state == other.state)
+
+    override fun hashCode(): Int {
+        var result = method.hashCode()
+        result = 31 * result + uri.hashCode()
+        result = 31 * result + headers.hashCode()
+        result = 31 * result + input.hashCode()
+        result = 31 * result + outputs.hashCode()
+        result = 31 * result + documentation.hashCode()
+        result = 31 * result + tags.hashCode()
+        result = 31 * result + state.hashCode()
+        return result
+    }
+
+    override fun toString(): String =
+        "Endpoint(method=$method, uri=$uri, headers=$headers, input=$input, outputs=$outputs, documentation=$documentation, tags=$tags, state=$state)"
+}
 
 /** Qualified API and property identifier of this ready endpoint. */
 val <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
