@@ -1,17 +1,26 @@
 package dev.akif.tapik
 
 /**
- * A complete HTTP media-type [value].
+ * A validated, concrete HTTP media type.
  *
- * @throws IllegalArgumentException when [value] is blank.
+ * Type/subtype and parameter names are case-insensitive, as are charset values. Other parameter values are
+ * case-sensitive. Parameter order and equivalent quoting do not affect equality or hashing.
+ *
+ * @param value complete HTTP media-type syntax, not an `Accept` range.
+ * @property value normalized wire syntax, retaining parameter declaration order.
+ * @throws IllegalArgumentException when syntax is invalid, parameter names repeat, or type/subtype contains a wildcard.
  */
-@JvmInline
-value class MediaType(
-    val value: String
+class MediaType(
+    value: String
 ) {
-    init {
-        require(value.isNotBlank()) { "Media type must not be blank" }
-    }
+    private val parsed: ParsedMediaType = parseMediaType(value)
+
+    val value: String = parsed.render()
+
+    override fun equals(other: Any?): Boolean =
+        this === other || other is MediaType && parsed == other.parsed
+
+    override fun hashCode(): Int = parsed.hashCode()
 
     override fun toString(): String = value
 

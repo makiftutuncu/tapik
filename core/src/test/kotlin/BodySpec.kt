@@ -46,6 +46,21 @@ class BodySpec : FunSpec({
         }
     }
 
+    test("reject semantically duplicate media types without rejecting distinct parameter values") {
+        listOf(
+            "APPLICATION/JSON" to "application/json",
+            "text/plain;Charset=\"UTF-8\";profile=Book" to "TEXT/PLAIN;profile=Book;charset=utf-8"
+        ).forEach { (first, second) ->
+            shouldThrow<IllegalArgumentException> {
+                bodiesOf(body(MediaType(first), bookFormat()), body(MediaType(second), bookFormat()))
+            }
+        }
+        bodiesOf(
+            body(MediaType("application/json;profile=Book"), bookFormat()),
+            body(MediaType("application/json;profile=book"), bookFormat())
+        ).values.size shouldBe 2
+    }
+
     test("support eight body alternatives") {
         val bodies =
             bodiesOf(

@@ -308,7 +308,9 @@ bodies must use the same declared Kotlin type and distinct media types.
 `Bodies` is non-empty by construction. `bodiesOf` and the single-body overloads are the public construction boundary;
 request and output bulk modifiers validate received body groups before accepting them.
 
-`MediaType` initially wraps the complete media-type string as its own evolvable type. Built-in values cover JSON,
+`MediaType` validates and normalizes a concrete HTTP media-type string at construction (see `media-types.md`).
+Equality follows type/subtype and parameter identity, so equivalent spellings cannot bypass body uniqueness.
+Built-in values cover JSON,
 XML, plain text, and arbitrary bytes. A `Body<Value>` combines one media type with a `ByteArrayFormat<Value>`; format
 integrations such as Kotlin serialization provide convenient builders including `jsonBody<Value>()`.
 

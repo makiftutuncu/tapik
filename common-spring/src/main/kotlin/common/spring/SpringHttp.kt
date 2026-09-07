@@ -27,7 +27,8 @@ fun HttpStatusCode.toStatus(): Status = Status(value())
 /**
  * Parses this complete tapik media type as a Spring media type.
  *
- * @throws org.springframework.http.InvalidMediaTypeException when [MediaType.value] is invalid.
+ * @throws org.springframework.http.InvalidMediaTypeException when Spring cannot support a parameter, such as an
+ * unknown charset. Neutral syntax has already been validated by [MediaType].
  */
 fun MediaType.toSpringMediaType(): SpringMediaType = SpringMediaType.parseMediaType(value)
 

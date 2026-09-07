@@ -36,6 +36,12 @@ One `Body<Value>` combines:
 Format integrations supply builders such as `jsonBody<CreateBook>()`. The generic `body(mediaType, format)` builder is
 available when defining another representation.
 
+`MediaType(...)` validates a concrete HTTP media type immediately. Malformed syntax, duplicate parameter names, and
+wildcards such as `application/*` are rejected. Its `value` and string representation use normalized spelling:
+`MediaType("Text/Plain;Charset=\"UTF-8\"")` becomes `text/plain;charset=utf-8`. Type/subtype, parameter-name, and charset
+casing do not affect equality; neither does parameter order or equivalent quoting. Other parameter values remain
+case-sensitive, so multipart boundaries `A` and `a` are different. Parameter order is retained in rendered output.
+
 `bodiesOf(...)` groups alternative media representations of one logical Kotlin type. Their media types must be
 distinct. Adding `noBody` as the final alternative makes the complete request body optional; an endpoint with only
 `noInput` has no request-body definition at all.

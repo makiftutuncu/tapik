@@ -15,6 +15,19 @@ import kotlinx.serialization.json.jsonPrimitive
 class OpenApiSpec : FunSpec({
     val document = OpenApi.from(Books, version = "0.6.0")
 
+    test("emit normalized concrete media types as JSON content keys") {
+        val representation = body(MediaType("Text/Plain ; Charset=\"UTF-8\""), openApiDocumentedBody.format)
+        val api = object : Api("NormalizedMedia") {
+            val create by post(root).input(representation).output(Status.Ok with representation)
+        }
+        val json = Json.parseToJsonElement(OpenApi.from(api, "1").toJson()).jsonObject
+        val operation = json.getValue("paths").jsonObject.getValue("/").jsonObject.getValue("post").jsonObject
+        operation.getValue("requestBody").jsonObject.getValue("content").jsonObject.keys shouldBe
+            setOf("text/plain;charset=utf-8")
+        operation.getValue("responses").jsonObject.getValue("200").jsonObject.getValue("content").jsonObject.keys shouldBe
+            setOf("text/plain;charset=utf-8")
+    }
+
     test("interpret API identity paths and operations") {
         document.specificationVersion shouldBe "3.2.0"
         document.info shouldBe OpenApiInfo(title = "Books", version = "0.6.0")

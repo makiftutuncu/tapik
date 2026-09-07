@@ -13,7 +13,7 @@ class RestClientResponseConformanceSpec : FunSpec({
 
         selectResponseBodyMediaType(
             response = response,
-            offered = listOf(MediaType.Json, MediaType("application/*")),
+            offered = listOf(MediaType.Json, MediaType("application/json;charset=utf-8")),
             allowsNoBody = false,
             endpointId = "Books.get"
         ) shouldBe MediaType.Json

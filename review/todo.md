@@ -85,7 +85,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
 
 ## P2 — protocol and architecture stabilization
 
-- [ ] Define and enforce neutral HTTP media-type syntax and identity.
+- [x] Define and enforce neutral HTTP media-type syntax and identity.
 
   Specify the accepted grammar and equality rules for `MediaType`. Validate malformed values before a target runs, and
   prevent semantically duplicate body representations such as type/subtype case variants. Keep core independent of

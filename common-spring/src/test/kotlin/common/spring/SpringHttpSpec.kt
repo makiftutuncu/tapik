@@ -27,6 +27,18 @@ class SpringHttpSpec : FunSpec({
         mediaType.toSpringMediaType().toMediaType() shouldBe mediaType
     }
 
+    test("parse normalized contract media types without deferred syntax failures") {
+        listOf(
+            "Text/Plain ; Charset=\"UTF-8\"",
+            "application/json;profile=\"bo\\ok\"",
+            "multipart/mixed;boundary=\"a;b\"",
+            "application/vnd.tapik+json; ;version=1;;"
+        ).forEach { input ->
+            val mediaType = MediaType(input)
+            mediaType.toSpringMediaType().toMediaType() shouldBe mediaType
+        }
+    }
+
     test("copy all Spring header values") {
         val headers = HttpHeaders()
         headers.addAll("X-Trace", listOf("first", "second"))
