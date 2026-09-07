@@ -140,6 +140,14 @@ quality zero excludes the representation when it is the most specific match. Non
 range must match parameters offered by the representation. Missing or wildcard `Accept` values select the first
 representation, while an invalid header or no compatible representation produces `406 Not Acceptable`.
 
+Parameter names (including `q`) compare case-insensitively. Charset values compare case-insensitively; other
+parameter values remain case-sensitive. Double-quoted values and their equivalent tokens compare equally after
+quoted-pair escapes are decoded; single quotes are ordinary token characters, not quoting syntax. Every requested
+non-quality parameter must be present and match. Parameter spelling does not change specificity, effective quality,
+or declaration-order tie breaking, including a most-specific parameterized `q=0` exclusion. Spring remains the
+header parser; this comparison does not add charset alias resolution. Invalid quality values reject the header
+regardless of how `q` is capitalized.
+
 An output selected without a body is not constrained by `Accept`. When any endpoint output can be bodyless, its Spring
 mapping omits an aggregate `produces` condition so routing cannot reject a request before the handler selects that
 output. Exact response variants imply their status. Set, range, and custom response variants require handlers to

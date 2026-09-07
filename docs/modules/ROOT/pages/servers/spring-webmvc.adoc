@@ -91,6 +91,12 @@ After the handler returns, the controller matches the selected response alternat
 negotiates the response representation, and constructs the Spring response. The handler cannot return a status or body
 shape outside the generated sealed hierarchy.
 
+Response negotiation matches `Accept` parameter names and charset values case-insensitively, so
+`text/plain;charset=UTF-8` matches a body declared as `text/plain;charset=utf-8`. Other parameter values remain
+case-sensitive; equivalent double-quoted and unquoted values match. The most specific matching range determines a
+representation's quality, including `q=0` exclusions. Equal-quality, equally specific matches follow body declaration
+order.
+
 == Ownership and naming
 
 tapik owns the generated `Server` interface, internal controller, registration descriptor, and wire conversion. Your

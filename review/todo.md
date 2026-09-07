@@ -101,7 +101,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - OpenAPI never emits an invalid Content Object key.
   - Spring applications do not defer contract media-type syntax errors to request time or context startup.
 
-- [ ] Compare `Accept` parameters using HTTP-aware semantics.
+- [x] Compare `Accept` parameters using HTTP-aware semantics.
 
   Replace raw parameter string equality in `selectResponseMediaType`. Preserve the existing effective quality,
   specificity, declaration-order, and most-specific-`q=0` behavior.
