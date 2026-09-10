@@ -115,7 +115,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Mismatched non-quality parameters still reject the representation.
   - Existing wildcard, quality, specificity, invalid-header, and declaration-order tests remain green.
 
-- [ ] Make Jackson schema derivation faithful to effective serializer shape.
+- [x] Make Jackson schema derivation faithful to effective serializer shape.
 
   Detect Jackson behavior that changes a Kotlin type's JSON shape, including `@JsonValue`, property serializers, class
   serializers, and registered module serializers. Support only shapes that can be proven; otherwise require an explicit

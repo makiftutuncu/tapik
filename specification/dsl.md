@@ -256,6 +256,19 @@ The derived object shape follows Jackson's effective serialization properties, i
 properties, and order. Polymorphic and sealed types still fail format construction until Jackson-specific derivation
 is implemented against the neutral union algebra and shared conformance cases.
 
+Jackson derivation must reject serialization overrides whose wire shape is not supported, at format construction,
+with `SchemaDerivationException` identifying the type or property and suggesting an explicit schema. This includes
+ordinary `@JsonValue` wrappers, class/property serializers and converters, and module-registered serializers (including
+overrides of scalar and collection element types). Existing enum derivation may retain its exhaustive string-value
+encoding check. Ordinary Kotlin value-class unboxing remains supported; custom value-class serialization does not.
+Serialization annotations are read through Jackson introspection so mix-ins cannot bypass these checks.
+
+`jsonFormat<Value>(format = mapper, schema = schema)` and `jsonBody<Value>(format = mapper, schema = schema)` attach
+the caller's schema without attempting derivation. The non-reified format builder accepts the same optional schema.
+An explicit schema describes the entire serialized value, including any nested custom behavior; callers own its
+accuracy and the matching mapper's encoder/decoder behavior. Explicit-schema formats do not enter the inferred-format
+cache, and cannot affect another call's schema. Supplying a schema must not change wire encoding or decoding.
+
 ## Request headers and input
 
 Request headers belong directly to an endpoint and append in declaration order:

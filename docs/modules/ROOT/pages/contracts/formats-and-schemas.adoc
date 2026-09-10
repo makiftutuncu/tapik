@@ -39,6 +39,29 @@ Both expose `jsonBody<Value>()` from their integration package. Pass the integra
 `ObjectMapper` to its `format` parameter, and override `mediaType` for vendor JSON while retaining the same format
 behavior.
 
+=== Custom Jackson serialization
+
+Jackson schema derivation supports ordinary Kotlin structures using the integration's recognized standard
+serializers. It preserves the mapper's property names, visibility, ignored properties, and ordering. Ordinary
+value-class unboxing is supported, and enum schemas are checked against every constant's encoded string.
+
+Custom serializers and converters can change that structure. tapik fails format construction with
+`SchemaDerivationException` for unsupported class, property, or module serializers, including overrides supplied by
+mix-ins. Ordinary `@JsonValue` wrappers also require an explicit schema for now. The error identifies the type or
+property; tapik does not execute sample user objects to guess their shape.
+
+Supply a schema describing the actual wire value to bypass derivation. For a `BookId` serialized as a JSON string,
+use `ScalarSchema` and `SchemaType` from `dev.akif.tapik`, with `jsonBody` from `dev.akif.tapik.format.jackson`:
+
+[source,kotlin]
+----
+val idBody = jsonBody<BookId>(format = mapper, schema = ScalarSchema(SchemaType.STRING, name = "BookId"))
+----
+
+`jsonFormat<Value>(format = mapper, schema = schema)` offers the same override without building a body. The schema
+describes the entire value, including nested serializer overrides; it does not configure or validate Jackson's codec.
+You own its accuracy and any matching deserializer. Explicit-schema formats are kept out of the inferred-format cache.
+
 == Neutral schemas
 
 The core schema algebra is intentionally independent of OpenAPI and serialization libraries. It currently represents:

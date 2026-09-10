@@ -36,6 +36,7 @@ private fun deriveSchema(
     val classifier = type.classifier as? KClass<*>
         ?: throw SchemaDerivationException("Unsupported Jackson Kotlin type '$type'")
     val name = classifier.qualifiedName ?: classifier.java.name
+    requireSupportedJacksonSerialization(format, format.typeFactory.constructType(type.javaType))
 
     if (classifier.isValue) {
         val parameter = classifier.primaryConstructor?.parameters?.singleOrNull()
@@ -153,6 +154,7 @@ private fun deriveJavaSchema(
 ): Schema {
     val raw = type.rawClass.kotlin
     val name = raw.qualifiedName ?: type.rawClass.name
+    requireSupportedJacksonSerialization(format, type)
     if (name in activeObjects) {
         return ReferenceSchema(name)
     }
