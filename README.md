@@ -208,9 +208,16 @@ module's earlier main source.
 | `./mvnw process-classes` | generates targets and compiles the project | generates targets |
 | `./mvnw package`, `verify`, or `install` | runs | runs |
 
-The default phase belongs to a lifecycle-bound plugin execution. Invoking `./mvnw tapik:generate` directly does not
-first compile the current project and does not reliably select an execution's configuration. Prefer the lifecycle
-commands in the table. To start a Spring Boot application after a clean build, use
+Only `generate-sources` and `process-classes` are supported **execution bindings**. Other bindings fail with a diagnostic;
+running a later lifecycle command such as `package`, `verify`, or `install` still runs either supported binding normally.
+
+Prefer the lifecycle commands in the table. Direct invocation, such as `./mvnw tapik:generate@<execution-id>`, reuses an
+execution's configuration and already compiled APIs; it does not run compilation or preceding lifecycle phases.
+It requires an existing main output directory and compiled API registries on the classpath. It always compiles generated
+Kotlin and synchronizes generated classes/resources into the main output, even for an execution configured with
+`generate-sources`. Recompile changed contracts first: direct invocation cannot detect stale compiled definitions.
+Plain `tapik:generate` needs goal-level configuration or Maven properties rather than a named execution's configuration.
+To start a Spring Boot application after a clean build, use
 `./mvnw process-classes spring-boot:run`; `spring-boot:run` alone should not be treated as a replacement for the Maven
 lifecycle that generates sources.
 

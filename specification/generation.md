@@ -194,7 +194,21 @@ directly does not first execute the lifecycle phases needed to compile a same-mo
 dependency-contract executions explicitly bound to `generate-sources`, but intentionally does not reach a same-module
 execution bound to `process-classes`.
 
+The Maven adapter resolves an explicit mode before inspecting APIs or changing output. Lifecycle-bound executions
+support exactly `generate-sources` (compiled-contract mode, registration for ordinary compilation) and
+`process-classes` (same-module mode, late compilation and synchronization). Other bindings, including
+`process-sources`, `compile`, `test-compile`, and `package`, fail with a diagnostic naming the unsupported phase and
+both supported alternatives. A missing phase on a lifecycle execution is invalid; it is not evidence of direct invocation.
+
+Maven's CLI execution source identifies direct invocation, including `generate@executionId`, independently of a
+configured phase. Direct mode performs the same late compilation and synchronization as `process-classes`, but does
+not run user compilation or any preceding lifecycle phase. It requires an existing main output directory and at least
+one API visible through compiled registries before selection; dependency registries are supported too. Missing
+prerequisites fail before artifact writes and explain how to compile same-module APIs or use a compiled-contract
+`generate-sources` binding. Existing API selection validation remains unchanged in every mode.
+Direct invocation logs that it reuses compiled output, which may be stale; users must compile changed contracts first.
+
 When an execution returns `RESOURCE` artifacts, the Maven adapter adds exactly those relative paths beneath the
-execution output directory as project resources. For a late `process-classes` execution it also materializes those
+execution output directory as project resources. For a late `process-classes` execution or direct invocation it also materializes those
 resources in the project's main output, keeping them packageable after Maven's normal resources phase has passed.
 Source and documentation artifacts in the same directory are not copied into runtime classes.

@@ -19,10 +19,16 @@ internal class MavenGenerator {
         executionId: String,
         parentClassLoader: ClassLoader,
         pluginVersion: String,
-        projectTapikVersions: Set<String>
+        projectTapikVersions: Set<String>,
+        mode: MavenGenerationMode = MavenGenerationMode.SAME_MODULE
     ): MavenGeneration {
         TapikVersionCompatibility.requireCompatible(pluginVersion, projectTapikVersions)
         return ProjectApis.use(classpath, parentClassLoader) { apis, projectClassLoader ->
+            require(mode != MavenGenerationMode.DIRECT || apis.isNotEmpty()) {
+                "Direct tapik generation found no APIs in compiled registries and does not run user compilation. " +
+                    "Compile same-module APIs with the tapik compiler plugin first, or add a compiled contract dependency " +
+                    "and bind generation to generate-sources."
+            }
             val configuration =
                 TargetConfiguration(
                     targetConfiguration.mapValues { (_, value) -> ScalarConfigurationValue(value) }

@@ -46,6 +46,14 @@ class GenerateMojo : AbstractMojo() {
 
     override fun execute() {
         try {
+            val mode = MavenGenerationMode.from(mojoExecution)
+            if (mode == MavenGenerationMode.DIRECT) {
+                log.info(
+                    "Direct tapik generation reuses compiled output and does not run user compilation or preceding lifecycle phases. " +
+                        "Compiled output may be stale; compile changed contracts first."
+                )
+            }
+            mode.requireCompiledOutput(Path.of(project.build.outputDirectory))
             val generation =
                 MavenGenerator().generate(
                     classpath = project.generationClasspath(),
@@ -60,9 +68,10 @@ class GenerateMojo : AbstractMojo() {
                         requireNotNull(mojoExecution.mojoDescriptor.pluginDescriptor.version) {
                             "tapik Maven plugin version is unavailable"
                         },
-                    projectTapikVersions = project.tapikDependencyVersions()
+                    projectTapikVersions = project.tapikDependencyVersions(),
+                    mode = mode
                 )
-            if (mojoExecution.lifecyclePhase != "generate-sources") {
+            if (mode.compileGeneratedSources) {
                 val classesDirectory = Path.of(project.build.outputDirectory)
                 val buildDirectory = Path.of(project.build.directory)
                 val stagingDirectory = buildDirectory.resolve("tapik-generated-classes").resolve(generatedModuleName())

@@ -100,8 +100,26 @@ from the current module, generates source, and compiles that late source into th
 the module's earlier user source, so that source cannot refer to the late-generated declarations. Put implementations
 that need those types in a downstream module, or use a separately compiled contract.
 
-`./mvnw tapik:generate` invokes only the goal. It does not first run the lifecycle phases needed to compile a
-same-module registry. Use `compile`, `process-classes`, `package`, `verify`, or `install` according to the table.
+Only these two lifecycle bindings are supported. Binding `generate` to `process-sources`, `compile`, `test-compile`,
+`package`, or any other phase fails before generation and lists the two alternatives. This restriction concerns the
+execution's binding, not the command: `./mvnw package`, `verify`, and `install` still reach either supported binding.
+
+=== Direct invocation
+
+Prefer the lifecycle commands above. For an already compiled project, `./mvnw tapik:generate@<execution-id>` explicitly
+selects an execution's configuration. Plain `tapik:generate` instead needs goal-level configuration or Maven properties.
+Neither command runs user compilation or preceding lifecycle phases.
+
+Direct invocation is a separate mode, even if the selected execution is configured with `generate-sources`. It always
+performs late generated-source compilation and synchronizes generated classes and resources into the main output.
+It requires an existing main output directory (normally `target/classes`) and at least one API discoverable through
+compiled registries, either from that directory or a compiled contract dependency. Missing prerequisites fail before
+artifacts are written. API selection validation remains the same as in lifecycle-bound executions.
+
+tapik logs that direct invocation reuses compiled output, which may be stale. Compile changed contracts first; this
+mode does not establish that compiled definitions match current source. For a fresh same-module build, run
+`./mvnw process-classes`; for a compiled-contract application, use `./mvnw compile` with generation bound to
+`generate-sources`.
 
 == Target discovery and versions
 
@@ -118,7 +136,7 @@ aligned.
 
 Every successful execution logs each generated project-relative path at Maven `INFO` level. `SOURCE` artifacts are
 registered as compile source roots. `RESOURCE` artifacts are registered as project resources; during late
-`process-classes` generation they are also copied into the main output so packaging does not miss them.
+`process-classes` generation or direct invocation they are also copied into the main output so packaging does not miss them.
 
 An execution owns only the paths it generated. A later successful run removes its stale paths while preserving files
 owned by another execution and files tapik does not own. Two executions cannot own the same path, and a failed run does

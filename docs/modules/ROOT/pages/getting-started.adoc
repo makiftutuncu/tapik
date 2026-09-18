@@ -138,9 +138,11 @@ example-application/target/generated/tapik/Books.openapi.yml
 |Yes
 |===
 
-Running `./mvnw tapik:generate` directly is not a substitute for these lifecycle commands: it does not first compile a
-same-module registry or guarantee that generated source is registered at the right point. During generation, tapik logs
-every file it writes, making the selected APIs and output locations visible in the build.
+Only these two execution bindings are supported; later lifecycle commands such as `package` and `verify` reach them
+normally. Running `./mvnw tapik:generate` directly is not a substitute for a fresh lifecycle build: it requires existing
+compiled output and API registries, runs no user compilation, and performs late compilation of generated Kotlin.
+See xref:reference/maven.adoc#_direct_invocation[direct invocation] for configuration and stale-output caveats.
+During generation, tapik logs every file it writes, making the selected APIs and output locations visible in the build.
 
 The default artifact output is `${project.build.directory}/generated/tapik`. Source targets in the runnable application
 use explicit directories:

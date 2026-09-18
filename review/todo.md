@@ -148,7 +148,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Naming remains deterministic and is documented as a compatibility contract.
   - Local endpoint/member collisions may continue using deterministic namespace-local allocation.
 
-- [ ] Model Maven generation lifecycle mode explicitly.
+- [x] Model Maven generation lifecycle mode explicitly.
 
   Replace the `lifecyclePhase != "generate-sources"` inference with explicit handling for compiled-contract
   `generate-sources`, same-module `process-classes`, and deliberately supported direct invocation behavior. Reject unsafe

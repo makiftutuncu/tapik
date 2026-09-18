@@ -43,10 +43,20 @@ clean build. Split the contract and application when source needs to implement a
 
 Running `tapik:generate` directly does not compile a same-module registry first. Use at least `process-classes` for
 same-module generation and at least `compile` for a compiled-contract execution bound to `generate-sources`.
+Direct invocation fails before artifact writes if the main output directory is absent or no compiled API registry
+exposes APIs. An existing directory alone is insufficient; compile APIs with the tapik compiler plugin enabled or add
+a compiled contract dependency. Recompile changed definitions before retrying, since old compiled output may be stale.
 
 If generation succeeds during `process-classes` but late Kotlin compilation fails, inspect the compiler output in the
 Maven error. Generated source uses the project's resolved classpath and Java 25 target; missing target runtime modules
 or incompatible dependency versions usually surface at this stage.
+
+== Unsupported generation lifecycle phase
+
+Bind `generate` to `generate-sources` for a compiled contract dependency or `process-classes` for APIs in the current
+module. Other bindings, including `process-sources`, `compile`, `test-compile`, and `package`, are rejected before output
+changes. Running `./mvnw package` is still supported: keep the execution bound to one of the two supported phases and
+let Maven reach it during the build.
 
 [#a_spring_handler_is_not_found]
 == A Spring handler is not found
