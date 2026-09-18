@@ -1,7 +1,7 @@
 package com.example.library.application
 
 import com.example.library.contract.Catalog
-import com.example.library.generated.CatalogServer
+import com.example.library.generated.contract.Catalog.CatalogServer
 import org.springframework.stereotype.Component
 
 @Component

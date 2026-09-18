@@ -76,7 +76,8 @@ application owns how the client is exposed, the `RestClient.Builder`, base URL, 
 observability, and Spring bean lifecycle. Regeneration may replace generated source; place application behavior in the
 user-owned component.
 
-The default generated package is `dev.akif.tapik.generated`, and the default type suffix is `Client`. The example
+The default generated package prefix is `dev.akif.tapik.generated`, and the default type suffix is `Client`. Each API
+gets its own namespace under that prefix based on its class name relative to the prefix's parent package. The example
 configures only `packageName`. See
 xref:reference/generation-options.adoc#_spring_restclient[Spring RestClient target options] for naming configuration.
 

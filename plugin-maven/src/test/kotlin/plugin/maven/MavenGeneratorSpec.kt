@@ -79,15 +79,15 @@ class MavenGeneratorSpec : FunSpec({
         generation.containsSources shouldBe true
         generation.sourcePaths.map(output::relativize).map { path -> path.toString() } shouldContainExactly
             listOf(
-                "dev/akif/tapik/generated/AuthorsServer.kt",
-                "dev/akif/tapik/generated/BooksServer.kt",
-                "dev/akif/tapik/generated/RentalsServer.kt"
+                "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsServer.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsServer.kt"
             )
         generation.resourcePaths shouldContainExactly
             listOf(
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.AuthorsGeneratedController.properties",
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.properties",
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.RentalsGeneratedController.properties"
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Authors.AuthorsGeneratedController.properties",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Books.BooksGeneratedController.properties",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Rentals.RentalsGeneratedController.properties"
             )
     }
 

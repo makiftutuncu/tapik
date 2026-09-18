@@ -16,22 +16,24 @@ object RestClientTarget : GenerationTarget {
      */
     override fun generate(request: GenerationRequest): GenerationResult {
         val configuration = RestClientTargetConfiguration.from(request.configuration)
-        val usedClientNames = mutableSetOf<String>()
+        val usedPackages = mutableSetOf<String>()
         val artifacts =
             request.apis.map { api ->
                 val apiTypeName = api.javaClass.simpleName
                 require(apiTypeName.isKotlinIdentifier()) {
                     "Spring RestClient generation requires a valid API type name, but was '$apiTypeName'"
                 }
-                val clientName = uniqueKotlinName(apiTypeName + configuration.clientSuffix, usedClientNames)
+                val packageName = generatedApiPackage(configuration.packageName, api.javaClass.name)
+                require(usedPackages.add(packageName)) { "Spring RestClient request repeats API class '${api.javaClass.name}'" }
+                val clientName = apiTypeName + configuration.clientSuffix
                 GeneratedArtifact(
                     relativePath =
-                        configuration.packageName.replace('.', '/') + "/" + clientName + ".kt",
+                        packageName.replace('.', '/') + "/" + clientName + ".kt",
                     mediaType = "text/x-kotlin",
                     kind = ArtifactKind.SOURCE,
                     content =
                         RestClientGenerator(
-                            packageName = configuration.packageName,
+                            packageName = packageName,
                             clientName = clientName
                         ).generate(CompiledApiReader.read(api))
                 )

@@ -1,4 +1,4 @@
-package dev.akif.tapik.generated
+package dev.akif.tapik.generated.test.fixtures.library.Books
 
 import dev.akif.tapik.MediaType
 import dev.akif.tapik.common.spring.selectResponseMediaType

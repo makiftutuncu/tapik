@@ -57,7 +57,7 @@ include::example$application/pom.xml[tag=restclient-execution]
 
 |`packageName`
 |`dev.akif.tapik.generated`
-|Valid Kotlin package for generated clients.
+|Valid Kotlin package prefix for per-API client namespaces.
 
 |`clientSuffix`
 |`Client`
@@ -85,7 +85,7 @@ include::example$application/pom.xml[tag=webmvc-execution]
 
 |`packageName`
 |`dev.akif.tapik.generated`
-|Valid Kotlin package for generated types.
+|Valid Kotlin package prefix for per-API type namespaces.
 
 |`serverSuffix`
 |`Server`
@@ -102,9 +102,30 @@ With the example configuration, Kotlin sources begin below
 
 == Naming and collisions
 
-Source targets start with the concrete API type's simple name, not `Api.id`, then apply the configured suffix. Names
-must be valid Kotlin identifiers. When multiple selected API types would produce the same generated name, tapik assigns
-a deterministic unique name rather than overwriting an artifact.
+Spring targets keep readable simple names such as `BooksClient` and `BooksServer`. Each API gets its own namespace
+under `packageName`, derived from its JVM class name relative to the configured package's parent, not `Api.id`.
+For API `com.example.library.contract.Authors` and `packageName` set to `com.example.library.generated`, import
+`com.example.library.generated.contract.Authors.AuthorsServer`: the shared `com.example.library` root appears only once.
+
+The source root is fixed by the configuration, never inferred from selected APIs. APIs outside that root retain their
+full class identity beneath a reserved `_external` namespace, so external `contract.Authors` cannot collide with local
+`com.example.library.contract.Authors`. A literal underscore in an API name is escaped, making that marker unambiguous.
+A one-segment `packageName` such as `generated` has no parent root and retains the full API identity below it.
+
+This policy is independent of API selection, declaration order, and whether generation runs in the contract module or
+a consuming module. Two contract artifacts with different qualified API classes cannot silently emit the same generated
+identity under the same prefix. Source paths, controller names, and WebMVC descriptor paths all use that namespace.
+
+Dot-separated class-name segments retain ASCII letters and digits. Every other UTF-16 code unit becomes `_` followed
+by four lowercase hexadecimal digits; an invalid resulting Kotlin identifier gets prefix `_k_`. Thus a nested
+`Outer$Books` uses `Outer_0024Books`, while an actual underscore is encoded as `_005f` so it cannot collide with an
+escape. API simple names and configured suffixes must remain valid Kotlin identifiers.
+
+Changing an API's qualified class name, `packageName`, or a suffix changes its generated public identity. Treat such
+changes as compatibility changes. The naming policy itself is also a compatibility contract. WebMVC server and
+controller suffixes must differ; different targets for the same API must also use distinct suffixes when sharing a
+prefix. Repeated API classes in one request are rejected. Local method and nested response-name collisions still use
+deterministic numeric suffixes.
 
 OpenAPI file templates use `Api.id`. API filters also use `Api.id`. This distinction lets a Kotlin type name determine
 source declarations while the contract's stable API identity determines selection and documentation filenames.

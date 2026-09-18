@@ -16,6 +16,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.jetbrains.kotlin.cli.common.ExitCode
+import java.net.URLClassLoader
 
 class WebMvcTargetSpec : FunSpec({
     test("generate every shared library API") {
@@ -29,12 +30,12 @@ class WebMvcTargetSpec : FunSpec({
 
         result.artifacts.map { it.relativePath } shouldContainExactly
             listOf(
-                "dev/akif/tapik/generated/BooksServer.kt",
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.properties",
-                "dev/akif/tapik/generated/AuthorsServer.kt",
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.AuthorsGeneratedController.properties",
-                "dev/akif/tapik/generated/RentalsServer.kt",
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.RentalsGeneratedController.properties"
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Books.BooksGeneratedController.properties",
+                "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsServer.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Authors.AuthorsGeneratedController.properties",
+                "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsServer.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Rentals.RentalsGeneratedController.properties"
             )
         result.artifacts.filter { it.kind == ArtifactKind.SOURCE }.forEach { artifact ->
             val compilation = compileKotlin(artifact.content)
@@ -53,8 +54,8 @@ class WebMvcTargetSpec : FunSpec({
 
         result.artifacts.map { artifact -> artifact.relativePath to artifact.kind } shouldContainExactly
             listOf(
-                "dev/akif/tapik/generated/BooksServer.kt" to ArtifactKind.SOURCE,
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksGeneratedController.properties" to
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt" to ArtifactKind.SOURCE,
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Books.BooksGeneratedController.properties" to
                     ArtifactKind.RESOURCE
             )
         val source = result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content
@@ -70,8 +71,8 @@ class WebMvcTargetSpec : FunSpec({
         source shouldContain "public fun list("
         source shouldNotContain "public fun listHttp("
         result.artifacts.single { artifact -> artifact.kind == ArtifactKind.RESOURCE }.content shouldBe
-            "handler=dev.akif.tapik.generated.BooksServer\n" +
-            "adapter=dev.akif.tapik.generated.BooksGeneratedController\n"
+            "handler=dev.akif.tapik.generated.test.fixtures.library.Books.BooksServer\n" +
+            "adapter=dev.akif.tapik.generated.test.fixtures.library.Books.BooksGeneratedController\n"
     }
 
     test("configure generated type suffixes independently") {
@@ -89,8 +90,8 @@ class WebMvcTargetSpec : FunSpec({
 
         result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
-                "dev/akif/tapik/generated/BooksContract.kt",
-                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.BooksSpringController.properties"
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksContract.kt",
+                "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Books.BooksSpringController.properties"
             )
         result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content.run {
             shouldContain("public interface BooksContract")
@@ -113,7 +114,7 @@ class WebMvcTargetSpec : FunSpec({
             )
 
         result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.run {
-            relativePath shouldBe "dev/akif/tapik/generated/BooksServer.kt"
+            relativePath shouldBe "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt"
             mediaType shouldBe "text/x-kotlin"
             kind shouldBe ArtifactKind.SOURCE
             val compilation = compileKotlin(content)
@@ -330,25 +331,57 @@ class WebMvcTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
-    test("disambiguate generated types and artifact paths for equal API simple names") {
+    test("reject repeated API classes and equal top-level suffixes") {
+        shouldThrow<IllegalArgumentException> {
+            WebMvcTarget.generate(GenerationRequest(listOf(WebMvcNamespace1.Catalog(), WebMvcNamespace1.Catalog())))
+        }.message shouldContain "repeats API class"
+        shouldThrow<IllegalArgumentException> {
+            WebMvcTarget.generate(GenerationRequest(
+                listOf(Books), targetConfigurationOf("serverSuffix" to "Endpoint", "controllerSuffix" to "Endpoint")
+            ))
+        }.message shouldContain "must differ"
+    }
+
+    test("keep generated identities stable across selection and independent contract builds") {
+        val first = WebMvcNamespace1.Catalog()
+        val second = WebMvcNamespace2.Catalog()
+        val firstArtifacts = WebMvcTarget.generate(GenerationRequest(listOf(first))).artifacts
+        val secondArtifacts = WebMvcTarget.generate(GenerationRequest(listOf(second))).artifacts
         val result =
             WebMvcTarget.generate(
                 GenerationRequest(
-                    apis = listOf(WebMvcNamespace1.Catalog(), WebMvcNamespace2.Catalog())
+                    apis = listOf(first, second)
                 )
             )
 
         val sources = result.artifacts.filter { artifact -> artifact.kind == ArtifactKind.SOURCE }
         sources.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
-                "dev/akif/tapik/generated/CatalogServer.kt",
-                "dev/akif/tapik/generated/CatalogServer2.kt"
+                "dev/akif/tapik/generated/target/spring/webmvc/WebMvcNamespace1_0024Catalog/CatalogServer.kt",
+                "dev/akif/tapik/generated/target/spring/webmvc/WebMvcNamespace2_0024Catalog/CatalogServer.kt"
             )
         sources.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
-            listOf("CatalogServer", "CatalogServer2")
-        sources.forEach { artifact ->
-            val compilation = compileKotlin(artifact.content)
-            withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+            listOf("CatalogServer", "CatalogServer")
+        result.artifacts shouldBe firstArtifacts + secondArtifacts
+        WebMvcTarget.generate(GenerationRequest(listOf(second, first))).artifacts shouldBe secondArtifacts + firstArtifacts
+        result.artifacts.map { it.relativePath }.toSet().size shouldBe 4
+        val compilations = sources.map { artifact ->
+            compileKotlin(artifact.content).also { compilation ->
+                withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+            }
+        }
+        URLClassLoader(
+            compilations.map { it.outputDirectory.toUri().toURL() }.toTypedArray(),
+            WebMvcTargetSpec::class.java.classLoader
+        ).use { loader ->
+            result.artifacts.filter { it.kind == ArtifactKind.RESOURCE }.forEach { descriptor ->
+                val entries = descriptor.content.lineSequence().filter(String::isNotBlank)
+                    .associate { line -> line.substringBefore('=') to line.substringAfter('=') }
+                val handler = loader.loadClass(entries.getValue("handler"))
+                val controller = loader.loadClass(entries.getValue("adapter"))
+                handler.isInterface shouldBe true
+                controller.declaredConstructors.single().parameterTypes.single() shouldBe handler
+            }
         }
     }
 })

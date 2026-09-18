@@ -11,6 +11,9 @@ fun String.optimizeKotlinImports(packageName: String): String {
     val existingImports = IMPORT_LINE.findAll(this).map(MatchResult::kotlinImport).toList()
     val sourceWithoutImports = IMPORT_LINE.replace(this, "")
     val code = sourceWithoutImports.kotlinCodeMask()
+    PACKAGE_DIRECTIVE.findAll(sourceWithoutImports)
+        .filter { match -> code.containsOnlyCode(match.range) }
+        .forEach { directive -> directive.range.forEach { index -> code[index] = false } }
     val declaredNames = sourceWithoutImports.declaredNames(code)
     val references = sourceWithoutImports.qualifiedReferences(code)
     val winners = importWinners(references, existingImports, declaredNames, packageName)

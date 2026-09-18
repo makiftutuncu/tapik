@@ -2,7 +2,7 @@ package com.example.library.application
 
 import com.example.library.contract.Book
 import com.example.library.contract.Books
-import com.example.library.generated.BooksServer
+import com.example.library.generated.contract.Books.BooksServer
 import org.springframework.stereotype.Component
 
 @Component

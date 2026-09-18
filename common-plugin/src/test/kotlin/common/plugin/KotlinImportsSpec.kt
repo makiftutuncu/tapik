@@ -4,6 +4,26 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 
 class KotlinImportsSpec : FunSpec({
+    test("preserve uppercase API namespaces without allocating imports for the package") {
+        val source = """
+            package generated.example.Books
+
+            public interface BooksServer {
+                public val api: example.Books
+            }
+        """.trimIndent()
+
+        source.optimizeKotlinImports("generated.example.Books") shouldBe """
+            package generated.example.Books
+
+            import example.Books
+
+            public interface BooksServer {
+                public val api: Books
+            }
+        """.trimIndent()
+    }
+
     test("optimize unambiguous imports without changing literals or comments") {
         val source =
             """

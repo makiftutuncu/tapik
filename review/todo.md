@@ -132,7 +132,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Existing Jackson visibility, naming, ignored-property, ordering, enum, recursion, default, and deprecation behavior
     remains intact.
 
-- [ ] Give generated top-level Spring types stable cross-artifact identities.
+- [x] Give generated top-level Spring types stable cross-artifact identities.
 
   Replace or constrain selection-dependent numeric disambiguation for client/server/controller top-level types. The
   identity of a generated public type should not change because an unrelated earlier API is selected, and independent

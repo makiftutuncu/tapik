@@ -55,7 +55,9 @@ class RestClientUriSpec : FunSpec({
             .andRespond(withSuccess())
 
         URLClassLoader(arrayOf(compilation.outputDirectory.toUri().toURL()), EncodedPaths::class.java.classLoader).use { loader ->
-            val type = loader.loadClass("dev.akif.tapik.generated.EncodedPathsImplementation")
+            val type = loader.loadClass(
+                "dev.akif.tapik.generated.target.spring.restclient.EncodedPaths.EncodedPathsImplementation"
+            )
             val client = type.getConstructor(RestClientTransport::class.java).newInstance(RestClientTransport(builder.build()))
             type.getMethod("literal").invoke(client)
             val download = type.getMethod("download", String::class.java, List::class.java, String::class.java, List::class.java, Int::class.javaPrimitiveType)

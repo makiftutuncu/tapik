@@ -9,6 +9,7 @@ import dev.akif.tapik.common.plugin.ArtifactKind
 import dev.akif.tapik.common.plugin.GenerationRequest
 import dev.akif.tapik.common.plugin.targetConfigurationOf
 import io.kotest.assertions.withClue
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.collections.shouldContainExactly
@@ -28,9 +29,9 @@ class RestClientTargetSpec : FunSpec({
 
         result.artifacts.map { it.relativePath } shouldContainExactly
             listOf(
-                "dev/akif/tapik/generated/BooksClient.kt",
-                "dev/akif/tapik/generated/AuthorsClient.kt",
-                "dev/akif/tapik/generated/RentalsClient.kt"
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksClient.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsClient.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsClient.kt"
             )
         result.artifacts.forEach { artifact ->
             val compilation = compileKotlin(artifact.content)
@@ -53,7 +54,7 @@ class RestClientTargetSpec : FunSpec({
             )
 
         result.artifacts.single().run {
-            relativePath shouldBe "dev/akif/tapik/generated/BooksClient.kt"
+            relativePath shouldBe "dev/akif/tapik/generated/test/fixtures/library/Books/BooksClient.kt"
             mediaType shouldBe "text/x-kotlin"
             kind shouldBe ArtifactKind.SOURCE
             content shouldBe expected
@@ -203,21 +204,33 @@ class RestClientTargetSpec : FunSpec({
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
     }
 
-    test("disambiguate generated types and artifact paths for equal API simple names") {
+    test("reject repeated API classes without allocating another public identity") {
+        shouldThrow<IllegalArgumentException> {
+            RestClientTarget.generate(GenerationRequest(listOf(RestClientNamespace1.Catalog(), RestClientNamespace1.Catalog())))
+        }.message shouldContain "repeats API class"
+    }
+
+    test("keep generated identities stable across selection and independent contract builds") {
+        val first = RestClientNamespace1.Catalog()
+        val second = RestClientNamespace2.Catalog()
+        val firstArtifacts = RestClientTarget.generate(GenerationRequest(listOf(first))).artifacts
+        val secondArtifacts = RestClientTarget.generate(GenerationRequest(listOf(second))).artifacts
         val result =
             RestClientTarget.generate(
                 GenerationRequest(
-                    apis = listOf(RestClientNamespace1.Catalog(), RestClientNamespace2.Catalog())
+                    apis = listOf(first, second)
                 )
             )
 
         result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
-                "dev/akif/tapik/generated/CatalogClient.kt",
-                "dev/akif/tapik/generated/CatalogClient2.kt"
+                "dev/akif/tapik/generated/target/spring/restclient/RestClientNamespace1_0024Catalog/CatalogClient.kt",
+                "dev/akif/tapik/generated/target/spring/restclient/RestClientNamespace2_0024Catalog/CatalogClient.kt"
             )
         result.artifacts.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
-            listOf("CatalogClient", "CatalogClient2")
+            listOf("CatalogClient", "CatalogClient")
+        result.artifacts shouldBe firstArtifacts + secondArtifacts
+        RestClientTarget.generate(GenerationRequest(listOf(second, first))).artifacts shouldBe secondArtifacts + firstArtifacts
         result.artifacts.forEach { artifact ->
             val compilation = compileKotlin(artifact.content)
             withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }

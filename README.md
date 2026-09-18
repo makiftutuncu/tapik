@@ -218,7 +218,7 @@ Each generated file is logged at `INFO`, for example:
 
 ```text
 [INFO] --- tapik:0.6.0:generate (generate-webmvc) @ application ---
-[INFO] Generated target/generated-sources/tapik-webmvc/com/example/generated/UsersServer.kt
+[INFO] Generated target/generated-sources/tapik-webmvc/com/example/generated/Users/UsersServer.kt
 ```
 
 If the Kotlin registry appears but no target files or tapik generation log appears, the selected command most likely
@@ -379,7 +379,14 @@ generated source and registration resources are compiled and packaged with the c
 
 Use `spring-webmvc` with `tapik-target-spring-webmvc` for Spring Boot server generation. Its optional suffix settings are
 `serverSuffix` and `controllerSuffix`, defaulting to `Server` and `GeneratedController`; both Spring targets default to
-package `dev.akif.tapik.generated`. Source output directories are added to Maven's Kotlin compile roots automatically.
+package prefix `dev.akif.tapik.generated`. Each API gets a namespace beneath the configured prefix, relative to its
+parent package. With `packageName` set to `com.example.library.generated`, API `com.example.library.contract.Authors`
+produces `com.example.library.generated.contract.Authors.AuthorsServer`. APIs outside the configured parent retain
+their full class identity under a reserved `_external` namespace, avoiding collisions with local relative names.
+This keeps identities stable when APIs are selected separately or generated in different contract artifacts. Renaming
+or moving the API class, or changing the package prefix or suffix, changes the generated public identity. Nested-class
+separators and other non-alphanumeric characters are escaped; see the documentation's naming policy for exact rules.
+Source output directories are added to Maven's Kotlin compile roots automatically.
 Generated runtime registration resources are also copied into the main output when generation happens after Maven's
 normal resources phase.
 

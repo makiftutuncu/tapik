@@ -1,7 +1,7 @@
 package com.example.library.application
 
 import com.example.library.contract.Books
-import com.example.library.generated.BooksClient
+import com.example.library.generated.contract.Books.BooksClient
 import dev.akif.tapik.target.spring.restclient.RestClientTransport
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component

@@ -5,10 +5,12 @@ import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.nio.file.Files
+import java.nio.file.Path
 
 internal data class KotlinSourceCompilation(
     val exitCode: ExitCode,
-    val messages: String
+    val messages: String,
+    val outputDirectory: Path
 )
 
 internal fun compileKotlin(sourceText: String): KotlinSourceCompilation {
@@ -27,5 +29,5 @@ internal fun compileKotlin(sourceText: String): KotlinSourceCompilation {
             "-module-name",
             "webmvc-generated-fixture"
         )
-    return KotlinSourceCompilation(exitCode, compilerOutput.toString())
+    return KotlinSourceCompilation(exitCode, compilerOutput.toString(), output)
 }

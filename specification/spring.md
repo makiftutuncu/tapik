@@ -79,14 +79,42 @@ declaration order. When `noBody` is also declared, the sealed request-body param
 Multiple output body representations remain distinguishable by response media type. Unsupported compiled shapes or
 endpoint capabilities fail generation with the API and endpoint ID.
 
-`packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `clientSuffix` selects the
+`packageName` selects the generated package prefix and defaults to `dev.akif.tapik.generated`. `clientSuffix` selects the
 interface-name suffix and defaults to `Client`. Each source artifact follows the package path and uses the concrete API
-type name plus that suffix.
+type name plus that suffix. The stable per-API namespace below applies to all generated Spring types.
 
-Generated declaration names are allocated deterministically in API, endpoint, and output declaration order. A
+### Stable generated identity
+
+Every API gets a namespace beneath the configured `packageName` prefix, derived solely from its JVM binary class
+name (including enclosing types). The prefix's parent is the fixed source root: with prefix
+`com.example.library.generated`, API `com.example.library.contract.Authors` uses package
+`com.example.library.generated.contract.Authors`, containing `AuthorsClient`, `AuthorsServer`, and
+`AuthorsGeneratedController`. Only that exact parent plus its trailing dot is removed; the source root is never inferred
+from the selected APIs or from a varying longest-common-prefix calculation. API display names, selection order, other
+selected APIs, and build layout do not affect this identity. Independent same-module contract artifacts use exactly
+the same policy as compiled-contract generation.
+
+For a one-segment prefix such as `generated`, the source root is empty and the entire binary name is retained.
+APIs outside a nonempty source root use the reserved `_external` namespace followed by their entire encoded binary
+name. For prefix `com.example.generated`, `other.Books` uses `com.example.generated._external.other.Books`.
+The marker prevents unrelated external APIs from colliding with relative local names. A literal `_external` segment
+in a local API name is escaped normally, so it cannot impersonate that reserved namespace.
+
+Each dot-separated binary-name segment is encoded without loss: ASCII letters and digits remain unchanged; every
+other UTF-16 code unit, including `_` and the nested-class separator `$`, becomes `_` followed by four lowercase hex
+digits. If the result is not an ordinary Kotlin identifier, prefix it with `_k_`. For example, with prefix
+`com.example.generated`, `com.example.Outer$Books` uses namespace `Outer_0024Books` beneath the prefix, distinct from a class named
+`Outer_0024Books`. There is no selection-dependent shortening, hashing, or numeric allocation of top-level names.
+
+Source paths use the generated package and type name. WebMVC registration paths and handler/controller entries use
+those same fully qualified names. Repeating the same API class in a request is rejected, as are equal WebMVC server
+and controller suffixes. Different targets must use distinct suffixes if configured under the same prefix for the
+same API. Moving or renaming an API class, changing the prefix, or changing a suffix changes its generated public
+identity and is a source/binary compatibility change. This policy itself is a compatibility contract.
+
+Local generated declaration names are allocated deterministically in endpoint and output declaration order. A
 normalized name collision keeps the first name unchanged and appends `2`, `3`, and so on to later declarations.
-Endpoint functions and nested response types use separate namespaces. API types with the same simple name are
-disambiguated together with their artifact paths. Original endpoint properties are accessed with their actual Kotlin
+Endpoint functions and nested response types use separate namespaces. Original endpoint properties are accessed with their actual Kotlin
 names, including backtick-escaped names.
 
 For a composed API, generated clients retain one property for the selected root API and follow each endpoint's
@@ -167,7 +195,7 @@ encoded response bytes. Generation fails when an output that can carry a body al
 output declares `Content-Length`; header names are compared case-insensitively. A bodyless output may declare
 `Content-Type`, which is emitted as an ordinary contract header.
 
-`packageName` selects the generated package and defaults to `dev.akif.tapik.generated`. `serverSuffix` selects the
+`packageName` selects the generated package prefix and defaults to `dev.akif.tapik.generated`. `serverSuffix` selects the
 handler-interface suffix and defaults to `Server`. `controllerSuffix` selects the internal generated-controller suffix
 and defaults to `GeneratedController`, producing pairs such as `BooksServer` and `BooksGeneratedController`. Users may
 name their implementation independently; a `Handler` suffix, such as `BooksHandler`, is the conventional arrangement.
@@ -176,7 +204,8 @@ WebMVC uses the same deterministic declaration-name allocation as RestClient. Ha
 namespace, adapter mappings share a separate adapter namespace, and nested response types retain their own namespace.
 Composed handlers also use the root API property and inclusion-path naming defined for RestClient, while generated
 adapters decode and encode through the original nested endpoint values.
-Top-level handler and adapter names and source artifact paths follow the same numeric disambiguation rule.
+Top-level handler and adapter names, artifact paths, and registration resources follow the stable per-API identity
+policy above, not local numeric disambiguation.
 
 ### Adapter registration
 

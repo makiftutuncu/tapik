@@ -5,9 +5,9 @@ import com.example.library.contract.Author
 import com.example.library.contract.Authors
 import com.example.library.contract.Catalog
 import com.example.library.contract.CreateAuthor
-import com.example.library.generated.AuthorsClient
-import com.example.library.generated.AuthorsServer
-import com.example.library.generated.CatalogServer
+import com.example.library.generated.contract.Authors.AuthorsClient
+import com.example.library.generated.contract.Authors.AuthorsServer
+import com.example.library.generated.contract.Catalog.CatalogServer
 import dev.akif.tapik.ApiRegistry
 import dev.akif.tapik.target.spring.restclient.RestClientTransport
 import dev.akif.tapik.target.spring.webmvc.EnableTapikWebMvc
@@ -59,16 +59,16 @@ class MavenUsageSpec : FunSpec({
 
         Files.isRegularFile(
             Path.of(
-                "target/generated-sources/tapik-restclient/com/example/library/generated/AuthorsClient.kt"
+                "target/generated-sources/tapik-restclient/com/example/library/generated/contract/Authors/AuthorsClient.kt"
             )
         ) shouldBe true
-        Class.forName("com.example.library.generated.AuthorsClient").isInterface shouldBe true
+        Class.forName("com.example.library.generated.contract.Authors.AuthorsClient").isInterface shouldBe true
         Files.isRegularFile(
             Path.of(
-                "target/generated-sources/tapik-webmvc/com/example/library/generated/AuthorsServer.kt"
+                "target/generated-sources/tapik-webmvc/com/example/library/generated/contract/Authors/AuthorsServer.kt"
             )
         ) shouldBe true
-        Class.forName("com.example.library.generated.AuthorsServer").isInterface shouldBe true
+        Class.forName("com.example.library.generated.contract.Authors.AuthorsServer").isInterface shouldBe true
 
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")

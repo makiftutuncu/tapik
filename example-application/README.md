@@ -26,8 +26,8 @@ Build and test the complete example from the repository root:
 The build verifies these generated artifacts:
 
 - `example-application/target/generated/tapik/Books.openapi.yml`
-- `example-application/target/generated-sources/tapik-restclient/com/example/library/generated/BooksClient.kt`
-- `example-application/target/generated-sources/tapik-webmvc/com/example/library/generated/BooksServer.kt`
+- `example-application/target/generated-sources/tapik-restclient/com/example/library/generated/contract/Books/BooksClient.kt`
+- `example-application/target/generated-sources/tapik-webmvc/com/example/library/generated/contract/Books/BooksServer.kt`
 
 The contract's same-module document is generated at `example-contract/target/generated/tapik/Books.openapi.yml`.
 

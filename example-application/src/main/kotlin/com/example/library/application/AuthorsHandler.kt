@@ -3,7 +3,7 @@ package com.example.library.application
 import com.example.library.contract.Author
 import com.example.library.contract.Authors
 import com.example.library.contract.CreateAuthor
-import com.example.library.generated.AuthorsServer
+import com.example.library.generated.contract.Authors.AuthorsServer
 import org.springframework.stereotype.Component
 
 @Component

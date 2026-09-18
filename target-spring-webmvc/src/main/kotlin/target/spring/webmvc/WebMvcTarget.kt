@@ -8,25 +8,27 @@ object WebMvcTarget : GenerationTarget {
 
     override fun generate(request: GenerationRequest): GenerationResult {
         val configuration = WebMvcTargetConfiguration.from(request.configuration)
-        val usedTypeNames = mutableSetOf<String>()
+        val usedPackages = mutableSetOf<String>()
         return GenerationResult(
             request.apis.flatMap { api ->
                 val apiTypeName = api.javaClass.simpleName
                 require(apiTypeName.isKotlinIdentifier()) {
                     "Spring WebMVC generation requires a valid API type name, but was '$apiTypeName'"
                 }
-                val serverName = uniqueKotlinName(apiTypeName + configuration.serverSuffix, usedTypeNames)
-                val controllerName = uniqueKotlinName(apiTypeName + configuration.controllerSuffix, usedTypeNames)
-                val serverType = "${configuration.packageName}.$serverName"
-                val controllerType = "${configuration.packageName}.$controllerName"
+                val packageName = generatedApiPackage(configuration.packageName, api.javaClass.name)
+                require(usedPackages.add(packageName)) { "Spring WebMVC request repeats API class '${api.javaClass.name}'" }
+                val serverName = apiTypeName + configuration.serverSuffix
+                val controllerName = apiTypeName + configuration.controllerSuffix
+                val serverType = "$packageName.$serverName"
+                val controllerType = "$packageName.$controllerName"
                 listOf(
                     GeneratedArtifact(
-                        relativePath = configuration.packageName.replace('.', '/') + "/$serverName.kt",
+                        relativePath = packageName.replace('.', '/') + "/$serverName.kt",
                         mediaType = "text/x-kotlin",
                         kind = ArtifactKind.SOURCE,
                         content =
                             WebMvcGenerator(
-                                packageName = configuration.packageName,
+                                packageName = packageName,
                                 serverName = serverName,
                                 controllerName = controllerName
                             ).generate(CompiledApiReader.read(api))
@@ -65,6 +67,9 @@ private data class WebMvcTargetConfiguration(
             val controllerSuffix = configuration.scalar("controllerSuffix") ?: DEFAULT_CONTROLLER_SUFFIX
             require(controllerSuffix.isKotlinIdentifier()) {
                 "Spring WebMVC target 'controllerSuffix' must be a valid Kotlin identifier, but was '$controllerSuffix'"
+            }
+            require(serverSuffix != controllerSuffix) {
+                "Spring WebMVC target 'serverSuffix' and 'controllerSuffix' must differ"
             }
             return WebMvcTargetConfiguration(packageName, serverSuffix, controllerSuffix)
         }

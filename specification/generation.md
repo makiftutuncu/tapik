@@ -29,6 +29,8 @@ interpretation, wire decoding and encoding, and target-specific model decisions 
 introducing a parallel neutral metadata model.
 
 Generated Kotlin files shorten qualified declarations and add deterministic, lexicographically ordered imports.
+The package directive is never treated as a type reference or shortened, including when namespace segments begin
+with uppercase letters. It cannot compete with actual referenced declarations when import names are allocated.
 Declarations from Kotlin/JVM default-import packages and the generated file's own package are shortened without an
 explicit import. When a simple name conflicts with a generated declaration or another qualified declaration, the
 conflicting reference remains qualified. Existing explicit imports, including imported top-level functions, are

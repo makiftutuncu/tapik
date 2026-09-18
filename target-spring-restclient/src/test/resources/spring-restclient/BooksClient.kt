@@ -1,4 +1,4 @@
-package dev.akif.tapik.generated
+package dev.akif.tapik.generated.test.fixtures.library.Books
 
 import dev.akif.tapik.target.spring.restclient.RestClientRequestBody
 import dev.akif.tapik.target.spring.restclient.RestClientTransport

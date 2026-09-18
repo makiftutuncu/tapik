@@ -103,7 +103,8 @@ tapik owns the generated `Server` interface, internal controller, registration d
 application owns handler behavior, Spring bean annotations, dependencies, persistence, transactions, authorization,
 and other application policy.
 
-The defaults are `dev.akif.tapik.generated`, `Server`, and `GeneratedController`; all three are configurable. See
+The defaults are package prefix `dev.akif.tapik.generated`, suffix `Server`, and suffix `GeneratedController`; all three
+are configurable. Each API gets its own namespace under the prefix, relative to the prefix's parent package. See
 xref:reference/generation-options.adoc#_spring_webmvc[Spring WebMVC target options]. Use the compiled-contract layout
 when the current application's handlers need to implement generated interfaces; same-module generation happens after
 its ordinary source compilation.
