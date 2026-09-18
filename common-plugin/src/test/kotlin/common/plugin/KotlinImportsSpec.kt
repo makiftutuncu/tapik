@@ -4,6 +4,70 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 
 class KotlinImportsSpec : FunSpec({
+    test("recognize directives and references only in lexical code regions") {
+        val source = listOf(
+            "@file:Suppress(",
+            "    \"\"\"",
+            "package fake.literal",
+            "import fake.literal.Type",
+            "alpha.literal.Book",
+            "\"\"\"",
+            ")",
+            "/*",
+            "package fake.comment",
+            "import fake.comment.Type",
+            "beta.comment.Book",
+            "/* import fake.nested.Type */",
+            "*/",
+            "package generated",
+            "",
+            "import java.time.Instant",
+            "import java.time.Instant",
+            "",
+            "/**",
+            " * import fake.kdoc.Type",
+            " * gamma.kdoc.Book",
+            " */",
+            "public fun load(value: java.time.Instant): dev.akif.tapik.DecodeResult.Success {",
+            "    val quoted = \"delta.quoted.Book and import fake.quoted.Type\"",
+            "    val character = 'x'",
+            "    // import fake.line.Type",
+            "    return dev.akif.tapik.DecodeResult.Success(value)",
+            "}"
+        ).joinToString("\n")
+
+        source.optimizeKotlinImports("generated") shouldBe listOf(
+            "@file:Suppress(",
+            "    \"\"\"",
+            "package fake.literal",
+            "import fake.literal.Type",
+            "alpha.literal.Book",
+            "\"\"\"",
+            ")",
+            "/*",
+            "package fake.comment",
+            "import fake.comment.Type",
+            "beta.comment.Book",
+            "/* import fake.nested.Type */",
+            "*/",
+            "package generated",
+            "",
+            "import dev.akif.tapik.DecodeResult",
+            "import java.time.Instant",
+            "",
+            "/**",
+            " * import fake.kdoc.Type",
+            " * gamma.kdoc.Book",
+            " */",
+            "public fun load(value: Instant): DecodeResult.Success {",
+            "    val quoted = \"delta.quoted.Book and import fake.quoted.Type\"",
+            "    val character = 'x'",
+            "    // import fake.line.Type",
+            "    return DecodeResult.Success(value)",
+            "}"
+        ).joinToString("\n")
+    }
+
     test("preserve uppercase API namespaces without allocating imports for the package") {
         val source = """
             package generated.example.Books

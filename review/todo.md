@@ -179,7 +179,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
   - Target-loading diagnostics remain unchanged.
   - Tests cover service construction failure and linkage failure.
 
-- [ ] Preserve comments and string literals during Kotlin import optimization.
+- [x] Preserve comments and string literals during Kotlin import optimization.
 
   Compute lexical code regions before removing imports or locating the package directive. Only real Kotlin directives
   in code may be removed or rewritten.

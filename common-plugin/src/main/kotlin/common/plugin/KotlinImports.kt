@@ -8,8 +8,16 @@ package dev.akif.tapik.common.plugin
  */
 fun String.optimizeKotlinImports(packageName: String): String {
     require(packageName.isNotBlank()) { "Generated Kotlin package name must not be blank" }
-    val existingImports = IMPORT_LINE.findAll(this).map(MatchResult::kotlinImport).toList()
-    val sourceWithoutImports = IMPORT_LINE.replace(this, "")
+    val initialCode = kotlinCodeMask()
+    val existingImportMatches =
+        IMPORT_LINE.findAll(this)
+            .filter { match -> initialCode.containsOnlyCode(match.range) }
+            .toList()
+    val existingImports = existingImportMatches.map(MatchResult::kotlinImport)
+    val sourceWithoutImports =
+        IMPORT_LINE.replace(this) { match ->
+            if (initialCode.containsOnlyCode(match.range)) "" else match.value
+        }
     val code = sourceWithoutImports.kotlinCodeMask()
     PACKAGE_DIRECTIVE.findAll(sourceWithoutImports)
         .filter { match -> code.containsOnlyCode(match.range) }
@@ -128,7 +136,9 @@ private fun String.isDefaultImported(): Boolean =
     substringBeforeLast('.', "") in DEFAULT_IMPORT_PACKAGES
 
 private fun String.withImports(imports: List<KotlinImport>): String {
-    val packageDirective = PACKAGE_DIRECTIVE.find(this)
+    val code = kotlinCodeMask()
+    val packageDirective = PACKAGE_DIRECTIVE.findAll(this)
+        .firstOrNull { match -> code.containsOnlyCode(match.range) }
         ?: throw IllegalArgumentException("Generated Kotlin source must contain a package directive")
     val prefix = substring(0, packageDirective.range.last + 1).trimEnd()
     val body = substring(packageDirective.range.last + 1).trimStart('\r', '\n')

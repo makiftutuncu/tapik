@@ -35,7 +35,9 @@ Declarations from Kotlin/JVM default-import packages and the generated file's ow
 explicit import. When a simple name conflicts with a generated declaration or another qualified declaration, the
 conflicting reference remains qualified. Existing explicit imports, including imported top-level functions, are
 retained and participate in collision detection. Import optimization only examines Kotlin code; string and character
-literals and comments are preserved verbatim.
+literals and comments are preserved verbatim. The optimizer computes lexical code regions before locating or removing
+package and import directives. Directive-looking lines and qualified references inside line comments, nested block
+comments, KDoc, quoted strings, character literals, and triple-quoted strings are never interpreted or rewritten.
 
 Generated artifact paths are relative and normalized. A generation result cannot contain the same path twice.
 Configuration lists and maps and generation-result artifact lists are structural snapshots: later caller mutation and
