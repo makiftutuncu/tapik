@@ -4,6 +4,7 @@ import dev.akif.tapik.Api
 import dev.akif.tapik.common.plugin.ApiCatalog
 import java.net.URLClassLoader
 import java.nio.file.Path
+import java.util.ServiceConfigurationError
 
 internal object ProjectApis {
     fun <Result> use(
@@ -14,10 +15,26 @@ internal object ProjectApis {
         val urls = classpath.map { path -> path.toUri().toURL() }.toTypedArray()
         return URLClassLoader(urls, parentClassLoader).use { classLoader ->
             withContextClassLoader(classLoader) {
-                block(ApiCatalog.load(classLoader).apis, classLoader)
+                block(load(classLoader), classLoader)
             }
         }
     }
+
+    private fun load(classLoader: ClassLoader): List<Api> =
+        try {
+            ApiCatalog.load(classLoader).apis
+        } catch (cause: ServiceConfigurationError) {
+            throw loadingFailure(cause)
+        } catch (cause: LinkageError) {
+            throw loadingFailure(cause)
+        }
+
+    private fun loadingFailure(cause: Throwable): IllegalStateException =
+        IllegalStateException(
+            "Failed to load API registries from the project classpath. " +
+                "Ensure compiled contract artifacts and their runtime dependencies are present and use compatible tapik versions.",
+            cause
+        )
 }
 
 private inline fun <Result> withContextClassLoader(

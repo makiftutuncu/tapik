@@ -28,6 +28,12 @@ tapik BOM for project dependencies and set the build-plugin version explicitly. 
 identify whether the project classpath or plugin realm failed so version alignment and dependency placement can be
 checked on the correct side.
 
+`Failed to load API registries from the project classpath` means a compiled registry provider could not be loaded,
+constructed, or read. Check that the contract artifact includes its generated registry provider and that the project's
+runtime dependencies include the types used by its APIs. Missing classes or incompatible method signatures may require
+dependency alignment and recompiling the contract. The original provider or linkage error remains in Maven's cause
+chain; use `./mvnw -e process-classes` (or your usual lifecycle command with `-e`) to inspect it.
+
 == API selection fails
 
 `includeApis` and `excludeApis` use exact, case-sensitive `Api.id` values. Blank values, unknown IDs, duplicate API IDs

@@ -166,7 +166,7 @@ smallest coherent correction, then refactor with `./mvnw verify` green.
 
 ## P3 — hardening
 
-- [ ] Add contextual diagnostics for API registry provider and linkage failures.
+- [x] Add contextual diagnostics for API registry provider and linkage failures.
 
   Give project-side `ApiRegistry` loading the same narrow failure translation as target loading. Handle known
   `ServiceConfigurationError` and `LinkageError` families without catching arbitrary `Throwable`.

@@ -14,10 +14,27 @@ import org.apache.maven.project.MavenProject
 import java.io.File
 import java.net.URL
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.Collections
 import java.util.Enumeration
+import java.util.ServiceConfigurationError
 
 class GenerateMojoSpec : FunSpec({
+    test("report registry construction and linkage errors through Maven's exception chain") {
+        listOf(
+            ConstructionFailureApiRegistry::class.java.name to ServiceConfigurationError::class.java,
+            MissingDependencyApiRegistry::class.java.name to NoClassDefFoundError::class.java
+        ).forEach { (provider, errorType) ->
+            val fixture = GenerateMojoFixture("generate-sources", dependencies = listOf(apiProviderDirectory(provider)))
+            val failure = shouldThrow<MojoExecutionException> { fixture.mojo.execute() }
+
+            failure.message shouldContain "Failed to load API registries from the project classpath"
+            (failure.cause is IllegalStateException) shouldBe true
+            failure.cause!!.cause!!.javaClass shouldBe errorType
+            Files.exists(fixture.output) shouldBe false
+        }
+    }
+
     test("generate-sources registers artifacts without compiling or synchronizing them") {
         val fixture = GenerateMojoFixture("generate-sources")
         fixture.mojo.execute()
@@ -106,7 +123,11 @@ class GenerateMojoSpec : FunSpec({
     }
 })
 
-private class GenerateMojoFixture(phase: String?, source: MojoExecution.Source = MojoExecution.Source.LIFECYCLE) {
+private class GenerateMojoFixture(
+    phase: String?,
+    source: MojoExecution.Source = MojoExecution.Source.LIFECYCLE,
+    dependencies: List<Path> = emptyList()
+) {
     val workspace = Files.createTempDirectory("tapik-mojo-lifecycle-").toAbsolutePath()
     val output = workspace.resolve("target/generated")
     val classes = workspace.resolve("target/classes")
@@ -117,7 +138,8 @@ private class GenerateMojoFixture(phase: String?, source: MojoExecution.Source =
         "dev.akif.tapik.generated.test.fixtures.library.Authors.AuthorsGeneratedController.properties"
     val project = object : MavenProject() {
         override fun getCompileClasspathElements(): List<String> =
-            listOf(classes.toString()) + System.getProperty("java.class.path").split(File.pathSeparator)
+            listOf(classes.toString()) + dependencies.map(Path::toString) +
+                System.getProperty("java.class.path").split(File.pathSeparator)
 
         override fun getRuntimeClasspathElements(): List<String> = compileClasspathElements
     }.apply {

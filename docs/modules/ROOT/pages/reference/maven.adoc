@@ -132,6 +132,10 @@ Before loading registries and targets, the plugin verifies that every resolved `
 uses exactly the plugin's version. Version skew fails early; the BOM is the easiest way to keep project dependencies
 aligned.
 
+Registry service-provider and linkage failures are reported with project-classpath context and advice to check compiled
+contract artifacts, runtime dependencies, and compatible tapik versions. Maven preserves the original failure in the
+exception cause chain. Target-loading failures retain their separate plugin/project-classpath diagnostics.
+
 == Generated output and logs
 
 Every successful execution logs each generated project-relative path at Maven `INFO` level. `SOURCE` artifacts are

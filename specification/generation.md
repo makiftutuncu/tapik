@@ -97,6 +97,13 @@ diagnostic lists targets visible in the plugin realm, and a target found only on
 a misplaced plugin dependency. Generation-target service-provider or linkage failures identify the classpath side that
 failed and point to target placement and tapik version alignment.
 
+API-registry service-provider and linkage failures during project catalog loading are translated into exceptions with
+project-classpath context. The diagnostic directs users to compiled contract artifacts, missing runtime dependencies,
+and compatible tapik versions; the original error remains the cause. Maven reports these failures through its normal
+`MojoExecutionException` chain. Translation catches only `ServiceConfigurationError` and `LinkageError` from catalog
+loading, not arbitrary errors or failures from subsequent target execution. Target-loading diagnostics are unchanged,
+and the thread context class loader is restored even when registry loading fails.
+
 Before generation, the Maven adapter compares the Maven plugin version with every resolved `dev.akif:tapik-*` project
 dependency. An empty project-side set is tolerated for hosts supplying APIs through the plugin realm, but every
 discovered project tapik version must equal the plugin version. Version skew fails before registry or target loading.
