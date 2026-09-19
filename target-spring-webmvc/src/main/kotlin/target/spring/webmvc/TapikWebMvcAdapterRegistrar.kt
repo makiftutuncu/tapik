@@ -27,7 +27,6 @@ private fun ConfigurableListableBeanFactory.register(
     descriptor: TapikWebMvcAdapterDescriptor,
     registry: BeanDefinitionRegistry
 ) {
-    val handlerType = ClassUtils.forName(descriptor.handlerType, beanClassLoader)
     val adapterType = ClassUtils.forName(descriptor.adapterType, beanClassLoader)
     BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
         this,
@@ -39,20 +38,6 @@ private fun ConfigurableListableBeanFactory.register(
         .filterNot { beanName -> beanName == descriptor.adapterType }
         .forEach(registry::removeBeanDefinition)
 
-    val candidates =
-        BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-            this,
-            handlerType,
-            true,
-            false
-        )
-    val selected =
-        when {
-            candidates.size == 1 -> candidates.single()
-            else -> candidates.singleOrNull(::isPrimary)
-        }
-    if (selected == null) return
-
     if (!registry.containsBeanDefinition(descriptor.adapterType)) {
         registry.registerBeanDefinition(
             descriptor.adapterType,
@@ -62,11 +47,3 @@ private fun ConfigurableListableBeanFactory.register(
         )
     }
 }
-
-private fun ConfigurableListableBeanFactory.isPrimary(beanName: String): Boolean =
-    when {
-        containsBeanDefinition(beanName) -> getMergedBeanDefinition(beanName).isPrimary
-        parentBeanFactory is ConfigurableListableBeanFactory ->
-            (parentBeanFactory as ConfigurableListableBeanFactory).isPrimary(beanName)
-        else -> false
-    }

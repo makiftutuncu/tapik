@@ -219,14 +219,19 @@ auto-configuration entry that applies `@EnableTapikWebMvc` and therefore uses th
 selection behavior as plain Spring. The Boot dependency is optional for the runtime artifact so plain Spring consumers
 do not receive Boot transitively.
 
-Each generated descriptor names both its pure handler interface and generated adapter. After application bean
-definitions are available, tapik registers an adapter only when Spring can select a single candidate handler bean. No
-handler leaves that API unregistered; one candidate registers the adapter; multiple candidates register it only when
-exactly one candidate is primary. Qualifiers alone do not select a generated adapter because the adapter declares no
-generated qualifier. A single user bean may implement several generated handler interfaces and receives one adapter
-for each interface. If an adapter's generated package is inside the application's component-scan tree, tapik replaces
-the implicitly scanned definition with its canonical descriptor-based definition so each mapping is registered once
-and the same handler-selection rules still apply.
+Each generated descriptor names both its pure handler interface and generated adapter. tapik always registers one
+canonical adapter bean definition per descriptor and delegates handler resolution to Spring's ordinary constructor
+injection. Spring therefore applies its complete dependency-candidate behavior: one compatible bean is injected,
+`@Primary` and any configured candidate resolver disambiguate multiple beans, and missing or unresolved ambiguous
+dependencies fail application-context startup with Spring's standard dependency diagnostic naming the adapter and
+handler types. tapik does not implement a parallel handler-selection algorithm. This fail-fast behavior applies equally
+to explicit `@EnableTapikWebMvc` registration and Spring Boot auto-configuration, including when generated packages are
+outside the application's component-scan tree.
+
+A single user bean may implement several generated handler interfaces and receives one adapter for each interface. If
+an adapter's generated package is inside the application's component-scan tree, tapik replaces the implicitly scanned
+definition with its canonical descriptor-based definition so each mapping is registered once and the same handler
+selection rules still apply.
 
 The target emits one source and one uniquely named registration resource per API. Resource identity includes the
 generated adapter's qualified name, and registration order is canonical by that name. The Maven host packages generated

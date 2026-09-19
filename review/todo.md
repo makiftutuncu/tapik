@@ -1,213 +1,84 @@
-# tapik rewrite stabilization TODO
+# tapik follow-up findings TODO
 
-This checklist converts the second-round review at `80d66cca` into implementation tasks. Follow the repository workflow
-for every item: update the relevant file under `specification/` first, add a failing Kotest specification, implement the
-smallest coherent correction, then refactor with `./mvnw verify` green.
+This checklist converts the issues in `review/findings.md` into implementation tasks. For every public-behavior change, update the relevant specification first, add a failing Kotest specification, implement the smallest coherent change, and finish with `./mvnw verify`.
 
-## P1 — release blockers
+## P1 — Runtime and cross-target correctness
 
-- [x] Make optional and defaulted WebMVC parameter decoding structurally generated.
+- [x] Make generated Spring WebMVC APIs fail fast when a handler is missing.
+  - Add a specification for handler discovery and startup validation, covering both `@EnableTapikWebMvc` and Spring Boot auto-configuration.
+  - Reproduce the failure with generated sources in a package outside the host application's default component-scan package.
+  - Ensure every discovered generated API descriptor must resolve to exactly one compatible handler bean; do not silently leave an API unregistered when no handler exists.
+  - Report a startup error that identifies the generated API/handler contract and explains that no implementation bean was found.
+  - Preserve the supported single-handler and primary-handler cases, and do not create duplicate controller registrations when generated classes are otherwise visible to component scanning.
 
-  Replace the unrestricted `String.replace` in `WebMvcGenerator.appendDecodedParameter` with decoder rendering that
-  accepts the raw-value expression explicitly. Ensure parameter names cannot alter endpoint or inclusion property
-  access, endpoint IDs, locations, or other generated source text.
+- [ ] Generate shared endpoint input/output types for Spring client and server targets.
+  - Specify a target-neutral ownership and naming model for generated contract types used by both the client and server.
+  - Move shared request/body variants, response variants, response headers, and related endpoint types out of the generated client/server interfaces so both targets reference the same stable fully qualified types.
+  - Ensure generating only the client or only the server still produces a complete, compilable result.
+  - Ensure generating both targets does not emit duplicate files, create artifact-ownership conflicts, or produce target-dependent type identities.
+  - Add an integration test in which a generated server handler delegates to the generated client and returns its response directly without mapping between otherwise identical types.
+  - Preserve stable names and references across endpoint selection and repeated generation.
 
-  Acceptance criteria:
+## P2 — Schema derivation and public contract API
 
-  - Optional and defaulted query/header decoding uses the local `raw` value without rewriting any other expression.
-  - Generated source compiles when an endpoint property is named `pageRaw` and its optional query is named `page`.
-  - Generated source compiles when an inclusion path overlaps an allocated `*Raw` parameter name.
-  - Required, fixed, scalar, and repeated parameter behavior remains unchanged.
+- [ ] Support standard Java time types and recursively configurable schema overrides in Jackson derivation.
+  - Specify the built-in Jackson/OpenAPI mappings for at least `LocalDate` as a `string` with `date` format and `Instant` as a `string` with `date-time` format.
+  - Make these mappings work when the types appear as object properties and inside nullable, collection, and map shapes—not only as root values.
+  - Introduce a public configuration mechanism for registering a schema or schema provider for a custom Kotlin/Java type, and apply it recursively during object derivation.
+  - Keep explicit root-schema support and serializer/schema compatibility validation intact.
+  - Prevent derivation caches from leaking results between configurations with different custom registrations.
+  - Add KDoc and tests for built-in temporal mappings, nested custom mappings, nullability/collection composition, and independent configurations.
 
-- [x] Reject generated artifact collisions with unowned files.
+- [ ] Rename or hide `Api.id` so it cannot collide with common user contract properties.
+  - Choose a non-conflicting name for the API's internal/public identity and update the relevant specification and KDoc.
+  - Allow an `Api` subclass to declare its own `id` value for a resource path variable without conflicting with an inherited `String` property.
+  - Add a compile-time usage test showing that an expression such as `get(root / id)` resolves to the user's path value rather than the API identity.
+  - Update catalog selection, endpoint identity, generation naming, diagnostics, and any other internal consumers without changing their identity semantics.
+  - Document the migration. Do not retain an `id` compatibility alias if doing so preserves the original collision.
 
-  Extend `ArtifactOwnership`/`ArtifactWriter` so a generated path may replace a destination only when that path is
-  already owned by the same execution. An exact-path unowned file must cause generation to fail before any destination
-  or ownership state is changed.
+- [ ] Expose documentation through the smart constructors for headers, query parameters, and path variables.
+  - Extend the public construction path for `Header`, `QueryParameter`, and `PathVariable` so callers can supply descriptions and deprecation state while retaining inferred value types.
+  - Preserve existing concise calls and their defaults.
+  - Verify that supplied documentation reaches generated OpenAPI parameters/headers and any other target that consumes it.
+  - Add KDoc and compile-time/runtime tests for documented and deprecated values created through the smart constructors.
 
-  Acceptance criteria:
+- [ ] Make the HTTP `Status` catalog exhaustive while retaining validated custom statuses.
+  - Define named values for the complete standard HTTP status-code set supported by tapik's contract model, grouped or documented clearly enough to remain maintainable.
+  - Provide a public way to construct a status from an integer within the supported HTTP status ranges.
+  - Reject invalid/out-of-range codes with a clear diagnostic.
+  - Preserve value equality and compatibility with endpoint outputs, OpenAPI generation, and Spring client/server generation.
+  - Add coverage for every named status, valid custom codes, range boundaries, and invalid codes.
 
-  - An unowned file at the exact generated source, resource, or documentation path is never overwritten or claimed.
-  - The failure identifies the colliding relative path and execution owner.
-  - The original file bytes and ownership manifest remain unchanged after failure.
-  - Regeneration still replaces paths already owned by the same execution.
-  - Unrelated unowned files and paths owned by other non-conflicting executions remain untouched.
+## P3 — Diagnostics and ergonomic defaults
 
-- [x] Reject late generated-output collisions with application classes and resources.
+- [ ] Make conflicting OpenAPI component diagnostics identify the actual difference.
+  - Include the conflicting component name and a concise, deterministic comparison of the existing and candidate definitions.
+  - Identify the differing schema path or fields where practical, including conflicts introduced by nested or normalized component names.
+  - Include source/contract context when it is available without creating a parallel metadata model solely for diagnostics.
+  - Add tests that assert useful messages for representative structural, requiredness, and nested-component conflicts.
 
-  Apply the same exact-path ownership rule in `GeneratedOutputSynchronizer` before copying staged output into
-  `target/classes`. Treat an existing path absent from all tapik ownership state as application-owned.
+- [ ] Add a neutral catalog of common HTTP headers.
+  - Add discoverable `Header` members/factories for common request and response headers, including at least `Authorization`.
+  - Give each predefined header the appropriate canonical wire name and value format while preserving type inference.
+  - Keep custom header definitions available and avoid taking a dependency on Spring constants in the core model.
+  - Document the predefined set and test its names, formats, and generated OpenAPI representation.
 
-  Acceptance criteria:
+- [ ] Expand the common `MediaType` catalog and retain ergonomic custom construction.
+  - Define a documented baseline of common media types comparable to the useful framework-standard constants, with canonical serialized values.
+  - Preserve or improve the public construction path for custom media types without coupling the core model to Spring.
+  - Decide and specify normalization, equality, and parameter handling for custom values such as charset-bearing media types.
+  - Add tests for predefined values, custom values, equality, and their use in endpoint bodies and generated targets.
 
-  - A generated `.class`, Kotlin module metadata file, or registration resource cannot overwrite an unowned output.
-  - Collision detection completes before stale deletion or copying begins.
-  - A failed synchronization preserves all application bytes, prior generated output, and ownership state.
-  - Output previously owned by the same execution can still be replaced and removed as stale.
-  - Conflicts with another execution continue to fail with both path and owner in the diagnostic.
+- [ ] Add enum helpers to the default format interfaces.
+  - Expose an ergonomic generic member such as `StringFormat.enum<MyEnum>()` on the relevant defaults surface.
+  - Encode enum values by name and decode them with a clear failure when the input does not match a constant.
+  - Preserve the concrete enum type in inferred endpoint input/output types.
+  - Specify how enum values appear in generated schemas/OpenAPI and ensure the format's schema and codec stay aligned.
+  - Add tests for round trips, invalid input, schema enumeration, and use through the public defaults APIs.
 
-- [x] Preserve already-encoded literal paths in generated RestClient requests.
+## Completion
 
-  Separate the DSL's already-encoded literal path structure from raw path-variable, remaining-path, and query values
-  that Spring must encode. Do not pass an encoded template through a builder mode that escapes percent signs again.
-
-  Acceptance criteria:
-
-  - A literal fragment such as `a%20b` is requested as `/a%20b`, never `/a%2520b`.
-  - Encoded reserved characters in literal fragments remain byte-for-byte stable.
-  - Ordinary path-variable values are encoded exactly once.
-  - Every remaining-path element is encoded exactly once and remains one segment.
-  - A black-box request test combines encoded literals, ordinary variables, remaining segments, and queries.
-
-- [x] Complete shallow snapshot semantics across every public structural value.
-
-  Audit all production modules for public collection and byte-array inputs/getters. Copy public collection inputs before
-  storage and expose collections that cannot mutate stored structure, including through JVM/Kotlin mutable casts. Do not
-  copy user-owned domain objects, formats, codecs, or values carried by them.
-
-  The audit must include at least:
-
-  - `DecodeResult.Failure.errors`;
-  - `Uri.segments`, endpoint tags, and `StatusSet.statuses`;
-  - compiler-generated `ApiRegistry.apis`;
-  - `ApiCatalog.apis` and `GenerationTargetCatalog.targets`;
-  - `GenerationRequest.apis`, `CompiledApi.endpoints`, `KotlinType.arguments`, and generated-source model collections;
-  - every list/map in the public OpenAPI document, schema, component, and discriminator model;
-  - all existing transport byte-array boundaries.
-
-  Acceptance criteria:
-
-  - Mutating an input collection after construction cannot change the tapik value.
-  - Casting an exposed collection to a mutable JVM/Kotlin type cannot change stored structure.
-  - Collection order and tag/set semantics remain as specified.
-  - Data-class `copy` or component functions cannot reintroduce an unsnapshotted boundary.
-  - A systematic snapshot test suite covers representative list, set, map, registry, OpenAPI, and byte values.
-
-## P2 — protocol and architecture stabilization
-
-- [x] Define and enforce neutral HTTP media-type syntax and identity.
-
-  Specify the accepted grammar and equality rules for `MediaType`. Validate malformed values before a target runs, and
-  prevent semantically duplicate body representations such as type/subtype case variants. Keep core independent of
-  Spring APIs.
-
-  Acceptance criteria:
-
-  - Malformed media types fail during contract construction, or every target rejects them during generation with API
-    and endpoint context if construction-time validation is intentionally deferred.
-  - Type/subtype and parameter-name case follow HTTP semantics.
-  - Parameter-value comparison distinguishes case-sensitive values while handling defined case-insensitive values.
-  - Semantically duplicate body media types fail the body uniqueness invariant.
-  - OpenAPI never emits an invalid Content Object key.
-  - Spring applications do not defer contract media-type syntax errors to request time or context startup.
-
-- [x] Compare `Accept` parameters using HTTP-aware semantics.
-
-  Replace raw parameter string equality in `selectResponseMediaType`. Preserve the existing effective quality,
-  specificity, declaration-order, and most-specific-`q=0` behavior.
-
-  Acceptance criteria:
-
-  - `text/plain;charset=utf-8` is compatible with `Accept: text/plain;charset=UTF-8`.
-  - Parameter names compare case-insensitively.
-  - Opaque parameter values retain the correct case-sensitive behavior.
-  - Quoted and unquoted equivalent values behave consistently with Spring/HTTP parsing.
-  - Mismatched non-quality parameters still reject the representation.
-  - Existing wildcard, quality, specificity, invalid-header, and declaration-order tests remain green.
-
-- [x] Make Jackson schema derivation faithful to effective serializer shape.
-
-  Detect Jackson behavior that changes a Kotlin type's JSON shape, including `@JsonValue`, property serializers, class
-  serializers, and registered module serializers. Support only shapes that can be proven; otherwise require an explicit
-  schema or fail format construction with `SchemaDerivationException`.
-
-  Acceptance criteria:
-
-  - An ordinary wrapper serialized through `@JsonValue` does not receive an object schema unless its wire value is an
-    object.
-  - Property-level custom serializers cannot silently leave a contradictory property schema.
-  - Class/module serializers cannot silently leave a contradictory root schema.
-  - Callers have a documented explicit-schema path for serializer behavior that cannot be inferred.
-  - Conformance tests encode representative values and verify that their JSON shape agrees with the attached schema.
-  - Existing Jackson visibility, naming, ignored-property, ordering, enum, recursion, default, and deprecation behavior
-    remains intact.
-
-- [x] Give generated top-level Spring types stable cross-artifact identities.
-
-  Replace or constrain selection-dependent numeric disambiguation for client/server/controller top-level types. The
-  identity of a generated public type should not change because an unrelated earlier API is selected, and independent
-  contract artifacts must not unknowingly publish the same generated class identity.
-
-  Acceptance criteria:
-
-  - Adding or excluding an unrelated same-simple-name API does not rename an existing generated public type.
-  - Two APIs with the same simple class name but different qualified identities cannot publish the same generated
-    top-level class/resource identity silently.
-  - The policy works across separate same-module generated contract artifacts, not only within one request.
-  - Client, handler, controller, artifact path, and WebMVC descriptor names use one coherent identity policy.
-  - Naming remains deterministic and is documented as a compatibility contract.
-  - Local endpoint/member collisions may continue using deterministic namespace-local allocation.
-
-- [x] Model Maven generation lifecycle mode explicitly.
-
-  Replace the `lifecyclePhase != "generate-sources"` inference with explicit handling for compiled-contract
-  `generate-sources`, same-module `process-classes`, and deliberately supported direct invocation behavior. Reject unsafe
-  or undefined phase bindings with an actionable diagnostic.
-
-  Acceptance criteria:
-
-  - `generate-sources` registers generated sources/resources for ordinary main compilation without late compilation.
-  - `process-classes` performs the documented late generated-source compilation and output synchronization.
-  - Bindings such as `process-sources`, `compile`, `test-compile`, and `package` either have explicitly specified
-    behavior or fail with the two supported alternatives.
-  - Direct goal invocation clearly reports missing same-module prerequisites and does not imply that lifecycle phases
-    were run.
-  - Tests cover both supported modes, representative unsupported phases, and direct invocation.
-
-## P3 — hardening
-
-- [x] Add contextual diagnostics for API registry provider and linkage failures.
-
-  Give project-side `ApiRegistry` loading the same narrow failure translation as target loading. Handle known
-  `ServiceConfigurationError` and `LinkageError` families without catching arbitrary `Throwable`.
-
-  Acceptance criteria:
-
-  - A malformed registry service provider fails with project-classpath context.
-  - Missing/incompatible linked types point to dependency and tapik version alignment.
-  - Maven reports a normal `MojoExecutionException` chain rather than an unwrapped `Error`.
-  - Target-loading diagnostics remain unchanged.
-  - Tests cover service construction failure and linkage failure.
-
-- [x] Preserve comments and string literals during Kotlin import optimization.
-
-  Compute lexical code regions before removing imports or locating the package directive. Only real Kotlin directives
-  in code may be removed or rewritten.
-
-  Acceptance criteria:
-
-  - Import-looking lines inside block comments, KDoc, quoted strings, and triple-quoted strings remain byte-for-byte
-    present.
-  - Package-looking lines inside comments and strings cannot be mistaken for the package directive.
-  - Real existing imports are retained/deduplicated and newly inferred imports remain deterministic.
-  - Qualified references inside comments and literals remain unchanged.
-  - Existing collision and generated-source compilation tests remain green.
-
-## Final verification
-
-- [ ] Run the complete clean stabilization and release checks after all findings are addressed.
-
-  Acceptance criteria:
-
-  - `./mvnw clean verify` passes.
-  - The documentation quality/preview build passes its cross-reference, link, snippet, and navigation gates.
-  - The documented unsigned external-consumer rehearsal passes from a clean checkout:
-
-    ```shell
-    ./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true \
-      -Dtapik.release.rehearsal=true clean install
-    ```
-
-  - Staged production POMs, JARs, source artifacts, documentation artifacts, generated OpenAPI, and generated Spring
-    code are inspected as release outputs.
-  - No test/example module is staged for publication.
+- [ ] All new and updated public APIs have KDoc.
+- [ ] All affected specification files describe the final behavior.
+- [ ] Focused regression and generated-source compilation tests pass.
+- [ ] `./mvnw verify` passes from a clean checkout.

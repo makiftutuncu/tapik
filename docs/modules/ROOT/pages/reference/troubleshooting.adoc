@@ -69,7 +69,9 @@ let Maven reach it during the build.
 
 Provide exactly one suitable Spring bean implementing each generated `Server` interface. In Spring Boot, generated
 controller imports are activated through auto-configuration; in plain Spring, enable tapik WebMVC registration
-explicitly.
+explicitly. Startup fails rather than silently omitting an API when no implementation exists. If the error lists
+multiple compatible beans, remove the unintended implementations or mark exactly one `@Primary`. Generated controller
+packages do not need to be included in component scanning because descriptor registration loads them directly.
 
 == A target rejects an endpoint
 

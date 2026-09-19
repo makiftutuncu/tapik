@@ -21,6 +21,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.beans.factory.UnsatisfiedDependencyException
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -310,6 +312,16 @@ class MavenUsageSpec : FunSpec({
         plainWebMvc.mvc.perform(get("/books")).andExpect(status().isOk)
         plainWebMvc.mvc.perform(get("/catalog")).andExpect(status().isOk)
     }
+
+    test("fail Boot startup when generated handlers outside component scanning are missing") {
+        val failure = shouldThrow<UnsatisfiedDependencyException> {
+            AnnotationConfigApplicationContext(BootWithoutGeneratedHandlers::class.java)
+        }
+
+        generateSequence(failure as Throwable, Throwable::cause)
+            .mapNotNull(Throwable::message)
+            .joinToString("\n") shouldContain AuthorsServer::class.java.name
+    }
 })
 
 private class LibraryController : AuthorsServer, CatalogServer {
@@ -370,6 +382,9 @@ private class PlainWebMvcTestApplication {
     @Bean
     fun booksHandler(): BooksHandler = BooksHandler()
 }
+
+@SpringBootApplication(scanBasePackages = ["com.example.library.missing"])
+private class BootWithoutGeneratedHandlers
 
 private class WebMvcFixture(
     private val context: AnnotationConfigApplicationContext,

@@ -1,7 +1,10 @@
 package dev.akif.tapik.target.spring.webmvc
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import org.springframework.beans.factory.UnsatisfiedDependencyException
 import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
@@ -37,22 +40,28 @@ class TapikWebMvcRegistrationSpec : FunSpec({
         }
     }
 
-    test("remove a component-scanned adapter without a handler") {
-        context(NoHandler::class.java, scannedAdapter = true).use { context ->
-            context.getBeansOfType(TestAdapter::class.java).isEmpty() shouldBe true
+    test("fail startup for a component-scanned adapter without a handler") {
+        val failure = shouldThrow<UnsatisfiedDependencyException> {
+            context(NoHandler::class.java, scannedAdapter = true)
         }
+        failure.failureMessages shouldContain TestAdapter::class.java.name
+        failure.failureMessages shouldContain TestHandler::class.java.name
+        failure.failureMessages shouldContain "expected at least 1 bean"
     }
 
-    test("leave an adapter unregistered without a handler") {
-        context(NoHandler::class.java).use { context ->
-            context.getBeansOfType(TestAdapter::class.java).isEmpty() shouldBe true
-        }
+    test("fail startup without a handler") {
+        val failure = shouldThrow<UnsatisfiedDependencyException> { context(NoHandler::class.java) }
+        failure.failureMessages shouldContain TestAdapter::class.java.name
+        failure.failureMessages shouldContain TestHandler::class.java.name
+        failure.failureMessages shouldContain "expected at least 1 bean"
     }
 
-    test("leave an adapter unregistered for ambiguous handlers") {
-        context(AmbiguousHandlers::class.java).use { context ->
-            context.getBeansOfType(TestAdapter::class.java).isEmpty() shouldBe true
-        }
+    test("fail startup for ambiguous handlers") {
+        val failure = shouldThrow<UnsatisfiedDependencyException> { context(AmbiguousHandlers::class.java) }
+        failure.failureMessages shouldContain TestHandler::class.java.name
+        failure.failureMessages shouldContain "first"
+        failure.failureMessages shouldContain "second"
+        failure.failureMessages shouldContain "expected single matching bean"
     }
 
     test("register an adapter for one primary handler") {
@@ -61,6 +70,9 @@ class TapikWebMvcRegistrationSpec : FunSpec({
         }
     }
 })
+
+private val Throwable.failureMessages: String
+    get() = generateSequence(this, Throwable::cause).mapNotNull(Throwable::message).joinToString("\n")
 
 private fun context(configuration: Class<*>): AnnotationConfigApplicationContext =
     context(configuration, scannedAdapter = false)

@@ -71,8 +71,10 @@ include::example$application/LibraryApplication.kt[]
 ----
 
 For a server interface, registration uses the sole matching handler bean. If multiple beans implement it, mark exactly
-one `@Primary`; with no unambiguous handler the corresponding controller is not registered. One handler bean may
-implement several generated server interfaces and receive a controller adapter for each one.
+one `@Primary`. Application startup fails when a generated server interface has no implementation bean or when multiple
+implementations remain ambiguous; the error identifies the generated interface and controller. One handler bean may
+implement several generated server interfaces and receive a controller adapter for each one. Descriptor discovery does
+not depend on generated controllers being inside the application's component-scan package.
 
 == Use plain Spring
 

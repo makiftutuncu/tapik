@@ -400,10 +400,11 @@ normal resources phase.
 The RestClient target generates composable client interfaces backed by `RestClientTransport`. The WebMVC target
 generates public interfaces containing only typed handler methods and response types. It also generates internal Spring
 adapters that Boot registers automatically when exactly one matching handler bean is available, including a primary
-bean among multiple candidates. A user supplies an ordinary `@Bean` or component implementing the generated interface;
-no `@RestController` annotation or per-API adapter configuration is required. One bean may implement several generated
-API interfaces. Plain Spring applications add `@EnableTapikWebMvc` to one configuration class; this registers the same
-generated adapters without component scanning but does not configure Spring MVC itself.
+bean among multiple candidates. Startup fails with the generated contract identity when a handler is missing or remains
+ambiguous. A user supplies an ordinary `@Bean` or component implementing the generated interface; no `@RestController`
+annotation or per-API adapter configuration is required. One bean may implement several generated API interfaces.
+Plain Spring applications add `@EnableTapikWebMvc` to one configuration class; this registers the same generated
+adapters without component scanning but does not configure Spring MVC itself.
 
 The pure handler/generated-controller boundary is intended to extend to future server stacks: application handlers can
 remain framework-free while each target supplies its own generated transport adapter. WebMVC currently generates both
