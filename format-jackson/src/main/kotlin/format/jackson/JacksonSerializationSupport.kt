@@ -4,6 +4,14 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import dev.akif.tapik.common.format.SchemaDerivationException
 import tools.jackson.core.JacksonException
 import tools.jackson.databind.*
+import tools.jackson.databind.ext.javatime.ser.DurationSerializer
+import tools.jackson.databind.ext.javatime.ser.InstantSerializer
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
+import tools.jackson.databind.ext.javatime.ser.LocalDateTimeSerializer
+import tools.jackson.databind.ext.javatime.ser.LocalTimeSerializer
+import tools.jackson.databind.ext.javatime.ser.OffsetDateTimeSerializer
+import tools.jackson.databind.ext.javatime.ser.OffsetTimeSerializer
+import tools.jackson.databind.ext.javatime.ser.ZonedDateTimeSerializer
 import tools.jackson.databind.introspect.Annotated
 import tools.jackson.databind.introspect.AnnotatedMember
 import tools.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper
@@ -14,8 +22,14 @@ import tools.jackson.databind.ser.bean.BeanSerializerBase
 import tools.jackson.databind.ser.jdk.*
 import tools.jackson.databind.ser.std.StdConvertingSerializer
 import tools.jackson.databind.ser.std.ToStringSerializer
+import java.time.*
 
-internal fun requireSupportedJacksonSerialization(mapper: ObjectMapper, type: JavaType) {
+internal fun requireSupportedJacksonSerialization(
+    mapper: ObjectMapper,
+    type: JavaType,
+    registry: JacksonSchemaRegistry = JacksonSchemaRegistry.Default
+) {
+    if (type.hasRegisteredSchema(registry)) return
     // Enum schemas are checked against every constant's actual encoded string instead.
     if (type.isEnumType) return
     val location = type.toCanonical()
@@ -37,6 +51,7 @@ internal fun requireSupportedJacksonSerialization(mapper: ObjectMapper, type: Ja
                         val propertyLocation = "$location.${property.name}"
                         val writer = property as? BeanPropertyWriter
                             ?: unsupportedJacksonShape(propertyLocation, "custom property writer")
+                        if (writer.type.hasRegisteredSchema(registry)) return@forEach
                         writer.member?.let { requireSupportedAnnotations(configuration, it, propertyLocation) }
                         if (writer.typeSerializer != null) unsupportedJacksonShape(propertyLocation, "polymorphic serialization")
                         requireSupportedSerializer(
@@ -101,6 +116,15 @@ private fun supportedSerializers(type: JavaType): Set<Class<*>> =
         Double::class -> setOf(NumberSerializers.DoubleSerializer::class.java)
         Char::class -> setOf(ToStringSerializer::class.java)
         String::class -> setOf(StringSerializer::class.java)
+        LocalDate::class -> setOf(LocalDateSerializer::class.java)
+        LocalTime::class -> setOf(LocalTimeSerializer::class.java)
+        LocalDateTime::class -> setOf(LocalDateTimeSerializer::class.java)
+        OffsetTime::class -> setOf(OffsetTimeSerializer::class.java)
+        OffsetDateTime::class -> setOf(OffsetDateTimeSerializer::class.java)
+        ZonedDateTime::class -> setOf(ZonedDateTimeSerializer::class.java)
+        Instant::class -> setOf(InstantSerializer::class.java)
+        Duration::class -> setOf(DurationSerializer::class.java)
+        Period::class -> setOf(ToStringSerializer::class.java)
         else -> when {
             type.isMapLikeType -> setOf(MapSerializer::class.java)
             type.isCollectionLikeType -> STANDARD_COLLECTION_SERIALIZERS
@@ -111,8 +135,13 @@ private fun supportedSerializers(type: JavaType): Set<Class<*>> =
 
 private fun unsupportedJacksonShape(location: String, behavior: String): Nothing =
     throw SchemaDerivationException(
-        "Unsupported Jackson $behavior at '$location'; provide an explicit schema with jsonFormat(schema = ...) or jsonBody(schema = ...)"
+        "Unsupported Jackson $behavior at '$location'; provide an explicit schema for the root value or register " +
+            "the type in " +
+            "JacksonSchemaRegistry"
     )
+
+private fun JavaType.hasRegisteredSchema(registry: JacksonSchemaRegistry): Boolean =
+    registry.contains(this)
 
 private val STANDARD_COLLECTION_SERIALIZERS: Set<Class<*>> =
     setOf(

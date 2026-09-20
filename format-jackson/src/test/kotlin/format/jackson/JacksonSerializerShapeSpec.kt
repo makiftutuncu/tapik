@@ -19,6 +19,7 @@ import tools.jackson.databind.ser.std.ToStringSerializer
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.jsonMapper
 import tools.jackson.module.kotlin.kotlinModule
+import java.time.LocalDate
 import kotlin.reflect.typeOf
 
 class JacksonSerializerShapeSpec : FunSpec({
@@ -54,11 +55,18 @@ class JacksonSerializerShapeSpec : FunSpec({
     test("reject registered scalar serializers before primitive schema shortcuts") {
         val mapper = jsonMapper {
             addModule(kotlinModule())
-            addModule(SimpleModule().addSerializer(String::class.java, StringLengthSerializer()))
+            addModule(
+                SimpleModule()
+                    .addSerializer(String::class.java, StringLengthSerializer())
+                    .addSerializer(LocalDate::class.java, LocalDateEpochDaySerializer())
+            )
         }
         mapper.writeValueAsString("book") shouldBe "4"
+        mapper.writeValueAsString(LocalDate.ofEpochDay(1)) shouldBe "1"
         shouldThrow<SchemaDerivationException> { jsonFormat<String>(mapper) }
         shouldThrow<SchemaDerivationException> { jsonFormat<List<String>>(mapper) }
+        shouldThrow<SchemaDerivationException> { jsonFormat<LocalDate>(mapper) }
+        shouldThrow<SchemaDerivationException> { jsonFormat<List<LocalDate>>(mapper) }
     }
 
     test("honor serializer overrides supplied through mixins") {
@@ -149,6 +157,12 @@ internal enum class WireGenre(@get:JsonValue val wireValue: String) {
 internal class StringLengthSerializer : ValueSerializer<String>() {
     override fun serialize(value: String, generator: JsonGenerator, context: SerializationContext) {
         generator.writeNumber(value.length)
+    }
+}
+
+internal class LocalDateEpochDaySerializer : ValueSerializer<LocalDate>() {
+    override fun serialize(value: LocalDate, generator: JsonGenerator, context: SerializationContext) {
+        generator.writeNumber(value.toEpochDay())
     }
 }
 

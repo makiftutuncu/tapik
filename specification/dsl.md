@@ -212,16 +212,27 @@ val configuredJson = jsonBody<Book>(format = applicationJson)
 ```
 
 Every body is attached to its concrete format when built. Body builders take the serialization format directly and
-do not consult API or tapik-global configuration. Derived core formats are cached by serialization-format and
-serializer identity. Concurrent lookups reuse the same live format instance. Cache keys and values are weakly held, so
-the cache does not retain an otherwise unreachable serialization format, serializer, derived format, or its defining
-classloader; a collected format may be recreated by a later lookup. `Json.Default` is the default argument for the
-Kotlin serialization JSON builder.
+do not consult API or tapik-global configuration. Derived core formats are cached by registry, serialization-format,
+and serializer identity. Concurrent lookups reuse the same live format instance. Cache keys and values are weakly
+held, so the cache does not retain an otherwise unreachable registry, serialization format, serializer, derived
+format, or its defining classloader; a collected format may be recreated by a later lookup. `Json.Default` is the
+default argument for the Kotlin serialization JSON builder.
 
 Kotlin serialization schema derivation covers primitives, enums, lists, maps, nullable properties, objects, value
 classes, sealed hierarchies, and finitely registered open polymorphic hierarchies. Recursive object and polymorphic
 references are retained as schema references. Object schema properties retain separate `required` and `deprecated`
 flags; derivers set each flag only when their source metadata can express it reliably.
+
+Primitive Kotlin values and standard Java time values are resolved through the same shared built-in scalar catalog.
+The catalog is independent of either serialization integration so their corresponding schema types and formats cannot
+drift.
+
+`KotlinxSchemaRegistry` is an immutable set of schema registrations matched by serializer descriptor name. A caller
+may register either a fixed `Schema` or a `KotlinxSchemaProvider` using a serializer or descriptor. Providers receive
+the resolved `SerialDescriptor`. Registrations apply recursively to roots, object properties, nullable values,
+collection elements, and map keys or values. Nullability wraps the registered schema. Built-in Java time descriptor
+names map to their string formats, but Kotlin serialization callers must still supply actual
+serializers for those Java types; tapik does not invent codecs.
 
 JSON polymorphism is derived from both the serializer and the selected `Json` instance. Sealed alternatives retain
 their serializer declaration order. Kotlin serialization does not expose open serializer-module registration order,
@@ -236,6 +247,11 @@ array polymorphism. `ClassDiscriminatorMode.ALL_JSON_OBJECTS` also fails until o
 that mode faithfully. Descriptor-only schema derivation uses `Json.Default`; callers needing configured polymorphism
 must provide their `Json` instance.
 
+`jsonFormat`, `jsonBody`, and `deriveSchema` accept a `KotlinxSchemaRegistry` through a `registry` parameter. They
+default to `KotlinxSchemaRegistry.Default`. A caller-owned root `schema` bypasses derivation and the registry. Derived
+formats are cached by `Json` identity, registry identity, and serializer identity. Different registries cannot reuse
+one another's formats or schemas.
+
 Jackson 3 body builders are provided independently by `dev.akif:tapik-format-jackson`:
 
 ```kotlin
@@ -246,15 +262,32 @@ val configuredJson = jsonBody<Book>(format = applicationObjectMapper)
 ```
 
 The default Jackson format uses an `ObjectMapper` with the Jackson Kotlin module registered. A supplied mapper controls
-wire encoding, decoding, property visibility, JSON names, and property order. Jackson formats are cached by mapper
-identity and Kotlin type; custom mappers remain isolated from the default and from one another. Cache entries do not
-retain otherwise unreachable mappers, types, formats, or their defining classloaders.
+wire encoding, decoding, property visibility, JSON names, and property order. Jackson formats are cached by registry,
+mapper, and Kotlin-type identity; custom mappers and registries remain isolated from one another. Cache entries do not
+retain otherwise unreachable registries, mappers, types, formats, or their defining classloaders.
 
 Jackson schema derivation has the same initial structural coverage as Kotlin serialization: primitives, enums, lists,
 maps, nullable properties, objects, value classes, recursive references, constructor defaults, and deprecation flags.
-The derived object shape follows Jackson's effective serialization properties, including configured names, ignored
-properties, and order. Polymorphic and sealed types still fail format construction until Jackson-specific derivation
-is implemented against the neutral union algebra and shared conformance cases.
+Standard Java time values are built-in scalar types and derive their string wire shapes wherever they occur.
+`LocalDate` uses the `date` format;
+`Instant` and offset/zoned date-time values use `date-time`; local time and date-time values use `time-local` and
+`date-time-local`; offset time uses `time`; and `Duration` and `Period` use `duration`. The derived object shape follows
+Jackson's effective serialization properties, including configured names, ignored properties, and order. Polymorphic
+and sealed types still fail format construction until Jackson-specific derivation is implemented against the neutral
+union algebra and shared conformance cases.
+
+`JacksonSchemaRegistry` is an immutable set of schema registrations, separate from the `ObjectMapper`. A caller may
+register either a fixed `Schema` or a `JacksonSchemaProvider` for a Kotlin or Java class. Providers receive Jackson's
+resolved `JavaType`, allowing one registration to account for generic arguments. A registration applies at every
+matching position during derivation, including object properties, nullable values, collection elements, and map keys
+or values. Nullability remains structural and wraps the registered schema when the matching Kotlin type is nullable. A
+matching registration is caller-owned and bypasses serializer-shape validation only for that value; unregistered
+surrounding and nested values retain normal compatibility validation.
+
+`jsonFormat`, `jsonBody`, and `deriveSchema` accept a `JacksonSchemaRegistry` through a `registry` parameter, defaulting
+to `JacksonSchemaRegistry.Default`. Derived-format cache entries are isolated by mapper identity, registry identity,
+and Kotlin type. Registries with different registrations cannot reuse one another's formats or schemas. Reusing the
+same mapper, registry instance, and type reuses the same live format instance.
 
 Jackson derivation must reject serialization overrides whose wire shape is not supported, at format construction,
 with `SchemaDerivationException` identifying the type or property and suggesting an explicit schema. This includes
@@ -264,10 +297,11 @@ encoding check. Ordinary Kotlin value-class unboxing remains supported; custom v
 Serialization annotations are read through Jackson introspection so mix-ins cannot bypass these checks.
 
 `jsonFormat<Value>(format = mapper, schema = schema)` and `jsonBody<Value>(format = mapper, schema = schema)` attach
-the caller's schema without attempting derivation. The non-reified format builder accepts the same optional schema.
-An explicit schema describes the entire serialized value, including any nested custom behavior; callers own its
-accuracy and the matching mapper's encoder/decoder behavior. Explicit-schema formats do not enter the inferred-format
-cache, and cannot affect another call's schema. Supplying a schema must not change wire encoding or decoding.
+the caller's root schema without attempting derivation or consulting the registry. The non-reified format
+builder accepts the same optional schema. An explicit schema describes the entire serialized value, including any
+nested custom behavior; callers own its accuracy and the matching mapper's encoder/decoder behavior. Explicit-schema
+formats do not enter the inferred-format cache, and cannot affect another call's schema. Supplying a schema must not
+change wire encoding or decoding.
 
 ## Request headers and input
 

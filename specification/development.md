@@ -116,9 +116,10 @@ or construct core `Format` values directly; targets consume only the concrete fo
 values.
 
 `common-format` provides the independently consumable provider-authoring boundary shared by format integrations. It
-depends only on `core` and contains weak format caching, consistent decoding-failure conversion, and the common
-schema-derivation exception. Serialization-library introspection, configuration, codecs, and user-facing builders
-remain in their respective `format-` modules.
+depends only on `core` and contains immutable schema-provider registries, the shared built-in scalar schema catalog,
+registry-aware weak format caching, consistent decoding-failure conversion, and the common schema-derivation exception.
+Serialization-library introspection, configuration, codecs, and user-facing registry wrappers and builders remain in
+their respective `format-` modules.
 
 `common-format` also attaches a test fixture containing provider-neutral byte-array codec and schema conformance
 cases. Format integrations supply their own model, expected wire representation, and expected core schema to the same

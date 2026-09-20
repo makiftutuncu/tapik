@@ -21,7 +21,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
 
 ## P2 — Schema derivation and public contract API
 
-- [ ] Support standard Java time types and recursively configurable schema overrides in Jackson derivation.
+- [x] Support standard Java time types and recursively configurable schema overrides in Jackson derivation.
   - Specify the built-in Jackson/OpenAPI mappings for at least `LocalDate` as a `string` with `date` format and `Instant` as a `string` with `date-time` format.
   - Make these mappings work when the types appear as object properties and inside nullable, collection, and map shapes—not only as root values.
   - Introduce a public configuration mechanism for registering a schema or schema provider for a custom Kotlin/Java type, and apply it recursively during object derivation.

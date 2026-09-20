@@ -2,6 +2,7 @@ package dev.akif.tapik.format.kotlinx
 
 import dev.akif.tapik.*
 import dev.akif.tapik.common.format.SchemaDerivationException
+import dev.akif.tapik.common.format.builtInSchema
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PolymorphicKind
@@ -12,26 +13,35 @@ import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.json.ClassDiscriminatorMode
 import kotlinx.serialization.json.Json
 
-/** Derives a tapik schema from [serializer] using [Json.Default]. */
-fun deriveSchema(serializer: KSerializer<*>): Schema = deriveSchema(Json.Default, serializer)
+/** Derives a tapik schema from [serializer] and [registry] using [Json.Default]. */
+fun deriveSchema(
+    serializer: KSerializer<*>,
+    registry: KotlinxSchemaRegistry = KotlinxSchemaRegistry.Default
+): Schema = deriveSchema(Json.Default, serializer, registry)
 
-/** Derives a tapik schema from [descriptor] using [Json.Default]. */
-fun deriveSchema(descriptor: SerialDescriptor): Schema = deriveSchema(Json.Default, descriptor)
+/** Derives a tapik schema from [descriptor] and [registry] using [Json.Default]. */
+fun deriveSchema(
+    descriptor: SerialDescriptor,
+    registry: KotlinxSchemaRegistry = KotlinxSchemaRegistry.Default
+): Schema = deriveSchema(Json.Default, descriptor, registry)
 
-/** Derives a tapik schema from [serializer] and the selected JSON [format]. */
+/** Derives a tapik schema from [serializer], the selected JSON [format], and [registry]. */
 fun deriveSchema(
     format: Json,
-    serializer: KSerializer<*>
-): Schema = deriveSchema(format, serializer.descriptor)
+    serializer: KSerializer<*>,
+    registry: KotlinxSchemaRegistry = KotlinxSchemaRegistry.Default
+): Schema = deriveSchema(format, serializer.descriptor, registry)
 
-/** Derives a tapik schema from [descriptor] and the selected JSON [format]. */
+/** Derives a tapik schema from [descriptor], the selected JSON [format], and [registry]. */
 fun deriveSchema(
     format: Json,
-    descriptor: SerialDescriptor
-): Schema = KotlinxSchemaDeriver(format).derive(descriptor)
+    descriptor: SerialDescriptor,
+    registry: KotlinxSchemaRegistry = KotlinxSchemaRegistry.Default
+): Schema = KotlinxSchemaDeriver(format, registry).derive(descriptor)
 
 internal class KotlinxSchemaDeriver(
-    val format: Json
+    val format: Json,
+    private val registry: KotlinxSchemaRegistry
 ) {
     fun derive(
         descriptor: SerialDescriptor,
@@ -48,6 +58,9 @@ internal class KotlinxSchemaDeriver(
         if (includeNullability && descriptor.isNullable) {
             return NullableSchema(derive(descriptor, activeSchemas, includeNullability = false))
         }
+
+        registry.schema(descriptor)?.let { return it }
+        builtInSchema(descriptor.schemaKey)?.let { return it }
 
         if (descriptor.isInline) {
             require(descriptor.elementsCount == 1) {
