@@ -3,19 +3,19 @@ package dev.akif.tapik.target.spring.webmvc
 import dev.akif.tapik.*
 import dev.akif.tapik.common.plugin.CompiledApi
 import dev.akif.tapik.common.plugin.CompiledEndpoint
+import dev.akif.tapik.common.plugin.EndpointTypeNames
 import dev.akif.tapik.common.plugin.KotlinClassClassifier
 import dev.akif.tapik.common.plugin.KotlinType
 import dev.akif.tapik.common.plugin.argument
+import dev.akif.tapik.common.plugin.endpointTypeNames
 import dev.akif.tapik.common.plugin.kotlinIdentifier
 import dev.akif.tapik.common.plugin.kotlinNameSource
 import dev.akif.tapik.common.plugin.kotlinPropertyAccess
-import dev.akif.tapik.common.plugin.kotlinVariantName
 import dev.akif.tapik.common.plugin.lowerCamel
 import dev.akif.tapik.common.plugin.pathTemplate
 import dev.akif.tapik.common.plugin.toKotlinSourceType
 import dev.akif.tapik.common.plugin.tupleElements
 import dev.akif.tapik.common.plugin.uniqueKotlinName
-import dev.akif.tapik.common.plugin.upperCamel
 
 internal fun webMvcApiModel(
     compiled: CompiledApi,
@@ -31,7 +31,7 @@ internal fun webMvcApiModel(
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
     val handlerNames = mutableSetOf<String>()
     val mappingNames = mutableSetOf<String>()
-    val responseNames = mutableSetOf<String>()
+    val endpointTypes = endpointTypeNames(compiled)
     return WebMvcApiModel(
         packageName = packageName,
         serverName = serverName,
@@ -39,14 +39,14 @@ internal fun webMvcApiModel(
         apiType = apiType,
         apiProperty = apiProperty,
         endpoints =
-            compiled.endpoints.map { endpoint ->
+            compiled.endpoints.zip(endpointTypes).map { (endpoint, typeNames) ->
                 val propertyName = endpoint.kotlinNameSource()
                 val handlerName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), handlerNames)
                 endpoint.toModel(
                     apiProperty = apiProperty,
                     handlerName = handlerName,
                     mappingName = uniqueKotlinName(handlerName.removeSurrounding("`"), mappingNames),
-                    responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", responseNames)
+                    typeNames = typeNames
                 )
             }
     )
@@ -56,7 +56,7 @@ private fun CompiledEndpoint.toModel(
     apiProperty: String,
     handlerName: String,
     mappingName: String,
-    responseName: String
+    typeNames: EndpointTypeNames
 ): WebMvcEndpointModel {
     require(value.method != Method.CONNECT && value.method != Method.QUERY) {
         "${value.id} uses ${value.method}, which Spring WebMVC cannot map"
@@ -184,7 +184,7 @@ private fun CompiledEndpoint.toModel(
                 add(WebMvcParameter(it.name, "${it.type}?", "null"))
             }
         }
-    val outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id)
+    val outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id, typeNames.responseVariants)
     val repeatedQueriesParameter =
         if (queries.any { (query, _) -> query.repeated }) uniqueKotlinName("queryParameters", usedRawNames) else null
     val acceptParameter =
@@ -197,7 +197,7 @@ private fun CompiledEndpoint.toModel(
         mappingName = mappingName,
         summary = value.documentation.summary,
         method = value.method,
-        responseName = responseName,
+        responseName = typeNames.response,
         pathTemplate = value.uri.pathTemplate(),
         paths = paths.map { it.first },
         queries = queries.map { it.first },
@@ -255,7 +255,8 @@ private fun outputs(
     outputsType: KotlinType,
     outputs: Outputs,
     endpointAccess: String,
-    endpointId: String
+    endpointId: String,
+    variantNames: List<String>
 ): List<WebMvcOutput> {
     val compiledTypes =
         if ((outputsType.classifier as? KotlinClassClassifier)?.name == "dev.akif.tapik.DefaultOutput") {
@@ -266,7 +267,6 @@ private fun outputs(
     require(compiledTypes.isEmpty() || compiledTypes.size == outputs.values.size) {
         "$endpointId compiled output types do not match its runtime outputs"
     }
-    val variantNames = mutableSetOf<String>()
     return outputs.values.mapIndexed { index, alternative ->
         val output = alternative as? Output<*, *, *>
             ?: throw IllegalArgumentException("$endpointId has unsupported output '${alternative::class.simpleName}'")
@@ -339,7 +339,7 @@ private fun outputs(
                 )
             }
         WebMvcOutput(
-            variantName = uniqueKotlinName(output.matcher.kotlinVariantName(), variantNames),
+            variantName = variantNames[index],
             statusCode = exact?.status?.code,
             definitionAccess = outputAccess,
             bodies = bodies,

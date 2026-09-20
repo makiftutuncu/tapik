@@ -2,6 +2,7 @@ package com.example.library.application
 
 import com.example.library.generated.contract.Books.BooksClient
 import com.example.library.generated.contract.Books.BooksServer
+import com.example.library.generated.contract.Books.ListResponse
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -28,7 +29,7 @@ class LibraryExampleSpec : FunSpec({
         val response = BooksHandler().list()
 
         response shouldBe
-            BooksServer.ListResponse.Ok(
+            ListResponse.Ok(
                 body =
                     listOf(
                         com.example.library.contract.Book(
@@ -54,7 +55,7 @@ class LibraryExampleSpec : FunSpec({
             )
 
         client.list() shouldBe
-            BooksClient.ListResponse.Ok(
+            ListResponse.Ok(
                 body =
                     listOf(
                         com.example.library.contract.Book(

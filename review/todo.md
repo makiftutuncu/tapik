@@ -11,7 +11,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
   - Report a startup error that identifies the generated API/handler contract and explains that no implementation bean was found.
   - Preserve the supported single-handler and primary-handler cases, and do not create duplicate controller registrations when generated classes are otherwise visible to component scanning.
 
-- [ ] Generate shared endpoint input/output types for Spring client and server targets.
+- [x] Generate shared endpoint input/output types for Spring client and server targets.
   - Specify a target-neutral ownership and naming model for generated contract types used by both the client and server.
   - Move shared request/body variants, response variants, response headers, and related endpoint types out of the generated client/server interfaces so both targets reference the same stable fully qualified types.
   - Ensure generating only the client or only the server still produces a complete, compilable result.

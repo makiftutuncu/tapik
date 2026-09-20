@@ -8,7 +8,6 @@ import dev.akif.tapik.target.spring.webmvc.webMvcNotAcceptable
 import dev.akif.tapik.target.spring.webmvc.webMvcResponse
 import dev.akif.tapik.target.spring.webmvc.webMvcUnsupportedMediaType
 import dev.akif.tapik.test.fixtures.library.AuthorId
-import dev.akif.tapik.test.fixtures.library.Book
 import dev.akif.tapik.test.fixtures.library.BookId
 import dev.akif.tapik.test.fixtures.library.Books
 import dev.akif.tapik.test.fixtures.library.CreateBook
@@ -27,12 +26,6 @@ import org.springframework.web.bind.annotation.RestController
 public interface BooksServer {
     public val booksApi: Books
 
-    public sealed interface ListResponse {
-        public data class Ok(
-            public val body: List<Book>
-        ) : ListResponse
-    }
-
     /** List books */
     public fun list(
         xRequestId: UUID,
@@ -40,26 +33,11 @@ public interface BooksServer {
         authorId: List<AuthorId>? = null
     ): ListResponse
 
-    public sealed interface GetResponse {
-        public data class Ok(
-            public val body: Book
-        ) : GetResponse
-        public data object NotFound : GetResponse
-    }
-
     /** Get a book */
     public fun get(
         bookId: BookId,
         xRequestId: UUID
     ): GetResponse
-
-    public sealed interface CreateResponse {
-        public data class Created(
-            public val body: Book,
-            public val location: String
-        ) : CreateResponse
-        public data object BadRequest : CreateResponse
-    }
 
     /** Create a book */
     public fun create(
@@ -94,7 +72,7 @@ internal class BooksGeneratedController(
             )
 
         return when (response) {
-            is BooksServer.ListResponse.Ok -> {
+            is ListResponse.Ok -> {
                 val headers = emptyMap<String, List<String>>()
                 val encodedBody =
                     when (selectResponseMediaType(accept, listOf(booksApi.list.outputs._1.bodies._1.mediaType))) {
@@ -121,7 +99,7 @@ internal class BooksGeneratedController(
             )
 
         return when (response) {
-            is BooksServer.GetResponse.Ok -> {
+            is GetResponse.Ok -> {
                 val headers = emptyMap<String, List<String>>()
                 val encodedBody =
                     when (selectResponseMediaType(accept, listOf(booksApi.get.outputs._1.bodies._1.mediaType))) {
@@ -130,7 +108,7 @@ internal class BooksGeneratedController(
                     }
                 webMvcResponse(200, headers, encodedBody)
             }
-            is BooksServer.GetResponse.NotFound -> {
+            is GetResponse.NotFound -> {
                 val headers = emptyMap<String, List<String>>()
                 val encodedBody: Pair<MediaType, ByteArray>? = null
                 webMvcResponse(404, headers, encodedBody)
@@ -158,7 +136,7 @@ internal class BooksGeneratedController(
             )
 
         return when (response) {
-            is BooksServer.CreateResponse.Created -> {
+            is CreateResponse.Created -> {
                 val headers = buildMap {
                     put("Location", listOf(booksApi.create.outputs._1.headers._1.format.encode(response.location)))
                 }
@@ -169,7 +147,7 @@ internal class BooksGeneratedController(
                     }
                 webMvcResponse(201, headers, encodedBody)
             }
-            is BooksServer.CreateResponse.BadRequest -> {
+            is CreateResponse.BadRequest -> {
                 val headers = emptyMap<String, List<String>>()
                 val encodedBody: Pair<MediaType, ByteArray>? = null
                 webMvcResponse(400, headers, encodedBody)

@@ -19,13 +19,16 @@ enum class ArtifactKind {
  * @property mediaType media type of [content].
  * @property kind role of the artifact in the host build.
  * @property content complete textual content.
+ * @property sharingKey stable identity allowing several executions to own the same path, or `null` for exclusive
+ * ownership.
  * @throws IllegalArgumentException when [relativePath] is blank, absolute, or not normalized.
  */
 data class GeneratedArtifact(
     val relativePath: String,
     val mediaType: String,
     val kind: ArtifactKind,
-    val content: String
+    val content: String,
+    val sharingKey: String? = null
 ) {
     init {
         require(relativePath.isNotBlank()) { "Generated artifact path must not be blank" }
@@ -43,6 +46,7 @@ data class GeneratedArtifact(
             "Generated artifact path must be normalized: '$relativePath'"
         }
         require(mediaType.isNotBlank()) { "Generated artifact media type must not be blank" }
+        require(sharingKey == null || sharingKey.isNotBlank()) { "Generated artifact sharing key must not be blank" }
     }
 }
 

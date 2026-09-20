@@ -38,14 +38,15 @@ Run at least `compile`:
 ./mvnw -pl example-application -am compile
 ----
 
-For `Books`, generation writes `BooksServer.kt` below the configured package and a registration descriptor below
-`META-INF/tapik/spring/webmvc/`. The Kotlin file contains the public `BooksServer` interface and internal
-`BooksGeneratedController` adapter.
+For `Books`, generation writes `BooksEndpoints.kt` and `BooksServer.kt` below the configured package and a registration
+descriptor below `META-INF/tapik/spring/webmvc/`. The first source owns the shared endpoint response types; the second
+contains the public `BooksServer` interface and internal `BooksGeneratedController` adapter.
 
 == Implement the handler
 
-The generated interface exposes the original API value, one abstract method per endpoint, and a sealed response type
-for each method. The user-owned handler deals only with decoded Kotlin inputs and typed outputs:
+The generated interface exposes the original API value and one abstract method per endpoint. Those methods return
+top-level sealed response types from the shared endpoint-types source. The user-owned handler deals only with decoded
+Kotlin inputs and typed outputs:
 
 [source,kotlin]
 ----
@@ -104,6 +105,10 @@ order.
 tapik owns the generated `Server` interface, internal controller, registration descriptor, and wire conversion. Your
 application owns handler behavior, Spring bean annotations, dependencies, persistence, transactions, authorization,
 and other application policy.
+
+RestClient and WebMVC generation for the same APIs use the same package prefix and output directory. Their shared
+endpoint types then have one physical source and one identity, allowing a handler to delegate to a generated client and
+return its response directly.
 
 The defaults are package prefix `dev.akif.tapik.generated`, suffix `Server`, and suffix `GeneratedController`; all three
 are configurable. Each API gets its own namespace under the prefix, relative to the prefix's parent package. See

@@ -225,7 +225,7 @@ Each generated file is logged at `INFO`, for example:
 
 ```text
 [INFO] --- tapik:0.6.0:generate (generate-webmvc) @ application ---
-[INFO] Generated target/generated-sources/tapik-webmvc/com/example/generated/Users/UsersServer.kt
+[INFO] Generated target/generated-sources/tapik-spring/com/example/generated/Users/UsersServer.kt
 ```
 
 If the Kotlin registry appears but no target files or tapik generation log appears, the selected command most likely
@@ -331,7 +331,7 @@ Then generate the WebMVC server before the application's Kotlin compilation:
             </goals>
             <configuration>
                 <target>spring-webmvc</target>
-                <outputDirectory>${project.build.directory}/generated-sources/tapik-webmvc</outputDirectory>
+                <outputDirectory>${project.build.directory}/generated-sources/tapik-spring</outputDirectory>
                 <targetConfiguration>
                     <packageName>com.example.library.generated</packageName>
                 </targetConfiguration>
@@ -351,8 +351,8 @@ The application can now implement the generated interface from ordinary main sou
 class BooksHandler : BooksServer {
     override val booksApi: Books = Books
 
-    override fun list(): BooksServer.ListResponse =
-        BooksServer.ListResponse.Ok(emptyList())
+    override fun list(): ListResponse =
+        ListResponse.Ok(emptyList())
 }
 ```
 
@@ -373,7 +373,7 @@ identical execution as follows:
 
 ```xml
 <target>spring-restclient</target>
-<outputDirectory>${project.build.directory}/generated-sources/tapik-restclient</outputDirectory>
+<outputDirectory>${project.build.directory}/generated-sources/tapik-spring</outputDirectory>
 <targetConfiguration>
     <packageName>com.example.library.client</packageName>
     <clientSuffix>Client</clientSuffix>
@@ -394,11 +394,15 @@ This keeps identities stable when APIs are selected separately or generated in d
 or moving the API class, or changing the package prefix or suffix, changes the generated public identity. Nested-class
 separators and other non-alphanumeric characters are escaped; see the documentation's naming policy for exact rules.
 Source output directories are added to Maven's Kotlin compile roots automatically.
+When RestClient and WebMVC are generated together with the same package prefix, configure both executions with the
+same output directory. Each target then shares the API's single `BooksEndpoints.kt` source, whose top-level response
+types can pass directly between generated clients and server handlers without mapping.
 Generated runtime registration resources are also copied into the main output when generation happens after Maven's
 normal resources phase.
 
 The RestClient target generates composable client interfaces backed by `RestClientTransport`. The WebMVC target
-generates public interfaces containing only typed handler methods and response types. It also generates internal Spring
+generates public interfaces containing only typed handler methods. Both reference target-neutral endpoint response and
+request-body types generated beside them. WebMVC also generates internal Spring
 adapters that Boot registers automatically when exactly one matching handler bean is available, including a primary
 bean among multiple candidates. Startup fails with the generated contract identity when a handler is missing or remains
 ambiguous. A user supplies an ordinary `@Bean` or component implementing the generated interface; no `@RestController`

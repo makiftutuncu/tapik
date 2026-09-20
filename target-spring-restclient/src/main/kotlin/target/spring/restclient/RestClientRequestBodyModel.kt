@@ -11,7 +11,6 @@ import dev.akif.tapik.common.plugin.argument
 import dev.akif.tapik.common.plugin.toKotlinSourceType
 import dev.akif.tapik.common.plugin.tupleElements
 import dev.akif.tapik.common.plugin.uniqueKotlinName
-import dev.akif.tapik.common.plugin.upperCamel
 
 internal data class RestClientRequestBodyModel(
     val parameterName: String,
@@ -34,8 +33,8 @@ internal fun restClientRequestBody(
     endpointAccess: String,
     endpointId: String,
     parameterNames: MutableSet<String>,
-    requestedTypeName: String,
-    nestedTypeNames: MutableSet<String>
+    choiceTypeName: String?,
+    variantNames: List<String>
 ): RestClientRequestBodyModel? {
     if (input is NoInput) return null
     require(input is BodyInput<*>) { "$endpointId has unsupported input '${input::class.simpleName}'" }
@@ -54,16 +53,10 @@ internal fun restClientRequestBody(
     require(valueTypes.distinct().size == 1) {
         "$endpointId request body representations must encode one value type"
     }
-    val variantNames = mutableSetOf<String>()
     val alternatives =
-        encoded.map { (index, alternative) ->
-            val body = alternative as Body<*>
+        encoded.mapIndexed { variantIndex, (index, _) ->
             RestClientRequestBodyAlternative(
-                variantName =
-                    uniqueKotlinName(
-                        body.mediaType.value.substringBefore(';').substringAfter('/').upperCamel(),
-                        variantNames
-                    ),
+                variantName = variantNames[variantIndex],
                 definitionAccess = "$endpointAccess.input.bodies._${index + 1}"
             )
         }
@@ -71,10 +64,7 @@ internal fun restClientRequestBody(
         parameterName = uniqueKotlinName("body", parameterNames),
         valueType = valueTypes.first(),
         alternatives = alternatives,
-        choiceTypeName =
-            requestedTypeName
-                .takeIf { alternatives.size > 1 }
-                ?.let { name -> uniqueKotlinName(name, nestedTypeNames) },
+        choiceTypeName = choiceTypeName,
         optional = input.bodies.values.any { alternative -> alternative is NoBody }
     )
 }

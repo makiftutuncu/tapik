@@ -13,15 +13,17 @@ internal data class KotlinSourceCompilation(
     val outputDirectory: Path
 )
 
-internal fun compileKotlin(sourceText: String): KotlinSourceCompilation {
+internal fun compileKotlin(vararg sourceTexts: String): KotlinSourceCompilation {
     val workspace = Files.createTempDirectory("tapik-restclient-source-").apply { toFile().deleteOnExit() }
-    val source = workspace.resolve("GeneratedClient.kt").apply { Files.writeString(this, sourceText) }
+    val sources = sourceTexts.mapIndexed { index, sourceText ->
+        workspace.resolve("Generated$index.kt").apply { Files.writeString(this, sourceText) }
+    }
     val output = Files.createDirectories(workspace.resolve("classes"))
     val compilerOutput = ByteArrayOutputStream()
     val exitCode =
         K2JVMCompiler().exec(
             PrintStream(compilerOutput),
-            source.toString(),
+            *sources.map(Path::toString).toTypedArray(),
             "-d",
             output.toString(),
             "-classpath",

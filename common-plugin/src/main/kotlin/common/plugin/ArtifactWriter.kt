@@ -42,9 +42,9 @@ object ArtifactWriter {
             path
         }
         val ownership = ArtifactOwnership(root)
-        val previousPaths = ownership.claimedPaths(owner, result.artifacts.map(GeneratedArtifact::relativePath))
+        val previousPaths = ownership.claimedPaths(owner, result.artifacts)
         val currentPaths = result.artifacts.mapTo(linkedSetOf(), GeneratedArtifact::relativePath)
-        val stalePaths = previousPaths - currentPaths
+        val stalePaths = ownership.pathsNotClaimedByOthers(owner, previousPaths - currentPaths)
 
         Files.createDirectories(root)
         val staging = Files.createTempDirectory(root, ".tapik-stage-")
@@ -60,7 +60,7 @@ object ArtifactWriter {
                 Files.createDirectories(requireNotNull(path.parent))
                 moveReplacing(staging.resolve(artifact.relativePath), path)
             }
-            ownership.update(owner, currentPaths)
+            ownership.update(owner, result.artifacts)
         } finally {
             deleteRecursively(staging)
         }

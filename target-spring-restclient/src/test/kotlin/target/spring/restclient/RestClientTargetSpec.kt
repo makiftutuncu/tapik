@@ -7,6 +7,7 @@ import dev.akif.tapik.test.fixtures.library.Rentals
 import dev.akif.tapik.test.fixtures.library.Library
 import dev.akif.tapik.common.plugin.ArtifactKind
 import dev.akif.tapik.common.plugin.GenerationRequest
+import dev.akif.tapik.common.plugin.GenerationResult
 import dev.akif.tapik.common.plugin.targetConfigurationOf
 import io.kotest.assertions.withClue
 import io.kotest.assertions.throwables.shouldThrow
@@ -29,12 +30,15 @@ class RestClientTargetSpec : FunSpec({
 
         result.artifacts.map { it.relativePath } shouldContainExactly
             listOf(
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Books/BooksClient.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsClient.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsClient.kt"
             )
-        result.artifacts.forEach { artifact ->
-            val compilation = compileKotlin(artifact.content)
+        result.artifacts.chunked(2).forEach { artifacts ->
+            val compilation = compileKotlin(*artifacts.map { artifact -> artifact.content }.toTypedArray())
             withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
         }
     }
@@ -53,22 +57,20 @@ class RestClientTargetSpec : FunSpec({
                 )
             )
 
-        result.artifacts.single().run {
+        result.artifacts.single { artifact -> artifact.relativePath.endsWith("BooksClient.kt") }.run {
             relativePath shouldBe "dev/akif/tapik/generated/test/fixtures/library/Books/BooksClient.kt"
             mediaType shouldBe "text/x-kotlin"
             kind shouldBe ArtifactKind.SOURCE
             content shouldBe expected
-            val compilation = compileKotlin(content)
-            withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
         }
+        result.artifacts.single { artifact -> artifact.relativePath.endsWith("BooksEndpoints.kt") }.sharingKey shouldBe
+            "endpoint-types:dev.akif.tapik.generated.test.fixtures.library.Books:Books"
+        result.shouldCompile()
     }
 
     test("generate nested endpoint access and names for a composed API") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(Library)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(Library)))
+        val source = result.generatedSource()
 
         source shouldContain "public fun authorsList("
         source shouldContain "public sealed interface AuthorsListResponse"
@@ -77,58 +79,42 @@ class RestClientTargetSpec : FunSpec({
         source shouldContain "val endpoint = libraryApi.books.list"
         source shouldContain "public fun rentalsReturnBook("
         source shouldContain "val endpoint = libraryApi.rentals.returnBook"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("generate content equality for aliased ByteArray response fields") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(BinaryDownloads)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(BinaryDownloads)))
+        val source = result.generatedSource()
 
         source shouldContain "import dev.akif.tapik.target.spring.restclient.BinaryContent"
         source shouldContain "body: BinaryContent"
         source shouldContain "body.contentEquals(other.body)"
         source shouldContain "body.contentHashCode()"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("validate fixed response headers without exposing response fields") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(FixedResponses)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(FixedResponses)))
+        val source = result.generatedSource()
 
         source shouldContain "public data object Ok : CheckResponse"
         source shouldContain "requireFixedResponseHeader("
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("generate uniform response body conformance checks") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(ResponseConformance)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(ResponseConformance)))
+        val source = result.generatedSource()
 
         source shouldContain "selectResponseBodyMediaType("
         source shouldContain "offered = emptyList()"
         source shouldContain "offered = listOf("
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("make a request body representation explicit when an input has multiple media types") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(RequestBodyAlternatives)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(RequestBodyAlternatives)))
+        val source = result.generatedSource()
 
         source shouldContain "public sealed interface SendRequestBody"
         source shouldContain "public data class Json("
@@ -148,16 +134,12 @@ class RestClientTargetSpec : FunSpec({
         source shouldNotContain "body: SendRequiredRequestBody? = null"
         source shouldContain "when (body) {"
         source shouldContain "requestBodyAlternativesApi.sendRequired.input.bodies._1.format.encode(body.body)"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("generate responses for every status matcher") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientStatusMatchers)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientStatusMatchers)))
+        val source = result.generatedSource()
 
         source shouldContain "public data class OkOrCreated("
         source shouldContain "public data class Status400To499("
@@ -166,16 +148,12 @@ class RestClientTargetSpec : FunSpec({
         source shouldContain "OkOrCreated(response.status)"
         source shouldContain "Status400To499(response.status)"
         source shouldContain "SuccessfulExtensionStatus(response.status)"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("append a remaining path as individually encoded segments") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientRemainingPaths)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientRemainingPaths)))
+        val source = result.generatedSource()
 
         source shouldContain "path: List<String>"
         source shouldContain "restClientUri("
@@ -183,16 +161,12 @@ class RestClientTargetSpec : FunSpec({
         source shouldContain
             "\"path\" to restClientRemainingPathsApi.download.uri.paths._2.format.encode(path)"
         source shouldNotContain "{*path}"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("disambiguate generated declarations and preserve endpoint property names") {
-        val source =
-            RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientNamingCollisions)))
-                .artifacts
-                .single()
-                .content
+        val result = RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientNamingCollisions)))
+        val source = result.generatedSource()
 
         source shouldContain "restClientNamingCollisionsApi.`find-book`"
         source shouldContain "public fun findBook(): FindBookResponse"
@@ -200,8 +174,7 @@ class RestClientTargetSpec : FunSpec({
         source shouldContain "public fun decodeResponseBody(): DecodeResponseBodyResponse"
         source shouldNotContain "public fun decodeResponseBody2("
         source shouldNotContain "private fun <Value : Any> decodeResponseBody("
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("reject repeated API classes without allocating another public identity") {
@@ -224,19 +197,29 @@ class RestClientTargetSpec : FunSpec({
 
         result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
+                "dev/akif/tapik/generated/target/spring/restclient/RestClientNamespace1_0024Catalog/CatalogEndpoints.kt",
                 "dev/akif/tapik/generated/target/spring/restclient/RestClientNamespace1_0024Catalog/CatalogClient.kt",
+                "dev/akif/tapik/generated/target/spring/restclient/RestClientNamespace2_0024Catalog/CatalogEndpoints.kt",
                 "dev/akif/tapik/generated/target/spring/restclient/RestClientNamespace2_0024Catalog/CatalogClient.kt"
             )
-        result.artifacts.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
+        result.artifacts.filter { artifact -> artifact.relativePath.endsWith("Client.kt") }
+            .map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
             listOf("CatalogClient", "CatalogClient")
         result.artifacts shouldBe firstArtifacts + secondArtifacts
         RestClientTarget.generate(GenerationRequest(listOf(second, first))).artifacts shouldBe secondArtifacts + firstArtifacts
-        result.artifacts.forEach { artifact ->
-            val compilation = compileKotlin(artifact.content)
+        result.artifacts.chunked(2).forEach { artifacts ->
+            val compilation = compileKotlin(*artifacts.map { artifact -> artifact.content }.toTypedArray())
             withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
         }
     }
 })
+
+private fun GenerationResult.generatedSource(): String = artifacts.joinToString("\n") { artifact -> artifact.content }
+
+private fun GenerationResult.shouldCompile() {
+    val compilation = compileKotlin(*artifacts.map { artifact -> artifact.content }.toTypedArray())
+    withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+}
 
 public typealias BinaryContent = ByteArray
 

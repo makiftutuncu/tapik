@@ -26,8 +26,9 @@ Build and test the complete example from the repository root:
 The build verifies these generated artifacts:
 
 - `example-application/target/generated/tapik/Books.openapi.yml`
-- `example-application/target/generated-sources/tapik-restclient/com/example/library/generated/contract/Books/BooksClient.kt`
-- `example-application/target/generated-sources/tapik-webmvc/com/example/library/generated/contract/Books/BooksServer.kt`
+- `example-application/target/generated-sources/tapik-spring/com/example/library/generated/contract/Books/BooksEndpoints.kt`
+- `example-application/target/generated-sources/tapik-spring/com/example/library/generated/contract/Books/BooksClient.kt`
+- `example-application/target/generated-sources/tapik-spring/com/example/library/generated/contract/Books/BooksServer.kt`
 
 The contract's same-module document is generated at `example-contract/target/generated/tapik/Books.openapi.yml`.
 
@@ -47,5 +48,7 @@ curl http://localhost:8080/books
 auto-configuration and delegates the decoded request to that handler. `BooksRestClient` implements the generated client
 interface with a `RestClientTransport`; set `library.books.base-url` to choose its remote server. The example test sends
 a real generated-client exchange through Spring's mock HTTP server and verifies Jackson decoding into `Book` values.
+Both Spring target executions share `BooksEndpoints.kt`, so a generated server implementation can delegate to the
+generated client and return its response without converting between target-specific types.
 The application selects Boot's dedicated WebMVC and RestClient starters so both generated integrations are
 auto-configurable at runtime.

@@ -7,7 +7,6 @@ import dev.akif.tapik.target.spring.restclient.decodeResponseHeader
 import dev.akif.tapik.target.spring.restclient.restClientUri
 import dev.akif.tapik.target.spring.restclient.selectResponseBodyMediaType
 import dev.akif.tapik.test.fixtures.library.AuthorId
-import dev.akif.tapik.test.fixtures.library.Book
 import dev.akif.tapik.test.fixtures.library.BookId
 import dev.akif.tapik.test.fixtures.library.Books
 import dev.akif.tapik.test.fixtures.library.CreateBook
@@ -17,12 +16,6 @@ public interface BooksClient {
     public val booksApi: Books
 
     public val restClientTransport: RestClientTransport
-
-    public sealed interface ListResponse {
-        public data class Ok(
-            public val body: List<Book>
-        ) : ListResponse
-    }
 
     /** List books */
     public fun list(
@@ -58,13 +51,6 @@ public interface BooksClient {
             }
             else -> error("Unexpected status ${response.status.code} for Books.list")
         }
-    }
-
-    public sealed interface GetResponse {
-        public data class Ok(
-            public val body: Book
-        ) : GetResponse
-        public data object NotFound : GetResponse
     }
 
     /** Get a book */
@@ -103,14 +89,6 @@ public interface BooksClient {
             }
             else -> error("Unexpected status ${response.status.code} for Books.get")
         }
-    }
-
-    public sealed interface CreateResponse {
-        public data class Created(
-            public val body: Book,
-            public val location: String
-        ) : CreateResponse
-        public data object BadRequest : CreateResponse
     }
 
     /** Create a book */

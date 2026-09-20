@@ -47,8 +47,6 @@ internal class WebMvcGenerator(
             appendLine("    public val ${model.apiProperty}: ${model.apiType}")
             model.endpoints.forEach { endpoint ->
                 appendLine()
-                appendResponses(endpoint)
-                appendLine()
                 appendHandler(endpoint)
             }
             appendLine("}")
@@ -61,7 +59,7 @@ internal class WebMvcGenerator(
             appendLine("        get() = handler.${model.apiProperty}")
             model.endpoints.forEach { endpoint ->
                 appendLine()
-                appendMapping(endpoint, model.serverName)
+                appendMapping(endpoint)
             }
             append('}')
         }.optimizeKotlinImports(model.packageName)
@@ -83,10 +81,7 @@ private fun StringBuilder.appendHandler(endpoint: WebMvcEndpointModel) {
     appendLine("    ): ${endpoint.responseName}")
 }
 
-private fun StringBuilder.appendMapping(
-    endpoint: WebMvcEndpointModel,
-    serverName: String
-) {
+private fun StringBuilder.appendMapping(endpoint: WebMvcEndpointModel) {
     appendLine("    ${endpoint.mappingAnnotation()}")
     val parameters = endpoint.mappingParameters()
     if (parameters.isEmpty()) {
@@ -130,7 +125,7 @@ private fun StringBuilder.appendMapping(
     }
     appendLine()
     appendLine("        return when (response) {")
-    endpoint.outputs.forEach { output -> appendEncodedOutput(endpoint, output, serverName) }
+    endpoint.outputs.forEach { output -> appendEncodedOutput(endpoint, output) }
     appendLine("        }")
     appendLine("    }")
 }
@@ -297,10 +292,9 @@ private fun StringBuilder.appendBodySelection(
 
 private fun StringBuilder.appendEncodedOutput(
     endpoint: WebMvcEndpointModel,
-    output: WebMvcOutput,
-    serverName: String
+    output: WebMvcOutput
 ) {
-    appendLine("            is $serverName.${endpoint.responseName}.${output.variantName} -> {")
+    appendLine("            is ${endpoint.responseName}.${output.variantName} -> {")
     if (output.statusCode == null) {
         appendLine("                require(${output.definitionAccess}.matcher.matches(response.status)) {")
         appendLine(

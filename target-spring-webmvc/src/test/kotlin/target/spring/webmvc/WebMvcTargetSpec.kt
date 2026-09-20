@@ -7,6 +7,7 @@ import dev.akif.tapik.test.fixtures.library.Rentals
 import dev.akif.tapik.test.fixtures.library.Library
 import dev.akif.tapik.common.plugin.ArtifactKind
 import dev.akif.tapik.common.plugin.GenerationRequest
+import dev.akif.tapik.common.plugin.GenerationResult
 import dev.akif.tapik.common.plugin.targetConfigurationOf
 import io.kotest.assertions.withClue
 import io.kotest.assertions.throwables.shouldThrow
@@ -30,15 +31,18 @@ class WebMvcTargetSpec : FunSpec({
 
         result.artifacts.map { it.relativePath } shouldContainExactly
             listOf(
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt",
                 "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Books.BooksGeneratedController.properties",
+                "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsServer.kt",
                 "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Authors.AuthorsGeneratedController.properties",
+                "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsServer.kt",
                 "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Rentals.RentalsGeneratedController.properties"
             )
-        result.artifacts.filter { it.kind == ArtifactKind.SOURCE }.forEach { artifact ->
-            val compilation = compileKotlin(artifact.content)
+        result.artifacts.chunked(3).forEach { artifacts ->
+            val compilation = compileKotlin(*artifacts.filter { it.kind == ArtifactKind.SOURCE }.map { it.content }.toTypedArray())
             withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
         }
     }
@@ -54,11 +58,12 @@ class WebMvcTargetSpec : FunSpec({
 
         result.artifacts.map { artifact -> artifact.relativePath to artifact.kind } shouldContainExactly
             listOf(
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksEndpoints.kt" to ArtifactKind.SOURCE,
                 "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt" to ArtifactKind.SOURCE,
                 "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Books.BooksGeneratedController.properties" to
                     ArtifactKind.RESOURCE
             )
-        val source = result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content
+        val source = result.generatedSource()
         val handler =
             source
                 .substringAfter("public interface BooksServer")
@@ -90,10 +95,11 @@ class WebMvcTargetSpec : FunSpec({
 
         result.artifacts.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Books/BooksContract.kt",
                 "META-INF/tapik/spring/webmvc/dev.akif.tapik.generated.test.fixtures.library.Books.BooksSpringController.properties"
             )
-        result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.content.run {
+        result.generatedSource().run {
             shouldContain("public interface BooksContract")
             shouldContain("internal class BooksSpringController(")
         }
@@ -113,12 +119,10 @@ class WebMvcTargetSpec : FunSpec({
                 )
             )
 
-        result.artifacts.single { artifact -> artifact.kind == ArtifactKind.SOURCE }.run {
+        result.artifacts.single { artifact -> artifact.relativePath.endsWith("BooksServer.kt") }.run {
             relativePath shouldBe "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt"
             mediaType shouldBe "text/x-kotlin"
             kind shouldBe ArtifactKind.SOURCE
-            val compilation = compileKotlin(content)
-            withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
             content shouldBe expected
             content shouldContain
                 "@RequestParam queryParameters: MultiValueMap<String, String>"
@@ -126,14 +130,12 @@ class WebMvcTargetSpec : FunSpec({
             content shouldNotContain
                 "@RequestParam(name = \"authorId\""
         }
+        result.shouldCompile()
     }
 
     test("generate nested endpoint access and names for a composed API") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(Library)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(Library)))
+        val source = result.generatedSource()
 
         source shouldContain "public fun authorsList("
         source shouldContain "public sealed interface AuthorsListResponse"
@@ -142,42 +144,30 @@ class WebMvcTargetSpec : FunSpec({
         source shouldContain "libraryApi.books.list"
         source shouldContain "public fun rentalsReturnBook("
         source shouldContain "libraryApi.rentals.returnBook"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("keep endpoint access intact when an optional parameter raw name overlaps it") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRawEndpointAccess)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRawEndpointAccess)))
+        val source = result.generatedSource()
 
         source shouldContain
             "pageRaw?.let { raw -> decodeRequest(webMvcRawEndpointAccessApi.pageRaw.uri.queries._1.format, raw, \"WebMvcRawEndpointAccess.pageRaw query page\") }"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("keep inclusion access intact when an optional parameter raw name overlaps it") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRawInclusionAccess)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRawInclusionAccess)))
+        val source = result.generatedSource()
 
         source shouldContain
             "pageRaw?.let { raw -> decodeRequest(webMvcRawInclusionAccessApi.pageRaw.list.uri.queries._1.format, raw, \"WebMvcRawIncluded.list query page\") }"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("preserve every request and response body representation") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(BodyAlternatives)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(BodyAlternatives)))
+        val source = result.generatedSource()
 
         source shouldContain "consumes = [\"application/json\", \"application/xml\"]"
         source shouldContain
@@ -191,16 +181,12 @@ class WebMvcTargetSpec : FunSpec({
         source shouldContain "public fun optionalEcho("
         source shouldContain "body: String? = null"
 
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("negotiate the body of the selected output") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(StatusBodyAlternatives)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(StatusBodyAlternatives)))
+        val source = result.generatedSource()
 
         source shouldContain
             "selectResponseMediaType(accept, listOf(statusBodyAlternativesApi.find.outputs._1.bodies._1.mediaType))"
@@ -208,31 +194,23 @@ class WebMvcTargetSpec : FunSpec({
             "selectResponseMediaType(accept, listOf(statusBodyAlternativesApi.find.outputs._2.bodies._1.mediaType))"
         source shouldContain "@GetMapping(path = [\"/optional\"])"
 
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("apply endpoint defaults when response headers are omitted") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(DefaultResponseHeaders)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(DefaultResponseHeaders)))
+        val source = result.generatedSource()
 
         source shouldContain "public val retryAfter: Int? = null"
         source shouldContain
             "response.retryAfter ?: defaultResponseHeadersApi.poll.outputs._1.headers._1.presence.value"
 
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("generate responses for every status matcher") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcStatusMatchers)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcStatusMatchers)))
+        val source = result.generatedSource()
 
         source shouldContain "public data class OkOrCreated("
         source shouldContain "public data class Status400To499("
@@ -241,24 +219,19 @@ class WebMvcTargetSpec : FunSpec({
         source shouldContain
             "require(webMvcStatusMatchersApi.selected.outputs._1.matcher.matches(response.status))"
         source shouldContain "webMvcResponse(response.status.code, headers, encodedBody)"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("decode a terminal Spring remaining-path mapping") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRemainingPaths)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcRemainingPaths)))
+        val source = result.generatedSource()
 
         source shouldContain "path: List<String>"
         source shouldContain "@GetMapping(path = [\"/files/{ownerId}/{*path}\"])"
         source shouldContain "@PathVariable(name = \"path\") pathRaw: String"
         source shouldContain
             "decodeRequest(webMvcRemainingPathsApi.download.uri.paths._2.format, pathRaw, \"WebMvcRemainingPaths.download path path\")"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("reject response headers owned by Spring WebMVC") {
@@ -275,30 +248,22 @@ class WebMvcTargetSpec : FunSpec({
     }
 
     test("preserve Content-Type on bodyless responses") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(BodylessContentTypeResponse)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(BodylessContentTypeResponse)))
+        val source = result.generatedSource()
 
         source shouldContain "put(\"Content-Type\", listOf("
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("generate content equality for aliased ByteArray response fields") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(BinaryResponses)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(BinaryResponses)))
+        val source = result.generatedSource()
 
         source shouldContain "import dev.akif.tapik.target.spring.webmvc.BinaryContent"
         source shouldContain "body: BinaryContent"
         source shouldContain "body.contentEquals(other.body)"
         source shouldContain "body.contentHashCode()"
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("reject methods Spring WebMVC cannot map") {
@@ -312,11 +277,8 @@ class WebMvcTargetSpec : FunSpec({
     }
 
     test("disambiguate handlers mappings responses and endpoint property names") {
-        val source =
-            WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcNamingCollisions)))
-                .artifacts
-                .single { artifact -> artifact.kind == ArtifactKind.SOURCE }
-                .content
+        val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcNamingCollisions)))
+        val source = result.generatedSource()
 
         source shouldContain "webMvcNamingCollisionsApi.`find-book`"
         source shouldContain "public fun findBook("
@@ -327,8 +289,7 @@ class WebMvcTargetSpec : FunSpec({
         source shouldNotContain "public fun decodeRequest2("
         source shouldNotContain "private fun <Value : Any> decodeRequest("
         source shouldNotContain "public fun findBookHttp2("
-        val compilation = compileKotlin(source)
-        withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+        result.shouldCompile()
     }
 
     test("reject repeated API classes and equal top-level suffixes") {
@@ -357,16 +318,19 @@ class WebMvcTargetSpec : FunSpec({
         val sources = result.artifacts.filter { artifact -> artifact.kind == ArtifactKind.SOURCE }
         sources.map { artifact -> artifact.relativePath } shouldContainExactly
             listOf(
+                "dev/akif/tapik/generated/target/spring/webmvc/WebMvcNamespace1_0024Catalog/CatalogEndpoints.kt",
                 "dev/akif/tapik/generated/target/spring/webmvc/WebMvcNamespace1_0024Catalog/CatalogServer.kt",
+                "dev/akif/tapik/generated/target/spring/webmvc/WebMvcNamespace2_0024Catalog/CatalogEndpoints.kt",
                 "dev/akif/tapik/generated/target/spring/webmvc/WebMvcNamespace2_0024Catalog/CatalogServer.kt"
             )
-        sources.map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
+        sources.filter { artifact -> artifact.relativePath.endsWith("Server.kt") }
+            .map { artifact -> artifact.content.substringBefore(" {").substringAfterLast(' ') } shouldContainExactly
             listOf("CatalogServer", "CatalogServer")
         result.artifacts shouldBe firstArtifacts + secondArtifacts
         WebMvcTarget.generate(GenerationRequest(listOf(second, first))).artifacts shouldBe secondArtifacts + firstArtifacts
-        result.artifacts.map { it.relativePath }.toSet().size shouldBe 4
-        val compilations = sources.map { artifact ->
-            compileKotlin(artifact.content).also { compilation ->
+        result.artifacts.map { it.relativePath }.toSet().size shouldBe 6
+        val compilations = result.artifacts.chunked(3).map { artifacts ->
+            compileKotlin(*artifacts.filter { it.kind == ArtifactKind.SOURCE }.map { it.content }.toTypedArray()).also { compilation ->
                 withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
             }
         }
@@ -385,6 +349,19 @@ class WebMvcTargetSpec : FunSpec({
         }
     }
 })
+
+private fun GenerationResult.generatedSource(): String =
+    artifacts.filter { artifact -> artifact.kind == ArtifactKind.SOURCE }
+        .joinToString("\n") { artifact -> artifact.content }
+
+private fun GenerationResult.shouldCompile() {
+    val compilation = compileKotlin(
+        *artifacts.filter { artifact -> artifact.kind == ArtifactKind.SOURCE }
+            .map { artifact -> artifact.content }
+            .toTypedArray()
+    )
+    withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
+}
 
 public typealias BinaryContent = ByteArray
 

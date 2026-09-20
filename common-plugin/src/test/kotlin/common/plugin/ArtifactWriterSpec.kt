@@ -91,6 +91,50 @@ class ArtifactWriterSpec : FunSpec({
         Files.readString(output.resolve("Client.kt")) shouldBe "class FirstClient"
     }
 
+    test("share an explicitly identified artifact between executions") {
+        val output = Files.createTempDirectory("tapik-artifacts-").apply { toFile().deleteOnExit() }
+        fun shared(content: String) =
+            GenerationResult(
+                listOf(
+                    GeneratedArtifact(
+                        "BooksEndpoints.kt",
+                        "text/x-kotlin",
+                        ArtifactKind.SOURCE,
+                        content,
+                        sharingKey = "endpoint-types:books"
+                    )
+                )
+            )
+
+        ArtifactWriter.write(shared("sealed interface ListResponse"), output, owner = "rest-client")
+        ArtifactWriter.write(shared("sealed interface ListResponse"), output, owner = "webmvc")
+        ArtifactWriter.write(shared("sealed interface UpdatedListResponse"), output, owner = "rest-client")
+        ArtifactWriter.write(shared("sealed interface UpdatedListResponse"), output, owner = "webmvc")
+        ArtifactWriter.write(GenerationResult(emptyList()), output, owner = "rest-client")
+
+        Files.readString(output.resolve("BooksEndpoints.kt")) shouldBe "sealed interface UpdatedListResponse"
+
+        ArtifactWriter.write(GenerationResult(emptyList()), output, owner = "webmvc")
+
+        Files.exists(output.resolve("BooksEndpoints.kt")) shouldBe false
+    }
+
+    test("reject different sharing identities for the same path") {
+        val output = Files.createTempDirectory("tapik-artifacts-").apply { toFile().deleteOnExit() }
+        fun shared(key: String) =
+            GenerationResult(
+                listOf(
+                    GeneratedArtifact("Shared.kt", "text/x-kotlin", ArtifactKind.SOURCE, "class Shared", key)
+                )
+            )
+
+        ArtifactWriter.write(shared("first"), output, owner = "first")
+
+        shouldThrow<IllegalStateException> {
+            ArtifactWriter.write(shared("second"), output, owner = "second")
+        }
+    }
+
     test("reject unowned generated paths before changing output or ownership") {
         val output = Files.createTempDirectory("tapik-artifacts-").apply { toFile().deleteOnExit() }
         val previous =

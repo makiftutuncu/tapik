@@ -1,23 +1,5 @@
 package dev.akif.tapik.target.spring.restclient
 
-import dev.akif.tapik.common.plugin.KotlinDataField
-import dev.akif.tapik.common.plugin.KotlinSealedVariant
-import dev.akif.tapik.common.plugin.appendSealedInterface
-
-internal fun StringBuilder.appendRequestBodyType(body: RestClientRequestBodyModel) {
-    appendSealedInterface(
-        name = requireNotNull(body.choiceTypeName),
-        variants =
-            body.alternatives.map { alternative ->
-                KotlinSealedVariant(
-                    name = alternative.variantName,
-                    fields = listOf(KotlinDataField("body", body.valueType))
-                )
-            },
-        indentation = "    "
-    )
-}
-
 internal fun StringBuilder.appendRequestBodyArgument(body: RestClientRequestBodyModel?) {
     when {
         body == null -> append("                body = null")

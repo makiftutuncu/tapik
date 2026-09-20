@@ -43,8 +43,8 @@ produce unique paths or generation fails.
 
 Target ID: `spring-restclient`
 
-The target produces one Kotlin `SOURCE` artifact per selected API. The tested application binds it to
-`generate-sources` and chooses a dedicated output directory:
+The target produces a client source and a shared endpoint-types `SOURCE` artifact per selected API. The tested
+application binds it to `generate-sources` and chooses the same Spring output directory used by WebMVC:
 
 [source,xml]
 ----
@@ -65,7 +65,7 @@ include::example$application/pom.xml[tag=restclient-execution]
 |===
 
 With the example configuration, generated sources begin below
-`target/generated-sources/tapik-restclient/com/example/library/generated/`.
+`target/generated-sources/tapik-spring/com/example/library/generated/`.
 
 == Spring WebMVC
 
@@ -97,8 +97,11 @@ include::example$application/pom.xml[tag=webmvc-execution]
 |===
 
 With the example configuration, Kotlin sources begin below
-`target/generated-sources/tapik-webmvc/com/example/library/generated/`. Registration descriptors use
+`target/generated-sources/tapik-spring/com/example/library/generated/`. Registration descriptors use
 `META-INF/tapik/spring/webmvc/` beneath the execution output and are packaged as runtime resources by the Maven host.
+
+When both Spring targets use the same `packageName`, they must also use the same output directory. Both executions then
+claim one shareable `BooksEndpoints.kt` path instead of placing duplicate declarations on separate compile roots.
 
 == Naming and collisions
 
@@ -106,6 +109,8 @@ Spring targets keep readable simple names such as `BooksClient` and `BooksServer
 under `packageName`, derived from its JVM class name relative to the configured package's parent, not `Api.id`.
 For API `com.example.library.contract.Authors` and `packageName` set to `com.example.library.generated`, import
 `com.example.library.generated.contract.Authors.AuthorsServer`: the shared `com.example.library` root appears only once.
+Endpoint response types and multi-representation request-body types are top-level declarations in that namespace and
+have the same fully qualified names regardless of which Spring targets are selected.
 
 The source root is fixed by the configuration, never inferred from selected APIs. APIs outside that root retain their
 full class identity beneath a reserved `_external` namespace, so external `contract.Authors` cannot collide with local

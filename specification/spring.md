@@ -9,6 +9,30 @@ them.
 
 ## RestClient transport
 
+### Shared generated endpoint types
+
+Every generated Spring API namespace contains one target-neutral endpoint-types source named from the API type with an
+`Endpoints` suffix. For example, the namespace for `Books` contains `BooksEndpoints.kt`; its public response and
+multi-representation request-body types are top-level declarations whose names are allocated from endpoint inclusion
+paths and declaration order. Their fully qualified names depend only on the API binary name, configured package prefix,
+and endpoint declarations. They never depend on whether client generation, server generation, or both are selected, or
+on configurable client, server, and controller suffixes.
+
+Spring RestClient methods and WebMVC handler methods reference these shared response types directly. A handler may
+therefore delegate to a generated client and return the client's result without mapping. Request-body choice types are
+also emitted in the shared source even when only WebMVC is selected, so selecting another target later does not change
+type ownership or identity. Each target remains independently complete and emits the shared source when selected alone.
+
+Generated artifacts may declare a stable sharing key when their content is intentionally owned by several target
+executions. The host writer permits the same path only when every owner declares the same nonblank sharing key, retains
+the file while at least one owner still claims it, and continues to reject ordinary cross-execution path collisions.
+The shared endpoint-types artifact uses its stable generated package and API identity as that key. Spring targets use
+one common generated-sources output directory when configured together, so the shared artifact has one physical path
+and both executions claim it without duplicate compiled declarations. In same-module or direct generation, the Maven
+host likewise co-owns byte-identical compiled classes; an execution that already owns a shared class may refresh it,
+and the class is removed only after every execution releases it. A new cross-execution class collision with different
+bytes remains an error.
+
 `tapik-target-spring-restclient` executes already-resolved requests with Spring `RestClient`. The transport accepts a
 tapik method, a Spring URI builder function, encoded headers, and an optional encoded body. It returns the raw tapik
 status, headers, media type, and bytes for every HTTP response, including error statuses.
@@ -24,10 +48,10 @@ Kotlin type to perform those operations and fail generation when an endpoint fea
 
 ## RestClient generation target
 
-The `spring-restclient` target generates one Kotlin interface for each selected API. Interfaces share a
+The `spring-restclient` target generates one Kotlin interface and one shared endpoint-types source for each selected API. Interfaces share a
 `restClientTransport` property so one implementation may compose multiple API clients, and each interface exposes a
-uniquely named property for its concrete API value. Every endpoint becomes a default interface method and a nested
-sealed response type. Output alternatives become response variants in declaration order. Exact variants imply their
+uniquely named property for its concrete API value. Every endpoint becomes a default interface method returning its
+shared sealed response type. Output alternatives become response variants in declaration order. Exact variants imply their
 status, while set, range, and custom variants carry the actual response `Status` selected by the runtime matcher.
 
 Generated response data classes containing byte-array fields compare those fields by content and derive their hash
@@ -114,7 +138,7 @@ identity and is a source/binary compatibility change. This policy itself is a co
 
 Local generated declaration names are allocated deterministically in endpoint and output declaration order. A
 normalized name collision keeps the first name unchanged and appends `2`, `3`, and so on to later declarations.
-Endpoint functions and nested response types use separate namespaces. Original endpoint properties are accessed with their actual Kotlin
+Endpoint functions and shared endpoint types use separate namespaces. Original endpoint properties are accessed with their actual Kotlin
 names, including backtick-escaped names.
 
 For a composed API, generated clients retain one property for the selected root API and follow each endpoint's
@@ -128,9 +152,9 @@ Spring's mock HTTP server.
 
 ## WebMVC generation target
 
-The `spring-webmvc` target generates one public Kotlin handler interface and one internal Spring adapter for each
-selected API. The handler interface exposes a uniquely named property for the concrete API value, a typed abstract
-handler method for every endpoint, and nested sealed response types. It contains no Spring mapping annotations, raw
+The `spring-webmvc` target generates one public Kotlin handler interface, one internal Spring adapter, and one shared
+endpoint-types source for each selected API. The handler interface exposes a uniquely named property for the concrete
+API value and a typed abstract handler method returning the corresponding shared response type for every endpoint. It contains no Spring mapping annotations, raw
 wire parameters, `ResponseEntity` values, or adapter methods.
 
 The internal adapter is a Spring `@RestController` with constructor injection of the handler interface. Its public
@@ -201,7 +225,7 @@ and defaults to `GeneratedController`, producing pairs such as `BooksServer` and
 name their implementation independently; a `Handler` suffix, such as `BooksHandler`, is the conventional arrangement.
 
 WebMVC uses the same deterministic declaration-name allocation as RestClient. Handler methods share one interface
-namespace, adapter mappings share a separate adapter namespace, and nested response types retain their own namespace.
+namespace, adapter mappings share a separate adapter namespace, and shared endpoint types retain their own namespace.
 Composed handlers also use the root API property and inclusion-path naming defined for RestClient, while generated
 adapters decode and encode through the original nested endpoint values.
 Top-level handler and adapter names, artifact paths, and registration resources follow the stable per-API identity

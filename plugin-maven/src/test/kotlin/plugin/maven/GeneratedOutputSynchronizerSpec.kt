@@ -74,6 +74,40 @@ class GeneratedOutputSynchronizerSpec : FunSpec({
         Files.readString(output.resolve("example/Server.class")) shouldBe "first"
     }
 
+    test("share identical outputs and retain them until every execution releases ownership") {
+        val workspace = Files.createTempDirectory("tapik-generated-output-shared-class-").apply { toFile().deleteOnExit() }
+        val first = Files.createDirectories(workspace.resolve("first/example"))
+        val second = Files.createDirectories(workspace.resolve("second/example"))
+        val output = workspace.resolve("classes")
+        val state = workspace.resolve("state")
+        Files.writeString(first.resolve("Endpoint.class"), "version-one")
+        Files.writeString(second.resolve("Endpoint.class"), "version-one")
+
+        GeneratedOutputSynchronizer.synchronize(workspace.resolve("first"), output, state, "first")
+        GeneratedOutputSynchronizer.synchronize(workspace.resolve("second"), output, state, "second")
+
+        Files.writeString(first.resolve("Endpoint.class"), "version-two")
+        GeneratedOutputSynchronizer.synchronize(workspace.resolve("first"), output, state, "first")
+        Files.writeString(second.resolve("Endpoint.class"), "version-two")
+        GeneratedOutputSynchronizer.synchronize(workspace.resolve("second"), output, state, "second")
+        GeneratedOutputSynchronizer.synchronize(
+            Files.createDirectories(workspace.resolve("first-empty")),
+            output,
+            state,
+            "first"
+        )
+
+        Files.readString(output.resolve("example/Endpoint.class")) shouldBe "version-two"
+
+        GeneratedOutputSynchronizer.synchronize(
+            Files.createDirectories(workspace.resolve("second-empty")),
+            output,
+            state,
+            "second"
+        )
+        Files.exists(output.resolve("example/Endpoint.class")) shouldBe false
+    }
+
     test("reject unowned output paths before changing application or generated output") {
         val workspace = Files.createTempDirectory("tapik-generated-output-unowned-").apply { toFile().deleteOnExit() }
         val first = Files.createDirectories(workspace.resolve("first/example"))

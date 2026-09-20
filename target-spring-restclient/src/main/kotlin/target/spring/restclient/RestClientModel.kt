@@ -3,19 +3,19 @@ package dev.akif.tapik.target.spring.restclient
 import dev.akif.tapik.*
 import dev.akif.tapik.common.plugin.CompiledApi
 import dev.akif.tapik.common.plugin.CompiledEndpoint
+import dev.akif.tapik.common.plugin.EndpointTypeNames
 import dev.akif.tapik.common.plugin.KotlinClassClassifier
 import dev.akif.tapik.common.plugin.KotlinSourceType
 import dev.akif.tapik.common.plugin.KotlinType
 import dev.akif.tapik.common.plugin.argument
+import dev.akif.tapik.common.plugin.endpointTypeNames
 import dev.akif.tapik.common.plugin.kotlinIdentifier
 import dev.akif.tapik.common.plugin.kotlinNameSource
 import dev.akif.tapik.common.plugin.kotlinPropertyAccess
-import dev.akif.tapik.common.plugin.kotlinVariantName
 import dev.akif.tapik.common.plugin.lowerCamel
 import dev.akif.tapik.common.plugin.toKotlinSourceType
 import dev.akif.tapik.common.plugin.tupleElements
 import dev.akif.tapik.common.plugin.uniqueKotlinName
-import dev.akif.tapik.common.plugin.upperCamel
 
 internal data class RestClientApiModel(
     val packageName: String,
@@ -102,20 +102,19 @@ internal fun restClientApiModel(
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
     val methodNames = mutableSetOf<String>()
-    val nestedTypeNames = mutableSetOf<String>()
+    val endpointTypes = endpointTypeNames(compiled)
     return RestClientApiModel(
         packageName = packageName,
         clientName = clientName,
         apiType = apiType,
         apiProperty = apiProperty,
         endpoints =
-            compiled.endpoints.map { endpoint ->
+            compiled.endpoints.zip(endpointTypes).map { (endpoint, typeNames) ->
                 val propertyName = endpoint.kotlinNameSource()
                 endpoint.toModel(
                     apiProperty = apiProperty,
                     methodName = uniqueKotlinName(propertyName.kotlinIdentifier("endpoint"), methodNames),
-                    responseName = uniqueKotlinName(propertyName.upperCamel() + "Response", nestedTypeNames),
-                    nestedTypeNames = nestedTypeNames
+                    typeNames = typeNames
                 )
             }
     )
@@ -124,8 +123,7 @@ internal fun restClientApiModel(
 private fun CompiledEndpoint.toModel(
     apiProperty: String,
     methodName: String,
-    responseName: String,
-    nestedTypeNames: MutableSet<String>
+    typeNames: EndpointTypeNames
 ): RestClientEndpointModel {
     val propertyName = kotlinNameSource()
     val endpointAccess = kotlinPropertyAccess(apiProperty)
@@ -234,8 +232,8 @@ private fun CompiledEndpoint.toModel(
             endpointAccess = endpointAccess,
             endpointId = value.id,
             parameterNames = usedNames,
-            requestedTypeName = propertyName.upperCamel() + "RequestBody",
-            nestedTypeNames = nestedTypeNames
+            choiceTypeName = typeNames.requestBody,
+            variantNames = typeNames.requestBodyVariants
         )
     val requiredParameters =
         buildList {
@@ -259,13 +257,13 @@ private fun CompiledEndpoint.toModel(
         endpointAccess = endpointAccess,
         methodName = methodName,
         summary = value.documentation.summary,
-        responseName = responseName,
+        responseName = typeNames.response,
         paths = paths.map(Pair<RestClientUriParameter, RestClientParameter>::first),
         queries = queries.map(Pair<RestClientUriParameter, RestClientParameter>::first),
         headers = headers.map(Pair<RestClientHeader, RestClientParameter?>::first),
         body = body,
         parameters = requiredParameters + optionalParameters,
-        outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id)
+        outputs = outputs(type.argument(4, value.id), value.outputs, endpointAccess, value.id, typeNames.responseVariants)
     )
 }
 
@@ -273,7 +271,8 @@ private fun outputs(
     outputsType: KotlinType,
     outputs: Outputs,
     endpointAccess: String,
-    endpointId: String
+    endpointId: String,
+    variantNames: List<String>
 ): List<RestClientOutput> {
     val compiledTypes =
         if ((outputsType.classifier as? KotlinClassClassifier)?.name == "dev.akif.tapik.DefaultOutput") {
@@ -284,7 +283,6 @@ private fun outputs(
     require(compiledTypes.isEmpty() || compiledTypes.size == outputs.values.size) {
         "$endpointId compiled output types do not match its runtime outputs"
     }
-    val variantNames = mutableSetOf<String>()
     return outputs.values.mapIndexed { index, alternative ->
         val output = alternative as? Output<*, *, *>
             ?: throw IllegalArgumentException("$endpointId has unsupported output '${alternative::class.simpleName}'")
@@ -312,7 +310,11 @@ private fun outputs(
                 )
             }
         val carriesStatus = output.matcher !is ExactStatus
-        val usedHeaderNames = mutableSetOf<String>().apply { if (carriesStatus) add("status") }
+        val usedHeaderNames =
+            mutableSetOf<String>().apply {
+                if (carriesStatus) add("status")
+                if (bodies.isNotEmpty()) add("body")
+            }
         val headers = mutableListOf<RestClientOutputHeader>()
         val fixedHeaders = mutableListOf<RestClientFixedOutputHeader>()
         output.headers.values.forEachIndexed { headerIndex, header ->
@@ -327,7 +329,8 @@ private fun outputs(
                     headerType
                         .argument(0, "$endpointId output header '${header.name}'")
                         .toKotlinSourceType("$endpointId output header '${header.name}'")
-                val renderedType = if (header.presence === Optional) rawType.asNullable() else rawType
+                val renderedType =
+                    if (header.presence === Optional || header.presence is Default<*>) rawType.asNullable() else rawType
                 headers += RestClientOutputHeader(
                     name = uniqueKotlinName(header.name.lowerCamel("header${headerIndex + 1}"), usedHeaderNames),
                     wireName = header.name,
@@ -338,7 +341,7 @@ private fun outputs(
             }
         }
         RestClientOutput(
-            variantName = uniqueKotlinName(output.matcher.kotlinVariantName(), variantNames),
+            variantName = variantNames[index],
             definitionAccess = outputAccess,
             carriesStatus = carriesStatus,
             bodies = bodies,

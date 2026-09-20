@@ -25,10 +25,17 @@ internal object GeneratedOutputSynchronizer {
         val stateFile = stateDirectory.toAbsolutePath().normalize().resolve(OWNERSHIP_FILE)
         val currentPaths = relativeFiles(staging)
         val ownership = readOwnership(stateFile).toMutableMap()
+        val claimedPaths = ownership[owner].orEmpty()
         val conflicts =
             ownership
                 .filterKeys { candidate -> candidate != owner }
-                .flatMap { (candidate, paths) -> paths.intersect(currentPaths).map { path -> path to candidate } }
+                .flatMap { (candidate, paths) ->
+                    paths.intersect(currentPaths).mapNotNull { path ->
+                        (path to candidate).takeUnless {
+                            path in claimedPaths || filesEqual(staging.resolve(path), output.resolve(path))
+                        }
+                    }
+                }
         check(conflicts.isEmpty()) {
             conflicts.joinToString(
                 prefix = "Generated output paths are already owned by other executions: ",
@@ -36,10 +43,11 @@ internal object GeneratedOutputSynchronizer {
             )
         }
 
-        val claimedPaths = ownership[owner].orEmpty()
+        val pathsOwnedByOthers =
+            ownership.filterKeys { candidate -> candidate != owner }.values.flatten().toSet()
         val unownedPaths =
             currentPaths.filter { path ->
-                path !in claimedPaths && Files.exists(output.resolve(path), NOFOLLOW_LINKS)
+                path !in claimedPaths && path !in pathsOwnedByOthers && Files.exists(output.resolve(path), NOFOLLOW_LINKS)
             }
         check(unownedPaths.isEmpty()) {
             unownedPaths.joinToString(
@@ -48,7 +56,7 @@ internal object GeneratedOutputSynchronizer {
             )
         }
 
-        val stalePaths = claimedPaths - currentPaths
+        val stalePaths = (claimedPaths - currentPaths) - pathsOwnedByOthers
         stalePaths.forEach { path -> Files.deleteIfExists(output.resolve(path)) }
         stalePaths.forEach { path -> deleteEmptyParents(output.resolve(path).parent, output) }
         currentPaths.forEach { path ->
@@ -104,6 +112,11 @@ internal object GeneratedOutputSynchronizer {
         }
     }
 }
+
+private fun filesEqual(first: Path, second: Path): Boolean =
+    Files.isRegularFile(first, NOFOLLOW_LINKS) &&
+        Files.isRegularFile(second, NOFOLLOW_LINKS) &&
+        Files.mismatch(first, second) == -1L
 
 private fun deleteEmptyParents(path: Path?, root: Path) {
     var current = path

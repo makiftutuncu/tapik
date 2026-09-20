@@ -31,15 +31,16 @@ class RestClientUriSpec : FunSpec({
     }
 
     test("generated requests preserve encoded literals and encode raw values exactly once") {
-        val source = RestClientTarget.generate(GenerationRequest(apis = listOf(EncodedPaths))).artifacts.single().content
-        val compilation = compileKotlin(source + """
+        val artifacts = RestClientTarget.generate(GenerationRequest(apis = listOf(EncodedPaths))).artifacts
+        val compilation = compileKotlin(*artifacts.map { artifact -> artifact.content }.dropLast(1).plus(
+            artifacts.last().content + """
 
             public class EncodedPathsImplementation(
                 override val restClientTransport: dev.akif.tapik.target.spring.restclient.RestClientTransport
             ) : EncodedPathsClient {
                 override val encodedPathsApi = dev.akif.tapik.target.spring.restclient.EncodedPaths
             }
-        """.trimIndent())
+        """.trimIndent()).toTypedArray())
         withClue(compilation.messages) { compilation.exitCode shouldBe ExitCode.OK }
         val builder = RestClient.builder().baseUrl("https://library.example/base?tenant=library#section")
         val server = MockRestServiceServer.bindTo(builder).build()

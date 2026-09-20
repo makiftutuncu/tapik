@@ -145,10 +145,9 @@ See xref:reference/maven.adoc#_direct_invocation[direct invocation] for configur
 During generation, tapik logs every file it writes, making the selected APIs and output locations visible in the build.
 
 The default artifact output is `${project.build.directory}/generated/tapik`. Source targets in the runnable application
-use explicit directories:
+use one explicit shared directory:
 
-* Spring RestClient: `target/generated-sources/tapik-restclient`
-* Spring WebMVC: `target/generated-sources/tapik-webmvc`
+* Spring RestClient and WebMVC: `target/generated-sources/tapik-spring`
 
 Next, xref:runnable-example.adoc[see the complete runnable example],
 xref:documentation/openapi.adoc[configure OpenAPI generation], or

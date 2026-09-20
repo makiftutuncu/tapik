@@ -7,7 +7,10 @@ import com.example.library.contract.Catalog
 import com.example.library.contract.CreateAuthor
 import com.example.library.generated.contract.Authors.AuthorsClient
 import com.example.library.generated.contract.Authors.AuthorsServer
+import com.example.library.generated.contract.Authors.CreateResponse as AuthorsCreateResponse
+import com.example.library.generated.contract.Authors.ListResponse as AuthorsListResponse
 import com.example.library.generated.contract.Catalog.CatalogServer
+import com.example.library.generated.contract.Catalog.ListResponse as CatalogListResponse
 import dev.akif.tapik.ApiRegistry
 import dev.akif.tapik.target.spring.restclient.RestClientTransport
 import dev.akif.tapik.target.spring.webmvc.EnableTapikWebMvc
@@ -61,16 +64,21 @@ class MavenUsageSpec : FunSpec({
 
         Files.isRegularFile(
             Path.of(
-                "target/generated-sources/tapik-restclient/com/example/library/generated/contract/Authors/AuthorsClient.kt"
+                "target/generated-sources/tapik-spring/com/example/library/generated/contract/Authors/AuthorsClient.kt"
             )
         ) shouldBe true
         Class.forName("com.example.library.generated.contract.Authors.AuthorsClient").isInterface shouldBe true
         Files.isRegularFile(
             Path.of(
-                "target/generated-sources/tapik-webmvc/com/example/library/generated/contract/Authors/AuthorsServer.kt"
+                "target/generated-sources/tapik-spring/com/example/library/generated/contract/Authors/AuthorsServer.kt"
             )
         ) shouldBe true
         Class.forName("com.example.library.generated.contract.Authors.AuthorsServer").isInterface shouldBe true
+        Files.isRegularFile(
+            Path.of(
+                "target/generated-sources/tapik-spring/com/example/library/generated/contract/Authors/AuthorsEndpoints.kt"
+            )
+        ) shouldBe true
 
         generated("Authors") shouldBe expected("Authors")
         generated("Books") shouldBe expected("Books")
@@ -102,8 +110,9 @@ class MavenUsageSpec : FunSpec({
                 ).header("x-api-version", "1")
             )
 
-        client.list(xRequestId = "request-1", name = listOf("Ursula")) shouldBe
-            AuthorsClient.ListResponse.Ok(
+        val handler = DelegatingAuthorsHandler(client)
+        handler.list(xRequestId = "request-1", name = listOf("Ursula")) shouldBe
+            AuthorsListResponse.Ok(
                 body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
             )
         server.verify()
@@ -163,7 +172,7 @@ class MavenUsageSpec : FunSpec({
             xRequestId = "request-1",
             body = CreateAuthor(name = "Octavia E. Butler")
         ) shouldBe
-            AuthorsClient.CreateResponse.Created(
+            AuthorsCreateResponse.Created(
                 body = Author(id = "author-2", name = "Octavia E. Butler"),
                 location = "/authors/author-2"
             )
@@ -171,7 +180,7 @@ class MavenUsageSpec : FunSpec({
         client.create(
             xRequestId = "request-1",
             body = CreateAuthor(name = "invalid")
-        ) shouldBe AuthorsClient.CreateResponse.BadRequest
+        ) shouldBe AuthorsCreateResponse.BadRequest
         server.verify()
     }
 
@@ -324,6 +333,23 @@ class MavenUsageSpec : FunSpec({
     }
 })
 
+private class DelegatingAuthorsHandler(
+    private val client: AuthorsClient
+) : AuthorsServer {
+    override val authorsApi: Authors = Authors()
+
+    override fun list(
+        xRequestId: String,
+        name: List<String>?,
+        page: Int
+    ): AuthorsListResponse = client.list(xRequestId = xRequestId, name = name, page = page)
+
+    override fun create(
+        xRequestId: String,
+        body: CreateAuthor
+    ): AuthorsCreateResponse = client.create(xRequestId = xRequestId, body = body)
+}
+
 private class LibraryController : AuthorsServer, CatalogServer {
     override val authorsApi: Authors = Authors()
     override val catalogApi: Catalog = Catalog()
@@ -335,13 +361,13 @@ private class LibraryController : AuthorsServer, CatalogServer {
         xRequestId: String,
         name: List<String>?,
         page: Int
-    ): AuthorsServer.ListResponse =
+    ): AuthorsListResponse =
         if (name == listOf("none")) {
-            AuthorsServer.ListResponse.NoContent
+            AuthorsListResponse.NoContent
         } else {
             names = name
             this.page = page
-            AuthorsServer.ListResponse.Ok(
+            AuthorsListResponse.Ok(
                 body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
             )
         }
@@ -349,18 +375,18 @@ private class LibraryController : AuthorsServer, CatalogServer {
     override fun create(
         xRequestId: String,
         body: CreateAuthor
-    ): AuthorsServer.CreateResponse =
+    ): AuthorsCreateResponse =
         if (body.name == "invalid") {
-            AuthorsServer.CreateResponse.BadRequest
+            AuthorsCreateResponse.BadRequest
         } else {
             created = body
-            AuthorsServer.CreateResponse.Created(
+            AuthorsCreateResponse.Created(
                 body = Author(id = "author-2", name = body.name),
                 location = "/authors/author-2"
             )
         }
 
-    override fun list(): CatalogServer.ListResponse = CatalogServer.ListResponse.Ok
+    override fun list(): CatalogListResponse = CatalogListResponse.Ok
 }
 
 @Configuration(proxyBeanMethods = false)

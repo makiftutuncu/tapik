@@ -4,6 +4,8 @@ import com.example.library.contract.Author
 import com.example.library.contract.Authors
 import com.example.library.contract.CreateAuthor
 import com.example.library.generated.contract.Authors.AuthorsServer
+import com.example.library.generated.contract.Authors.CreateResponse
+import com.example.library.generated.contract.Authors.ListResponse
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,16 +16,16 @@ class AuthorsHandler : AuthorsServer {
         xRequestId: String,
         name: List<String>?,
         page: Int
-    ): AuthorsServer.ListResponse =
-        AuthorsServer.ListResponse.Ok(
+    ): ListResponse =
+        ListResponse.Ok(
             body = listOf(Author(id = "author-1", name = "Ursula K. Le Guin"))
         )
 
     override fun create(
         xRequestId: String,
         body: CreateAuthor
-    ): AuthorsServer.CreateResponse =
-        AuthorsServer.CreateResponse.Created(
+    ): CreateResponse =
+        CreateResponse.Created(
             body = Author(id = "author-2", name = body.name),
             location = "/authors/author-2"
         )

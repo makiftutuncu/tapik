@@ -18,7 +18,7 @@ object RestClientTarget : GenerationTarget {
         val configuration = RestClientTargetConfiguration.from(request.configuration)
         val usedPackages = mutableSetOf<String>()
         val artifacts =
-            request.apis.map { api ->
+            request.apis.flatMap { api ->
                 val apiTypeName = api.javaClass.simpleName
                 require(apiTypeName.isKotlinIdentifier()) {
                     "Spring RestClient generation requires a valid API type name, but was '$apiTypeName'"
@@ -26,16 +26,20 @@ object RestClientTarget : GenerationTarget {
                 val packageName = generatedApiPackage(configuration.packageName, api.javaClass.name)
                 require(usedPackages.add(packageName)) { "Spring RestClient request repeats API class '${api.javaClass.name}'" }
                 val clientName = apiTypeName + configuration.clientSuffix
-                GeneratedArtifact(
-                    relativePath =
-                        packageName.replace('.', '/') + "/" + clientName + ".kt",
-                    mediaType = "text/x-kotlin",
-                    kind = ArtifactKind.SOURCE,
-                    content =
-                        RestClientGenerator(
-                            packageName = packageName,
-                            clientName = clientName
-                        ).generate(CompiledApiReader.read(api))
+                val compiled = CompiledApiReader.read(api)
+                listOf(
+                    endpointTypesArtifact(compiled, packageName),
+                    GeneratedArtifact(
+                        relativePath =
+                            packageName.replace('.', '/') + "/" + clientName + ".kt",
+                        mediaType = "text/x-kotlin",
+                        kind = ArtifactKind.SOURCE,
+                        content =
+                            RestClientGenerator(
+                                packageName = packageName,
+                                clientName = clientName
+                            ).generate(compiled)
+                    )
                 )
             }
         return GenerationResult(artifacts)

@@ -79,8 +79,11 @@ class MavenGeneratorSpec : FunSpec({
         generation.containsSources shouldBe true
         generation.sourcePaths.map(output::relativize).map { path -> path.toString() } shouldContainExactly
             listOf(
+                "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Authors/AuthorsServer.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Books/BooksEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Books/BooksServer.kt",
+                "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsEndpoints.kt",
                 "dev/akif/tapik/generated/test/fixtures/library/Rentals/RentalsServer.kt"
             )
         generation.resourcePaths shouldContainExactly

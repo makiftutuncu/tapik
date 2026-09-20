@@ -38,12 +38,6 @@ internal class RestClientGenerator(
                 "    public val restClientTransport: dev.akif.tapik.target.spring.restclient.RestClientTransport"
             )
             model.endpoints.forEach { endpoint ->
-                endpoint.body?.choiceTypeName?.let {
-                    appendLine()
-                    appendRequestBodyType(endpoint.body)
-                }
-                appendLine()
-                appendResponse(endpoint)
                 appendLine()
                 appendMethod(endpoint)
             }

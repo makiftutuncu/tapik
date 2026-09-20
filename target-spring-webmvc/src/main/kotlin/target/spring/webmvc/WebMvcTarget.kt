@@ -21,7 +21,9 @@ object WebMvcTarget : GenerationTarget {
                 val controllerName = apiTypeName + configuration.controllerSuffix
                 val serverType = "$packageName.$serverName"
                 val controllerType = "$packageName.$controllerName"
+                val compiled = CompiledApiReader.read(api)
                 listOf(
+                    endpointTypesArtifact(compiled, packageName),
                     GeneratedArtifact(
                         relativePath = packageName.replace('.', '/') + "/$serverName.kt",
                         mediaType = "text/x-kotlin",
@@ -31,7 +33,7 @@ object WebMvcTarget : GenerationTarget {
                                 packageName = packageName,
                                 serverName = serverName,
                                 controllerName = controllerName
-                            ).generate(CompiledApiReader.read(api))
+                            ).generate(compiled)
                     ),
                     GeneratedArtifact(
                         relativePath = "META-INF/tapik/spring/webmvc/$controllerType.properties",
