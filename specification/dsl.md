@@ -369,14 +369,40 @@ integrations such as Kotlin serialization provide convenient builders including 
 ## Outputs
 
 `Status` is a validated data class, not an enum. Named constants cover standard statuses without excluding extension
-codes. Keeping it as a regular class also lets status-set builders expose Kotlin's natural vararg syntax. A status
-becomes an exact matcher when combined with a body. Other matcher values use the same output grammar:
+codes. The constructor accepts every integer from `100` through `599` and rejects values outside that HTTP status
+domain. Value equality depends only on that integer. Keeping it as a regular class also lets status-set builders expose
+Kotlin's natural vararg syntax. A status becomes an exact matcher when combined with a body. Other matcher values use
+the same output grammar:
 
 ```kotlin
 statusesOf(Status.Ok, Status.Created) with noBody
 statusesIn(400..499) with noBody
 statusMatching("successful extension status") { status -> status.code in 290..299 } with noBody
 ```
+
+The stable named catalog follows the IANA HTTP Status Code Registry and is grouped by class:
+
+- informational: `Continue` (100), `SwitchingProtocols` (101), `Processing` (102), `EarlyHints` (103);
+- success: `Ok` (200), `Created` (201), `Accepted` (202), `NonAuthoritativeInformation` (203), `NoContent`
+  (204), `ResetContent` (205), `PartialContent` (206), `MultiStatus` (207), `AlreadyReported` (208), and
+  `ImUsed` (226);
+- redirection: `MultipleChoices` (300), `MovedPermanently` (301), `Found` (302), `SeeOther` (303),
+  `NotModified` (304), `UseProxy` (305), `Unused` (306), `TemporaryRedirect` (307), and `PermanentRedirect` (308);
+- client error: `BadRequest` (400), `Unauthorized` (401), `PaymentRequired` (402), `Forbidden` (403), `NotFound`
+  (404), `MethodNotAllowed` (405), `NotAcceptable` (406), `ProxyAuthenticationRequired` (407), `RequestTimeout`
+  (408), `Conflict` (409), `Gone` (410), `LengthRequired` (411), `PreconditionFailed` (412), `ContentTooLarge`
+  (413), `UriTooLong` (414), `UnsupportedMediaType` (415), `RangeNotSatisfiable` (416), `ExpectationFailed`
+  (417), `ImATeapot` (418), `MisdirectedRequest` (421), `UnprocessableContent` (422), `Locked` (423),
+  `FailedDependency` (424), `TooEarly` (425), `UpgradeRequired` (426), `PreconditionRequired` (428),
+  `TooManyRequests` (429), `RequestHeaderFieldsTooLarge` (431), and `UnavailableForLegalReasons` (451);
+- server error: `InternalServerError` (500), `NotImplemented` (501), `BadGateway` (502), `ServiceUnavailable`
+  (503), `GatewayTimeout` (504), `HttpVersionNotSupported` (505), `VariantAlsoNegotiates` (506),
+  `InsufficientStorage` (507), `LoopDetected` (508), `NotExtended` (510), and
+  `NetworkAuthenticationRequired` (511).
+
+The catalog retains conventional names for registered unused or obsolete codes so existing wire values remain
+describable. A temporarily registered draft code does not become a stable named API; it remains available through the
+validated constructor while its registration is temporary.
 
 `statusesOf` takes one required status followed by zero or more statuses and produces a `StatusSet`, normalizing
 duplicates. `statusesIn` requires a non-empty range contained by the valid HTTP status domain and produces a

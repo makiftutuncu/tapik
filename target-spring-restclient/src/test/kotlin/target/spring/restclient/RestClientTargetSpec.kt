@@ -141,11 +141,11 @@ class RestClientTargetSpec : FunSpec({
         val result = RestClientTarget.generate(GenerationRequest(apis = listOf(RestClientStatusMatchers)))
         val source = result.generatedSource()
 
-        source shouldContain "public data class OkOrCreated("
+        source shouldContain "public data class OkOrAccepted("
         source shouldContain "public data class Status400To499("
         source shouldContain "public data class SuccessfulExtensionStatus("
         source shouldContain "public val status: Status"
-        source shouldContain "OkOrCreated(response.status)"
+        source shouldContain "OkOrAccepted(response.status)"
         source shouldContain "Status400To499(response.status)"
         source shouldContain "SuccessfulExtensionStatus(response.status)"
         result.shouldCompile()
@@ -272,7 +272,7 @@ public object ResponseConformance : Api() {
 public object RestClientStatusMatchers : Api() {
     public val selected by
         get(root / "selected")
-            .output(statusesOf(Status.Ok, Status.Created) with noBody)
+            .output(statusesOf(Status.Ok, Status.Accepted) with noBody)
 
     public val clientErrors by
         get(root / "client-errors")

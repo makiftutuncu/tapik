@@ -14,7 +14,12 @@ include::example$dsl/RequestAndOutputExamples.kt[tag=response-output]
 == Status matchers
 
 An exact `Status` is the common case. `Status` accepts every valid HTTP code from 100 through 599 and provides named
-values such as `Status.Ok`, `Status.Created`, and `Status.NotFound`.
+values for the stable IANA catalog, grouped in API documentation by informational, success, redirection, client-error,
+and server-error status classes. This includes values such as `Status.EarlyHints`, `Status.Accepted`,
+`Status.PermanentRedirect`, `Status.UnprocessableContent`, and `Status.NetworkAuthenticationRequired`.
+
+Construct extension and temporarily registered statuses directly from their integer, such as `Status(299)`. Values
+below 100 or above 599 are rejected immediately, and two statuses with the same code are equal.
 
 Broader matchers are explicit:
 

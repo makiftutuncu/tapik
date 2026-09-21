@@ -212,7 +212,7 @@ class WebMvcTargetSpec : FunSpec({
         val result = WebMvcTarget.generate(GenerationRequest(apis = listOf(WebMvcStatusMatchers)))
         val source = result.generatedSource()
 
-        source shouldContain "public data class OkOrCreated("
+        source shouldContain "public data class OkOrAccepted("
         source shouldContain "public data class Status400To499("
         source shouldContain "public data class SuccessfulExtensionStatus("
         source shouldContain "public val status: Status"
@@ -392,7 +392,7 @@ public object BodyAlternatives : Api() {
 public object WebMvcStatusMatchers : Api() {
     public val selected by
         get(root / "selected")
-            .output(statusesOf(Status.Ok, Status.Created) with noBody)
+            .output(statusesOf(Status.Ok, Status.Accepted) with noBody)
 
     public val clientErrors by
         get(root / "client-errors")

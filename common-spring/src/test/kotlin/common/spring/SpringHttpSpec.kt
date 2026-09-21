@@ -15,10 +15,16 @@ class SpringHttpSpec : FunSpec({
         }
     }
 
-    test("round-trip arbitrary tapik statuses") {
-        val status = Status(299)
-
-        status.toHttpStatusCode().toStatus() shouldBe status
+    test("round-trip named and custom tapik statuses") {
+        listOf(
+            Status.Continue,
+            Status.Accepted,
+            Status.PermanentRedirect,
+            Status.UnprocessableContent,
+            Status.NetworkAuthenticationRequired,
+            Status(299),
+            Status(599)
+        ).forEach { status -> status.toHttpStatusCode().toStatus() shouldBe status }
     }
 
     test("round-trip complete media types") {

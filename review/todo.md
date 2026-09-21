@@ -42,7 +42,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
   - Verify that supplied documentation reaches generated OpenAPI parameters/headers and any other target that consumes it.
   - Add KDoc and compile-time/runtime tests for documented and deprecated values created through the smart constructors.
 
-- [ ] Make the HTTP `Status` catalog exhaustive while retaining validated custom statuses.
+- [x] Make the HTTP `Status` catalog exhaustive while retaining validated custom statuses.
   - Define named values for the complete standard HTTP status-code set supported by tapik's contract model, grouped or documented clearly enough to remain maintainable.
   - Provide a public way to construct a status from an integer within the supported HTTP status ranges.
   - Reject invalid/out-of-range codes with a clear diagnostic.

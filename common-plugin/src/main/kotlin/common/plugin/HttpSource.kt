@@ -34,14 +34,8 @@ private fun List<PathSegment>.renderPathTemplate(): String =
 
 /** Returns the stable Kotlin variant name for this HTTP status. */
 fun Status.kotlinVariantName(): String =
-    when (this) {
-        Status.Ok -> "Ok"
-        Status.Created -> "Created"
-        Status.NoContent -> "NoContent"
-        Status.BadRequest -> "BadRequest"
-        Status.NotFound -> "NotFound"
-        Status.Conflict -> "Conflict"
-        Status.InternalServerError -> "InternalServerError"
+    when {
+        standardDescription != null -> requireNotNull(standardDescription).lowercase().upperCamel()
         else -> "Status$code"
     }
 

@@ -100,6 +100,27 @@ class OpenApiSpec : FunSpec({
         create.responses.getValue("400").content shouldBe emptyMap()
     }
 
+    test("describe named and custom exact statuses") {
+        val statuses =
+            object : Api("Statuses") {
+                val inspect by
+                    get(root)
+                        .output(Status.Accepted with noBody)
+                        .output(Status(299) with noBody)
+            }
+
+        val responses =
+            OpenApi.from(statuses, version = "1")
+                .paths
+                .getValue("/")
+                .operations
+                .getValue(Method.GET)
+                .responses
+
+        responses.getValue("202").description shouldBe "Accepted"
+        responses.getValue("299").description shouldBe "HTTP 299 response"
+    }
+
     test("interpret documentation owned by parameters request bodies and responses") {
         val requestId =
             header("X-Request-Id", format.string, description = "Request trace", deprecated = true)

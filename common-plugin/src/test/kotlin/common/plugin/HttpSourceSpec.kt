@@ -22,12 +22,17 @@ class HttpSourceSpec : FunSpec({
     test("derive stable Kotlin status variant names") {
         Status.Ok.kotlinVariantName() shouldBe "Ok"
         Status.Created.kotlinVariantName() shouldBe "Created"
+        Status.NonAuthoritativeInformation.kotlinVariantName() shouldBe "NonAuthoritativeInformation"
         Status.NoContent.kotlinVariantName() shouldBe "NoContent"
+        Status.ImUsed.kotlinVariantName() shouldBe "ImUsed"
+        Status.UriTooLong.kotlinVariantName() shouldBe "UriTooLong"
+        Status.ImATeapot.kotlinVariantName() shouldBe "ImATeapot"
+        Status.HttpVersionNotSupported.kotlinVariantName() shouldBe "HttpVersionNotSupported"
         Status.BadRequest.kotlinVariantName() shouldBe "BadRequest"
         Status.NotFound.kotlinVariantName() shouldBe "NotFound"
         Status.Conflict.kotlinVariantName() shouldBe "Conflict"
         Status.InternalServerError.kotlinVariantName() shouldBe "InternalServerError"
-        Status(418).kotlinVariantName() shouldBe "Status418"
+        Status(299).kotlinVariantName() shouldBe "Status299"
     }
 
     test("derive stable Kotlin status matcher variant names") {
