@@ -91,9 +91,20 @@ data class PathVariable<Value : Any>(
             PathVariable<Duration>,
             PathVariable<Period>
         > {
-        /** Builds a required path variable named [name] using [format]. */
-        operator fun <Value : Any> invoke(name: String, format: StringFormat<Value>): PathVariable<Value> =
-            PathVariable(name, format)
+        /**
+         * Builds a required path variable named [name] using [format].
+         *
+         * @param description optional human-readable description.
+         * @param deprecated whether consumers should avoid this path variable.
+         * @throws IllegalArgumentException when [description] is present but blank.
+         */
+        operator fun <Value : Any> invoke(
+            name: String,
+            format: StringFormat<Value>,
+            description: String? = null,
+            deprecated: Boolean = false
+        ): PathVariable<Value> =
+            PathVariable(name, format, ParameterDocumentation(description, deprecated))
 
         override fun boolean(name: String): PathVariable<Boolean> = invoke(name, format.boolean)
         override fun byte(name: String): PathVariable<Byte> = invoke(name, format.byte)

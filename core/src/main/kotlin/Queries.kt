@@ -80,11 +80,20 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
             QueryParameter<Duration, Required>,
             QueryParameter<Period, Required>
         > {
-        /** Builds a required scalar query parameter named [name] using [format]. */
+        /**
+         * Builds a required scalar query parameter named [name] using [format].
+         *
+         * @param description optional human-readable description.
+         * @param deprecated whether consumers should avoid this query parameter.
+         * @throws IllegalArgumentException when [description] is present but blank.
+         */
         operator fun <Value : Any> invoke(
             name: String,
-            format: StringFormat<Value>
-        ): QueryParameter<Value, Required> = QueryParameter(name, format, Required)
+            format: StringFormat<Value>,
+            description: String? = null,
+            deprecated: Boolean = false
+        ): QueryParameter<Value, Required> =
+            QueryParameter(name, format, Required, ParameterDocumentation(description, deprecated))
 
         override fun boolean(name: String): QueryParameter<Boolean, Required> = invoke(name, format.boolean)
         override fun byte(name: String): QueryParameter<Byte, Required> = invoke(name, format.byte)

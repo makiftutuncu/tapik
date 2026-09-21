@@ -36,7 +36,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
   - Update catalog selection, endpoint identity, generation naming, diagnostics, and any other internal consumers without changing their identity semantics.
   - Document the migration. Do not retain an `id` compatibility alias if doing so preserves the original collision.
 
-- [ ] Expose documentation through the smart constructors for headers, query parameters, and path variables.
+- [x] Expose documentation through the smart constructors for headers, query parameters, and path variables.
   - Extend the public construction path for `Header`, `QueryParameter`, and `PathVariable` so callers can supply descriptions and deprecation state while retaining inferred value types.
   - Preserve existing concise calls and their defaults.
   - Verify that supplied documentation reaches generated OpenAPI parameters/headers and any other target that consumes it.

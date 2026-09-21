@@ -21,6 +21,10 @@ include::example$dsl/RequestAndOutputExamples.kt[tag=header-builders,indent=0]
 Headers may be required, optional, optional with a default, or fixed to a value. Names are validated as HTTP field
 names and must be unique case-insensitively within an endpoint.
 
+The generic `header("X-Request-Id", requestIdFormat)` constructor accepts optional `description` and `deprecated`
+arguments. The resulting documentation is preserved by optional, defaulted, and fixed presence modifiers and is used
+for request parameters and response headers in generated OpenAPI.
+
 `.headers(headersOf(...))` is a one-time bulk initializer available only while the endpoint has no headers. After the
 first header is present, `.header(...)` appends one definition at a time. Both preserve concrete types and declaration
 order. `headersOf` requires between one and eight values; `noHeaders` represents the empty group.

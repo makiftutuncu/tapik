@@ -171,6 +171,22 @@ class DslCompilationSpec : FunSpec({
         ) shouldBe ExitCode.OK
     }
 
+    test("retain value types through documented parameter smart constructors") {
+        compile(
+            """
+            import dev.akif.tapik.*
+            import java.util.UUID
+
+            val bookId: PathVariable<UUID> =
+                PathVariable("bookId", format.uuid, description = "Book identifier", deprecated = true)
+            val authorId: QueryParameter<UUID, Required> =
+                QueryParameter("authorId", format.uuid, description = "Author filter", deprecated = true)
+            val requestId: Header<UUID, Required> =
+                Header("X-Request-Id", format.uuid, description = "Request trace", deprecated = true)
+            """
+        ) shouldBe ExitCode.OK
+    }
+
     test("not expose an id on a draft endpoint") {
         compile(
             """

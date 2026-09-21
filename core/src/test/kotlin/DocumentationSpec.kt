@@ -61,6 +61,26 @@ class DocumentationSpec : FunSpec({
         requestId.presence shouldBe Optional
     }
 
+    test("document parameters through generic smart constructors") {
+        val bookId: PathVariable<UUID> =
+            path("bookId", format.uuid, description = "Book identifier", deprecated = true)
+        val tags: RepeatedQueryParameter<String, Optional> =
+            query("tag", format.string, description = "Tag filter", deprecated = true).repeated().optional()
+        val requestId: Header<UUID, Fixed<UUID>> =
+            header("X-Request-Id", format.uuid, description = "Request trace", deprecated = true)
+                .fixed(UUID(0, 1))
+
+        bookId.documentation shouldBe ParameterDocumentation("Book identifier", deprecated = true)
+        tags.documentation shouldBe ParameterDocumentation("Tag filter", deprecated = true)
+        requestId.documentation shouldBe ParameterDocumentation("Request trace", deprecated = true)
+    }
+
+    test("default smart constructor parameter documentation") {
+        path("bookId", format.uuid).documentation shouldBe ParameterDocumentation()
+        query("tag", format.string).documentation shouldBe ParameterDocumentation()
+        header("X-Request-Id", format.uuid).documentation shouldBe ParameterDocumentation()
+    }
+
     test("document a request body and response alternative") {
         val books =
             object : Api("Books") {

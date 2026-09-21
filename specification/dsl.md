@@ -443,6 +443,19 @@ values. This applies uniformly to path variables, query parameters, and headers;
 when a header appears on a response. Immutable `.description(...)` and `.deprecated(...)` modifiers retain the
 definition's concrete generic type, and presence or repetition modifiers preserve its documentation.
 
+The generic smart constructors expose the same documentation at creation time:
+
+```kotlin
+path("bookId", bookIdFormat, description = "Book identifier", deprecated = true)
+query("authorId", authorIdFormat, description = "Author filter", deprecated = true)
+header("X-Request-Id", requestIdFormat, description = "Request trace", deprecated = true)
+```
+
+`description` defaults to absent and `deprecated` defaults to `false`, so existing `path(name, format)`,
+`query(name, format)`, and `header(name, format)` calls retain their concise spelling and behavior. Smart constructors
+preserve the format's decoded value type and create required definitions; subsequent presence and repetition modifiers
+continue to preserve the supplied documentation.
+
 A `BodyInput` carries `RequestBodyDocumentation` because OpenAPI documents the request body as a whole rather than an
 individual media representation. Both `.input(body, description = ...)` and `.input(bodies, description = ...)`
 initialize it, while `.requestBodyDescription(...)` replaces it without changing the input's generic type. An `Output`

@@ -64,8 +64,9 @@ A query parameter begins as required. Presence modifiers change both its value s
 |`List<UUID>` from repeated wire occurrences
 |===
 
-The generic form is `query("authorId", authorIdFormat)`. Repetition belongs to one query definition and does not use
-extra tuple positions. Query names remain unique within a URI even though a repeated parameter may occur multiple
+The generic forms are `path("bookId", bookIdFormat)` and `query("authorId", authorIdFormat)`. Both accept optional
+`description` and `deprecated` arguments at construction time. Repetition belongs to one query definition and does not
+use extra tuple positions. Query names remain unique within a URI even though a repeated parameter may occur multiple
 times on the wire.
 
 Paths and queries preserve declaration order. Once a query has been appended, Kotlin no longer offers `/` overloads

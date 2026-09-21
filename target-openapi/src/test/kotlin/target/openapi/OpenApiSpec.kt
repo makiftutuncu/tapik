@@ -101,15 +101,22 @@ class OpenApiSpec : FunSpec({
     }
 
     test("interpret documentation owned by parameters request bodies and responses") {
-        val requestId = header.string("X-Request-Id").description("Request trace").deprecated()
-        val location = header.string("Location").description("Created resource").deprecated()
+        val requestId =
+            header("X-Request-Id", format.string, description = "Request trace", deprecated = true)
+        val location =
+            header("Location", format.string, description = "Created resource", deprecated = true)
         val documented =
             object : Api("Documented") {
                 val create by
                     post(
                         root /
-                            path.uuid("bookId").description("Book identifier").deprecated() +
-                            query.string("view").description("Requested view")
+                            path(
+                                "bookId",
+                                format.uuid,
+                                description = "Book identifier",
+                                deprecated = true
+                            ) +
+                            query("view", format.string, description = "Requested view")
                     )
                         .header(requestId)
                         .input(openApiDocumentedBody, description = "Book changes")

@@ -75,11 +75,20 @@ data class Header<Value : Any, out P : Presence<Value>>(
             Header<Duration, Required>,
             Header<Period, Required>
         > {
-        /** Builds a required header named [name] using [format]. */
+        /**
+         * Builds a required header named [name] using [format].
+         *
+         * @param description optional human-readable description.
+         * @param deprecated whether consumers should avoid this header.
+         * @throws IllegalArgumentException when [description] is present but blank.
+         */
         operator fun <Value : Any> invoke(
             name: String,
-            format: StringFormat<Value>
-        ): Header<Value, Required> = Header(name, format, Required)
+            format: StringFormat<Value>,
+            description: String? = null,
+            deprecated: Boolean = false
+        ): Header<Value, Required> =
+            Header(name, format, Required, ParameterDocumentation(description, deprecated))
 
         override fun boolean(name: String): Header<Boolean, Required> = invoke(name, format.boolean)
         override fun byte(name: String): Header<Byte, Required> = invoke(name, format.byte)
