@@ -51,7 +51,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
 
 ## P3 — Diagnostics and ergonomic defaults
 
-- [ ] Make conflicting OpenAPI component diagnostics identify the actual difference.
+- [x] Make conflicting OpenAPI component diagnostics identify the actual difference.
   - Include the conflicting component name and a concise, deterministic comparison of the existing and candidate definitions.
   - Identify the differing schema path or fields where practical, including conflicts introduced by nested or normalized component names.
   - Include source/contract context when it is available without creating a parallel metadata model solely for diagnostics.

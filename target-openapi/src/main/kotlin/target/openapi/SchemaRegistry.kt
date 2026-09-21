@@ -11,8 +11,12 @@ internal class SchemaRegistry(
     private val references: MutableSet<String> = linkedSetOf()
     private val active: MutableSet<String> = mutableSetOf()
     private val discriminatedUnions: MutableList<OpenApiSchema> = mutableListOf()
+    private val provenance: MutableMap<String, ComponentProvenance> = mutableMapOf()
 
-    fun schema(schema: Schema): OpenApiSchema {
+    fun schema(
+        schema: Schema,
+        context: String? = null
+    ): OpenApiSchema {
         val schemaName = schema.name
         if (schema is ReferenceSchema &&
             (schemaName == null || componentNaming.name(schemaName) == componentNaming.name(schema.reference))
@@ -23,20 +27,27 @@ internal class SchemaRegistry(
             requireValidComponentName(name)
             val existing = components[name]
             if (existing != null) {
-                val candidate = inline(schema)
+                val candidate = inline(schema, context)
                 if (existing != candidate) {
+                    val difference = requireNotNull(existing.firstDifference(candidate))
                     throw OpenApiGenerationException(
-                        "OpenAPI schema component '$name' has conflicting definitions"
+                        conflictMessage(
+                            componentName = name,
+                            difference = difference,
+                            existing = provenance[name],
+                            candidate = ComponentProvenance(schemaName, context)
+                        )
                     )
                 }
             } else if (active.add(name)) {
-                components[name] = inline(schema)
+                components[name] = inline(schema, context)
+                provenance[name] = ComponentProvenance(schemaName, context)
                 active.remove(name)
             }
             return componentReference(name)
         }
 
-        return inline(schema)
+        return inline(schema, context)
     }
 
     fun requireResolvedReferences() {
@@ -72,7 +83,10 @@ internal class SchemaRegistry(
             (schema.anyOf.isNotEmpty() && schema.anyOf.all { requiresProperty(it, property, visited) })
     }
 
-    private fun inline(schema: Schema): OpenApiSchema =
+    private fun inline(
+        schema: Schema,
+        context: String?
+    ): OpenApiSchema =
         when (schema) {
             is ScalarSchema ->
                 OpenApiSchema(
@@ -82,7 +96,7 @@ internal class SchemaRegistry(
             is ArraySchema ->
                 OpenApiSchema(
                     types = listOf("array"),
-                    items = schema(schema.items)
+                    items = schema(schema.items, context)
                 )
             is EnumSchema ->
                 OpenApiSchema(
@@ -94,7 +108,7 @@ internal class SchemaRegistry(
                     types = listOf("object"),
                     properties =
                         schema.properties.mapValues { (_, property) ->
-                            schema(property.schema).copy(deprecated = property.deprecated)
+                            schema(property.schema, context).copy(deprecated = property.deprecated)
                         },
                     required =
                         schema.properties
@@ -105,36 +119,42 @@ internal class SchemaRegistry(
             is MapSchema ->
                 OpenApiSchema(
                     types = listOf("object"),
-                    propertyNames = mapKeySchema(schema.keys),
-                    additionalProperties = schema(schema.values)
+                    propertyNames = mapKeySchema(schema.keys, context),
+                    additionalProperties = schema(schema.values, context)
                 )
             is NullableSchema ->
                 OpenApiSchema(
                     anyOf =
                         listOf(
-                            schema(schema.schema),
+                            schema(schema.schema, context),
                             OpenApiSchema(types = listOf("null"))
                         )
                 )
-            is UnionSchema -> union(schema)
+            is UnionSchema -> union(schema, context)
             is ReferenceSchema -> schemaReference(schema.reference)
         }
 
-    private fun union(union: UnionSchema): OpenApiSchema {
-        val alternatives = union.alternatives.map(::schema)
+    private fun union(
+        union: UnionSchema,
+        context: String?
+    ): OpenApiSchema {
+        val alternatives = union.alternatives.map { schema(it, context) }
         if (alternatives.distinct().size != alternatives.size) {
             throw OpenApiGenerationException(
                 "OpenAPI union alternatives must remain unique after component naming"
             )
         }
 
-        val discriminator = union.discriminator?.openApi(alternatives)
+        val discriminator = union.discriminator?.openApi(alternatives, context)
         return OpenApiSchema(oneOf = alternatives, discriminator = discriminator).also { schema ->
             if (discriminator != null) discriminatedUnions += schema
         }
     }
 
-    private fun SchemaDiscriminator.openApi(alternatives: List<OpenApiSchema>): OpenApiDiscriminator {
+    private fun SchemaDiscriminator.openApi(
+        alternatives: List<OpenApiSchema>,
+        context: String?
+    ): OpenApiDiscriminator {
         val alternativeReferences =
             alternatives.map { alternative ->
                 alternative.reference
@@ -144,11 +164,11 @@ internal class SchemaRegistry(
             }
         val mapping =
             mapping.mapValues { (_, target) ->
-                requireListedDiscriminatorTarget(target, alternativeReferences)
+                requireListedDiscriminatorTarget(target, alternativeReferences, context)
             }
         val defaultMapping =
             defaultMapping?.let { target ->
-                requireListedDiscriminatorTarget(target, alternativeReferences)
+                requireListedDiscriminatorTarget(target, alternativeReferences, context)
             }
 
         return OpenApiDiscriminator(
@@ -160,9 +180,10 @@ internal class SchemaRegistry(
 
     private fun requireListedDiscriminatorTarget(
         target: ReferenceSchema,
-        alternatives: List<String>
+        alternatives: List<String>,
+        context: String?
     ): String {
-        val reference = requireNotNull(schema(target).reference)
+        val reference = requireNotNull(schema(target, context).reference)
         if (reference !in alternatives) {
             throw OpenApiGenerationException(
                 "OpenAPI discriminator mapping target '${target.reference}' must be a union alternative"
@@ -171,7 +192,10 @@ internal class SchemaRegistry(
         return reference
     }
 
-    private fun mapKeySchema(keys: Schema): OpenApiSchema =
+    private fun mapKeySchema(
+        keys: Schema,
+        context: String?
+    ): OpenApiSchema =
         when (keys) {
             is ScalarSchema -> {
                 if (keys.type != SchemaType.STRING) {
@@ -179,9 +203,9 @@ internal class SchemaRegistry(
                         "OpenAPI map keys must use a string schema, but found ${keys.type}"
                     )
                 }
-                schema(keys)
+                schema(keys, context)
             }
-            is EnumSchema -> schema(keys)
+            is EnumSchema -> schema(keys, context)
             else ->
                 throw OpenApiGenerationException(
                     "Unsupported OpenAPI map key schema '${keys::class.qualifiedName}'"
@@ -206,6 +230,30 @@ internal class SchemaRegistry(
         }
     }
 }
+
+private data class ComponentProvenance(
+    val schemaName: String,
+    val context: String?
+)
+
+private fun conflictMessage(
+    componentName: String,
+    difference: OpenApiSchemaDifference,
+    existing: ComponentProvenance?,
+    candidate: ComponentProvenance
+): String =
+    buildString {
+        append(
+            "OpenAPI schema component '$componentName' has conflicting definitions at " +
+                "'${difference.path}': existing=${difference.existing}, candidate=${difference.candidate}"
+        )
+        existing?.let { source ->
+            append("; existing schema '${source.schemaName}'")
+            source.context?.let { append(" from $it") }
+        }
+        append("; candidate schema '${candidate.schemaName}'")
+        candidate.context?.let { append(" from $it") }
+    }
 
 private val COMPONENT_NAME: Regex = Regex("^[A-Za-z0-9._-]+$")
 

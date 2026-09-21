@@ -440,7 +440,12 @@ class OpenApiSpec : FunSpec({
             }
 
         shouldThrow<OpenApiGenerationException> { OpenApi.from(invalidName, version = "1") }
-        shouldThrow<OpenApiGenerationException> { OpenApi.from(conflictingDefinitions, version = "1") }
+        val conflict =
+            shouldThrow<OpenApiGenerationException> { OpenApi.from(conflictingDefinitions, version = "1") }
+        requireNotNull(conflict.message).let { message ->
+            message shouldContain "ConflictingDefinitions.endpoint query parameter 'text'"
+            message shouldContain "ConflictingDefinitions.endpoint query parameter 'number'"
+        }
     }
 
     test("reject unresolved schema references") {

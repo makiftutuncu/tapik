@@ -92,7 +92,7 @@ private class Interpreter(
             summary = endpoint.documentation.summary,
             description = endpoint.documentation.description,
             parameters = parameters(endpoint),
-            requestBody = requestBody(endpoint.input),
+            requestBody = requestBody(endpoint.id, endpoint.input),
             responses = responses(endpoint.id, endpoint.outputs)
         )
 
@@ -106,62 +106,75 @@ private class Interpreter(
                         description = variable.documentation.description,
                         required = true,
                         deprecated = variable.documentation.deprecated,
-                        schema = schemas.schema(variable.format.schema)
+                        schema =
+                            schemas.schema(
+                                variable.format.schema,
+                                "${endpoint.id} path variable '${variable.name}'"
+                            )
                     )
                 )
             }
 
-            endpoint.uri.queries.values.forEach { query -> add(query.parameter()) }
-            endpoint.headers.values.forEach { header -> add(header.parameter()) }
+            endpoint.uri.queries.values.forEach { query -> add(query.parameter(endpoint.id)) }
+            endpoint.headers.values.forEach { header -> add(header.parameter(endpoint.id)) }
         }
 
-    private fun Query.parameter(): OpenApiParameter =
+    private fun Query.parameter(endpointId: String): OpenApiParameter =
         when (this) {
-            is QueryParameter<*, *> -> parameter()
-            is RepeatedQueryParameter<*, *> -> parameter()
+            is QueryParameter<*, *> -> parameter(endpointId)
+            is RepeatedQueryParameter<*, *> -> parameter(endpointId)
         }
 
-    private fun <Value : Any> QueryParameter<Value, *>.parameter(): OpenApiParameter =
+    private fun <Value : Any> QueryParameter<Value, *>.parameter(endpointId: String): OpenApiParameter =
         OpenApiParameter(
             name = name,
             location = OpenApiParameterLocation.QUERY,
             description = documentation.description,
             required = presence.required,
             deprecated = documentation.deprecated,
-            schema = schemas.schema(format.schema).withPresence(presence, format),
+            schema =
+                schemas.schema(format.schema, "$endpointId query parameter '$name'")
+                    .withPresence(presence, format),
             style = null,
             explode = null
         )
 
-    private fun <Value : Any> RepeatedQueryParameter<Value, *>.parameter(): OpenApiParameter =
+    private fun <Value : Any> RepeatedQueryParameter<Value, *>.parameter(endpointId: String): OpenApiParameter =
         OpenApiParameter(
             name = name,
             location = OpenApiParameterLocation.QUERY,
             description = documentation.description,
             required = presence.required,
             deprecated = documentation.deprecated,
-            schema = schemas.schema(format.schema).withPresence(presence, format),
+            schema =
+                schemas.schema(format.schema, "$endpointId repeated query parameter '$name'")
+                    .withPresence(presence, format),
             style = "form",
             explode = true
         )
 
-    private fun <Value : Any> Header<Value, *>.parameter(): OpenApiParameter =
+    private fun <Value : Any> Header<Value, *>.parameter(endpointId: String): OpenApiParameter =
         OpenApiParameter(
             name = name,
             location = OpenApiParameterLocation.HEADER,
             description = documentation.description,
             required = presence.required,
             deprecated = documentation.deprecated,
-            schema = schemas.schema(format.schema).withPresence(presence, format),
+            schema =
+                schemas.schema(format.schema, "$endpointId request header '$name'")
+                    .withPresence(presence, format),
             style = null,
             explode = null
         )
 
-    private fun requestBody(input: Input): OpenApiRequestBody? =
+    private fun requestBody(
+        endpointId: String,
+        input: Input
+    ): OpenApiRequestBody? =
         when (input) {
             NoInput -> null
             is BodyInput<*> -> {
-                val content = input.bodies.content()
+                val content = input.bodies.content("$endpointId request body")
                 if (content.isEmpty()) {
                     throw OpenApiGenerationException(
                         "An OpenAPI request body must contain at least one media type"
@@ -190,27 +203,33 @@ private class Interpreter(
                         status.key,
                         OpenApiResponse(
                             description = output.documentation.description ?: status.description,
-                            headers = output.headers.values.associate { it.name to it.responseHeader() },
-                            content = output.bodies.content()
+                            headers =
+                                output.headers.values.associate {
+                                    it.name to it.responseHeader("$endpointId response '${status.key}'")
+                                },
+                            content = output.bodies.content("$endpointId response '${status.key}'")
                         )
                     )
                 }
             }
         }
 
-    private fun <Value : Any> Header<Value, *>.responseHeader(): OpenApiHeader =
+    private fun <Value : Any> Header<Value, *>.responseHeader(context: String): OpenApiHeader =
         OpenApiHeader(
             description = documentation.description,
             required = presence.required,
             deprecated = documentation.deprecated,
-            schema = schemas.schema(format.schema).withPresence(presence, format)
+            schema = schemas.schema(format.schema, "$context header '$name'").withPresence(presence, format)
         )
 
-    private fun Bodies.content(): Map<String, OpenApiMediaType> =
+    private fun Bodies.content(context: String): Map<String, OpenApiMediaType> =
         values
             .filterIsInstance<Body<*>>()
             .associate { body ->
-                body.mediaType.value to OpenApiMediaType(schemas.schema(body.format.schema))
+                body.mediaType.value to
+                    OpenApiMediaType(
+                        schemas.schema(body.format.schema, "$context body '${body.mediaType.value}'")
+                    )
             }
 }
 

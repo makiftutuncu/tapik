@@ -81,6 +81,13 @@ change the contract or select a target that supports it rather than silently los
 Targets also reject missing, unknown, or malformed target configuration. Compare the accepted keys and defaults in
 xref:reference/generation-options.adoc[Targets and generated output].
 
+== OpenAPI schema components conflict
+
+The default simple component naming policy removes package prefixes. If two differently named tapik schemas normalize
+to the same component name but produce different OpenAPI shapes, generation reports the component, original schema
+names, endpoint locations when available, and the first differing schema path with its existing and candidate values.
+Either make the definitions identical, give them distinct final names, or select qualified component naming.
+
 == Generated files are stale or collide
 
 Each Maven execution owns its previously generated paths. A successful rerun removes paths it no longer produces, so

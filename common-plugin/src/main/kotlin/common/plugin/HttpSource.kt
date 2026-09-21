@@ -35,6 +35,7 @@ private fun List<PathSegment>.renderPathTemplate(): String =
 /** Returns the stable Kotlin variant name for this HTTP status. */
 fun Status.kotlinVariantName(): String =
     when {
+        code == Status.ImATeapot.code -> "ImATeapot"
         standardDescription != null -> requireNotNull(standardDescription).lowercase().upperCamel()
         else -> "Status$code"
     }
