@@ -31,7 +31,7 @@ parallel metadata model. The contract remains the ordinary, immutable Kotlin val
 
 Registry service providers travel inside compiled contract artifacts. A consumer can therefore discover a dependency's
 APIs as if those definitions were on its own classpath. The host combines every visible registry, orders APIs
-canonically by exact `Api.id`, and rejects duplicate IDs.
+canonically by exact `Api.apiId`, and rejects duplicate IDs.
 
 == The host selects APIs and a target
 

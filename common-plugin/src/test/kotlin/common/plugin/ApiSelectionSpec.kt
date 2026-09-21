@@ -41,7 +41,7 @@ class ApiSelectionSpec : FunSpec({
             ApiSelection(includes = setOf("Missing")).select(apis)
         }.message shouldContain "Missing"
         shouldThrow<IllegalArgumentException> {
-            ApiSelection(excludes = apis.map(Api::id).toSet()).select(apis)
+            ApiSelection(excludes = apis.map(Api::apiId).toSet()).select(apis)
         }
     }
 })

@@ -26,7 +26,7 @@ internal fun webMvcApiModel(
     val api = compiled.value
     val apiSimpleName = api.javaClass.simpleName
     val apiType = requireNotNull(api.javaClass.canonicalName) {
-        "Spring WebMVC generation requires a canonical API type for '${api.id}'"
+        "Spring WebMVC generation requires a canonical API type for '${api.apiId}'"
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
     val handlerNames = mutableSetOf<String>()

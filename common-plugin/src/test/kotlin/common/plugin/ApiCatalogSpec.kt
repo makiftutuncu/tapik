@@ -34,7 +34,7 @@ class ApiCatalogSpec : FunSpec({
     test("load compiler-contributed registries through the shared service") {
         val catalog = ApiCatalog.load(ApiCatalogSpec::class.java.classLoader)
 
-        catalog.apis.map(Api::id) shouldContainExactly listOf("Service")
+        catalog.apis.map(Api::apiId) shouldContainExactly listOf("Service")
     }
 })
 

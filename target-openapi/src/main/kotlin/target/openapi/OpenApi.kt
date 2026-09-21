@@ -24,7 +24,7 @@ object OpenApi {
      *
      * @param api compiled tapik API value to interpret.
      * @param version version of the API document.
-     * @param title human-readable API title, defaulting to [Api.id].
+     * @param title human-readable API title, defaulting to [Api.apiId].
      * @param componentNaming policy for converting schema names to component names.
      * @return an OpenAPI document preserving endpoint declaration order.
      * @throws IllegalArgumentException when [title] or [version] is blank.
@@ -33,7 +33,7 @@ object OpenApi {
     fun from(
         api: Api,
         version: String,
-        title: String = api.id,
+        title: String = api.apiId,
         componentNaming: OpenApiComponentNaming = OpenApiComponentNaming.Simple
     ): OpenApiDocument =
         from(

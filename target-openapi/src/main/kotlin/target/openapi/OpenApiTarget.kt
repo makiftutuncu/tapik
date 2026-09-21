@@ -27,7 +27,7 @@ object OpenApiTarget : GenerationTarget {
                         componentNaming = configuration.componentNaming
                     )
                 GeneratedArtifact(
-                    relativePath = configuration.output.replace(API_PLACEHOLDER, api.id),
+                    relativePath = configuration.output.replace(API_PLACEHOLDER, api.apiId),
                     mediaType = configuration.format.mediaType,
                     kind = ArtifactKind.DOCUMENTATION,
                     content = configuration.format.render(document, configuration.pretty)

@@ -11,6 +11,11 @@ object Books : Api() {
 }
 ```
 
+`Api.apiId` exposes the resolved API identity. The name is deliberately API-specific: `Api` does not declare an `id`
+member, so contracts may use the natural name `id` for a path variable or another resource definition. `Api()` derives
+`apiId` from the concrete type's simple name, while `Api(apiId = "...")` selects an explicit non-blank identity. There
+is no deprecated `Api.id` alias because retaining it would preserve the member collision this name avoids.
+
 Delegation registers endpoints in declaration order without package scanning. An implementation should use Kotlin's
 `provideDelegate` convention so registration occurs during API initialization rather than on first property access.
 `Api.endpoints` exposes an ordered snapshot `List<Endpoint<*, *, *, *, *, Ready>>` for discovery. Mutating a castable

@@ -3,18 +3,18 @@ package dev.akif.tapik
 /**
  * A named, ordered collection of delegated endpoint definitions.
  *
- * @param id optional API identifier used to qualify endpoint property names. The concrete type's simple name is used
- * when omitted.
- * @property id resolved API identifier.
- * @throws IllegalArgumentException when [id] is blank or the concrete type has no simple name.
+ * @param apiId optional API identifier used to qualify endpoint property names. The concrete type's simple name is
+ * used when omitted.
+ * @property apiId resolved API identifier.
+ * @throws IllegalArgumentException when [apiId] is blank or the concrete type has no simple name.
  */
 abstract class Api(
-    id: String? = null
+    apiId: String? = null
 ) {
-    val id: String = id ?: requireNotNull(this::class.simpleName) { "API type must have a simple name" }
+    val apiId: String = apiId ?: requireNotNull(this::class.simpleName) { "API type must have a simple name" }
 
     init {
-        require(this.id.isNotBlank()) { "API ID must not be blank" }
+        require(this.apiId.isNotBlank()) { "API ID must not be blank" }
     }
 
     private val registeredEntries: MutableList<ApiEntry> = mutableListOf()
@@ -129,15 +129,17 @@ abstract class Api(
     ) {
         val includedTree = inclusion.api.apiTree()
         require(includedTree.none { api -> api === this }) {
-            "API '${id}' cannot include itself directly or transitively"
+            "API '$apiId' cannot include itself directly or transitively"
         }
         val currentTree = apiTree()
         val repeated = includedTree.firstOrNull { included -> currentTree.any { current -> current === included } }
-        require(repeated == null) { "API '${requireNotNull(repeated).id}' is already included in API '$id'" }
-        val currentIds = currentTree.mapTo(mutableSetOf(), Api::id)
-        val duplicateId = includedTree.firstOrNull { included -> included.id in currentIds }
+        require(repeated == null) {
+            "API '${requireNotNull(repeated).apiId}' is already included in API '$apiId'"
+        }
+        val currentIds = currentTree.mapTo(mutableSetOf(), Api::apiId)
+        val duplicateId = includedTree.firstOrNull { included -> included.apiId in currentIds }
         require(duplicateId == null) {
-            "API ID '${requireNotNull(duplicateId).id}' is already present in API '$id'"
+            "API ID '${requireNotNull(duplicateId).apiId}' is already present in API '$apiId'"
         }
         require(includedApis.none { existing -> existing.propertyName == propertyName }) {
             "API inclusion property '$propertyName' is already registered"

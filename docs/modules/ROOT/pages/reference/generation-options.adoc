@@ -106,7 +106,7 @@ claim one shareable `BooksEndpoints.kt` path instead of placing duplicate declar
 == Naming and collisions
 
 Spring targets keep readable simple names such as `BooksClient` and `BooksServer`. Each API gets its own namespace
-under `packageName`, derived from its JVM class name relative to the configured package's parent, not `Api.id`.
+under `packageName`, derived from its JVM class name relative to the configured package's parent, not `Api.apiId`.
 For API `com.example.library.contract.Authors` and `packageName` set to `com.example.library.generated`, import
 `com.example.library.generated.contract.Authors.AuthorsServer`: the shared `com.example.library` root appears only once.
 Endpoint response types and multi-representation request-body types are top-level declarations in that namespace and
@@ -132,8 +132,8 @@ controller suffixes must differ; different targets for the same API must also us
 prefix. Repeated API classes in one request are rejected. Local method and nested response-name collisions still use
 deterministic numeric suffixes.
 
-OpenAPI file templates use `Api.id`. API filters also use `Api.id`. This distinction lets a Kotlin type name determine
-source declarations while the contract's stable API identity determines selection and documentation filenames.
+OpenAPI file templates use `Api.apiId`. API filters also use `Api.apiId`. This distinction lets a Kotlin type name
+determine source declarations while the contract's stable API identity determines selection and documentation filenames.
 
 == Artifact synchronization
 

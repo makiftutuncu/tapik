@@ -8,8 +8,9 @@ An `Api` is a named, ordered collection of endpoints. Both classes and objects c
 include::example$dsl/ApiAndUriExamples.kt[tag=api-and-endpoints]
 ----
 
-`Api()` uses the concrete type's simple name as its ID. You may pass an explicit non-blank ID to the constructor when
-the Kotlin type name is not the contract name you want.
+`Api()` uses the concrete type's simple name as its `apiId`. You may pass an explicit non-blank `apiId` to the
+constructor when the Kotlin type name is not the contract name you want. The API base class intentionally has no `id`
+member, leaving that natural name available for resource path variables and other contract definitions.
 
 == Endpoint identity
 

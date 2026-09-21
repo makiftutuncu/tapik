@@ -14,6 +14,8 @@ until the replacement behaves as expected.
 . Re-express endpoints as delegated properties of a public `Api` object or constructible class. Keep user-owned models
   and explicitly attach their formats. Review paths, parameter presence, body alternatives, and outputs against the
   xref:contracts/index.adoc[DSL guide]; do not assume previous DSL spelling or generated names still apply.
+. Replace reads of `Api.id` with `Api.apiId`, and rename explicit constructor arguments from `id` to `apiId`. There is
+  no compatibility alias, so an API may declare its own `id` resource definition without colliding with the base class.
 . Choose the lifecycle deliberately: same-module output uses `process-classes`; main source implementing generated
   interfaces should consume a compiled contract and generate during `generate-sources`.
 . Regenerate everything in a clean build. Implement generated `*Server` interfaces in handlers, let generated

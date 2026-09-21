@@ -44,7 +44,7 @@ class MavenProjectClasspathSpec : FunSpec({
             }
 
         ProjectApis.use(project.generationClasspath(), MavenProjectClasspathSpec::class.java.classLoader) { apis, _ ->
-            apis.map(Api::id) shouldContain "RuntimeOnly"
+            apis.map(Api::apiId) shouldContain "RuntimeOnly"
         }
     }
 

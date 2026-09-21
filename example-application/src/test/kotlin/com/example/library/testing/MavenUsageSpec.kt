@@ -59,8 +59,8 @@ class MavenUsageSpec : FunSpec({
 
     test("compile API definitions and generate OpenAPI through one tapik Maven plugin") {
         val apis = ServiceLoader.load(ApiRegistry::class.java).flatMap(ApiRegistry::apis)
-        apis.map { api -> api.id }.sorted() shouldContainExactly listOf("Authors", "Books", "Catalog")
-        apis.single { api -> api.id == "Authors" }.shouldBeInstanceOf<Authors>()
+        apis.map { api -> api.apiId }.sorted() shouldContainExactly listOf("Authors", "Books", "Catalog")
+        apis.single { api -> api.apiId == "Authors" }.shouldBeInstanceOf<Authors>()
 
         Files.isRegularFile(
             Path.of(

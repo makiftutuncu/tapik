@@ -156,6 +156,21 @@ class DslCompilationSpec : FunSpec({
         ) shouldBe ExitCode.OK
     }
 
+    test("compile an API with an id path variable") {
+        compile(
+            """
+            import dev.akif.tapik.*
+
+            object Books : Api() {
+                val id = path.uuid("id")
+                val get by get(root / "books" / id)
+            }
+
+            val uri = Books.get.uri.toString()
+            """
+        ) shouldBe ExitCode.OK
+    }
+
     test("not expose an id on a draft endpoint") {
         compile(
             """

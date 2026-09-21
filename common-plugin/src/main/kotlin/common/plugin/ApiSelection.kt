@@ -27,14 +27,14 @@ class ApiSelection(
      * @throws IllegalArgumentException when a configured ID is unknown or no API remains.
      */
     fun select(apis: List<Api>): List<Api> {
-        val availableIds = apis.mapTo(mutableSetOf(), Api::id)
+        val availableIds = apis.mapTo(mutableSetOf(), Api::apiId)
         val unknownIds = (includes + excludes) - availableIds
         require(unknownIds.isEmpty()) {
             "API selection references unknown IDs: ${unknownIds.sorted().joinToString()}"
         }
         val selected =
             apis.filter { api ->
-                (includes.isEmpty() || api.id in includes) && api.id !in excludes
+                (includes.isEmpty() || api.apiId in includes) && api.apiId !in excludes
             }
         require(selected.isNotEmpty()) { "API selection must retain at least one API" }
         return selected

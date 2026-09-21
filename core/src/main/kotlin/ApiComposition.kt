@@ -33,7 +33,7 @@ class ApiInclusion<out Included : Api> internal constructor(
         property: KProperty<*>
     ): Included {
         check(owner === thisRef && name == property.name) {
-            "API inclusion is not delegated to '${thisRef.id}.${property.name}'"
+            "API inclusion is not delegated to '${thisRef.apiId}.${property.name}'"
         }
         return api
     }

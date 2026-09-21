@@ -63,7 +63,7 @@ Target-specific options are listed in xref:reference/generation-options.adoc[Tar
 
 == Select APIs
 
-Selection uses the exact `Api.id` values reported by the compiler registries. It does not use package or wildcard
+Selection uses the exact `Api.apiId` values reported by the compiler registries. It does not use package or wildcard
 matching. This tested execution includes `Authors` and `Catalog`, then excludes `Authors`, so only `Catalog` remains:
 
 [source,xml]

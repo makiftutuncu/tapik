@@ -36,7 +36,7 @@ chain; use `./mvnw -e process-classes` (or your usual lifecycle command with `-e
 
 == API selection fails
 
-`includeApis` and `excludeApis` use exact, case-sensitive `Api.id` values. Blank values, unknown IDs, duplicate API IDs
+`includeApis` and `excludeApis` use exact, case-sensitive `Api.apiId` values. Blank values, unknown IDs, duplicate API IDs
 across registries, and filters that leave no API are errors. With no includes, every API is selected; exclusions are
 then applied and win.
 

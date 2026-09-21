@@ -30,7 +30,7 @@ object CompiledApiReader {
                 val location =
                     locations.singleOrNull { candidate -> candidate.endpoint === endpoint }
                         ?: throw CompiledApiInspectionException(
-                            "Cannot locate endpoint '${endpoint.id}' from API '${api.id}'"
+                            "Cannot locate endpoint '${endpoint.id}' from API '${api.apiId}'"
                         )
                 CompiledEndpoint(endpoint, location.type, location.propertyPath)
             }
@@ -49,21 +49,21 @@ object CompiledApiReader {
                 val expectedType = inclusion.api.javaClass.canonicalName
                 if (actualType != expectedType) {
                     throw CompiledApiInspectionException(
-                        "Inclusion property '${api.id}.${inclusion.propertyName}' must retain concrete type " +
+                        "Inclusion property '${api.apiId}.${inclusion.propertyName}' must retain concrete type " +
                             "'$expectedType', but has type '${property.type.classifier}'"
                     )
                 }
                 locations(inclusion.api, parentPath + inclusion.propertyName)
             }
         val nestedEndpoints = nested.map(EndpointLocation::endpoint)
-        val prefix = "${api.id}."
+        val prefix = "${api.apiId}."
         val direct =
             api.endpoints
                 .filter { endpoint -> nestedEndpoints.none { nestedEndpoint -> nestedEndpoint === endpoint } }
                 .map { endpoint ->
                     if (!endpoint.id.startsWith(prefix)) {
                         throw CompiledApiInspectionException(
-                            "Endpoint '${endpoint.id}' does not belong to API '${api.id}'"
+                            "Endpoint '${endpoint.id}' does not belong to API '${api.apiId}'"
                         )
                     }
                     val propertyName = endpoint.id.removePrefix(prefix)
@@ -88,11 +88,11 @@ object CompiledApiReader {
         val property =
             properties[propertyName]
                 ?: throw CompiledApiInspectionException(
-                    "Cannot find compiled property '$propertyName' in API '${api.id}'"
+                    "Cannot find compiled property '$propertyName' in API '${api.apiId}'"
                 )
         if (property.visibility != Visibility.PUBLIC) {
             throw CompiledApiInspectionException(
-                "$kind property '${api.id}.$propertyName' must be public for generated targets"
+                "$kind property '${api.apiId}.$propertyName' must be public for generated targets"
             )
         }
         return property

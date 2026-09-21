@@ -83,7 +83,7 @@ class RegistrySynchronizationSpec : FunSpec({
             RegistrySynchronizationSpec::class.java.classLoader
         ).use { classLoader ->
             val registry = ServiceLoader.load(ApiRegistry::class.java, classLoader).single()
-            registry.apis.map(Api::id) shouldContainExactly listOf("Authors")
+            registry.apis.map(Api::apiId) shouldContainExactly listOf("Authors")
         }
         generatedRegistryClasses(recompiled.outputDirectory).shouldHaveSize(1)
     }
@@ -118,7 +118,7 @@ class RegistrySynchronizationSpec : FunSpec({
         ).use { classLoader ->
             val registries = ServiceLoader.load(ApiRegistry::class.java, classLoader).toList()
             registries.shouldHaveSize(2)
-            registries.flatMap(ApiRegistry::apis).map(Api::id) shouldContainExactly listOf("Books")
+            registries.flatMap(ApiRegistry::apis).map(Api::apiId) shouldContainExactly listOf("Books")
         }
 
         val recompiled =
@@ -178,7 +178,7 @@ class RegistrySynchronizationSpec : FunSpec({
             RegistrySynchronizationSpec::class.java.classLoader
         ).use { classLoader ->
             val registry = ServiceLoader.load(ApiRegistry::class.java, classLoader).single()
-            registry.apis.map(Api::id) shouldContainExactly listOf("Books")
+            registry.apis.map(Api::apiId) shouldContainExactly listOf("Books")
         }
     }
 })

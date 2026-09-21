@@ -11,7 +11,13 @@ class EndpointSpec : FunSpec({
     test("derive the API ID from its concrete type") {
         class Books : Api()
 
-        Books().id shouldBe "Books"
+        Books().apiId shouldBe "Books"
+    }
+
+    test("use an explicit API ID") {
+        val books = object : Api(apiId = "Catalog") {}
+
+        books.apiId shouldBe "Catalog"
     }
 
     test("bind endpoint identity through property delegation") {

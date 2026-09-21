@@ -98,7 +98,7 @@ internal fun restClientApiModel(
     val api = compiled.value
     val apiSimpleName = api.javaClass.simpleName
     val apiType = requireNotNull(api.javaClass.canonicalName) {
-        "Spring RestClient generation requires a canonical API type for '${api.id}'"
+        "Spring RestClient generation requires a canonical API type for '${api.apiId}'"
     }
     val apiProperty = apiSimpleName.lowerCamel("api") + "Api"
     val methodNames = mutableSetOf<String>()

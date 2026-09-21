@@ -147,7 +147,7 @@ operator fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
                 outputs = outputs,
                 documentation = documentation,
                 tags = tags,
-                state = Ready("${thisRef.id}.${property.name}")
+                state = Ready("${thisRef.apiId}.${property.name}")
             )
         thisRef.register(ready)
         return ReadOnlyProperty { _, _ -> ready }

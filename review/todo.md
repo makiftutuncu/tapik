@@ -29,7 +29,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
   - Prevent derivation caches from leaking results between configurations with different custom registrations.
   - Add KDoc and tests for built-in temporal mappings, nested custom mappings, nullability/collection composition, and independent configurations.
 
-- [ ] Rename or hide `Api.id` so it cannot collide with common user contract properties.
+- [x] Rename or hide `Api.id` so it cannot collide with common user contract properties.
   - Choose a non-conflicting name for the API's internal/public identity and update the relevant specification and KDoc.
   - Allow an `Api` subclass to declare its own `id` value for a resource path variable without conflicting with an inherited `String` property.
   - Add a compile-time usage test showing that an expression such as `get(root / id)` resolves to the user's path value rather than the API identity.

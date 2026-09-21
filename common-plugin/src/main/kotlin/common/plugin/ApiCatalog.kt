@@ -7,7 +7,7 @@ import java.util.ServiceLoader
 /**
  * A deterministic collection of APIs from every available [ApiRegistry].
  *
- * @property apis all registered APIs ordered by [Api.id].
+ * @property apis all registered APIs ordered by [Api.apiId].
  */
 class ApiCatalog private constructor(
     apis: List<Api>
@@ -26,7 +26,7 @@ class ApiCatalog private constructor(
         fun from(registries: Iterable<ApiRegistry>): ApiCatalog {
             val apis = registries.flatMap(ApiRegistry::apis)
             requireUniqueApiIds(apis)
-            return ApiCatalog(apis.sortedBy(Api::id))
+            return ApiCatalog(apis.sortedBy(Api::apiId))
         }
 
         /**
@@ -44,7 +44,7 @@ class ApiCatalog private constructor(
 internal fun requireUniqueApiIds(apis: List<Api>) {
     val duplicateIds =
         apis
-            .groupingBy(Api::id)
+            .groupingBy(Api::apiId)
             .eachCount()
             .filterValues { count -> count > 1 }
             .keys

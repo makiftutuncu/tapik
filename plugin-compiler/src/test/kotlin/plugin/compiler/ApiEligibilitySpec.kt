@@ -39,7 +39,7 @@ class ApiEligibilitySpec : FunSpec({
             ApiEligibilitySpec::class.java.classLoader
         ).use { classLoader ->
             val registry = ServiceLoader.load(ApiRegistry::class.java, classLoader).single()
-            registry.apis.map { api -> api.id } shouldContainExactly listOf("Authors", "Rentals", "Books")
+            registry.apis.map { api -> api.apiId } shouldContainExactly listOf("Authors", "Rentals", "Books")
         }
     }
 
@@ -61,7 +61,7 @@ class ApiEligibilitySpec : FunSpec({
             ApiEligibilitySpec::class.java.classLoader
         ).use { classLoader ->
             val registry = ServiceLoader.load(ApiRegistry::class.java, classLoader).single()
-            registry.apis.single().id shouldBe "catalog"
+            registry.apis.single().apiId shouldBe "catalog"
         }
     }
 
