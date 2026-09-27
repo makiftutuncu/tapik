@@ -375,9 +375,10 @@ request and output bulk modifiers validate received body groups before accepting
 
 `MediaType` validates and normalizes a concrete HTTP media-type string at construction (see `media-types.md`).
 Equality follows type/subtype and parameter identity, so equivalent spellings cannot bypass body uniqueness.
-Built-in values cover JSON,
-XML, plain text, and arbitrary bytes. A `Body<Value>` combines one media type with a `ByteArrayFormat<Value>`; format
-integrations such as Kotlin serialization provide convenient builders including `jsonBody<Value>()`.
+Built-in values cover common application, image, multipart, and text representations while the public constructor
+remains available for registered and vendor-specific values. A `Body<Value>` combines one media type with a
+`ByteArrayFormat<Value>`; format integrations such as Kotlin serialization provide convenient builders including
+`jsonBody<Value>()`.
 
 ## Outputs
 

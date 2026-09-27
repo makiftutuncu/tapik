@@ -28,6 +28,17 @@ class OpenApiSpec : FunSpec({
             setOf("text/plain;charset=utf-8")
     }
 
+    test("emit catalog media types as content keys") {
+        val representation = body(MediaType.GraphQlResponse, openApiDocumentedBody.format)
+        val api = object : Api("CatalogMedia") {
+            val create by post(root).input(representation).output(Status.Ok with representation)
+        }
+        val operation = OpenApi.from(api, "1").paths.getValue("/").operations.getValue(Method.POST)
+
+        operation.requestBody?.content?.keys shouldBe setOf("application/graphql-response+json")
+        operation.responses.getValue("200").content.keys shouldBe setOf("application/graphql-response+json")
+    }
+
     test("interpret API identity paths and operations") {
         document.specificationVersion shouldBe "3.2.0"
         document.info shouldBe OpenApiInfo(title = "Books", version = "0.6.0")

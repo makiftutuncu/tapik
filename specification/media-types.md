@@ -28,6 +28,21 @@ lookups, or additional media-specific parameter semantics are inferred.
 Thus `Text/Plain;Charset="UTF-8"` equals `text/plain;charset=utf-8`, but `multipart/mixed;boundary=A` does not equal
 `multipart/mixed;boundary=a`. Different explicit parameters remain distinct representations.
 
+## Common values
+
+`MediaType.Companion` provides a neutral baseline catalog using canonical registered values:
+
+- application: `AtomXml`, `Cbor`, `FormUrlEncoded`, `GraphQlResponse`, `Json`, `NdJson`, `OctetStream`, `Pdf`,
+  `ProblemJson`, `ProblemXml`, `Protobuf`, `RssXml`, `XhtmlXml`, `Xml`, and `Yaml`;
+- image: `Gif`, `Jpeg`, and `Png`;
+- multipart: `MultipartFormData`, `MultipartMixed`, and `MultipartRelated`;
+- text: `EventStream`, `Html`, `Markdown`, `PlainText`, and `TextXml`.
+
+The catalog contains concrete body media types only, so it intentionally has no wildcard equivalent of `*/*`.
+Catalog values use the same validated constructor and value semantics as custom values. A caller defines any
+unlisted registered or vendor media type directly, for example `MediaType("application/vnd.example+json")` or
+`MediaType("application/json;profile=Book")`; catalog membership never restricts bodies or generated targets.
+
 ## Targets
 
 Body uniqueness uses `MediaType` equality. OpenAPI Content Object keys and generated Spring mappings use its

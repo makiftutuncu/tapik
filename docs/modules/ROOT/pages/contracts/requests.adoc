@@ -53,6 +53,12 @@ wildcards such as `application/*` are rejected. Its `value` and string represent
 casing do not affect equality; neither does parameter order or equivalent quoting. Other parameter values remain
 case-sensitive, so multipart boundaries `A` and `a` are different. Parameter order is retained in rendered output.
 
+Common values are available from `MediaType`, including JSON, XML, CBOR, Protocol Buffers, YAML, PDF, form data,
+problem details, common images, multipart variants, HTML, Markdown, plain text, and event streams. For example, use
+`MediaType.GraphQlResponse`, `MediaType.ProblemJson`, `MediaType.MultipartFormData`, or `MediaType.Png`. The catalog is
+only a convenience: custom registered and vendor values continue to use `MediaType("application/vnd.example+json")`.
+Wildcards are not catalogued because a body has one concrete representation rather than an `Accept` range.
+
 `bodiesOf(...)` groups alternative media representations of one logical Kotlin type. Their media types must be
 distinct. Adding `noBody` as the final alternative makes the complete request body optional; an endpoint with only
 `noInput` has no request-body definition at all.

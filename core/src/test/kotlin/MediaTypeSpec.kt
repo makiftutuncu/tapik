@@ -7,6 +7,39 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 
 class MediaTypeSpec : FunSpec({
+    test("provide common concrete media types with canonical values") {
+        listOf(
+            MediaType.AtomXml to "application/atom+xml",
+            MediaType.Cbor to "application/cbor",
+            MediaType.FormUrlEncoded to "application/x-www-form-urlencoded",
+            MediaType.GraphQlResponse to "application/graphql-response+json",
+            MediaType.Json to "application/json",
+            MediaType.NdJson to "application/x-ndjson",
+            MediaType.OctetStream to "application/octet-stream",
+            MediaType.Pdf to "application/pdf",
+            MediaType.ProblemJson to "application/problem+json",
+            MediaType.ProblemXml to "application/problem+xml",
+            MediaType.Protobuf to "application/x-protobuf",
+            MediaType.RssXml to "application/rss+xml",
+            MediaType.XhtmlXml to "application/xhtml+xml",
+            MediaType.Xml to "application/xml",
+            MediaType.Yaml to "application/yaml",
+            MediaType.Gif to "image/gif",
+            MediaType.Jpeg to "image/jpeg",
+            MediaType.Png to "image/png",
+            MediaType.MultipartFormData to "multipart/form-data",
+            MediaType.MultipartMixed to "multipart/mixed",
+            MediaType.MultipartRelated to "multipart/related",
+            MediaType.EventStream to "text/event-stream",
+            MediaType.Html to "text/html",
+            MediaType.Markdown to "text/markdown",
+            MediaType.PlainText to "text/plain",
+            MediaType.TextXml to "text/xml"
+        ).forEach { (mediaType, value) ->
+            mediaType.value shouldBe value
+        }
+    }
+
     test("normalize complete concrete media types while retaining parameter order") {
         val mediaType = MediaType(" \tApplication/Vnd.Example+JSON ; Profile=\"Book\"; CHARSET=\"UTF-8\" \t")
         mediaType.value shouldBe "application/vnd.example+json;profile=Book;charset=utf-8"

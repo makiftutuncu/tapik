@@ -63,7 +63,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
   - Keep custom header definitions available and avoid taking a dependency on Spring constants in the core model.
   - Document the predefined set and test its names, formats, and generated OpenAPI representation.
 
-- [ ] Expand the common `MediaType` catalog and retain ergonomic custom construction.
+- [x] Expand the common `MediaType` catalog and retain ergonomic custom construction.
   - Define a documented baseline of common media types comparable to the useful framework-standard constants, with canonical serialized values.
   - Preserve or improve the public construction path for custom media types without coupling the core model to Spring.
   - Decide and specify normalization, equality, and parameter handling for custom values such as charset-bearing media types.
