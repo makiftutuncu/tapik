@@ -389,6 +389,25 @@ class OpenApiSpec : FunSpec({
         }
     }
 
+    test("translate enum default schemas without losing their value type") {
+        val api =
+            object : Api("EnumDefaults") {
+                val list by
+                    get(
+                        root / path.enumValue<OpenApiVisibility>("visibility") +
+                            query.enumValue<OpenApiVisibility>("filter")
+                    )
+            }
+        val parameters =
+            OpenApi.from(api, "1")
+                .paths.getValue("/{visibility}")
+                .operations.getValue(Method.GET)
+                .parameters
+
+        parameters.map { it.schema.enumValues } shouldBe
+            listOf(listOf("PUBLIC", "PRIVATE"), listOf("PUBLIC", "PRIVATE"))
+    }
+
     test("interpret portable status matchers") {
         val statuses =
             object : Api("Statuses") {
@@ -492,3 +511,8 @@ private fun openApiBody(schema: Schema): Body<String> =
                 schema = schema
             )
     )
+
+private enum class OpenApiVisibility {
+    PUBLIC,
+    PRIVATE
+}

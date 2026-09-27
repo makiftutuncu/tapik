@@ -43,6 +43,19 @@ class StringFormatsSpec : FunSpec({
         format.uuid.encode(uuid) shouldBe uuid.toString()
     }
 
+    test("encode and decode enums by exact constant name") {
+        val visibility: StringFormat<Visibility> = format.enumValue<Visibility>()
+
+        visibility.encode(Visibility.PUBLIC) shouldBe "PUBLIC"
+        visibility.decode("PRIVATE") shouldBe DecodeResult.Success(Visibility.PRIVATE)
+        visibility.schema shouldBe EnumSchema(listOf("PUBLIC", "PRIVATE"))
+
+        val failure = visibility.decode("private").shouldBeInstanceOf<DecodeResult.Failure>()
+        failure.errors.single().message shouldBe
+            "Unknown enum value 'private'; expected one of [PUBLIC, PRIVATE]"
+        failure.errors.single().cause.shouldBeInstanceOf<IllegalArgumentException>()
+    }
+
     test("describe scalar formats with OpenAPI-compatible schemas") {
         format.boolean.schema shouldBe ScalarSchema(SchemaType.BOOLEAN)
         format.byte.schema shouldBe ScalarSchema(SchemaType.INTEGER, "int8")
@@ -89,4 +102,9 @@ class StringFormatsSpec : FunSpec({
 
 private fun <Value : Any> verifyRoundTrip(format: StringFormat<Value>, value: Value) {
     format.decode(format.encode(value)) shouldBe DecodeResult.Success(value)
+}
+
+private enum class Visibility {
+    PUBLIC,
+    PRIVATE
 }

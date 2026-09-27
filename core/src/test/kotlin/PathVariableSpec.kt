@@ -38,6 +38,13 @@ class PathVariableSpec : FunSpec({
         path.period("value").format shouldBeSameInstanceAs format.period
     }
 
+    test("build enum path variables while retaining their value type") {
+        val visibility: PathVariable<PathVisibility> = path.enumValue<PathVisibility>("visibility")
+
+        visibility.format.decode("PUBLIC") shouldBe DecodeResult.Success(PathVisibility.PUBLIC)
+        visibility.format.schema shouldBe EnumSchema(listOf("PUBLIC", "PRIVATE"))
+    }
+
     test("reject invalid path variable names") {
         shouldThrow<IllegalArgumentException> { path.string("") }
         shouldThrow<IllegalArgumentException> { path.string("   ") }
@@ -142,3 +149,8 @@ class PathVariableSpec : FunSpec({
 private data class PathBookId(
     val value: UUID
 )
+
+private enum class PathVisibility {
+    PUBLIC,
+    PRIVATE
+}

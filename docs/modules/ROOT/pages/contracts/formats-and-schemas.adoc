@@ -25,6 +25,12 @@ schema. `.named("BookId")` gives schema-aware targets a stable reusable componen
 Every format also has `.repeated()`, which produces a list format, preserves element order, and accumulates decoding
 errors. Repeated query parameters use this operation internally.
 
+For a Kotlin enum, use `format.enumValue<BookState>()`. The resulting format writes and reads exact constant names and
+publishes the same ordered names through `EnumSchema`; an unknown value becomes a structured decode failure listing
+the allowed names. Convenience factories are also available as `path.enumValue<BookState>("state")`,
+`query.enumValue<BookState>("state")`, and `header.enumValue<BookState>("X-Book-State")`. Each retains `BookState` in
+the inferred endpoint type. Use `.named("BookState")` when the enum should become a reusable schema component.
+
 == Parameter and body formats
 
 Path variables, query parameters, and headers use `StringFormat<Value>`, an alias for `Format<Value, String>`. Bodies

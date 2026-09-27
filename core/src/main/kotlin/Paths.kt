@@ -106,6 +106,10 @@ data class PathVariable<Value : Any>(
         ): PathVariable<Value> =
             PathVariable(name, format, ParameterDocumentation(description, deprecated))
 
+        /** Builds a required path variable for enum [Value] using exact constant names. */
+        inline fun <reified Value : Enum<Value>> enumValue(name: String): PathVariable<Value> =
+            invoke(name, format.enumValue())
+
         override fun boolean(name: String): PathVariable<Boolean> = invoke(name, format.boolean)
         override fun byte(name: String): PathVariable<Byte> = invoke(name, format.byte)
         override fun short(name: String): PathVariable<Short> = invoke(name, format.short)

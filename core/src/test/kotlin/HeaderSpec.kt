@@ -33,6 +33,14 @@ class HeaderSpec : FunSpec({
         header.instant("X-Value").format shouldBeSameInstanceAs format.instant
     }
 
+    test("build enum headers while retaining value and presence types") {
+        val visibility: Header<HeaderVisibility, Required> =
+            header.enumValue<HeaderVisibility>("X-Visibility")
+
+        visibility.format.decode("PUBLIC") shouldBe DecodeResult.Success(HeaderVisibility.PUBLIC)
+        visibility.presence shouldBe Required
+    }
+
     test("provide common HTTP headers with canonical names") {
         val headers =
             listOf(
@@ -152,3 +160,8 @@ class HeaderSpec : FunSpec({
 private data class HeaderBookId(
     val value: UUID
 )
+
+private enum class HeaderVisibility {
+    PUBLIC,
+    PRIVATE
+}

@@ -27,6 +27,14 @@ class QueryParameterSpec : FunSpec({
         query.instant("value").format shouldBeSameInstanceAs format.instant
     }
 
+    test("build enum query parameters while retaining value and presence types") {
+        val visibility: QueryParameter<QueryVisibility, Required> =
+            query.enumValue<QueryVisibility>("visibility")
+
+        visibility.format.decode("PRIVATE") shouldBe DecodeResult.Success(QueryVisibility.PRIVATE)
+        visibility.presence shouldBe Required
+    }
+
     test("represent required, optional, and defaulted presence in types") {
         val required: QueryParameter<String, Required> = query.string("term")
         val optional: QueryParameter<String, Optional> = required.optional()
@@ -101,3 +109,8 @@ class QueryParameterSpec : FunSpec({
 private data class QueryBookId(
     val value: UUID
 )
+
+private enum class QueryVisibility {
+    PUBLIC,
+    PRIVATE
+}

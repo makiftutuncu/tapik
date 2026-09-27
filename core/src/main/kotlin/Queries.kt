@@ -95,6 +95,10 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
         ): QueryParameter<Value, Required> =
             QueryParameter(name, format, Required, ParameterDocumentation(description, deprecated))
 
+        /** Builds a required query parameter for enum [Value] using exact constant names. */
+        inline fun <reified Value : Enum<Value>> enumValue(name: String): QueryParameter<Value, Required> =
+            invoke(name, format.enumValue())
+
         override fun boolean(name: String): QueryParameter<Boolean, Required> = invoke(name, format.boolean)
         override fun byte(name: String): QueryParameter<Byte, Required> = invoke(name, format.byte)
         override fun short(name: String): QueryParameter<Short, Required> = invoke(name, format.short)

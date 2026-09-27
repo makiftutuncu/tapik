@@ -186,6 +186,19 @@ The cached string defaults live on `Format.Companion`; `format` is an ergonomic 
 corresponding OpenAPI format when one exists. A failed parse produces a structured decode failure and retains the
 parsing exception as its cause.
 
+Enum defaults use exact Kotlin constant names on the wire:
+
+```kotlin
+val stateFormat: StringFormat<BookState> = format.enumValue<BookState>()
+val stateQuery: QueryParameter<BookState, Required> = query.enumValue<BookState>("state")
+```
+
+`enumValue<Value>()` is available on the string defaults surface and derives the complete ordered constant set from
+the reified enum type. It encodes `Enum.name`, accepts only an exact name while decoding, reports the received value
+and allowed names in a structured failure, and supplies an `EnumSchema` containing those same names. Concrete
+path-variable, query-parameter, and header companions expose matching named factories, preserving the enum type and
+presence in endpoint types. (`enum` itself is a Kotlin keyword, hence the `enumValue` name.)
+
 Value-class formats favor discoverable transformation syntax:
 
 ```kotlin

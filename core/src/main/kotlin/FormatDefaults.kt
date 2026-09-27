@@ -75,3 +75,32 @@ interface FormatDefaults<Representation : Any> {
     /** The standard [Period] format. */
     val period: Format<Period, Representation>
 }
+
+/**
+ * Builds a format for enum [Value] using exact constant names as wire values.
+ *
+ * Decoding is case-sensitive. Unknown names become structured failures identifying every accepted constant. The
+ * schema contains the same constants in declaration order.
+ */
+inline fun <reified Value : Enum<Value>> FormatDefaults<String>.enumValue(): StringFormat<Value> =
+    enumFormat(string, enumValues<Value>())
+
+@PublishedApi
+internal fun <Value : Enum<Value>> enumFormat(
+    strings: StringFormat<String>,
+    values: Array<Value>
+): StringFormat<Value> {
+    val names = values.map(Enum<Value>::name)
+    val valuesByName = values.associateBy(Enum<Value>::name)
+    val transformed =
+        strings.transform(
+            decode = { name ->
+                valuesByName[name]
+                    ?: throw IllegalArgumentException(
+                        "Unknown enum value '$name'; expected one of $names"
+                    )
+            },
+            encode = Enum<Value>::name
+        )
+    return transformed.copy(schema = EnumSchema(names))
+}

@@ -69,7 +69,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
   - Decide and specify normalization, equality, and parameter handling for custom values such as charset-bearing media types.
   - Add tests for predefined values, custom values, equality, and their use in endpoint bodies and generated targets.
 
-- [ ] Add enum helpers to the default format interfaces.
+- [x] Add enum helpers to the default format interfaces.
   - Expose an ergonomic generic member such as `StringFormat.enum<MyEnum>()` on the relevant defaults surface.
   - Encode enum values by name and decode them with a clear failure when the input does not match a constant.
   - Preserve the concrete enum type in inferred endpoint input/output types.

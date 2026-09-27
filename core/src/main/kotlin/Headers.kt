@@ -90,6 +90,10 @@ data class Header<Value : Any, out P : Presence<Value>>(
         ): Header<Value, Required> =
             Header(name, format, Required, ParameterDocumentation(description, deprecated))
 
+        /** Builds a required header for enum [Value] using exact constant names. */
+        inline fun <reified Value : Enum<Value>> enumValue(name: String): Header<Value, Required> =
+            invoke(name, format.enumValue())
+
         /** The `Accept` request header. */
         val Accept: Header<String, Required> = string("Accept")
 
