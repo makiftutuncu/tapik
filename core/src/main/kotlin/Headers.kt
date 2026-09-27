@@ -90,6 +90,117 @@ data class Header<Value : Any, out P : Presence<Value>>(
         ): Header<Value, Required> =
             Header(name, format, Required, ParameterDocumentation(description, deprecated))
 
+        /** The `Accept` request header. */
+        val Accept: Header<String, Required> = string("Accept")
+
+        /** The `Accept-Encoding` request header. */
+        val AcceptEncoding: Header<String, Required> = string("Accept-Encoding")
+
+        /** The `Accept-Language` request header. */
+        val AcceptLanguage: Header<String, Required> = string("Accept-Language")
+
+        /** The `Authorization` request header. */
+        val Authorization: Header<String, Required> = string("Authorization")
+
+        /** The `Cache-Control` request or response header. */
+        val CacheControl: Header<String, Required> = string("Cache-Control")
+
+        /** The `Connection` request or response header. */
+        val Connection: Header<String, Required> = string("Connection")
+
+        /** The `Content-Disposition` content header. */
+        val ContentDisposition: Header<String, Required> = string("Content-Disposition")
+
+        /** The `Content-Encoding` content header. */
+        val ContentEncoding: Header<String, Required> = string("Content-Encoding")
+
+        /** The `Content-Language` content header. */
+        val ContentLanguage: Header<String, Required> = string("Content-Language")
+
+        /** The `Content-Length` content header. */
+        val ContentLength: Header<Long, Required> = long("Content-Length")
+
+        /** The `Content-Location` content header. */
+        val ContentLocation: Header<String, Required> = string("Content-Location")
+
+        /** The `Content-Range` response header. */
+        val ContentRange: Header<String, Required> = string("Content-Range")
+
+        /** The `Content-Type` content header. */
+        val ContentType: Header<String, Required> = string("Content-Type")
+
+        /** The `Cookie` request header. */
+        val Cookie: Header<String, Required> = string("Cookie")
+
+        /** The `Date` request or response header. */
+        val Date: Header<String, Required> = string("Date")
+
+        /** The `ETag` response header. */
+        val ETag: Header<String, Required> = string("ETag")
+
+        /** The `Expires` response header. */
+        val Expires: Header<String, Required> = string("Expires")
+
+        /** The `Host` request header. */
+        val Host: Header<String, Required> = string("Host")
+
+        /** The `If-Match` conditional request header. */
+        val IfMatch: Header<String, Required> = string("If-Match")
+
+        /** The `If-Modified-Since` conditional request header. */
+        val IfModifiedSince: Header<String, Required> = string("If-Modified-Since")
+
+        /** The `If-None-Match` conditional request header. */
+        val IfNoneMatch: Header<String, Required> = string("If-None-Match")
+
+        /** The `If-Range` conditional request header. */
+        val IfRange: Header<String, Required> = string("If-Range")
+
+        /** The `If-Unmodified-Since` conditional request header. */
+        val IfUnmodifiedSince: Header<String, Required> = string("If-Unmodified-Since")
+
+        /** The `Last-Modified` response header. */
+        val LastModified: Header<String, Required> = string("Last-Modified")
+
+        /** The `Location` response header. */
+        val Location: Header<String, Required> = string("Location")
+
+        /** The `Origin` request header. */
+        val Origin: Header<String, Required> = string("Origin")
+
+        /** The `Pragma` request or response header. */
+        val Pragma: Header<String, Required> = string("Pragma")
+
+        /** The `Range` request header. */
+        val Range: Header<String, Required> = string("Range")
+
+        /** The `Referer` request header. */
+        val Referer: Header<String, Required> = string("Referer")
+
+        /** The `Retry-After` response header. */
+        val RetryAfter: Header<String, Required> = string("Retry-After")
+
+        /** The `Server` response header. */
+        val Server: Header<String, Required> = string("Server")
+
+        /** The `Set-Cookie` response header. */
+        val SetCookie: Header<String, Required> = string("Set-Cookie")
+
+        /** The `Transfer-Encoding` request or response header. */
+        val TransferEncoding: Header<String, Required> = string("Transfer-Encoding")
+
+        /** The `Upgrade` request or response header. */
+        val Upgrade: Header<String, Required> = string("Upgrade")
+
+        /** The `User-Agent` request header. */
+        val UserAgent: Header<String, Required> = string("User-Agent")
+
+        /** The `Vary` response header. */
+        val Vary: Header<String, Required> = string("Vary")
+
+        /** The `WWW-Authenticate` response header. */
+        val WWWAuthenticate: Header<String, Required> = string("WWW-Authenticate")
+
         override fun boolean(name: String): Header<Boolean, Required> = invoke(name, format.boolean)
         override fun byte(name: String): Header<Byte, Required> = invoke(name, format.byte)
         override fun short(name: String): Header<Short, Required> = invoke(name, format.short)

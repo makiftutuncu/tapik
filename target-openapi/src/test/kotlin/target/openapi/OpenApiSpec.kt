@@ -354,13 +354,13 @@ class OpenApiSpec : FunSpec({
     test("translate request and response headers literally") {
         val requestHeader =
             object : Api("RequestHeader") {
-                val endpoint by get(root / "books").header(header.string("Authorization"))
+                val endpoint by get(root / "books").header(Header.Authorization)
             }
         val responseHeader =
             object : Api("ResponseHeader") {
                 val endpoint by
                     get(root / "books")
-                        .output(Status.Ok with noBody with headersOf(header.string("Content-Type")))
+                        .output(Status.Ok with noBody with headersOf(Header.ContentLength))
             }
 
         val requestOperation =
@@ -368,8 +368,14 @@ class OpenApiSpec : FunSpec({
         val response =
             OpenApi.from(responseHeader, version = "1").paths.getValue("/books").operations.getValue(Method.GET)
 
-        requestOperation.parameters.single().name shouldBe "Authorization"
-        response.responses.getValue("200").headers.keys shouldBe setOf("Content-Type")
+        requestOperation.parameters.single().let { parameter ->
+            parameter.name shouldBe "Authorization"
+            parameter.schema.types shouldBe listOf("string")
+        }
+        response.responses.getValue("200").headers.getValue("Content-Length").schema.let { schema ->
+            schema.types shouldBe listOf("integer")
+            schema.format shouldBe "int64"
+        }
     }
 
     test("interpret portable status matchers") {

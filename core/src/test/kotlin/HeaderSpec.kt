@@ -33,6 +33,61 @@ class HeaderSpec : FunSpec({
         header.instant("X-Value").format shouldBeSameInstanceAs format.instant
     }
 
+    test("provide common HTTP headers with canonical names") {
+        val headers =
+            listOf(
+                Header.Accept to "Accept",
+                Header.AcceptEncoding to "Accept-Encoding",
+                Header.AcceptLanguage to "Accept-Language",
+                Header.Authorization to "Authorization",
+                Header.CacheControl to "Cache-Control",
+                Header.Connection to "Connection",
+                Header.ContentDisposition to "Content-Disposition",
+                Header.ContentEncoding to "Content-Encoding",
+                Header.ContentLanguage to "Content-Language",
+                Header.ContentLength to "Content-Length",
+                Header.ContentLocation to "Content-Location",
+                Header.ContentRange to "Content-Range",
+                Header.ContentType to "Content-Type",
+                Header.Cookie to "Cookie",
+                Header.Date to "Date",
+                Header.ETag to "ETag",
+                Header.Expires to "Expires",
+                Header.Host to "Host",
+                Header.IfMatch to "If-Match",
+                Header.IfModifiedSince to "If-Modified-Since",
+                Header.IfNoneMatch to "If-None-Match",
+                Header.IfRange to "If-Range",
+                Header.IfUnmodifiedSince to "If-Unmodified-Since",
+                Header.LastModified to "Last-Modified",
+                Header.Location to "Location",
+                Header.Origin to "Origin",
+                Header.Pragma to "Pragma",
+                Header.Range to "Range",
+                Header.Referer to "Referer",
+                Header.RetryAfter to "Retry-After",
+                Header.Server to "Server",
+                Header.SetCookie to "Set-Cookie",
+                Header.TransferEncoding to "Transfer-Encoding",
+                Header.Upgrade to "Upgrade",
+                Header.UserAgent to "User-Agent",
+                Header.Vary to "Vary",
+                Header.WWWAuthenticate to "WWW-Authenticate"
+            )
+
+        headers.map { (header, _) -> header.name } shouldBe headers.map { (_, name) -> name }
+    }
+
+    test("preserve catalog header value types and presence") {
+        val authorization: Header<String, Required> = Header.Authorization
+        val contentLength: Header<Long, Required> = Header.ContentLength
+
+        authorization.format shouldBeSameInstanceAs format.string
+        authorization.presence shouldBe Required
+        contentLength.format shouldBeSameInstanceAs format.long
+        contentLength.presence shouldBe Required
+    }
+
     test("represent all header presence modes in types") {
         val required: Header<String, Required> = header.string("X-Required")
         val optional: Header<String, Optional> = required.optional()

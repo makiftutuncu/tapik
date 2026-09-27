@@ -332,7 +332,20 @@ The scalar representation is `Header<Value, Presence>`. Generic and convenient b
 header<BookId>(name = "X-Book-Id", format = bookIdFormat)
 header.uuid("X-Request-Id")
 header.string("X-Source").fixed("tapik")
+Header.Authorization.optional()
+Header.ContentLength
 ```
+
+`Header.Companion` also provides a neutral catalog of common request and response fields. The catalog contains
+`Accept`, `AcceptEncoding`, `AcceptLanguage`, `Authorization`, `CacheControl`, `Connection`, `ContentDisposition`,
+`ContentEncoding`, `ContentLanguage`, `ContentLength`, `ContentLocation`, `ContentRange`, `ContentType`, `Cookie`,
+`Date`, `ETag`, `Expires`, `Host`, `IfMatch`, `IfModifiedSince`, `IfNoneMatch`, `IfRange`, `IfUnmodifiedSince`,
+`LastModified`, `Location`, `Origin`, `Pragma`, `Range`, `Referer`, `RetryAfter`, `Server`, `SetCookie`,
+`TransferEncoding`, `Upgrade`, `UserAgent`, `Vary`, and `WWWAuthenticate`. Each value is a required header by default
+and may use the ordinary presence and documentation modifiers. `ContentLength` uses the built-in `Long` format;
+the remaining fields use the built-in `String` format because tapik does not yet model their structured HTTP field
+grammars. Catalog values are conveniences, not restrictions: custom names and formats remain available through the
+generic and named builders.
 
 `headersOf` accepts between one and eight headers, preserves their exact types and declaration order in `Headers1`
 through `Headers8`, and rejects duplicate names case-insensitively. `Headers0` represents the absence of headers and

@@ -57,7 +57,7 @@ This checklist converts the issues in `review/findings.md` into implementation t
   - Include source/contract context when it is available without creating a parallel metadata model solely for diagnostics.
   - Add tests that assert useful messages for representative structural, requiredness, and nested-component conflicts.
 
-- [ ] Add a neutral catalog of common HTTP headers.
+- [x] Add a neutral catalog of common HTTP headers.
   - Add discoverable `Header` members/factories for common request and response headers, including at least `Authorization`.
   - Give each predefined header the appropriate canonical wire name and value format while preserving type inference.
   - Keep custom header definitions available and avoid taking a dependency on Spring constants in the core model.

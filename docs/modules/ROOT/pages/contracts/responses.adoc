@@ -44,6 +44,10 @@ output alternative with a non-overlapping status matcher.
 Output headers follow the body group with another `with`, as in `Status.Created with jsonBody<Book>() with
 headersOf(location)`. Header types and order remain part of that output's inferred type.
 
+The same neutral catalog used by requests is available for responses, including `Header.CacheControl`, `Header.ETag`,
+`Header.LastModified`, `Header.Location`, `Header.RetryAfter`, `Header.Server`, `Header.SetCookie`, and `Header.Vary`.
+These are ordinary immutable header definitions and may be made optional, fixed, documented, or deprecated.
+
 `.description(...)` on the complete output supplies its response description. When it is absent, documentation targets
 may use their standard description for an exact status.
 

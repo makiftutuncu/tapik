@@ -25,6 +25,13 @@ The generic `header("X-Request-Id", requestIdFormat)` constructor accepts option
 arguments. The resulting documentation is preserved by optional, defaulted, and fixed presence modifiers and is used
 for request parameters and response headers in generated OpenAPI.
 
+Common fields are available directly from `Header`, for example `Header.Authorization`, `Header.Accept`,
+`Header.ContentType`, and `Header.UserAgent`. They are required by default and support the same modifiers, so an
+optional credential field is `Header.Authorization.optional()`. `Header.ContentLength` has type `Long`; other
+catalog fields remain `String` until tapik models their structured HTTP field grammars. The catalog also includes
+common caching, conditional, content, cookie, origin, range, routing, and response fields. Custom headers remain
+available through `header.string(...)` or the generic `header(name, format)` builder.
+
 `.headers(headersOf(...))` is a one-time bulk initializer available only while the endpoint has no headers. After the
 first header is present, `.header(...)` appends one definition at a time. Both preserve concrete types and declaration
 order. `headersOf` requires between one and eight values; `noHeaders` represents the empty group.
