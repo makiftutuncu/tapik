@@ -14,8 +14,11 @@ object ArtifactWriter {
      * Writes every artifact in [result] beneath [outputDirectory].
      *
      * Existing files at paths owned by [owner] are replaced. Paths previously written by [owner] but absent from
-     * [result] are removed. A generated path that already exists without ownership fails the complete write before any
-     * output changes. Paths belonging to other owners and unrelated unowned files are left untouched.
+     * [result] are removed unless another owner still claims them. Artifacts are exclusive by default; several owners
+     * may claim one path only when each artifact declares the same nonblank
+     * [GeneratedArtifact.sharingKey]. A generated path that already exists without ownership, or is incompatibly owned,
+     * fails the complete write before any output changes. Compatible shared paths may be replaced by any owner and
+     * remain until their final owner releases them. Unrelated paths are left untouched.
      *
      * @param result generated artifacts to write.
      * @param outputDirectory root directory owned by the host adapter.
@@ -23,8 +26,8 @@ object ArtifactWriter {
      * @return written paths in artifact order.
      * @throws java.io.IOException when a directory or file cannot be written.
      * @throws IllegalArgumentException when an artifact resolves outside [outputDirectory].
-     * @throws IllegalStateException when another execution owns a generated path or that path exists without tapik
-     * ownership.
+     * @throws IllegalStateException when another execution owns a generated path without the same nonblank sharing key,
+     * or that path exists without tapik ownership.
      */
     @Synchronized
     fun write(

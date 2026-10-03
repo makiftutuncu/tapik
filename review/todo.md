@@ -11,7 +11,7 @@ The implementation review found no remaining code-level correctness blocker. The
   - Preserve the guarantees for unowned application files, incompatible shared output, stale cleanup, failure atomicity, and deterministic ownership state.
   - Cross-reference the Spring endpoint-types use case without making the host-neutral generation specification Spring-specific.
 
-- [ ] Align public Maven documentation and KDoc with shared ownership.
+- [x] Align public Maven documentation and KDoc with shared ownership.
   - Update `docs/modules/ROOT/pages/reference/maven.adoc` to describe exclusive artifacts, explicitly shared artifacts, and their cleanup behavior.
   - Update `ArtifactWriter.write` KDoc so its collision contract includes the compatible-sharing-key exception.
   - Audit nearby ownership and synchronization prose for obsolete claims that two executions can never own the same path.

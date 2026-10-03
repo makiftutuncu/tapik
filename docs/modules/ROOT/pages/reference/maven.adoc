@@ -143,8 +143,17 @@ registered as compile source roots. `RESOURCE` artifacts are registered as proje
 `process-classes` generation or direct invocation they are also copied into the main output so packaging does not miss them.
 
 An execution owns only the paths it generated. A later successful run removes its stale paths while preserving files
-owned by another execution and files tapik does not own. Two executions cannot own the same path, and a failed run does
-not replace or delete the last successful output.
+owned by another execution and files tapik does not own. Generated artifacts are exclusive by default. A target may
+mark an artifact as intentionally shared; several executions may then own its path only when all of them declare the
+same nonblank sharing key. A shared artifact remains until its final owner stops producing it. Spring RestClient and
+WebMVC use this mechanism for their common endpoint-types source, so both executions can use one output directory and
+produce one Kotlin type identity.
+
+Ordinary cross-execution collisions, different sharing keys, and existing files not owned by tapik fail before output
+or ownership state changes. During late same-module compilation, a new execution can join ownership of a compiled path
+only when its bytes equal the existing output. An execution that already owns a shared compiled path may refresh it
+during staggered regeneration; the output remains until every owner releases it. A failed generation does not replace
+or delete the last successful output.
 
 Continue with xref:reference/generation-options.adoc[the target option catalogue] or
 xref:reference/troubleshooting.adoc[troubleshooting].

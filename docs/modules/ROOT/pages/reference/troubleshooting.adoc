@@ -92,8 +92,14 @@ Either make the definitions identical, give them distinct final names, or select
 
 Each Maven execution owns its previously generated paths. A successful rerun removes paths it no longer produces, so
 renaming an API, package, or suffix does not require `clean`. It preserves files owned by other executions and files
-not owned by tapik. Two executions attempting to own the same output path fail instead of overwriting one another;
-choose distinct output directories or target output templates.
+not owned by tapik. Ordinary cross-execution path collisions fail instead of overwriting one another; choose distinct
+output directories or target output templates.
+
+An intentional shared artifact is the exception: every owner must declare the same nonblank sharing key, and the file
+remains until its final owner releases it. Spring client and server targets use this for their common endpoint-types
+source. For late compiled output, a new owner must produce bytes identical to the existing file; an owner that already
+shares the path may refresh it during staggered regeneration. A different sharing key or incompatible new compiled
+output is still a collision.
 
 A failed generation intentionally leaves the last successful files and ownership state intact. Those files are not
 evidence that the failed run succeeded; use the Maven result and the `INFO` log entries for the current execution.
