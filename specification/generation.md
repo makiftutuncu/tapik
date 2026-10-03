@@ -164,12 +164,20 @@ collection configured, every discovered API is generated.
 `outputDirectory` defaults to `${project.build.directory}/generated/tapik`. Target artifact paths are resolved below
 that directory and written as UTF-8. Each Maven execution owns the paths it generated there. A later invocation of the
 same execution removes its previously owned paths that are absent from the new result, while paths owned by other
-executions and unowned files remain untouched. Two executions cannot own the same path. Before stale output is removed
-or new output is written, the host rejects any generated path already present on disk unless the same execution owns
-that exact path. A collision reports its relative path and requesting execution, and leaves destination bytes and the
-ownership manifest unchanged. Ownership is updated only after target generation and artifact materialization succeed,
-so a failed generation leaves the last successful result available. Maven configuration is translated into the
-host-neutral configuration model before target selection; Maven types do not cross into `common-plugin` or target
+executions and unowned files remain untouched. Artifacts are exclusively owned by default. Several executions may
+co-own one path only when every claim declares the same nonblank sharing key; the key is the target's assertion that
+the independently produced artifacts have one stable identity. A shared path remains until its final owner releases
+it, including when another owner has already stopped producing it.
+
+Before stale output is removed or new output is written, the host rejects an unowned destination path and every
+cross-execution collision that does not carry a matching sharing key. An unowned collision reports its relative path
+and requesting execution; a cross-execution collision reports the path and existing owner. Either leaves destination
+bytes and the deterministic ownership manifest unchanged. Target generation and staging complete before destination
+mutation, and ownership is updated only after artifact materialization succeeds, so generation, validation, and
+collision failures preserve the last successful result.
+The [Spring integration specification](spring.md#shared-generated-endpoint-types) applies this host-neutral sharing
+contract to endpoint types emitted by independent client and server targets. Maven configuration is translated into
+the host-neutral configuration model before target selection; Maven types do not cross into `common-plugin` or target
 modules.
 
 When an execution returns `SOURCE` artifacts, the adapter adds that execution's output directory as a project compile
@@ -191,11 +199,15 @@ Late generated Kotlin is compiled into a fresh per-execution staging directory. 
 that execution's staged class files and runtime resources into the main output using build-state ownership outside the
 packaged classes directory. Outputs absent from the latest successful execution are removed, including nested classes,
 Kotlin module metadata, and registration descriptors after generated package or suffix changes. Outputs owned by other
-executions and unowned application classes or resources are preserved. Before stale deletion or copying begins, every
-staged path must either be absent from the main output or already belong to the same execution; an unowned exact-path
-collision fails with its relative path and requesting execution. Collision failure preserves application bytes, prior
-generated output, and build-state ownership. Conflicting execution ownership continues to fail with both the path and
-existing owner.
+executions and unowned application classes or resources are preserved. A new execution may join ownership of an
+existing generated path only when its staged bytes are identical to the current output. Once an execution owns a
+co-owned path, it may refresh that output while the other owner still has the preceding bytes; this permits staggered
+regeneration, and the path remains until its final owner releases it.
+
+Before stale deletion or copying begins, the adapter validates every staged path. An unowned exact-path collision or a
+new owner's byte-incompatible collision fails. The former identifies the path and requesting execution; the latter
+identifies the path and existing owner. Collision failure preserves application bytes, prior generated output, and the
+deterministically written build-state ownership.
 
 Lifecycle phase selection is part of the host configuration, not target behavior. Maven's default `process-classes`
 phase applies when the `generate` goal is bound as an execution and the build reaches that phase. Invoking the goal
