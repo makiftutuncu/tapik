@@ -43,9 +43,15 @@ Targets are developed in this order:
 
 Kotlin serialization is the default format integration. Jackson follows for the Spring ecosystem.
 
-The initial OpenAPI target is a programmatic interpreter over explicitly supplied, compiled `Api` values. It runs
-after contract compilation, reads their immutable endpoint graphs without reflection, and fails generation when a
-valid tapik construct cannot be represented by OpenAPI 3.2.0. A later Maven plugin wraps the same interpreter.
+The OpenAPI target is a host-neutral interpreter over selected, compiled `Api` values. It runs after contract
+compilation, reads their immutable endpoint graphs without reflective endpoint discovery, returns generated artifacts
+without writing them, and fails generation when a valid tapik construct cannot be represented by OpenAPI 3.2.0.
+
+The implemented Maven adapter activates the compiler plugin, loads its generated API registries from the project
+classpath, discovers generation targets through host-neutral target registries, translates Maven configuration and API
+selection, invokes the selected target, and owns artifact materialization and lifecycle integration. Future Gradle and
+command-line hosts consume the same compiler registries, target registries, selection rules, configuration boundary,
+and generation results rather than wrapping OpenAPI-specific behavior.
 
 ## Non-goals for the foundation
 

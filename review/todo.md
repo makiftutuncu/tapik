@@ -19,7 +19,7 @@ The implementation review found no remaining code-level correctness blocker. The
 
 ## P2 — Bring foundational specifications into the present
 
-- [ ] Update the product specification to describe the implemented Maven adapter.
+- [x] Update the product specification to describe the implemented Maven adapter.
   - Replace the statement that a later Maven plugin will wrap OpenAPI generation with the current host-neutral target and Maven-adapter architecture.
   - Keep future Gradle and command-line hosts framed as consumers of the same registry and generation boundaries.
 
