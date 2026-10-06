@@ -49,6 +49,6 @@ The implementation review found no remaining code-level correctness blocker. The
 ## Completion
 
 - [x] `./mvnw clean verify` passes after the documentation corrections.
-- [ ] `git diff --check` passes for files changed while completing this checklist.
+- [x] `git diff --check` passes for files changed while completing this checklist.
 - [ ] No specification, KDoc, or user guide contradicts shared artifact ownership.
 - [ ] Documentation validation and the opt-in release rehearsal pass from clean generated state.
