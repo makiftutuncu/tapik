@@ -19,8 +19,23 @@ Every observable behavior follows this sequence:
 4. Refactor while the complete reactor remains green.
 5. Run `./mvnw verify` before handing off a change.
 
-Compile-failure behavior should eventually use a dedicated Kotlin compilation-test harness. Selecting that harness is
-itself deferred until the first compile-failure behavior is implemented.
+Compile-time behavior is covered by Kotest specifications that invoke Kotlin's K2 JVM compiler against isolated source
+snippets using the module's test classpath. DSL compilation specifications also select the supported JVM target and run
+without the tapik compiler plugin: valid type-level compositions must return `ExitCode.OK`, while operations
+intentionally absent from the public type surface must return `ExitCode.COMPILATION_ERROR`. Positive neighboring cases
+accompany failures where needed so a broad or accidental rejection cannot satisfy the specification.
+
+Compiler-plugin specifications package the plugin classes produced by the current build, pass that artifact to the
+same compiler through `-Xplugin`, and retain the exit code, diagnostics, and compiled output. They cover API and
+property eligibility, stable tapik diagnostics, registry generation and loading, and clean or incremental registry
+synchronization. Source-generating target specifications likewise compile emitted Kotlin when source validity is the
+behavior under test.
+
+Compilation specifications are required when the contract is that code must or must not compile, that the compiler
+plugin must report a particular tapik diagnostic, or that generated Kotlin must be accepted by the supported compiler.
+Ordinary Kotest coverage remains responsible for runtime behavior such as value validation, ordering, snapshots,
+codec round trips, target interpretation, rendering, and framework execution; compiling a snippet does not replace
+those assertions.
 
 ## Continuous integration
 

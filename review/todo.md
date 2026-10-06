@@ -23,7 +23,7 @@ The implementation review found no remaining code-level correctness blocker. The
   - Replace the statement that a later Maven plugin will wrap OpenAPI generation with the current host-neutral target and Maven-adapter architecture.
   - Keep future Gradle and command-line hosts framed as consumers of the same registry and generation boundaries.
 
-- [ ] Document the current compile-failure testing approach.
+- [x] Document the current compile-failure testing approach.
   - Replace the deferred-harness note in `specification/development.md` with the compiler-based approach now used by DSL and compiler-plugin specifications.
   - State which compile-success and compile-failure behaviors belong in this harness and retain ordinary Kotest coverage for runtime behavior.
 
