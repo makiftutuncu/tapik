@@ -53,6 +53,27 @@ selection, invokes the selected target, and owns artifact materialization and li
 command-line hosts consume the same compiler registries, target registries, selection rules, configuration boundary,
 and generation results rather than wrapping OpenAPI-specific behavior.
 
+## Versioning and compatibility
+
+Version 0.6.0 establishes the first compatibility baseline for the rewrite and is intentionally incompatible with
+earlier tapik implementations. From that baseline, tapik follows Semantic Versioning with an explicit pre-1.0
+convention: patch releases in one `0.y` line are backward-compatible, while an incompatible public change increments
+the minor version. After 1.0, incompatible changes increment the major version.
+
+The compatibility contract covers public Kotlin declarations in production artifacts, documented compiler and Maven
+configuration, stable generation target IDs, and the documented names and signatures of generated public Kotlin
+declarations. An incompatible change to any of these surfaces requires the corresponding version increment and
+migration guidance. Internal implementation, generated formatting, and behavior outside the documented supported
+surface are not compatibility contracts.
+
+The current supported surface being intentionally narrow does not make it experimental. Maven is the only build host;
+the built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC; same-module generation occurs after
+ordinary main-source compilation; and format integrations require explicit schemas for serializer shapes they cannot
+derive. New hosts, targets, and derivation coverage can be added compatibly.
+
+tapik does not determine whether a user's HTTP contract is semantically backward-compatible with its previously
+deployed form. API versioning and rollout remain application responsibilities.
+
 ## Non-goals for the foundation
 
 - OpenAPI consumption

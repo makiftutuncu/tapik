@@ -41,7 +41,7 @@ The implementation review found no remaining code-level correctness blocker. The
   - Verify that the external consumer rebuilds compiler registries, OpenAPI, shared Spring types, generated client/server sources, and Spring runtime behavior without relying on the repository reactor.
   - Confirm that no `test-` or `example-` artifact is staged for publication.
 
-- [ ] Decide and document the 0.6 compatibility posture.
+- [x] Decide and document the 0.6 compatibility posture.
   - Review the remaining intentional limitations: Maven-only hosting, initial target set, late same-module source visibility, and serializer shapes requiring explicit schemas.
   - Decide whether public DSL and generated-source identities are ready to be treated as compatibility contracts.
   - Retain the experimental warning if further breaking iteration is expected; otherwise replace it with an explicit stability and migration policy.

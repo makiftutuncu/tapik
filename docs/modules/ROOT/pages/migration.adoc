@@ -3,7 +3,8 @@
 
 The 0.6 rewrite is not source- or binary-compatible with earlier tapik releases. There is no automatic converter, and
 the previous Gradle integration is not available. Migrate one small API first and retain the previous build separately
-until the replacement behaves as expected.
+until the replacement behaves as expected. Once migrated, the rewrite follows the
+xref:compatibility.adoc[documented compatibility policy].
 
 . Move to Java 25, Kotlin 2.4, and Maven Wrapper-based builds. Start with the xref:getting-started.adoc[quickstart] or
   copy the xref:runnable-example.adoc[runnable example]'s layout.

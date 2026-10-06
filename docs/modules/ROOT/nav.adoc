@@ -3,6 +3,7 @@
 ** xref:getting-started.adoc[Quickstart]
 ** xref:choose-a-goal.adoc[Choose a goal]
 ** xref:runnable-example.adoc[Runnable example]
+** xref:compatibility.adoc[Versioning and compatibility]
 ** xref:migration.adoc[Migrate to 0.6]
 * Define contracts
 ** xref:contracts/index.adoc[Contract DSL]

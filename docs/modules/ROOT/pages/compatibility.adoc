@@ -1,0 +1,52 @@
+= Versioning and compatibility
+:description: Understand tapik's compatibility baseline, pre-1.0 versioning, and currently supported surface.
+
+Version 0.6.0 is the first compatibility baseline for the rewritten tapik. It is intentionally incompatible with
+earlier implementations: the build integration, registry model, DSL spelling, and generated output were redesigned
+before tapik had production users.
+
+== Semantic Versioning before 1.0
+
+tapik follows Semantic Versioning with this explicit pre-1.0 convention:
+
+* Patch releases within one `0.y` line are backward-compatible.
+* An incompatible public change before 1.0 increments the minor version and includes migration guidance.
+* After 1.0, an incompatible public change increments the major version.
+
+Applications should still use one tapik version consistently across the BOM, compiler and Maven plugins, format
+integrations, and generation targets. tapik rejects version skew during generation.
+
+== Compatibility surface
+
+The compatibility contract covers:
+
+* public Kotlin declarations in published production artifacts;
+* documented compiler-plugin and Maven-plugin configuration;
+* stable generation target IDs;
+* documented names and signatures of generated public Kotlin declarations.
+
+Changing an application's API ID or qualified API type, or changing a generated package or suffix option, still
+changes that application's public output identity. Those are user-controlled compatibility changes, not changes made
+by a tapik patch release.
+
+Internal implementations, generated source formatting, and undocumented or unsupported behavior are not compatibility
+contracts. tapik also does not decide whether a user's HTTP contract remains semantically compatible with a deployed
+version; API versioning and rollout remain application responsibilities.
+
+== Current supported scope
+
+Maven is currently the only build host. The built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC.
+The generation architecture is host-neutral so future hosts and targets can be added without redefining contracts.
+
+Same-module generation runs after ordinary main-source compilation. When main source implements or imports generated
+Kotlin, generate during `generate-sources` from a separately compiled contract.
+
+Kotlin serialization and Jackson formats derive schemas for their documented supported shapes. When a serializer
+changes the wire shape in a way tapik cannot derive, supply an explicit schema or schema-registry entry; the caller
+then owns agreement between that schema and the codec.
+
+These are supported-scope boundaries, not experimental disclaimers. Unsupported configurations fail visibly where
+tapik can detect them.
+
+Continue with xref:migration.adoc[] when moving an older tapik project to 0.6, or
+xref:reference/maven.adoc[] when choosing a generation lifecycle.

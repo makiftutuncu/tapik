@@ -7,7 +7,8 @@ single contract can be interpreted as OpenAPI documentation, a Spring RestClient
 Kotlin remains the source of truth; tapik does not import OpenAPI documents or discover endpoints by scanning packages.
 
 > [!IMPORTANT]
-> tapik 0.6.0 is an experimental rewrite. Its API and generated source are not yet compatibility-stable.
+> tapik 0.6.0 is the first compatibility baseline for the rewrite. It is intentionally incompatible with earlier
+> versions; subsequent changes follow [tapik's Semantic Versioning policy](docs/modules/ROOT/pages/compatibility.adoc).
 
 ## Requirements
 
@@ -469,6 +470,8 @@ The 0.6 rewrite replaces the previous implementation rather than preserving its 
 - Existing endpoint definitions and generated-build configuration require manual migration.
 
 Follow the [migration guide](docs/modules/ROOT/pages/migration.adoc) when moving an older project to 0.6.
+Version 0.6.0 then forms the rewrite's compatibility baseline: patches in the 0.6 line remain backward-compatible,
+while an incompatible pre-1.0 change increments the minor version and includes migration guidance.
 
 ## Build tapik
 

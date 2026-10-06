@@ -26,7 +26,8 @@ Understand APIs, endpoints, URIs, inputs, outputs, formats, and composition.
 See how compiler-generated registries feed host-neutral generation targets.
 |===
 
-TIP: tapik 0.6.0 is an experimental rewrite. Its API and generated source are not yet compatibility-stable.
+NOTE: tapik 0.6.0 is the first compatibility baseline for the rewrite and is intentionally incompatible with earlier
+implementations. Future changes follow xref:compatibility.adoc[tapik's Semantic Versioning policy].
 
 == What tapik optimizes for
 
