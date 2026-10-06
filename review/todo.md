@@ -29,7 +29,7 @@ The implementation review found no remaining code-level correctness blocker. The
 
 ## P3 — Complete release validation
 
-- [ ] Run the complete documentation validation pipeline.
+- [x] Run the complete documentation validation pipeline.
   - Install reactor artifacts needed by the standalone site build.
   - Build the website and unified Dokka API reference through `site/pom.xml`.
   - Run `npm ci`, `npm run docs:preview`, and the Playwright desktop/mobile smoke checks used by CI.

@@ -49,7 +49,9 @@ class JacksonSchemaRegistry private constructor(
     inline fun <reified Value : Any> withSchemaProvider(provider: JacksonSchemaProvider): JacksonSchemaRegistry =
         withSchemaProvider(Value::class, provider)
 
-    internal fun schema(type: JavaType): Schema? = registry.schema(type.rawClass, type)
+    internal fun schema(type: JavaType): Schema? = schema(type.rawClass, type)
+
+    internal fun schema(type: Class<*>, resolvedType: JavaType): Schema? = registry.schema(type, resolvedType)
 
     internal fun contains(type: JavaType): Boolean = registry.contains(type.rawClass)
 

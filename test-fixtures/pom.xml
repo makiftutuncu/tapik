@@ -30,6 +30,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>dev.akif</groupId>
+            <artifactId>tapik-format-jackson</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
             <scope>test</scope>

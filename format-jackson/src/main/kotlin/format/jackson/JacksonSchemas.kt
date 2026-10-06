@@ -40,7 +40,7 @@ private fun deriveSchema(
         ?: throw SchemaDerivationException("Unsupported Jackson Kotlin type '$type'")
     val name = classifier.qualifiedName ?: classifier.java.name
     val jacksonType = format.typeFactory.constructType(type.javaType)
-    registry.schema(jacksonType)?.let { return it }
+    registry.schema(classifier.java, jacksonType)?.let { return it }
     requireSupportedJacksonSerialization(format, jacksonType, registry)
     builtInSchema(classifier.java)?.let { return it }
 

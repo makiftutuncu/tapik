@@ -75,6 +75,15 @@ class JacksonSchemaRegistrySpec : FunSpec({
         format.decode(format.encode(value)) shouldBe DecodeResult.Success(value)
     }
 
+    test("apply registered schemas to Kotlin value-class properties before unboxing") {
+        val wireIdSchema = ScalarSchema(SchemaType.STRING, name = "ValueClassWireId")
+        val registry = JacksonSchemaRegistry.Default.withSchema<ValueClassWireId>(wireIdSchema)
+
+        val schema = jsonFormat<ValueClassValues>(registry = registry).schema.shouldBeInstanceOf<ObjectSchema>()
+
+        schema.properties.getValue("id").schema shouldBe wireIdSchema
+    }
+
     test("invoke schema providers with the resolved generic Java type") {
         val registry =
             JacksonSchemaRegistry.Default.withSchemaProvider(Page::class) { type ->
@@ -139,6 +148,15 @@ private data class RegisteredValues(
     val ids: List<RegisteredWireId>,
     val idsByName: Map<String, RegisteredWireId>,
     val homepage: URI
+)
+
+@JvmInline
+internal value class ValueClassWireId(
+    val value: String
+)
+
+private data class ValueClassValues(
+    val id: ValueClassWireId
 )
 
 private data class Page<Value>(
