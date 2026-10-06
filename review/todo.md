@@ -35,7 +35,7 @@ The implementation review found no remaining code-level correctness blocker. The
   - Run `npm ci`, `npm run docs:preview`, and the Playwright desktop/mobile smoke checks used by CI.
   - Resolve broken cross-references, stale snippets, navigation failures, or KDoc rendering problems before completion.
 
-- [ ] Run the unsigned release and external-consumer rehearsal.
+- [x] Run the unsigned release and external-consumer rehearsal.
   - Execute `./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install`.
   - Verify production POMs, binaries, source archives, and API documentation archives in the isolated staged repository.
   - Verify that the external consumer rebuilds compiler registries, OpenAPI, shared Spring types, generated client/server sources, and Spring runtime behavior without relying on the repository reactor.
