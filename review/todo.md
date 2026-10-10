@@ -22,7 +22,7 @@ Gradle extension and task APIs require KDoc.
   - Keep generation targets host-neutral and discover them through `GenerationTargetRegistry`; do not hard-code built-in
     target behavior in the Gradle adapter.
 
-- [ ] Specify Gradle lifecycle and source-visibility rules.
+- [x] Specify Gradle lifecycle and source-visibility rules.
   - In compiled-contract mode, resolve registries from a dedicated contract dependency configuration and generate
     before ordinary main compilation so main source can use generated Kotlin.
   - In same-project mode, depend on compiled main output and generate afterward; ordinary main source cannot refer to

@@ -21,7 +21,6 @@ and has:
 
 - a unique, nonblank Gradle name used for diagnostics and stable execution identity;
 - one nonblank target ID;
-- one explicit generation mode;
 - exact API-ID include and exclude sets; and
 - a target-owned configuration tree containing scalar, list, and object values.
 
@@ -38,9 +37,9 @@ generator-specific blocks with generic executions and targets:
 ```kotlin
 tapik {
     outputRoot(layout.buildDirectory.dir("generated/contracts"))
+    sameProject()
 
     execution("publicOpenApi") {
-        sameProject()
         includeApis("Catalog")
 
         target("openapi") {
@@ -51,7 +50,7 @@ tapik {
 }
 ```
 
-`sameProject()` and `compiledContract()` select the corresponding explicit mode and are mutually exclusive.
+`sameProject()` and `compiledContract()` select the corresponding explicit project mode and are mutually exclusive.
 `target(id) { ... }` both selects the target and configures it, mirroring the earlier integration's useful property that
 entering a generator block enabled that generator. It is generic rather than tied to built-in target names and may be
 called exactly once per execution. `value` adds a scalar configuration entry; corresponding list and object builders
@@ -65,7 +64,7 @@ configuration cannot redirect an artifact outside it.
 
 ## Explicit generation modes
 
-Every execution declares exactly one of two modes:
+Every project using generation declares exactly one of two modes:
 
 - **Compiled contract** reads APIs from artifacts on the dedicated contract dependency configuration. It is intended
   for consumers of a separately compiled contract and can make generated declarations available to ordinary main
@@ -75,9 +74,65 @@ Every execution declares exactly one of two modes:
   source compilation.
 
 The adapter never infers mode from resolved files, populated dependency configurations, output directories, task
-names, requested tasks, or whether a registry happens to be visible. Explicit mode is part of the execution's task
-input and diagnostic context. A single project may contain executions in either mode; the adapter applies the
-mode-specific classpath and lifecycle rules to each one.
+names, requested tasks, or whether a registry happens to be visible. Explicit mode is part of the generation task's
+input and every execution's diagnostic context. All executions in one project use that mode. Mixing modes would require
+the same aggregated task to run both before and after main compilation, so it is not a supported configuration.
+
+## Lifecycle and source visibility
+
+The plugin registers one `tapikGenerate` task for the configured executions. Mode determines its relationship with the
+Kotlin/JVM main compilation; task names, requested command-line tasks, and previously compiled files do not alter that
+relationship.
+
+| Mode | Registry input | Task relationship | Main-source visibility |
+| --- | --- | --- | --- |
+| Compiled contract | Dedicated contract dependency configuration | `compileKotlin` and `processResources` consume `tapikGenerate` outputs | Main source can use generated Kotlin |
+| Same project | Compiled main output and runtime classpath | `tapikGenerate` depends on the main `classes` lifecycle | Main source cannot use generated Kotlin |
+
+### Compiled-contract mode
+
+The dedicated contract configuration resolves already compiled artifacts and their runtime dependencies. Project
+dependencies on contract modules retain Gradle's normal producing-task dependencies, so generation never scans or
+executes uncompiled source. `tapikGenerate` loads compiler-produced registries only from that resolved contract
+classpath.
+
+The generated Kotlin directory is registered lazily as a main Kotlin source directory backed by `tapikGenerate`.
+Consequently `compileKotlin` runs generation first and compiles generated declarations together with application main
+source. Application source may implement or invoke those declarations. The generated resource directory is likewise a
+lazy input to `processResources`, so resources are copied into the ordinary main resource output and included in the
+normal runtime artifact. These relationships come from providers and task dependencies rather than eager task
+realization or string task-name ordering.
+
+Generated documentation remains an output of `tapikGenerate` only. It is neither a Kotlin source directory nor an
+input to `processResources`, the runtime classpath, or `jar` packaging unless the consuming build deliberately adds a
+separate publication step.
+
+### Same-project mode
+
+`tapikGenerate` depends on the Kotlin/JVM main `classes` lifecycle and reads the resulting main output together with the
+main runtime classpath. This guarantees that the compiler-generated `ApiRegistry` service provider, Kotlin contract
+classes, Java main classes, and processed application resources exist before API loading. Running `tapikGenerate`
+directly from a clean checkout therefore builds those prerequisites through the ordinary Gradle task graph.
+
+The adapter does not add same-project generated Kotlin to the ordinary main Kotlin sources. Doing so would require
+`compileKotlin` to depend on generation while generation already depends on main compilation. Main source that needs a
+generated declaration must move the contract to a separately compiled project and use compiled-contract mode.
+
+When same-project targets emit Kotlin, a separate Kotlin compilation consumes only the generated source and compiles
+against the completed main output and its runtime dependencies. It has a stable module name distinct from the main
+compilation and writes to a separate classes directory, preserving the main compilation's Kotlin module metadata. The
+normal `jar` includes both class directories. Runtime consumers of the project are wired to the late classes without
+making them inputs to ordinary main compilation.
+
+Same-project generated resources are materialized in their own resource directory after `tapikGenerate`. The normal
+`jar` includes that directory, and runtime-consuming tasks receive it alongside the late classes. The adapter does not
+rerun or overwrite `processResources`. Documentation remains outside all runtime and packaging inputs in this mode as
+well.
+
+The late Kotlin compilation and packaging tasks depend on `tapikGenerate`; `tapikGenerate` does not finalize or invoke
+them when requested alone. A direct `tapikGenerate` command means exactly generation plus its declared prerequisites.
+There is no Gradle equivalent of Maven's special direct mode, no reuse of unchecked stale main output, and no behavior
+branch based on how the task entered the graph.
 
 ## Host-neutral target boundary
 
