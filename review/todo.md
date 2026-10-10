@@ -33,7 +33,7 @@ Gradle extension and task APIs require KDoc.
     runtime resources.
   - Make direct task invocation follow the Gradle task graph, without Maven's stale-output direct mode.
 
-- [ ] Specify Gradle output ownership and layout.
+- [x] Specify Gradle output ownership and layout.
   - Give one cacheable generation task sole Gradle ownership of each output tree and aggregate all configured target
     executions behind it.
   - Preserve generation-execution declaration order when invoking targets and reporting generated paths.

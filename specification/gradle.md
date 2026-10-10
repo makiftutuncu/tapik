@@ -62,6 +62,45 @@ The extension-level output root is the only user-configured filesystem root. A t
 artifact paths and never writes files. The Gradle adapter owns the layout and materialization beneath that root; target
 configuration cannot redirect an artifact outside it.
 
+## Output ownership and layout
+
+`tapikGenerate` is the only Gradle task that produces the configured output root. It is cacheable and declares that
+root as one output directory. Executions do not receive separate generation tasks or overlapping Gradle output
+declarations, and tasks that compile or package generated artifacts consume directories from this tree without claiming
+ownership of them.
+
+The adapter routes each target artifact by its host-neutral kind before materialization:
+
+| Artifact kind | Directory beneath the output root |
+| --- | --- |
+| `SOURCE` | `sources/` |
+| `RESOURCE` | `resources/` |
+| `DOCUMENTATION` | `documentation/` |
+
+The target's normalized relative path is appended unchanged beneath the corresponding directory. Thus two artifacts
+with the same target-relative path but different kinds remain distinct, while two artifacts of the same kind and path
+claim the same materialized path. Source-set, resource, documentation, and packaging wiring uses these exact stable
+directories rather than inspecting media types or target IDs.
+
+The task snapshots executions in declaration order, invokes every target in that order, and retains each target's
+artifact order. It generates all execution results before changing the output tree. Materialized paths are accumulated
+in first-claim order and reported in that order; a compatible shared path appears once at the position of its first
+claim.
+
+An artifact path is exclusive unless every claim for that materialized path has the same nonblank sharing key and
+byte-identical UTF-8 content. A compatible set of claims is merged into one artifact. A missing or different sharing
+key, or different content under the same key, fails the complete task with the path and conflicting execution names
+before output is changed. This makes independently generated Spring client and server endpoint types shareable without
+allowing a sharing key to hide divergent source.
+
+After every target succeeds and the aggregate is conflict-free, the adapter passes one merged `GenerationResult` to
+`ArtifactWriter` with the stable owner `gradle:tapikGenerate`. One write owns all routed paths regardless of which
+execution produced them. On a later run, output absent from the complete aggregate is stale and is released, including
+output from a removed or renamed execution. Compatible duplicate claims do not need separate persistent owners because
+the aggregate retains the path while any current execution still claims it. The writer's ownership manifest remains
+internal task output; exact-path collisions with files not owned by tapik fail without modifying the previous successful
+tree.
+
 ## Explicit generation modes
 
 Every project using generation declares exactly one of two modes:
