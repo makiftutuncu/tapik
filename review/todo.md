@@ -44,7 +44,7 @@ Gradle extension and task APIs require KDoc.
   - Write the merged result once through `ArtifactWriter` under a stable Gradle task owner so removed executions release
     stale output and client/server endpoint types do not create overlapping Gradle task outputs.
 
-- [ ] Define compatibility, dependency, and diagnostic policy.
+- [x] Define compatibility, dependency, and diagnostic policy.
   - Record the initial supported intersection of Java 25, Kotlin 2.4.10, and Gradle 9.1–9.5; test both Gradle endpoints.
   - Define separate resolvable, non-consumable contract and generation-target configurations with built-in target
     defaults and support for custom target artifacts.

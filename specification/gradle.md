@@ -6,10 +6,12 @@ The Gradle adapter is a host for the same compiler-generated API registries, hos
 selection rules, configuration tree, and generated artifacts used by other tapik hosts. It is published as
 `dev.akif:tapik-plugin-gradle` and preserves the public Gradle plugin ID `dev.akif.tapik.plugin.gradle`.
 
-The initial supported project type is Kotlin/JVM. A supported project applies Kotlin's JVM plugin and uses Java 25,
-Kotlin 2.4.10, and a supported Gradle version. The tapik plugin does not turn a Java-only, Android, or Kotlin
-Multiplatform project into a Kotlin/JVM project. Android and Kotlin Multiplatform integration are explicitly deferred;
-their compilations, variants, source sets, and packaging rules are not part of the initial adapter contract.
+The initial supported project type is Kotlin/JVM. Its supported toolchain intersection is Java 25, Kotlin 2.4.10, and
+Gradle 9.1 through 9.5 inclusive. Compatibility coverage runs the complete Gradle functional suite against both Gradle
+9.1 and 9.5 with that Java and Kotlin version; intermediate Gradle versions are supported by the same range contract.
+The tapik plugin does not turn a Java-only, Android, or Kotlin Multiplatform project into a Kotlin/JVM project. Android
+and Kotlin Multiplatform integration are explicitly deferred; their compilations, variants, source sets, and packaging
+rules are not part of the initial adapter contract.
 
 ## Configuration model
 
@@ -172,6 +174,73 @@ The late Kotlin compilation and packaging tasks depend on `tapikGenerate`; `tapi
 them when requested alone. A direct `tapikGenerate` command means exactly generation plus its declared prerequisites.
 There is no Gradle equivalent of Maven's special direct mode, no reuse of unchecked stale main output, and no behavior
 branch based on how the task entered the graph.
+
+## Dependencies and compatibility
+
+The adapter keeps dependency declaration and resolution in separate Gradle configuration roles. `tapikContract` and
+`tapikTarget` are declarable, non-resolvable, non-consumable dependency scopes. Their respective internal
+`tapikContractClasspath` and `tapikTargetClasspath` configurations are resolvable, non-consumable runtime classpaths.
+They are absent from published project variants, and none extends or is extended by the project's ordinary compile or
+runtime configurations:
+
+- `tapikContract` contains compiled contract artifacts and their runtime dependencies. It has no default dependency;
+  `tapikContractClasspath` is the registry input only in compiled-contract mode. A project dependency retains its
+  producing task dependency.
+- `tapikTarget` contains generation-target providers and their runtime dependencies. The plugin adds
+  `dev.akif:tapik-target-openapi`, `dev.akif:tapik-target-spring-restclient`, and
+  `dev.akif:tapik-target-spring-webmvc` at the applied plugin version. User-declared custom target artifacts are
+  additive. `tapikTargetClasspath` presents built-in and custom targets through the same service-provider boundary.
+
+The public dependency syntax is ordinary Gradle dependency notation:
+
+```kotlin
+dependencies {
+    tapikContract(project(":contract"))
+    tapikTarget("com.example:company-tapik-target:1.2.0")
+}
+```
+
+The built-in target modules are not implementation dependencies of the Gradle plugin and are not visible to project
+source. Contract artifacts likewise do not become ordinary application dependencies merely by being added to
+`tapikContract`; an application that imports contract declarations adds the contract to its normal dependencies too.
+The worker receives the two classpaths separately so API registries cannot implicitly contribute executable targets
+and target artifacts cannot become contract inputs.
+
+Before loading any registry or target provider, the adapter inspects resolved components on every classpath used for
+generation. This includes `tapikContractClasspath` in compiled-contract mode, the main runtime classpath in same-project
+mode, and `tapikTargetClasspath` in both modes. Every resolved external or project component whose group is `dev.akif`
+and whose module name starts with `tapik-` must have exactly the applied Gradle plugin version. The compiler-plugin
+artifact is requested at that same version by construction. A mismatch fails before worker loading or output mutation
+and reports the configuration, every conflicting coordinate and resolved version, the plugin version, and the
+instruction to align the tapik platform and plugin declaration. Versions of third-party custom-target artifacts are
+unrestricted, but any tapik modules in their transitive graphs remain subject to this rule.
+
+Applying the plugin before Kotlin/JVM is supported; compatibility validation waits until plugin application and lazy
+configuration have had the opportunity to observe it. Running a tapik task without `org.jetbrains.kotlin.jvm`, or in
+an Android or Kotlin Multiplatform project, fails with the detected project type and states that the initial adapter
+supports Kotlin/JVM only. An unsupported Gradle, Java, or Kotlin version reports the detected and supported versions.
+The compatibility suite treats Gradle 9.1 and 9.5 as separate required endpoints rather than testing only the build's
+default wrapper version.
+
+## Diagnostics
+
+Target discovery uses only `tapikTargetClasspath`. Selecting an unknown ID reports the requested ID, execution name,
+and sorted IDs available from that configuration, then explains how to add a custom artifact with
+`tapikTarget(...)`. Before reporting an ordinary unknown target, the adapter checks the contract classpath for that ID.
+Finding it there produces a placement diagnostic explaining that target artifacts belong in `tapikTarget`, not
+`tapikContract` or application dependencies.
+
+`ServiceConfigurationError` and `LinkageError` from target discovery identify `tapikTargetClasspath`, retain the
+original cause, and point to provider declarations, runtime dependencies, and tapik version alignment. The
+corresponding failures from API-registry discovery identify either `tapikContractClasspath` or the same project's main
+runtime classpath according to mode, retain the cause, and point to compiler-generated registries, contract runtime
+dependencies, and version alignment. Arbitrary target execution failures are not reclassified as loading failures.
+
+An empty API catalog has a mode-specific diagnostic. Compiled-contract mode tells the user to add a contract compiled
+with the tapik compiler plugin to `tapikContract`; same-project mode states that main compilation produced no eligible
+public concrete `Api` and points to compiler-plugin activation and the API eligibility rules. These failures, version
+failures, unknown or misplaced targets, and unsupported project types all occur before the output tree is changed and
+use lowercase `tapik` in their messages.
 
 ## Host-neutral target boundary
 
