@@ -55,7 +55,7 @@ Gradle extension and task APIs require KDoc.
 
 ## P1 — Establish the plugin build and compiler integration
 
-- [ ] Create the standalone `plugin-gradle` build.
+- [x] Create the standalone `plugin-gradle` build.
   - Add a Gradle wrapper and a focused `settings.gradle.kts`/`build.gradle.kts` using `java-gradle-plugin`, Kotlin/JVM,
     Maven publishing, Kotest, and Gradle TestKit.
   - Read or receive the tapik version from one authoritative release value and fail when it differs from the root Maven

@@ -111,6 +111,7 @@ directly beneath `src/main/kotlin` or `src/test/kotlin`; subpackage paths begin 
 | `format-jackson` | `dev.akif:tapik-format-jackson` |
 | `format-kotlinx` | `dev.akif:tapik-format-kotlinx` |
 | `plugin-compiler` | `dev.akif:tapik-plugin-compiler` |
+| `plugin-gradle` | `dev.akif:tapik-plugin-gradle` |
 | `plugin-maven` | `dev.akif:tapik-plugin-maven` |
 | `target-openapi` | `dev.akif:tapik-target-openapi` |
 | `target-spring-restclient` | `dev.akif:tapik-target-spring-restclient` |
@@ -124,6 +125,14 @@ It excludes all non-production `test-` and `example-` artifacts. Users import th
 `dependencyManagement` and omit versions from their ordinary tapik dependencies. Maven build-plugin versions and
 dependencies declared inside a build plugin remain explicitly versioned because project dependency management does
 not govern those scopes.
+
+`plugin-gradle` is a standalone Gradle build inside the Maven-primary repository rather than a Maven reactor module.
+Its project version is read from the root POM, which remains the single release-version authority; an explicitly
+supplied `tapikVersion` must match or configuration fails. The build resolves repository-produced tapik dependencies
+only from an explicitly supplied isolated Maven repository and never calls `mavenLocal()`. Maven Central and the Gradle
+Plugin Portal supply third-party build dependencies, but their repository filters cannot satisfy `dev.akif` artifacts.
+The Gradle build publishes `dev.akif:tapik-plugin-gradle` and the marker for `dev.akif.tapik.plugin.gradle`; the BOM
+manages the implementation artifact alongside Maven-built production artifacts.
 
 `core` remains dependency-free. Format integrations are opt-in contract dependencies: neither core nor generation
 targets select a serialization library for the user. A contract may use one integration, combine multiple integrations,

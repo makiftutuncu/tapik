@@ -53,6 +53,11 @@
             </dependency>
             <dependency>
                 <groupId>dev.akif</groupId>
+                <artifactId>tapik-plugin-gradle</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.akif</groupId>
                 <artifactId>tapik-plugin-maven</artifactId>
                 <version>${project.version}</version>
             </dependency>

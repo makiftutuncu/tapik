@@ -18,6 +18,7 @@ class BomSpec : FunSpec({
                     module == "bom" || module.startsWith("test-") || module.startsWith("example-")
                 }
                 .map { module -> documentElement(repository.resolve(module).resolve("pom.xml")).childText("artifactId") }
+                .plus("tapik-plugin-gradle")
 
         val managedDependencies = elements(repository.resolve("bom/pom.xml"), "dependency")
         val managedArtifacts = managedDependencies.map { dependency -> dependency.childText("artifactId") }
