@@ -44,11 +44,11 @@ class TapikExtensionDslSpec : FunSpec({
             GradleRunner
                 .create()
                 .withProjectDir(project.toFile())
-                .withArguments("tapikGenerate", "--stacktrace")
+                .withArguments("tasks", "--stacktrace")
                 .withPluginClasspath()
                 .build()
 
-        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":tasks")?.outcome shouldBe TaskOutcome.SUCCESS
     }
 
     test("configure typed executions from Groovy DSL") {
@@ -87,10 +87,10 @@ class TapikExtensionDslSpec : FunSpec({
             GradleRunner
                 .create()
                 .withProjectDir(project.toFile())
-                .withArguments("tapikGenerate", "--stacktrace")
+                .withArguments("tasks", "--stacktrace")
                 .withPluginClasspath()
                 .build()
 
-        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":tasks")?.outcome shouldBe TaskOutcome.SUCCESS
     }
 })

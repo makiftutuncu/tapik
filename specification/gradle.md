@@ -117,6 +117,11 @@ root as one output directory. Executions do not receive separate generation task
 declarations, and tasks that compile or package generated artifacts consume directories from this tree without claiming
 ownership of them.
 
+The task declares the resolved contract and target artifacts as normalized classpath inputs. Its value inputs include
+the explicit mode, plugin version, and complete declaration-ordered execution definitions: execution and target IDs,
+API selection, and the recursively nested target configuration. Worker result files are temporary implementation
+details rather than additional task outputs.
+
 The adapter routes each target artifact by its host-neutral kind before materialization:
 
 | Artifact kind | Directory beneath the output root |
@@ -148,6 +153,10 @@ output from a removed or renamed execution. Compatible duplicate claims do not n
 the aggregate retains the path while any current execution still claims it. The writer's ownership manifest remains
 internal task output; exact-path collisions with files not owned by tapik fail without modifying the previous successful
 tree.
+
+After the single write succeeds, the task logs each materialized path once, relative to the Gradle project directory,
+in the same first-claim order. Failed generation, incompatible duplicate claims, and writer preflight failures log no
+successful paths and preserve the last successful output tree.
 
 ## Explicit generation modes
 

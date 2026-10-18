@@ -96,7 +96,7 @@ Gradle extension and task APIs require KDoc.
     preserving list and map declaration order.
   - Restore all context and close disposable classloaders on success and failure.
 
-- [ ] Implement the aggregated cacheable generation task.
+- [x] Implement the aggregated cacheable generation task.
   - Declare contract and target artifacts as normalized `@Classpath` inputs, execution definitions and plugin version as
     value inputs, and the generated root as the task output.
   - Generate every configured execution before mutating destination output; merge artifacts according to the specified

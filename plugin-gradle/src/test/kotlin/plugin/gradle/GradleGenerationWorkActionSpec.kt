@@ -91,6 +91,7 @@ internal abstract class GenerationWorkerHarness @Inject constructor(
             }
         queue.submit(GradleGenerationWorkAction::class.java) { parameters ->
             parameters.contractClasspath.from(contractClasspath)
+            parameters.executionName.set("docs")
             parameters.targetId.set("openapi")
             parameters.configuration.set(mapOf("version" to ScalarGradleConfigurationValue("1.0.0")))
             parameters.includeApis.set(emptySet())
