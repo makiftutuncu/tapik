@@ -85,7 +85,7 @@ Gradle extension and task APIs require KDoc.
 
 ## P2 — Deliver compiled-contract generation
 
-- [ ] Implement isolated registry and target loading for Gradle.
+- [x] Implement isolated registry and target loading for Gradle.
   - Run generation through the Worker API with classloader isolation so contract and target dependencies do not leak
     into the Gradle daemon or task state.
   - Load targets only from the generation-target classpath and APIs from a child contract/runtime classloader with the

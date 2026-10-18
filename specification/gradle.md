@@ -183,6 +183,18 @@ dependencies on contract modules retain Gradle's normal producing-task dependenc
 executes uncompiled source. `tapikGenerate` loads compiler-produced registries only from that resolved contract
 classpath.
 
+Generation runs through Gradle's Worker API with classloader isolation. The isolated worker classloader contains the
+Gradle adapter implementation and target classpath, but not the contract classpath. The worker discovers
+`GenerationTargetRegistry` providers only from that target classloader. It then creates a closeable child classloader
+for the contract classpath, makes the child the thread context classloader while loading `ApiRegistry` providers and
+invoking targets, and restores the previous context classloader before closing the child on success or failure.
+
+Target results cross the worker boundary through a versioned internal result file containing complete ordered artifact
+values; user classes and target instances never become Gradle task state. Gradle scalar, list, and object configuration
+values are recursively converted to the corresponding host-neutral `ConfigurationValue` tree inside the worker while
+preserving map and list declaration order. Generation reuses `ApiCatalog`, `GenerationTargetCatalog`, `ApiSelection`,
+and `GenerationEngine` rather than implementing Gradle-specific discovery or dispatch.
+
 The generated Kotlin directory is registered lazily as a main Kotlin source directory backed by `tapikGenerate`.
 Consequently `compileKotlin` runs generation first and compiles generated declarations together with application main
 source. Application source may implement or invoke those declarations. The generated resource directory is likewise a
