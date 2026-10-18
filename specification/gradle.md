@@ -13,6 +13,25 @@ The tapik plugin does not turn a Java-only, Android, or Kotlin Multiplatform pro
 and Kotlin Multiplatform integration are explicitly deferred; their compilations, variants, source sets, and packaging
 rules are not part of the initial adapter contract.
 
+## Compiler-plugin attachment
+
+Applying the tapik Gradle plugin also attaches `dev.akif:tapik-plugin-compiler` through Kotlin's
+`KotlinCompilerPluginSupportPlugin` API. Its artifact version is exactly the applied tapik Gradle plugin version and its
+compiler plugin ID is `dev.akif.tapik`. This attachment is automatic and has no user-facing compiler options: endpoint
+definitions remain ordinary Kotlin values and API discovery remains the compiler-generated `ApiRegistry` service
+provider rather than a second Gradle metadata model.
+
+The compiler plugin is applicable to every compilation whose Kotlin platform type is JVM. It is not attached to
+common, JavaScript, Android JVM, Native, or Wasm compilations. Project-type diagnostics remain separate from compiler
+attachment: the generation adapter initially supports only projects applying `org.jetbrains.kotlin.jvm`, even if
+another project type exposes an individual JVM-like compilation.
+
+Each applicable compilation owns registry state in its own Kotlin classes output. A compilation containing eligible
+APIs writes one compiler-owned registry class and its `META-INF/services/dev.akif.tapik.ApiRegistry` provider; a
+compilation without eligible APIs leaves neither artifact behind. On non-clean compilation, adding or changing APIs
+replaces the generated registry and removing the last API removes the generated class and service entry. This is the
+same compiler-owned synchronization used by Maven: Gradle neither synthesizes registries nor retains a separate index.
+
 ## Configuration model
 
 The plugin contributes one `tapik` extension. Its output root is backed by a Gradle directory property, shared by all

@@ -65,7 +65,7 @@ Gradle extension and task APIs require KDoc.
   - Register the historical plugin ID, implementation class, display name, description, and generated plugin marker.
   - Add the production artifact to the tapik BOM without adding test fixtures or examples to the publication set.
 
-- [ ] Attach `tapik-plugin-compiler` through Kotlin's supported Gradle API.
+- [x] Attach `tapik-plugin-compiler` through Kotlin's supported Gradle API.
   - Implement `KotlinCompilerPluginSupportPlugin` with compiler plugin ID `dev.akif.tapik` and coordinates matching the
     applied Gradle plugin version.
   - Apply it only to supported Kotlin/JVM compilations and preserve registry generation for contract modules without

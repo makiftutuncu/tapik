@@ -58,6 +58,7 @@ gradle.beforeProject {
     group = "dev.akif"
     version = tapikVersion
     extensions.extraProperties["tapikVersion"] = tapikVersion
+    extensions.extraProperties["tapikRepository"] = tapikRepository
 }
 
 dependencyResolutionManagement {
