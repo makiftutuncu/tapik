@@ -36,9 +36,8 @@ same compiler-owned synchronization used by Maven: Gradle neither synthesizes re
 
 The plugin contributes one `tapik` extension. Its output root is backed by a Gradle directory property, shared by all
 tapik generation in the project, and defaults below the project's build directory at `generated/tapik`. Calling
-`outputRoot` replaces that convention with a directory or directory provider. Calling `execution(name) { ... }`
-registers an entry lazily in a managed named container. Each entry describes one invocation of one generation target
-and has:
+`outputRoot` replaces that convention with a directory or directory provider. Direct target methods register entries
+lazily in one internal managed named container. Each entry describes one invocation of one generation target and has:
 
 - a unique, nonblank Gradle name used for diagnostics and stable execution identity;
 - one nonblank target ID;
@@ -46,38 +45,66 @@ and has:
 - a target-owned configuration tree containing scalar, list, and object values.
 
 Execution names do not select targets. A project may declare several differently named executions for the same target
-with different API selections or target configuration. Their declaration order is observable: the adapter snapshots,
-invokes, and reports executions in that order. Reconfiguring a named entry does not move it. `includeApis` and
-`excludeApis` append exact IDs to their respective managed sets. API selection retains the host-neutral rules: an empty
-include set selects every discovered API, exclusions are applied afterward, unknown IDs and an empty final selection
-fail, and selected APIs retain catalog order.
+with different API selections or target configuration. Their declaration order is observable: the adapter records,
+snapshots, invokes, and reports executions in that order rather than the named container's lookup order. `includeApis`
+and `excludeApis` append exact IDs to their respective managed sets. API selection retains the host-neutral rules: an
+empty include set selects every discovered API, exclusions are applied afterward, unknown IDs and an empty final
+selection fail, and selected APIs retain catalog order.
 
-The Kotlin DSL keeps the direct, block-oriented style of tapik's earlier Gradle integration while replacing its
-generator-specific blocks with generic executions and targets:
+The Kotlin DSL keeps the direct, typed, block-oriented style of tapik's earlier Gradle integration. Built-in targets
+have dedicated entry methods and managed execution types; their known options are properties, booleans, or enums rather
+than string keys and stringly typed values:
 
 ```kotlin
 tapik {
     outputRoot(layout.buildDirectory.dir("generated/contracts"))
-    sameProject()
+    mode(Mode.COMPILED_CONTRACT)
 
-    execution("publicOpenApi") {
+    openApi("public") {
         includeApis("Catalog")
+        version("1.0.0")
+        format(OpenApiFormat.YAML)
+    }
 
-        target("openapi") {
-            value("version", "1.0.0")
-            value("format", "yaml")
-        }
+    springRestClient("catalogClient") {
+        packageName("com.example.generated")
+        clientSuffix("Client")
+    }
+
+    springWebMvc("catalogServer") {
+        packageName("com.example.generated")
+        serverSuffix("Server")
+        controllerSuffix("GeneratedController")
     }
 }
 ```
 
-`sameProject()` and `compiledContract()` select the corresponding explicit project mode and are mutually exclusive.
-`target(id) { ... }` both selects the target and configures it, mirroring the earlier integration's useful property that
-entering a generator block enabled that generator. It is generic rather than tied to built-in target names and may be
-called exactly once per execution. `value` adds a scalar configuration entry; corresponding list and object builders
-preserve the complete host-neutral tree and declaration order. The DSL methods write only to Gradle `Property`,
-`SetProperty`, `MapProperty`, `DirectoryProperty`, and managed nested values. They do not resolve providers during
-configuration. Equivalent Groovy DSL uses the same methods and behavior rather than a separate compatibility API.
+`mode(Mode.COMPILED_CONTRACT)` and `mode(Mode.SAME_PROJECT)` select the explicit contract-loading mode. No mode is
+selected by default: applying the plugin without invoking generation remains valid, while invoking `tapikGenerate`
+without a mode fails. Repeating the same mode is harmless, but selecting a different mode after one has already been
+selected fails during configuration.
+
+`openApi`, `springRestClient`, and `springWebMvc` each enable and configure their target, retaining the earlier plugin's
+useful generator-block behavior. The optional argument is the execution's stable Gradle name, not the target ID or an
+output name. A target has no executions when its method is absent, and the same target may have several differently
+configured executions. The overload without a name uses the target ID as its execution name; additional executions of
+that target therefore require explicit unique names. OpenAPI format and component naming are enums.
+Known Spring naming options are dedicated string properties and are validated as Kotlin names by their targets.
+
+Custom service-loaded targets use `target(executionName, targetId) { ... }`. Only that escape hatch accepts target-owned
+configuration names. Its overloaded scalar, list, and object builders construct the complete host-neutral
+configuration value tree while retaining list and map declaration order; callers do not manipulate raw maps or encode
+booleans as strings themselves. Adding a custom target does not require changing the Gradle plugin API.
+
+The DSL methods write only to Gradle `Property`, `SetProperty`, `MapProperty`, `DirectoryProperty`, and managed nested
+values. They do not resolve providers during configuration. Equivalent Groovy DSL uses the same methods, types, and
+behavior rather than a separate compatibility API.
+
+Blank or duplicate execution names and blank custom target IDs fail when declared. Entering a built-in target block
+always supplies its target ID, so a missing target is not representable. Selecting both modes fails during
+configuration. Before `tapikGenerate` performs work, it rejects executions without a mode, blank API IDs, and IDs
+present in both include and exclude sets. An applied plugin with no configured executions remains valid so it may be
+used only to attach the compiler plugin, but invoking `tapikGenerate` without executions fails clearly.
 
 The extension-level output root is the only user-configured filesystem root. A target still returns normalized relative
 artifact paths and never writes files. The Gradle adapter owns the layout and materialization beneath that root; target

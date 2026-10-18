@@ -75,7 +75,7 @@ Gradle extension and task APIs require KDoc.
   - Cover non-clean source addition, change, and removal so incremental registry synchronization behaves the same under
     Gradle as it does under Maven.
 
-- [ ] Introduce the public Gradle extension and lazy configuration model.
+- [x] Introduce the public Gradle extension and lazy configuration model.
   - Model values with Gradle `Property`, `SetProperty`, `MapProperty`, `DirectoryProperty`, and managed nested beans;
     never capture `Project`, configurations, classloaders, or resolved tapik values in task actions.
   - Preserve generation-execution declaration order when snapshotting the named container into task inputs.

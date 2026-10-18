@@ -10,7 +10,22 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 /** Entry point for tapik's Gradle integration. */
 class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
     /** Applies tapik to [target]. */
-    override fun apply(target: Project) = Unit
+    override fun apply(target: Project) {
+        val extension =
+            target.extensions.create(
+                "tapik",
+                TapikExtension::class.java,
+                target.objects
+            )
+        extension.outputRoot.convention(target.layout.buildDirectory.dir("generated/tapik"))
+        target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) { task ->
+            task.group = "tapik"
+            task.description = "Generates artifacts from tapik API contracts"
+            task.mode.set(extension.mode)
+            task.executions.set(extension.orderedExecutions)
+            task.outputRoot.set(extension.outputRoot)
+        }
+    }
 
     /** Returns whether the tapik compiler plugin supports [kotlinCompilation]. */
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean =
