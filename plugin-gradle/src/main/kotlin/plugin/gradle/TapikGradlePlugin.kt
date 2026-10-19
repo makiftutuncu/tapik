@@ -3,6 +3,7 @@ package dev.akif.tapik.plugin.gradle
 import org.gradle.api.Project
 import org.gradle.api.attributes.Usage
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
@@ -30,6 +31,7 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 target.objects
             )
         extension.outputRoot.convention(target.layout.buildDirectory.dir("generated/tapik"))
+        val emptyClasspath = target.files()
         val generation =
             target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) { task ->
                 task.group = "tapik"
@@ -37,22 +39,44 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 task.mode.set(extension.mode)
                 task.pluginVersion.set(tapikVersion)
                 task.executions.set(extension.orderedExecutions)
-                task.contractClasspath.from(contractClasspath)
+                task.contractClasspath.from(
+                    extension.classpathForMode(Mode.COMPILED_CONTRACT, contractClasspath, emptyClasspath)
+                )
                 task.targetClasspath.from(targetClasspath)
                 task.outputRoot.set(extension.outputRoot)
                 task.projectDirectory.set(target.layout.projectDirectory)
             }
         target.wireCompiledContractOutputs(extension, generation)
+        target.wireSameProjectInputsAndResources(extension, generation)
     }
 
     /** Returns whether the tapik compiler plugin supports [kotlinCompilation]. */
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean =
         kotlinCompilation.platformType == KotlinPlatformType.jvm
 
-    /** Attaches tapik to [kotlinCompilation] without user-facing compiler options. */
+    /** Attaches tapik and its host-managed registry synchronization to [kotlinCompilation]. */
     override fun applyToCompilation(
         kotlinCompilation: KotlinCompilation<*>
-    ) = kotlinCompilation.target.project.provider<List<SubpluginOption>> { emptyList() }
+    ): Provider<List<SubpluginOption>> {
+        val project = kotlinCompilation.target.project
+        val registryIndex =
+            project.layout.projectDirectory.file(
+                ".gradle/tapik/compiler/${kotlinCompilation.name}/registry.index"
+            )
+        return project.provider {
+            buildList {
+                add(SubpluginOption(key = "incrementalRegistry", value = "true"))
+                add(SubpluginOption(key = "registryIndex", value = registryIndex.asFile.absolutePath))
+                kotlinCompilation.allKotlinSourceSets
+                    .flatMap { sourceSet -> sourceSet.kotlin.srcDirs }
+                    .map { directory -> directory.absoluteFile.normalize() }
+                    .distinct()
+                    .forEach { directory ->
+                        add(SubpluginOption(key = "sourceRoot", value = directory.path))
+                    }
+            }
+        }
+    }
 
     /** Kotlin compiler plugin ID used by tapik. */
     override fun getCompilerPluginId(): String = "dev.akif.tapik"

@@ -20,12 +20,19 @@ class TapikCompilerPluginRegistrar : CompilerPluginRegistrar() {
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messages = configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
         val outputDirectory = configuration[JVMConfigurationKeys.OUTPUT_DIRECTORY] ?: return
+        val configuredSourceRoots = configuration.getList(SOURCE_ROOTS).map(Path::of)
         IrGenerationExtension.registerExtension(
             ApiRegistryGenerationExtension(
                 outputDirectory = outputDirectory.toPath(),
                 messages = messages,
-                incremental = configuration.getBoolean(CommonConfigurationKeys.INCREMENTAL_COMPILATION),
-                sourceRoots = configuration.kotlinSourceRoots.map { sourceRoot -> Path.of(sourceRoot.path) }
+                incremental =
+                    configuration[INCREMENTAL_REGISTRY]
+                        ?: configuration.getBoolean(CommonConfigurationKeys.INCREMENTAL_COMPILATION),
+                registryIndex = configuration[REGISTRY_INDEX]?.let(Path::of),
+                sourceRoots =
+                    configuredSourceRoots.ifEmpty {
+                        configuration.kotlinSourceRoots.map { sourceRoot -> Path.of(sourceRoot.path) }
+                    }
             )
         )
     }

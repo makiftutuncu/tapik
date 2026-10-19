@@ -227,6 +227,16 @@ main runtime classpath. This guarantees that the compiler-generated `ApiRegistry
 classes, Java main classes, and processed application resources exist before API loading. Running `tapikGenerate`
 directly from a clean checkout therefore builds those prerequisites through the ordinary Gradle task graph.
 
+The same-project contract classpath is assembled from the main compiled-class directories, the processed main-resource
+directory, and the ordinary runtime dependency configuration. It is captured before tapik adds any late generated
+output, so `tapikGenerate` never consumes its own resource or class output. Compiled-contract dependencies remain absent
+from this mode's registry classpath. The Gradle adapter also gives each Kotlin compilation a private registry index in
+the project's Gradle state directory, passes its complete declared Kotlin source roots, and tells the compiler
+integration to retain eligible APIs from unchanged active sources when Kotlin performs an incremental compilation. The
+registry therefore always describes the complete current source set rather than only the dirty files compiled in that
+invocation. Each compilation reconciles the index against its current active source files, so deleted sources and a
+later clean compilation cannot retain stale APIs.
+
 The adapter does not add same-project generated Kotlin to the ordinary main Kotlin sources. Doing so would require
 `compileKotlin` to depend on generation while generation already depends on main compilation. Main source that needs a
 generated declaration must move the contract to a separately compiled project and use compiled-contract mode.

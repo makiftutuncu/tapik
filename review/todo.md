@@ -116,7 +116,7 @@ Gradle extension and task APIs require KDoc.
 
 ## P3 — Add same-project generation
 
-- [ ] Support same-project documentation and resource targets.
+- [x] Support same-project documentation and resource targets.
   - Depend lazily on the supported main Kotlin compilation output and its runtime classpath.
   - Generate only after the compiler-produced registry exists, including when `tapikGenerate` is invoked directly.
   - Package generated resources at the correct point even though ordinary resource processing may already have run.

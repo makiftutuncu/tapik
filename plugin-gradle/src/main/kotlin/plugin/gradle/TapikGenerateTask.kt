@@ -57,9 +57,6 @@ abstract class TapikGenerateTask @Inject constructor(
     @TaskAction
     internal fun generate() {
         validateConfiguration()
-        check(mode.get() == Mode.COMPILED_CONTRACT) {
-            "tapik same-project generation is not implemented yet"
-        }
 
         val configuredExecutions = executions.get()
         val resultDirectory = temporaryDir.toPath().resolve("results")
