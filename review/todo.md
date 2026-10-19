@@ -106,7 +106,7 @@ Gradle extension and task APIs require KDoc.
   - Add focused tests for multiple targets, shared Spring endpoint types, exclusive collisions, stale cleanup, removed
     executions, failure preservation, API selection, and nested target configuration.
 
-- [ ] Wire compiled-contract outputs into Kotlin/JVM builds.
+- [x] Wire compiled-contract outputs into Kotlin/JVM builds.
   - Make generated Kotlin a lazy source-directory provider so compilation receives the task dependency automatically.
   - Make generated resources inputs of `processResources` without including generated source or documentation files.
   - Keep documentation output available as a task artifact without adding it to runtime jars.

@@ -30,17 +30,19 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 target.objects
             )
         extension.outputRoot.convention(target.layout.buildDirectory.dir("generated/tapik"))
-        target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) { task ->
-            task.group = "tapik"
-            task.description = "Generates artifacts from tapik API contracts"
-            task.mode.set(extension.mode)
-            task.pluginVersion.set(tapikVersion)
-            task.executions.set(extension.orderedExecutions)
-            task.contractClasspath.from(contractClasspath)
-            task.targetClasspath.from(targetClasspath)
-            task.outputRoot.set(extension.outputRoot)
-            task.projectDirectory.set(target.layout.projectDirectory)
-        }
+        val generation =
+            target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) { task ->
+                task.group = "tapik"
+                task.description = "Generates artifacts from tapik API contracts"
+                task.mode.set(extension.mode)
+                task.pluginVersion.set(tapikVersion)
+                task.executions.set(extension.orderedExecutions)
+                task.contractClasspath.from(contractClasspath)
+                task.targetClasspath.from(targetClasspath)
+                task.outputRoot.set(extension.outputRoot)
+                task.projectDirectory.set(target.layout.projectDirectory)
+            }
+        target.wireCompiledContractOutputs(extension, generation)
     }
 
     /** Returns whether the tapik compiler plugin supports [kotlinCompilation]. */

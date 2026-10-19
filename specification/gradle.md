@@ -211,6 +211,11 @@ lazy input to `processResources`, so resources are copied into the ordinary main
 normal runtime artifact. These relationships come from providers and task dependencies rather than eager task
 realization or string task-name ordering.
 
+This source-set wiring is installed only for explicit compiled-contract mode after the project has applied
+`org.jetbrains.kotlin.jvm`. The providers point directly to `sources/` and `resources/` beneath the configured output
+root and carry their producing `tapikGenerate` task dependency; the adapter does not inspect generated files to decide
+whether either lifecycle edge exists.
+
 Generated documentation remains an output of `tapikGenerate` only. It is neither a Kotlin source directory nor an
 input to `processResources`, the runtime classpath, or `jar` packaging unless the consuming build deliberately adds a
 separate publication step.

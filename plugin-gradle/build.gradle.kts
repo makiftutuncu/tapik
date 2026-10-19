@@ -33,6 +33,7 @@ val generationWorkerTargets =
 dependencies {
     implementation("dev.akif:tapik-common-plugin:$tapikVersion")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:$kotlinVersion")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
 
     testImplementation(platform("io.kotest:kotest-bom:6.2.4"))
     testImplementation("io.kotest:kotest-runner-junit5-jvm")
