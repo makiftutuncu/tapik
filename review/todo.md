@@ -162,7 +162,7 @@ Gradle extension and task APIs require KDoc.
     host rather than a future or unavailable integration.
   - Use tested source snippets for Kotlin and Groovy DSL examples and keep the project name lowercase `tapik`.
 
-- [ ] Integrate verification and publication.
+- [x] Integrate verification and publication.
   - Add a repeatable repository command that installs Maven artifacts into an isolated repository and runs the complete
     Gradle plugin check without relying on global state.
   - Add CI jobs for the Gradle support matrix, TestKit functional tests, configuration cache, build cache, and Gradle

@@ -73,3 +73,48 @@ jobs:
             site/target/browser-report
           if-no-files-found: ignore
           retention-days: 7
+
+  gradle:
+    name: Gradle ${{ matrix.gradle }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        gradle:
+          - '9.1.0'
+          - '9.5.0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Set up Gradle ${{ matrix.gradle }}
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: ${{ matrix.gradle }}
+          cache-disabled: true
+
+      - name: Verify the plugin and external consumer
+        run: ./scripts/verify-gradle.sh
+        env:
+          GRADLE: gradle
+
+      - name: Retain Gradle failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-${{ matrix.gradle }}-failures
+          path: |
+            target/gradle-verification/external-consumer.log
+            target/gradle-verification/external-consumer.txt
+            plugin-gradle/build/reports
+            plugin-gradle/build/test-results
+          if-no-files-found: ignore
+          retention-days: 7

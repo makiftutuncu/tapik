@@ -44,6 +44,17 @@ the Maven Wrapper and the Kotlin version declared by the parent build, so it ver
 without maintaining an independent version configuration. The workflow has read-only repository permissions, includes
 every production, `test-`, and `example-` reactor module, and receives no publication credentials.
 
+The standalone Gradle plugin is additionally verified with Java 25 on the minimum and maximum supported Gradle
+versions, currently 9.1 and 9.5. Each matrix entry runs the complete plugin unit and TestKit suite, including the
+configuration-cache, build-cache, non-clean, relocation, and parallel-execution fixtures, and builds the runnable
+Gradle example. These jobs consume Maven-built tapik dependencies from a repository inside `target`; they do not read
+the machine's ordinary Maven local repository or Gradle user home.
+
+`./scripts/verify-gradle.sh` is the repeatable local equivalent of that CI matrix entry. It accepts the Gradle
+executable through `GRADLE`, defaults to the standalone plugin wrapper, prepares fresh Maven and Gradle repositories
+below `target`, installs the Maven-built artifacts there, and runs the complete Gradle verification. Deleting those
+repositories cannot affect user-owned build-tool state.
+
 ## Publication
 
 tapik releases are published to Maven Central under `dev.akif`. The parent and every production module inherit the
@@ -133,6 +144,26 @@ only from an explicitly supplied isolated Maven repository and never calls `mave
 Plugin Portal supply third-party build dependencies, but their repository filters cannot satisfy `dev.akif` artifacts.
 The Gradle build publishes `dev.akif:tapik-plugin-gradle` and the marker for `dev.akif.tapik.plugin.gradle`; the BOM
 manages the implementation artifact alongside Maven-built production artifacts.
+
+The Gradle publication uses the same `dev.akif:tapik-plugin-gradle` coordinates, version, project URL, MIT license,
+developer, source-control metadata, sources, and Dokka HTML `javadoc` archive as Maven publications. It also publishes
+the `dev.akif.tapik.plugin.gradle` marker artifact required by the `plugins` block. A repository-local publication task
+publishes both artifacts into an explicitly configured isolated repository for verification; ordinary checks never
+contact a remote publication service. Portal metadata declares the configuration-cache compatibility exercised by the
+functional suite.
+
+Maven Central publication precedes Gradle Plugin Portal publication. The release operator first publishes and verifies
+the parent, BOM, and every Maven-built production dependency, then validates the Gradle plugin publication, then
+publishes the plugin marker and implementation to the Portal. A plugin version must not become observable through the
+Portal while any tapik dependency with that version is unavailable from Maven Central.
+
+The Gradle release rehearsal publishes the implementation, sources, Dokka HTML API documentation, and marker into a
+fresh isolated Maven repository. It then copies only the Gradle consumer build files and ordinary example sources into
+a temporary workspace outside the source checkout. The copied build resolves the plugin through its published marker
+and resolves every `dev.akif` dependency exclusively from that staged repository. Its Gradle user home is isolated and
+the build does not use `mavenLocal()`, an included plugin build, TestKit plugin-classpath injection, or paths back to the
+checkout. The retained workspace and build log make a missing marker, publication artifact, dependency, or generated
+output diagnosable.
 
 `core` remains dependency-free. Format integrations are opt-in contract dependencies: neither core nor generation
 targets select a serialization library for the user. A contract may use one integration, combine multiple integrations,

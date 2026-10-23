@@ -79,6 +79,7 @@
         <maven.version>3.9.16</maven.version>
         <maven.plugin.tools.version>3.15.2</maven.plugin.tools.version>
         <dokka.version>2.2.0</dokka.version>
+        <gradle.plugin.publish.version>2.2.1</gradle.plugin.publish.version>
         <central.publishing.version>0.11.0</central.publishing.version>
         <release.artifacts.skip>true</release.artifacts.skip>
         <central.skipPublishing>false</central.skipPublishing>

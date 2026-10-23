@@ -8,6 +8,7 @@ Use Java 25 and run from the repository root:
 [source,shell]
 ----
 ./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install
+./scripts/verify-gradle.sh
 ----
 
 This runs the Maven suite, builds production source and Dokka HTML `javadoc` JARs, and installs the reactor locally.
@@ -30,6 +31,10 @@ Inspect these files before approving the release:
 * `example-application/target/release-rehearsal.txt`: temporary workspace location.
 * `example-application/target/release-staged-artifacts.txt`: exact staged artifact inventory.
 * `example-application/target/release-consumer.log`: external Maven output and test results.
+* `target/gradle-verification/external-consumer.log`: external Gradle output and test results.
+* `target/gradle-verification/external-consumer.txt`: retained external Gradle workspace location.
+* `target/gradle-verification/repository/dev/akif/tapik-plugin-gradle`: staged Gradle implementation, sources, HTML
+  API documentation, and POM.
 
 The temporary workspace retains its consumer project, repository, and log after either success or failure; remove that
 specific directory manually when no longer needed. CI retains the small diagnostic files for seven days.
@@ -76,6 +81,18 @@ Publish Maven Central artifacts before the Gradle Plugin Portal marker. A plugin
 its matching `tapik-plugin-compiler`, runtime, or built-in target artifacts are unavailable from Maven Central. Verify
 the implementation and marker metadata against the exact staged version, then publish the already tested Gradle
 plugin candidate through the configured portal credentials.
+
+After Maven Central confirms every dependency is available, supply Portal credentials through `GRADLE_PUBLISH_KEY`
+and `GRADLE_PUBLISH_SECRET` and validate the already rehearsed plugin version without uploading it:
+
+[source,shell]
+----
+GRADLE_USER_HOME=target/gradle-release-home ./plugin-gradle/gradlew -p plugin-gradle publishPlugins --validate-only \
+  -PtapikRepository=/absolute/path/to/staged-repository \
+  -PtapikVersion=0.6.0
+----
+
+Resolve every reported problem before removing `--validate-only` from that exact command to perform the real upload.
 
 Published versions must not be overwritten. Fix a released defect in a new version.
 

@@ -32,8 +32,19 @@ The same repository and version can run the source-backed example:
   -PtapikVersion=0.6.0
 ----
 
-The repository's integrated verification command prepares this isolated repository; see the release procedure before
-testing publication behavior manually.
+Run the complete standalone plugin suite and an external consumer from fresh, repository-local Maven and Gradle state
+with:
+
+[source,shell]
+----
+./scripts/verify-gradle.sh
+----
+
+Set `GRADLE=gradle` to use a Gradle installation selected by a version manager or CI instead of the plugin wrapper.
+The command installs Maven-built tapik dependencies into `target/gradle-verification/repository`, checks and publishes
+the plugin implementation and marker there, validates its source and Dokka HTML archives, and builds a copied consumer
+through the published marker. It does not read `~/.m2/repository`, `~/.gradle`, or `mavenLocal()`. The retained consumer
+log is `target/gradle-verification/external-consumer.log`; `external-consumer.txt` names its temporary workspace.
 
 To build a local documentation preview, first install the reactor artifacts needed by unified Dokka, build the website
 assets and API reference, then run Antora:

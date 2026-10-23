@@ -19,8 +19,23 @@ pluginManagement {
         requireNotNull(Regex("""<kotlin\.version>([^<]+)</kotlin\.version>""").find(rootPom)?.groupValues?.get(1)) {
             "Cannot read kotlin.version from the root Maven POM"
         }
+    val dokkaVersion =
+        requireNotNull(Regex("""<dokka\.version>([^<]+)</dokka\.version>""").find(rootPom)?.groupValues?.get(1)) {
+            "Cannot read dokka.version from the root Maven POM"
+        }
+    val pluginPublishVersion =
+        requireNotNull(
+            Regex("""<gradle\.plugin\.publish\.version>([^<]+)</gradle\.plugin\.publish\.version>""")
+                .find(rootPom)
+                ?.groupValues
+                ?.get(1)
+        ) {
+            "Cannot read gradle.plugin.publish.version from the root Maven POM"
+        }
     plugins {
         id("org.jetbrains.kotlin.jvm") version kotlinVersion
+        id("org.jetbrains.dokka") version dokkaVersion
+        id("com.gradle.plugin-publish") version pluginPublishVersion
     }
 }
 

@@ -1,10 +1,14 @@
 import org.gradle.api.tasks.WriteProperties
+import org.gradle.plugin.compatibility.compatibility
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.dokka")
     `java-gradle-plugin`
     `maven-publish`
+    id("com.gradle.plugin-publish")
 }
 
 val tapikVersion = extra["tapikVersion"] as String
@@ -49,6 +53,7 @@ java {
         languageVersion.set(JavaLanguageVersion.of(25))
     }
     withSourcesJar()
+    withJavadocJar()
 }
 
 kotlin {
@@ -59,6 +64,9 @@ kotlin {
 }
 
 gradlePlugin {
+    website.set("https://tapik.akif.dev")
+    vcsUrl.set("https://github.com/makiftutuncu/tapik")
+
     plugins {
         create("tapik") {
             id = "dev.akif.tapik.plugin.gradle"
@@ -66,6 +74,60 @@ gradlePlugin {
             displayName = "tapik Gradle plugin"
             description = "Generates artifacts from type-safe tapik API contracts"
             tags.set(listOf("tapik", "code-generation", "kotlin"))
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
+        }
+    }
+}
+
+tasks.named<Jar>("javadocJar") {
+    dependsOn(tasks.named("dokkaGeneratePublicationHtml"))
+    from(layout.buildDirectory.dir("dokka/html"))
+}
+
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        pom {
+            name.set("tapik Gradle plugin")
+            description.set("Generates artifacts from type-safe tapik API contracts")
+            url.set("https://tapik.akif.dev")
+            licenses {
+                license {
+                    name.set("MIT License")
+                    url.set("https://opensource.org/licenses/MIT")
+                    distribution.set("repo")
+                }
+            }
+            developers {
+                developer {
+                    id.set("makiftutuncu")
+                    name.set("Mehmet Akif Tütüncü")
+                    url.set("https://akif.dev")
+                }
+            }
+            scm {
+                connection.set("scm:git:https://github.com/makiftutuncu/tapik.git")
+                developerConnection.set("scm:git:ssh://git@github.com/makiftutuncu/tapik.git")
+                url.set("https://github.com/makiftutuncu/tapik")
+                tag.set("HEAD")
+            }
+            issueManagement {
+                system.set("GitHub")
+                url.set("https://github.com/makiftutuncu/tapik/issues")
+            }
+        }
+    }
+
+    val verificationRepository = providers.gradleProperty("tapikPublishRepository")
+    if (verificationRepository.isPresent) {
+        repositories {
+            maven {
+                name = "tapikVerification"
+                url = uri(verificationRepository.get())
+            }
         }
     }
 }

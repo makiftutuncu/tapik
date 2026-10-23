@@ -19,19 +19,41 @@ jobs:
           distribution: temurin
           java-version: 25
           cache: maven
+      - name: Set up Gradle 9.5
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.5.0'
+          cache-disabled: true
       - name: Package and consume the unsigned release
         run: >-
           ./mvnw --batch-mode --no-transfer-progress -Prelease
           -Dgpg.skip=true -Dcentral.skipPublishing=true
           -Dtapik.release.rehearsal=true clean install
-      - name: Retain rehearsal diagnostics
+      - name: Retain Maven rehearsal diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: release-rehearsal
+          name: maven-release-rehearsal
           path: |
             example-application/target/release-*.txt
             example-application/target/release-consumer.log
             **/target/surefire-reports/*.txt
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Package and consume the Gradle plugin
+        run: ./scripts/verify-gradle.sh
+        env:
+          GRADLE: gradle
+      - name: Retain Gradle rehearsal diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-release-rehearsal
+          path: |
+            target/gradle-verification/external-consumer.log
+            target/gradle-verification/external-consumer.txt
+            target/gradle-verification/repository/dev/akif/tapik-plugin-gradle
+            plugin-gradle/build/reports
+            plugin-gradle/build/test-results
           if-no-files-found: ignore
           retention-days: 7

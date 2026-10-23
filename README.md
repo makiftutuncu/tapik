@@ -531,13 +531,16 @@ while an incompatible pre-1.0 change increments the minor version and includes m
 
 The Maven build requires Java 25 and runs every Maven production, fixture, and runnable example module. The standalone
 Gradle plugin and Gradle example use [`plugin-gradle/gradlew`](plugin-gradle/gradlew) with an explicitly staged tapik
-repository; see the [development guide](docs/modules/ROOT/pages/development.adoc). Product and architecture decisions
-live under [`specification`](specification/README.md).
+repository. Run `./scripts/verify-gradle.sh` to install the Maven-built dependencies into isolated state, check and
+publish the Gradle plugin locally, and build an external consumer through its published marker. See the
+[development guide](docs/modules/ROOT/pages/development.adoc). Product and architecture decisions live under
+[`specification`](specification/README.md).
 
 Before publication, run the unsigned packaging and external-consumer rehearsal:
 
 ```shell
 ./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install
+./scripts/verify-gradle.sh
 ```
 
 This installs locally but does not publish. The [release procedure](docs/modules/ROOT/pages/releasing.adoc) explains
