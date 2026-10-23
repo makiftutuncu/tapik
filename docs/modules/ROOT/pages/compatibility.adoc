@@ -36,7 +36,7 @@ version; API versioning and rollout remain application responsibilities.
 == Current supported scope
 
 Maven and Gradle Kotlin/JVM are supported build hosts. Gradle support covers Java 25, Kotlin 2.4.10, and Gradle 9.1
-through 9.5. The built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC. The generation architecture
+through 9.8. The built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC. The generation architecture
 is host-neutral so future hosts and targets can be added without redefining contracts.
 
 Same-module generation runs after ordinary main-source compilation. When main source implements or imports generated

@@ -29,6 +29,13 @@ abstract class CustomTargetExecution @Inject constructor(name: String, targetId:
     fun list(name: String, vararg values: String) =
         put(name, ListGradleConfigurationValue(values.map(::ScalarGradleConfigurationValue)))
 
+    /** Adds an ordered, structurally typed list configured by [action] under [name]. */
+    fun list(name: String, action: Action<in GradleListConfigurationBuilder>) {
+        val builder = GradleListConfigurationBuilder()
+        action.execute(builder)
+        put(name, builder.build())
+    }
+
     /** Adds a nested object configured by [action] under [name]. */
     fun objectValue(name: String, action: Action<in GradleObjectConfigurationBuilder>) {
         val builder = GradleObjectConfigurationBuilder()

@@ -6,7 +6,7 @@ import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.TaskOutcome
 
 class GradleCompatibilitySpec : FunSpec({
-    listOf("9.1.0", "9.5.0").forEach { gradleVersion ->
+    listOf("9.1.0", "9.8.0").forEach { gradleVersion ->
         test("generate with Gradle $gradleVersion, Java 25, and Kotlin 2.4.10") {
             val fixture = CacheableGenerationFixture.create()
 

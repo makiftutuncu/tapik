@@ -45,7 +45,7 @@ without maintaining an independent version configuration. The workflow has read-
 every production, `test-`, and `example-` reactor module, and receives no publication credentials.
 
 The standalone Gradle plugin is additionally verified with Java 25 on the minimum and maximum supported Gradle
-versions, currently 9.1 and 9.5. Each matrix entry runs the complete plugin unit and TestKit suite, including the
+versions, currently 9.1 and 9.8. Each matrix entry runs the complete plugin unit and TestKit suite, including the
 configuration-cache, build-cache, non-clean, relocation, and parallel-execution fixtures, and builds the runnable
 Gradle example. These jobs consume Maven-built tapik dependencies from a repository inside `target`; they do not read
 the machine's ordinary Maven local repository or Gradle user home.

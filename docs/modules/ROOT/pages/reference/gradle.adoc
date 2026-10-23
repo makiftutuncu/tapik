@@ -3,7 +3,7 @@
 
 `dev.akif.tapik.plugin.gradle` is tapik's Gradle plugin. It activates the tapik Kotlin compiler plugin and hosts every
 generation target behind one cacheable `tapikGenerate` task. The initial adapter supports Java 25, Kotlin 2.4.10, and
-Gradle 9.1 through 9.5 in Kotlin/JVM projects.
+Gradle 9.1 through 9.8 in Kotlin/JVM projects.
 
 == Apply the plugin
 
@@ -94,7 +94,8 @@ The xref:reference/generation-options.adoc[target reference] describes defaults 
 
 Put a service-loaded custom target and its runtime dependencies on `tapikTarget`, not `implementation` or
 `tapikContract`. Register an execution with its stable target ID. The escape hatch supports scalar, ordered list, and
-nested object configuration without exposing host-neutral implementation maps:
+nested object configuration--including lists containing other lists or objects--without exposing host-neutral
+implementation maps:
 
 [source,kotlin]
 ----
@@ -167,6 +168,10 @@ OpenAPI, generated client/server source, and WebMVC registration resources under
 `tapikGenerate` says no mode or executions are configured:: Call `mode(Mode.COMPILED_CONTRACT)` or
 `mode(Mode.SAME_PROJECT)` and declare at least one target block. Applying the plugin alone intentionally performs no
 generation.
+
+`tapikGenerate` rejects the project or toolchain:: Generation initially supports Kotlin/JVM projects using Java 25,
+Kotlin 2.4.10, and Gradle 9.1 through 9.8. The plugin may be applied before Kotlin/JVM, but that plugin must be present
+by the time Gradle finishes configuring the project. Android and Kotlin Multiplatform projects are not yet supported.
 
 No API registries are found in compiled-contract mode:: Put a contract compiled with the tapik compiler plugin on
 `tapikContract`. Add it separately to `implementation` when source imports its declarations.

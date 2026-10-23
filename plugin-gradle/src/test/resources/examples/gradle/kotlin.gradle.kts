@@ -38,6 +38,12 @@ tapik {
         list("formats", "html", "markdown")
         objectValue("branding") {
             value("compact", true)
+            list("audiences") {
+                value("public")
+                objectValue {
+                    value("name", "partners")
+                }
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ from the examples exercised by `./mvnw verify`.
 
 * Java 25
 * Kotlin 2.4 or newer
-* Maven 3.9+ or Gradle 9.1 through 9.5
+* Maven 3.9+ or Gradle 9.1 through 9.8
 
 == Generate OpenAPI in the contract module
 

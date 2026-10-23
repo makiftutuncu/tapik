@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.maps.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.testfixtures.ProjectBuilder
@@ -77,7 +78,18 @@ class TapikExtensionSpec : FunSpec({
                 execution.list("formats", "json", "yaml")
                 execution.objectValue(
                     "metadata",
-                    Action { value -> value.value("owner", "platform") }
+                    Action { value ->
+                        value.value("owner", "platform")
+                        value.list(
+                            "rules",
+                            Action { rules ->
+                                rules.value(true)
+                                rules.objectValue(
+                                    Action { rule -> rule.value("audience", "public") }
+                                )
+                            }
+                        )
+                    }
                 )
             }
         )
@@ -114,7 +126,18 @@ class TapikExtensionSpec : FunSpec({
                     ),
                 "metadata" to
                     ObjectGradleConfigurationValue(
-                        linkedMapOf("owner" to ScalarGradleConfigurationValue("platform"))
+                        linkedMapOf(
+                            "owner" to ScalarGradleConfigurationValue("platform"),
+                            "rules" to
+                                ListGradleConfigurationValue(
+                                    listOf(
+                                        ScalarGradleConfigurationValue("true"),
+                                        ObjectGradleConfigurationValue(
+                                            linkedMapOf("audience" to ScalarGradleConfigurationValue("public"))
+                                        )
+                                    )
+                                )
+                        )
                     )
             )
     }
@@ -175,6 +198,34 @@ class TapikExtensionSpec : FunSpec({
 
         extension.mode(Mode.SAME_PROJECT)
         shouldThrow<GradleException> { task.validateConfiguration() }
+    }
+
+    test("validate the supported Kotlin JVM toolchain before generation") {
+        val project = ProjectBuilder.builder().build()
+        project.pluginManager.apply(TapikGradlePlugin::class.java)
+        val task = project.tasks.named("tapikGenerate", TapikGenerateTask::class.java).get()
+
+        shouldThrow<GradleException> { task.validateEnvironment() }.message shouldContain
+            "supports Kotlin/JVM projects only"
+
+        task.kotlinJvmProject.set(true)
+        task.projectType.set("Kotlin/JVM")
+        task.gradleVersion.set("9.0.0")
+        shouldThrow<GradleException> { task.validateEnvironment() }.message shouldContain
+            "supports Gradle 9.1 through 9.8"
+
+        task.gradleVersion.set("9.8.0")
+        task.javaVersion.set("24")
+        shouldThrow<GradleException> { task.validateEnvironment() }.message shouldContain
+            "supports Java 25"
+
+        task.javaVersion.set("25")
+        task.kotlinVersion.set("2.4.0")
+        shouldThrow<GradleException> { task.validateEnvironment() }.message shouldContain
+            "supports Kotlin 2.4.10"
+
+        task.kotlinVersion.set("2.4.10")
+        task.validateEnvironment()
     }
 
     test("register the generation task lazily") {

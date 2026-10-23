@@ -5,7 +5,11 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import javax.inject.Inject
 
-/** Common, typed configuration for one tapik generation execution. */
+/**
+ * Common, typed configuration for one declaration-ordered tapik generation execution.
+ *
+ * The execution `name` is a unique diagnostic identity; [targetId] independently selects the service-loaded target.
+ */
 abstract class TapikExecution @Inject constructor(
     private val executionName: String,
     @get:Input val targetId: String
@@ -14,11 +18,11 @@ abstract class TapikExecution @Inject constructor(
     @Input
     final override fun getName(): String = executionName
 
-    /** Exact API IDs included by this execution, or empty to include every API. */
+    /** Exact, case-sensitive API IDs included by this execution, or empty to include every discovered API. */
     @get:Input
     abstract val includeApis: SetProperty<String>
 
-    /** Exact API IDs excluded by this execution. */
+    /** Exact, case-sensitive API IDs excluded after inclusion has been evaluated. */
     @get:Input
     abstract val excludeApis: SetProperty<String>
 

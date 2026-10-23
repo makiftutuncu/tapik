@@ -7,7 +7,7 @@ registries, explicit generation modes, and named target executions. Migrate one 
 build separately until the replacement behaves as expected. Once migrated, the rewrite follows the
 xref:compatibility.adoc[documented compatibility policy].
 
-. Move to Java 25 and Kotlin 2.4. Use Maven 3.9+ or a supported Gradle 9.1-9.5 release. Start with the
+. Move to Java 25 and Kotlin 2.4. Use Maven 3.9+ or a supported Gradle 9.1-9.8 release. Start with the
   xref:getting-started.adoc[quickstart] or copy the xref:runnable-example.adoc[runnable example]'s layout.
 . Import `dev.akif:tapik-bom:0.6.0`. Replace old dependencies with the current `tapik-core`, chosen `tapik-format-*`,
   and required `tapik-target-*` artifacts. Build-plugin versions still need to be explicit.

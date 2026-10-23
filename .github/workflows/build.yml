@@ -83,7 +83,7 @@ jobs:
       matrix:
         gradle:
           - '9.1.0'
-          - '9.5.0'
+          - '9.8.0'
 
     steps:
       - name: Checkout

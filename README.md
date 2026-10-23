@@ -14,7 +14,7 @@ Kotlin remains the source of truth; tapik does not import OpenAPI documents or d
 
 - Java 25
 - Kotlin 2.4.10 or a compatible Kotlin 2.4 release
-- Maven 3.9+ or Gradle 9.1 through 9.5
+- Maven 3.9+ or Gradle 9.1 through 9.8
 
 ## Define an API
 

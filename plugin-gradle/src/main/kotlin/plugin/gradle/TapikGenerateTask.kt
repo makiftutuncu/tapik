@@ -20,11 +20,33 @@ import org.gradle.workers.WorkerExecutor
 import java.nio.file.Files
 import javax.inject.Inject
 
-/** Aggregates configured tapik generation executions behind one Gradle output owner. */
+/**
+ * Aggregates configured tapik generation executions behind one cacheable Gradle output owner.
+ *
+ * The task generates every execution before atomically materializing the merged result below [outputRoot]. In
+ * [Mode.COMPILED_CONTRACT], main Kotlin and resource tasks consume its outputs. In [Mode.SAME_PROJECT], it depends on
+ * main classes; separate lifecycle wiring compiles and packages late source and resources when the corresponding
+ * lifecycle tasks are requested. Invoking `tapikGenerate` directly does not compile those late sources.
+ */
 @CacheableTask
 abstract class TapikGenerateTask @Inject constructor(
     private val workerExecutor: WorkerExecutor
 ) : DefaultTask() {
+    @get:Internal
+    internal abstract val kotlinJvmProject: Property<Boolean>
+
+    @get:Internal
+    internal abstract val projectType: Property<String>
+
+    @get:Internal
+    internal abstract val gradleVersion: Property<String>
+
+    @get:Internal
+    internal abstract val javaVersion: Property<String>
+
+    @get:Internal
+    internal abstract val kotlinVersion: Property<String>
+
     /** Explicit source of compiled API contracts. */
     @get:Optional
     @get:Input
@@ -42,15 +64,20 @@ abstract class TapikGenerateTask @Inject constructor(
     @get:Nested
     abstract val executions: ListProperty<TapikExecution>
 
-    /** Resolved contract artifacts and their runtime dependencies. */
+    /**
+     * Resolved contract artifacts and their runtime dependencies.
+     *
+     * These come from `tapikContractClasspath` in compiled-contract mode or main output and its runtime classpath in
+     * same-project mode.
+     */
     @get:Classpath
     abstract val contractClasspath: ConfigurableFileCollection
 
-    /** Resolved generation targets and their runtime dependencies. */
+    /** Resolved generation targets and their runtime dependencies from `tapikTargetClasspath`. */
     @get:Classpath
     abstract val targetClasspath: ConfigurableFileCollection
 
-    /** Root directory owned by this task. */
+    /** Root directory solely owned by this task, containing routed artifact-kind subdirectories. */
     @get:OutputDirectory
     abstract val outputRoot: DirectoryProperty
 
@@ -61,6 +88,7 @@ abstract class TapikGenerateTask @Inject constructor(
     /** Generates all configured target executions and materializes one merged result. */
     @TaskAction
     internal fun generate() {
+        validateEnvironment()
         validateConfiguration()
 
         val configuredExecutions = executions.get()
@@ -104,6 +132,25 @@ abstract class TapikGenerateTask @Inject constructor(
         written.forEach { path ->
             val relative = projectPath.relativize(path.toAbsolutePath().normalize()).toString().replace('\\', '/')
             logger.lifecycle("Generated $relative")
+        }
+    }
+
+    internal fun validateEnvironment() {
+        try {
+            require(kotlinJvmProject.get()) {
+                "tapik Gradle generation supports Kotlin/JVM projects only; detected ${projectType.get()}"
+            }
+            require(isSupportedGradleVersion(gradleVersion.get())) {
+                "tapik Gradle generation supports Gradle 9.1 through 9.8; detected ${gradleVersion.get()}"
+            }
+            require(javaVersion.get() == "25") {
+                "tapik Gradle generation supports Java 25; detected Java ${javaVersion.get()}"
+            }
+            require(kotlinVersion.get() == "2.4.10") {
+                "tapik Gradle generation supports Kotlin 2.4.10; detected Kotlin ${kotlinVersion.get()}"
+            }
+        } catch (failure: IllegalArgumentException) {
+            throw GradleException(failure.message ?: "Unsupported tapik Gradle environment", failure)
         }
     }
 

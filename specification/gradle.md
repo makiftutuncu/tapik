@@ -7,8 +7,8 @@ selection rules, configuration tree, and generated artifacts used by other tapik
 `dev.akif:tapik-plugin-gradle` and preserves the public Gradle plugin ID `dev.akif.tapik.plugin.gradle`.
 
 The initial supported project type is Kotlin/JVM. Its supported toolchain intersection is Java 25, Kotlin 2.4.10, and
-Gradle 9.1 through 9.5 inclusive. Compatibility coverage runs the complete Gradle functional suite against both Gradle
-9.1 and 9.5 with that Java and Kotlin version; intermediate Gradle versions are supported by the same range contract.
+Gradle 9.1 through 9.8 inclusive. Compatibility coverage runs the complete Gradle functional suite against both Gradle
+9.1 and 9.8 with that Java and Kotlin version; intermediate Gradle versions are supported by the same range contract.
 The tapik plugin does not turn a Java-only, Android, or Kotlin Multiplatform project into a Kotlin/JVM project. Android
 and Kotlin Multiplatform integration are explicitly deferred; their compilations, variants, source sets, and packaging
 rules are not part of the initial adapter contract.
@@ -307,7 +307,7 @@ Applying the plugin before Kotlin/JVM is supported; compatibility validation wai
 configuration have had the opportunity to observe it. Running a tapik task without `org.jetbrains.kotlin.jvm`, or in
 an Android or Kotlin Multiplatform project, fails with the detected project type and states that the initial adapter
 supports Kotlin/JVM only. An unsupported Gradle, Java, or Kotlin version reports the detected and supported versions.
-The compatibility suite treats Gradle 9.1 and 9.5 as separate required endpoints rather than testing only the build's
+The compatibility suite treats Gradle 9.1 and 9.8 as separate required endpoints rather than testing only the build's
 default wrapper version.
 
 ## Incrementality and caching
@@ -375,8 +375,10 @@ does not depend on or reuse Maven adapter types.
 
 Keeping the historical plugin ID is an application and discovery convenience, not DSL compatibility. The 0.6 Gradle
 adapter is a new rewrite surface and is intentionally not source-compatible with the pre-rewrite scanning DSL.
-Configuration based on package scanning or generator-specific blocks such as `basePackage`, `generatedPackageName`,
-`endpointsSuffix`, `springRestClient`, `springWebMvc`, or `markdownDocumentation` is not recognized or emulated.
+The old generator container, package scanning, and options such as `basePackage`, `generatedPackageName`,
+`endpointsSuffix`, or `markdownDocumentation` are not recognized or emulated. The new DSL happens to reuse the
+`springRestClient` and `springWebMvc` names as direct execution-registration methods, but their blocks configure one
+host-neutral target execution rather than the old scanning generators.
 
 API discovery comes only from compiler-generated registries. Target selection comes only from named executions and
 service-loaded target registries. Migration requires replacing old scanning configuration with ordinary tapik API

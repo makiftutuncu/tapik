@@ -10,7 +10,13 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
-/** Entry point for tapik's Gradle integration. */
+/**
+ * Entry point for tapik's Kotlin/JVM Gradle integration.
+ *
+ * Applying the plugin attaches the tapik compiler plugin, creates the `tapik` extension, adds the `tapikContract` and
+ * `tapikTarget` dependency scopes, and registers the single `tapikGenerate` task. It does not apply Kotlin/JVM or run
+ * generation merely because the plugin is present.
+ */
 class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
     /** Applies tapik to [target]. */
     override fun apply(target: Project) {
@@ -58,6 +64,7 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 task.outputRoot.set(extension.outputRoot)
                 task.projectDirectory.set(target.layout.projectDirectory)
             }
+        target.configureTapikEnvironment(generation)
         target.wireCompiledContractOutputs(extension, generation)
         target.wireSameProjectGeneration(extension, generation)
     }

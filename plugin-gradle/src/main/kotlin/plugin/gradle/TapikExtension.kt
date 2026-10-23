@@ -10,9 +10,19 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import javax.inject.Inject
 
-/** Type-safe, lazy configuration for tapik generation in a Gradle project. */
+/**
+ * Type-safe, lazy configuration for tapik generation in a Kotlin/JVM Gradle project.
+ *
+ * Each target method registers one declaration-ordered execution behind the single `tapikGenerate` task. Target
+ * methods that are not called do not run, and differently named executions may select the same target. Generation
+ * requires an explicit [mode], while applying the plugin only for compiler-plugin activation does not.
+ */
 abstract class TapikExtension @Inject constructor(private val objects: ObjectFactory) {
-    /** Root directory beneath which tapik materializes generated artifacts. */
+    /**
+     * Root directory beneath which tapik materializes `sources`, `resources`, and `documentation` subdirectories.
+     *
+     * The default is `build/generated/tapik`.
+     */
     abstract val outputRoot: DirectoryProperty
 
     /** Explicit source of compiled API contracts. */
@@ -35,7 +45,7 @@ abstract class TapikExtension @Inject constructor(private val objects: ObjectFac
     /** Sets the generated artifact root from a lazy [directory] provider. */
     fun outputRoot(directory: Provider<Directory>) = outputRoot.set(directory)
 
-    /** Registers the default OpenAPI execution. */
+    /** Registers an OpenAPI execution named `openapi`. */
     fun openApi(action: Action<in OpenApiExecution>) = openApi("openapi", action)
 
     /** Registers an OpenAPI execution named [name]. */
@@ -43,7 +53,7 @@ abstract class TapikExtension @Inject constructor(private val objects: ObjectFac
         register(name, objects.newInstance(OpenApiExecution::class.java, name), action)
     }
 
-    /** Registers the default Spring RestClient execution. */
+    /** Registers a Spring RestClient execution named `spring-restclient`. */
     fun springRestClient(action: Action<in SpringRestClientExecution>) =
         springRestClient("spring-restclient", action)
 
@@ -52,7 +62,7 @@ abstract class TapikExtension @Inject constructor(private val objects: ObjectFac
         register(name, objects.newInstance(SpringRestClientExecution::class.java, name), action)
     }
 
-    /** Registers the default Spring WebMVC execution. */
+    /** Registers a Spring WebMVC execution named `spring-webmvc`. */
     fun springWebMvc(action: Action<in SpringWebMvcExecution>) = springWebMvc("spring-webmvc", action)
 
     /** Registers a Spring WebMVC execution named [name]. */

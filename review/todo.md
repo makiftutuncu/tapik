@@ -45,7 +45,7 @@ Gradle extension and task APIs require KDoc.
     stale output and client/server endpoint types do not create overlapping Gradle task outputs.
 
 - [x] Define compatibility, dependency, and diagnostic policy.
-  - Record the initial supported intersection of Java 25, Kotlin 2.4.10, and Gradle 9.1–9.5; test both Gradle endpoints.
+  - Record the initial supported intersection of Java 25, Kotlin 2.4.10, and Gradle 9.1–9.8; test both Gradle endpoints.
   - Define separate resolvable, non-consumable contract and generation-target configurations with built-in target
     defaults and support for custom target artifacts.
   - Require every resolved `dev.akif:tapik-*` dependency used for contracts or generation to match the Gradle plugin
@@ -143,7 +143,7 @@ Gradle extension and task APIs require KDoc.
   - Verify changes to contract bytecode, runtime dependencies, target artifacts, API selection, nested configuration,
     execution order, plugin version, and output root invalidate exactly the necessary work.
   - Verify no two tapik tasks declare overlapping outputs and parallel execution cannot corrupt generated state.
-  - Exercise Gradle 9.1 and 9.5 with Java 25 and Kotlin 2.4.10.
+  - Exercise Gradle 9.1 and 9.8 with Java 25 and Kotlin 2.4.10.
 
 - [x] Complete failure and compatibility coverage.
   - Test duplicate API IDs, empty selections, missing registries, incompatible tapik versions, unknown and duplicate
@@ -176,9 +176,9 @@ Gradle extension and task APIs require KDoc.
 
 ## Completion
 
-- [ ] The Gradle adapter specification, public KDoc, user guide, and implementation describe the same DSL and lifecycle.
+- [x] The Gradle adapter specification, public KDoc, user guide, and implementation describe the same DSL and lifecycle.
 - [ ] `./mvnw clean verify` passes.
-- [ ] The standalone Gradle plugin unit and TestKit suites pass on Gradle 9.1 and 9.5 with Java 25.
+- [ ] The standalone Gradle plugin unit and TestKit suites pass on Gradle 9.1 and 9.8 with Java 25.
 - [ ] Configuration-cache, build-cache, non-clean, relocation, and parallel-execution checks pass.
 - [ ] Maven and Gradle external-consumer release rehearsals pass from isolated repositories.
 - [ ] The documentation build and desktop/mobile smoke tests pass.
