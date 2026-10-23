@@ -123,7 +123,7 @@ Gradle extension and task APIs require KDoc.
   - Add TestKit coverage for same-project OpenAPI, generated resources, API filtering, non-clean changes, and direct task
     invocation from a clean checkout.
 
-- [ ] Compile and package late same-project Kotlin sources.
+- [x] Compile and package late same-project Kotlin sources.
   - Create a separate generated Kotlin compilation/task with main output and runtime dependencies on its classpath.
   - Use a distinct stable module name and output directory so main Kotlin metadata is preserved.
   - Include compiled late classes and generated resources in the project's normal jar without recompiling user source.

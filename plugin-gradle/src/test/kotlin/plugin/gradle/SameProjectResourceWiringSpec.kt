@@ -22,6 +22,7 @@ class SameProjectResourceWiringSpec : FunSpec({
         first.task(":processResources")?.outcome shouldBe TaskOutcome.NO_SOURCE
         first.task(":classes")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         first.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        first.task(":compileTapikGeneratedKotlin") shouldBe null
         project.generatedDocumentation() shouldBe listOf("Catalog.openapi.json")
         project.generatedResources() shouldBe listOf("Books.txt", "Catalog.txt")
 

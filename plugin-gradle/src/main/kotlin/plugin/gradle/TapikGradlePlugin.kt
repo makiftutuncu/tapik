@@ -47,7 +47,7 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 task.projectDirectory.set(target.layout.projectDirectory)
             }
         target.wireCompiledContractOutputs(extension, generation)
-        target.wireSameProjectInputsAndResources(extension, generation)
+        target.wireSameProjectGeneration(extension, generation)
     }
 
     /** Returns whether the tapik compiler plugin supports [kotlinCompilation]. */

@@ -241,11 +241,16 @@ The adapter does not add same-project generated Kotlin to the ordinary main Kotl
 `compileKotlin` to depend on generation while generation already depends on main compilation. Main source that needs a
 generated declaration must move the contract to a separately compiled project and use compiled-contract mode.
 
-When same-project targets emit Kotlin, a separate Kotlin compilation consumes only the generated source and compiles
-against the completed main output and its runtime dependencies. It has a stable module name distinct from the main
-compilation and writes to a separate classes directory, preserving the main compilation's Kotlin module metadata. The
-normal `jar` includes both class directories. Runtime consumers of the project are wired to the late classes without
-making them inputs to ordinary main compilation.
+When same-project targets emit Kotlin, the `tapikGenerated` Kotlin/JVM compilation consumes only the generated source
+and compiles against the completed main output and its runtime dependencies. Its `compileTapikGeneratedKotlin` task
+writes to `build/classes/kotlin/tapikGenerated` and uses the stable `<project-name>_tapik_generated` module name,
+distinct from the main compilation's module name. The normal `jar` includes both class directories and therefore both
+distinct Kotlin module metadata files. Runtime consumers of the project receive the late classes without making them
+inputs to ordinary main compilation or recompiling application source.
+
+The adapter reports the same-project visibility boundary before ordinary main compilation. If main source refers to a
+late generated declaration, compilation fails with the ordinary Kotlin diagnostic and tapik guidance to move the API
+contract to a separately compiled project and use compiled-contract mode.
 
 Same-project generated resources are materialized in their own resource directory after `tapikGenerate`. The normal
 `jar` includes that directory, and runtime-consuming tasks receive it alongside the late classes. The adapter does not
@@ -254,8 +259,9 @@ well.
 
 The late Kotlin compilation and packaging tasks depend on `tapikGenerate`; `tapikGenerate` does not finalize or invoke
 them when requested alone. A direct `tapikGenerate` command means exactly generation plus its declared prerequisites.
-There is no Gradle equivalent of Maven's special direct mode, no reuse of unchecked stale main output, and no behavior
-branch based on how the task entered the graph.
+The dedicated late class directory is synchronized with the current generated sources, including nested classes and
+its module metadata, without deleting any main-compilation output. There is no Gradle equivalent of Maven's special
+direct mode, no reuse of unchecked stale main output, and no behavior branch based on how the task entered the graph.
 
 ## Dependencies and compatibility
 
