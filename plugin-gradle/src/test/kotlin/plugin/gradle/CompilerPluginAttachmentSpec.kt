@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import org.gradle.testkit.runner.TaskOutcome
 
 class CompilerPluginAttachmentSpec : FunSpec({
     test("generate an API registry in a Kotlin JVM contract jar") {
@@ -20,7 +21,8 @@ class CompilerPluginAttachmentSpec : FunSpec({
             """
         )
 
-        fixture.build("jar")
+        val (_, reused) = repeatWithConfigurationCache { fixture.build("jar") }
+        reused.task(":jar")?.outcome shouldBe TaskOutcome.UP_TO_DATE
 
         val registry = fixture.registryArtifacts()
         registry.classes.shouldHaveSize(1)

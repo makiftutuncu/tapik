@@ -49,15 +49,18 @@ class GradleGenerationWorkActionSpec : FunSpec({
             """.trimIndent()
         )
 
-        val result =
+        fun build() =
             GradleRunner
                 .create()
                 .withProjectDir(project.toFile())
-                .withArguments("generationWorker", "--stacktrace")
+                .withArguments("generationWorker", "--configuration-cache", "--stacktrace")
                 .withPluginClasspath(workerPluginClasspath() + descriptorRoot.toFile())
                 .build()
 
+        val (result, reused) = repeatWithConfigurationCache(::build)
+
         result.task(":generationWorker")?.outcome shouldBe TaskOutcome.SUCCESS
+        reused.task(":generationWorker")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         GradleGenerationResultCodec
             .read(project.resolve("build/worker/result.bin"))
             .artifacts

@@ -40,13 +40,15 @@ class TapikExtensionDslSpec : FunSpec({
             """.trimIndent()
         )
 
-        val result =
+        fun build() =
             GradleRunner
                 .create()
                 .withProjectDir(project.toFile())
-                .withArguments("tasks", "--stacktrace")
+                .withArguments("tasks", "--configuration-cache", "--stacktrace")
                 .withPluginClasspath()
                 .build()
+
+        val (result, _) = repeatWithConfigurationCache(::build)
 
         result.task(":tasks")?.outcome shouldBe TaskOutcome.SUCCESS
     }
@@ -83,13 +85,15 @@ class TapikExtensionDslSpec : FunSpec({
             """.trimIndent()
         )
 
-        val result =
+        fun build() =
             GradleRunner
                 .create()
                 .withProjectDir(project.toFile())
-                .withArguments("tasks", "--stacktrace")
+                .withArguments("tasks", "--configuration-cache", "--stacktrace")
                 .withPluginClasspath()
                 .build()
+
+        val (result, _) = repeatWithConfigurationCache(::build)
 
         result.task(":tasks")?.outcome shouldBe TaskOutcome.SUCCESS
     }

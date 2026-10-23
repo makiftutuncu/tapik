@@ -27,7 +27,7 @@ internal class GradleContractFixture private constructor(
         GradleRunner
             .create()
             .withProjectDir(project.toFile())
-            .withArguments(*arguments, "--stacktrace")
+            .withArguments(*arguments, "--configuration-cache", "--stacktrace")
             .withPluginClasspath()
             .build()
 

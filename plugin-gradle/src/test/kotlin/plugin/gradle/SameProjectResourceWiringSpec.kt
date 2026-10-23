@@ -16,13 +16,14 @@ class SameProjectResourceWiringSpec : FunSpec({
     test("generate documentation and package resources from the same project on clean and non-clean builds") {
         val project = sameProjectFixture()
 
-        val first = project.run("tapikGenerate")
+        val (first, reused) = repeatWithConfigurationCache { project.run("tapikGenerate") }
 
         first.task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         first.task(":processResources")?.outcome shouldBe TaskOutcome.NO_SOURCE
         first.task(":classes")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         first.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
         first.task(":compileTapikGeneratedKotlin") shouldBe null
+        reused.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         project.generatedDocumentation() shouldBe listOf("Catalog.openapi.json")
         project.generatedResources() shouldBe listOf("Books.txt", "Catalog.txt")
 
@@ -181,7 +182,7 @@ private class SameProjectFixture(private val root: Path) {
     fun run(vararg tasks: String) =
         GradleRunner.create()
             .withProjectDir(root.toFile())
-            .withArguments(*tasks, "--stacktrace")
+            .withArguments(*tasks, "--configuration-cache", "--stacktrace")
             .withPluginClasspath()
             .build()
 

@@ -136,7 +136,7 @@ Gradle extension and task APIs require KDoc.
 
 ## P4 — Make the plugin production-grade
 
-- [ ] Prove incremental, build-cache, and configuration-cache correctness.
+- [x] Prove incremental, build-cache, and configuration-cache correctness.
   - Run each functional fixture twice with `--configuration-cache` and require reuse without reported problems.
   - Verify `UP-TO-DATE` behavior, local build-cache restoration after deleting outputs, and relocation to another
     project directory.

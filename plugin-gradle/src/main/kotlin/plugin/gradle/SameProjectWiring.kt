@@ -64,10 +64,12 @@ internal fun Project.wireSameProjectGeneration(
             }
         }
 
+        val sameProjectMode =
+            extension.mode.map { selected -> selected == Mode.SAME_PROJECT }.orElse(false)
         mainCompilation.compileTaskProvider.configure { task ->
-            task.doFirst {
-                if (extension.mode.orNull == Mode.SAME_PROJECT) {
-                    logger.lifecycle(
+            task.doFirst { runningTask ->
+                if (sameProjectMode.get()) {
+                    runningTask.logger.lifecycle(
                         "tapik same-project generated declarations are unavailable to ordinary main source; " +
                             "move the API contract to a separately compiled project and use Mode.COMPILED_CONTRACT"
                     )

@@ -30,13 +30,15 @@ class TapikGradlePluginSpec : FunSpec({
             """.trimIndent()
         )
 
-        val result =
+        fun build() =
             GradleRunner
                 .create()
                 .withProjectDir(project.toFile())
-                .withArguments("help", "--stacktrace")
+                .withArguments("help", "--configuration-cache", "--stacktrace")
                 .withPluginClasspath()
                 .build()
+
+        val (result, _) = repeatWithConfigurationCache(::build)
 
         result.task(":help")?.outcome shouldBe TaskOutcome.SUCCESS
     }

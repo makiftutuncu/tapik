@@ -15,7 +15,7 @@ class CompiledContractWiringSpec : FunSpec({
     test("compile main source against generated declarations and package generated resources only") {
         val project = compiledContractProject()
 
-        val result = project.run(":application:build")
+        val (result, reused) = repeatWithConfigurationCache { project.run(":application:build") }
 
         result.task(":contract:compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":contract:jar")?.outcome shouldBe TaskOutcome.SUCCESS
@@ -24,6 +24,7 @@ class CompiledContractWiringSpec : FunSpec({
         result.task(":application:tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":application:compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":application:processResources")?.outcome shouldBe TaskOutcome.SUCCESS
+        reused.task(":application:tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         project.path("application/build/classes/kotlin/main/com/example/application/CatalogHandler.class").exists() shouldBe true
         project.path("application/build/classes/kotlin/main/com/example/generated/contract/Catalog/CatalogServer.class").exists() shouldBe true
         project.path("application/build/classes/kotlin/main/com/example/generated/contract/Catalog/CatalogClient.class").exists() shouldBe true
@@ -204,7 +205,7 @@ private class CompiledContractProject(private val root: Path) {
     fun run(vararg tasks: String) =
         GradleRunner.create()
             .withProjectDir(root.toFile())
-            .withArguments(*tasks, "--stacktrace")
+            .withArguments(*tasks, "--configuration-cache", "--stacktrace")
             .withPluginClasspath()
             .build()
 }

@@ -27,9 +27,10 @@ class TapikGenerateFunctionalSpec : FunSpec({
         val project = generationProject()
         project.writeBuild(allTargetsBuild())
 
-        val first = project.run("tapikGenerate")
+        val (first, reused) = repeatWithConfigurationCache { project.run("tapikGenerate") }
 
         first.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        reused.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         first.output shouldContain "Generated build/generated/tapik/documentation/Catalog.openapi.json"
         project.generatedFiles().map(Path::name) shouldContain "Catalog.openapi.json"
         project.generatedFiles().map(Path::name).count { name -> name == "BooksEndpoints.kt" } shouldBe 1
@@ -79,9 +80,10 @@ class TapikGenerateFunctionalSpec : FunSpec({
                 "tapikTarget files('${descriptorRoot.groovyPath()}', '${testClasses.groovyPath()}')"
         )
 
-        val result = project.run("tapikGenerate")
+        val (result, reused) = repeatWithConfigurationCache { project.run("tapikGenerate") }
 
         result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        reused.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         project.generatedFiles().single { path -> path.name == "nested.txt" }.readText() shouldBe
             "Catalog|json,yaml|platform|true"
     }
@@ -147,7 +149,7 @@ private class GenerationProject(private val root: Path) {
     private fun runner(task: String): GradleRunner =
         GradleRunner.create()
             .withProjectDir(root.toFile())
-            .withArguments(task, "--stacktrace")
+            .withArguments(task, "--configuration-cache", "--stacktrace")
             .withPluginClasspath()
 }
 

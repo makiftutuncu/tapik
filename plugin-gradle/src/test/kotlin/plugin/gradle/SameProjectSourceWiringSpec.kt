@@ -15,12 +15,14 @@ class SameProjectSourceWiringSpec : FunSpec({
     test("compile and package same-project generated Kotlin for runtime use") {
         val project = sameProjectSourceFixture()
 
-        val result = project.run("verifyTapikRuntime", "jar")
+        val (result, reused) = repeatWithConfigurationCache { project.run("verifyTapikRuntime", "jar") }
 
         result.task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":verifyTapikRuntime")?.outcome shouldBe TaskOutcome.SUCCESS
+        reused.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
+        reused.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         result.output shouldContain "tapik late runtime OK"
         project.generatedDocumentation() shouldBe listOf("Books.openapi.json", "Catalog.openapi.json")
         project.generatedSources().count { source -> source.endsWith("/BooksEndpoints.kt") } shouldBe 1
@@ -241,7 +243,7 @@ private class SameProjectSourceFixture(private val root: Path) {
     private fun runner(tasks: Array<out String>): GradleRunner =
         GradleRunner.create()
             .withProjectDir(root.toFile())
-            .withArguments(*tasks, "--stacktrace")
+            .withArguments(*tasks, "--configuration-cache", "--stacktrace")
             .withPluginClasspath()
 }
 

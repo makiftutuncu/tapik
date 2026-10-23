@@ -188,4 +188,19 @@ class TapikExtensionSpec : FunSpec({
         project.tasks.named("tapikGenerate", TapikGenerateTask::class.java).get()
         realized shouldBe true
     }
+
+    test("give a single generation task sole ownership of the generated root") {
+        val project = ProjectBuilder.builder().build()
+        project.pluginManager.apply(TapikGradlePlugin::class.java)
+        val extension = project.extensions.getByType(TapikExtension::class.java)
+        extension.mode(Mode.COMPILED_CONTRACT)
+        extension.openApi("docs", Action { execution -> execution.version("1.0.0") })
+        extension.springRestClient("client", Action {})
+        extension.springWebMvc("server", Action {})
+
+        val generationTasks = project.tasks.withType(TapikGenerateTask::class.java).toList()
+
+        generationTasks.map { task -> task.name } shouldContainExactly listOf("tapikGenerate")
+        generationTasks.single().outputs.files.singleFile shouldBe extension.outputRoot.get().asFile
+    }
 })
