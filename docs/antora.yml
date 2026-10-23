@@ -18,6 +18,18 @@ ext:
       - dir: example-application/src/main/kotlin/com/example/library/application
         files: '*.kt'
         into: modules/ROOT/examples/application
+      - dir: example-contract
+        files: build.gradle.kts
+        into: modules/ROOT/examples/gradle/contract
+      - dir: example-application
+        files: build.gradle.kts
+        into: modules/ROOT/examples/gradle/application
+      - dir: example-gradle
+        files: settings.gradle.kts
+        into: modules/ROOT/examples/gradle
+      - dir: plugin-gradle/src/test/resources/examples/gradle
+        files: '*'
+        into: modules/ROOT/examples/gradle/dsl
       - dir: test-fixtures/src/main/kotlin/test/fixtures/library
         files: Identifiers.kt
         into: modules/ROOT/examples/dsl/library

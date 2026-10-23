@@ -16,12 +16,12 @@ ApiRegistry service providers
 GenerationTarget + target configuration
       │ returns artifacts; performs no file I/O
       ▼
-Maven, a future Gradle plugin, or another host materializes them
+Maven, Gradle, or another host materializes them
 ----
 
-The boundary matters. OpenAPI, Spring RestClient, and Spring WebMVC targets do not understand Maven projects or Maven
-lifecycle phases. A future build-tool plugin can load the same registries, invoke the same targets, and materialize the
-same results.
+The boundary matters. OpenAPI, Spring RestClient, and Spring WebMVC targets do not understand Maven projects, Gradle
+projects, or either host's lifecycle. Both supported plugins load the same registries, invoke the same targets, and
+materialize the same results.
 
 == Compilation records APIs
 
@@ -55,12 +55,17 @@ Every result contains normalized relative paths and complete textual content. An
 Two artifacts in one result cannot use the same path. A target never writes files directly; ownership, cleanup,
 logging, source roots, resource registration, and lifecycle timing belong to the host.
 
-== Maven is one host
+== Maven and Gradle are hosts
 
 The Maven plugin exposes this model through one `generate` goal and any number of executions. In same-module mode,
 generation must wait for the current module's registry and therefore defaults to `process-classes`. In
 compiled-contract mode, an execution can run during `generate-sources` because its dependency's registry already
 exists.
 
+The Gradle plugin exposes the same model through a typed `tapik` extension and one aggregated `tapikGenerate` task.
+`Mode.SAME_PROJECT` runs after main classes; `Mode.COMPILED_CONTRACT` reads the dedicated `tapikContract` dependency
+configuration early enough for ordinary main compilation to consume generated source.
+
 Continue with the xref:reference/compiler-registry.adoc[compiler registry reference],
-xref:reference/maven.adoc[Maven reference], or xref:reference/generation-options.adoc[target and output reference].
+xref:reference/maven.adoc[Maven reference], xref:reference/gradle.adoc[Gradle reference], or
+xref:reference/generation-options.adoc[target and output reference].

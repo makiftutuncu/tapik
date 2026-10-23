@@ -10,9 +10,10 @@ Use Java 25 and run from the repository root:
 ./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install
 ----
 
-This runs the full suite, builds production source and Dokka HTML `javadoc` JARs, and installs the reactor locally.
-It does not sign, deploy, create tags, or publish a GitHub release. The manually dispatched `Rehearse release` workflow
-runs the same command without publication secrets.
+This runs the Maven suite, builds production source and Dokka HTML `javadoc` JARs, and installs the reactor locally.
+Gradle verification additionally builds the standalone plugin, its marker, and the Gradle external-consumer example
+from an isolated repository. Neither path signs, deploys, creates tags, or publishes a GitHub release. The manually
+dispatched `Rehearse release` workflow runs the complete credential-free rehearsal.
 
 The final example module stages only production artifacts into a fresh temporary Maven repository. It copies cached
 third-party POMs/JARs to reduce downloads, excluding every artifact under `dev/akif`, then adds this build's artifacts.
@@ -37,13 +38,15 @@ Ordinary `./mvnw verify` runs the rehearsal helper tests but skips the expensive
 == Approve the release candidate
 
 . Finish review and commit the intended changes. Run the clean rehearsal against that exact commit.
-. Check all module/BOM versions and migration notes. Maven `0.6.0`, Antora `v0.6.0`, and the eventual Git tag `v0.6.0`
-  must agree; use the actual release version when preparing later releases.
+. Check all module/BOM versions, the Gradle implementation and marker versions, and migration notes. Maven `0.6.0`,
+  Gradle `0.6.0`, Antora `v0.6.0`, and the eventual Git tag `v0.6.0` must agree; use the actual release version when
+  preparing later releases.
 . Build and check the documentation preview as described in xref:development.adoc[Development guide].
 . Confirm that the staged inventory contains the parent, BOM, production POMs/JARs, source JARs, and HTML documentation
   JARs, but no non-production module artifacts.
 
-The unsigned rehearsal does not prove signing-key access, Central namespace permissions, or remote publication.
+The unsigned rehearsal does not prove signing-key access, Central namespace permissions, Gradle Plugin Portal
+credentials, or remote publication.
 
 == Sign and publish (release operator only)
 
@@ -52,7 +55,7 @@ https://central.sonatype.org/publish/publish-portal-maven/[Central publishing pl
 key and GPG agent using the https://maven.apache.org/plugins/maven-gpg-plugin/usage.html[Maven GPG instructions].
 Keep credentials out of repository files and command-line passphrases; tapik enables the plugin's best-practices mode.
 
-After explicit release approval, verify signing locally:
+After explicit release approval, verify Maven signing locally:
 
 [source,shell]
 ----
@@ -69,6 +72,11 @@ another rehearsal:
 
 The profile automatically publishes the reactor-wide Central deployment and waits for completion. If the command
 fails after uploading, inspect its deployment status in Central before retrying; a timeout is not proof of failure.
+Publish Maven Central artifacts before the Gradle Plugin Portal marker. A plugin marker must never become visible while
+its matching `tapik-plugin-compiler`, runtime, or built-in target artifacts are unavailable from Maven Central. Verify
+the implementation and marker metadata against the exact staged version, then publish the already tested Gradle
+plugin candidate through the configured portal credentials.
+
 Published versions must not be overwritten. Fix a released defect in a new version.
 
 Once Central publication is confirmed, create and push the matching release tag for the tested commit, then publish

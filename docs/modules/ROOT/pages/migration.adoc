@@ -1,24 +1,28 @@
 = Migrate to 0.6
-:description: Move an earlier tapik contract to the Kotlin 2.4 and Maven-based rewrite.
+:description: Move an earlier tapik contract to the Kotlin 2.4 rewrite with Maven or Gradle.
 
-The 0.6 rewrite is not source- or binary-compatible with earlier tapik releases. There is no automatic converter, and
-the previous Gradle integration is not available. Migrate one small API first and retain the previous build separately
-until the replacement behaves as expected. Once migrated, the rewrite follows the
+The 0.6 rewrite is not source- or binary-compatible with earlier tapik releases. There is no automatic converter. Its
+Gradle plugin keeps the historical ID but replaces package scanning and the earlier generator DSL with compiler-owned
+registries, explicit generation modes, and named target executions. Migrate one small API first and retain the previous
+build separately until the replacement behaves as expected. Once migrated, the rewrite follows the
 xref:compatibility.adoc[documented compatibility policy].
 
-. Move to Java 25, Kotlin 2.4, and Maven Wrapper-based builds. Start with the xref:getting-started.adoc[quickstart] or
-  copy the xref:runnable-example.adoc[runnable example]'s layout.
+. Move to Java 25 and Kotlin 2.4. Use Maven 3.9+ or a supported Gradle 9.1-9.5 release. Start with the
+  xref:getting-started.adoc[quickstart] or copy the xref:runnable-example.adoc[runnable example]'s layout.
 . Import `dev.akif:tapik-bom:0.6.0`. Replace old dependencies with the current `tapik-core`, chosen `tapik-format-*`,
   and required `tapik-target-*` artifacts. Build-plugin versions still need to be explicit.
-. Enable `tapik-plugin-maven` as the Kotlin compiler extension and configure its target executions. Remove old
-  discovery/reflection setup; the compiler now produces the registry. See xref:reference/maven.adoc[Maven reference].
+. With Maven, enable `tapik-plugin-maven` as the Kotlin compiler extension and configure its target executions. With
+  Gradle, apply `dev.akif.tapik.plugin.gradle`; it attaches the compiler plugin automatically. Remove old
+  discovery/reflection setup; the compiler now produces the registry. See the xref:reference/maven.adoc[Maven] or
+  xref:reference/gradle.adoc[Gradle] reference.
 . Re-express endpoints as delegated properties of a public `Api` object or constructible class. Keep user-owned models
   and explicitly attach their formats. Review paths, parameter presence, body alternatives, and outputs against the
   xref:contracts/index.adoc[DSL guide]; do not assume previous DSL spelling or generated names still apply.
 . Replace reads of `Api.id` with `Api.apiId`, and rename explicit constructor arguments from `id` to `apiId`. There is
   no compatibility alias, so an API may declare its own `id` resource definition without colliding with the base class.
-. Choose the lifecycle deliberately: same-module output uses `process-classes`; main source implementing generated
-  interfaces should consume a compiled contract and generate during `generate-sources`.
+. Choose the lifecycle deliberately. Maven same-module output uses `process-classes`; Gradle uses
+  `Mode.SAME_PROJECT`. Main source implementing generated interfaces should consume a compiled contract and use
+  Maven `generate-sources` or Gradle `Mode.COMPILED_CONTRACT`.
 . Regenerate everything in a clean build. Implement generated `*Server` interfaces in handlers, let generated
   `*GeneratedController` classes handle Spring mappings, and use the generated client interfaces with a transport.
 . Compare generated OpenAPI documents and run request/response tests against the previous application. Check status

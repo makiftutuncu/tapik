@@ -1,17 +1,21 @@
 = Runnable example
 :description: Explore tapik's tested contract and Spring application example.
 
-The repository includes a complete library API split across two Maven modules:
+The repository includes one complete library API split into contract and application projects. Maven and Gradle build
+the same Kotlin source, so their examples cannot disagree about the contract or generated application behavior:
 
 `example-contract`:: Defines authors, books, and catalog APIs with the Jackson format integration. It also demonstrates
 same-module OpenAPI generation.
 `example-application`:: Depends on the compiled contract, generates OpenAPI, RestClient, and WebMVC outputs during
 `generate-sources`, implements generated server interfaces, and calls a generated client.
 
-The example is part of the normal Maven reactor, so `./mvnw verify` checks that its documented architecture still
-compiles and runs. Browse the
+The Maven modules are part of `./mvnw verify`. The `example-gradle` multi-project build maps its `contract` and
+`application` projects onto those same source directories and exercises same-project OpenAPI plus compiled-contract
+OpenAPI, RestClient, and WebMVC generation. Browse the
 https://github.com/makiftutuncu/tapik/tree/main/example-contract[contract module,window=_blank] and
-https://github.com/makiftutuncu/tapik/tree/main/example-application[application module,window=_blank].
+https://github.com/makiftutuncu/tapik/tree/main/example-application[application module,window=_blank], or inspect the
+https://github.com/makiftutuncu/tapik/tree/main/example-gradle[Gradle build,window=_blank].
 
-The xref:getting-started.adoc[quickstart] collects its Kotlin and Maven fragments directly from these tested modules.
-For the complete application wiring, inspect the modules themselves.
+The xref:getting-started.adoc[quickstart] collects its Kotlin and Maven fragments directly from these modules. The
+xref:reference/gradle.adoc[Gradle reference] does the same for Gradle Kotlin and Groovy DSL. For complete application
+wiring, inspect the modules themselves.

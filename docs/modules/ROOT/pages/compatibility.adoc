@@ -13,7 +13,7 @@ tapik follows Semantic Versioning with this explicit pre-1.0 convention:
 * An incompatible public change before 1.0 increments the minor version and includes migration guidance.
 * After 1.0, an incompatible public change increments the major version.
 
-Applications should still use one tapik version consistently across the BOM, compiler and Maven plugins, format
+Applications should still use one tapik version consistently across the BOM, compiler and build plugins, format
 integrations, and generation targets. tapik rejects version skew during generation.
 
 == Compatibility surface
@@ -21,7 +21,7 @@ integrations, and generation targets. tapik rejects version skew during generati
 The compatibility contract covers:
 
 * public Kotlin declarations in published production artifacts;
-* documented compiler-plugin and Maven-plugin configuration;
+* documented compiler-plugin, Maven-plugin, and Gradle-plugin configuration;
 * stable generation target IDs;
 * documented names and signatures of generated public Kotlin declarations.
 
@@ -35,8 +35,9 @@ version; API versioning and rollout remain application responsibilities.
 
 == Current supported scope
 
-Maven is currently the only build host. The built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC.
-The generation architecture is host-neutral so future hosts and targets can be added without redefining contracts.
+Maven and Gradle Kotlin/JVM are supported build hosts. Gradle support covers Java 25, Kotlin 2.4.10, and Gradle 9.1
+through 9.5. The built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC. The generation architecture
+is host-neutral so future hosts and targets can be added without redefining contracts.
 
 Same-module generation runs after ordinary main-source compilation. When main source implements or imports generated
 Kotlin, generate during `generate-sources` from a separately compiled contract.
@@ -48,5 +49,5 @@ then owns agreement between that schema and the codec.
 These are supported-scope boundaries, not experimental disclaimers. Unsupported configurations fail visibly where
 tapik can detect them.
 
-Continue with xref:migration.adoc[] when moving an older tapik project to 0.6, or
-xref:reference/maven.adoc[] when choosing a generation lifecycle.
+Continue with xref:migration.adoc[] when moving an older tapik project to 0.6, or choose the
+xref:reference/maven.adoc[Maven] or xref:reference/gradle.adoc[Gradle] host reference.

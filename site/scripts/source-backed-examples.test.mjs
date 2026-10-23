@@ -4,7 +4,7 @@ import path from 'node:path'
 import test from 'node:test'
 
 const pagesDirectory = path.resolve('docs', 'modules')
-const sourceBlock = /^\[source,(kotlin|xml)\]\r?\n----\r?\n([\s\S]*?)\r?\n----$/gm
+const sourceBlock = /^\[source,(kotlin|groovy|xml)\]\r?\n----\r?\n([\s\S]*?)\r?\n----$/gm
 
 test('collects substantial executable documentation examples from tested source', async () => {
   const copiedBlocks = []
@@ -22,7 +22,7 @@ test('collects substantial executable documentation examples from tested source'
   assert.deepEqual(
     copiedBlocks,
     [],
-    `Multiline Kotlin and XML examples must use Antora Collector imports:\n${copiedBlocks.join('\n')}`
+    `Multiline Kotlin, Groovy, and XML examples must use Antora Collector imports:\n${copiedBlocks.join('\n')}`
   )
 })
 

@@ -1,0 +1,30 @@
+import dev.akif.tapik.plugin.gradle.Mode
+import dev.akif.tapik.plugin.gradle.OpenApiFormat
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'dev.akif.tapik.plugin.gradle'
+}
+
+dependencies {
+    tapikContract 'com.example:library-contract:1.0.0'
+    tapikTarget 'com.example:company-tapik-target:1.2.0'
+}
+
+// tag::groovy-configuration[]
+tapik {
+    mode(Mode.SAME_PROJECT)
+
+    openApi('docs') {
+        version('1.0.0')
+        format(OpenApiFormat.YAML)
+    }
+
+    springWebMvc('server') {
+        includeApis('Books')
+        packageName('com.example.generated')
+        serverSuffix('Server')
+        controllerSuffix('GeneratedController')
+    }
+}
+// end::groovy-configuration[]

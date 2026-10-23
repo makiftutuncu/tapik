@@ -1,0 +1,186 @@
+= Gradle reference
+:description: Configure tapik registry compilation and host-neutral generation in Kotlin/JVM Gradle builds.
+
+`dev.akif.tapik.plugin.gradle` is tapik's Gradle plugin. It activates the tapik Kotlin compiler plugin and hosts every
+generation target behind one cacheable `tapikGenerate` task. The initial adapter supports Java 25, Kotlin 2.4.10, and
+Gradle 9.1 through 9.5 in Kotlin/JVM projects.
+
+== Apply the plugin
+
+Declare the Kotlin/JVM and tapik plugins with the same tapik version used by project dependencies:
+
+[source,kotlin]
+----
+include::example$gradle/settings.gradle.kts[tag=plugin-versions]
+----
+
+Then apply both IDs in a project build. The runnable example centralizes the versions in settings, so project plugin
+blocks do not repeat them.
+
+[source,kotlin]
+----
+include::example$gradle/dsl/kotlin.gradle.kts[tag=plugin-application]
+----
+
+Applying the plugin automatically attaches `dev.akif:tapik-plugin-compiler` to every Kotlin/JVM compilation. There is
+no separate compiler block, package scan, or registry task. The Kotlin compiler records eligible public `Api` types as
+an `ApiRegistry` service provider.
+
+Import `dev.akif:tapik-bom:0.6.0` for ordinary tapik dependencies. The Gradle plugin version is still explicit in the
+plugins block. All resolved `dev.akif:tapik-*` modules used during generation must match that plugin version; tapik
+reports every mismatched coordinate before loading providers or changing output.
+
+== Choose one explicit mode
+
+Generation has no default mode. Calling `tapikGenerate` without one fails, while applying the plugin only for compiler
+activation remains valid.
+
+[cols="2,3,3,3", options="header"]
+|===
+|Mode |Registry input |Task relationship |Can ordinary main source use generated Kotlin?
+
+|`Mode.COMPILED_CONTRACT`
+|Dependencies declared on `tapikContract`
+|`compileKotlin` and `processResources` consume `tapikGenerate`
+|Yes
+
+|`Mode.SAME_PROJECT`
+|Compiled main output and runtime classpath
+|`tapikGenerate` depends on `classes`; generated Kotlin compiles separately afterward
+|No
+|===
+
+Use compiled-contract mode for an application whose handlers or clients import generated types. Add the contract as
+both an ordinary dependency and a generation input; these configurations intentionally have different roles:
+
+[source,kotlin]
+----
+include::example$gradle/application/build.gradle.kts[tag=compiled-contract-dependencies]
+----
+
+Use same-project mode for documentation or artifacts intended only for downstream consumers. The runnable contract
+does this for OpenAPI:
+
+[source,kotlin]
+----
+include::example$gradle/contract/build.gradle.kts[tag=same-project]
+----
+
+== Configure named executions
+
+Each `openApi`, `springRestClient`, `springWebMvc`, or `target` block registers one execution. Its optional argument is
+the execution's unique diagnostic name, not a target ID or output filename. Omitting the method means that target does
+not run. Omitting the name uses the target ID, so additional executions of the same target need explicit names.
+Declarations run in source order.
+
+[source,kotlin]
+----
+include::example$gradle/application/build.gradle.kts[tag=compiled-contract]
+----
+
+An empty include set selects every discovered API. `includeApis("Authors", "Books")` narrows that set by exact,
+case-sensitive `Api.apiId`; `excludeApis(...)` is applied afterward. Unknown IDs and an empty final selection fail.
+
+Built-in target options are typed:
+
+`openApi`:: Requires `version`. It also accepts `format(OpenApiFormat.YAML|JSON)`, `pretty(Boolean)`,
+`componentNaming(OpenApiComponentNaming.SIMPLE|QUALIFIED)`, and `output(String)`.
+`springRestClient`:: Accepts `packageName(String)` and `clientSuffix(String)`.
+`springWebMvc`:: Accepts `packageName(String)`, `serverSuffix(String)`, and `controllerSuffix(String)`.
+
+The xref:reference/generation-options.adoc[target reference] describes defaults and generated declarations.
+
+== Add a custom target
+
+Put a service-loaded custom target and its runtime dependencies on `tapikTarget`, not `implementation` or
+`tapikContract`. Register an execution with its stable target ID. The escape hatch supports scalar, ordered list, and
+nested object configuration without exposing host-neutral implementation maps:
+
+[source,kotlin]
+----
+include::example$gradle/dsl/kotlin.gradle.kts[tag=dependency-configurations]
+----
+
+[source,kotlin]
+----
+include::example$gradle/dsl/kotlin.gradle.kts[tag=kotlin-configuration]
+----
+
+Built-in target artifacts are added to `tapikTarget` automatically. A custom target still implements the neutral
+`GenerationTarget` SPI from `tapik-common-plugin`; it does not depend on Gradle APIs.
+
+== Groovy DSL
+
+Groovy uses the same managed extension, enums, methods, and semantics:
+
+[source,groovy]
+----
+include::example$gradle/dsl/groovy.gradle[tag=groovy-configuration]
+----
+
+Both complete DSL files are exercised by Gradle TestKit, so their public syntax is compiled during development.
+
+== Generated output and tasks
+
+`tapikGenerate` aggregates every execution before replacing output. Its default root is `build/generated/tapik`:
+
+[cols="2,3", options="header"]
+|===
+|Artifact kind |Directory below the output root
+
+|Source |`sources/`
+|Runtime resource |`resources/`
+|Documentation |`documentation/`
+|===
+
+Set another root with `outputRoot(layout.buildDirectory.dir("generated/contracts"))`. Targets return relative paths
+but cannot choose or escape this root. One task owns the complete tree, removes stale owned files after successful
+generation, and logs each materialized project-relative path. Any failed execution leaves the previous successful
+tree intact.
+
+Run `./gradlew tapikGenerate` when only generated artifacts are needed. In compiled-contract mode, ordinary
+`./gradlew compileKotlin`, `classes`, `test`, or `build` also schedules generation because source and resource sets
+consume it. In same-project mode, `tapikGenerate` first runs `classes`; `jar`, `test`, and `build` additionally compile
+and package late generated Kotlin and resources. Generated documentation is never packaged automatically.
+
+The task supports Gradle's up-to-date checks, build cache, configuration cache, and relocation. Contract bytecode,
+target artifacts, selection, configuration, execution order, mode, and tapik version are inputs; the destination path
+does not alter generated bytes.
+
+== Runnable example
+
+The repository's `example-gradle` build maps `contract` and `application` onto the same Kotlin sources used by the
+Maven example. It therefore compares hosts without copying endpoint definitions or constructing metadata. Once the
+release artifacts and plugin marker are available, run:
+
+[,shell]
+----
+./plugin-gradle/gradlew -p example-gradle clean check
+----
+
+The contract writes OpenAPI under `example-contract/build/generated/tapik/documentation`. The application writes
+OpenAPI, generated client/server source, and WebMVC registration resources under the corresponding
+`example-application/build/generated/tapik` directories.
+
+== Troubleshooting
+
+`tapikGenerate` says no mode or executions are configured:: Call `mode(Mode.COMPILED_CONTRACT)` or
+`mode(Mode.SAME_PROJECT)` and declare at least one target block. Applying the plugin alone intentionally performs no
+generation.
+
+No API registries are found in compiled-contract mode:: Put a contract compiled with the tapik compiler plugin on
+`tapikContract`. Add it separately to `implementation` when source imports its declarations.
+
+No API registries are found in same-project mode:: Ensure the project applies Kotlin/JVM and contains an eligible
+public concrete `Api`. Run `tapikGenerate`; it schedules main compilation itself.
+
+A custom target is unknown:: Put its provider artifact on `tapikTarget`. The diagnostic lists target IDs visible on
+`tapikTargetClasspath` and identifies a provider found on the wrong contract side.
+
+A generated type is unresolved:: Use compiled-contract mode. Same-project generation necessarily follows ordinary
+main compilation, so only its separate late compilation and downstream projects can use generated Kotlin.
+
+Generation fails after a dependency upgrade:: Align the Gradle plugin, BOM, contract, format, runtime, and target
+modules. The compatibility diagnostic identifies the classpath, coordinate, resolved version, and plugin version.
+
+See xref:reference/troubleshooting.adoc[] for contract, target, OpenAPI, and Spring-specific failures.

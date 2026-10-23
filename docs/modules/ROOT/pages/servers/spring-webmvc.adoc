@@ -42,6 +42,10 @@ For `Books`, generation writes `BooksEndpoints.kt` and `BooksServer.kt` below th
 descriptor below `META-INF/tapik/spring/webmvc/`. The first source owns the shared endpoint response types; the second
 contains the public `BooksServer` interface and internal `BooksGeneratedController` adapter.
 
+In Gradle, declare the contract on both `implementation` and `tapikContract`, choose
+`Mode.COMPILED_CONTRACT`, and configure `springWebMvc { ... }`. The plugin adds generated source and registration
+resources to the ordinary main lifecycle. See xref:reference/gradle.adoc[Gradle reference] for the tested build.
+
 == Implement the handler
 
 The generated interface exposes the original API value and one abstract method per endpoint. Those methods return

@@ -47,11 +47,11 @@ The OpenAPI target is a host-neutral interpreter over selected, compiled `Api` v
 compilation, reads their immutable endpoint graphs without reflective endpoint discovery, returns generated artifacts
 without writing them, and fails generation when a valid tapik construct cannot be represented by OpenAPI 3.2.0.
 
-The implemented Maven adapter activates the compiler plugin, loads its generated API registries from the project
-classpath, discovers generation targets through host-neutral target registries, translates Maven configuration and API
-selection, invokes the selected target, and owns artifact materialization and lifecycle integration. Future Gradle and
-command-line hosts consume the same compiler registries, target registries, selection rules, configuration boundary,
-and generation results rather than wrapping OpenAPI-specific behavior.
+The Maven and Gradle adapters activate the compiler plugin, load its generated API registries from explicit contract
+classpaths, discover generation targets through host-neutral target registries, translate host configuration and API
+selection, invoke selected targets, and own artifact materialization and lifecycle integration. A future command-line
+host consumes those same compiler registries, target registries, selection rules, configuration boundary, and
+generation results rather than wrapping OpenAPI-specific behavior.
 
 ## Versioning and compatibility
 
@@ -60,16 +60,16 @@ earlier tapik implementations. From that baseline, tapik follows Semantic Versio
 convention: patch releases in one `0.y` line are backward-compatible, while an incompatible public change increments
 the minor version. After 1.0, incompatible changes increment the major version.
 
-The compatibility contract covers public Kotlin declarations in production artifacts, documented compiler and Maven
-configuration, stable generation target IDs, and the documented names and signatures of generated public Kotlin
+The compatibility contract covers public Kotlin declarations in production artifacts, documented compiler, Maven,
+and Gradle configuration, stable generation target IDs, and the documented names and signatures of generated public Kotlin
 declarations. An incompatible change to any of these surfaces requires the corresponding version increment and
 migration guidance. Internal implementation, generated formatting, and behavior outside the documented supported
 surface are not compatibility contracts.
 
-The current supported surface being intentionally narrow does not make it experimental. Maven is the only build host;
-the built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC; same-module generation occurs after
-ordinary main-source compilation; and format integrations require explicit schemas for serializer shapes they cannot
-derive. New hosts, targets, and derivation coverage can be added compatibly.
+The current supported surface being intentionally narrow does not make it experimental. Maven and Gradle Kotlin/JVM
+are build hosts; the built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC; same-project generation
+occurs after ordinary main-source compilation; and format integrations require explicit schemas for serializer shapes
+they cannot derive. New hosts, targets, and derivation coverage can be added compatibly.
 
 tapik does not determine whether a user's HTTP contract is semantically backward-compatible with its previously
 deployed form. API versioning and rollout remain application responsibilities.

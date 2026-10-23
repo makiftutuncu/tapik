@@ -1,8 +1,9 @@
 = Quickstart
 :description: Generate OpenAPI from a tapik contract in the same module or from a compiled contract dependency.
 
-This guide takes the shortest path from an ordinary Kotlin value to an OpenAPI document. It also explains the two
-Maven lifecycle modes so you can choose the right setup when adding generated clients or servers later.
+This guide takes the shortest Maven path from an ordinary Kotlin value to an OpenAPI document. For a Gradle build,
+start with the xref:reference/gradle.adoc[Gradle reference], which covers the same two generation modes with the typed
+Gradle DSL and runnable example.
 
 The snippets below are collected from the repository's tested
 https://github.com/makiftutuncu/tapik/tree/main/example-contract[`example-contract`^] and
@@ -12,8 +13,8 @@ from the examples exercised by `./mvnw verify`.
 == Requirements
 
 * Java 25
-* Maven 3.9, or the Maven Wrapper in the tapik repository
 * Kotlin 2.4 or newer
+* Maven 3.9+ or Gradle 9.1 through 9.5
 
 == Generate OpenAPI in the contract module
 

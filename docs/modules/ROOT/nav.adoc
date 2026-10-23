@@ -26,6 +26,7 @@
 ** xref:generation/index.adoc[Generation model]
 ** xref:reference/compiler-registry.adoc[Compiler registry]
 ** xref:reference/maven.adoc[Maven reference]
+** xref:reference/gradle.adoc[Gradle reference]
 ** xref:reference/generation-options.adoc[Targets and generated output]
 ** xref:reference/troubleshooting.adoc[Troubleshooting]
 * Understand tapik

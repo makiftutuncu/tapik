@@ -99,3 +99,7 @@ sourceSets.main {
 tasks.processResources {
     dependsOn(generatePluginProperties)
 }
+
+tasks.named("sourcesJar") {
+    dependsOn(generatePluginProperties)
+}

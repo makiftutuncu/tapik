@@ -14,7 +14,7 @@ Kotlin remains the source of truth; tapik does not import OpenAPI documents or d
 
 - Java 25
 - Kotlin 2.4.10 or a compatible Kotlin 2.4 release
-- Maven 3.9+, supplied by the included Maven Wrapper when developing tapik itself
+- Maven 3.9+ or Gradle 9.1 through 9.5
 
 ## Define an API
 
@@ -78,6 +78,55 @@ sources can follow paths such as `libraryApi.authors.list`. The standalone `Auth
 for generation; use `includeApis` when an execution should generate only `Library`.
 
 See the [DSL specification](specification/dsl.md) for the complete currently implemented grammar.
+
+## Gradle setup
+
+Apply Kotlin/JVM and `dev.akif.tapik.plugin.gradle` at the same version as the tapik BOM. The Gradle plugin attaches the
+tapik compiler plugin automatically; no package scan or separate compiler configuration is needed.
+
+```kotlin
+plugins {
+    kotlin("jvm") version "2.4.10"
+    id("dev.akif.tapik.plugin.gradle") version "0.6.0"
+}
+
+dependencies {
+    implementation(platform("dev.akif:tapik-bom:0.6.0"))
+    implementation("dev.akif:tapik-core")
+    implementation("dev.akif:tapik-format-jackson")
+}
+```
+
+Generation requires one explicit mode. Use `SAME_PROJECT` for output generated after the current project's APIs
+compile, or `COMPILED_CONTRACT` when ordinary main source needs generated client or server types from a separate
+contract project:
+
+```kotlin
+import dev.akif.tapik.plugin.gradle.Mode
+
+dependencies {
+    implementation(project(":contract"))
+    tapikContract(project(":contract"))
+}
+
+tapik {
+    mode(Mode.COMPILED_CONTRACT)
+
+    openApi("public") {
+        version("1.0.0")
+    }
+
+    springWebMvc("server") {
+        packageName("com.example.generated")
+    }
+}
+```
+
+`tapikGenerate` is one cacheable, configuration-cache-compatible owner for all configured executions. It writes source,
+resources, and documentation below `build/generated/tapik` and logs each generated path. See the
+[Gradle reference](docs/modules/ROOT/pages/reference/gradle.adoc) and the source-backed
+[`example-gradle`](example-gradle) build for modes, task relationships, custom targets, Kotlin/Groovy DSL, and
+troubleshooting.
 
 ## Maven setup
 
@@ -464,7 +513,8 @@ See the [generation specification](specification/generation.md), [OpenAPI specif
 
 The 0.6 rewrite replaces the previous implementation rather than preserving its build integration or binary API:
 
-- Maven is the only supported build host today; the previous Gradle integration is not available.
+- Maven and Gradle Kotlin/JVM are supported build hosts. The Gradle plugin keeps its historical ID but replaces the
+  previous scanning DSL with compiler registries, explicit modes, and named target executions.
 - API registries are generated at Kotlin compile time instead of scanning packages or reflecting over endpoints.
 - Kotlin contract values are authoritative; OpenAPI is generated output and cannot be consumed as an input contract.
 - Existing endpoint definitions and generated-build configuration require manual migration.
@@ -479,8 +529,10 @@ while an incompatible pre-1.0 change increments the minor version and includes m
 ./mvnw clean verify
 ```
 
-The build requires Java 25 and runs every production, fixture, and runnable example module. Product and architecture
-decisions live under [`specification`](specification/README.md).
+The Maven build requires Java 25 and runs every Maven production, fixture, and runnable example module. The standalone
+Gradle plugin and Gradle example use [`plugin-gradle/gradlew`](plugin-gradle/gradlew) with an explicitly staged tapik
+repository; see the [development guide](docs/modules/ROOT/pages/development.adoc). Product and architecture decisions
+live under [`specification`](specification/README.md).
 
 Before publication, run the unsigned packaging and external-consumer rehearsal:
 

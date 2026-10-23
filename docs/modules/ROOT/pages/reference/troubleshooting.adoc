@@ -1,8 +1,8 @@
 = Troubleshooting
-:description: Diagnose common tapik compiler registry and Maven generation problems.
+:description: Diagnose common tapik compiler registry and build-host generation problems.
 
-tapik fails at the boundary where information becomes invalid or unavailable. The message is wrapped by Maven as
-`tapik generation failed`, with the stage-specific cause following it.
+tapik fails at the boundary where information becomes invalid or unavailable. Maven wraps a failure as
+`tapik generation failed`; Gradle frames it with the named execution and target ID. The stage-specific cause follows.
 
 == Contract compilation fails
 
@@ -12,10 +12,10 @@ Fix the declaration named in the diagnostic; generation has not run yet.
 
 == Registry files exist but targets do not
 
-Registries are loaded from the project's compile and runtime classpath, while targets are loaded from the Maven plugin
-realm. A custom target must be placed under `tapik-plugin-maven`'s `<dependencies>`, not under the project's ordinary
-`<dependencies>`. Unknown-target errors list the targets actually visible to the plugin and diagnose the misplaced
-project dependency when possible.
+Maven loads registries from the project classpath and targets from its plugin realm. A custom target therefore belongs
+under `tapik-plugin-maven`'s `<dependencies>`, not ordinary project dependencies. Gradle loads registries from
+`tapikContractClasspath` or same-project main output and targets from `tapikTargetClasspath`; declare a custom provider
+with `tapikTarget(...)`. Unknown-target errors list visible targets and diagnose common wrong-side placement.
 
 If no APIs are found, check that the contract enabled tapik inside `kotlin-maven-plugin`, the configured lifecycle phase
 actually runs for the command, and the execution sees either a compiled contract dependency or the current module's
@@ -23,10 +23,10 @@ compiled output.
 
 == Registry or target linkage fails
 
-Every resolved `dev.akif:tapik-*` project dependency must have the same version as `tapik-plugin-maven`. Import the
-tapik BOM for project dependencies and set the build-plugin version explicitly. Service-provider and linkage errors
-identify whether the project classpath or plugin realm failed so version alignment and dependency placement can be
-checked on the correct side.
+Every resolved `dev.akif:tapik-*` generation dependency must have the same version as its Maven or Gradle plugin.
+Import the tapik BOM for project dependencies and set the build-plugin version explicitly. Service-provider and
+linkage errors identify the Maven project/plugin side or Gradle contract/target classpath so alignment and placement
+can be checked correctly.
 
 `Failed to load API registries from the project classpath` means a compiled registry provider could not be loaded,
 constructed, or read. Check that the contract artifact includes its generated registry provider and that the project's
@@ -47,7 +47,7 @@ Source generated from a compiled contract can run during `generate-sources`. Sou
 cannot exist until that module has compiled its registry, so main source in that same module cannot reference it on a
 clean build. Split the contract and application when source needs to implement a generated server or client.
 
-Running `tapik:generate` directly does not compile a same-module registry first. Use at least `process-classes` for
+Running Maven `tapik:generate` directly does not compile a same-module registry first. Use at least `process-classes` for
 same-module generation and at least `compile` for a compiled-contract execution bound to `generate-sources`.
 Direct invocation fails before artifact writes if the main output directory is absent or no compiled API registry
 exposes APIs. An existing directory alone is insufficient; compile APIs with the tapik compiler plugin enabled or add
@@ -56,6 +56,10 @@ a compiled contract dependency. Recompile changed definitions before retrying, s
 If generation succeeds during `process-classes` but late Kotlin compilation fails, inspect the compiler output in the
 Maven error. Generated source uses the project's resolved classpath and Java 25 target; missing target runtime modules
 or incompatible dependency versions usually surface at this stage.
+
+With Gradle, use `Mode.COMPILED_CONTRACT` when ordinary main source imports generated declarations. In
+`Mode.SAME_PROJECT`, `tapikGenerate` depends on `classes` and generated Kotlin belongs to the separate late
+`tapikGenerated` compilation; main compilation cannot see it by design.
 
 == Unsupported generation lifecycle phase
 
@@ -90,7 +94,8 @@ Either make the definitions identical, give them distinct final names, or select
 
 == Generated files are stale or collide
 
-Each Maven execution owns its previously generated paths. A successful rerun removes paths it no longer produces, so
+Maven tracks each execution's paths; Gradle's single `tapikGenerate` task owns its complete output root. A successful
+rerun removes paths it no longer produces, so
 renaming an API, package, or suffix does not require `clean`. It preserves files owned by other executions and files
 not owned by tapik. Ordinary cross-execution path collisions fail instead of overwriting one another; choose distinct
 output directories or target output templates.
@@ -106,6 +111,7 @@ evidence that the failed run succeeded; use the Maven result and the `INFO` log 
 
 == Nothing is logged
 
-A successful execution logs every generated project-relative path at Maven `INFO`. If no such entries appear, verify
-that the Maven command reaches the configured execution phase and that Maven has not been run in quiet mode with `-q`.
-For same-module generation, `compile` is too early for the default `process-classes` execution.
+A successful execution logs every generated project-relative path. In Maven, verify the command reaches the configured
+phase and has not been run with `-q`; same-module `compile` is too early for `process-classes`. In Gradle, verify a
+target block exists and the graph includes `tapikGenerate`; applying the plugin only for compiler activation performs
+no generation. Use `./gradlew tapikGenerate --info` to inspect task selection and up-to-date behavior.

@@ -1,8 +1,8 @@
 = Development guide
 :description: Build, test, and document tapik itself.
 
-tapik is built with Java 25, Kotlin 2.4, Maven, and Kotest. The documentation toolchain additionally requires Node.js
-20 or newer. Use the Maven Wrapper for the complete build:
+tapik is built with Java 25, Kotlin 2.4, Maven, Gradle, and Kotest. The documentation toolchain additionally requires
+Node.js 20 or newer. Use the Maven Wrapper for the Maven reactor:
 
 [source,shell]
 ----
@@ -11,6 +11,29 @@ tapik is built with Java 25, Kotlin 2.4, Maven, and Kotest. The documentation to
 
 Public behavior is specified under `specification/` before implementation. Changes follow a red-green-refactor cycle
 and keep each coherent green increment small.
+
+The `plugin-gradle` build is intentionally standalone: Maven remains the release-version authority, while Gradle
+builds and publishes its plugin implementation and marker. It resolves tapik development artifacts only from an
+explicit repository, never implicitly from `mavenLocal()`. After staging matching Maven artifacts, run:
+
+[source,shell]
+----
+./plugin-gradle/gradlew -p plugin-gradle check \
+  -PtapikRepository=/absolute/path/to/staged-repository \
+  -PtapikVersion=0.6.0
+----
+
+The same repository and version can run the source-backed example:
+
+[source,shell]
+----
+./plugin-gradle/gradlew -p example-gradle clean check \
+  -PtapikRepository=/absolute/path/to/staged-repository \
+  -PtapikVersion=0.6.0
+----
+
+The repository's integrated verification command prepares this isolated repository; see the release procedure before
+testing publication behavior manually.
 
 To build a local documentation preview, first install the reactor artifacts needed by unified Dokka, build the website
 assets and API reference, then run Antora:

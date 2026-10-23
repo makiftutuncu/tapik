@@ -99,9 +99,11 @@ optional response body documents its possible media types without representing a
 
 == Ownership boundary
 
-You own the Kotlin APIs, models, format configuration, documentation, and the Maven execution. tapik owns generated
-documents below the execution output directory. They may be validated, packaged, or published by later build steps,
-but hand edits will be replaced on regeneration.
+You own the Kotlin APIs, models, format configuration, documentation, and build-host execution. tapik owns generated
+documents below the configured output. They may be validated, packaged, or published by later build steps, but hand
+edits will be replaced on regeneration. Gradle users configure the same target with the typed `openApi` block described
+in xref:reference/gradle.adoc[Gradle reference].
 
-Continue with xref:reference/maven.adoc[Maven reference] for lifecycle and selection behavior or
+Continue with the xref:reference/maven.adoc[Maven] or xref:reference/gradle.adoc[Gradle] reference for lifecycle and
+selection behavior, or
 xref:reference/troubleshooting.adoc[Troubleshooting] when generation fails.

@@ -382,3 +382,17 @@ API discovery comes only from compiler-generated registries. Target selection co
 service-loaded target registries. Migration requires replacing old scanning configuration with ordinary tapik API
 definitions, compiler-plugin activation, explicit generation mode, contract or target dependencies, and named target
 executions. From its 0.6 baseline, this public Gradle DSL follows tapik's documented pre-1.0 Semantic Versioning policy.
+
+## Examples and documentation
+
+The repository contains one runnable Gradle multi-project build with `contract` and `application` projects. It reuses
+the same ordinary Kotlin library contract and application sources as the Maven example: it does not translate APIs
+into another model or maintain Gradle-specific endpoint definitions. The contract demonstrates same-project OpenAPI
+generation; the application consumes that project through both its ordinary dependency and `tapikContract`, then
+generates OpenAPI, Spring RestClient, and Spring WebMVC artifacts in compiled-contract mode.
+
+Public Gradle documentation takes Kotlin and Groovy DSL fragments from files exercised by the Gradle test suite or the
+runnable example. It documents automatic compiler-plugin activation, explicit modes, dependency configurations,
+declaration-ordered named executions, built-in and custom target configuration, generated layout, lifecycle task
+relationships, diagnostics, and commands for both direct generation and ordinary compilation. Repository development
+instructions keep the standalone Gradle build and example invocation separate from Maven's complete reactor command.

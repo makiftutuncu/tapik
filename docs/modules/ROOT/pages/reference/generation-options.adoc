@@ -1,9 +1,11 @@
 = Targets and generated output
 :description: Built-in target IDs, configuration keys, naming defaults, and artifact locations.
 
-Every Maven execution selects one host-neutral target and passes string values under `targetConfiguration`. A target
-rejects unknown keys and validates its values before producing artifacts. Relative artifact paths are resolved below
-the execution's `outputDirectory`, which defaults to `target/generated/tapik`.
+Every Maven or Gradle execution selects one host-neutral target. Maven passes strings under `targetConfiguration`;
+Gradle exposes typed built-in options and a structured custom-target builder. A target rejects unknown keys and
+validates values before producing artifacts. Maven resolves relative artifact paths below each `outputDirectory`,
+which defaults to `target/generated/tapik`. Gradle routes them below the single `build/generated/tapik` root into
+`sources`, `resources`, or `documentation` by artifact kind.
 
 == OpenAPI
 
@@ -141,7 +143,8 @@ All artifact paths are normalized relative paths; absolute paths, `.` or `..` se
 and duplicate result paths are rejected. The Maven host writes them below `outputDirectory`, records execution
 ownership outside packaged output, and logs each path.
 
-After a successful regeneration, files no longer returned by that execution are removed, including generated nested
+After a successful regeneration, files no longer returned by a Maven execution or the aggregated Gradle task are
+removed, including generated nested
 classes and registration descriptors after a package or suffix change. A failed generation keeps the previous
 successful files and ownership state intact. See xref:reference/troubleshooting.adoc[Troubleshooting] for failure
 stages and diagnostics.

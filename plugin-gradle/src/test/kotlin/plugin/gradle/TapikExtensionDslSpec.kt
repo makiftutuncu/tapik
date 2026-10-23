@@ -5,40 +5,13 @@ import io.kotest.matchers.shouldBe
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import java.nio.file.Files
+import kotlin.io.path.readText
 
 class TapikExtensionDslSpec : FunSpec({
     test("configure typed executions from Kotlin DSL") {
         val project = Files.createTempDirectory("tapik-gradle-kotlin-dsl-")
         Files.writeString(project.resolve("settings.gradle.kts"), "rootProject.name = \"consumer\"\n")
-        Files.writeString(
-            project.resolve("build.gradle.kts"),
-            """
-            import dev.akif.tapik.plugin.gradle.OpenApiComponentNaming
-            import dev.akif.tapik.plugin.gradle.OpenApiFormat
-            import dev.akif.tapik.plugin.gradle.Mode
-
-            plugins {
-                id("org.jetbrains.kotlin.jvm")
-                id("dev.akif.tapik.plugin.gradle")
-            }
-
-            tapik {
-                mode(Mode.COMPILED_CONTRACT)
-                outputRoot(layout.buildDirectory.dir("generated/contracts"))
-
-                openApi("public") {
-                    includeApis("Catalog")
-                    version("1.0.0")
-                    format(OpenApiFormat.JSON)
-                    componentNaming(OpenApiComponentNaming.QUALIFIED)
-                }
-
-                springRestClient("client") {
-                    clientSuffix("Client")
-                }
-            }
-            """.trimIndent()
-        )
+        Files.writeString(project.resolve("build.gradle.kts"), dslExample("kotlin.gradle.kts"))
 
         fun build() =
             GradleRunner
@@ -56,34 +29,7 @@ class TapikExtensionDslSpec : FunSpec({
     test("configure typed executions from Groovy DSL") {
         val project = Files.createTempDirectory("tapik-gradle-groovy-dsl-")
         Files.writeString(project.resolve("settings.gradle"), "rootProject.name = 'consumer'\n")
-        Files.writeString(
-            project.resolve("build.gradle"),
-            """
-            import dev.akif.tapik.plugin.gradle.OpenApiFormat
-            import dev.akif.tapik.plugin.gradle.Mode
-
-            plugins {
-                id 'org.jetbrains.kotlin.jvm'
-                id 'dev.akif.tapik.plugin.gradle'
-            }
-
-            tapik {
-                mode(Mode.SAME_PROJECT)
-
-                openApi('docs') {
-                    version('1.0.0')
-                    format(OpenApiFormat.YAML)
-                }
-
-                springWebMvc('server') {
-                    includeApis('Books')
-                    packageName('com.example.generated')
-                    serverSuffix('Server')
-                    controllerSuffix('GeneratedController')
-                }
-            }
-            """.trimIndent()
-        )
+        Files.writeString(project.resolve("build.gradle"), dslExample("groovy.gradle"))
 
         fun build() =
             GradleRunner
@@ -98,3 +44,8 @@ class TapikExtensionDslSpec : FunSpec({
         result.task(":tasks")?.outcome shouldBe TaskOutcome.SUCCESS
     }
 })
+
+private fun dslExample(name: String): String =
+    requireNotNull(TapikExtensionDslSpec::class.java.getResource("/examples/gradle/$name")) {
+        "Missing Gradle DSL example '$name'"
+    }.toURI().let(java.nio.file.Path::of).readText()

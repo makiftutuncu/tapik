@@ -38,6 +38,11 @@ The example writes `AuthorsClient.kt`, `BooksClient.kt`, and `CatalogClient.kt` 
 API below `target/generated-sources/tapik-spring/com/example/library/generated/` and registers that directory as a
 compile source root.
 
+In Gradle, declare the contract on both `implementation` and `tapikContract`, choose
+`Mode.COMPILED_CONTRACT`, and configure `springRestClient { ... }`. Generated source under
+`build/generated/tapik/sources` is a main Kotlin source directory automatically. See
+xref:reference/gradle.adoc[Gradle reference] for the tested build.
+
 == Supply the runtime client
 
 For `Books`, tapik generates a `BooksClient` interface with:

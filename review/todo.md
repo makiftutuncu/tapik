@@ -153,7 +153,7 @@ Gradle extension and task APIs require KDoc.
     applicable.
   - Ensure failures leave the last successful generated result and Gradle task metadata usable on the next run.
 
-- [ ] Add Gradle examples and public documentation.
+- [x] Add Gradle examples and public documentation.
   - Add runnable Gradle contract/application fixtures equivalent to the Maven examples without duplicating contract
     definitions into another metadata model.
   - Document plugin application, compiler activation, dependency configurations, both generation modes, named
