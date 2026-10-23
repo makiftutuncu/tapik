@@ -145,7 +145,7 @@ Gradle extension and task APIs require KDoc.
   - Verify no two tapik tasks declare overlapping outputs and parallel execution cannot corrupt generated state.
   - Exercise Gradle 9.1 and 9.5 with Java 25 and Kotlin 2.4.10.
 
-- [ ] Complete failure and compatibility coverage.
+- [x] Complete failure and compatibility coverage.
   - Test duplicate API IDs, empty selections, missing registries, incompatible tapik versions, unknown and duplicate
     targets, misplaced custom targets, malformed configuration, service-provider failures, linkage failures, and target
     exceptions.

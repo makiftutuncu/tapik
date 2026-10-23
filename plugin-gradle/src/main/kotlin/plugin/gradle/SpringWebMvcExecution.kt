@@ -36,8 +36,14 @@ abstract class SpringWebMvcExecution @Inject constructor(name: String) :
 
     internal override fun validateConfiguration() {
         super.validateConfiguration()
-        require(packageName.get().isNotBlank()) { "tapik generated package name must not be blank" }
-        require(serverSuffix.get().isNotBlank()) { "tapik server suffix must not be blank" }
-        require(controllerSuffix.get().isNotBlank()) { "tapik controller suffix must not be blank" }
+        require(packageName.get().isNotBlank()) {
+            "tapik execution '$name' for target '$targetId' requires a nonblank package name"
+        }
+        require(serverSuffix.get().isNotBlank()) {
+            "tapik execution '$name' for target '$targetId' requires a nonblank server suffix"
+        }
+        require(controllerSuffix.get().isNotBlank()) {
+            "tapik execution '$name' for target '$targetId' requires a nonblank controller suffix"
+        }
     }
 }

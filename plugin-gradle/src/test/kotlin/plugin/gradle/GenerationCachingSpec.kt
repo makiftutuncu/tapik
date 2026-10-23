@@ -53,8 +53,14 @@ class GenerationCachingSpec : FunSpec({
         fixture.configure { configuration -> configuration.copy(openApiFirst = false) }
         fixture.run().task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
 
+        val successfulFiles = fixture.generatedFiles()
         fixture.configure { configuration -> configuration.copy(pluginInputVersion = "${cacheFixtureVersionForTests}-fixture") }
-        fixture.run().task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        val incompatiblePlugin = fixture.runAndFail()
+        incompatiblePlugin.output shouldContain "incompatible with resolved dependencies"
+        fixture.generatedFiles() shouldBe successfulFiles
+
+        fixture.configure { configuration -> configuration.copy(pluginInputVersion = cacheFixtureVersionForTests) }
+        fixture.run().task(":tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
 
         fixture.configure { configuration -> configuration.copy(outputRoot = "build/alternate/tapik") }
         fixture.run().task(":tapikGenerate")?.outcome shouldBe TaskOutcome.FROM_CACHE

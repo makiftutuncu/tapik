@@ -343,12 +343,20 @@ original cause, and point to provider declarations, runtime dependencies, and ta
 corresponding failures from API-registry discovery identify either `tapikContractClasspath` or the same project's main
 runtime classpath according to mode, retain the cause, and point to compiler-generated registries, contract runtime
 dependencies, and version alignment. Arbitrary target execution failures are not reclassified as loading failures.
+Every worker failure is additionally framed by the configured execution name and target ID.
 
 An empty API catalog has a mode-specific diagnostic. Compiled-contract mode tells the user to add a contract compiled
 with the tapik compiler plugin to `tapikContract`; same-project mode states that main compilation produced no eligible
 public concrete `Api` and points to compiler-plugin activation and the API eligibility rules. These failures, version
 failures, unknown or misplaced targets, and unsupported project types all occur before the output tree is changed and
 use lowercase `tapik` in their messages.
+
+Duplicate API or target IDs identify the classpath side containing the invalid catalog. Selection and target
+configuration failures retain the host-neutral cause while the worker frame identifies the execution and target.
+Generation first completes every isolated execution and validates the merged result; therefore any discovery,
+selection, configuration, target, or merge failure preserves the complete last successful output tree. Correcting the
+inputs allows the same task to run normally, and a following unchanged invocation remains eligible for ordinary
+`UP-TO-DATE` state.
 
 ## Host-neutral target boundary
 

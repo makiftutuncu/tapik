@@ -10,6 +10,7 @@ import org.gradle.workers.WorkParameters
 
 internal interface GradleGenerationWorkParameters : WorkParameters {
     val contractClasspath: ConfigurableFileCollection
+    val mode: Property<Mode>
     val executionName: Property<String>
     val targetId: Property<String>
     val configuration: MapProperty<String, GradleConfigurationValue>
@@ -24,6 +25,7 @@ internal abstract class GradleGenerationWorkAction : WorkAction<GradleGeneration
             val result =
                 GradleGenerationLoader.generate(
                     contractClasspath = parameters.contractClasspath.files.map { file -> file.toPath() },
+                    mode = parameters.mode.get(),
                     targetId = parameters.targetId.get(),
                     configuration = parameters.configuration.get(),
                     includeApis = parameters.includeApis.get(),

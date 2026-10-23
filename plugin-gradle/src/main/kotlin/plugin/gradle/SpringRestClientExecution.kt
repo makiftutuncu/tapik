@@ -28,7 +28,11 @@ abstract class SpringRestClientExecution @Inject constructor(name: String) :
 
     internal override fun validateConfiguration() {
         super.validateConfiguration()
-        require(packageName.get().isNotBlank()) { "tapik generated package name must not be blank" }
-        require(clientSuffix.get().isNotBlank()) { "tapik client suffix must not be blank" }
+        require(packageName.get().isNotBlank()) {
+            "tapik execution '$name' for target '$targetId' requires a nonblank package name"
+        }
+        require(clientSuffix.get().isNotBlank()) {
+            "tapik execution '$name' for target '$targetId' requires a nonblank client suffix"
+        }
     }
 }

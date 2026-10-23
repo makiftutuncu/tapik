@@ -27,6 +27,7 @@ enum class OpenApiComponentNaming {
 abstract class OpenApiExecution @Inject constructor(name: String) : TapikExecution(name, "openapi") {
     /** Version written into the generated OpenAPI document. */
     @get:Input
+    @get:Optional
     abstract val version: Property<String>
 
     /** OpenAPI serialization format. */
@@ -70,10 +71,10 @@ abstract class OpenApiExecution @Inject constructor(name: String) : TapikExecuti
     internal override fun validateConfiguration() {
         super.validateConfiguration()
         require(version.isPresent && version.get().isNotBlank()) {
-            "tapik OpenAPI execution '$name' requires a nonblank version"
+            "tapik execution '$name' for target '$targetId' requires a nonblank version"
         }
         require(!output.isPresent || output.get().isNotBlank()) {
-            "tapik OpenAPI execution '$name' output must not be blank"
+            "tapik execution '$name' for target '$targetId' output must not be blank"
         }
     }
 }

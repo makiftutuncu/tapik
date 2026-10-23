@@ -6,6 +6,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
@@ -32,6 +33,10 @@ abstract class TapikGenerateTask @Inject constructor(
     /** Version of the applied tapik Gradle plugin. */
     @get:Input
     abstract val pluginVersion: Property<String>
+
+    /** Resolved tapik module versions keyed by classpath and module coordinates. */
+    @get:Input
+    abstract val tapikDependencyVersions: MapProperty<String, String>
 
     /** Generation executions in declaration order. */
     @get:Nested
@@ -71,6 +76,7 @@ abstract class TapikGenerateTask @Inject constructor(
                 Files.deleteIfExists(resultFile)
                 queue.submit(GradleGenerationWorkAction::class.java) { parameters ->
                     parameters.contractClasspath.from(contractClasspath)
+                    parameters.mode.set(mode)
                     parameters.executionName.set(execution.name)
                     parameters.targetId.set(execution.targetId)
                     parameters.configuration.set(execution.generationConfiguration())
@@ -108,6 +114,22 @@ abstract class TapikGenerateTask @Inject constructor(
                 "tapik generation requires mode(Mode.COMPILED_CONTRACT) or mode(Mode.SAME_PROJECT)"
             }
             executions.get().forEach(TapikExecution::validateConfiguration)
+            val incompatible =
+                tapikDependencyVersions.getOrElse(emptyMap())
+                    .filterValues { version -> version != pluginVersion.get() }
+                    .toSortedMap()
+            require(incompatible.isEmpty()) {
+                buildString {
+                    append("tapik Gradle plugin ${pluginVersion.get()} is incompatible with resolved dependencies: ")
+                    append(
+                        incompatible.entries.joinToString { (key, version) ->
+                            val (classpath, coordinates) = key.split('|', limit = 2)
+                            "$classpath contains $coordinates:$version"
+                        }
+                    )
+                    append(". Align every dev.akif:tapik-* dependency with the plugin version.")
+                }
+            }
         } catch (failure: IllegalArgumentException) {
             throw GradleException(failure.message ?: "Invalid tapik generation configuration", failure)
         }

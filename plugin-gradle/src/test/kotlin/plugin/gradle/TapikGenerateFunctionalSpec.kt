@@ -13,12 +13,9 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.exists
-import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
 import kotlin.io.path.readText
 
@@ -48,9 +45,16 @@ class TapikGenerateFunctionalSpec : FunSpec({
 
         val successfulFiles = project.generatedFileContents()
         project.writeBuild(invalidBuild())
-        project.runAndFail("tapikGenerate")
+        val failed = project.runAndFail("tapikGenerate")
 
+        failed.output shouldContain "tapik execution 'invalid' for target 'openapi' requires a nonblank version"
         project.generatedFileContents() shouldBe successfulFiles
+
+        project.writeBuild(restClientBuild())
+        val recovered = project.run("tapikGenerate")
+        recovered.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
+        val unchanged = project.run("tapikGenerate")
+        unchanged.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
     }
 
     test("pass nested configuration to a custom isolated target") {
@@ -77,7 +81,7 @@ class TapikGenerateFunctionalSpec : FunSpec({
                 }
                 """.trimIndent(),
             additionalDependencies =
-                "tapikTarget files('${descriptorRoot.groovyPath()}', '${testClasses.groovyPath()}')"
+                "tapikTarget files('${descriptorRoot.gradleGroovyPath()}', '${testClasses.gradleGroovyPath()}')"
         )
 
         val (result, reused) = repeatWithConfigurationCache { project.run("tapikGenerate") }
@@ -87,71 +91,8 @@ class TapikGenerateFunctionalSpec : FunSpec({
         project.generatedFiles().single { path -> path.name == "nested.txt" }.readText() shouldBe
             "Catalog|json,yaml|platform|true"
     }
+
 })
-
-private fun generationProject(): GenerationProject {
-    val root = Files.createTempDirectory("tapik-gradle-generation-")
-    Files.writeString(root.resolve("settings.gradle"), "rootProject.name = 'consumer'\n")
-    return GenerationProject(root)
-}
-
-private class GenerationProject(private val root: Path) {
-    fun writeBuild(tapikBlock: String, additionalDependencies: String = "") {
-        Files.writeString(
-            root.resolve("build.gradle"),
-            """
-            import dev.akif.tapik.plugin.gradle.Mode
-            import dev.akif.tapik.plugin.gradle.OpenApiFormat
-
-            plugins {
-                id 'org.jetbrains.kotlin.jvm'
-                id 'dev.akif.tapik.plugin.gradle'
-            }
-
-            repositories {
-                maven { url = uri('${tapikRepository.toUri()}') }
-                mavenCentral()
-            }
-
-            dependencies {
-                tapikContract 'dev.akif:tapik-example-contract:$tapikVersion'
-                $additionalDependencies
-            }
-
-            tapik {
-                mode(Mode.COMPILED_CONTRACT)
-                $tapikBlock
-            }
-            """.trimIndent()
-        )
-    }
-
-    fun run(task: String) =
-        runner(task).build()
-
-    fun runAndFail(task: String) =
-        runner(task).buildAndFail()
-
-    fun generatedFiles(): List<Path> {
-        val generated = root.resolve("build/generated/tapik")
-        if (!generated.exists()) return emptyList()
-        return Files.walk(generated).use { paths ->
-            paths.filter(Path::isRegularFile)
-                .filter { path -> path.name != ".tapik-ownership" }
-                .sorted()
-                .toList()
-        }
-    }
-
-    fun generatedFileContents(): List<Pair<String, String>> =
-        generatedFiles().map { path -> root.relativize(path).toString() to path.readText() }
-
-    private fun runner(task: String): GradleRunner =
-        GradleRunner.create()
-            .withProjectDir(root.toFile())
-            .withArguments(task, "--configuration-cache", "--stacktrace")
-            .withPluginClasspath()
-}
 
 private fun allTargetsBuild(): String =
     """
@@ -183,13 +124,6 @@ private fun invalidBuild(): String =
     openApi('invalid') {
     }
     """.trimIndent()
-
-private val tapikRepository: Path =
-    Path.of(requireNotNull(System.getProperty("tapik.repository")) { "Missing tapik.repository" })
-private val tapikVersion: String =
-    requireNotNull(System.getProperty("tapik.version")) { "Missing tapik.version" }
-
-private fun Path.groovyPath(): String = toString().replace("'", "\\'")
 
 class NestedConfigurationTargetRegistry : GenerationTargetRegistry {
     override val targets: List<GenerationTarget> = listOf(NestedConfigurationTarget)

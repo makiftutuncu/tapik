@@ -44,6 +44,15 @@ internal fun Project.wireSameProjectGeneration(
                 extension.classpathForMode(Mode.SAME_PROJECT, sameProjectClasspath, emptyClasspath)
             )
             task.dependsOn(sameProjectClasses)
+            task.tapikDependencyVersions.putAll(
+                extension.mode.flatMap { selected ->
+                    if (selected == Mode.SAME_PROJECT) {
+                        runtimeDependencies.get().tapikDependencyVersions("mainRuntimeClasspath")
+                    } else {
+                        providers.provider { emptyMap() }
+                    }
+                }.orElse(providers.provider { emptyMap() })
+            )
         }
 
         val unusedRoot = layout.buildDirectory.dir("tapik/unwired-main")

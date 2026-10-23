@@ -71,13 +71,20 @@ internal class CacheableGenerationFixture private constructor(
     }
 
     fun run(gradleVersion: String? = null, vararg tasks: String = arrayOf("tapikGenerate")): BuildResult {
+        return runner(gradleVersion, tasks).build()
+    }
+
+    fun runAndFail(vararg tasks: String = arrayOf("tapikGenerate")): BuildResult =
+        runner(null, tasks).buildAndFail()
+
+    private fun runner(gradleVersion: String?, tasks: Array<out String>): GradleRunner {
         val runner =
             GradleRunner.create()
                 .withProjectDir(root.toFile())
                 .withArguments(*tasks, "--configuration-cache", "--build-cache", "--stacktrace")
                 .withPluginClasspath()
         if (gradleVersion != null) runner.withGradleVersion(gradleVersion)
-        return runner.build()
+        return runner
     }
 
     private fun writeBuild() {

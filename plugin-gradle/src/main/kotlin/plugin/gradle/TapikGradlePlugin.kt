@@ -38,6 +38,18 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 task.description = "Generates artifacts from tapik API contracts"
                 task.mode.set(extension.mode)
                 task.pluginVersion.set(tapikVersion)
+                task.tapikDependencyVersions.putAll(
+                    targetClasspath.tapikDependencyVersions("tapikTargetClasspath")
+                )
+                task.tapikDependencyVersions.putAll(
+                    extension.mode.flatMap { selected ->
+                        if (selected == Mode.COMPILED_CONTRACT) {
+                            contractClasspath.tapikDependencyVersions("tapikContractClasspath")
+                        } else {
+                            target.providers.provider { emptyMap() }
+                        }
+                    }.orElse(target.providers.provider { emptyMap() })
+                )
                 task.executions.set(extension.orderedExecutions)
                 task.contractClasspath.from(
                     extension.classpathForMode(Mode.COMPILED_CONTRACT, contractClasspath, emptyClasspath)
