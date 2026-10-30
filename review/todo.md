@@ -177,7 +177,7 @@ Gradle extension and task APIs require KDoc.
 ## Completion
 
 - [x] The Gradle adapter specification, public KDoc, user guide, and implementation describe the same DSL and lifecycle.
-- [ ] `./mvnw clean verify` passes.
+- [x] `./mvnw clean verify` passes.
 - [ ] The standalone Gradle plugin unit and TestKit suites pass on Gradle 9.1 and 9.8 with Java 25.
 - [ ] Configuration-cache, build-cache, non-clean, relocation, and parallel-execution checks pass.
 - [ ] Maven and Gradle external-consumer release rehearsals pass from isolated repositories.
