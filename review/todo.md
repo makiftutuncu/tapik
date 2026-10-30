@@ -181,5 +181,5 @@ Gradle extension and task APIs require KDoc.
 - [x] The standalone Gradle plugin unit and TestKit suites pass on Gradle 9.1 and 9.8 with Java 25.
 - [x] Configuration-cache, build-cache, non-clean, relocation, and parallel-execution checks pass.
 - [x] Maven and Gradle external-consumer release rehearsals pass from isolated repositories.
-- [ ] The documentation build and desktop/mobile smoke tests pass.
+- [x] The documentation build and desktop/mobile smoke tests pass.
 - [ ] `git diff --check` passes for every changed file.
