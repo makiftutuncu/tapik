@@ -56,7 +56,7 @@ abstract class TapikGenerateTask @Inject constructor(
     @get:Input
     abstract val pluginVersion: Property<String>
 
-    /** Resolved tapik module versions keyed by classpath and module coordinates. */
+    /** Resolved tapik module versions keyed by classpath, coordinates, and selected component identity. */
     @get:Input
     abstract val tapikDependencyVersions: MapProperty<String, String>
 
@@ -169,9 +169,8 @@ abstract class TapikGenerateTask @Inject constructor(
                 buildString {
                     append("tapik Gradle plugin ${pluginVersion.get()} is incompatible with resolved dependencies: ")
                     append(
-                        incompatible.entries.joinToString { (key, version) ->
-                            val (classpath, coordinates) = key.split('|', limit = 2)
-                            "$classpath contains $coordinates:$version"
+                        incompatible.entries.joinToString { (component, _) ->
+                            component
                         }
                     )
                     append(". Align every dev.akif:tapik-* dependency with the plugin version.")
