@@ -1,6 +1,7 @@
 package dev.akif.tapik.plugin.gradle
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.shouldBe
 import java.nio.file.Files
@@ -59,7 +60,11 @@ class GenerationFailureSpec : FunSpec({
                     version('1.0.0')
                 }
                 """.trimIndent(),
-            additionalDependencies = "tapikContract 'dev.akif:tapik-incompatible:9.9.9'"
+            additionalDependencies =
+                """
+                tapikContract 'dev.akif:tapik-incompatible:9.9.9'
+                ${linkageFailingTargetDependency()}
+                """.trimIndent()
         )
 
         val failure = project.runAndFail("tapikGenerate")
@@ -80,7 +85,11 @@ class GenerationFailureSpec : FunSpec({
                     version('1.0.0')
                 }
                 """.trimIndent(),
-            additionalDependencies = "tapikContract project(':tapik-incompatible')"
+            additionalDependencies =
+                """
+                tapikContract project(':tapik-incompatible')
+                ${linkageFailingTargetDependency()}
+                """.trimIndent()
         )
 
         val failure = project.runAndFail("tapikGenerate")
@@ -104,7 +113,10 @@ class GenerationFailureSpec : FunSpec({
                 }
                 """.trimIndent(),
             additionalDependencies =
-                "tapikContract 'dev.akif:tapik-incompatible:$gradleTestTapikVersion'"
+                """
+                tapikContract 'dev.akif:tapik-incompatible:$gradleTestTapikVersion'
+                ${linkageFailingTargetDependency()}
+                """.trimIndent()
         )
 
         val failure = project.runAndFail("tapikGenerate")
@@ -116,6 +128,39 @@ class GenerationFailureSpec : FunSpec({
         failure.output shouldContain "included build"
         failure.output shouldContain "tapik-incompatible"
         project.generatedFiles() shouldBe emptyList()
+    }
+
+    test("accept compatible tapik project and included-build components") {
+        val project = generationProject()
+        project.includeTapikProject("tapik-compatible", gradleTestTapikVersion)
+        project.writeBuild(
+            tapikBlock =
+                """
+                openApi('docs') {
+                    version('1.0.0')
+                }
+                """.trimIndent(),
+            additionalDependencies = "tapikContract project(':tapik-compatible')"
+        )
+
+        project.run("tapikGenerate")
+        project.generatedFiles().shouldNotBeEmpty()
+
+        val composite = generationProject()
+        composite.includeSubstitutedTapikBuild("tapik-compatible", gradleTestTapikVersion)
+        composite.writeBuild(
+            tapikBlock =
+                """
+                openApi('docs') {
+                    version('1.0.0')
+                }
+                """.trimIndent(),
+            additionalDependencies =
+                "tapikContract 'dev.akif:tapik-compatible:$gradleTestTapikVersion'"
+        )
+
+        composite.run("tapikGenerate")
+        composite.generatedFiles().shouldNotBeEmpty()
     }
 
     test("frame target exceptions with their execution and target") {
@@ -142,3 +187,13 @@ class GenerationFailureSpec : FunSpec({
         failure.output shouldContain "target failure"
     }
 })
+
+private fun linkageFailingTargetDependency(): String {
+    val descriptorRoot = Files.createTempDirectory("tapik-gradle-linkage-failing-target-")
+    val descriptor =
+        descriptorRoot.resolve("META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry")
+    Files.createDirectories(descriptor.parent)
+    Files.writeString(descriptor, LinkageFailingTargetRegistry::class.qualifiedName + "\n")
+    val testClasses = Path.of(LinkageFailingTargetRegistry::class.java.protectionDomain.codeSource.location.toURI())
+    return "tapikTarget files('${descriptorRoot.gradleGroovyPath()}', '${testClasses.gradleGroovyPath()}')"
+}
