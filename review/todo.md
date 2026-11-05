@@ -34,7 +34,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Environment validation and cached task state
 
-- [ ] Update the compatibility and cache-identity specification so project type and supported Gradle, Java, and Kotlin
+- [x] Update the compatibility and cache-identity specification so project type and supported Gradle, Java, and Kotlin
   versions cannot be bypassed by `UP-TO-DATE` or `FROM-CACHE` outcomes.
 - [ ] Add a failing TestKit case that generates valid output, changes only to an unsupported Kotlin plugin version, and
   requires the next invocation to fail instead of remaining up-to-date.

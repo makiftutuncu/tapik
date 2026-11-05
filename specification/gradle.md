@@ -340,12 +340,20 @@ supports Kotlin/JVM only. An unsupported Gradle, Java, or Kotlin version reports
 The compatibility suite treats Gradle 9.1 and 9.8 as separate required endpoints rather than testing only the build's
 default wrapper version.
 
+The detected project type and the Gradle, Java, and Kotlin versions that govern compatibility are stable task inputs,
+not internal action-only state. Compatibility validation runs before worker loading or output mutation whenever those
+inputs require task execution. A successful `UP-TO-DATE` or `FROM-CACHE` result is valid only for the same supported
+environment identity that produced it; changing only a compatibility-affecting value cannot reuse task history or a
+cache entry created under a different value. Unsupported environment identities cannot create successful cache
+entries because their execution fails validation before generation.
+
 ## Incrementality and caching
 
 `tapikGenerate` is cacheable and configuration-cache compatible. Its cache identity consists of the applied plugin
-version, ordered execution definitions including nested target configuration, the normalized contract classpath, and
-the normalized generation-target classpath. The project directory and absolute locations of relocatable classpath
-entries are not inputs. The generated root is the task's only output tree and is not itself part of the cache key.
+version, detected project type, supported-tool versions, ordered execution definitions including nested target
+configuration, the normalized contract classpath, and the normalized generation-target classpath. The project
+directory and absolute locations of relocatable classpath entries are not inputs. The generated root is the task's
+only output tree and is not itself part of the cache key.
 
 An unchanged invocation is `UP-TO-DATE`. Deleting the generated root restores it from the local build cache, and moving
 the same build and relative inputs to another project directory can reuse the same cached result. Changing contract
