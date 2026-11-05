@@ -34,4 +34,21 @@ class GradleCompatibilitySpec : FunSpec({
         failure.output shouldContain "tapik Gradle generation supports Kotlin 2.4.10; detected Kotlin 2.4.0"
         fixture.generatedFiles() shouldBe generated
     }
+
+    test("reject an unsupported project type after successful generation") {
+        val fixture = CacheableGenerationFixture.create()
+        val first = fixture.run()
+        first.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        val generated = fixture.generatedFiles()
+
+        fixture.configure { configuration ->
+            configuration.copy(projectTypeInput = "Kotlin Multiplatform")
+        }
+        val failure = fixture.runAndFail()
+
+        failure.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.FAILED
+        failure.output shouldContain
+            "tapik Gradle generation supports Kotlin/JVM projects only; detected Kotlin Multiplatform"
+        fixture.generatedFiles() shouldBe generated
+    }
 })

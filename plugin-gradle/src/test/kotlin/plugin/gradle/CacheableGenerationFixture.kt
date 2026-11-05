@@ -117,6 +117,13 @@ internal class CacheableGenerationFixture private constructor(
             configuration.kotlinInputVersion?.let { version ->
                 "task.'getKotlinVersion${'$'}dev_akif_tapik_plugin_gradle'().set('$version')"
             }.orEmpty()
+        val projectTypeOverride =
+            configuration.projectTypeInput?.let { projectType ->
+                """
+                task.'getKotlinJvmProject${'$'}dev_akif_tapik_plugin_gradle'().set(false)
+                task.'getProjectType${'$'}dev_akif_tapik_plugin_gradle'().set('$projectType')
+                """.trimIndent()
+            }.orEmpty()
         Files.writeString(
             root.resolve("build.gradle"),
             """
@@ -155,6 +162,7 @@ internal class CacheableGenerationFixture private constructor(
             tasks.named('tapikGenerate') { task ->
                 task.pluginVersion.set('${configuration.pluginInputVersion}')
                 $kotlinVersionOverride
+            ${projectTypeOverride.prependIndent("    ")}
             }
             """.trimIndent() + "\n"
         )
@@ -201,6 +209,7 @@ internal data class CacheableGenerationConfiguration(
     val openApiFirst: Boolean = true,
     val pluginInputVersion: String = cacheFixtureVersion,
     val kotlinInputVersion: String? = null,
+    val projectTypeInput: String? = null,
     val outputRoot: String? = null
 )
 

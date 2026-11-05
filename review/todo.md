@@ -38,7 +38,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   versions cannot be bypassed by `UP-TO-DATE` or `FROM-CACHE` outcomes.
 - [x] Add a failing TestKit case that generates valid output, changes only to an unsupported Kotlin plugin version, and
   requires the next invocation to fail instead of remaining up-to-date.
-- [ ] Add equivalent coverage for changing from Kotlin/JVM to an unsupported project type while preserving the output
+- [x] Add equivalent coverage for changing from Kotlin/JVM to an unsupported project type while preserving the output
   tree and task history.
 - [ ] Make compatibility-affecting environment values declared task inputs or move validation to a hook that executes
   before cached/up-to-date completion.
