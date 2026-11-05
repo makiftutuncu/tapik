@@ -22,7 +22,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Project and composite dependency version alignment
 
-- [ ] Clarify in `specification/gradle.md` how external modules, project dependencies, and composite substitutions are
+- [x] Clarify in `specification/gradle.md` how external modules, project dependencies, and composite substitutions are
   identified and reported during tapik version validation.
 - [ ] Add a failing multi-project TestKit case where a resolved `dev.akif:tapik-*` project has a version different from
   the applied Gradle plugin.

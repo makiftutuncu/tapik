@@ -319,6 +319,20 @@ and reports the configuration, every conflicting coordinate and resolved version
 instruction to align the tapik platform and plugin declaration. Versions of third-party custom-target artifacts are
 unrestricted, but any tapik modules in their transitive graphs remain subject to this rule.
 
+Validation classifies selected components from Gradle's resolved component metadata rather than declared dependency
+selectors, artifact filenames, or only `ModuleComponentIdentifier`. An external module retains its module component
+identity. A same-build project dependency retains its project path, and a dependency substituted by an included build
+retains that included-build and project identity. For either kind of project component, its advertised selected
+group, module name, and version determine whether it is a `dev.akif:tapik-*` component and which version is validated.
+Composite substitution therefore cannot hide an incompatible local tapik implementation behind the version requested
+by the original external-module selector.
+
+Each validation entry retains the classpath name, logical `group:module` coordinate, resolved version, and selected
+component identity. A mismatch diagnostic identifies an external module, same-build project, or included-build project
+as applicable, reports every conflict in stable order, and states the applied plugin version. Compatible project and
+composite components proceed through the same classpath and service-loading boundaries as compatible external modules;
+the component kind does not otherwise change generation behavior.
+
 Applying the plugin before Kotlin/JVM is supported; compatibility validation waits until plugin application and lazy
 configuration have had the opportunity to observe it. Running a tapik task without `org.jetbrains.kotlin.jvm`, or in
 an Android or Kotlin Multiplatform project, fails with the detected project type and states that the initial adapter
