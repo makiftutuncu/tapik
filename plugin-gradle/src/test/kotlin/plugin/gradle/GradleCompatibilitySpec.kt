@@ -18,4 +18,20 @@ class GradleCompatibilitySpec : FunSpec({
             second.output shouldContain "Reusing configuration cache."
         }
     }
+
+    test("reject an unsupported Kotlin version after successful generation") {
+        val fixture = CacheableGenerationFixture.create()
+        val first = fixture.run()
+        first.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        val generated = fixture.generatedFiles()
+
+        fixture.configure { configuration ->
+            configuration.copy(kotlinInputVersion = "2.4.0")
+        }
+        val failure = fixture.runAndFail()
+
+        failure.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.FAILED
+        failure.output shouldContain "tapik Gradle generation supports Kotlin 2.4.10; detected Kotlin 2.4.0"
+        fixture.generatedFiles() shouldBe generated
+    }
 })

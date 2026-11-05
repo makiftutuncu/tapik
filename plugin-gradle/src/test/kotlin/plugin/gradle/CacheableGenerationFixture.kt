@@ -113,6 +113,10 @@ internal class CacheableGenerationFixture private constructor(
         val executions = if (configuration.openApiFirst) "$openApi\n$nested" else "$nested\n$openApi"
         val outputRoot =
             configuration.outputRoot?.let { path -> "outputRoot(layout.projectDirectory.dir('$path'))" }.orEmpty()
+        val kotlinVersionOverride =
+            configuration.kotlinInputVersion?.let { version ->
+                "task.'getKotlinVersion${'$'}dev_akif_tapik_plugin_gradle'().set('$version')"
+            }.orEmpty()
         Files.writeString(
             root.resolve("build.gradle"),
             """
@@ -148,8 +152,9 @@ internal class CacheableGenerationFixture private constructor(
                 jvmToolchain(25)
             }
 
-            tasks.named('tapikGenerate') {
-                pluginVersion.set('${configuration.pluginInputVersion}')
+            tasks.named('tapikGenerate') { task ->
+                task.pluginVersion.set('${configuration.pluginInputVersion}')
+                $kotlinVersionOverride
             }
             """.trimIndent() + "\n"
         )
@@ -195,6 +200,7 @@ internal data class CacheableGenerationConfiguration(
     val nestedOwner: String = "platform",
     val openApiFirst: Boolean = true,
     val pluginInputVersion: String = cacheFixtureVersion,
+    val kotlinInputVersion: String? = null,
     val outputRoot: String? = null
 )
 
