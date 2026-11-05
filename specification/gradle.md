@@ -257,6 +257,20 @@ Same-project generated resources are materialized in their own resource director
 rerun or overwrite `processResources`. Documentation remains outside all runtime and packaging inputs in this mode as
 well.
 
+The late class and resource directories join the final main output as producer-aware file collections rather than
+plain directories. The resource collection is built by `tapikGenerate`; the class collection is built by
+`compileTapikGeneratedKotlin`, whose dependency on `tapikGenerate` supplies generation transitively. Any task that
+consumes the main source-set output or main runtime classpath inherits those producer dependencies through Gradle's
+file-collection metadata, regardless of the task's type or name. This applies equally to the standard `jar`, custom
+runtime consumers, archive and distribution tasks, and plugin-provided packaging tasks; the adapter does not maintain
+an allowlist of known consumers.
+
+Producer metadata is attached only to the final consumer-facing output. The main `classes` lifecycle and the contract
+classpath captured for generation retain the pre-generation main output, which excludes both late directories.
+Consequently `classes` remains a prerequisite of `tapikGenerate`, while neither `classes` nor `tapikGenerate` acquires
+a dependency on `compileTapikGeneratedKotlin`. This preserves the required ordering for final-output consumers without
+creating a `classes -> tapikGenerate -> classes` cycle.
+
 The late Kotlin compilation and packaging tasks depend on `tapikGenerate`; `tapikGenerate` does not finalize or invoke
 them when requested alone. A direct `tapikGenerate` command means exactly generation plus its declared prerequisites.
 The dedicated late class directory is synchronized with the current generated sources, including nested classes and
