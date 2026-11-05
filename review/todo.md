@@ -11,7 +11,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Specify how late same-project classes and resources expose their producing tasks to every runtime/output consumer
   without creating a `classes -> tapikGenerate -> classes` cycle.
-- [ ] Add a failing TestKit fixture with a custom task that consumes `sourceSets.main.output` or the main runtime
+- [x] Add a failing TestKit fixture with a custom task that consumes `sourceSets.main.output` or the main runtime
   classpath without being a `Test`, `JavaExec`, or the standard `jar` task.
 - [ ] Add a failing archive/plugin-task fixture, such as `bootJar`, `shadowJar`, or a focused equivalent, proving that
   late generated classes and resources are built before packaging.

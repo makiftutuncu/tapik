@@ -12,6 +12,22 @@ import java.nio.file.Path
 import java.util.jar.JarFile
 
 class SameProjectSourceWiringSpec : FunSpec({
+    test("build late output before a custom main-output consumer") {
+        val project = sameProjectSourceFixture()
+
+        val result = project.run("copyMainOutput")
+
+        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        project.copiedMainOutputEntries().apply {
+            shouldContain("com/example/generated/api/Books/BooksClient.class")
+            shouldContain(
+                "META-INF/tapik/spring/webmvc/" +
+                    "com.example.generated.api.Books.BooksGeneratedController.properties"
+            )
+        }
+    }
+
     test("compile and package same-project generated Kotlin for runtime use") {
         val project = sameProjectSourceFixture()
 
@@ -176,6 +192,11 @@ private class SameProjectSourceFixture(private val root: Path) {
                 classpath = sourceSets.main.runtimeClasspath
                 mainClass = 'com.example.application.RuntimeProbe'
             }
+
+            tasks.register('copyMainOutput', Sync) {
+                from sourceSets.main.output
+                into layout.buildDirectory.dir('copied-main-output')
+            }
             """.trimIndent()
         )
     }
@@ -235,6 +256,16 @@ private class SameProjectSourceFixture(private val root: Path) {
         JarFile(root.resolve("build/libs/same-project-sources.jar").toFile()).use { jar ->
             jar.entries().asSequence().map { entry -> entry.name }.toList()
         }
+
+    fun copiedMainOutputEntries(): List<String> {
+        val output = root.resolve("build/copied-main-output")
+        return Files.walk(output).use { files ->
+            files.filter(Files::isRegularFile)
+                .map { path -> output.relativize(path).toString().replace('\\', '/') }
+                .sorted()
+                .toList()
+        }
+    }
 
     fun run(vararg tasks: String) = runner(tasks).build()
 
