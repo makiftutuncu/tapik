@@ -93,6 +93,31 @@ class GenerationFailureSpec : FunSpec({
         project.generatedFiles() shouldBe emptyList()
     }
 
+    test("diagnose incompatible tapik components substituted by an included build") {
+        val project = generationProject()
+        project.includeSubstitutedTapikBuild("tapik-incompatible", "9.9.9")
+        project.writeBuild(
+            tapikBlock =
+                """
+                openApi('docs') {
+                    version('1.0.0')
+                }
+                """.trimIndent(),
+            additionalDependencies =
+                "tapikContract 'dev.akif:tapik-incompatible:$gradleTestTapikVersion'"
+        )
+
+        val failure = project.runAndFail("tapikGenerate")
+
+        failure.output shouldContain
+            "tapik Gradle plugin $gradleTestTapikVersion is incompatible with resolved dependencies"
+        failure.output shouldContain "tapikContractClasspath"
+        failure.output shouldContain "dev.akif:tapik-incompatible:9.9.9"
+        failure.output shouldContain "included build"
+        failure.output shouldContain "tapik-incompatible"
+        project.generatedFiles() shouldBe emptyList()
+    }
+
     test("frame target exceptions with their execution and target") {
         val descriptorRoot = Files.createTempDirectory("tapik-gradle-throwing-target-")
         val descriptor =

@@ -36,6 +36,35 @@ internal class GenerationProject(private val root: Path) {
         )
     }
 
+    fun includeSubstitutedTapikBuild(module: String, version: String) {
+        val directoryName = "included-$module"
+        Files.writeString(
+            root.resolve("settings.gradle"),
+            """
+            rootProject.name = 'consumer'
+            includeBuild('$directoryName') {
+                dependencySubstitution {
+                    substitute module('dev.akif:$module') using project(':')
+                }
+            }
+            """.trimIndent() + "\n"
+        )
+        val build = root.resolve(directoryName)
+        Files.createDirectories(build)
+        Files.writeString(build.resolve("settings.gradle"), "rootProject.name = '$module'\n")
+        Files.writeString(
+            build.resolve("build.gradle"),
+            """
+            plugins {
+                id 'java-library'
+            }
+
+            group = 'dev.akif'
+            version = '$version'
+            """.trimIndent() + "\n"
+        )
+    }
+
     fun writeBuild(
         tapikBlock: String,
         additionalDependencies: String = "",
