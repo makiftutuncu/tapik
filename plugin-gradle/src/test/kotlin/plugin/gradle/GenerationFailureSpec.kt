@@ -2,6 +2,7 @@ package dev.akif.tapik.plugin.gradle
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.shouldBe
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -67,6 +68,29 @@ class GenerationFailureSpec : FunSpec({
             "tapik Gradle plugin $gradleTestTapikVersion is incompatible with resolved dependencies"
         failure.output shouldContain "tapikContractClasspath contains dev.akif:tapik-incompatible:9.9.9"
         failure.output shouldContain "Align every dev.akif:tapik-* dependency with the plugin version"
+    }
+
+    test("diagnose incompatible tapik project dependencies before isolated generation") {
+        val project = generationProject()
+        project.includeTapikProject("tapik-incompatible", "9.9.9")
+        project.writeBuild(
+            tapikBlock =
+                """
+                openApi('docs') {
+                    version('1.0.0')
+                }
+                """.trimIndent(),
+            additionalDependencies = "tapikContract project(':tapik-incompatible')"
+        )
+
+        val failure = project.runAndFail("tapikGenerate")
+
+        failure.output shouldContain
+            "tapik Gradle plugin $gradleTestTapikVersion is incompatible with resolved dependencies"
+        failure.output shouldContain "tapikContractClasspath"
+        failure.output shouldContain "dev.akif:tapik-incompatible:9.9.9"
+        failure.output shouldContain "project :tapik-incompatible"
+        project.generatedFiles() shouldBe emptyList()
     }
 
     test("frame target exceptions with their execution and target") {

@@ -24,7 +24,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Clarify in `specification/gradle.md` how external modules, project dependencies, and composite substitutions are
   identified and reported during tapik version validation.
-- [ ] Add a failing multi-project TestKit case where a resolved `dev.akif:tapik-*` project has a version different from
+- [x] Add a failing multi-project TestKit case where a resolved `dev.akif:tapik-*` project has a version different from
   the applied Gradle plugin.
 - [ ] Add a failing included-build dependency-substitution case for an incompatible local tapik component.
 - [ ] Change `tapikDependencyVersions` to inspect resolved component metadata for module and project component IDs,

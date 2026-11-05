@@ -16,6 +16,26 @@ internal fun generationProject(): GenerationProject {
 }
 
 internal class GenerationProject(private val root: Path) {
+    fun includeTapikProject(module: String, version: String) {
+        Files.writeString(
+            root.resolve("settings.gradle"),
+            "rootProject.name = 'consumer'\ninclude '$module'\n"
+        )
+        val project = root.resolve(module)
+        Files.createDirectories(project)
+        Files.writeString(
+            project.resolve("build.gradle"),
+            """
+            plugins {
+                id 'java-library'
+            }
+
+            group = 'dev.akif'
+            version = '$version'
+            """.trimIndent() + "\n"
+        )
+    }
+
     fun writeBuild(
         tapikBlock: String,
         additionalDependencies: String = "",
