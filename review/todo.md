@@ -15,7 +15,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   classpath without being a `Test`, `JavaExec`, or the standard `jar` task.
 - [x] Add a failing archive/plugin-task fixture, such as `bootJar`, `shadowJar`, or a focused equivalent, proving that
   late generated classes and resources are built before packaging.
-- [ ] Replace the task-type/name allowlist in `SameProjectWiring` with produced file collections, a dedicated variant,
+- [x] Replace the task-type/name allowlist in `SameProjectWiring` with produced file collections, a dedicated variant,
   or equivalent Gradle producer metadata that travels with all consumers.
 - [ ] Verify direct `tapikGenerate` still performs generation only, the standard `jar` remains correct, custom consumers
   receive current output, and stale late classes/resources are removed after configuration changes.

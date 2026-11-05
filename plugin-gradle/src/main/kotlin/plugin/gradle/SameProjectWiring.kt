@@ -1,9 +1,6 @@
 package dev.akif.tapik.plugin.gradle
 
 import org.gradle.api.Project
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.testing.Test
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.jvm.tasks.ProcessResources
@@ -17,7 +14,6 @@ internal fun Project.wireSameProjectGeneration(
 ) {
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         val main = extensions.getByType(SourceSetContainer::class.java).named("main").get()
-        val classes = tasks.named(main.classesTaskName)
         val processedResources =
             tasks.named(main.processResourcesTaskName, ProcessResources::class.java).map { task ->
                 task.destinationDir
@@ -30,10 +26,6 @@ internal fun Project.wireSameProjectGeneration(
                 runtimeDependencies
             )
         val emptyClasspath = files()
-        val sameProjectClasses =
-            extension.mode.map<List<Any>> { selected ->
-                if (selected == Mode.SAME_PROJECT) listOf(classes) else emptyList()
-            }.orElse(emptyList())
         val sameProjectGeneration =
             extension.mode.map<List<Any>> { selected ->
                 if (selected == Mode.SAME_PROJECT) listOf(generation) else emptyList()
@@ -43,7 +35,6 @@ internal fun Project.wireSameProjectGeneration(
             task.contractClasspath.from(
                 extension.classpathForMode(Mode.SAME_PROJECT, sameProjectClasspath, emptyClasspath)
             )
-            task.dependsOn(sameProjectClasses)
             task.tapikDependencyVersions.putAll(
                 extension.mode.flatMap { selected ->
                     if (selected == Mode.SAME_PROJECT) {
@@ -86,20 +77,11 @@ internal fun Project.wireSameProjectGeneration(
             }
         }
         val generatedClasses = layout.buildDirectory.dir("classes/kotlin/tapikGenerated")
-        main.output.dir(generatedClasses)
-        main.output.dir(generatedResources)
         val sameProjectGeneratedCompilation =
             extension.mode.map<List<Any>> { selected ->
                 if (selected == Mode.SAME_PROJECT) listOf(generatedCompilation.compileTaskProvider) else emptyList()
             }.orElse(emptyList())
-        tasks.withType(JavaExec::class.java).configureEach { task ->
-            task.dependsOn(sameProjectGeneratedCompilation)
-        }
-        tasks.withType(Test::class.java).configureEach { task ->
-            task.dependsOn(sameProjectGeneratedCompilation)
-        }
-        tasks.named("jar", Jar::class.java).configure { task ->
-            task.dependsOn(sameProjectGeneration, sameProjectGeneratedCompilation)
-        }
+        main.output.dir(mapOf("builtBy" to sameProjectGeneratedCompilation), generatedClasses)
+        main.output.dir(mapOf("builtBy" to sameProjectGeneration), generatedResources)
     }
 }

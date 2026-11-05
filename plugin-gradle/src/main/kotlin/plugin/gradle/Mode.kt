@@ -19,8 +19,9 @@ enum class Mode {
     /**
      * Load API contracts from the current project's compiled main output and runtime classpath.
      *
-     * `tapikGenerate` runs after main classes. Generated Kotlin is compiled separately and packaged for downstream
-     * consumers, but is not visible to ordinary main source in the same project.
+     * `tapikGenerate` runs after ordinary main compilation and resource processing. Generated Kotlin is compiled
+     * separately and packaged for downstream consumers, but is not visible to ordinary main source in the same
+     * project.
      */
     SAME_PROJECT
 }

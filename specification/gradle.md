@@ -183,7 +183,7 @@ relationship.
 | Mode | Registry input | Task relationship | Main-source visibility |
 | --- | --- | --- | --- |
 | Compiled contract | Dedicated contract dependency configuration | `compileKotlin` and `processResources` consume `tapikGenerate` outputs | Main source can use generated Kotlin |
-| Same project | Compiled main output and runtime classpath | `tapikGenerate` depends on the main `classes` lifecycle | Main source cannot use generated Kotlin |
+| Same project | Compiled main output and runtime classpath | `tapikGenerate` consumes the ordinary main compile and resource outputs; final main output also carries late producers | Main source cannot use generated Kotlin |
 
 ### Compiled-contract mode
 
@@ -222,10 +222,12 @@ separate publication step.
 
 ### Same-project mode
 
-`tapikGenerate` depends on the Kotlin/JVM main `classes` lifecycle and reads the resulting main output together with the
-main runtime classpath. This guarantees that the compiler-generated `ApiRegistry` service provider, Kotlin contract
-classes, Java main classes, and processed application resources exist before API loading. Running `tapikGenerate`
-directly from a clean checkout therefore builds those prerequisites through the ordinary Gradle task graph.
+`tapikGenerate` reads the Kotlin/JVM main compile and processed-resource outputs together with the main runtime
+dependency configuration. Those producer-aware file collections schedule ordinary Kotlin and Java compilation plus
+resource processing without depending on the final `classes` lifecycle task. This guarantees that the
+compiler-generated `ApiRegistry` service provider, Kotlin contract classes, Java main classes, and processed
+application resources exist before API loading. Running `tapikGenerate` directly from a clean checkout therefore
+builds those prerequisites through the ordinary Gradle task graph.
 
 The same-project contract classpath is assembled from the main compiled-class directories, the processed main-resource
 directory, and the ordinary runtime dependency configuration. It is captured before tapik adds any late generated
@@ -265,11 +267,11 @@ file-collection metadata, regardless of the task's type or name. This applies eq
 runtime consumers, archive and distribution tasks, and plugin-provided packaging tasks; the adapter does not maintain
 an allowlist of known consumers.
 
-Producer metadata is attached only to the final consumer-facing output. The main `classes` lifecycle and the contract
-classpath captured for generation retain the pre-generation main output, which excludes both late directories.
-Consequently `classes` remains a prerequisite of `tapikGenerate`, while neither `classes` nor `tapikGenerate` acquires
-a dependency on `compileTapikGeneratedKotlin`. This preserves the required ordering for final-output consumers without
-creating a `classes -> tapikGenerate -> classes` cycle.
+Producer metadata is attached only to the final consumer-facing output. The contract classpath captured for generation
+retains the pre-generation main compile and resource outputs, which exclude both late directories. Consequently the
+final `classes` lifecycle may inherit `tapikGenerate` and `compileTapikGeneratedKotlin` as output producers, while
+`tapikGenerate` depends only on the ordinary pre-generation producers and never on `classes`. This preserves the
+required ordering for final-output consumers without creating a `classes -> tapikGenerate -> classes` cycle.
 
 The late Kotlin compilation and packaging tasks depend on `tapikGenerate`; `tapikGenerate` does not finalize or invoke
 them when requested alone. A direct `tapikGenerate` command means exactly generation plus its declared prerequisites.
