@@ -13,7 +13,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   without creating a `classes -> tapikGenerate -> classes` cycle.
 - [x] Add a failing TestKit fixture with a custom task that consumes `sourceSets.main.output` or the main runtime
   classpath without being a `Test`, `JavaExec`, or the standard `jar` task.
-- [ ] Add a failing archive/plugin-task fixture, such as `bootJar`, `shadowJar`, or a focused equivalent, proving that
+- [x] Add a failing archive/plugin-task fixture, such as `bootJar`, `shadowJar`, or a focused equivalent, proving that
   late generated classes and resources are built before packaging.
 - [ ] Replace the task-type/name allowlist in `SameProjectWiring` with produced file collections, a dedicated variant,
   or equivalent Gradle producer metadata that travels with all consumers.

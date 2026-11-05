@@ -10,6 +10,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.jar.JarFile
+import java.util.zip.ZipFile
 
 class SameProjectSourceWiringSpec : FunSpec({
     test("build late output before a custom main-output consumer") {
@@ -21,6 +22,22 @@ class SameProjectSourceWiringSpec : FunSpec({
         result.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         project.copiedMainOutputEntries().apply {
             shouldContain("com/example/generated/api/Books/BooksClient.class")
+            shouldContain(
+                "META-INF/tapik/spring/webmvc/" +
+                    "com.example.generated.api.Books.BooksGeneratedController.properties"
+            )
+        }
+    }
+
+    test("build late output before a custom archive packages main output") {
+        val project = sameProjectSourceFixture()
+
+        val result = project.run("packageMainOutput")
+
+        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        project.packagedMainOutputEntries().apply {
+            shouldContain("com/example/generated/api/Books/BooksServer.class")
             shouldContain(
                 "META-INF/tapik/spring/webmvc/" +
                     "com.example.generated.api.Books.BooksGeneratedController.properties"
@@ -197,6 +214,12 @@ private class SameProjectSourceFixture(private val root: Path) {
                 from sourceSets.main.output
                 into layout.buildDirectory.dir('copied-main-output')
             }
+
+            tasks.register('packageMainOutput', Zip) {
+                from sourceSets.main.output
+                archiveFileName = 'main-output.zip'
+                destinationDirectory = layout.buildDirectory.dir('archives')
+            }
             """.trimIndent()
         )
     }
@@ -266,6 +289,11 @@ private class SameProjectSourceFixture(private val root: Path) {
                 .toList()
         }
     }
+
+    fun packagedMainOutputEntries(): List<String> =
+        ZipFile(root.resolve("build/archives/main-output.zip").toFile()).use { archive ->
+            archive.entries().asSequence().map { entry -> entry.name }.toList()
+        }
 
     fun run(vararg tasks: String) = runner(tasks).build()
 
