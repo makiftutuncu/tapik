@@ -13,6 +13,19 @@ import java.util.jar.JarFile
 import java.util.zip.ZipFile
 
 class SameProjectSourceWiringSpec : FunSpec({
+    test("generate only when tapikGenerate is requested directly") {
+        val project = sameProjectSourceFixture()
+
+        val result = project.run("tapikGenerate")
+
+        result.task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":classes") shouldBe null
+        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":compileTapikGeneratedKotlin") shouldBe null
+        project.generatedSources().any { source -> source.endsWith("/BooksClient.kt") } shouldBe true
+        project.generatedClassFiles() shouldBe emptyList()
+    }
+
     test("build late output before a custom main-output consumer") {
         val project = sameProjectSourceFixture()
 
@@ -26,6 +39,20 @@ class SameProjectSourceWiringSpec : FunSpec({
                 "META-INF/tapik/spring/webmvc/" +
                     "com.example.generated.api.Books.BooksGeneratedController.properties"
             )
+        }
+
+        project.delete("src/main/kotlin/com/example/api/Books.kt")
+        val changed = project.run("copyMainOutput")
+
+        changed.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        changed.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        project.copiedMainOutputEntries().apply {
+            shouldNotContain("com/example/generated/api/Books/BooksClient.class")
+            shouldNotContain(
+                "META-INF/tapik/spring/webmvc/" +
+                    "com.example.generated.api.Books.BooksGeneratedController.properties"
+            )
+            shouldContain("com/example/generated/api/Catalog/CatalogClient.class")
         }
     }
 
@@ -42,6 +69,17 @@ class SameProjectSourceWiringSpec : FunSpec({
                 "META-INF/tapik/spring/webmvc/" +
                     "com.example.generated.api.Books.BooksGeneratedController.properties"
             )
+        }
+
+        project.writeBuild(includeSpringTargets = false)
+        val changed = project.run("packageMainOutput")
+
+        changed.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        changed.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        project.packagedMainOutputEntries().apply {
+            none { entry -> entry.startsWith("com/example/generated/") && entry.endsWith(".class") } shouldBe true
+            none { entry -> entry.startsWith("META-INF/tapik/spring/webmvc/") } shouldBe true
+            shouldContain("com/example/application/RuntimeProbe.class")
         }
     }
 
@@ -274,6 +312,17 @@ private class SameProjectSourceFixture(private val root: Path) {
                 .sorted()
                 .toList()
         }
+
+    fun generatedClassFiles(): List<String> {
+        val output = root.resolve("build/classes/kotlin/tapikGenerated")
+        if (Files.notExists(output)) return emptyList()
+        return Files.walk(output).use { files ->
+            files.filter(Files::isRegularFile)
+                .map { path -> output.relativize(path).toString().replace('\\', '/') }
+                .sorted()
+                .toList()
+        }
+    }
 
     fun jarEntries(): List<String> =
         JarFile(root.resolve("build/libs/same-project-sources.jar").toFile()).use { jar ->

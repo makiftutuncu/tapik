@@ -17,7 +17,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   late generated classes and resources are built before packaging.
 - [x] Replace the task-type/name allowlist in `SameProjectWiring` with produced file collections, a dedicated variant,
   or equivalent Gradle producer metadata that travels with all consumers.
-- [ ] Verify direct `tapikGenerate` still performs generation only, the standard `jar` remains correct, custom consumers
+- [x] Verify direct `tapikGenerate` still performs generation only, the standard `jar` remains correct, custom consumers
   receive current output, and stale late classes/resources are removed after configuration changes.
 
 ### Project and composite dependency version alignment
