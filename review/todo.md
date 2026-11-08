@@ -64,7 +64,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   both sets, matching `ApiSelection` and Maven.
 - [x] Replace the Gradle overlap-rejection test with a failing parity test that includes and excludes the same API and
   verifies the exclusion is applied.
-- [ ] Remove the Gradle-only overlap validation from `TapikExecution` and keep blank/unknown/empty-selection validation
+- [x] Remove the Gradle-only overlap validation from `TapikExecution` and keep blank/unknown/empty-selection validation
   in the host-neutral selection model.
 - [ ] Update Gradle reference and troubleshooting prose if it currently implies that overlap is invalid.
 

@@ -44,13 +44,5 @@ abstract class TapikExecution @Inject constructor(
     internal open fun validateConfiguration() {
         require(name.isNotBlank()) { "tapik execution names must not be blank" }
         require(targetId.isNotBlank()) { "tapik target IDs must not be blank" }
-        val includes = includeApis.get()
-        val excludes = excludeApis.get()
-        require(includes.none(String::isBlank)) { "tapik API include filters must not contain blank IDs" }
-        require(excludes.none(String::isBlank)) { "tapik API exclude filters must not contain blank IDs" }
-        val overlap = includes intersect excludes
-        require(overlap.isEmpty()) {
-            "tapik APIs cannot be both included and excluded: ${overlap.joinToString()}"
-        }
     }
 }

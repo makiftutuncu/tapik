@@ -180,7 +180,7 @@ class TapikExtensionSpec : FunSpec({
         shouldThrow<IllegalArgumentException> { extension.mode(Mode.SAME_PROJECT) }
     }
 
-    test("validate mode API selection and required typed options") {
+    test("validate execution and mode requirements") {
         val project = ProjectBuilder.builder().build()
         project.pluginManager.apply(TapikGradlePlugin::class.java)
         val extension = project.extensions.getByType(TapikExtension::class.java)
@@ -190,14 +190,15 @@ class TapikExtensionSpec : FunSpec({
 
         extension.openApi(
             Action { execution ->
-                execution.includeApis("Books", " ")
+                execution.includeApis("Books")
                 execution.excludeApis("Authors")
+                execution.version("1.0.0")
             }
         )
         shouldThrow<GradleException> { task.validateConfiguration() }
 
         extension.mode(Mode.SAME_PROJECT)
-        shouldThrow<GradleException> { task.validateConfiguration() }
+        task.validateConfiguration()
     }
 
     test("validate the supported Kotlin JVM toolchain before generation") {
