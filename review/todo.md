@@ -42,7 +42,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   tree and task history.
 - [x] Make compatibility-affecting environment values declared task inputs or move validation to a hook that executes
   before cached/up-to-date completion.
-- [ ] Re-run configuration-cache, local build-cache, output restoration, and relocation tests to ensure the new inputs
+- [x] Re-run configuration-cache, local build-cache, output restoration, and relocation tests to ensure the new inputs
   are stable and intentional.
 
 ### Per-target compiler registry state
