@@ -152,10 +152,11 @@ with the same target-relative path but different kinds remain distinct, while tw
 claim the same materialized path. Source-set, resource, documentation, and packaging wiring uses these exact stable
 directories rather than inspecting media types or target IDs.
 
-The task snapshots executions in declaration order, invokes every target in that order, and retains each target's
-artifact order. It generates all execution results before changing the output tree. Materialized paths are accumulated
-in first-claim order and reported in that order; a compatible shared path appears once at the position of its first
-claim.
+The task snapshots executions in declaration order and uses that order for actual target invocation, not only later
+aggregation or logging. One execution's `GenerationTarget.generate` call completes before the next declared execution
+starts; executions within one project never overlap or overtake one another. Each result retains its target's artifact
+order. The task generates all execution results before changing the output tree. Materialized paths are accumulated in
+first-claim order and reported in that order; a compatible shared path appears once at the position of its first claim.
 
 An artifact path is exclusive unless every claim for that materialized path has the same nonblank sharing key and
 byte-identical UTF-8 content. A compatible set of claims is merged into one artifact. A missing or different sharing

@@ -70,7 +70,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Declaration-ordered target invocation
 
-- [ ] Reaffirm in the Gradle specification that declaration order governs actual target invocation, not only result
+- [x] Reaffirm in the Gradle specification that declaration order governs actual target invocation, not only result
   aggregation and logging.
 - [ ] Add a failing worker test with delayed/custom target executions that records start order and exposes concurrent or
   non-FIFO invocation.
