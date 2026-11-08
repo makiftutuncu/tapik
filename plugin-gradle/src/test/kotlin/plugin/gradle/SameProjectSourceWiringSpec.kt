@@ -161,14 +161,46 @@ class SameProjectSourceWiringSpec : FunSpec({
             "tapik same-project generated declarations are unavailable to ordinary main source; " +
             "move the API contract to a separately compiled project and use Mode.COMPILED_CONTRACT"
     }
+
+    test("load contracts and compile generated source with compileOnly dependencies") {
+        val project = sameProjectSourceFixture(includeCompileOnlyModel = true)
+
+        val result = project.run("jar")
+
+        result.task(":compile-only-model:classes")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        project.jarEntries().apply {
+            shouldContain("com/example/generated/api/CompileOnly/CompileOnlyClient.class")
+            shouldContain("com/example/generated/api/CompileOnly/CompileOnlyServer.class")
+            none { entry -> entry == "com/example/compileonly/ExternalModel.class" } shouldBe true
+        }
+    }
 })
 
-private fun sameProjectSourceFixture(): SameProjectSourceFixture {
-    val fixture = SameProjectSourceFixture(Files.createTempDirectory("tapik-gradle-same-project-sources-"))
-    fixture.write("settings.gradle", "rootProject.name = 'same-project-sources'\n")
+private fun sameProjectSourceFixture(includeCompileOnlyModel: Boolean = false): SameProjectSourceFixture {
+    val fixture =
+        SameProjectSourceFixture(
+            Files.createTempDirectory("tapik-gradle-same-project-sources-"),
+            includeCompileOnlyModel
+        )
+    fixture.write(
+        "settings.gradle",
+        buildString {
+            appendLine("rootProject.name = 'same-project-sources'")
+            if (includeCompileOnlyModel) appendLine("include 'compile-only-model'")
+        }
+    )
+    if (includeCompileOnlyModel) {
+        fixture.writeCompileOnlyModel()
+    }
     fixture.writeBuild()
     fixture.writeApi("Catalog")
     fixture.writeApi("Books")
+    if (includeCompileOnlyModel) {
+        fixture.writeCompileOnlyApi()
+    }
     fixture.write(
         "src/main/kotlin/com/example/application/RuntimeProbe.kt",
         """
@@ -197,7 +229,10 @@ private fun sameProjectSourceFixture(): SameProjectSourceFixture {
     return fixture
 }
 
-private class SameProjectSourceFixture(private val root: Path) {
+private class SameProjectSourceFixture(
+    private val root: Path,
+    private val includeCompileOnlyModel: Boolean
+) {
     fun writeBuild(includeSpringTargets: Boolean = true) {
         val springTargets =
             if (includeSpringTargets) {
@@ -232,6 +267,7 @@ private class SameProjectSourceFixture(private val root: Path) {
                 implementation 'dev.akif:tapik-core:$sameProjectSourceVersion'
                 implementation 'dev.akif:tapik-target-spring-restclient:$sameProjectSourceVersion'
                 implementation 'dev.akif:tapik-target-spring-webmvc:$sameProjectSourceVersion'
+                ${if (includeCompileOnlyModel) "compileOnly project(':compile-only-model')" else ""}
             }
 
             tapik {
@@ -257,6 +293,55 @@ private class SameProjectSourceFixture(private val root: Path) {
                 from sourceSets.main.output
                 archiveFileName = 'main-output.zip'
                 destinationDirectory = layout.buildDirectory.dir('archives')
+            }
+            """.trimIndent()
+        )
+    }
+
+    fun writeCompileOnlyModel() {
+        write(
+            "compile-only-model/build.gradle",
+            """
+            plugins {
+                id 'java-library'
+            }
+
+            java {
+                toolchain {
+                    languageVersion = JavaLanguageVersion.of(25)
+                }
+            }
+            """.trimIndent()
+        )
+        write(
+            "compile-only-model/src/main/java/com/example/compileonly/ExternalModel.java",
+            """
+            package com.example.compileonly;
+
+            public record ExternalModel(String value) {}
+            """.trimIndent()
+        )
+    }
+
+    fun writeCompileOnlyApi() {
+        write(
+            "src/main/kotlin/com/example/api/CompileOnly.kt",
+            """
+            package com.example.api
+
+            import com.example.compileonly.ExternalModel
+            import dev.akif.tapik.*
+
+            class CompileOnly : Api() {
+                val external =
+                    path(
+                        "external",
+                        format.string.transform(
+                            decode = ::ExternalModel,
+                            encode = ExternalModel::value
+                        )
+                    )
+                val find by get(root / "compile-only" / external)
             }
             """.trimIndent()
         )
