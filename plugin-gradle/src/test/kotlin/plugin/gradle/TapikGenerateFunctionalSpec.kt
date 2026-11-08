@@ -92,6 +92,26 @@ class TapikGenerateFunctionalSpec : FunSpec({
             "Catalog|json,yaml|platform|true"
     }
 
+    test("apply exclusions after inclusions") {
+        val project = generationProject()
+        project.writeBuild(
+            """
+            openApi('docs') {
+                includeApis('Authors', 'Catalog')
+                excludeApis('Authors')
+                version('1.0.0')
+                format(OpenApiFormat.JSON)
+            }
+            """.trimIndent()
+        )
+
+        val result = project.run("tapikGenerate")
+
+        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        project.generatedFiles().map(Path::name) shouldContain "Catalog.openapi.json"
+        project.generatedFiles().map(Path::name).any { name -> name == "Authors.openapi.json" } shouldBe false
+    }
+
 })
 
 private fun allTargetsBuild(): String =

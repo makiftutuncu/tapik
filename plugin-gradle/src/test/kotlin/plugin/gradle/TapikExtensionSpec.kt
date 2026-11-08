@@ -191,7 +191,7 @@ class TapikExtensionSpec : FunSpec({
         extension.openApi(
             Action { execution ->
                 execution.includeApis("Books", " ")
-                execution.excludeApis("Books")
+                execution.excludeApis("Authors")
             }
         )
         shouldThrow<GradleException> { task.validateConfiguration() }
