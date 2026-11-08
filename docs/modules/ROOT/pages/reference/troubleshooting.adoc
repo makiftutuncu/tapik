@@ -38,7 +38,7 @@ chain; use `./mvnw -e process-classes` (or your usual lifecycle command with `-e
 
 `includeApis` and `excludeApis` use exact, case-sensitive `Api.apiId` values. Blank values, unknown IDs, duplicate API IDs
 across registries, and filters that leave no API are errors. With no includes, every API is selected; exclusions are
-then applied and win.
+then applied and win, including when the same ID is explicitly present in both sets.
 
 [#a_generated_type_is_missing_during_kotlin_compilation]
 == A generated type is missing during Kotlin compilation

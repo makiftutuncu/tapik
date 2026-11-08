@@ -79,7 +79,8 @@ include::example$gradle/application/build.gradle.kts[tag=compiled-contract]
 ----
 
 An empty include set selects every discovered API. `includeApis("Authors", "Books")` narrows that set by exact,
-case-sensitive `Api.apiId`; `excludeApis(...)` is applied afterward. Unknown IDs and an empty final selection fail.
+case-sensitive `Api.apiId`; `excludeApis(...)` is applied afterward. The same ID may appear in both sets, in which case
+it is excluded. Unknown IDs and an empty final selection fail.
 
 Built-in target options are typed:
 

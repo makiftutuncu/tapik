@@ -66,7 +66,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   verifies the exclusion is applied.
 - [x] Remove the Gradle-only overlap validation from `TapikExecution` and keep blank/unknown/empty-selection validation
   in the host-neutral selection model.
-- [ ] Update Gradle reference and troubleshooting prose if it currently implies that overlap is invalid.
+- [x] Update Gradle reference and troubleshooting prose if it currently implies that overlap is invalid.
 
 ### Declaration-ordered target invocation
 
