@@ -112,9 +112,9 @@ abstract class TapikGenerateTask @Inject constructor(
                     parameters.excludeApis.set(execution.excludeApis)
                     parameters.resultFile.fileValue(resultFile.toFile())
                 }
+                queue.await()
                 resultFile
             }
-        queue.await()
 
         val aggregate =
             aggregateGradleGenerationResults(

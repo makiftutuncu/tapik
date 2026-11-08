@@ -74,7 +74,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   aggregation and logging.
 - [x] Add a failing worker test with delayed/custom target executions that records start order and exposes concurrent or
   non-FIFO invocation.
-- [ ] Execute the ordered execution snapshots sequentially inside one classloader-isolated work item, or otherwise
+- [x] Execute the ordered execution snapshots sequentially inside one classloader-isolated work item, or otherwise
   enforce an await boundary that guarantees invocation order.
 - [ ] Preserve per-target artifact order, first-claim aggregation order, failure framing, atomic output preservation,
   configuration-cache compatibility, and parallel generation across distinct projects.
