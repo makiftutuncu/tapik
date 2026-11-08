@@ -63,8 +63,8 @@ Execution names do not select targets. A project may declare several differently
 with different API selections or target configuration. Their declaration order is observable: the adapter records,
 snapshots, invokes, and reports executions in that order rather than the named container's lookup order. `includeApis`
 and `excludeApis` append exact IDs to their respective managed sets. API selection retains the host-neutral rules: an
-empty include set selects every discovered API, exclusions are applied afterward, unknown IDs and an empty final
-selection fail, and selected APIs retain catalog order.
+empty include set selects every discovered API, and exclusions are applied afterward. An ID present in both sets is
+valid and excluded. Blank or unknown IDs and an empty final selection fail, while selected APIs retain catalog order.
 
 The Kotlin DSL keeps the direct, typed, block-oriented style of tapik's earlier Gradle integration. Built-in targets
 have dedicated entry methods and managed execution types; their known options are properties, booleans, or enums rather
@@ -117,9 +117,11 @@ behavior rather than a separate compatibility API.
 
 Blank or duplicate execution names and blank custom target IDs fail when declared. Entering a built-in target block
 always supplies its target ID, so a missing target is not representable. Selecting both modes fails during
-configuration. Before `tapikGenerate` performs work, it rejects executions without a mode, blank API IDs, and IDs
-present in both include and exclude sets. An applied plugin with no configured executions remains valid so it may be
-used only to attach the compiler plugin, but invoking `tapikGenerate` without executions fails clearly.
+configuration. Before `tapikGenerate` performs work, it rejects executions without a mode and delegates blank or
+unknown filter IDs, duplicate discovered API IDs, and empty-result validation to the host-neutral selection model.
+Include/exclude overlap is not rejected because exclusion wins. An applied plugin with no configured executions
+remains valid so it may be used only to attach the compiler plugin, but invoking `tapikGenerate` without executions
+fails clearly.
 
 The extension-level output root is the only user-configured filesystem root. A target still returns normalized relative
 artifact paths and never writes files. The Gradle adapter owns the layout and materialization beneath that root; target

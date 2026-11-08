@@ -60,7 +60,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### API include/exclude semantics
 
-- [ ] Reconcile `specification/gradle.md` with `specification/generation.md`: exclusions win when the same API ID is in
+- [x] Reconcile `specification/gradle.md` with `specification/generation.md`: exclusions win when the same API ID is in
   both sets, matching `ApiSelection` and Maven.
 - [ ] Replace the Gradle overlap-rejection test with a failing parity test that includes and excludes the same API and
   verifies the exclusion is applied.
