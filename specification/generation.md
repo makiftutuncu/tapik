@@ -11,6 +11,12 @@ Every target has a unique non-blank ID. Selecting an unknown target, registering
 APIs, or supplying APIs with duplicate IDs fails before target execution. Target-specific configuration is parsed and
 validated by the target so every host observes the same behavior.
 
+Optional built-in configuration defaults belong exclusively to generation targets. A host adapter translates only
+values explicitly supplied by its user and omits every unset optional value from `TargetConfiguration`; it must not
+copy a target's format, naming, formatting, package, suffix, or output defaults into build-tool conventions. The target
+applies and validates the same defaults regardless of host. A host may still model a required option with a typed
+property and an earlier, clearer diagnostic, but it passes the explicitly supplied value unchanged.
+
 Each host-neutral generation execution may select APIs by exact ID with include and exclude sets. An empty include set
 selects every discovered API; otherwise only included IDs are eligible. Exclusions are applied afterward and therefore
 win when an ID is present in both sets. Selection preserves the catalog's canonical order. Blank filter values, unknown

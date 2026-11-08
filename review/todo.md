@@ -93,7 +93,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Target-owned defaults and cross-host configuration parity
 
-- [ ] Specify that optional built-in target defaults belong to generation targets and are not duplicated by host
+- [x] Specify that optional built-in target defaults belong to generation targets and are not duplicated by host
   adapters.
 - [ ] Add tests proving an unset Gradle OpenAPI, RestClient, or WebMVC option is absent from the translated
   `TargetConfiguration`, while an explicitly configured value is present and typed correctly.

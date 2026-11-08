@@ -115,6 +115,12 @@ The DSL methods write only to Gradle `Property`, `SetProperty`, `MapProperty`, `
 values. They do not resolve providers during configuration. Equivalent Groovy DSL uses the same methods, types, and
 behavior rather than a separate compatibility API.
 
+Optional built-in target properties have no Gradle conventions. An unset optional property remains absent from the
+task's translated target configuration, while an explicitly set value is serialized with its target-defined name and
+type. Defaults for OpenAPI format, pretty-printing, component naming, output templates, and Spring package and suffix
+names are owned and applied by the corresponding generation target. Required OpenAPI version remains a typed Gradle
+property so the adapter can report the execution name before worker loading.
+
 Blank or duplicate execution names and blank custom target IDs fail when declared. Entering a built-in target block
 always supplies its target ID, so a missing target is not representable. Selecting both modes fails during
 configuration. Before `tapikGenerate` performs work, it rejects executions without a mode and delegates blank or
