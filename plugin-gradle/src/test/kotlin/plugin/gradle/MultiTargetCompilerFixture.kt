@@ -62,6 +62,9 @@ internal class MultiTargetCompilerFixture private constructor(
         }
     }
 
+    fun registryState(target: String): String =
+        Files.readString(project.resolve(compilerRegistryIndexPath(target, "main")))
+
     private fun writeSource(
         target: String,
         fileName: String,

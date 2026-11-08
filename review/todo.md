@@ -53,7 +53,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   change, and remove APIs without clean builds.
 - [x] Include Kotlin target identity and compilation identity in the registry-index path, with a stable filesystem-safe
   representation.
-- [ ] Verify each target retains its complete independent registry and that one target's compilation cannot delete or
+- [x] Verify each target retains its complete independent registry and that one target's compilation cannot delete or
   rewrite the other's incremental state.
 
 ## P2 — Align host semantics and consolidate shared behavior

@@ -113,31 +113,53 @@ class CompilerPluginAttachmentSpec : FunSpec({
 
         fixture.compile("first")
         fixture.apiIds("first").sorted() shouldBe listOf("FirstStable")
+        var firstState = fixture.registryState("first")
+
         fixture.compile("second")
         fixture.apiIds("second").sorted() shouldBe listOf("SecondStable")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstStable")
+        fixture.registryState("first") shouldBe firstState
+        var secondState = fixture.registryState("second")
 
         fixture.writeMutableApi("first", "FirstAdded")
         fixture.compile("first")
         fixture.apiIds("first").sorted() shouldBe listOf("FirstAdded", "FirstStable")
+        fixture.apiIds("second").sorted() shouldBe listOf("SecondStable")
+        fixture.registryState("second") shouldBe secondState
+        firstState = fixture.registryState("first")
 
         fixture.writeMutableApi("second", "SecondAdded")
         fixture.compile("second")
         fixture.apiIds("second").sorted() shouldBe listOf("SecondAdded", "SecondStable")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstAdded", "FirstStable")
+        fixture.registryState("first") shouldBe firstState
+        secondState = fixture.registryState("second")
 
         fixture.writeMutableApi("first", "FirstChanged")
         fixture.compile("first")
         fixture.apiIds("first").sorted() shouldBe listOf("FirstChanged", "FirstStable")
+        fixture.apiIds("second").sorted() shouldBe listOf("SecondAdded", "SecondStable")
+        fixture.registryState("second") shouldBe secondState
+        firstState = fixture.registryState("first")
 
         fixture.writeMutableApi("second", "SecondChanged")
         fixture.compile("second")
         fixture.apiIds("second").sorted() shouldBe listOf("SecondChanged", "SecondStable")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstChanged", "FirstStable")
+        fixture.registryState("first") shouldBe firstState
+        secondState = fixture.registryState("second")
 
         fixture.writeMutableApi("first", null)
         fixture.compile("first")
         fixture.apiIds("first").sorted() shouldBe listOf("FirstStable")
+        fixture.apiIds("second").sorted() shouldBe listOf("SecondChanged", "SecondStable")
+        fixture.registryState("second") shouldBe secondState
+        firstState = fixture.registryState("first")
 
         fixture.writeMutableApi("second", null)
         fixture.compile("second")
         fixture.apiIds("second").sorted() shouldBe listOf("SecondStable")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstStable")
+        fixture.registryState("first") shouldBe firstState
     }
 })
