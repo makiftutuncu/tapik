@@ -18,6 +18,9 @@ class ParallelGenerationSpec : FunSpec({
         first.task(":books:tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
         project.path("catalog/build/generated/tapik/documentation/Catalog.json").exists() shouldBe true
         project.path("books/build/generated/tapik/documentation/Books.json").exists() shouldBe true
+        val catalog = project.invocation("catalog")
+        val books = project.invocation("books")
+        (catalog.start < books.finish && books.start < catalog.finish) shouldBe true
 
         val second = project.run()
         second.task(":catalog:tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
@@ -29,7 +32,14 @@ class ParallelGenerationSpec : FunSpec({
 private fun parallelGenerationProject(): ParallelGenerationProject {
     val root = Files.createTempDirectory("tapik-gradle-parallel-")
     val buildCache = Files.createTempDirectory("tapik-gradle-parallel-cache-")
-    val project = ParallelGenerationProject(root)
+    val eventDirectory = Files.createTempDirectory("tapik-gradle-parallel-events-")
+    val descriptorRoot = Files.createTempDirectory("tapik-gradle-parallel-target-")
+    val descriptor =
+        descriptorRoot.resolve("META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry")
+    Files.createDirectories(descriptor.parent)
+    Files.writeString(descriptor, InvocationOrderTargetRegistry::class.qualifiedName + "\n")
+    val testClasses = Path.of(InvocationOrderTargetRegistry::class.java.protectionDomain.codeSource.location.toURI())
+    val project = ParallelGenerationProject(root, eventDirectory)
     project.write(
         "settings.gradle",
         """
@@ -54,13 +64,21 @@ private fun parallelGenerationProject(): ParallelGenerationProject {
         }
         """.trimIndent()
     )
-    project.writeProject("catalog", "Catalog")
-    project.writeProject("books", "Books")
+    project.writeProject("catalog", "Catalog", descriptorRoot, testClasses)
+    project.writeProject("books", "Books", descriptorRoot, testClasses)
     return project
 }
 
-private class ParallelGenerationProject(private val root: Path) {
-    fun writeProject(project: String, apiId: String) {
+private class ParallelGenerationProject(
+    private val root: Path,
+    private val eventDirectory: Path
+) {
+    fun writeProject(
+        project: String,
+        apiId: String,
+        descriptorRoot: Path,
+        testClasses: Path
+    ) {
         write(
             "$project/build.gradle",
             """
@@ -74,6 +92,10 @@ private class ParallelGenerationProject(private val root: Path) {
 
             dependencies {
                 tapikContract 'dev.akif:tapik-example-contract:$parallelVersion'
+                tapikTarget files(
+                    '${descriptorRoot.parallelGroovyPath()}',
+                    '${testClasses.parallelGroovyPath()}'
+                )
             }
 
             tapik {
@@ -83,6 +105,11 @@ private class ParallelGenerationProject(private val root: Path) {
                     version('1.0.0')
                     format(OpenApiFormat.JSON)
                     output('$apiId.json')
+                }
+                target('delay', 'invocation-order') {
+                    value('name', '$project')
+                    value('delayMillis', '750')
+                    value('eventDirectory', '${eventDirectory.parallelGroovyPath()}')
                 }
             }
 
@@ -101,6 +128,12 @@ private class ParallelGenerationProject(private val root: Path) {
 
     fun path(relativePath: String): Path = root.resolve(relativePath)
 
+    fun invocation(name: String): InvocationInterval =
+        InvocationInterval(
+            start = Files.readString(eventDirectory.resolve("$name.start")).toLong(),
+            finish = Files.readString(eventDirectory.resolve("$name.finish")).toLong()
+        )
+
     fun run() =
         GradleRunner.create()
             .withProjectDir(root.toFile())
@@ -115,6 +148,11 @@ private class ParallelGenerationProject(private val root: Path) {
             .withPluginClasspath()
             .build()
 }
+
+private data class InvocationInterval(
+    val start: Long,
+    val finish: Long
+)
 
 private fun Path.parallelGroovyPath(): String = toString().replace("'", "\\'")
 

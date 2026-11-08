@@ -76,7 +76,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   non-FIFO invocation.
 - [x] Execute the ordered execution snapshots sequentially inside one classloader-isolated work item, or otherwise
   enforce an await boundary that guarantees invocation order.
-- [ ] Preserve per-target artifact order, first-claim aggregation order, failure framing, atomic output preservation,
+- [x] Preserve per-target artifact order, first-claim aggregation order, failure framing, atomic output preservation,
   configuration-cache compatibility, and parallel generation across distinct projects.
 - [ ] Confirm the implementation does not rebuild the target catalog and contract classloader unnecessarily for every
   execution.
