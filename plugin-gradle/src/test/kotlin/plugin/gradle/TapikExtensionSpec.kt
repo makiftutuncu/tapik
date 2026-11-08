@@ -11,7 +11,7 @@ import org.gradle.api.GradleException
 import org.gradle.testfixtures.ProjectBuilder
 
 class TapikExtensionSpec : FunSpec({
-    test("provide typed target conventions") {
+    test("provide typed targets without host-owned defaults") {
         val project = ProjectBuilder.builder().build()
         project.pluginManager.apply(TapikGradlePlugin::class.java)
         val extension = project.extensions.getByType(TapikExtension::class.java)
@@ -28,19 +28,19 @@ class TapikExtensionSpec : FunSpec({
 
         val openApi = executions[0] as OpenApiExecution
         openApi.targetId shouldBe "openapi"
-        openApi.format.get() shouldBe OpenApiFormat.YAML
-        openApi.pretty.get() shouldBe true
-        openApi.componentNaming.get() shouldBe OpenApiComponentNaming.SIMPLE
+        openApi.format.isPresent shouldBe false
+        openApi.pretty.isPresent shouldBe false
+        openApi.componentNaming.isPresent shouldBe false
         openApi.output.isPresent shouldBe false
 
         val restClient = executions[1] as SpringRestClientExecution
-        restClient.packageName.get() shouldBe "dev.akif.tapik.generated"
-        restClient.clientSuffix.get() shouldBe "Client"
+        restClient.packageName.isPresent shouldBe false
+        restClient.clientSuffix.isPresent shouldBe false
 
         val webMvc = executions[2] as SpringWebMvcExecution
-        webMvc.packageName.get() shouldBe "dev.akif.tapik.generated"
-        webMvc.serverSuffix.get() shouldBe "Server"
-        webMvc.controllerSuffix.get() shouldBe "GeneratedController"
+        webMvc.packageName.isPresent shouldBe false
+        webMvc.serverSuffix.isPresent shouldBe false
+        webMvc.controllerSuffix.isPresent shouldBe false
     }
 
     test("apply typed overrides and preserve execution declaration order") {

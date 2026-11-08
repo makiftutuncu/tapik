@@ -32,26 +32,23 @@ abstract class OpenApiExecution @Inject constructor(name: String) : TapikExecuti
 
     /** OpenAPI serialization format. */
     @get:Input
+    @get:Optional
     abstract val format: Property<OpenApiFormat>
 
     /** Whether generated OpenAPI is pretty-printed. */
     @get:Input
+    @get:Optional
     abstract val pretty: Property<Boolean>
 
     /** OpenAPI component naming policy. */
     @get:Input
+    @get:Optional
     abstract val componentNaming: Property<OpenApiComponentNaming>
 
     /** Optional output filename relative to tapik's documentation output directory. */
     @get:Input
     @get:Optional
     abstract val output: Property<String>
-
-    init {
-        format.convention(OpenApiFormat.YAML)
-        pretty.convention(true)
-        componentNaming.convention(OpenApiComponentNaming.SIMPLE)
-    }
 
     /** Sets the OpenAPI document [version]. */
     fun version(version: String) = this.version.set(version)

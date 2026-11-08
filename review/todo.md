@@ -97,9 +97,9 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   adapters.
 - [x] Add tests proving an unset Gradle OpenAPI, RestClient, or WebMVC option is absent from the translated
   `TargetConfiguration`, while an explicitly configured value is present and typed correctly.
-- [ ] Make optional built-in Gradle properties optional task inputs and serialize only values explicitly supplied by the
+- [x] Make optional built-in Gradle properties optional task inputs and serialize only values explicitly supplied by the
   user; keep required values and clear Gradle diagnostics where useful.
-- [ ] Remove duplicated Gradle conventions for OpenAPI format/pretty/component naming and Spring package/suffix values,
+- [x] Remove duplicated Gradle conventions for OpenAPI format/pretty/component naming and Spring package/suffix values,
   allowing the shared targets to apply and validate their defaults.
 - [ ] Add an automated Maven/Gradle parity fixture comparing default and explicitly configured OpenAPI, Kotlin source,
   and Spring registration output byte-for-byte, excluding intentional host layout and ownership files.
