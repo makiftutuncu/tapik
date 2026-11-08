@@ -95,7 +95,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Specify that optional built-in target defaults belong to generation targets and are not duplicated by host
   adapters.
-- [ ] Add tests proving an unset Gradle OpenAPI, RestClient, or WebMVC option is absent from the translated
+- [x] Add tests proving an unset Gradle OpenAPI, RestClient, or WebMVC option is absent from the translated
   `TargetConfiguration`, while an explicitly configured value is present and typed correctly.
 - [ ] Make optional built-in Gradle properties optional task inputs and serialize only values explicitly supplied by the
   user; keep required values and clear Gradle diagnostics where useful.
