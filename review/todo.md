@@ -47,7 +47,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Per-target compiler registry state
 
-- [ ] Extend the compiler-attachment specification to define registry-state identity for every JVM target and
+- [x] Extend the compiler-attachment specification to define registry-state identity for every JVM target and
   compilation to which the compiler plugin is attached.
 - [ ] Add a failing compiler-only TestKit project with two JVM targets whose `main` compilations alternately add,
   change, and remove APIs without clean builds.

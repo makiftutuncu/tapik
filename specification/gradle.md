@@ -26,11 +26,26 @@ common, JavaScript, Android JVM, Native, or Wasm compilations. Project-type diag
 attachment: the generation adapter initially supports only projects applying `org.jetbrains.kotlin.jvm`, even if
 another project type exposes an individual JVM-like compilation.
 
-Each applicable compilation owns registry state in its own Kotlin classes output. A compilation containing eligible
-APIs writes one compiler-owned registry class and its `META-INF/services/dev.akif.tapik.ApiRegistry` provider; a
-compilation without eligible APIs leaves neither artifact behind. On non-clean compilation, adding or changing APIs
-replaces the generated registry and removing the last API removes the generated class and service entry. This is the
-same compiler-owned synchronization used by Maven: Gradle neither synthesizes registries nor retains a separate index.
+Each applicable compilation owns registry output in its own Kotlin classes directory and incremental registry state in
+a project-local Gradle state directory. The incremental state's identity is the ordered pair of the Kotlin target
+identity and compilation identity exposed by the Kotlin Gradle plugin. Neither identity is optional or inferred from
+task names. Two targets with compilations having the same name, and two compilations of one target, therefore never
+share registry state.
+
+The registry index path is
+`.gradle/tapik/compiler/<target-identity>/<compilation-identity>/registry.index`. Each identity occupies one
+filesystem-safe path segment. Its canonical encoding starts with `id-`, retains only lowercase ASCII letters, digits,
+`-`, and `_`, and percent-encodes every other UTF-8 byte using two uppercase hexadecimal digits. This makes the mapping
+stable and injective even on case-insensitive filesystems, prevents separators and special directory names from
+escaping their segment, and keeps ordinary lowercase Gradle identities readable.
+
+A compilation containing eligible APIs writes one compiler-owned registry class and its
+`META-INF/services/dev.akif.tapik.ApiRegistry` provider; a compilation without eligible APIs leaves neither artifact
+behind. On non-clean compilation, adding or changing APIs replaces the generated registry and removing the last API
+removes the generated class and service entry. The adapter supplies only that compilation's index and complete source
+roots to the compiler integration. The compiler reconciles and updates them without reading, pruning, or rewriting any
+other target or compilation's state. Gradle never synthesizes registries or duplicates endpoint definitions into its
+own metadata model.
 
 ## Configuration model
 
@@ -232,12 +247,12 @@ builds those prerequisites through the ordinary Gradle task graph.
 The same-project contract classpath is assembled from the main compiled-class directories, the processed main-resource
 directory, and the ordinary runtime dependency configuration. It is captured before tapik adds any late generated
 output, so `tapikGenerate` never consumes its own resource or class output. Compiled-contract dependencies remain absent
-from this mode's registry classpath. The Gradle adapter also gives each Kotlin compilation a private registry index in
-the project's Gradle state directory, passes its complete declared Kotlin source roots, and tells the compiler
-integration to retain eligible APIs from unchanged active sources when Kotlin performs an incremental compilation. The
-registry therefore always describes the complete current source set rather than only the dirty files compiled in that
-invocation. Each compilation reconciles the index against its current active source files, so deleted sources and a
-later clean compilation cannot retain stale APIs.
+from this mode's registry classpath. For each applicable target and compilation, the Gradle adapter passes the
+compiler-attachment section's private registry index and complete declared Kotlin source roots. The compiler
+integration retains eligible APIs from unchanged active sources when Kotlin performs an incremental compilation. The
+registry therefore always describes that compilation's complete current source set rather than only the dirty files
+compiled in that invocation. It reconciles its own index against its current active source files, so deleted sources
+and a later clean compilation cannot retain stale APIs or affect another compilation.
 
 The adapter does not add same-project generated Kotlin to the ordinary main Kotlin sources. Doing so would require
 `compileKotlin` to depend on generation while generation already depends on main compilation. Main source that needs a
