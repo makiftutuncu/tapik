@@ -55,6 +55,12 @@ executable through `GRADLE`, defaults to the standalone plugin wrapper, prepares
 below `target`, installs the Maven-built artifacts there, and runs the complete Gradle verification. Deleting those
 repositories cannot affect user-owned build-tool state.
 
+The same verification runs the standalone fixture under `scripts/fixtures/host-parity` through both Maven and Gradle.
+The fixture generates every built-in artifact kind once with target-owned defaults and once with explicit target
+configuration. Verification removes only host layout and ownership files, then compares OpenAPI documents, generated
+Kotlin sources, and Spring registration resources byte-for-byte. A host adapter therefore cannot silently redefine a
+target default or translate an explicit value differently while both example builds still succeed independently.
+
 ## Publication
 
 tapik releases are published to Maven Central under `dev.akif`. The parent and every production module inherit the

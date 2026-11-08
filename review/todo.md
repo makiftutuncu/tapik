@@ -101,7 +101,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   user; keep required values and clear Gradle diagnostics where useful.
 - [x] Remove duplicated Gradle conventions for OpenAPI format/pretty/component naming and Spring package/suffix values,
   allowing the shared targets to apply and validate their defaults.
-- [ ] Add an automated Maven/Gradle parity fixture comparing default and explicitly configured OpenAPI, Kotlin source,
+- [x] Add an automated Maven/Gradle parity fixture comparing default and explicitly configured OpenAPI, Kotlin source,
   and Spring registration output byte-for-byte, excluding intentional host layout and ownership files.
 
 ### Shared service-provider isolation

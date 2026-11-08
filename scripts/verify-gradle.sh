@@ -28,6 +28,7 @@ MAVEN_USER_HOME="$STAGING_MAVEN_HOME" "$ROOT/mvnw" \
     --no-transfer-progress \
     -Dmaven.repo.local="$STAGING_REPOSITORY" \
     -DskipTests \
+    --projects '!example-application' \
     clean \
     install
 
@@ -111,5 +112,84 @@ GRADLE_USER_HOME="$GRADLE_HOME" "$GRADLE_COMMAND" \
     -PtapikRepository="$MAVEN_REPOSITORY" \
     -PtapikVersion="$VERSION" \
     2>&1 | tee "$LOG"
+
+PARITY_FIXTURE="$ROOT/scripts/fixtures/host-parity"
+PARITY_BUILD="$PARITY_FIXTURE/build"
+PARITY_MAVEN="$PARITY_BUILD/maven/raw"
+PARITY_GRADLE="$PARITY_BUILD/gradle/raw"
+PARITY_NORMALIZED="$WORK_ROOT/host-parity"
+rm -rf "$PARITY_BUILD" "$PARITY_NORMALIZED"
+
+echo "Generating the Maven side of the host-parity fixture"
+MAVEN_USER_HOME="$MAVEN_HOME" "$ROOT/mvnw" \
+    --batch-mode \
+    --no-transfer-progress \
+    -f "$PARITY_FIXTURE/pom.xml" \
+    -Dmaven.repo.local="$MAVEN_REPOSITORY" \
+    -Dtapik.version="$VERSION" \
+    generate-sources
+
+echo "Generating the Gradle side of the host-parity fixture"
+GRADLE_USER_HOME="$GRADLE_HOME" "$GRADLE_COMMAND" \
+    --no-daemon \
+    -p "$PARITY_FIXTURE" \
+    tapikGenerate \
+    -PtapikRepository="$MAVEN_REPOSITORY" \
+    -PtapikVersion="$VERSION"
+
+normalize_maven_parity() {
+    local destination="$PARITY_NORMALIZED/maven"
+    mkdir -p "$destination/documentation" "$destination/sources" "$destination/resources"
+    while IFS= read -r -d '' source; do
+        local relative="${source#"$PARITY_MAVEN/documentation/"}"
+        mkdir -p "$destination/documentation/$(dirname "$relative")"
+        cp "$source" "$destination/documentation/$relative"
+    done < <(find "$PARITY_MAVEN/documentation" -type f ! -name '.tapik-ownership' -print0)
+    while IFS= read -r -d '' source; do
+        local relative="${source#"$PARITY_MAVEN/spring/"}"
+        local kind="sources"
+        case "$relative" in
+            META-INF/*) kind="resources" ;;
+        esac
+        mkdir -p "$destination/$kind/$(dirname "$relative")"
+        cp "$source" "$destination/$kind/$relative"
+    done < <(find "$PARITY_MAVEN/spring" -type f ! -name '.tapik-ownership' -print0)
+}
+
+normalize_gradle_parity() {
+    local destination="$PARITY_NORMALIZED/gradle"
+    mkdir -p "$destination"
+    for kind in documentation sources resources; do
+        mkdir -p "$destination/$kind"
+        while IFS= read -r -d '' source; do
+            local relative="${source#"$PARITY_GRADLE/$kind/"}"
+            mkdir -p "$destination/$kind/$(dirname "$relative")"
+            cp "$source" "$destination/$kind/$relative"
+        done < <(find "$PARITY_GRADLE/$kind" -type f ! -name '.tapik-ownership' -print0)
+    done
+}
+
+normalize_maven_parity
+normalize_gradle_parity
+
+for expected in \
+    'documentation/Authors.openapi.yml' \
+    'documentation/explicit/Authors.json' \
+    'sources/dev/akif/tapik/generated/_external/com/example/library/contract/Authors/AuthorsClient.kt' \
+    'sources/com/example/parity/library/contract/Authors/AuthorsHttpClient.kt' \
+    'resources/META-INF/tapik/spring/webmvc/dev.akif.tapik.generated._external.com.example.library.contract.Authors.AuthorsGeneratedController.properties' \
+    'resources/META-INF/tapik/spring/webmvc/com.example.parity.library.contract.Authors.AuthorsController.properties'
+do
+    test -f "$PARITY_NORMALIZED/maven/$expected" || {
+        echo "Missing Maven host-parity artifact: $expected" >&2
+        exit 1
+    }
+    test -f "$PARITY_NORMALIZED/gradle/$expected" || {
+        echo "Missing Gradle host-parity artifact: $expected" >&2
+        exit 1
+    }
+done
+
+diff -ru "$PARITY_NORMALIZED/maven" "$PARITY_NORMALIZED/gradle"
 
 echo "Gradle verification passed; external consumer log: $LOG"
