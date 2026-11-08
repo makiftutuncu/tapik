@@ -26,7 +26,10 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Properties
+import java.util.UUID
 import javax.inject.Inject
+import kotlin.io.path.name
+import kotlin.io.path.readText
 
 class GradleGenerationWorkActionSpec : FunSpec({
     test("run generation through a classloader-isolated Gradle worker") {
@@ -118,6 +121,38 @@ class GradleGenerationWorkActionSpec : FunSpec({
                 "third:finish"
             )
     }
+
+    test("reuse one target catalog and contract classloader for every execution") {
+        val descriptorRoot = Files.createTempDirectory("tapik-gradle-worker-reuse-")
+        val descriptor =
+            descriptorRoot.resolve("META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry")
+        Files.createDirectories(descriptor.parent)
+        Files.writeString(descriptor, ReuseTrackingTargetRegistry::class.qualifiedName + "\n")
+        val testClasses = Path.of(ReuseTrackingTargetRegistry::class.java.protectionDomain.codeSource.location.toURI())
+        val project = generationProject()
+        project.writeBuild(
+            tapikBlock =
+                """
+                target('first', 'reuse-tracking') {
+                    value('output', 'first.txt')
+                }
+                target('second', 'reuse-tracking') {
+                    value('output', 'second.txt')
+                }
+                """.trimIndent(),
+            additionalDependencies =
+                "tapikTarget files('${descriptorRoot.gradleGroovyPath()}', '${testClasses.gradleGroovyPath()}')"
+        )
+
+        val result = project.run("tapikGenerate")
+
+        result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+        val fingerprints =
+            project.generatedFiles()
+                .filter { path -> path.name == "first.txt" || path.name == "second.txt" }
+                .map(Path::readText)
+        fingerprints.distinct().size shouldBe 1
+    }
 })
 
 internal class GenerationWorkerHarnessPlugin : Plugin<Project> {
@@ -147,18 +182,51 @@ internal abstract class GenerationWorkerHarness @Inject constructor(
         queue.submit(GradleGenerationWorkAction::class.java) { parameters ->
             parameters.contractClasspath.from(contractClasspath)
             parameters.mode.set(Mode.COMPILED_CONTRACT)
-            parameters.executionName.set("docs")
-            parameters.targetId.set("openapi")
-            parameters.configuration.set(mapOf("version" to ScalarGradleConfigurationValue("1.0.0")))
-            parameters.includeApis.set(emptySet())
-            parameters.excludeApis.set(emptySet())
-            parameters.resultFile.set(resultFile)
+            parameters.executions.set(
+                listOf(
+                    GradleGenerationWorkExecution(
+                        executionName = "docs",
+                        targetId = "openapi",
+                        configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
+                        includeApis = emptySet(),
+                        excludeApis = emptySet(),
+                        resultFileName = resultFile.get().asFile.name
+                    )
+                )
+            )
+            parameters.resultDirectory.fileValue(resultFile.get().asFile.parentFile)
         }
     }
 }
 
 class InvocationOrderTargetRegistry : GenerationTargetRegistry {
     override val targets: List<GenerationTarget> = listOf(InvocationOrderTarget)
+}
+
+class ReuseTrackingTargetRegistry : GenerationTargetRegistry {
+    private val catalogIdentity = UUID.randomUUID().toString()
+
+    override val targets: List<GenerationTarget> = listOf(ReuseTrackingTarget(catalogIdentity))
+}
+
+private class ReuseTrackingTarget(
+    private val catalogIdentity: String
+) : GenerationTarget {
+    override val id: String = "reuse-tracking"
+
+    override fun generate(request: GenerationRequest): GenerationResult {
+        val apiClassLoader = request.apis.first().javaClass.classLoader
+        return GenerationResult(
+            listOf(
+                GeneratedArtifact(
+                    relativePath = request.scalar("output"),
+                    mediaType = "text/plain",
+                    kind = ArtifactKind.DOCUMENTATION,
+                    content = "$catalogIdentity:${System.identityHashCode(apiClassLoader)}"
+                )
+            )
+        )
+    }
 }
 
 private object InvocationOrderTarget : GenerationTarget {

@@ -98,23 +98,26 @@ abstract class TapikGenerateTask @Inject constructor(
             workerExecutor.classLoaderIsolation { isolation ->
                 isolation.classpath.from(targetClasspath)
             }
-        val resultFiles =
+        val workExecutions =
             configuredExecutions.mapIndexed { index, execution ->
-                val resultFile = resultDirectory.resolve("$index.bin")
-                Files.deleteIfExists(resultFile)
-                queue.submit(GradleGenerationWorkAction::class.java) { parameters ->
-                    parameters.contractClasspath.from(contractClasspath)
-                    parameters.mode.set(mode)
-                    parameters.executionName.set(execution.name)
-                    parameters.targetId.set(execution.targetId)
-                    parameters.configuration.set(execution.generationConfiguration())
-                    parameters.includeApis.set(execution.includeApis)
-                    parameters.excludeApis.set(execution.excludeApis)
-                    parameters.resultFile.fileValue(resultFile.toFile())
-                }
-                queue.await()
-                resultFile
+                GradleGenerationWorkExecution(
+                    executionName = execution.name,
+                    targetId = execution.targetId,
+                    configuration = LinkedHashMap(execution.generationConfiguration()),
+                    includeApis = LinkedHashSet(execution.includeApis.get()),
+                    excludeApis = LinkedHashSet(execution.excludeApis.get()),
+                    resultFileName = "$index.bin"
+                )
             }
+        val resultFiles = workExecutions.map { execution -> resultDirectory.resolve(execution.resultFileName) }
+        resultFiles.forEach(Files::deleteIfExists)
+        queue.submit(GradleGenerationWorkAction::class.java) { parameters ->
+            parameters.contractClasspath.from(contractClasspath)
+            parameters.mode.set(mode)
+            parameters.executions.set(workExecutions)
+            parameters.resultDirectory.fileValue(resultDirectory.toFile())
+        }
+        queue.await()
 
         val aggregate =
             aggregateGradleGenerationResults(

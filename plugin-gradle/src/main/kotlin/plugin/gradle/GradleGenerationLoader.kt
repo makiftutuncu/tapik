@@ -14,6 +14,13 @@ import java.util.Enumeration
 import java.util.ServiceConfigurationError
 
 internal object GradleGenerationLoader {
+    fun open(
+        contractClasspath: List<Path>,
+        mode: Mode,
+        targetClassLoader: ClassLoader
+    ): GradleGenerationSession =
+        GradleGenerationSession(contractClasspath, mode, targetClassLoader)
+
     fun generate(
         contractClasspath: List<Path>,
         mode: Mode,
@@ -22,87 +29,117 @@ internal object GradleGenerationLoader {
         includeApis: Set<String>,
         excludeApis: Set<String>,
         targetClassLoader: ClassLoader
-    ): GenerationResult {
-        val targets = loadTargets(targetClassLoader, TARGET_CLASSPATH)
-        val available = targets.map(GenerationTarget::id)
-        val urls = contractClasspath.map { path -> path.toUri().toURL() }.toTypedArray()
-        return ContractClassLoader(urls, targetClassLoader).use { contractClassLoader ->
+    ): GenerationResult =
+        open(contractClasspath, mode, targetClassLoader).use { session ->
+            session.generate(targetId, configuration, includeApis, excludeApis)
+        }
+}
+
+internal class GradleGenerationSession(
+    contractClasspath: List<Path>,
+    private val mode: Mode,
+    targetClassLoader: ClassLoader
+) : AutoCloseable {
+    private val targets = loadTargets(targetClassLoader, TARGET_CLASSPATH)
+    private val available = targets.map(GenerationTarget::id)
+    private val contractClassLoader =
+        ContractClassLoader(
+            contractClasspath.map { path -> path.toUri().toURL() }.toTypedArray(),
+            targetClassLoader
+        )
+    private val apis =
+        try {
             withContextClassLoader(contractClassLoader) {
-                if (targetId !in available) {
-                    diagnoseUnknownTarget(targetId, available, contractClassLoader)
-                }
-                val apiClasspath = mode.apiClasspathName()
-                val apis = loadApis(contractClassLoader, apiClasspath)
-                require(apis.isNotEmpty()) { mode.emptyApiCatalogMessage() }
-                GenerationEngine(targets).generate(
-                    targetId = targetId,
-                    apis = apis,
-                    configuration = configuration.toTargetConfiguration(),
-                    selection = ApiSelection(includes = includeApis, excludes = excludeApis)
-                )
+                loadApis(contractClassLoader, mode.apiClasspathName())
+                    .also { loaded -> require(loaded.isNotEmpty()) { mode.emptyApiCatalogMessage() } }
             }
+        } catch (failure: Exception) {
+            contractClassLoader.close()
+            throw failure
         }
-    }
+    private val engine = GenerationEngine(targets)
 
-    private fun loadTargets(classLoader: ClassLoader, classpath: String): List<GenerationTarget> =
-        try {
-            GenerationTargetCatalog.load(classLoader).targets
-        } catch (cause: ServiceConfigurationError) {
-            throw targetLoadingFailure(classpath, cause)
-        } catch (cause: LinkageError) {
-            throw targetLoadingFailure(classpath, cause)
-        } catch (cause: IllegalArgumentException) {
-            throw IllegalStateException("Invalid generation target catalog on $classpath: ${cause.message}", cause)
-        }
-
-    private fun loadApis(classLoader: ClassLoader, classpath: String): List<Api> =
-        try {
-            ApiCatalog.load(classLoader).apis
-        } catch (cause: ServiceConfigurationError) {
-            throw apiLoadingFailure(classpath, cause)
-        } catch (cause: LinkageError) {
-            throw apiLoadingFailure(classpath, cause)
-        } catch (cause: IllegalArgumentException) {
-            throw IllegalStateException("Invalid API catalog on $classpath: ${cause.message}", cause)
-        }
-
-    private fun diagnoseUnknownTarget(
+    fun generate(
         targetId: String,
-        available: List<String>,
-        contractClassLoader: ClassLoader
-    ): Nothing {
-        val misplaced =
-            runCatching { loadTargets(contractClassLoader, CONTRACT_CLASSPATH) }
-                .getOrDefault(emptyList())
-                .any { target -> target.id == targetId }
-        if (misplaced) {
-            error(
-                "Generation target '$targetId' was found on $CONTRACT_CLASSPATH, but target artifacts belong in " +
-                    "tapikTarget rather than tapikContract or application dependencies."
+        configuration: Map<String, GradleConfigurationValue>,
+        includeApis: Set<String>,
+        excludeApis: Set<String>
+    ): GenerationResult =
+        withContextClassLoader(contractClassLoader) {
+            if (targetId !in available) {
+                diagnoseUnknownTarget(targetId, available, contractClassLoader)
+            }
+            engine.generate(
+                targetId = targetId,
+                apis = apis,
+                configuration = configuration.toTargetConfiguration(),
+                selection = ApiSelection(includes = includeApis, excludes = excludeApis)
             )
         }
-        throw IllegalArgumentException(
-            "Unknown generation target '$targetId' on $TARGET_CLASSPATH. " +
-                "Available targets: ${available.sorted().joinToString().ifEmpty { "none" }}. " +
-                "Add custom target artifacts to tapikTarget."
-        )
+
+    override fun close() {
+        contractClassLoader.close()
+    }
+}
+
+private fun loadTargets(classLoader: ClassLoader, classpath: String): List<GenerationTarget> =
+    try {
+        GenerationTargetCatalog.load(classLoader).targets
+    } catch (cause: ServiceConfigurationError) {
+        throw targetLoadingFailure(classpath, cause)
+    } catch (cause: LinkageError) {
+        throw targetLoadingFailure(classpath, cause)
+    } catch (cause: IllegalArgumentException) {
+        throw IllegalStateException("Invalid generation target catalog on $classpath: ${cause.message}", cause)
     }
 
-    private fun targetLoadingFailure(classpath: String, cause: Throwable): IllegalStateException =
-        IllegalStateException(
-            "Failed to load generation target providers from $classpath. " +
-                "Check META-INF/services declarations, target runtime dependencies, and tapik version alignment.",
-            cause
-        )
+private fun loadApis(classLoader: ClassLoader, classpath: String): List<Api> =
+    try {
+        ApiCatalog.load(classLoader).apis
+    } catch (cause: ServiceConfigurationError) {
+        throw apiLoadingFailure(classpath, cause)
+    } catch (cause: LinkageError) {
+        throw apiLoadingFailure(classpath, cause)
+    } catch (cause: IllegalArgumentException) {
+        throw IllegalStateException("Invalid API catalog on $classpath: ${cause.message}", cause)
+    }
 
-    private fun apiLoadingFailure(classpath: String, cause: Throwable): IllegalStateException =
-        IllegalStateException(
-            "Failed to load API registry providers from $classpath. " +
-                "Check compiler-generated registry declarations, contract runtime dependencies, and tapik version " +
-                "alignment.",
-            cause
+private fun diagnoseUnknownTarget(
+    targetId: String,
+    available: List<String>,
+    contractClassLoader: ClassLoader
+): Nothing {
+    val misplaced =
+        runCatching { loadTargets(contractClassLoader, CONTRACT_CLASSPATH) }
+            .getOrDefault(emptyList())
+            .any { target -> target.id == targetId }
+    if (misplaced) {
+        error(
+            "Generation target '$targetId' was found on $CONTRACT_CLASSPATH, but target artifacts belong in " +
+                "tapikTarget rather than tapikContract or application dependencies."
         )
+    }
+    throw IllegalArgumentException(
+        "Unknown generation target '$targetId' on $TARGET_CLASSPATH. " +
+            "Available targets: ${available.sorted().joinToString().ifEmpty { "none" }}. " +
+            "Add custom target artifacts to tapikTarget."
+    )
 }
+
+private fun targetLoadingFailure(classpath: String, cause: Throwable): IllegalStateException =
+    IllegalStateException(
+        "Failed to load generation target providers from $classpath. " +
+            "Check META-INF/services declarations, target runtime dependencies, and tapik version alignment.",
+        cause
+    )
+
+private fun apiLoadingFailure(classpath: String, cause: Throwable): IllegalStateException =
+    IllegalStateException(
+        "Failed to load API registry providers from $classpath. " +
+            "Check compiler-generated registry declarations, contract runtime dependencies, and tapik version " +
+            "alignment.",
+        cause
+    )
 
 private class ContractClassLoader(
     urls: Array<URL>,
