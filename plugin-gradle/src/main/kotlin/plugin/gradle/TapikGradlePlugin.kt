@@ -80,7 +80,10 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
         val project = kotlinCompilation.target.project
         val registryIndex =
             project.layout.projectDirectory.file(
-                ".gradle/tapik/compiler/${kotlinCompilation.name}/registry.index"
+                compilerRegistryIndexPath(
+                    targetIdentity = kotlinCompilation.target.name,
+                    compilationIdentity = kotlinCompilation.name
+                )
             )
         return project.provider {
             buildList {
