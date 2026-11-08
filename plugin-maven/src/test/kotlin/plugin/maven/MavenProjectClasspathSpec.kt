@@ -31,6 +31,19 @@ class MavenProjectClasspathSpec : FunSpec({
             )
     }
 
+    test("retain provided dependencies from the Maven compile classpath") {
+        val project =
+            object : MavenProject() {
+                override fun getCompileClasspathElements(): List<String> =
+                    listOf("target/classes", "dependencies/provided.jar")
+
+                override fun getRuntimeClasspathElements(): List<String> = listOf("target/classes")
+            }
+
+        project.generationClasspath() shouldContain
+            Path.of("dependencies/provided.jar").toAbsolutePath().normalize()
+    }
+
     test("discover an API registry present only at runtime") {
         val runtime = Files.createTempDirectory("tapik-runtime-classpath-")
         val service = runtime.resolve("META-INF/services/dev.akif.tapik.ApiRegistry")
