@@ -27,6 +27,15 @@ Generation targets are contributed through host-neutral target registries discov
 mechanism. Build-tool adapters and future command-line applications load the same registries instead of hard-coding
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
 
+Service-provider visibility is directional and independent of ordinary class delegation. An API catalog reads
+`ApiRegistry` service resources only from the contract or application classpath it owns; providers inherited from a
+build-tool, plugin, target, or other parent classloader are invisible to that catalog. A target catalog likewise reads
+`GenerationTargetRegistry` service resources only from its configured target classpath; providers inherited from the
+contract/application side or another parent are invisible. The provider implementations still link against the shared
+tapik interfaces supplied by the owning host. Hosts use child-only lookup for both service resource names, restore the
+thread context classloader after every success or failure, and close disposable classloaders. A provider placed on the
+opposite side can support a placement diagnostic, but it can never become part of the catalog being executed.
+
 `common-plugin` provides target-neutral Kotlin source helpers for reading compiled type arguments and tapik tuples,
 allocating and sanitizing Kotlin declaration names, escaping Kotlin string literals, deriving HTTP path templates and
 status variant names, and rendering sealed data hierarchies with correct byte-array value semantics. Source-generating

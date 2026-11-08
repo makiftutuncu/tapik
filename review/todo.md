@@ -106,7 +106,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Shared service-provider isolation
 
-- [ ] Define one host-neutral visibility rule for API-registry and generation-target service resources in
+- [x] Define one host-neutral visibility rule for API-registry and generation-target service resources in
   `specification/generation.md`, while retaining host-specific classpath placement guidance.
 - [ ] Add Maven and Gradle tests with `ApiRegistry` and `GenerationTargetRegistry` providers deliberately placed on the
   wrong classloader side.
