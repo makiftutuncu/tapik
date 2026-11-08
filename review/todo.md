@@ -49,7 +49,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Extend the compiler-attachment specification to define registry-state identity for every JVM target and
   compilation to which the compiler plugin is attached.
-- [ ] Add a failing compiler-only TestKit project with two JVM targets whose `main` compilations alternately add,
+- [x] Add a failing compiler-only TestKit project with two JVM targets whose `main` compilations alternately add,
   change, and remove APIs without clean builds.
 - [ ] Include Kotlin target identity and compilation identity in the registry-index path, with a stable filesystem-safe
   representation.

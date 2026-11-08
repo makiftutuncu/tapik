@@ -105,4 +105,39 @@ class CompilerPluginAttachmentSpec : FunSpec({
         empty.provider.shouldBeNull()
         empty.classes.shouldBeEmpty()
     }
+
+    test("isolate non-clean registry state between JVM targets") {
+        val fixture = MultiTargetCompilerFixture.create()
+        fixture.writeStableApi("first", "FirstStable")
+        fixture.writeStableApi("second", "SecondStable")
+
+        fixture.compile("first")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstStable")
+        fixture.compile("second")
+        fixture.apiIds("second").sorted() shouldBe listOf("SecondStable")
+
+        fixture.writeMutableApi("first", "FirstAdded")
+        fixture.compile("first")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstAdded", "FirstStable")
+
+        fixture.writeMutableApi("second", "SecondAdded")
+        fixture.compile("second")
+        fixture.apiIds("second").sorted() shouldBe listOf("SecondAdded", "SecondStable")
+
+        fixture.writeMutableApi("first", "FirstChanged")
+        fixture.compile("first")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstChanged", "FirstStable")
+
+        fixture.writeMutableApi("second", "SecondChanged")
+        fixture.compile("second")
+        fixture.apiIds("second").sorted() shouldBe listOf("SecondChanged", "SecondStable")
+
+        fixture.writeMutableApi("first", null)
+        fixture.compile("first")
+        fixture.apiIds("first").sorted() shouldBe listOf("FirstStable")
+
+        fixture.writeMutableApi("second", null)
+        fixture.compile("second")
+        fixture.apiIds("second").sorted() shouldBe listOf("SecondStable")
+    }
 })
