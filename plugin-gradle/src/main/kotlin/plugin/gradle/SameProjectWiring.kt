@@ -40,6 +40,15 @@ internal fun Project.wireSameProjectGeneration(
             task.tapikDependencyVersions.putAll(
                 extension.mode.flatMap { selected ->
                     if (selected == Mode.SAME_PROJECT) {
+                        compileDependencies.get().tapikDependencyVersions("mainCompileClasspath")
+                    } else {
+                        providers.provider { emptyMap() }
+                    }
+                }.orElse(providers.provider { emptyMap() })
+            )
+            task.tapikDependencyVersions.putAll(
+                extension.mode.flatMap { selected ->
+                    if (selected == Mode.SAME_PROJECT) {
                         runtimeDependencies.get().tapikDependencyVersions("mainRuntimeClasspath")
                     } else {
                         providers.provider { emptyMap() }

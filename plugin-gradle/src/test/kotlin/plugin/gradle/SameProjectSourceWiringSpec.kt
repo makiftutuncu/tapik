@@ -167,7 +167,7 @@ class SameProjectSourceWiringSpec : FunSpec({
 
         val result = project.run("jar")
 
-        result.task(":compile-only-model:classes")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":tapik-compile-only-model:classes")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":compileTapikGeneratedKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
@@ -177,19 +177,37 @@ class SameProjectSourceWiringSpec : FunSpec({
             none { entry -> entry == "com/example/compileonly/ExternalModel.class" } shouldBe true
         }
     }
+
+    test("validate tapik versions on the same-project compile classpath") {
+        val project =
+            sameProjectSourceFixture(
+                includeCompileOnlyModel = true,
+                compileOnlyModelVersion = "9.9.9"
+            )
+
+        val result = project.runAndFail("tapikGenerate")
+
+        result.output shouldContain "incompatible with resolved dependencies"
+        result.output shouldContain "mainCompileClasspath"
+        result.output shouldContain "dev.akif:tapik-compile-only-model:9.9.9"
+        result.output shouldContain "project :tapik-compile-only-model"
+    }
 })
 
-private fun sameProjectSourceFixture(includeCompileOnlyModel: Boolean = false): SameProjectSourceFixture {
+private fun sameProjectSourceFixture(
+    includeCompileOnlyModel: Boolean = false,
+    compileOnlyModelVersion: String = sameProjectSourceVersion
+): SameProjectSourceFixture {
     val fixture =
         SameProjectSourceFixture(
             Files.createTempDirectory("tapik-gradle-same-project-sources-"),
-            includeCompileOnlyModel
+            if (includeCompileOnlyModel) compileOnlyModelVersion else null
         )
     fixture.write(
         "settings.gradle",
         buildString {
             appendLine("rootProject.name = 'same-project-sources'")
-            if (includeCompileOnlyModel) appendLine("include 'compile-only-model'")
+            if (includeCompileOnlyModel) appendLine("include 'tapik-compile-only-model'")
         }
     )
     if (includeCompileOnlyModel) {
@@ -231,7 +249,7 @@ private fun sameProjectSourceFixture(includeCompileOnlyModel: Boolean = false): 
 
 private class SameProjectSourceFixture(
     private val root: Path,
-    private val includeCompileOnlyModel: Boolean
+    private val compileOnlyModelVersion: String?
 ) {
     fun writeBuild(includeSpringTargets: Boolean = true) {
         val springTargets =
@@ -267,7 +285,7 @@ private class SameProjectSourceFixture(
                 implementation 'dev.akif:tapik-core:$sameProjectSourceVersion'
                 implementation 'dev.akif:tapik-target-spring-restclient:$sameProjectSourceVersion'
                 implementation 'dev.akif:tapik-target-spring-webmvc:$sameProjectSourceVersion'
-                ${if (includeCompileOnlyModel) "compileOnly project(':compile-only-model')" else ""}
+                ${if (compileOnlyModelVersion != null) "compileOnly project(':tapik-compile-only-model')" else ""}
             }
 
             tapik {
@@ -300,11 +318,14 @@ private class SameProjectSourceFixture(
 
     fun writeCompileOnlyModel() {
         write(
-            "compile-only-model/build.gradle",
+            "tapik-compile-only-model/build.gradle",
             """
             plugins {
                 id 'java-library'
             }
+
+            group = 'dev.akif'
+            version = '$compileOnlyModelVersion'
 
             java {
                 toolchain {
@@ -314,7 +335,7 @@ private class SameProjectSourceFixture(
             """.trimIndent()
         )
         write(
-            "compile-only-model/src/main/java/com/example/compileonly/ExternalModel.java",
+            "tapik-compile-only-model/src/main/java/com/example/compileonly/ExternalModel.java",
             """
             package com.example.compileonly;
 
