@@ -6,11 +6,24 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.ServiceConfigurationError
 
 class ProjectApiLoadingSpec : FunSpec({
+    test("never discover API registries from the Maven plugin classpath") {
+        val pluginDependency = apiProviderDirectory(TestApiRegistry::class.java.name)
+        URLClassLoader(
+            arrayOf(pluginDependency.toUri().toURL()),
+            ProjectApiLoadingSpec::class.java.classLoader
+        ).use { pluginClassLoader ->
+            ProjectApis.use(emptyList(), pluginClassLoader) { apis, _ ->
+                apis shouldBe emptyList()
+            }
+        }
+    }
+
     test("diagnose a malformed registry provider on the project classpath") {
         val failure = shouldThrow<IllegalStateException> {
             withRegistry("example.MissingApiRegistry")

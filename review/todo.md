@@ -108,7 +108,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Define one host-neutral visibility rule for API-registry and generation-target service resources in
   `specification/generation.md`, while retaining host-specific classpath placement guidance.
-- [ ] Add Maven and Gradle tests with `ApiRegistry` and `GenerationTargetRegistry` providers deliberately placed on the
+- [x] Add Maven and Gradle tests with `ApiRegistry` and `GenerationTargetRegistry` providers deliberately placed on the
   wrong classloader side.
 - [ ] Add a failing Maven test proving an API registry packaged in a Maven plugin dependency is not treated as a project
   API.
