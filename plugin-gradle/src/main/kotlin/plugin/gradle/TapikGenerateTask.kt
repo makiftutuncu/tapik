@@ -32,19 +32,19 @@ import javax.inject.Inject
 abstract class TapikGenerateTask @Inject constructor(
     private val workerExecutor: WorkerExecutor
 ) : DefaultTask() {
-    @get:Internal
+    @get:Input
     internal abstract val kotlinJvmProject: Property<Boolean>
 
-    @get:Internal
+    @get:Input
     internal abstract val projectType: Property<String>
 
-    @get:Internal
+    @get:Input
     internal abstract val gradleVersion: Property<String>
 
-    @get:Internal
+    @get:Input
     internal abstract val javaVersion: Property<String>
 
-    @get:Internal
+    @get:Input
     internal abstract val kotlinVersion: Property<String>
 
     /** Explicit source of compiled API contracts. */

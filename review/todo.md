@@ -40,7 +40,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   requires the next invocation to fail instead of remaining up-to-date.
 - [x] Add equivalent coverage for changing from Kotlin/JVM to an unsupported project type while preserving the output
   tree and task history.
-- [ ] Make compatibility-affecting environment values declared task inputs or move validation to a hook that executes
+- [x] Make compatibility-affecting environment values declared task inputs or move validation to a hook that executes
   before cached/up-to-date completion.
 - [ ] Re-run configuration-cache, local build-cache, output restoration, and relocation tests to ensure the new inputs
   are stable and intentional.
