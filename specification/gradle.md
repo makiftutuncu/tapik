@@ -240,22 +240,32 @@ separate publication step.
 
 ### Same-project mode
 
-`tapikGenerate` reads the Kotlin/JVM main compile and processed-resource outputs together with the main runtime
-dependency configuration. Those producer-aware file collections schedule ordinary Kotlin and Java compilation plus
-resource processing without depending on the final `classes` lifecycle task. This guarantees that the
-compiler-generated `ApiRegistry` service provider, Kotlin contract classes, Java main classes, and processed
+`tapikGenerate` reads the Kotlin/JVM main compile and processed-resource outputs together with both the main compile
+and runtime dependency configurations. Those producer-aware file collections schedule ordinary Kotlin and Java
+compilation plus resource processing without depending on the final `classes` lifecycle task. This guarantees that
+the compiler-generated `ApiRegistry` service provider, Kotlin contract classes, Java main classes, and processed
 application resources exist before API loading. Running `tapikGenerate` directly from a clean checkout therefore
 builds those prerequisites through the ordinary Gradle task graph.
 
 The same-project contract classpath is assembled from the main compiled-class directories, the processed main-resource
-directory, and the ordinary runtime dependency configuration. It is captured before tapik adds any late generated
-output, so `tapikGenerate` never consumes its own resource or class output. Compiled-contract dependencies remain absent
-from this mode's registry classpath. For each applicable target and compilation, the Gradle adapter passes the
-compiler-attachment section's private registry index and complete declared Kotlin source roots. The compiler
-integration retains eligible APIs from unchanged active sources when Kotlin performs an incremental compilation. The
-registry therefore always describes that compilation's complete current source set rather than only the dirty files
-compiled in that invocation. It reconciles its own index against its current active source files, so deleted sources
-and a later clean compilation cannot retain stale APIs or affect another compilation.
+directory, main compile classpath, and main runtime classpath, in that order. Duplicate files retain their first
+position, while the original producer dependencies of every contributing file collection remain attached. The compile
+classpath makes `compileOnly` types exposed by contract signatures loadable; the runtime classpath supplies
+`runtimeOnly` implementations needed while registries and targets run. The classpath is captured before tapik adds any
+late generated output, so `tapikGenerate` never consumes its own resource or class output. Compiled-contract
+dependencies remain absent from this mode's registry classpath.
+
+Late generated-source compilation uses the same main compiled-class directories, processed resources, compile
+classpath, and runtime classpath. It can therefore compile generated declarations that mention a main `compileOnly`
+type while retaining every dependency needed by target-generated code. This visibility does not add those dependencies
+to the packaged runtime artifact; Gradle's ordinary dependency scopes remain authoritative.
+
+For each applicable target and compilation, the Gradle adapter passes the compiler-attachment section's private
+registry index and complete declared Kotlin source roots. The compiler integration retains eligible APIs from unchanged
+active sources when Kotlin performs an incremental compilation. The registry therefore always describes that
+compilation's complete current source set rather than only the dirty files compiled in that invocation. It reconciles
+its own index against its current active source files, so deleted sources and a later clean compilation cannot retain
+stale APIs or affect another compilation.
 
 The adapter does not add same-project generated Kotlin to the ordinary main Kotlin sources. Doing so would require
 `compileKotlin` to depend on generation while generation already depends on main compilation. Main source that needs a

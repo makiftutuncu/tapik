@@ -83,7 +83,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Same-project compile visibility
 
-- [ ] Update the same-project classpath specification to define which main compile and runtime dependencies are
+- [x] Update the same-project classpath specification to define which main compile and runtime dependencies are
   available during contract loading and late generated-source compilation.
 - [ ] Add a failing TestKit fixture whose contract or generated source requires a dependency declared `compileOnly`.
 - [ ] Build the generation and late-compilation classpaths from the necessary main compile and runtime configurations,
