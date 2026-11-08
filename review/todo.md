@@ -72,7 +72,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Reaffirm in the Gradle specification that declaration order governs actual target invocation, not only result
   aggregation and logging.
-- [ ] Add a failing worker test with delayed/custom target executions that records start order and exposes concurrent or
+- [x] Add a failing worker test with delayed/custom target executions that records start order and exposes concurrent or
   non-FIFO invocation.
 - [ ] Execute the ordered execution snapshots sequentially inside one classloader-isolated work item, or otherwise
   enforce an await boundary that guarantees invocation order.
