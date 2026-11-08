@@ -86,7 +86,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 - [x] Update the same-project classpath specification to define which main compile and runtime dependencies are
   available during contract loading and late generated-source compilation.
 - [x] Add a failing TestKit fixture whose contract or generated source requires a dependency declared `compileOnly`.
-- [ ] Build the generation and late-compilation classpaths from the necessary main compile and runtime configurations,
+- [x] Build the generation and late-compilation classpaths from the necessary main compile and runtime configurations,
   deduplicating entries without losing producing-task dependencies or declaration order where observable.
 - [ ] Run tapik version validation over every classpath actually used for contract loading and late compilation.
 - [ ] Verify Maven `provided`/compile visibility and Gradle `compileOnly` visibility now behave equivalently.

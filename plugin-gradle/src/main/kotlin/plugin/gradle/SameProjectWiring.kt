@@ -18,11 +18,13 @@ internal fun Project.wireSameProjectGeneration(
             tasks.named(main.processResourcesTaskName, ProcessResources::class.java).map { task ->
                 task.destinationDir
             }
+        val compileDependencies = configurations.named(main.compileClasspathConfigurationName)
         val runtimeDependencies = configurations.named(main.runtimeClasspathConfigurationName)
         val sameProjectClasspath =
             objects.fileCollection().from(
                 main.output.classesDirs,
                 processedResources,
+                compileDependencies,
                 runtimeDependencies
             )
         val emptyClasspath = files()
@@ -59,7 +61,12 @@ internal fun Project.wireSameProjectGeneration(
         }
         generatedCompilation.compileTaskProvider.configure { task ->
             (task as KotlinJvmCompile).apply {
-                libraries.setFrom(main.output.classesDirs, processedResources, runtimeDependencies)
+                libraries.setFrom(
+                    main.output.classesDirs,
+                    processedResources,
+                    compileDependencies,
+                    runtimeDependencies
+                )
                 compilerOptions.moduleName.set(generatedModuleName)
             }
         }
