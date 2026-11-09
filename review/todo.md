@@ -110,7 +110,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   `specification/generation.md`, while retaining host-specific classpath placement guidance.
 - [x] Add Maven and Gradle tests with `ApiRegistry` and `GenerationTargetRegistry` providers deliberately placed on the
   wrong classloader side.
-- [ ] Add a failing Maven test proving an API registry packaged in a Maven plugin dependency is not treated as a project
+- [x] Add a failing Maven test proving an API registry packaged in a Maven plugin dependency is not treated as a project
   API.
 - [ ] Extract the child-only service-resource classloader/context session into `common-plugin` without introducing a
   parallel endpoint metadata model or build-tool dependency.

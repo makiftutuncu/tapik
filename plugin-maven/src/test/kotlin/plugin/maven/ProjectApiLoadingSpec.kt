@@ -10,10 +10,24 @@ import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.ServiceConfigurationError
+import java.util.jar.JarEntry
+import java.util.jar.JarOutputStream
 
 class ProjectApiLoadingSpec : FunSpec({
     test("never discover API registries from the Maven plugin classpath") {
         val pluginDependency = apiProviderDirectory(TestApiRegistry::class.java.name)
+        URLClassLoader(
+            arrayOf(pluginDependency.toUri().toURL()),
+            ProjectApiLoadingSpec::class.java.classLoader
+        ).use { pluginClassLoader ->
+            ProjectApis.use(emptyList(), pluginClassLoader) { apis, _ ->
+                apis shouldBe emptyList()
+            }
+        }
+    }
+
+    test("never treat an API registry packaged in a Maven plugin dependency as a project API") {
+        val pluginDependency = apiProviderJar(TestApiRegistry::class.java.name)
         URLClassLoader(
             arrayOf(pluginDependency.toUri().toURL()),
             ProjectApiLoadingSpec::class.java.classLoader
@@ -98,6 +112,16 @@ internal fun apiProviderDirectory(provider: String): Path {
     Files.createDirectories(service.parent)
     Files.writeString(service, "$provider\n")
     return directory
+}
+
+private fun apiProviderJar(provider: String): Path {
+    val jar = Files.createTempFile("tapik-maven-plugin-dependency-", ".jar").apply { toFile().deleteOnExit() }
+    JarOutputStream(Files.newOutputStream(jar)).use { output ->
+        output.putNextEntry(JarEntry("META-INF/services/dev.akif.tapik.ApiRegistry"))
+        output.write("$provider\n".toByteArray())
+        output.closeEntry()
+    }
+    return jar
 }
 
 class ConstructionFailureApiRegistry : ApiRegistry {
