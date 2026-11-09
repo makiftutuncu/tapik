@@ -123,7 +123,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Specify how Gradle compiler-option paths and the registry index participate in task inputs, local state, clean
   builds, cache restoration, and relocation.
-- [ ] Add a failing TestKit test that compiles a contract, restores or reuses compilation from cache in a relocated
+- [x] Add a failing TestKit test that compiles a contract, restores or reuses compilation from cache in a relocated
   project, changes one source, and verifies the complete API registry remains present.
 - [ ] Replace absolute path strings passed as ordinary `SubpluginOption`s with Kotlin Gradle path-aware/internal options
   as appropriate.
