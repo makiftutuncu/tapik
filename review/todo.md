@@ -171,4 +171,4 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   byte-identical.
 - [x] Public KDoc, Gradle reference, troubleshooting, compatibility, development, and release documentation match the
   implemented behavior.
-- [ ] `git diff --check` passes for every changed file.
+- [x] `git diff --check` passes for every changed file.
