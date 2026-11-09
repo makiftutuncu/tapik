@@ -58,6 +58,11 @@ Generated artifact paths are relative and normalized. A generation result cannot
 Configuration lists and maps and generation-result artifact lists are structural snapshots: later caller mutation and
 mutation attempts through exposed collection values cannot change the validated configuration or result.
 
+After successful materialization, host adapters log every written path in deterministic generation order. They display
+a project-relative path when the project and output share a filesystem root and otherwise fall back to the normalized
+absolute path. Path display and logging are post-commit reporting only: inability to relativize a path or any other
+reporting failure cannot turn an already committed generation result into a failed build.
+
 ## API registries
 
 A compiled contract contributes an `ApiRegistry` containing all concrete Kotlin classes and objects extending `Api`.
