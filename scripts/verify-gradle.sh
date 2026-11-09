@@ -41,6 +41,8 @@ mkdir -p "$GRADLE_HOME"
 echo "Checking and publishing the Gradle plugin with $GRADLE_COMMAND"
 GRADLE_USER_HOME="$GRADLE_HOME" "$GRADLE_COMMAND" \
     --no-daemon \
+    --configuration-cache \
+    --configuration-cache-problems=fail \
     -p "$ROOT/plugin-gradle" \
     clean \
     check \
@@ -106,6 +108,8 @@ cp "$ROOT/example-gradle/application/src/test/kotlin/com/example/library/applica
 echo "Building an external Gradle consumer from the published marker"
 GRADLE_USER_HOME="$GRADLE_HOME" "$GRADLE_COMMAND" \
     --no-daemon \
+    --configuration-cache \
+    --configuration-cache-problems=fail \
     -p "$CONSUMER/example-gradle" \
     clean \
     check \
@@ -132,6 +136,8 @@ MAVEN_USER_HOME="$MAVEN_HOME" "$ROOT/mvnw" \
 echo "Generating the Gradle side of the host-parity fixture"
 GRADLE_USER_HOME="$GRADLE_HOME" "$GRADLE_COMMAND" \
     --no-daemon \
+    --configuration-cache \
+    --configuration-cache-problems=fail \
     -p "$PARITY_FIXTURE" \
     tapikGenerate \
     -PtapikRepository="$MAVEN_REPOSITORY" \
