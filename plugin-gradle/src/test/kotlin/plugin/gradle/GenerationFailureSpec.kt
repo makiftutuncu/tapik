@@ -186,6 +186,35 @@ class GenerationFailureSpec : FunSpec({
         failure.output shouldContain "tapik execution 'explode' for target 'throwing' failed"
         failure.output shouldContain "target failure"
     }
+
+    test("retain misplaced contract target failures through the worker frame") {
+        val descriptorRoot = Files.createTempDirectory("tapik-gradle-contract-target-failure-")
+        val descriptor =
+            descriptorRoot.resolve("META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry")
+        Files.createDirectories(descriptor.parent)
+        Files.writeString(descriptor, LinkageFailingTargetRegistry::class.qualifiedName + "\n")
+        val testClasses = Path.of(LinkageFailingTargetRegistry::class.java.protectionDomain.codeSource.location.toURI())
+        val project = generationProject()
+        project.writeBuild(
+            tapikBlock =
+                """
+                target('misplaced', 'missing') {
+                }
+                """.trimIndent(),
+            contractDependencies =
+                """
+                tapikContract 'dev.akif:tapik-example-contract:$gradleTestTapikVersion'
+                tapikContract files('${descriptorRoot.gradleGroovyPath()}', '${testClasses.gradleGroovyPath()}')
+                """.trimIndent()
+        )
+
+        val failure = project.runAndFail("tapikGenerate")
+
+        failure.output shouldContain "tapik execution 'misplaced' for target 'missing' failed"
+        failure.output shouldContain "Failed to load generation target providers from tapikContractClasspath"
+        failure.output shouldContain "target providers belong in tapikTarget"
+        failure.output shouldContain "missing target dependency"
+    }
 })
 
 private fun linkageFailingTargetDependency(): String {

@@ -94,7 +94,10 @@ private fun loadTargets(classLoader: ClassLoader, classpath: String): List<Gener
     } catch (cause: LinkageError) {
         throw targetLoadingFailure(classpath, cause)
     } catch (cause: IllegalArgumentException) {
-        throw IllegalStateException("Invalid generation target catalog on $classpath: ${cause.message}", cause)
+        throw IllegalStateException(
+            "Invalid generation target catalog on $classpath: ${cause.message}." + targetPlacementGuidance(classpath),
+            cause
+        )
     }
 
 private fun loadApis(classLoader: ClassLoader, classpath: String): List<Api> =
@@ -132,9 +135,17 @@ private fun diagnoseUnknownTarget(
 private fun targetLoadingFailure(classpath: String, cause: Throwable): IllegalStateException =
     IllegalStateException(
         "Failed to load generation target providers from $classpath. " +
-            "Check META-INF/services declarations, target runtime dependencies, and tapik version alignment.",
+            "Check META-INF/services declarations, target runtime dependencies, and tapik version alignment." +
+            targetPlacementGuidance(classpath),
         cause
     )
+
+private fun targetPlacementGuidance(classpath: String): String =
+    if (classpath == CONTRACT_CLASSPATH) {
+        " Generation target providers belong in tapikTarget rather than tapikContract or application dependencies."
+    } else {
+        ""
+    }
 
 private fun apiLoadingFailure(classpath: String, cause: Throwable): IllegalStateException =
     IllegalStateException(

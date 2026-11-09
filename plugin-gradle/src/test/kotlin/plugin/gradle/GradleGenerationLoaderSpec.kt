@@ -87,7 +87,9 @@ class GradleGenerationLoaderSpec : FunSpec({
             }
 
             failure.message shouldContain "tapikContractClasspath"
+            failure.message shouldContain "tapikTarget"
             failure.cause!!.javaClass.name shouldBe "java.util.ServiceConfigurationError"
+            failure.cause!!.message shouldContain "example.MissingTargetRegistry"
         }
     }
 
@@ -113,7 +115,9 @@ class GradleGenerationLoaderSpec : FunSpec({
 
             failure.message shouldContain "Invalid generation target catalog on tapikContractClasspath"
             failure.message shouldContain "duplicate"
+            failure.message shouldContain "tapikTarget"
             failure.cause!!.javaClass shouldBe IllegalArgumentException::class.java
+            failure.cause!!.message shouldContain "duplicates: duplicate"
         }
     }
 
@@ -133,7 +137,9 @@ class GradleGenerationLoaderSpec : FunSpec({
             }
 
             failure.message shouldContain "tapikContractClasspath"
+            failure.message shouldContain "tapikTarget"
             failure.cause!!.javaClass shouldBe NoClassDefFoundError::class.java
+            failure.cause!!.message shouldContain "missing target dependency"
         }
     }
 

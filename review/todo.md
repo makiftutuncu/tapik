@@ -140,7 +140,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   `tapikContractClasspath` during an unknown-target request.
 - [x] Remove the blanket `runCatching` fallback around the misplaced-target catalog load; treat an absent catalog as
   empty while allowing actual catalog failures to propagate with their cause.
-- [ ] Verify the corrected errors still name the execution, target, classpath side, placement correction, and original
+- [x] Verify the corrected errors still name the execution, target, classpath side, placement correction, and original
   provider failure.
 
 ## P3 — Finish cross-platform diagnostics
