@@ -151,7 +151,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 - [x] Extract or reuse a neutral project-relative path display helper with an absolute-path fallback when paths cannot
   be relativized.
 - [x] Apply the same safe behavior to Gradle and Maven without changing deterministic generated-path order.
-- [ ] Add platform-conditional coverage for output on a different filesystem root and verify successful output remains
+- [x] Add platform-conditional coverage for output on a different filesystem root and verify successful output remains
   successful and correctly reported.
 
 ## Completion

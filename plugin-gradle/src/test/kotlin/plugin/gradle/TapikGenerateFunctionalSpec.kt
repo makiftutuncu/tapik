@@ -14,6 +14,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.TaskOutcome
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.name
@@ -112,7 +113,36 @@ class TapikGenerateFunctionalSpec : FunSpec({
         project.generatedFiles().map(Path::name).any { name -> name == "Authors.openapi.json" } shouldBe false
     }
 
+    test("report successful output on a different filesystem root")
+        .config(enabled = crossRootOutput != null) {
+            val output = requireNotNull(crossRootOutput)
+            val project = generationProject()
+            project.writeBuild(
+                """
+                outputRoot.set(file('${output.gradleGroovyPath()}'))
+                openApi('docs') {
+                    includeApis('Authors')
+                    version('1.0.0')
+                }
+                """.trimIndent()
+            )
+
+            val result = project.run("tapikGenerate")
+            val generated = output.resolve("documentation/Authors.openapi.yml").toAbsolutePath().normalize()
+            val displayed = generated.toString().replace(generated.fileSystem.separator, "/")
+
+            result.task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
+            Files.isRegularFile(generated) shouldBe true
+            result.output shouldContain "Generated $displayed"
+        }
 })
+
+private val crossRootOutput: Path? =
+    FileSystems.getDefault().rootDirectories
+        .filter { root -> root != Path.of(System.getProperty("java.io.tmpdir")).toAbsolutePath().root }
+        .firstNotNullOfOrNull { root ->
+            runCatching { Files.createTempDirectory(root, "tapik-gradle-cross-root-") }.getOrNull()
+        }
 
 private fun allTargetsBuild(): String =
     """

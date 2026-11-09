@@ -149,4 +149,4 @@ internal val gradleTestTapikRepository: Path =
 internal val gradleTestTapikVersion: String =
     requireNotNull(System.getProperty("tapik.version")) { "Missing tapik.version" }
 
-internal fun Path.gradleGroovyPath(): String = toString().replace("'", "\\'")
+internal fun Path.gradleGroovyPath(): String = toString().replace('\\', '/').replace("'", "\\'")
