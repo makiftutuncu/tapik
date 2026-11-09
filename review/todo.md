@@ -112,7 +112,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   wrong classloader side.
 - [x] Add a failing Maven test proving an API registry packaged in a Maven plugin dependency is not treated as a project
   API.
-- [ ] Extract the child-only service-resource classloader/context session into `common-plugin` without introducing a
+- [x] Extract the child-only service-resource classloader/context session into `common-plugin` without introducing a
   parallel endpoint metadata model or build-tool dependency.
 - [ ] Use the shared isolation primitive from `ProjectApis`, `MavenTargets`, and `GradleGenerationLoader`, retaining each
   adapter's classpath labels, placement diagnostics, and lifecycle ownership.
