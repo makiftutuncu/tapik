@@ -5,9 +5,12 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.jar.JarEntry
+import java.util.jar.JarOutputStream
 
 class ServiceProviderSessionSpec : FunSpec({
     test("isolate selected service resources to the owned classpath") {
@@ -62,6 +65,31 @@ class ServiceProviderSessionSpec : FunSpec({
             Thread.currentThread().contextClassLoader shouldBe previous
         }
     }
+
+    test("close the disposable classloader after successful and failing use") {
+        listOf(false, true).forEach { fail ->
+            val resourceName = "example/session-$fail.txt"
+            val jar = resourceJar(resourceName, "session")
+            lateinit var classLoader: ClassLoader
+            val result =
+                runCatching {
+                    ServiceProviderSession.open(
+                        classpath = listOf(jar),
+                        parent = javaClass.classLoader,
+                        serviceTypes = setOf(ApiRegistry::class.java)
+                    ).use { session ->
+                        session.run { activeClassLoader ->
+                            classLoader = activeClassLoader
+                            classLoader.getResource(resourceName) shouldNotBe null
+                            if (fail) error("session failure")
+                        }
+                    }
+                }
+
+            result.isFailure shouldBe fail
+            classLoader.getResource(resourceName) shouldBe null
+        }
+    }
 })
 
 private fun serviceDirectory(type: Class<*>, provider: String): Path =
@@ -76,3 +104,13 @@ private fun resourceDirectory(name: String, content: String): Path {
 }
 
 private fun serviceName(type: Class<*>): String = "META-INF/services/${type.name}"
+
+private fun resourceJar(name: String, content: String): Path {
+    val jar = Files.createTempFile("tapik-service-session-", ".jar")
+    JarOutputStream(Files.newOutputStream(jar)).use { output ->
+        output.putNextEntry(JarEntry(name))
+        output.write(content.toByteArray())
+        output.closeEntry()
+    }
+    return jar
+}

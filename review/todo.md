@@ -116,7 +116,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   parallel endpoint metadata model or build-tool dependency.
 - [x] Use the shared isolation primitive from `ProjectApis`, `MavenTargets`, and `GradleGenerationLoader`, retaining each
   adapter's classpath labels, placement diagnostics, and lifecycle ownership.
-- [ ] Verify target providers cannot become contract APIs, contract providers cannot become executable targets, context
+- [x] Verify target providers cannot become contract APIs, contract providers cannot become executable targets, context
   classloaders are restored, and disposable classloaders close on every success/failure path.
 
 ### Relocatable compiler options and registry local state

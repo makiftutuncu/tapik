@@ -91,6 +91,7 @@ class GradleGenerationLoaderSpec : FunSpec({
 
     test("diagnose broken target providers on the target classpath") {
         val broken = serviceDirectory(TARGET_SERVICE, "example.MissingTargetRegistry")
+        val previous = Thread.currentThread().contextClassLoader
         targetClassLoader(listOf(broken)).use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
@@ -108,6 +109,7 @@ class GradleGenerationLoaderSpec : FunSpec({
             failure.message shouldContain "META-INF/services"
             failure.cause!!.javaClass.name shouldBe "java.util.ServiceConfigurationError"
         }
+        Thread.currentThread().contextClassLoader shouldBe previous
     }
 
     test("diagnose broken API registries and restore the context classloader") {

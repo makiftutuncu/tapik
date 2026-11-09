@@ -6,6 +6,7 @@ import dev.akif.tapik.common.plugin.GenerationTarget
 import dev.akif.tapik.common.plugin.GenerationTargetRegistry
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.net.URLClassLoader
 import java.nio.file.Files
@@ -36,6 +37,7 @@ class MavenTargetLoadingSpec : FunSpec({
 
     test("diagnose broken target providers in the Maven plugin realm") {
         val brokenProvider = targetProviderDirectory("example.MissingTargetRegistry")
+        val previous = Thread.currentThread().contextClassLoader
         URLClassLoader(
             arrayOf(brokenProvider.toUri().toURL()),
             MavenTargetLoadingSpec::class.java.classLoader
@@ -48,6 +50,7 @@ class MavenTargetLoadingSpec : FunSpec({
             error.message shouldContain "Failed to load generation targets from the Maven plugin classpath"
             error.message shouldContain "compatible tapik versions"
         }
+        Thread.currentThread().contextClassLoader shouldBe previous
     }
 })
 
