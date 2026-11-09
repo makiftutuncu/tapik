@@ -71,6 +71,72 @@ class GradleGenerationLoaderSpec : FunSpec({
         }
     }
 
+    test("retain malformed target providers on the contract classpath during unknown-target diagnosis") {
+        val malformed = serviceDirectory(TARGET_SERVICE, "example.MissingTargetRegistry")
+        targetClassLoader().use { targetClassLoader ->
+            val failure = shouldThrow<IllegalStateException> {
+                GradleGenerationLoader.generate(
+                    contractClasspath = contractClasspath + malformed,
+                    mode = Mode.COMPILED_CONTRACT,
+                    targetId = "missing",
+                    configuration = emptyMap(),
+                    includeApis = emptySet(),
+                    excludeApis = emptySet(),
+                    targetClassLoader = targetClassLoader
+                )
+            }
+
+            failure.message shouldContain "tapikContractClasspath"
+            failure.cause!!.javaClass.name shouldBe "java.util.ServiceConfigurationError"
+        }
+    }
+
+    test("retain duplicate target providers on the contract classpath during unknown-target diagnosis") {
+        val duplicates =
+            serviceDirectory(
+                TARGET_SERVICE,
+                DuplicateTargetRegistryOne::class.qualifiedName!!,
+                DuplicateTargetRegistryTwo::class.qualifiedName!!
+            )
+        targetClassLoader().use { targetClassLoader ->
+            val failure = shouldThrow<IllegalStateException> {
+                GradleGenerationLoader.generate(
+                    contractClasspath = contractClasspath + duplicates,
+                    mode = Mode.COMPILED_CONTRACT,
+                    targetId = "missing",
+                    configuration = emptyMap(),
+                    includeApis = emptySet(),
+                    excludeApis = emptySet(),
+                    targetClassLoader = targetClassLoader
+                )
+            }
+
+            failure.message shouldContain "Invalid generation target catalog on tapikContractClasspath"
+            failure.message shouldContain "duplicate"
+            failure.cause!!.javaClass shouldBe IllegalArgumentException::class.java
+        }
+    }
+
+    test("retain target linkage failures on the contract classpath during unknown-target diagnosis") {
+        val broken = serviceDirectory(TARGET_SERVICE, LinkageFailingTargetRegistry::class.qualifiedName!!)
+        targetClassLoader().use { targetClassLoader ->
+            val failure = shouldThrow<IllegalStateException> {
+                GradleGenerationLoader.generate(
+                    contractClasspath = contractClasspath + broken,
+                    mode = Mode.COMPILED_CONTRACT,
+                    targetId = "missing",
+                    configuration = emptyMap(),
+                    includeApis = emptySet(),
+                    excludeApis = emptySet(),
+                    targetClassLoader = targetClassLoader
+                )
+            }
+
+            failure.message shouldContain "tapikContractClasspath"
+            failure.cause!!.javaClass shouldBe NoClassDefFoundError::class.java
+        }
+    }
+
     test("never discover API registries from the target classpath") {
         val misplaced = serviceDirectory(API_SERVICE, "example.MissingApiRegistry")
         targetClassLoader(targetClasspath + misplaced).use { targetClassLoader ->

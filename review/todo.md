@@ -136,7 +136,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 - [x] Clarify that malformed, duplicate, or linkage-broken target providers on the contract side must retain their
   catalog-loading failure rather than degrading to an ordinary unknown-target diagnostic.
-- [ ] Add failing Gradle loader tests for malformed service declarations, duplicate target IDs, and linkage failures on
+- [x] Add failing Gradle loader tests for malformed service declarations, duplicate target IDs, and linkage failures on
   `tapikContractClasspath` during an unknown-target request.
 - [ ] Remove the blanket `runCatching` fallback around the misplaced-target catalog load; treat an absent catalog as
   empty while allowing actual catalog failures to propagate with their cause.
