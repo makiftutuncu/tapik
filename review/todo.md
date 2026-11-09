@@ -167,7 +167,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   relocation.
 - [x] `./mvnw verify` passes with Java 25.
 - [x] `./scripts/verify-gradle.sh` passes using both Gradle 9.1 and 9.8 with configuration cache enabled.
-- [ ] The isolated Maven and Gradle external-consumer rehearsals pass and corresponding generated artifacts remain
+- [x] The isolated Maven and Gradle external-consumer rehearsals pass and corresponding generated artifacts remain
   byte-identical.
 - [ ] Public KDoc, Gradle reference, troubleshooting, compatibility, development, and release documentation match the
   implemented behavior.
