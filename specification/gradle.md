@@ -383,6 +383,23 @@ entries because their execution fails validation before generation.
 
 ## Incrementality and caching
 
+Each Kotlin/JVM compilation keeps one tapik registry index beneath
+`.gradle/tapik/compiler/<target>/<compilation>/registry.index`. The index is non-relocatable incremental analysis, not
+a contract artifact, compilation output, or semantic input. The adapter registers it as local state of the owning
+Kotlin compile task, retains it across ordinary incremental executions, and removes it when `clean` removes that
+compilation's outputs. Gradle also removes registered local state whenever compilation outputs are restored from the
+build cache. Restored compiler output already contains the complete generated registry; before a later partial source
+change, compilation must rebuild a complete trustworthy index rather than treating the changed source set as the
+whole contract.
+
+Filesystem-valued compiler options are not ordinary scalar `SubpluginOption` inputs containing absolute paths. The
+complete source-root set uses Kotlin Gradle's path-aware file option and remains associated with the compilation's
+declared source inputs. The registry-index location uses an internal option because its absolute execution path has no
+effect on compiler output and the file is declared separately as local state. Both values may be materialized as
+absolute paths only when invoking the compiler; neither project location participates in the Kotlin compile cache key.
+Equivalent contract compilations in different project directories can therefore share cached class output, while
+each workspace owns its own registry index.
+
 `tapikGenerate` is cacheable and configuration-cache compatible. Its cache identity consists of the applied plugin
 version, detected project type, supported-tool versions, ordered execution definitions including nested target
 configuration, the normalized contract classpath, and the normalized generation-target classpath. The project

@@ -121,7 +121,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Relocatable compiler options and registry local state
 
-- [ ] Specify how Gradle compiler-option paths and the registry index participate in task inputs, local state, clean
+- [x] Specify how Gradle compiler-option paths and the registry index participate in task inputs, local state, clean
   builds, cache restoration, and relocation.
 - [ ] Add a failing TestKit test that compiles a contract, restores or reuses compilation from cache in a relocated
   project, changes one source, and verifies the complete API registry remains present.
