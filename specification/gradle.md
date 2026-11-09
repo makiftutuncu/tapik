@@ -389,8 +389,10 @@ a contract artifact, compilation output, or semantic input. The adapter register
 Kotlin compile task, retains it across ordinary incremental executions, and removes it when `clean` removes that
 compilation's outputs. Gradle also removes registered local state whenever compilation outputs are restored from the
 build cache. Restored compiler output already contains the complete generated registry; before a later partial source
-change, compilation must rebuild a complete trustworthy index rather than treating the changed source set as the
-whole contract.
+change, a cacheable compiler snapshot outside the published classes rebuilds a complete trustworthy index from
+root-relative source identities rather than treating the changed source set as the whole contract. The snapshot is an
+implementation detail of compilation caching: it contains only source-to-API-type associations, is not packaged into
+the contract artifact, and never duplicates endpoint definitions.
 
 Filesystem-valued compiler options are not ordinary scalar `SubpluginOption` inputs containing absolute paths. The
 complete source-root set uses Kotlin Gradle's path-aware file option and remains associated with the compilation's

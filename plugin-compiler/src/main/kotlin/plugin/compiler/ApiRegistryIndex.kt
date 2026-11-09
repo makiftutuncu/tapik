@@ -9,8 +9,12 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.util.Base64
 
 internal class ApiRegistryIndex(
-    private val stateFile: Path
+    private val stateFile: Path,
+    snapshotFile: Path? = null,
+    sourceRoots: List<Path> = emptyList()
 ) {
+    private val snapshot = snapshotFile?.let { ApiRegistrySnapshot(it, sourceRoots) }
+
     fun synchronize(
         incremental: Boolean,
         activeSources: Set<Path>,
@@ -20,7 +24,7 @@ internal class ApiRegistryIndex(
         val compiled = compiledSources.mapKeys { (source, _) -> source.normalized() }
         val entries =
             if (incremental) {
-                read()
+                readPreviousEntries()
                     .filterKeys(active::contains)
                     .toMutableMap()
                     .apply {
@@ -32,11 +36,15 @@ internal class ApiRegistryIndex(
                 compiled.filterValues(List<RegisteredApiType>::isNotEmpty).toMutableMap()
             }
         write(entries)
+        snapshot?.write(entries)
         return entries
             .toSortedMap(compareBy(Path::toString))
             .values
             .flatten()
     }
+
+    private fun readPreviousEntries(): Map<Path, List<RegisteredApiType>> =
+        if (Files.isRegularFile(stateFile)) read() else snapshot?.read().orEmpty()
 
     private fun read(): Map<Path, List<RegisteredApiType>> {
         if (!Files.isRegularFile(stateFile)) return emptyMap()
@@ -44,8 +52,8 @@ internal class ApiRegistryIndex(
         Files.readAllLines(stateFile, UTF_8).forEach { line ->
             val fields = line.split('\t')
             check(fields.size == 3) { "Invalid tapik API registry index at '$stateFile'" }
-            val source = Path.of(fields[0].decoded()).normalized()
-            val type = RegisteredApiType(fields[1].decoded(), ApiInstantiation.valueOf(fields[2]))
+            val source = Path.of(fields[0].decodeIndexField()).normalized()
+            val type = RegisteredApiType(fields[1].decodeIndexField(), ApiInstantiation.valueOf(fields[2]))
             entries.getOrPut(source, ::mutableListOf).add(type)
         }
         return entries
@@ -61,36 +69,40 @@ internal class ApiRegistryIndex(
                 .toSortedMap(compareBy(Path::toString))
                 .flatMap { (source, types) ->
                     types.map { type ->
-                        "${source.toString().encoded()}\t${type.internalName.encoded()}\t${type.instantiation.name}"
+                        "${source.toString().encodeIndexField()}\t" +
+                            "${type.internalName.encodeIndexField()}\t${type.instantiation.name}"
                     }
                 }
-        Files.createDirectories(requireNotNull(stateFile.parent))
-        val temporary = Files.createTempFile(stateFile.parent, ".tapik-api-index-", ".tmp")
-        try {
-            Files.write(temporary, lines, UTF_8)
-            moveReplacing(temporary, stateFile)
-        } finally {
-            Files.deleteIfExists(temporary)
-        }
+        writeAtomically(stateFile, lines)
     }
 }
 
 internal fun registryIndexPath(outputDirectory: Path): Path =
     outputDirectory.resolveSibling(".${outputDirectory.fileName}.tapik-api-index")
 
-private fun Path.normalized(): Path = toAbsolutePath().normalize()
+internal fun Path.normalized(): Path = toAbsolutePath().normalize()
 
 private val ENCODER: Base64.Encoder = Base64.getUrlEncoder().withoutPadding()
 private val DECODER: Base64.Decoder = Base64.getUrlDecoder()
 
-private fun String.encoded(): String = ENCODER.encodeToString(toByteArray(UTF_8))
+internal fun String.encodeIndexField(): String = ENCODER.encodeToString(toByteArray(UTF_8))
 
-private fun String.decoded(): String = String(DECODER.decode(this), UTF_8)
+internal fun String.decodeIndexField(): String = String(DECODER.decode(this), UTF_8)
 
-private fun moveReplacing(source: Path, target: Path) {
+internal fun writeAtomically(
+    target: Path,
+    lines: List<String>
+) {
+    Files.createDirectories(requireNotNull(target.parent))
+    val temporary = Files.createTempFile(target.parent, ".tapik-api-index-", ".tmp")
     try {
-        Files.move(source, target, REPLACE_EXISTING, ATOMIC_MOVE)
-    } catch (_: AtomicMoveNotSupportedException) {
-        Files.move(source, target, REPLACE_EXISTING)
+        Files.write(temporary, lines, UTF_8)
+        try {
+            Files.move(temporary, target, REPLACE_EXISTING, ATOMIC_MOVE)
+        } catch (_: AtomicMoveNotSupportedException) {
+            Files.move(temporary, target, REPLACE_EXISTING)
+        }
+    } finally {
+        Files.deleteIfExists(temporary)
     }
 }

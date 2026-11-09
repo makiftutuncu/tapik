@@ -9,6 +9,15 @@ internal fun compilerRegistryIndexPath(
         "${compilationIdentity.registryIdentitySegment()}/" +
         "registry.index"
 
+internal fun compilerRegistrySnapshotDirectoryPath(
+    targetIdentity: String,
+    compilationIdentity: String
+): String =
+    "tapik/compiler/" +
+        "${targetIdentity.registryIdentitySegment()}/" +
+        "${compilationIdentity.registryIdentitySegment()}/" +
+        "snapshot"
+
 internal fun String.registryIdentitySegment(): String =
     buildString {
         append("id-")

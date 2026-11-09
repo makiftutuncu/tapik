@@ -11,6 +11,8 @@ class CompilerRegistryStateSpec : FunSpec({
             ".gradle/tapik/compiler/id-second/id-main/registry.index"
         compilerRegistryIndexPath("first", "test") shouldBe
             ".gradle/tapik/compiler/id-first/id-test/registry.index"
+        compilerRegistrySnapshotDirectoryPath("first", "main") shouldBe
+            "tapik/compiler/id-first/id-main/snapshot"
     }
 
     test("encode registry identities as stable filesystem-safe segments") {

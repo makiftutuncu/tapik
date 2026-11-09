@@ -12,7 +12,7 @@ internal class TapikCommandLineProcessor : CommandLineProcessor {
     override val pluginId: String = "dev.akif.tapik"
 
     override val pluginOptions: Collection<CliOption> =
-        listOf(INCREMENTAL_REGISTRY_OPTION, REGISTRY_INDEX_OPTION, SOURCE_ROOT_OPTION)
+        listOf(INCREMENTAL_REGISTRY_OPTION, REGISTRY_INDEX_OPTION, REGISTRY_SNAPSHOT_OPTION, SOURCE_ROOT_OPTION)
 
     override fun processOption(
         option: AbstractCliOption,
@@ -23,6 +23,7 @@ internal class TapikCommandLineProcessor : CommandLineProcessor {
             INCREMENTAL_REGISTRY_OPTION.optionName ->
                 configuration.put(INCREMENTAL_REGISTRY, value.toBooleanStrict())
             REGISTRY_INDEX_OPTION.optionName -> configuration.put(REGISTRY_INDEX, value)
+            REGISTRY_SNAPSHOT_OPTION.optionName -> configuration.put(REGISTRY_SNAPSHOT, value)
             SOURCE_ROOT_OPTION.optionName -> configuration.add(SOURCE_ROOTS, value)
             else -> error("Unknown tapik compiler option '${option.optionName}'")
         }
@@ -34,6 +35,9 @@ internal val INCREMENTAL_REGISTRY: CompilerConfigurationKey<Boolean> =
 
 internal val REGISTRY_INDEX: CompilerConfigurationKey<String> =
     CompilerConfigurationKey.create("tapik API registry index path")
+
+internal val REGISTRY_SNAPSHOT: CompilerConfigurationKey<String> =
+    CompilerConfigurationKey.create("tapik API registry cache snapshot path")
 
 internal val SOURCE_ROOTS: CompilerConfigurationKey<List<String>> =
     CompilerConfigurationKey.create("tapik Kotlin source roots")
@@ -52,6 +56,15 @@ private val REGISTRY_INDEX_OPTION =
         optionName = "registryIndex",
         valueDescription = "<path>",
         description = "Persistent tapik API registry index",
+        required = false,
+        allowMultipleOccurrences = false
+    )
+
+private val REGISTRY_SNAPSHOT_OPTION =
+    CliOption(
+        optionName = "registrySnapshot",
+        valueDescription = "<path>",
+        description = "Cacheable root-relative tapik API registry snapshot",
         required = false,
         allowMultipleOccurrences = false
     )

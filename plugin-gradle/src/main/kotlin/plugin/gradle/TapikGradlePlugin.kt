@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.attributes.Usage
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Delete
 import org.jetbrains.kotlin.gradle.plugin.FilesSubpluginOption
 import org.jetbrains.kotlin.gradle.plugin.InternalSubpluginOption
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -87,10 +88,31 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                     compilationIdentity = kotlinCompilation.name
                 )
             )
+        val registrySnapshotDirectory =
+            project.layout.buildDirectory.dir(
+                compilerRegistrySnapshotDirectoryPath(
+                    targetIdentity = kotlinCompilation.target.name,
+                    compilationIdentity = kotlinCompilation.name
+                )
+            )
+        val registrySnapshot = registrySnapshotDirectory.map { directory -> directory.file("registry.index") }
+        kotlinCompilation.compileTaskProvider.configure { task ->
+            task.localState.register(registryIndex)
+            task.outputs.dir(registrySnapshotDirectory).withPropertyName("tapikRegistrySnapshot")
+        }
+        project.tasks.named("clean", Delete::class.java).configure { task ->
+            task.delete(registryIndex)
+        }
         return project.provider {
             buildList {
                 add(SubpluginOption(key = "incrementalRegistry", value = "true"))
                 add(InternalSubpluginOption(key = "registryIndex", value = registryIndex.asFile.absolutePath))
+                add(
+                    InternalSubpluginOption(
+                        key = "registrySnapshot",
+                        value = registrySnapshot.get().asFile.absolutePath
+                    )
+                )
                 kotlinCompilation.allKotlinSourceSets
                     .flatMap { sourceSet -> sourceSet.kotlin.srcDirs }
                     .map { directory -> directory.absoluteFile.normalize() }

@@ -29,6 +29,7 @@ internal class ApiRegistryGenerationExtension(
     private val messages: MessageCollector,
     private val incremental: Boolean,
     private val registryIndex: Path?,
+    private val registrySnapshot: Path?,
     private val sourceRoots: List<Path>
 ) : IrGenerationExtension {
     override fun generate(
@@ -72,7 +73,11 @@ internal class ApiRegistryGenerationExtension(
             }
         val activeSources = activeKotlinSources(sourceRoots) + compiledSources.keys
         val registeredTypes =
-            ApiRegistryIndex(registryIndex ?: registryIndexPath(outputDirectory)).synchronize(
+            ApiRegistryIndex(
+                stateFile = registryIndex ?: registryIndexPath(outputDirectory),
+                snapshotFile = registrySnapshot,
+                sourceRoots = sourceRoots
+            ).synchronize(
                 incremental = incremental,
                 activeSources = activeSources,
                 compiledSources = compiledSources

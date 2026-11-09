@@ -29,6 +29,7 @@ class TapikCompilerPluginRegistrar : CompilerPluginRegistrar() {
                     configuration[INCREMENTAL_REGISTRY]
                         ?: configuration.getBoolean(CommonConfigurationKeys.INCREMENTAL_COMPILATION),
                 registryIndex = configuration[REGISTRY_INDEX]?.let(Path::of),
+                registrySnapshot = configuration[REGISTRY_SNAPSHOT]?.let(Path::of),
                 sourceRoots =
                     configuredSourceRoots.ifEmpty {
                         configuration.kotlinSourceRoots.map { sourceRoot -> Path.of(sourceRoot.path) }

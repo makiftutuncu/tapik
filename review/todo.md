@@ -127,7 +127,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   project, changes one source, and verifies the complete API registry remains present.
 - [x] Replace absolute path strings passed as ordinary `SubpluginOption`s with Kotlin Gradle path-aware/internal options
   as appropriate.
-- [ ] Register the registry index as compilation-local state so Gradle understands its lifecycle without making the
+- [x] Register the registry index as compilation-local state so Gradle understands its lifecycle without making the
   project directory part of the Kotlin compile cache key.
 - [ ] Verify source roots remain complete for incremental reconciliation and Kotlin compile cache reuse works across
   equivalent project locations.
