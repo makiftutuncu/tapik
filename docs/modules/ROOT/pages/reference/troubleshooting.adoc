@@ -15,7 +15,8 @@ Fix the declaration named in the diagnostic; generation has not run yet.
 Maven loads registries from the project classpath and targets from its plugin realm. A custom target therefore belongs
 under `tapik-plugin-maven`'s `<dependencies>`, not ordinary project dependencies. Gradle loads registries from
 `tapikContractClasspath` or same-project main output and targets from `tapikTargetClasspath`; declare a custom provider
-with `tapikTarget(...)`. Unknown-target errors list visible targets and diagnose common wrong-side placement.
+with `tapikTarget(...)`. Same-project registry loading uses main output plus compile and runtime dependencies.
+Unknown-target errors list visible targets and diagnose common wrong-side placement.
 
 If no APIs are found, check that the contract enabled tapik inside `kotlin-maven-plugin`, the configured lifecycle phase
 actually runs for the command, and the execution sees either a compiled contract dependency or the current module's
@@ -111,7 +112,9 @@ evidence that the failed run succeeded; use the Maven result and the `INFO` log 
 
 == Nothing is logged
 
-A successful execution logs every generated project-relative path. In Maven, verify the command reaches the configured
-phase and has not been run with `-q`; same-module `compile` is too early for `process-classes`. In Gradle, verify a
-target block exists and the graph includes `tapikGenerate`; applying the plugin only for compiler activation performs
-no generation. Use `./gradlew tapikGenerate --info` to inspect task selection and up-to-date behavior.
+A successful execution logs every generated path relative to the project when possible, with a normalized absolute
+fallback for output on another filesystem root. A display failure cannot turn committed generation into a failed
+build. In Maven, verify the command reaches the configured phase and has not been run with `-q`; same-module `compile`
+is too early for `process-classes`. In Gradle, verify a target block exists and the graph includes `tapikGenerate`;
+applying the plugin only for compiler activation performs no generation. Use `./gradlew tapikGenerate --info` to
+inspect task selection and up-to-date behavior.

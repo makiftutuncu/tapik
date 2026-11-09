@@ -138,9 +138,11 @@ exception cause chain. Target-loading failures retain their separate plugin/proj
 
 == Generated output and logs
 
-Every successful execution logs each generated project-relative path at Maven `INFO` level. `SOURCE` artifacts are
-registered as compile source roots. `RESOURCE` artifacts are registered as project resources; during late
-`process-classes` generation or direct invocation they are also copied into the main output so packaging does not miss them.
+Every successful execution logs each generated path at Maven `INFO` level, relative to the project when possible and
+as a normalized absolute path when it is on another filesystem root. A display failure cannot invalidate committed
+output. `SOURCE` artifacts are registered as compile source roots. `RESOURCE` artifacts are registered as project
+resources; during late `process-classes` generation or direct invocation they are also copied into the main output so
+packaging does not miss them.
 
 An execution owns only the paths it generated. A later successful run removes its stale paths while preserving files
 owned by another execution and files tapik does not own. Generated artifacts are exclusive by default. A target may

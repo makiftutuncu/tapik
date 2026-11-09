@@ -17,7 +17,7 @@ enum class Mode {
     COMPILED_CONTRACT,
 
     /**
-     * Load API contracts from the current project's compiled main output and runtime classpath.
+     * Load API contracts from the current project's compiled main output plus compile and runtime classpaths.
      *
      * `tapikGenerate` runs after ordinary main compilation and resource processing. Generated Kotlin is compiled
      * separately and packaged for downstream consumers, but is not visible to ordinary main source in the same

@@ -207,7 +207,7 @@ relationship.
 | Mode | Registry input | Task relationship | Main-source visibility |
 | --- | --- | --- | --- |
 | Compiled contract | Dedicated contract dependency configuration | `compileKotlin` and `processResources` consume `tapikGenerate` outputs | Main source can use generated Kotlin |
-| Same project | Compiled main output and runtime classpath | `tapikGenerate` consumes the ordinary main compile and resource outputs; final main output also carries late producers | Main source cannot use generated Kotlin |
+| Same project | Compiled main output plus compile and runtime classpaths | `tapikGenerate` consumes the ordinary main compile and resource outputs; final main output also carries late producers | Main source cannot use generated Kotlin |
 
 ### Compiled-contract mode
 
@@ -345,8 +345,9 @@ The worker receives the two classpaths separately so API registries cannot impli
 and target artifacts cannot become contract inputs.
 
 Before loading any registry or target provider, the adapter inspects resolved components on every classpath used for
-generation. This includes `tapikContractClasspath` in compiled-contract mode, the main runtime classpath in same-project
-mode, and `tapikTargetClasspath` in both modes. Every resolved external or project component whose group is `dev.akif`
+generation. This includes `tapikContractClasspath` in compiled-contract mode, the main compile and runtime classpaths
+in same-project mode, and `tapikTargetClasspath` in both modes. Every resolved external or project component whose
+group is `dev.akif`
 and whose module name starts with `tapik-` must have exactly the applied Gradle plugin version. The compiler-plugin
 artifact is requested at that same version by construction. A mismatch fails before worker loading or output mutation
 and reports the configuration, every conflicting coordinate and resolved version, the plugin version, and the
@@ -438,8 +439,9 @@ and `tapikContractClasspath`, retain the original failure as their cause, and ex
 `ServiceConfigurationError` and `LinkageError` from target discovery identify `tapikTargetClasspath`, retain the
 original cause, and point to provider declarations, runtime dependencies, and tapik version alignment. The
 corresponding failures from API-registry discovery identify either `tapikContractClasspath` or the same project's main
-runtime classpath according to mode, retain the cause, and point to compiler-generated registries, contract runtime
-dependencies, and version alignment. Arbitrary target execution failures are not reclassified as loading failures.
+compile and runtime classpaths according to mode, retain the cause, and point to compiler-generated registries,
+contract dependencies, and version alignment. Arbitrary target execution failures are not reclassified as loading
+failures.
 Every worker failure is additionally framed by the configured execution name and target ID.
 
 An empty API catalog has a mode-specific diagnostic. Compiled-contract mode tells the user to add a contract compiled

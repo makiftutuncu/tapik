@@ -41,10 +41,12 @@ with:
 ----
 
 Set `GRADLE=gradle` to use a Gradle installation selected by a version manager or CI instead of the plugin wrapper.
-The command installs Maven-built tapik dependencies into `target/gradle-verification/repository`, checks and publishes
-the plugin implementation and marker there, validates its source and Dokka HTML archives, and builds a copied consumer
-through the published marker. It does not read `~/.m2/repository`, `~/.gradle`, or `mavenLocal()`. The retained consumer
-log is `target/gradle-verification/external-consumer.log`; `external-consumer.txt` names its temporary workspace.
+Run the script once with Gradle 9.1 and once with the wrapper's Gradle 9.8 before release. Every Gradle invocation
+enables configuration cache and treats cache problems as failures. The command installs Maven-built tapik dependencies
+into `target/gradle-verification/repository`, checks and publishes the plugin implementation and marker there,
+validates its source and Dokka HTML archives, and builds a copied consumer through the published marker. It does not
+read `~/.m2/repository`, `~/.gradle`, or `mavenLocal()`. The retained consumer log is
+`target/gradle-verification/external-consumer.log`; `external-consumer.txt` names its temporary workspace.
 
 To build a local documentation preview, first install the reactor artifacts needed by unified Dokka, build the website
 assets and API reference, then run Antora:

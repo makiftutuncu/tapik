@@ -173,4 +173,4 @@ private fun Mode.emptyApiCatalogMessage(): String =
 
 private const val TARGET_CLASSPATH: String = "tapikTargetClasspath"
 private const val CONTRACT_CLASSPATH: String = "tapikContractClasspath"
-private const val SAME_PROJECT_CLASSPATH: String = "the same project's main runtime classpath"
+private const val SAME_PROJECT_CLASSPATH: String = "the same project's main compile and runtime classpaths"

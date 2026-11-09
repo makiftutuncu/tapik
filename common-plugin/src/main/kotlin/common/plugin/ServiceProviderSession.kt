@@ -6,7 +6,7 @@ import java.nio.file.Path
 import java.util.Enumeration
 
 /**
- * Owns a disposable classloader whose selected service resources are visible only from its own [classpath].
+ * Owns a disposable classloader whose selected service resources are visible only from its own `classpath`.
  *
  * Ordinary classes and resources retain normal parent-first delegation. [run] temporarily installs the owned loader
  * as the current thread's context classloader and restores the previous value after success or failure.
@@ -30,7 +30,7 @@ class ServiceProviderSession private constructor(
         ): Result = withContextClassLoader(classLoader, block)
 
         /**
-         * Opens a session over [classpath], delegating ordinary loading to [parent] while isolating descriptors for
+         * Opens a session over `classpath`, delegating ordinary loading to [parent] while isolating descriptors for
          * [serviceTypes].
          */
         fun open(

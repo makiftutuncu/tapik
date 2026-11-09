@@ -342,7 +342,7 @@ class GradleGenerationLoaderSpec : FunSpec({
                     targetClassLoader = targetClassLoader
                 )
             }
-            sameProject.message shouldContain "same project's main runtime classpath"
+            sameProject.message shouldContain "same project's main compile and runtime classpaths"
             sameProject.message shouldContain "public concrete Api"
         }
     }

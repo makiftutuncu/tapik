@@ -8,13 +8,15 @@ Use Java 25 and run from the repository root:
 [source,shell]
 ----
 ./mvnw -Prelease -Dgpg.skip=true -Dcentral.skipPublishing=true -Dtapik.release.rehearsal=true clean install
+GRADLE=/absolute/path/to/gradle-9.1/bin/gradle ./scripts/verify-gradle.sh
 ./scripts/verify-gradle.sh
 ----
 
 This runs the Maven suite, builds production source and Dokka HTML `javadoc` JARs, and installs the reactor locally.
 Gradle verification additionally builds the standalone plugin, its marker, and the Gradle external-consumer example
-from an isolated repository. Neither path signs, deploys, creates tags, or publishes a GitHub release. The manually
-dispatched `Rehearse release` workflow runs the complete credential-free rehearsal.
+from an isolated repository, with configuration-cache failures enabled at both supported Gradle endpoints (9.1 and
+the 9.8 wrapper). Neither path signs, deploys, creates tags, or publishes a GitHub release. The manually dispatched
+`Rehearse release` workflow runs the complete credential-free rehearsal.
 
 The final example module stages only production artifacts into a fresh temporary Maven repository. It copies cached
 third-party POMs/JARs to reduce downloads, excluding every artifact under `dev/akif`, then adds this build's artifacts.
