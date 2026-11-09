@@ -156,7 +156,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ## Completion
 
-- [ ] Every finding in `review/findings.md` has a corresponding specification change and regression test.
+- [x] Every finding in `review/findings.md` has a corresponding specification change and regression test.
 - [ ] Maven and Gradle use the shared catalog, selection, generation, configuration, artifact, ownership, and
   classloader primitives wherever behavior is host-neutral.
 - [ ] Maven and Gradle parity fixtures pass for default/explicit target configuration, API selection, service-provider
