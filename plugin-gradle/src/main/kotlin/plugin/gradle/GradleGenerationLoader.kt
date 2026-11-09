@@ -114,8 +114,7 @@ private fun diagnoseUnknownTarget(
     contractClassLoader: ClassLoader
 ): Nothing {
     val misplaced =
-        runCatching { loadTargets(contractClassLoader, CONTRACT_CLASSPATH) }
-            .getOrDefault(emptyList())
+        loadTargets(contractClassLoader, CONTRACT_CLASSPATH)
             .any { target -> target.id == targetId }
     if (misplaced) {
         error(

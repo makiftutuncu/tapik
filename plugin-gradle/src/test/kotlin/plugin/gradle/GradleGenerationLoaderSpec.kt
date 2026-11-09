@@ -76,7 +76,7 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath + malformed,
+                    contractClasspath = contractClasspath + listOf(malformed),
                     mode = Mode.COMPILED_CONTRACT,
                     targetId = "missing",
                     configuration = emptyMap(),
@@ -101,7 +101,7 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath + duplicates,
+                    contractClasspath = contractClasspath + listOf(duplicates),
                     mode = Mode.COMPILED_CONTRACT,
                     targetId = "missing",
                     configuration = emptyMap(),
@@ -122,7 +122,7 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath + broken,
+                    contractClasspath = contractClasspath + listOf(broken),
                     mode = Mode.COMPILED_CONTRACT,
                     targetId = "missing",
                     configuration = emptyMap(),
