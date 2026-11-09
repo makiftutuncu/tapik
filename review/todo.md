@@ -114,7 +114,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   API.
 - [x] Extract the child-only service-resource classloader/context session into `common-plugin` without introducing a
   parallel endpoint metadata model or build-tool dependency.
-- [ ] Use the shared isolation primitive from `ProjectApis`, `MavenTargets`, and `GradleGenerationLoader`, retaining each
+- [x] Use the shared isolation primitive from `ProjectApis`, `MavenTargets`, and `GradleGenerationLoader`, retaining each
   adapter's classpath labels, placement diagnostics, and lifecycle ownership.
 - [ ] Verify target providers cannot become contract APIs, contract providers cannot become executable targets, context
   classloaders are restored, and disposable classloaders close on every success/failure path.

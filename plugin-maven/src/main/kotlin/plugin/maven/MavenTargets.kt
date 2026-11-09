@@ -2,6 +2,7 @@ package dev.akif.tapik.plugin.maven
 
 import dev.akif.tapik.common.plugin.GenerationTarget
 import dev.akif.tapik.common.plugin.GenerationTargetCatalog
+import dev.akif.tapik.common.plugin.ServiceProviderSession
 import java.util.ServiceConfigurationError
 
 internal object MavenTargets {
@@ -33,7 +34,9 @@ internal object MavenTargets {
         classpathSide: String
     ): List<GenerationTarget> =
         try {
-            GenerationTargetCatalog.load(classLoader).targets
+            ServiceProviderSession.runWith(classLoader) { activeClassLoader ->
+                GenerationTargetCatalog.load(activeClassLoader).targets
+            }
         } catch (cause: ServiceConfigurationError) {
             throw loadingFailure(classpathSide, cause)
         } catch (cause: LinkageError) {

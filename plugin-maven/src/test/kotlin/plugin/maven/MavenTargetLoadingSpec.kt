@@ -58,7 +58,7 @@ private fun generateWith(
 ) {
     val output = Files.createTempDirectory("tapik-maven-target-").apply { toFile().deleteOnExit() }
     MavenGenerator().generate(
-        classpath = classpath,
+        classpath = testApiClasspath + classpath,
         targetId = targetId,
         targetConfiguration = emptyMap(),
         outputDirectory = output,

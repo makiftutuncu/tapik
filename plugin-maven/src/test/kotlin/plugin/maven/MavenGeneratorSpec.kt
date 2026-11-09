@@ -19,7 +19,7 @@ class MavenGeneratorSpec : FunSpec({
 
         val generation =
             MavenGenerator().generate(
-                classpath = emptyList(),
+                classpath = testApiClasspath,
                 targetId = "openapi",
                 targetConfiguration = mapOf("version" to "0.6.0"),
                 outputDirectory = output,
@@ -46,7 +46,7 @@ class MavenGeneratorSpec : FunSpec({
 
         val generation =
             MavenGenerator().generate(
-                classpath = emptyList(),
+                classpath = testApiClasspath,
                 targetId = "openapi",
                 targetConfiguration = mapOf("version" to "0.6.0"),
                 includeApis = setOf("Authors", "Rentals"),
@@ -66,7 +66,7 @@ class MavenGeneratorSpec : FunSpec({
 
         val generation =
             MavenGenerator().generate(
-                classpath = emptyList(),
+                classpath = testApiClasspath,
                 targetId = "spring-webmvc",
                 targetConfiguration = mapOf("packageName" to "dev.akif.tapik.generated"),
                 outputDirectory = output,
@@ -98,7 +98,7 @@ class MavenGeneratorSpec : FunSpec({
         val previous = Thread.currentThread().contextClassLoader
 
         ProjectApis.use(
-            classpath = emptyList(),
+            classpath = testApiClasspath,
             parentClassLoader = MavenGeneratorSpec::class.java.classLoader
         ) { apis, _ ->
             apis shouldContainExactly listOf(Authors, Books, Rentals)
@@ -114,7 +114,7 @@ class MavenGeneratorSpec : FunSpec({
         val parentClassLoader = MavenGeneratorSpec::class.java.classLoader
 
         generator.generate(
-            classpath = emptyList(),
+            classpath = testApiClasspath,
             targetId = "openapi",
             targetConfiguration =
                 mapOf("version" to "0.6.0", "format" to "json", "output" to "old/{api}.json"),
@@ -125,7 +125,7 @@ class MavenGeneratorSpec : FunSpec({
             projectTapikVersions = setOf("0.6.0")
         )
         generator.generate(
-            classpath = emptyList(),
+            classpath = testApiClasspath,
             targetId = "openapi",
             targetConfiguration =
                 mapOf("version" to "0.6.0", "format" to "json", "output" to "new/{api}.json"),

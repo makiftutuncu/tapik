@@ -15,16 +15,7 @@ class ServiceProviderSession private constructor(
     private val classLoader: ChildOnlyServiceClassLoader
 ) : AutoCloseable {
     /** Runs [block] with this session's isolated loader as both argument and thread context classloader. */
-    fun <Result> run(block: (ClassLoader) -> Result): Result {
-        val thread = Thread.currentThread()
-        val previous = thread.contextClassLoader
-        return try {
-            thread.contextClassLoader = classLoader
-            block(classLoader)
-        } finally {
-            thread.contextClassLoader = previous
-        }
-    }
+    fun <Result> run(block: (ClassLoader) -> Result): Result = withContextClassLoader(classLoader, block)
 
     /** Closes the disposable loader owned by this session. */
     override fun close() {
@@ -32,6 +23,12 @@ class ServiceProviderSession private constructor(
     }
 
     companion object {
+        /** Runs [block] with [classLoader] as the thread context loader without taking ownership of it. */
+        fun <Result> runWith(
+            classLoader: ClassLoader,
+            block: (ClassLoader) -> Result
+        ): Result = withContextClassLoader(classLoader, block)
+
         /**
          * Opens a session over [classpath], delegating ordinary loading to [parent] while isolating descriptors for
          * [serviceTypes].
@@ -48,6 +45,20 @@ class ServiceProviderSession private constructor(
                     childOnlyResources = serviceTypes.mapTo(hashSetOf(), ::serviceResourceName)
                 )
             )
+    }
+}
+
+private fun <Result> withContextClassLoader(
+    classLoader: ClassLoader,
+    block: (ClassLoader) -> Result
+): Result {
+    val thread = Thread.currentThread()
+    val previous = thread.contextClassLoader
+    return try {
+        thread.contextClassLoader = classLoader
+        block(classLoader)
+    } finally {
+        thread.contextClassLoader = previous
     }
 }
 

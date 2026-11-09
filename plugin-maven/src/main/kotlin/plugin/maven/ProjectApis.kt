@@ -1,8 +1,10 @@
 package dev.akif.tapik.plugin.maven
 
 import dev.akif.tapik.Api
+import dev.akif.tapik.ApiRegistry
 import dev.akif.tapik.common.plugin.ApiCatalog
-import java.net.URLClassLoader
+import dev.akif.tapik.common.plugin.GenerationTargetRegistry
+import dev.akif.tapik.common.plugin.ServiceProviderSession
 import java.nio.file.Path
 import java.util.ServiceConfigurationError
 
@@ -12,9 +14,12 @@ internal object ProjectApis {
         parentClassLoader: ClassLoader,
         block: (List<Api>, ClassLoader) -> Result
     ): Result {
-        val urls = classpath.map { path -> path.toUri().toURL() }.toTypedArray()
-        return URLClassLoader(urls, parentClassLoader).use { classLoader ->
-            withContextClassLoader(classLoader) {
+        return ServiceProviderSession.open(
+            classpath = classpath,
+            parent = parentClassLoader,
+            serviceTypes = setOf(ApiRegistry::class.java, GenerationTargetRegistry::class.java)
+        ).use { session ->
+            session.run { classLoader ->
                 block(load(classLoader), classLoader)
             }
         }
@@ -35,18 +40,4 @@ internal object ProjectApis {
                 "Ensure compiled contract artifacts and their runtime dependencies are present and use compatible tapik versions.",
             cause
         )
-}
-
-private inline fun <Result> withContextClassLoader(
-    classLoader: ClassLoader,
-    block: () -> Result
-): Result {
-    val thread = Thread.currentThread()
-    val previous = thread.contextClassLoader
-    return try {
-        thread.contextClassLoader = classLoader
-        block()
-    } finally {
-        thread.contextClassLoader = previous
-    }
 }

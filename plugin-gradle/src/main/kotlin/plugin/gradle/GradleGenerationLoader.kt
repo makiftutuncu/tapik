@@ -1,16 +1,16 @@
 package dev.akif.tapik.plugin.gradle
 
 import dev.akif.tapik.Api
+import dev.akif.tapik.ApiRegistry
 import dev.akif.tapik.common.plugin.ApiCatalog
 import dev.akif.tapik.common.plugin.ApiSelection
 import dev.akif.tapik.common.plugin.GenerationEngine
 import dev.akif.tapik.common.plugin.GenerationResult
 import dev.akif.tapik.common.plugin.GenerationTarget
 import dev.akif.tapik.common.plugin.GenerationTargetCatalog
-import java.net.URLClassLoader
-import java.net.URL
+import dev.akif.tapik.common.plugin.GenerationTargetRegistry
+import dev.akif.tapik.common.plugin.ServiceProviderSession
 import java.nio.file.Path
-import java.util.Enumeration
 import java.util.ServiceConfigurationError
 
 internal object GradleGenerationLoader {
@@ -40,21 +40,25 @@ internal class GradleGenerationSession(
     private val mode: Mode,
     targetClassLoader: ClassLoader
 ) : AutoCloseable {
-    private val targets = loadTargets(targetClassLoader, TARGET_CLASSPATH)
+    private val targets =
+        ServiceProviderSession.runWith(targetClassLoader) { activeClassLoader ->
+            loadTargets(activeClassLoader, TARGET_CLASSPATH)
+        }
     private val available = targets.map(GenerationTarget::id)
-    private val contractClassLoader =
-        ContractClassLoader(
-            contractClasspath.map { path -> path.toUri().toURL() }.toTypedArray(),
-            targetClassLoader
+    private val contractSession =
+        ServiceProviderSession.open(
+            classpath = contractClasspath,
+            parent = targetClassLoader,
+            serviceTypes = setOf(ApiRegistry::class.java, GenerationTargetRegistry::class.java)
         )
     private val apis =
         try {
-            withContextClassLoader(contractClassLoader) {
+            contractSession.run { contractClassLoader ->
                 loadApis(contractClassLoader, mode.apiClasspathName())
                     .also { loaded -> require(loaded.isNotEmpty()) { mode.emptyApiCatalogMessage() } }
             }
         } catch (failure: Exception) {
-            contractClassLoader.close()
+            contractSession.close()
             throw failure
         }
     private val engine = GenerationEngine(targets)
@@ -65,7 +69,7 @@ internal class GradleGenerationSession(
         includeApis: Set<String>,
         excludeApis: Set<String>
     ): GenerationResult =
-        withContextClassLoader(contractClassLoader) {
+        contractSession.run { contractClassLoader ->
             if (targetId !in available) {
                 diagnoseUnknownTarget(targetId, available, contractClassLoader)
             }
@@ -78,7 +82,7 @@ internal class GradleGenerationSession(
         }
 
     override fun close() {
-        contractClassLoader.close()
+        contractSession.close()
     }
 }
 
@@ -141,19 +145,6 @@ private fun apiLoadingFailure(classpath: String, cause: Throwable): IllegalState
         cause
     )
 
-private class ContractClassLoader(
-    urls: Array<URL>,
-    parent: ClassLoader
-) : URLClassLoader(urls, parent) {
-    override fun getResource(name: String): URL? =
-        if (name == API_REGISTRY_SERVICE || name == TARGET_REGISTRY_SERVICE) findResource(name)
-        else super.getResource(name)
-
-    override fun getResources(name: String): Enumeration<URL> =
-        if (name == API_REGISTRY_SERVICE || name == TARGET_REGISTRY_SERVICE) findResources(name)
-        else super.getResources(name)
-}
-
 private fun Mode.apiClasspathName(): String =
     when (this) {
         Mode.COMPILED_CONTRACT -> CONTRACT_CLASSPATH
@@ -170,23 +161,6 @@ private fun Mode.emptyApiCatalogMessage(): String =
                 "public concrete Api types and the tapik compiler plugin is active."
     }
 
-private inline fun <Result> withContextClassLoader(
-    classLoader: ClassLoader,
-    block: () -> Result
-): Result {
-    val thread = Thread.currentThread()
-    val previous = thread.contextClassLoader
-    return try {
-        thread.contextClassLoader = classLoader
-        block()
-    } finally {
-        thread.contextClassLoader = previous
-    }
-}
-
-private const val API_REGISTRY_SERVICE: String = "META-INF/services/dev.akif.tapik.ApiRegistry"
-private const val TARGET_REGISTRY_SERVICE: String =
-    "META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry"
 private const val TARGET_CLASSPATH: String = "tapikTargetClasspath"
 private const val CONTRACT_CLASSPATH: String = "tapikContractClasspath"
 private const val SAME_PROJECT_CLASSPATH: String = "the same project's main runtime classpath"
