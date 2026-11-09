@@ -148,7 +148,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 ### Safe generated-path logging
 
 - [x] Specify that logging failure cannot turn an already committed generation result into a failed task.
-- [ ] Extract or reuse a neutral project-relative path display helper with an absolute-path fallback when paths cannot
+- [x] Extract or reuse a neutral project-relative path display helper with an absolute-path fallback when paths cannot
   be relativized.
 - [ ] Apply the same safe behavior to Gradle and Maven without changing deterministic generated-path order.
 - [ ] Add platform-conditional coverage for output on a different filesystem root and verify successful output remains
