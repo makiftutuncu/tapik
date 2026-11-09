@@ -165,7 +165,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   stale-output removal.
 - [x] Kotlin compiler registry tests pass for non-clean builds, multiple JVM targets, build-cache restoration, and
   relocation.
-- [ ] `./mvnw verify` passes with Java 25.
+- [x] `./mvnw verify` passes with Java 25.
 - [ ] `./scripts/verify-gradle.sh` passes using both Gradle 9.1 and 9.8 with configuration cache enabled.
 - [ ] The isolated Maven and Gradle external-consumer rehearsals pass and corresponding generated artifacts remain
   byte-identical.
