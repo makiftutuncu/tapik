@@ -134,7 +134,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 
 ### Contract-side provider diagnostics
 
-- [ ] Clarify that malformed, duplicate, or linkage-broken target providers on the contract side must retain their
+- [x] Clarify that malformed, duplicate, or linkage-broken target providers on the contract side must retain their
   catalog-loading failure rather than degrading to an ordinary unknown-target diagnostic.
 - [ ] Add failing Gradle loader tests for malformed service declarations, duplicate target IDs, and linkage failures on
   `tapikContractClasspath` during an unknown-target request.

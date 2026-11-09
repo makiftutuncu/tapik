@@ -429,6 +429,12 @@ and sorted IDs available from that configuration, then explains how to add a cus
 Finding it there produces a placement diagnostic explaining that target artifacts belong in `tapikTarget`, not
 `tapikContract` or application dependencies.
 
+The contract-side target lookup used for that placement check treats a classpath with no target-registry provider as
+an empty catalog. Once a provider declaration is present, however, malformed service declarations, duplicate target
+IDs, and provider linkage failures remain catalog-loading failures. They identify the execution, requested target,
+and `tapikContractClasspath`, retain the original failure as their cause, and explain that target providers belong in
+`tapikTarget`; they never degrade to the ordinary unknown-target diagnostic.
+
 `ServiceConfigurationError` and `LinkageError` from target discovery identify `tapikTargetClasspath`, retain the
 original cause, and point to provider declarations, runtime dependencies, and tapik version alignment. The
 corresponding failures from API-registry discovery identify either `tapikContractClasspath` or the same project's main
