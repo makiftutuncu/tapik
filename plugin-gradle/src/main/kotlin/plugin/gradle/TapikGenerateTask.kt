@@ -1,6 +1,7 @@
 package dev.akif.tapik.plugin.gradle
 
 import dev.akif.tapik.common.plugin.ArtifactWriter
+import dev.akif.tapik.common.plugin.reportGeneratedPaths
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
@@ -132,9 +133,8 @@ abstract class TapikGenerateTask @Inject constructor(
                 owner = "gradle:tapikGenerate"
             )
         val projectPath = projectDirectory.get().asFile.toPath().toAbsolutePath().normalize()
-        written.forEach { path ->
-            val relative = projectPath.relativize(path.toAbsolutePath().normalize()).toString().replace('\\', '/')
-            logger.lifecycle("Generated $relative")
+        reportGeneratedPaths(written, projectPath) { path ->
+            logger.lifecycle("Generated $path")
         }
     }
 

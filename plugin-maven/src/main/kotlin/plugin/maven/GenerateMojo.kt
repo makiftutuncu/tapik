@@ -1,5 +1,6 @@
 package dev.akif.tapik.plugin.maven
 
+import dev.akif.tapik.common.plugin.reportGeneratedPaths
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecution
 import org.apache.maven.plugin.MojoExecutionException
@@ -90,14 +91,13 @@ class GenerateMojo : AbstractMojo() {
                 )
             }
             project.registerGeneratedArtifacts(outputDirectory.toPath(), generation)
-            generation.written.forEach { path -> log.info("Generated ${projectRelativePath(path)}") }
+            reportGeneratedPaths(generation.written, project.basedir.toPath()) { path ->
+                log.info("Generated $path")
+            }
         } catch (cause: Exception) {
             throw MojoExecutionException("tapik generation failed: ${cause.message}", cause)
         }
     }
-
-    private fun projectRelativePath(path: Path): Path =
-        runCatching { project.basedir.toPath().toAbsolutePath().normalize().relativize(path) }.getOrDefault(path)
 
     private fun generatedModuleName(): String =
         "tapik-${project.artifactId}-${mojoExecution.executionId}"

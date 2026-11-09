@@ -1,6 +1,7 @@
 package dev.akif.tapik.common.plugin
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import java.net.URI
 import java.nio.file.FileSystems
@@ -24,5 +25,18 @@ class PathDisplaySpec : FunSpec({
             generated.displayRelativeTo(project) shouldBe
                 generated.toAbsolutePath().normalize().toString().replace(generated.fileSystem.separator, "/")
         }
+    }
+
+    test("report generated paths in order without propagating reporting failures") {
+        val project = Files.createTempDirectory("tapik-path-display-")
+        val paths = listOf("Authors.yml", "Books.yml", "Catalog.yml").map { name -> project.resolve(name) }
+        val attempts = mutableListOf<String>()
+
+        reportGeneratedPaths(paths, project) { path ->
+            attempts += path
+            if (path == "Books.yml") error("logging failed")
+        }
+
+        attempts shouldContainExactly listOf("Authors.yml", "Books.yml", "Catalog.yml")
     }
 })
