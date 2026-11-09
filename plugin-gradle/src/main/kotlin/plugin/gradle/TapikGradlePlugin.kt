@@ -4,6 +4,8 @@ import org.gradle.api.Project
 import org.gradle.api.attributes.Usage
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.provider.Provider
+import org.jetbrains.kotlin.gradle.plugin.FilesSubpluginOption
+import org.jetbrains.kotlin.gradle.plugin.InternalSubpluginOption
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
@@ -88,13 +90,18 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
         return project.provider {
             buildList {
                 add(SubpluginOption(key = "incrementalRegistry", value = "true"))
-                add(SubpluginOption(key = "registryIndex", value = registryIndex.asFile.absolutePath))
+                add(InternalSubpluginOption(key = "registryIndex", value = registryIndex.asFile.absolutePath))
                 kotlinCompilation.allKotlinSourceSets
                     .flatMap { sourceSet -> sourceSet.kotlin.srcDirs }
                     .map { directory -> directory.absoluteFile.normalize() }
                     .distinct()
                     .forEach { directory ->
-                        add(SubpluginOption(key = "sourceRoot", value = directory.path))
+                        add(
+                            FilesSubpluginOption(
+                                key = "sourceRoot",
+                                files = listOf(directory)
+                            )
+                        )
                     }
             }
         }

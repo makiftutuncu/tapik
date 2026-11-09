@@ -125,7 +125,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   builds, cache restoration, and relocation.
 - [x] Add a failing TestKit test that compiles a contract, restores or reuses compilation from cache in a relocated
   project, changes one source, and verifies the complete API registry remains present.
-- [ ] Replace absolute path strings passed as ordinary `SubpluginOption`s with Kotlin Gradle path-aware/internal options
+- [x] Replace absolute path strings passed as ordinary `SubpluginOption`s with Kotlin Gradle path-aware/internal options
   as appropriate.
 - [ ] Register the registry index as compilation-local state so Gradle understands its lifecycle without making the
   project directory part of the Kotlin compile cache key.
