@@ -19,14 +19,23 @@ class CompilerRegistryCachingSpec : FunSpec({
 
         fixture.build().task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         fixture.apiIds() shouldContainExactly listOf("Authors", "Books")
+        fixture.registryIndexExists() shouldBe true
+        fixture.registrySnapshotExists() shouldBe true
 
         val relocated = fixture.relocate()
         relocated.build().task(":compileKotlin")?.outcome shouldBe TaskOutcome.FROM_CACHE
         relocated.apiIds() shouldContainExactly listOf("Authors", "Books")
+        relocated.registryIndexExists() shouldBe false
+        relocated.registrySnapshotExists() shouldBe true
 
         relocated.writeAuthors(revision = 2)
         relocated.build().task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         relocated.apiIds() shouldContainExactly listOf("Authors", "Books")
+        relocated.registryIndexExists() shouldBe true
+
+        relocated.clean().task(":clean")?.outcome shouldBe TaskOutcome.SUCCESS
+        relocated.registryIndexExists() shouldBe false
+        relocated.registrySnapshotExists() shouldBe false
     }
 })
 
@@ -36,7 +45,7 @@ private class CompilerRegistryCacheFixture private constructor(
 ) {
     fun writeAuthors(revision: Int) {
         writeSource(
-            "Authors.kt",
+            "main/kotlin/example/Authors.kt",
             """
             package example
 
@@ -49,13 +58,32 @@ private class CompilerRegistryCacheFixture private constructor(
         )
     }
 
-    fun build(): BuildResult =
+    fun build(): BuildResult = run("jar")
+
+    fun clean(): BuildResult = run("clean")
+
+    fun registryIndexExists(): Boolean =
+        containsFileUnder(".gradle/tapik/compiler", "registry.index")
+
+    fun registrySnapshotExists(): Boolean =
+        containsFileUnder("build/tapik/compiler", "registry.index")
+
+    private fun run(task: String): BuildResult =
         GradleRunner
             .create()
             .withProjectDir(root.toFile())
-            .withArguments("jar", "--configuration-cache", "--build-cache", "--stacktrace")
+            .withArguments(task, "--configuration-cache", "--build-cache", "--stacktrace")
             .withPluginClasspath()
             .build()
+
+    private fun containsFileUnder(
+        directory: String,
+        fileName: String
+    ): Boolean {
+        val base = root.resolve(directory)
+        if (!Files.isDirectory(base)) return false
+        return Files.walk(base).use { paths -> paths.anyMatch { path -> path.fileName.toString() == fileName } }
+    }
 
     fun apiIds(): List<String> {
         val jar = root.resolve("build/libs/contract.jar")
@@ -80,7 +108,7 @@ private class CompilerRegistryCacheFixture private constructor(
     }
 
     private fun writeSource(name: String, content: String) {
-        val source = root.resolve("src/main/kotlin/example/$name")
+        val source = root.resolve("src/$name")
         Files.createDirectories(source.parent)
         Files.writeString(source, content.trimIndent() + "\n")
     }
@@ -91,7 +119,7 @@ private class CompilerRegistryCacheFixture private constructor(
             return createProject(Files.createTempDirectory("tapik-gradle-compiler-cache-"), buildCache).also { fixture ->
                 fixture.writeAuthors(revision = 1)
                 fixture.writeSource(
-                    "Books.kt",
+                    "shared/kotlin/example/Books.kt",
                     """
                     package example
 
@@ -139,6 +167,10 @@ private class CompilerRegistryCacheFixture private constructor(
                 }
 
                 kotlin { jvmToolchain(25) }
+
+                kotlin.sourceSets.named("main") {
+                    kotlin.srcDir("src/shared/kotlin")
+                }
 
                 tasks.jar { archiveFileName.set("contract.jar") }
                 """.trimIndent() + "\n"

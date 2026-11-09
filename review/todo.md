@@ -129,7 +129,7 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   as appropriate.
 - [x] Register the registry index as compilation-local state so Gradle understands its lifecycle without making the
   project directory part of the Kotlin compile cache key.
-- [ ] Verify source roots remain complete for incremental reconciliation and Kotlin compile cache reuse works across
+- [x] Verify source roots remain complete for incremental reconciliation and Kotlin compile cache reuse works across
   equivalent project locations.
 
 ### Contract-side provider diagnostics
