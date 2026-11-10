@@ -44,11 +44,11 @@ order, so clients, servers, and documentation can use the same endpoints.
 
 ## Supported integrations
 
-- **Build hosts:** Maven and Gradle
-- **Documentation targets:** OpenAPI
-- **Client targets:** Spring RestClient
-- **Server targets:** Spring WebMVC
-- **Format integrations:** Kotlin serialization and Jackson 3
+- **Build tools:** Maven and Gradle
+- **API documentation:** OpenAPI
+- **HTTP clients:** Spring RestClient
+- **HTTP servers:** Spring WebMVC
+- **Data formats:** Kotlin serialization and Jackson 3
 
 ## Requirements
 
