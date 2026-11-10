@@ -28,10 +28,10 @@ mechanism. Build-tool adapters and future command-line applications load the sam
 known targets. Target IDs must be unique across all loaded registries and are ordered deterministically.
 
 Service-provider visibility is directional and independent of ordinary class delegation. An API catalog reads
-`ApiRegistry` service resources only from the contract or application classpath it owns; providers inherited from a
+`ApiRegistry` service resources only from the API or application classpath it owns; providers inherited from a
 build-tool, plugin, target, or other parent classloader are invisible to that catalog. A target catalog likewise reads
 `GenerationTargetRegistry` service resources only from its configured target classpath; providers inherited from the
-contract/application side or another parent are invisible. The provider implementations still link against the shared
+API/application side or another parent are invisible. The provider implementations still link against the shared
 tapik interfaces supplied by the owning host. Hosts use child-only lookup for both service resource names, restore the
 thread context classloader after every success or failure, and close disposable classloaders. A provider placed on the
 opposite side can support a placement diagnostic, but it can never become part of the catalog being executed.
@@ -39,7 +39,7 @@ opposite side can support a placement diagnostic, but it can never become part o
 `common-plugin` provides target-neutral Kotlin source helpers for reading compiled type arguments and tapik tuples,
 allocating and sanitizing Kotlin declaration names, escaping Kotlin string literals, deriving HTTP path templates and
 status variant names, and rendering sealed data hierarchies with correct byte-array value semantics. Source-generating
-targets use these shared rules rather than maintaining target-specific copies. Target compatibility, compiled-contract
+targets use these shared rules rather than maintaining target-specific copies. Target compatibility, compiled-API
 interpretation, wire decoding and encoding, and target-specific model decisions remain inside each target instead of
 introducing a parallel neutral metadata model.
 
@@ -65,9 +65,9 @@ reporting failure cannot turn an already committed generation result into a fail
 
 ## API registries
 
-A compiled contract contributes an `ApiRegistry` containing all concrete Kotlin classes and objects extending `Api`.
+A compiled API artifact contributes an `ApiRegistry` containing all concrete Kotlin classes and objects extending `Api`.
 Registration is automatic by default; generation-time include and exclude filters may narrow the resulting catalog
-later. Registry-provider order and the order inside an individual registry are not generation contracts. A catalog
+later. Registry-provider order and the order inside an individual registry are not ordering guarantees. A catalog
 orders APIs canonically by ID across all artifacts and rejects duplicate API IDs. Endpoint order remains property
 declaration order within each API.
 
@@ -81,15 +81,15 @@ subclass may close type parameters inherited from an abstract API base class. Cl
 generated registry. The provider retains these instances and is exposed through the standard service-provider
 mechanism; consumers do not rely on their internal order. Abstract API base classes are ignored. Unsupported API
 visibility, generic shape, or construction fails compilation with a targeted diagnostic. The plugin does not execute
-endpoint expressions, discover APIs reflectively, or create a second contract representation. Compilations without a
+endpoint expressions, discover APIs reflectively, or create a second endpoint model. Compilations without a
 concrete API type do not publish a registry.
 
 Every delegated endpoint property reachable from a registered API, including properties declared by API base classes,
 must be public. The same requirement applies to delegated API inclusion properties because generated targets follow
-those properties to reach the original endpoint values. Private, protected, and internal properties fail contract
+those properties to reach the original endpoint values. Private, protected, and internal properties fail API
 compilation because generated targets access them from another package and potentially another module. Kotlin's
 public-signature visibility rules likewise reject inaccessible model types exposed by a public endpoint or inclusion
-property. Metadata inspection repeats these checks so contracts produced without the current compiler plugin fail
+property. Metadata inspection repeats these checks so APIs compiled without the current compiler plugin fail
 before target source emission.
 
 Each compiler output directory has one deterministic compiler-owned registry class and one corresponding entry in the
@@ -103,7 +103,7 @@ directory. A partial IR compilation replaces the entries for compiled source fil
 unchanged source files, and removes entries whose source files no longer belong to the compilation. The complete index
 is sorted deterministically before the single registry class is regenerated. A full compilation replaces the index,
 and an empty index removes both its build state and generated registry artifacts. The index is build state and is never
-packaged in the contract artifact.
+packaged in the API artifact.
 
 ### Maven activation
 
@@ -157,7 +157,7 @@ which artifacts an execution produces.
 Typed source targets derive a neutral source type that keeps emitted spelling separate from the expanded classifier
 identity. Type aliases are emitted by their source names while target semantics continue to use their expanded types;
 containing types and generic projections are rendered without flattening their structure. Flexible platform types,
-definitely-non-null types, and unresolved type parameters are rejected with their contract location until tapik can
+definitely-non-null types, and unresolved type parameters are rejected with their endpoint location until tapik can
 reproduce them without losing information.
 
 ## OpenAPI target
@@ -195,21 +195,21 @@ and requesting execution; a cross-execution collision reports the path and exist
 bytes and the deterministic ownership manifest unchanged. Target generation and staging complete before destination
 mutation, and ownership is updated only after artifact materialization succeeds, so generation, validation, and
 collision failures preserve the last successful result.
-The [Spring integration specification](spring.md#shared-generated-endpoint-types) applies this host-neutral sharing
-contract to endpoint types emitted by independent client and server targets. Maven configuration is translated into
+The [Spring integration specification](spring.md#shared-generated-endpoint-types) applies these host-neutral sharing
+rules to endpoint types emitted by independent client and server targets. Maven configuration is translated into
 the host-neutral configuration model before target selection; Maven types do not cross into `common-plugin` or target
 modules.
 
 When an execution returns `SOURCE` artifacts, the adapter adds that execution's output directory as a project compile
 source root. Source targets may therefore use either of two workflows:
 
-- An execution in `generate-sources` consumes already compiled contract dependencies. Generated source is available to
+- An execution in `generate-sources` consumes already compiled API dependencies. Generated source is available to
   the project's ordinary main compilation, preserving the existing workflow for client and handler implementations.
 - An execution in `process-classes` consumes APIs declared by the current module after their endpoint values and
   compiler registry exist. The adapter compiles only those generated Kotlin files into the same main output without
   recompiling user sources or starting a nested Maven lifecycle.
 
-The second workflow packages generated types alongside same-module contracts, but ordinary main sources compiled
+The second workflow packages generated types alongside same-module APIs, but ordinary main sources compiled
 earlier in the lifecycle cannot reference those newly generated types. Such implementations remain in a downstream
 module or a later source set until compiler-integrated declaration generation exists. Each generated Kotlin compilation
 uses the project's resolved classpath, Java 25 bytecode target, and a distinct module name so it does not replace the

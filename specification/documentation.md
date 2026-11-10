@@ -29,9 +29,9 @@ Keep broad descriptions technology-neutral. An overview may say that tapik gener
 particular client framework. Put framework details in that framework's guide, and put complete option lists and exact
 behavior in the relevant reference. Link to those pages instead of repeating their detail elsewhere.
 
-Prefer `endpoint` for an individual HTTP operation and `API` for a named collection of endpoints. Use `contract` when
-referring specifically to the shared agreement or to a contract module or artifact, rather than as a general synonym
-for an endpoint or API.
+Prefer `endpoint` for an individual HTTP operation and `API` for a named collection of endpoints. Do not use
+`contract` as a synonym for either; keep it in exact identifiers such as `Mode.COMPILED_CONTRACT`, `tapikContract`, or
+module and package names.
 
 Treat existing documentation as material to review, not as proof that a statement is correct or useful. Check behavior
 and capability claims against current specifications, implementation, and runnable examples. Rewrite or remove claims

@@ -2,22 +2,22 @@
 
 ## Purpose
 
-tapik lets people who build, consume, or document HTTP APIs define those APIs once in Kotlin. Definitions must feel
-idiomatic, remain arbitrarily composable, and make incorrect, incomplete, or inconsistent contracts difficult or
-impossible to express.
+tapik lets people who build, use, or document HTTP APIs define them once in Kotlin. Definitions should feel natural in
+Kotlin, remain easy to combine, and make incorrect, incomplete, or conflicting endpoints difficult or impossible to
+express.
 
 Kotlin definitions are the sole source of truth. OpenAPI is an output and will not be consumed as an input language.
 
 ## Core promises
 
 1. An endpoint is an immutable, ordinary Kotlin value.
-2. Its inferred generic type retains its exact structural contract, including ordered paths, queries, headers,
+2. Its inferred type retains the endpoint's structure, including ordered paths, queries, headers,
    request bodies, response alternatives, matcher kinds, formats, and presence modes.
 3. DSL construction prevents invalid states where Kotlin's type system can express the rule.
-4. Value-level invariants fail while the contract is built.
-5. A target fails the build when it cannot faithfully interpret a valid tapik contract.
+4. Values enforce their own rules when created.
+5. A target fails generation when it cannot faithfully represent a valid endpoint.
 6. Arbitrary Kotlin composition is supported; tapik does not define a statically analyzable subset of Kotlin.
-7. Published contract artifacts behave like contract definitions on a consumer's classpath.
+7. A published API artifact behaves like the same API defined in the consuming project.
 
 tapik-owned structural values have shallow snapshot semantics. Public collection inputs are copied before they are
 stored, and exposed collections cannot mutate the stored structure. Encoded byte arrays crossing a tapik transport
@@ -43,15 +43,14 @@ Targets are developed in this order:
 
 Kotlin serialization is the default format integration. Jackson follows for the Spring ecosystem.
 
-The OpenAPI target is a host-neutral interpreter over selected, compiled `Api` values. It runs after contract
-compilation, reads their immutable endpoint graphs without reflective endpoint discovery, returns generated artifacts
-without writing them, and fails generation when a valid tapik construct cannot be represented by OpenAPI 3.2.0.
+The OpenAPI target reads selected, compiled `Api` values. It runs after API compilation, reads their immutable endpoint
+values without reflective discovery, returns generated artifacts without writing them, and fails generation when a
+valid endpoint cannot be represented by OpenAPI 3.2.0.
 
-The Maven and Gradle adapters activate the compiler plugin, load its generated API registries from explicit contract
-classpaths, discover generation targets through host-neutral target registries, translate host configuration and API
-selection, invoke selected targets, and own artifact materialization and lifecycle integration. A future command-line
-host consumes those same compiler registries, target registries, selection rules, configuration boundary, and
-generation results rather than wrapping OpenAPI-specific behavior.
+The Maven and Gradle adapters activate the compiler plugin, load generated API registries from configured API
+dependencies or the current project, find generation targets through shared registries, translate host configuration
+and API selection, invoke targets, and manage generated files and build lifecycle. A future command-line host can use
+the same registries, selection rules, configuration, and generation results.
 
 ## Versioning and compatibility
 
@@ -60,19 +59,19 @@ earlier tapik implementations. From that baseline, tapik follows Semantic Versio
 convention: patch releases in one `0.y` line are backward-compatible, while an incompatible public change increments
 the minor version. After 1.0, incompatible changes increment the major version.
 
-The compatibility contract covers public Kotlin declarations in production artifacts, documented compiler, Maven,
+The compatibility policy covers public Kotlin declarations in production artifacts, documented compiler, Maven,
 and Gradle configuration, stable generation target IDs, and the documented names and signatures of generated public Kotlin
 declarations. An incompatible change to any of these surfaces requires the corresponding version increment and
 migration guidance. Internal implementation, generated formatting, and behavior outside the documented supported
-surface are not compatibility contracts.
+surface are outside the compatibility policy.
 
 The current supported surface being intentionally narrow does not make it experimental. Maven and Gradle Kotlin/JVM
 are build hosts; the built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC; same-project generation
 occurs after ordinary main-source compilation; and format integrations require explicit schemas for serializer shapes
 they cannot derive. New hosts, targets, and derivation coverage can be added compatibly.
 
-tapik does not determine whether a user's HTTP contract is semantically backward-compatible with its previously
-deployed form. API versioning and rollout remain application responsibilities.
+tapik does not determine whether an API's endpoints remain compatible with a deployed version. API versioning and
+rollout remain application responsibilities.
 
 ## Non-goals for the foundation
 

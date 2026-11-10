@@ -7,7 +7,7 @@ public OpenAPI 3.2 document model without scanning the classpath, using reflecti
 target-neutral metadata model.
 
 Endpoint, parameter, response, media-type, and schema discovery order is preserved. Request headers and response
-headers are translated literally from the tapik contract; the interpreter does not silently discard names that
+headers are translated literally from the tapik endpoint; the interpreter does not silently discard names that
 OpenAPI tooling might treat specially.
 
 Repeated query parameters use an array schema with `style: form` and `explode: true`, representing one query name
@@ -90,7 +90,7 @@ The baseline is the [OpenAPI 3.2.0 specification](https://spec.openapis.org/oas/
 existing Kotlin DSL, not every feature the OpenAPI format can express. The public document model is a supported
 subset, not an arbitrary OpenAPI editor or an independent document validator.
 
-| Contract concept | Generated representation | Regression coverage |
+| Endpoint concept | Generated representation | Regression coverage |
 | --- | --- | --- |
 | Identity, documentation, tags, composition | Info, operation IDs, summaries, descriptions, sorted tag sets | Both goldens; composition test |
 | Methods and paths | Fixed method fields including `query`; `additionalOperations.CONNECT`; required template variables | Coverage golden; every `Method` entry; duplicate/template rejection tests |

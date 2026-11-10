@@ -12,7 +12,7 @@ object Books : Api() {
 ```
 
 `Api.apiId` exposes the resolved API identity. The name is deliberately API-specific: `Api` does not declare an `id`
-member, so contracts may use the natural name `id` for a path variable or another resource definition. `Api()` derives
+member, so endpoints may use the natural name `id` for a path variable or another resource definition. `Api()` derives
 `apiId` from the concrete type's simple name, while `Api(apiId = "...")` selects an explicit non-blank identity. There
 is no deprecated `Api.id` alias because retaining it would preserve the member collision this name avoids.
 
@@ -64,9 +64,9 @@ Endpoint<
 
 Endpoint identity has two compile-time states. Standard method builders produce an immutable `Endpoint<..., Draft>`.
 Property delegation creates a new `Endpoint<..., Ready>` whose qualified ID combines the API ID and property name.
-Only ready endpoints expose `id` and may be consumed by targets. Contract modifiers are available only on draft
+Only ready endpoints expose `id` and may be consumed by targets. Endpoint modifiers are available only on draft
 endpoints and return new draft values, allowing ordinary Kotlin functions to compose definitions before declaration
-without creating divergent ready contracts that share an ID.
+without creating multiple ready endpoints with the same ID.
 
 Every endpoint initially has `noHeaders`, `noInput`, and `DefaultOutput`. `NoInput` is the type of the `noInput`
 value. `DefaultOutput` means one empty `200`
@@ -80,7 +80,7 @@ preserved exactly. Reaching a ninth element is a compilation failure.
 
 The shared tuple algebra consists of `Tuple0` through `Tuple8`. `Tuple0` is the empty value; each non-empty tuple
 stores its elements in `_1` through `_8` and exposes them in declaration order through `values`. `NonEmptyTuple`
-distinguishes `Tuple1` through `Tuple8` wherever an empty collection is not a valid contract state. Every tuple has
+distinguishes `Tuple1` through `Tuple8` wherever an empty collection is not valid. Every tuple has
 structural value semantics.
 
 Tuple values are publicly readable structural results of the DSL, not a second public construction API. Non-empty
@@ -541,4 +541,4 @@ POST /rentals/{rentalId}/return
 It includes transformed domain identifier formats, defaulted and repeated queries, an optional `LocalDate` query, a
 required request ID header, Kotlin-serialization JSON inputs and outputs, multiple status alternatives, and response
 `Location` headers. OpenAPI, RestClient, and WebMVC target tests generate all three APIs while retaining focused golden
-coverage for the Books contract.
+coverage for the Books API.

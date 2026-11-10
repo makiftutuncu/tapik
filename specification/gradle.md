@@ -8,10 +8,10 @@ selection rules, configuration tree, and generated artifacts used by other tapik
 
 The initial supported project type is Kotlin/JVM. Its supported toolchain intersection is Java 25, Kotlin 2.4.10, and
 Gradle 9.1 through 9.8 inclusive. Compatibility coverage runs the complete Gradle functional suite against both Gradle
-9.1 and 9.8 with that Java and Kotlin version; intermediate Gradle versions are supported by the same range contract.
+9.1 and 9.8 with that Java and Kotlin version; every version in that range is supported.
 The tapik plugin does not turn a Java-only, Android, or Kotlin Multiplatform project into a Kotlin/JVM project. Android
 and Kotlin Multiplatform integration are explicitly deferred; their compilations, variants, source sets, and packaging
-rules are not part of the initial adapter contract.
+rules are outside the initial adapter scope.
 
 ## Compiler-plugin attachment
 
@@ -94,7 +94,7 @@ tapik {
 }
 ```
 
-`mode(Mode.COMPILED_CONTRACT)` and `mode(Mode.SAME_PROJECT)` select the explicit contract-loading mode. No mode is
+`mode(Mode.COMPILED_CONTRACT)` and `mode(Mode.SAME_PROJECT)` select where tapik loads APIs. No mode is
 selected by default: applying the plugin without invoking generation remains valid, while invoking `tapikGenerate`
 without a mode fails. Repeating the same mode is harmless, but selecting a different mode after one has already been
 selected fails during configuration.
@@ -140,7 +140,7 @@ root as one output directory. Executions do not receive separate generation task
 declarations, and tasks that compile or package generated artifacts consume directories from this tree without claiming
 ownership of them.
 
-The task declares the resolved contract and target artifacts as normalized classpath inputs. Its value inputs include
+The task declares the resolved API and target artifacts as normalized classpath inputs. Its value inputs include
 the explicit mode, plugin version, and complete declaration-ordered execution definitions: execution and target IDs,
 API selection, and the recursively nested target configuration. Worker result files are temporary implementation
 details rather than additional task outputs.
@@ -186,8 +186,8 @@ successful paths and preserve the last successful output tree.
 
 Every project using generation declares exactly one of two modes:
 
-- **Compiled contract** reads APIs from artifacts on the dedicated contract dependency configuration. It is intended
-  for consumers of a separately compiled contract and can make generated declarations available to ordinary main
+- **Compiled API dependency** reads APIs from artifacts on the dedicated `tapikContract` configuration. It is intended
+  for consumers of a separately compiled API and can make generated declarations available to ordinary main
   source compilation.
 - **Same project** reads APIs from the current project's compiled Kotlin/JVM main output. It is intended for targets
   that must interpret APIs declared by that project; generated declarations are necessarily later than ordinary main
@@ -206,20 +206,20 @@ relationship.
 
 | Mode | Registry input | Task relationship | Main-source visibility |
 | --- | --- | --- | --- |
-| Compiled contract | Dedicated contract dependency configuration | `compileKotlin` and `processResources` consume `tapikGenerate` outputs | Main source can use generated Kotlin |
+| Compiled API dependency | `tapikContract` configuration | `compileKotlin` and `processResources` consume `tapikGenerate` outputs | Main source can use generated Kotlin |
 | Same project | Compiled main output plus compile and runtime classpaths | `tapikGenerate` consumes the ordinary main compile and resource outputs; final main output also carries late producers | Main source cannot use generated Kotlin |
 
-### Compiled-contract mode
+### Compiled API dependency mode
 
-The dedicated contract configuration resolves already compiled artifacts and their runtime dependencies. Project
-dependencies on contract modules retain Gradle's normal producing-task dependencies, so generation never scans or
-executes uncompiled source. `tapikGenerate` loads compiler-produced registries only from that resolved contract
+The `tapikContract` configuration resolves compiled API artifacts and their runtime dependencies. Project
+dependencies on API modules retain Gradle's normal producing-task dependencies, so generation never scans or
+executes uncompiled source. `tapikGenerate` loads compiler-produced registries only from that resolved API
 classpath.
 
 Generation runs through Gradle's Worker API with classloader isolation. The isolated worker classloader contains the
-Gradle adapter implementation and target classpath, but not the contract classpath. The worker discovers
+Gradle adapter implementation and target classpath, but not the API classpath. The worker discovers
 `GenerationTargetRegistry` providers only from that target classloader. It then creates a closeable child classloader
-for the contract classpath, makes the child the thread context classloader while loading `ApiRegistry` providers and
+for the API classpath, makes the child the thread context classloader while loading `ApiRegistry` providers and
 invoking targets, and restores the previous context classloader before closing the child on success or failure.
 
 Target results cross the worker boundary through a versioned internal result file containing complete ordered artifact
@@ -235,7 +235,7 @@ lazy input to `processResources`, so resources are copied into the ordinary main
 normal runtime artifact. These relationships come from providers and task dependencies rather than eager task
 realization or string task-name ordering.
 
-This source-set wiring is installed only for explicit compiled-contract mode after the project has applied
+This source-set wiring is installed only for explicit compiled API dependency mode after the project has applied
 `org.jetbrains.kotlin.jvm`. The providers point directly to `sources/` and `resources/` beneath the configured output
 root and carry their producing `tapikGenerate` task dependency; the adapter does not inspect generated files to decide
 whether either lifecycle edge exists.
@@ -249,17 +249,17 @@ separate publication step.
 `tapikGenerate` reads the Kotlin/JVM main compile and processed-resource outputs together with both the main compile
 and runtime dependency configurations. Those producer-aware file collections schedule ordinary Kotlin and Java
 compilation plus resource processing without depending on the final `classes` lifecycle task. This guarantees that
-the compiler-generated `ApiRegistry` service provider, Kotlin contract classes, Java main classes, and processed
+the compiler-generated `ApiRegistry` service provider, Kotlin API classes, Java main classes, and processed
 application resources exist before API loading. Running `tapikGenerate` directly from a clean checkout therefore
 builds those prerequisites through the ordinary Gradle task graph.
 
-The same-project contract classpath is assembled from the main compiled-class directories, the processed main-resource
+The same-project API classpath is assembled from the main compiled-class directories, the processed main-resource
 directory, main compile classpath, and main runtime classpath, in that order. Duplicate files retain their first
 position, while the original producer dependencies of every contributing file collection remain attached. The compile
-classpath makes `compileOnly` types exposed by contract signatures loadable; the runtime classpath supplies
+classpath makes `compileOnly` types exposed by API signatures loadable; the runtime classpath supplies
 `runtimeOnly` implementations needed while registries and targets run. The classpath is captured before tapik adds any
-late generated output, so `tapikGenerate` never consumes its own resource or class output. Compiled-contract
-dependencies remain absent from this mode's registry classpath.
+late generated output, so `tapikGenerate` never consumes its own resource or class output. The dedicated API dependency
+configuration is absent from this mode's registry classpath.
 
 Late generated-source compilation uses the same main compiled-class directories, processed resources, compile
 classpath, and runtime classpath. It can therefore compile generated declarations that mention a main `compileOnly`
@@ -275,7 +275,8 @@ stale APIs or affect another compilation.
 
 The adapter does not add same-project generated Kotlin to the ordinary main Kotlin sources. Doing so would require
 `compileKotlin` to depend on generation while generation already depends on main compilation. Main source that needs a
-generated declaration must move the contract to a separately compiled project and use compiled-contract mode.
+generated declaration must move its endpoint definitions to a separately compiled project and use compiled API
+dependency mode.
 
 When same-project targets emit Kotlin, the `tapikGenerated` Kotlin/JVM compilation consumes only the generated source
 and compiles against the completed main output and its runtime dependencies. Its `compileTapikGeneratedKotlin` task
@@ -285,8 +286,8 @@ distinct Kotlin module metadata files. Runtime consumers of the project receive 
 inputs to ordinary main compilation or recompiling application source.
 
 The adapter reports the same-project visibility boundary before ordinary main compilation. If main source refers to a
-late generated declaration, compilation fails with the ordinary Kotlin diagnostic and tapik guidance to move the API
-contract to a separately compiled project and use compiled-contract mode.
+late generated declaration, compilation fails with the ordinary Kotlin diagnostic and tapik guidance to move endpoint
+definitions to a separately compiled project and use compiled API dependency mode.
 
 Same-project generated resources are materialized in their own resource directory after `tapikGenerate`. The normal
 `jar` includes that directory, and runtime-consuming tasks receive it alongside the late classes. The adapter does not
@@ -301,7 +302,7 @@ file-collection metadata, regardless of the task's type or name. This applies eq
 runtime consumers, archive and distribution tasks, and plugin-provided packaging tasks; the adapter does not maintain
 an allowlist of known consumers.
 
-Producer metadata is attached only to the final consumer-facing output. The contract classpath captured for generation
+Producer metadata is attached only to the final consumer-facing output. The API classpath captured for generation
 retains the pre-generation main compile and resource outputs, which exclude both late directories. Consequently the
 final `classes` lifecycle may inherit `tapikGenerate` and `compileTapikGeneratedKotlin` as output producers, while
 `tapikGenerate` depends only on the ordinary pre-generation producers and never on `classes`. This preserves the
@@ -321,7 +322,7 @@ The adapter keeps dependency declaration and resolution in separate Gradle confi
 They are absent from published project variants, and none extends or is extended by the project's ordinary compile or
 runtime configurations:
 
-- `tapikContract` contains compiled contract artifacts and their runtime dependencies. It has no default dependency;
+- `tapikContract` contains compiled API artifacts and their runtime dependencies. It has no default dependency;
   `tapikContractClasspath` is the registry input only in compiled-contract mode. A project dependency retains its
   producing task dependency.
 - `tapikTarget` contains generation-target providers and their runtime dependencies. The plugin adds
@@ -339,10 +340,10 @@ dependencies {
 ```
 
 The built-in target modules are not implementation dependencies of the Gradle plugin and are not visible to project
-source. Contract artifacts likewise do not become ordinary application dependencies merely by being added to
-`tapikContract`; an application that imports contract declarations adds the contract to its normal dependencies too.
+source. API artifacts do not become ordinary application dependencies merely by being added to `tapikContract`; an
+application that imports endpoint declarations adds the API to its normal dependencies too.
 The worker receives the two classpaths separately so API registries cannot implicitly contribute executable targets
-and target artifacts cannot become contract inputs.
+and target artifacts cannot become API inputs.
 
 Before loading any registry or target provider, the adapter inspects resolved components on every classpath used for
 generation. This includes `tapikContractClasspath` in compiled-contract mode, the main compile and runtime classpaths
@@ -386,32 +387,32 @@ entries because their execution fails validation before generation.
 
 Each Kotlin/JVM compilation keeps one tapik registry index beneath
 `.gradle/tapik/compiler/<target>/<compilation>/registry.index`. The index is non-relocatable incremental analysis, not
-a contract artifact, compilation output, or semantic input. The adapter registers it as local state of the owning
+an API artifact, compilation output, or semantic input. The adapter registers it as local state of the owning
 Kotlin compile task, retains it across ordinary incremental executions, and removes it when `clean` removes that
 compilation's outputs. Gradle also removes registered local state whenever compilation outputs are restored from the
 build cache. Restored compiler output already contains the complete generated registry; before a later partial source
 change, a cacheable compiler snapshot outside the published classes rebuilds a complete trustworthy index from
-root-relative source identities rather than treating the changed source set as the whole contract. The snapshot is an
+root-relative source identities rather than treating the changed source set as the entire API. The snapshot is an
 implementation detail of compilation caching: it contains only source-to-API-type associations, is not packaged into
-the contract artifact, and never duplicates endpoint definitions.
+the API artifact, and never duplicates endpoint definitions.
 
 Filesystem-valued compiler options are not ordinary scalar `SubpluginOption` inputs containing absolute paths. The
 complete source-root set uses Kotlin Gradle's path-aware file option and remains associated with the compilation's
 declared source inputs. The registry-index location uses an internal option because its absolute execution path has no
 effect on compiler output and the file is declared separately as local state. Both values may be materialized as
 absolute paths only when invoking the compiler; neither project location participates in the Kotlin compile cache key.
-Equivalent contract compilations in different project directories can therefore share cached class output, while
+Equivalent API compilations in different project directories can therefore share cached class output, while
 each workspace owns its own registry index.
 
 `tapikGenerate` is cacheable and configuration-cache compatible. Its cache identity consists of the applied plugin
 version, detected project type, supported-tool versions, ordered execution definitions including nested target
-configuration, the normalized contract classpath, and the normalized generation-target classpath. The project
+configuration, the normalized API classpath, and the normalized generation-target classpath. The project
 directory and absolute locations of relocatable classpath entries are not inputs. The generated root is the task's
 only output tree and is not itself part of the cache key.
 
 An unchanged invocation is `UP-TO-DATE`. Deleting the generated root restores it from the local build cache, and moving
-the same build and relative inputs to another project directory can reuse the same cached result. Changing contract
-bytecode, a contract runtime dependency, a target artifact, API selection, nested target configuration, execution
+the same build and relative inputs to another project directory can reuse the same cached result. Changing API
+bytecode, an API runtime dependency, a target artifact, API selection, nested target configuration, execution
 order, or the applied plugin version invalidates generation. Changing the output root invalidates up-to-date state and
 materializes the same result at the new location; the build cache may supply that content because destination paths do
 not affect generated bytes.
@@ -426,11 +427,11 @@ exercised twice with the configuration cache, and the supported Gradle endpoints
 
 Target discovery uses only `tapikTargetClasspath`. Selecting an unknown ID reports the requested ID, execution name,
 and sorted IDs available from that configuration, then explains how to add a custom artifact with
-`tapikTarget(...)`. Before reporting an ordinary unknown target, the adapter checks the contract classpath for that ID.
+`tapikTarget(...)`. Before reporting an ordinary unknown target, the adapter checks the API classpath for that ID.
 Finding it there produces a placement diagnostic explaining that target artifacts belong in `tapikTarget`, not
 `tapikContract` or application dependencies.
 
-The contract-side target lookup used for that placement check treats a classpath with no target-registry provider as
+The API-side target lookup used for that placement check treats a classpath with no target-registry provider as
 an empty catalog. Once a provider declaration is present, however, malformed service declarations, duplicate target
 IDs, and provider linkage failures remain catalog-loading failures. They identify the execution, requested target,
 and `tapikContractClasspath`, retain the original failure as their cause, and explain that target providers belong in
@@ -440,11 +441,11 @@ and `tapikContractClasspath`, retain the original failure as their cause, and ex
 original cause, and point to provider declarations, runtime dependencies, and tapik version alignment. The
 corresponding failures from API-registry discovery identify either `tapikContractClasspath` or the same project's main
 compile and runtime classpaths according to mode, retain the cause, and point to compiler-generated registries,
-contract dependencies, and version alignment. Arbitrary target execution failures are not reclassified as loading
+API dependencies, and version alignment. Arbitrary target execution failures are not reclassified as loading
 failures.
 Every worker failure is additionally framed by the configured execution name and target ID.
 
-An empty API catalog has a mode-specific diagnostic. Compiled-contract mode tells the user to add an API compiled
+An empty API catalog has a mode-specific diagnostic. Compiled API dependency mode tells the user to add an API compiled
 with the tapik compiler plugin to `tapikContract`; same-project mode states that main compilation produced no eligible
 public concrete `Api` and points to compiler-plugin activation and the API eligibility rules. These failures, version
 failures, unknown or misplaced targets, and unsupported project types all occur before the output tree is changed and
@@ -481,16 +482,16 @@ host-neutral target execution rather than the old scanning generators.
 
 API discovery comes only from compiler-generated registries. Target selection comes only from named executions and
 service-loaded target registries. Migration requires replacing old scanning configuration with ordinary tapik API
-definitions, compiler-plugin activation, explicit generation mode, contract or target dependencies, and named target
+definitions, compiler-plugin activation, explicit generation mode, API or target dependencies, and named target
 executions. From its 0.6 baseline, this public Gradle DSL follows tapik's documented pre-1.0 Semantic Versioning policy.
 
 ## Examples and documentation
 
 The repository contains one runnable Gradle multi-project build with `contract` and `application` projects. It reuses
-the same ordinary Kotlin library contract and application sources as the Maven example: it does not translate APIs
-into another model or maintain Gradle-specific endpoint definitions. The contract demonstrates same-project OpenAPI
+the same ordinary Kotlin API and application sources as the Maven example: it does not translate endpoints into
+another model or maintain Gradle-specific endpoint definitions. The `contract` project demonstrates same-project OpenAPI
 generation; the application consumes that project through both its ordinary dependency and `tapikContract`, then
-generates OpenAPI, Spring RestClient, and Spring WebMVC artifacts in compiled-contract mode.
+generates OpenAPI, Spring RestClient, and Spring WebMVC artifacts in compiled API dependency mode.
 
 Public Gradle documentation takes Kotlin and Groovy DSL fragments from files exercised by the Gradle test suite or the
 runnable example. It documents automatic compiler-plugin activation, explicit modes, dependency configurations,

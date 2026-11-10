@@ -31,8 +31,8 @@ property eligibility, stable tapik diagnostics, registry generation and loading,
 synchronization. Source-generating target specifications likewise compile emitted Kotlin when source validity is the
 behavior under test.
 
-Compilation specifications are required when the contract is that code must or must not compile, that the compiler
-plugin must report a particular tapik diagnostic, or that generated Kotlin must be accepted by the supported compiler.
+Compilation specifications are required when code must or must not compile, when the compiler plugin must report a
+particular tapik diagnostic, or when generated Kotlin must be accepted by the supported compiler.
 Ordinary Kotest coverage remains responsible for runtime behavior such as value validation, ordering, snapshots,
 codec round trips, target interpretation, rendering, and framework execution; compiling a snippet does not replace
 those assertions.
@@ -92,7 +92,7 @@ POMs and JARs from this build into a fresh temporary Maven repository and checks
 from the local Maven cache, but the entire `dev/akif` subtree is excluded before staging to prevent stale tapik artifacts
 from hiding missing release files.
 
-The consumer is a temporary copy of the runnable library contract/application sources, with its own parent POM rather
+The consumer is a temporary copy of the runnable library API and application sources, with its own parent POM rather
 than tapik's parent. It exercises compiler registries, same-module OpenAPI, compiled-contract generation, generated
 server/client compilation, and Spring behavior. Only source/example assets are copied, never generated `target` output.
 The nested build uses the repository Maven Wrapper, an isolated local repository, and a bounded timeout. Its workspace,
@@ -171,8 +171,8 @@ the build does not use `mavenLocal()`, an included plugin build, TestKit plugin-
 checkout. The retained workspace and build log make a missing marker, publication artifact, dependency, or generated
 output diagnosable.
 
-`core` remains dependency-free. Format integrations are opt-in contract dependencies: neither core nor generation
-targets select a serialization library for the user. A contract may use one integration, combine multiple integrations,
+`core` remains dependency-free. Format integrations are opt-in API dependencies: neither core nor generation targets
+select a serialization library for the user. An API may use one integration, combine multiple integrations,
 or construct core `Format` values directly; targets consume only the concrete formats already attached to the endpoint
 values.
 
@@ -187,17 +187,17 @@ cases. Format integrations supply their own model, expected wire representation,
 cases. This keeps behavioral parity testable without introducing a production dependency between integrations.
 
 `format-kotlinx` depends on `common-format` and Kotlin serialization, and converts its serializers into core codecs and
-schemas without leaking Kotlin serialization types into endpoint contracts. Projects that choose another integration
+schemas without leaking Kotlin serialization types into endpoint definitions. Projects that choose another integration
 do not depend on `format-kotlinx` or enable the Kotlin serialization compiler plugin. Dependencies used internally to
-render a target's own artifact are separate from contract format integrations and do not choose how endpoint values are
+render a target's own artifact are separate from API format integrations and do not choose how endpoint values are
 encoded.
 
 `format-jackson` depends on `common-format`, Jackson 3 databind, and its Kotlin module. It converts configured
-`ObjectMapper` behavior and Kotlin types into the same core codec and schema contracts without depending on
+`ObjectMapper` behavior and Kotlin types into the same core codec and schema values without depending on
 `format-kotlinx`.
 
-`core` exposes the minimal API registry provider contract needed by compiler-generated code. The `common-plugin` module
-defines host-neutral registry loading, target configuration, target execution, and generated artifact contracts.
+`core` exposes the API registry provider interface used by compiler-generated code. The `common-plugin` module defines
+host-neutral registry loading, target configuration, target execution, and generated artifact types.
 Target modules and adapters for Maven, Gradle, or command-line use depend on `common-plugin`; it must not depend on any
 build-tool API.
 
@@ -214,7 +214,7 @@ project without carrying tapik's internal test naming.
 
 The non-production `test-fixtures` module contains ordinary tapik definitions grouped by domain package. Its initial
 `dev.akif.tapik.test.fixtures.library` package covers books, authors, and rentals. Target modules consume this artifact
-in their tests so every interpreter is verified against the same contracts instead of maintaining target-specific
+in their tests so every interpreter is verified against the same API definitions instead of maintaining target-specific
 fixtures.
 
 Non-production modules remain installable so reactor and local integration builds can resolve them, but they must be
@@ -222,14 +222,14 @@ excluded from deployment. This applies to every `test-` and `example-` module; r
 production modules.
 
 The `example-contract` and `example-application` modules form the runnable Maven example and own the end-to-end Maven
-coverage. The contract publishes ordinary API values, Jackson-backed formats, and a compiler-generated registry; its
+coverage. The API module publishes ordinary endpoint values, Jackson-backed formats, and a compiler-generated registry; its
 OpenAPI execution also verifies the same-module `process-classes` workflow. The application consumes that compiled
-contract and runs OpenAPI, Spring RestClient, and Spring WebMVC generation during `generate-sources`, allowing its main
+API artifact and runs OpenAPI, Spring RestClient, and Spring WebMVC generation during `generate-sources`, allowing its main
 source to implement generated servers and construct a generated client backed by Spring's `RestClient`. API selection,
 BOM coverage, generated-source compilation, Spring runtime behavior, and golden OpenAPI artifacts are verified here
 rather than in parallel Maven-only fixture modules. The example is built and tested in the normal reactor so its
 documented configuration cannot drift from supported behavior.
 
-The `target-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy contracts
+The `target-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or copy APIs
 into a neutral metadata model. Its public document model represents the OpenAPI output itself, and deterministic JSON
 and YAML renderers expose the same document values.

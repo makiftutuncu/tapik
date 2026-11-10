@@ -57,7 +57,7 @@ status, while set, range, and custom variants carry the actual response `Status`
 Generated response data classes containing byte-array fields compare those fields by content and derive their hash
 codes from the byte content.
 
-Fixed output headers are contract checks rather than public response fields. For each selected output, a generated
+Fixed output headers are response requirements rather than public response fields. For each selected output, a generated
 client encodes the fixed value through its header format and requires the transport response to contain exactly one
 value with that encoding. A missing header, a different value, or repeated values fail response decoding.
 
@@ -115,7 +115,7 @@ name (including enclosing types). The prefix's parent is the fixed source root: 
 `com.example.library.generated.contract.Authors`, containing `AuthorsClient`, `AuthorsServer`, and
 `AuthorsGeneratedController`. Only that exact parent plus its trailing dot is removed; the source root is never inferred
 from the selected APIs or from a varying longest-common-prefix calculation. API display names, selection order, other
-selected APIs, and build layout do not affect this identity. Independent same-module contract artifacts use exactly
+selected APIs, and build layout do not affect this identity. Independent same-module API artifacts use exactly
 the same policy as compiled-contract generation.
 
 For a one-segment prefix such as `generated`, the source root is empty and the entire binary name is retained.
@@ -134,7 +134,7 @@ Source paths use the generated package and type name. WebMVC registration paths 
 those same fully qualified names. Repeating the same API class in a request is rejected, as are equal WebMVC server
 and controller suffixes. Different targets must use distinct suffixes if configured under the same prefix for the
 same API. Moving or renaming an API class, changing the prefix, or changing a suffix changes its generated public
-identity and is a source/binary compatibility change. This policy itself is a compatibility contract.
+identity and is a source/binary compatibility change. The naming scheme is part of tapik's compatibility surface.
 
 Local generated declaration names are allocated deterministically in endpoint and output declaration order. A
 normalized name collision keeps the first name unchanged and appends `2`, `3`, and so on to later declarations.
@@ -146,7 +146,7 @@ delegated inclusion path to its original definition. Inclusion and endpoint prop
 and response stem, so `libraryApi.authors.list` becomes `authorsList()` and `AuthorsListResponse`. This keeps equal
 endpoint property names from different included APIs meaningful before ordinary collision suffixing is needed.
 
-The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its RestClient
+The Maven integration fixture consumes an API from a separate compiled API artifact, generates its RestClient
 client during `generate-sources`, compiles the generated source, and executes a typed request and response through
 Spring's mock HTTP server.
 
@@ -164,12 +164,12 @@ runtime endpoint value used for decoding and encoding. Injecting the handler by 
 compatible, while the internal adapter keeps its framework methods out of the consumer's Kotlin API.
 
 This separation is also the server-integration boundary. User implementations depend on the pure typed handler
-contract, while wire adaptation and framework annotations belong to generated target-specific controllers. Future
+interface, while wire adaptation and framework annotations belong to generated target-specific controllers. Future
 server targets should preserve that boundary and provide their own adapters without requiring application handlers to
 adopt framework types or annotations. The WebMVC target currently emits both types in one source artifact; extracting a
-shared server-contract generator is deferred until another server target needs to consume the same generated contract.
+shared handler generator is deferred until another server target needs to reuse it.
 
-Generated Spring adapter methods receive wire values rather than asking Spring to convert contract values. They decode
+Generated Spring adapter methods receive wire values rather than asking Spring to convert endpoint values. They decode
 path variables, query parameters, headers, and bodies through the formats attached to the endpoint. Decode failures and
 fixed-header mismatches produce `400 Bad Request`. `CONNECT` and `QUERY` fail generation because Spring WebMVC cannot
 map them.
@@ -217,7 +217,7 @@ controller.
 Spring WebMVC derives `Content-Type` from the selected response body representation and owns `Content-Length` for the
 encoded response bytes. Generation fails when an output that can carry a body also declares `Content-Type`, or when any
 output declares `Content-Length`; header names are compared case-insensitively. A bodyless output may declare
-`Content-Type`, which is emitted as an ordinary contract header.
+`Content-Type`, which is emitted as an ordinary endpoint header.
 
 `packageName` selects the generated package prefix and defaults to `dev.akif.tapik.generated`. `serverSuffix` selects the
 handler-interface suffix and defaults to `Server`. `controllerSuffix` selects the internal generated-controller suffix
@@ -262,7 +262,7 @@ generated adapter's qualified name, and registration order is canonical by that 
 runtime resources in addition to compiling generated source. Users provide only ordinary Spring beans implementing the
 handler interfaces; they do not write per-API adapter configuration.
 
-The Maven integration fixture consumes an API from a separate compiled contract artifact, generates its WebMVC
+The Maven integration fixture consumes an API from a separate compiled API artifact, generates its WebMVC
 handler, adapter, and registration resource during `generate-sources`, and compiles an implementation of the generated
 interface. Boot and plain Spring application contexts discover the same adapters and serve typed responses through
 Spring's mock MVC runtime without per-API adapter configuration.
@@ -270,11 +270,11 @@ Spring's mock MVC runtime without per-API adapter configuration.
 ## Target runtime conformance
 
 The Maven integration fixture is the shared black-box conformance boundary for generated Spring clients and servers.
-One compiled contract dependency supplies both generated targets so their protocol behavior is exercised from the same
+One compiled API dependency supplies both generated targets so their protocol behavior is exercised from the same
 endpoint values rather than from target-specific copies. Generated-source snapshots remain useful structural tests,
 but they do not replace requests and responses executed through Spring's mock HTTP transports.
 
-The conformance contract's create operation verifies an encoded JSON request body, a successful body response with a
+The conformance API's create endpoint verifies an encoded JSON request body, a successful body response with a
 required `Location` header, and a bodyless error alternative. RestClient tests assert the complete request and decode
 both response alternatives. MockMVC tests assert successful response encoding, malformed-body rejection as `400 Bad
 Request`, unsupported request media rejection as `415 Unsupported Media Type`, required response-header encoding, and

@@ -16,7 +16,7 @@ property already stores an immutable snapshot of its declared type.
 | Area | Protected structure |
 | --- | --- |
 | Core decoding | `DecodeResult.Failure.errors`; successful values retain caller identity |
-| Core contracts | URI segments, endpoint tags, and status sets |
+| Core API values | URI segments, endpoint tags, and status sets |
 | Core schemas | Enum values, object properties, union alternatives, and discriminator mappings |
 | API and tuple views | API endpoint/inclusion lists and tuple value lists are fresh views; changing a view cannot change the source |
 | Compiler registry | Generated `ApiRegistry.apis` is unmodifiable and retains the created API instances |

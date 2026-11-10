@@ -46,6 +46,6 @@ unlisted registered or vendor media type directly, for example `MediaType("appli
 ## Targets
 
 Body uniqueness uses `MediaType` equality. OpenAPI Content Object keys and generated Spring mappings use its
-normalized, validated `value`. Malformed contract media types never reach document generation or Spring startup.
+normalized, validated `value`. Malformed endpoint media types never reach document generation or Spring startup.
 This validates neutral syntax, not whether a target has a codec or supports a particular charset or media type.
 `Accept` quality, wildcard selection, and compatibility are separate concerns and are unchanged by this task.
