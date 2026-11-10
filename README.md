@@ -14,7 +14,9 @@
                     |__/
 ```
 
-tapik lets you define HTTP endpoints as ordinary Kotlin values, then generate documentation, clients, or server interfaces from them. Kotlin is the source of truth: each endpoint's structure stays in its type, and generation reports when a target cannot represent an endpoint feature.
+Define HTTP endpoints as ordinary Kotlin values with tapik. Generate documentation, clients, and server interfaces from
+those endpoints. Their structure stays in the Kotlin types, and generation reports when an integration does not support
+an endpoint feature.
 
 ## Start here
 

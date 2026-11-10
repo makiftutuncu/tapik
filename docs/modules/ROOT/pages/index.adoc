@@ -5,8 +5,8 @@ tapik lets you define HTTP endpoints as ordinary Kotlin values, then generate AP
 interfaces from those endpoints.
 
 Kotlin definitions remain the source of truth. Kotlin keeps each endpoint's request and response details in its type.
-Kotlin and tapik catch invalid combinations early, and each output checks that it supports the endpoint features it
-receives.
+Kotlin and tapik catch invalid combinations early, and each integration checks that it can handle the endpoint features
+it receives.
 
 [.cards]
 == Start here
@@ -31,7 +31,7 @@ upgrading.
 
 == What you get
 
-Catch mistakes early:: Kotlin and output generation report invalid or unsupported endpoint definitions before an
+Catch mistakes early:: Kotlin and generation report invalid or unsupported endpoint definitions before an
 application starts.
 Keep one definition:: Define endpoints as Kotlin values and reuse them for documentation, clients, and servers.
 Compose APIs:: Name, share, and combine endpoints using ordinary Kotlin values.
