@@ -25,7 +25,7 @@ the configured phase, and that generation can read either a compiled API depende
 
 Every resolved `dev.akif:tapik-*` generation dependency must have the same version as its Maven or Gradle plugin.
 Import the tapik BOM for project dependencies and set the build-plugin version explicitly. Service-provider and
-linkage errors identify the Maven project/plugin side or Gradle contract/target classpath so alignment and placement
+linkage errors identify the Maven project/plugin side or Gradle API/target classpath so alignment and placement
 can be checked correctly.
 
 `Failed to load API registries from the project classpath` means a compiled registry provider could not be loaded,

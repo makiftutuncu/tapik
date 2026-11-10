@@ -58,7 +58,7 @@ dependencies and `tapikContract`; these configurations have different roles:
 include::example$gradle/application/build.gradle.kts[tag=compiled-contract-dependencies]
 ----
 
-Use same-project mode for documentation or artifacts intended only for downstream consumers. The runnable contract
+Use same-project mode for documentation or artifacts intended only for downstream consumers. The runnable API project
 does this for OpenAPI:
 
 [source,kotlin]
@@ -166,7 +166,7 @@ release artifacts and plugin marker are available, run:
 ./plugin-gradle/gradlew -p example-gradle clean check
 ----
 
-The contract writes OpenAPI under `example-contract/build/generated/tapik/documentation`. The application writes
+The API project writes OpenAPI under `example-contract/build/generated/tapik/documentation`. The application writes
 OpenAPI, generated client/server source, and WebMVC registration resources under the corresponding
 `example-application/build/generated/tapik` directories.
 
@@ -187,7 +187,7 @@ No API registries are found in same-project mode:: Ensure the project applies Ko
 public concrete `Api`. Run `tapikGenerate`; it schedules main compilation itself.
 
 A custom target is unknown:: Put its provider artifact on `tapikTarget`. The diagnostic lists target IDs visible on
-`tapikTargetClasspath` and identifies a provider found on the wrong contract side.
+`tapikTargetClasspath` and identifies a provider found on the API side.
 
 A generated type is unresolved:: Use compiled-contract mode. Same-project generation necessarily follows ordinary
 main compilation, so only its separate late compilation and downstream projects can use generated Kotlin.
@@ -196,4 +196,4 @@ Generation fails after a dependency upgrade:: Align the Gradle plugin, BOM, API 
 modules. The compatibility diagnostic identifies the classpath, coordinate, resolved version, plugin version, and
 whether a conflicting component came from an external module, project dependency, or included-build substitution.
 
-See xref:reference/troubleshooting.adoc[] for contract, target, OpenAPI, and Spring-specific failures.
+See xref:reference/troubleshooting.adoc[] for API loading, target, OpenAPI, and Spring-specific failures.

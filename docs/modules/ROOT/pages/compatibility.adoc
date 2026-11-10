@@ -18,7 +18,7 @@ integrations, and generation targets. tapik rejects version skew during generati
 
 == Compatibility surface
 
-The compatibility contract covers:
+The compatibility policy covers:
 
 * public Kotlin declarations in published production artifacts;
 * documented compiler-plugin, Maven-plugin, and Gradle-plugin configuration;
@@ -29,9 +29,9 @@ Changing an application's API ID or qualified API type, or changing a generated 
 changes that application's public output identity. Those are user-controlled compatibility changes, not changes made
 by a tapik patch release.
 
-Internal implementations, generated source formatting, and undocumented or unsupported behavior are not compatibility
-contracts. tapik also does not decide whether a user's HTTP contract remains semantically compatible with a deployed
-version; API versioning and rollout remain application responsibilities.
+Internal implementations, generated source formatting, and undocumented or unsupported behavior are outside the
+compatibility policy. tapik also does not decide whether a user's endpoints remain semantically compatible with a
+deployed version; API versioning and rollout remain application responsibilities.
 
 == Current supported scope
 
@@ -41,7 +41,7 @@ build-tool details separate from endpoints, so other hosts and targets can be ad
 definitions.
 
 Same-module generation runs after ordinary main-source compilation. When main source implements or imports generated
-Kotlin, generate during `generate-sources` from a separately compiled contract.
+Kotlin, generate during `generate-sources` from a separately compiled API module.
 
 Kotlin serialization and Jackson formats derive schemas for their documented supported shapes. When a serializer
 changes the wire shape in a way tapik cannot derive, supply an explicit schema or schema-registry entry; the caller
