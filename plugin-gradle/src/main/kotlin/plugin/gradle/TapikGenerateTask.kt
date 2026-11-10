@@ -48,7 +48,7 @@ abstract class TapikGenerateTask @Inject constructor(
     @get:Input
     internal abstract val kotlinVersion: Property<String>
 
-    /** Explicit source of compiled API contracts. */
+    /** Explicit source of compiled APIs. */
     @get:Optional
     @get:Input
     abstract val mode: Property<Mode>
@@ -66,7 +66,7 @@ abstract class TapikGenerateTask @Inject constructor(
     abstract val executions: ListProperty<TapikExecution>
 
     /**
-     * Resolved contract artifacts and their runtime dependencies.
+     * Resolved API artifacts and their runtime dependencies.
      *
      * These come from `tapikContractClasspath` in compiled-contract mode or main output and its compile and runtime
      * classpaths in same-project mode.

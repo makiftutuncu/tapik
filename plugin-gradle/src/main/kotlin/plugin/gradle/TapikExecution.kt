@@ -9,6 +9,8 @@ import javax.inject.Inject
  * Common, typed configuration for one declaration-ordered tapik generation execution.
  *
  * The execution `name` is a unique diagnostic identity; [targetId] independently selects the service-loaded target.
+ *
+ * @property targetId exact identifier of the generation target.
  */
 abstract class TapikExecution @Inject constructor(
     private val executionName: String,

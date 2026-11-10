@@ -14,7 +14,7 @@ internal enum class MavenGenerationMode(val compileGeneratedSources: Boolean) {
         require(Files.isDirectory(directory)) {
             "Direct tapik generation does not run user compilation or preceding lifecycle phases. " +
                 "Main output directory '$directory' is missing; compile same-module APIs first, " +
-                "or bind generation to generate-sources for a compiled contract dependency."
+                "or bind generation to generate-sources for a compiled API dependency."
         }
     }
 
@@ -26,7 +26,7 @@ internal enum class MavenGenerationMode(val compileGeneratedSources: Boolean) {
                 "process-classes" -> SAME_MODULE
                 else -> throw IllegalArgumentException(
                     "Unsupported tapik generation lifecycle phase '${execution.lifecyclePhase ?: "<missing>"}'. " +
-                        "Bind generation to generate-sources for compiled contracts or process-classes for same-module APIs."
+                        "Bind generation to generate-sources for a compiled API dependency or process-classes for same-module APIs."
                 )
             }
         }

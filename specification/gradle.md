@@ -444,7 +444,7 @@ contract dependencies, and version alignment. Arbitrary target execution failure
 failures.
 Every worker failure is additionally framed by the configured execution name and target ID.
 
-An empty API catalog has a mode-specific diagnostic. Compiled-contract mode tells the user to add a contract compiled
+An empty API catalog has a mode-specific diagnostic. Compiled-contract mode tells the user to add an API compiled
 with the tapik compiler plugin to `tapikContract`; same-project mode states that main compilation produced no eligible
 public concrete `Api` and points to compiler-plugin activation and the API eligibility rules. These failures, version
 failures, unknown or misplaced targets, and unsupported project types all occur before the output tree is changed and

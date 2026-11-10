@@ -71,7 +71,7 @@ class ProjectApiLoadingSpec : FunSpec({
             val failure = shouldThrow<IllegalStateException> { withRegistry(provider) }
 
             failure.message shouldContain "project classpath"
-            failure.message shouldContain "compiled contract artifacts"
+            failure.message shouldContain "compiled API artifacts"
             failure.message shouldContain "runtime dependencies"
             failure.message shouldContain "compatible tapik versions"
             failure.cause!!.javaClass shouldBe errorType

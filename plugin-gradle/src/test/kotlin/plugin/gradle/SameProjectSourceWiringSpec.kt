@@ -159,7 +159,7 @@ class SameProjectSourceWiringSpec : FunSpec({
         result.output shouldContain "Unresolved reference 'BooksClient'"
         result.output shouldContain
             "tapik same-project generated declarations are unavailable to ordinary main source; " +
-            "move the API contract to a separately compiled project and use Mode.COMPILED_CONTRACT"
+            "move endpoint definitions to a separately compiled project and use Mode.COMPILED_CONTRACT"
     }
 
     test("load contracts and compile generated source with compileOnly dependencies") {

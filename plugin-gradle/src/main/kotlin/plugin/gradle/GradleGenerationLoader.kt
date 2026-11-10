@@ -150,7 +150,7 @@ private fun targetPlacementGuidance(classpath: String): String =
 private fun apiLoadingFailure(classpath: String, cause: Throwable): IllegalStateException =
     IllegalStateException(
         "Failed to load API registry providers from $classpath. " +
-            "Check compiler-generated registry declarations, contract runtime dependencies, and tapik version " +
+            "Check compiler-generated registry declarations, API runtime dependencies, and tapik version " +
             "alignment.",
         cause
     )
@@ -164,7 +164,7 @@ private fun Mode.apiClasspathName(): String =
 private fun Mode.emptyApiCatalogMessage(): String =
     when (this) {
         Mode.COMPILED_CONTRACT ->
-            "No APIs were discovered on $CONTRACT_CLASSPATH. Add a contract compiled with the tapik compiler " +
+            "No APIs were discovered on $CONTRACT_CLASSPATH. Add an API compiled with the tapik compiler " +
                 "plugin to tapikContract."
         Mode.SAME_PROJECT ->
             "No APIs were discovered on $SAME_PROJECT_CLASSPATH. Ensure the main compilation contains eligible " +

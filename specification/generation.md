@@ -120,7 +120,7 @@ a misplaced plugin dependency. Generation-target service-provider or linkage fai
 failed and point to target placement and tapik version alignment.
 
 API-registry service-provider and linkage failures during project catalog loading are translated into exceptions with
-project-classpath context. The diagnostic directs users to compiled contract artifacts, missing runtime dependencies,
+project-classpath context. The diagnostic directs users to compiled API artifacts, missing runtime dependencies,
 and compatible tapik versions; the original error remains the cause. Maven reports these failures through its normal
 `MojoExecutionException` chain. Translation catches only `ServiceConfigurationError` and `LinkageError` from catalog
 loading, not arbitrary errors or failures from subsequent target execution. Target-loading diagnostics are unchanged,
@@ -130,12 +130,12 @@ Before generation, the Maven adapter compares the Maven plugin version with ever
 dependency. An empty project-side set is tolerated for hosts supplying APIs through the plugin realm, but every
 discovered project tapik version must equal the plugin version. Version skew fails before registry or target loading.
 
-Generated registries travel with compiled contract artifacts. A consuming Maven project discovers registries from
+Generated registries travel with compiled API artifacts. A consuming Maven project discovers registries from
 its own output and its compile classpath, combines every API deterministically, and applies the configured target to
-all of them by default. Consuming a contract dependency therefore behaves like compiling its API definitions in the
+all of them by default. Consuming an API dependency therefore behaves like compiling its endpoint definitions in the
 current project.
 
-## Compiled contract types
+## Compiled API types
 
 Targets that generate typed source use a compiled view pairing each runtime `Api` and endpoint value with the
 endpoint property's actual Kotlin return type and its property path from the selected root API. The type is read from
@@ -247,7 +247,7 @@ not run user compilation or any preceding lifecycle phase. It requires an existi
 one API visible through compiled registries before selection; dependency registries are supported too. Missing
 prerequisites fail before artifact writes and explain how to compile same-module APIs or use a compiled-contract
 `generate-sources` binding. Existing API selection validation remains unchanged in every mode.
-Direct invocation logs that it reuses compiled output, which may be stale; users must compile changed contracts first.
+Direct invocation logs that it reuses compiled output, which may be stale; users must compile changed endpoint definitions first.
 
 When an execution returns `RESOURCE` artifacts, the Maven adapter adds exactly those relative paths beneath the
 execution output directory as project resources. For a late `process-classes` execution or direct invocation it also materializes those

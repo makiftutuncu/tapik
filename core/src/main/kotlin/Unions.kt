@@ -6,6 +6,10 @@ package dev.akif.tapik
  * [mapping] associates wire values with neutral schema references. [defaultMapping] identifies the alternative used
  * when the property is absent or does not have an explicit mapping.
  *
+ * @property propertyName name of the wire property used to distinguish alternatives.
+ * @param mapping mapping from wire values to schema references.
+ * @property mapping schema references in declaration order.
+ * @property defaultMapping fallback schema when a wire value has no mapping.
  * @throws IllegalArgumentException when [propertyName] or a discriminating value in [mapping] is blank.
  */
 class SchemaDiscriminator(
@@ -49,6 +53,9 @@ class SchemaDiscriminator(
 /**
  * A schema matching exactly one of [alternatives], optionally aided by [discriminator].
  *
+ * @property alternatives schemas accepted by this union in declaration order.
+ * @property discriminator optional hint for identifying an alternative.
+ * @property name optional reusable schema name.
  * @throws IllegalArgumentException when fewer than two distinct alternatives are supplied or [name] is blank.
  */
 class UnionSchema(

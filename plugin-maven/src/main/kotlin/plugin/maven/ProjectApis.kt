@@ -37,7 +37,7 @@ internal object ProjectApis {
     private fun loadingFailure(cause: Throwable): IllegalStateException =
         IllegalStateException(
             "Failed to load API registries from the project classpath. " +
-                "Ensure compiled contract artifacts and their runtime dependencies are present and use compatible tapik versions.",
+                "Ensure compiled API artifacts and their runtime dependencies are present and use compatible tapik versions.",
             cause
         )
 }

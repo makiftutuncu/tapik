@@ -16,7 +16,7 @@ import java.nio.file.Path
  * Runs one configured tapik generation execution against compiled API registries.
  *
  * The goal defaults to `process-classes`, after APIs declared by the current project have compiled. Bind it to
- * `generate-sources` when generating from an already compiled contract dependency so generated Kotlin can be used by
+ * `generate-sources` when generating from an already compiled API dependency so generated Kotlin can be used by
  * the current project's main sources. The goal does not scan packages or execute API declarations.
  */
 @Mojo(
@@ -57,7 +57,7 @@ class GenerateMojo : AbstractMojo() {
             if (mode == MavenGenerationMode.DIRECT) {
                 log.info(
                     "Direct tapik generation reuses compiled output and does not run user compilation or preceding lifecycle phases. " +
-                        "Compiled output may be stale; compile changed contracts first."
+                        "Compiled output may be stale; compile changed endpoint definitions first."
                 )
             }
             mode.requireCompiledOutput(Path.of(project.build.outputDirectory))

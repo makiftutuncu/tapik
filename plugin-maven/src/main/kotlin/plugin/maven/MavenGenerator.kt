@@ -26,7 +26,7 @@ internal class MavenGenerator {
         return ProjectApis.use(classpath, parentClassLoader) { apis, projectClassLoader ->
             require(mode != MavenGenerationMode.DIRECT || apis.isNotEmpty()) {
                 "Direct tapik generation found no APIs in compiled registries and does not run user compilation. " +
-                    "Compile same-module APIs with the tapik compiler plugin first, or add a compiled contract dependency " +
+                    "Compile same-module APIs with the tapik compiler plugin first, or add a compiled API dependency " +
                     "and bind generation to generate-sources."
             }
             val configuration =

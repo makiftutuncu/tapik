@@ -87,7 +87,7 @@ internal fun Project.wireSameProjectGeneration(
                 if (sameProjectMode.get()) {
                     runningTask.logger.lifecycle(
                         "tapik same-project generated declarations are unavailable to ordinary main source; " +
-                            "move the API contract to a separately compiled project and use Mode.COMPILED_CONTRACT"
+                            "move endpoint definitions to a separately compiled project and use Mode.COMPILED_CONTRACT"
                     )
                 }
             }

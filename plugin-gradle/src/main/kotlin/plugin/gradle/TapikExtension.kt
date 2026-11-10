@@ -25,7 +25,7 @@ abstract class TapikExtension @Inject constructor(private val objects: ObjectFac
      */
     abstract val outputRoot: DirectoryProperty
 
-    /** Explicit source of compiled API contracts. */
+    /** Explicit source of compiled APIs. */
     abstract val mode: Property<Mode>
 
     private val executions: NamedDomainObjectContainer<TapikExecution> =
@@ -36,7 +36,7 @@ abstract class TapikExtension @Inject constructor(private val objects: ObjectFac
     internal val orderedExecutions: ListProperty<TapikExecution> =
         objects.listProperty(TapikExecution::class.java).convention(emptyList())
 
-    /** Selects the explicit [mode] used to load compiled API contracts. */
+    /** Selects the explicit [mode] used to load compiled APIs. */
     fun mode(mode: Mode) = selectMode(mode)
 
     /** Sets the generated artifact root to [directory]. */

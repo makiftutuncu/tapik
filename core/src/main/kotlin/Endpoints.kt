@@ -12,6 +12,7 @@ data object Draft : EndpointState
 /**
  * An endpoint bound to a property with a qualified [id].
  *
+ * @property id qualified API and property identifier.
  * @throws IllegalArgumentException when [id] is blank.
  */
 data class Ready(

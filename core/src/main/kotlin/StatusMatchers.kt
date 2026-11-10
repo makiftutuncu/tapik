@@ -6,7 +6,10 @@ sealed interface StatusMatcher {
     fun matches(status: Status): Boolean
 }
 
-/** A matcher selecting exactly [status]. */
+/** A matcher selecting exactly [status].
+ *
+ * @property status only status accepted by this matcher.
+ */
 data class ExactStatus(
     val status: Status
 ) : StatusMatcher {
@@ -50,7 +53,10 @@ fun statusesOf(
     vararg rest: Status
 ): StatusSet = StatusSet(setOf(first, *rest))
 
-/** A matcher selecting statuses whose numeric codes belong to [range]. */
+/** A matcher selecting statuses whose numeric codes belong to [range].
+ *
+ * @property range inclusive range of accepted status codes.
+ */
 data class StatusRange(
     val range: IntRange
 ) : StatusMatcher {
@@ -71,6 +77,10 @@ fun statusesIn(range: IntRange): StatusRange = StatusRange(range)
  *
  * The [predicate] must be pure and deterministic because tapik evaluates it during endpoint validation and generation
  * may evaluate it again at runtime.
+ *
+ * @property description stable label used in diagnostics.
+ * @property predicate returns whether a status is accepted.
+ * @throws IllegalArgumentException when [description] is blank.
  */
 data class CustomStatus(
     val description: String,

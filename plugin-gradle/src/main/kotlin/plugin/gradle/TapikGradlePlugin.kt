@@ -44,7 +44,7 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
         val generation =
             target.tasks.register("tapikGenerate", TapikGenerateTask::class.java) { task ->
                 task.group = "tapik"
-                task.description = "Generates artifacts from tapik API contracts"
+                task.description = "Generates artifacts from tapik APIs"
                 task.mode.set(extension.mode)
                 task.pluginVersion.set(tapikVersion)
                 task.tapikDependencyVersions.putAll(

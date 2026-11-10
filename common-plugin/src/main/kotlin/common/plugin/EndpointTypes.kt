@@ -23,7 +23,7 @@ class EndpointTypeNames(
 /**
  * Allocates target-neutral endpoint type names for [compiled] in endpoint declaration order.
  *
- * The returned names depend only on the compiled contract and may be shared by client and server generators.
+ * The returned names depend only on the compiled API and may be shared by client and server generators.
  */
 fun endpointTypeNames(compiled: CompiledApi): List<EndpointTypeNames> {
     val typeNames = mutableSetOf<String>()
