@@ -1,18 +1,19 @@
 # tapik Gradle example
 
-This multi-project build uses the same library contract and application Kotlin sources as the Maven example. The
-`contract` project generates OpenAPI after compiling its own APIs, while `application` generates documentation and
-Spring sources from the compiled contract project.
+This build reuses the API and application sources from the Maven example. The `contract` project defines endpoints and
+generates OpenAPI; the `application` project uses the compiled API to generate documentation, a Spring client, and a
+Spring server.
 
-From a released checkout, run the build with the Gradle wrapper available in `plugin-gradle`:
+From this directory, run the example with the wrapper in `plugin-gradle`:
 
 ```shell
 ../plugin-gradle/gradlew -p . check
 ```
 
-During tapik development, first prepare the isolated repository described in the development guide, then pass it as
-`-PtapikRepository=/absolute/path/to/repository` together with the matching `-PtapikVersion`.
+During tapik development, prepare the isolated repository described in the
+[development guide](../docs/modules/ROOT/pages/development.adoc), then pass its path as `-PtapikRepository` and the
+matching version as `-PtapikVersion`.
 
-For the shared user guides, see the [Gradle reference](../docs/modules/ROOT/pages/reference/gradle.adoc),
+For the shared guides, see the [Gradle reference](../docs/modules/ROOT/pages/reference/gradle.adoc),
 [generation model](../docs/modules/ROOT/pages/generation/index.adoc), and
 [development guide](../docs/modules/ROOT/pages/development.adoc).
