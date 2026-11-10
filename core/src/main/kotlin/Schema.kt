@@ -14,9 +14,16 @@ sealed interface Schema {
 
 /** Scalar schema types needed by tapik's built-in formats. */
 enum class SchemaType {
+    /** A Boolean value. */
     BOOLEAN,
+
+    /** An integer number. */
     INTEGER,
+
+    /** A number that may include a fractional part. */
     NUMBER,
+
+    /** A string value. */
     STRING
 }
 
