@@ -16,7 +16,7 @@ class BooksSpec : FunSpec({
             listOf("/books?page={page}&authorId={authorId}", "/books/{bookId}", "/books")
     }
 
-    test("exercise request and response contract features") {
+    test("exercise request and response API features") {
         Books.list.headers.values.single().name shouldBe "X-Request-Id"
         Books.list.uri.queries.values[1].shouldBeInstanceOf<RepeatedQueryParameter<*, *>>()
         Books.list.outputs.values.size shouldBe 1

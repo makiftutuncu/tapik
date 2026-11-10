@@ -23,8 +23,8 @@ val testKitPlugins =
         isCanBeConsumed = false
         isCanBeResolved = true
     }
-val generationWorkerContract =
-    configurations.create("generationWorkerContract") {
+val generationWorkerApi =
+    configurations.create("generationWorkerApi") {
         isCanBeConsumed = false
         isCanBeResolved = true
     }
@@ -44,7 +44,7 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core-jvm")
     testImplementation(gradleTestKit())
     testKitPlugins("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-    generationWorkerContract("dev.akif:tapik-example-contract:$tapikVersion")
+    generationWorkerApi("dev.akif:tapik-example-contract:$tapikVersion")
     generationWorkerTargets("dev.akif:tapik-target-openapi:$tapikVersion")
 }
 
@@ -136,7 +136,7 @@ tasks.test {
     useJUnitPlatform()
     systemProperty("tapik.repository", tapikRepository)
     systemProperty("tapik.version", tapikVersion)
-    systemProperty("tapik.generation-worker.contract-classpath", generationWorkerContract.asPath)
+    systemProperty("tapik.generation-worker.api-dependency-classpath", generationWorkerApi.asPath)
     systemProperty("tapik.generation-worker.target-classpath", generationWorkerTargets.asPath)
 }
 

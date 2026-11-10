@@ -53,7 +53,7 @@ class GradleGenerationWorkActionSpec : FunSpec({
             }
 
             tasks.named('generationWorker') {
-                contractClasspath.from(files(${workerContractClasspath.groovyFiles()}))
+                apiDependencyClasspath.from(files(${workerApiDependencyClasspath.groovyFiles()}))
                 targetClasspath.from(files(${workerTargetClasspath.groovyFiles()}))
                 resultFile.set(layout.buildDirectory.file('worker/result.bin'))
             }
@@ -122,7 +122,7 @@ class GradleGenerationWorkActionSpec : FunSpec({
             )
     }
 
-    test("reuse one target catalog and contract classloader for every execution") {
+    test("reuse one target catalog and API dependency classloader for every execution") {
         val descriptorRoot = Files.createTempDirectory("tapik-gradle-worker-reuse-")
         val descriptor =
             descriptorRoot.resolve("META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry")
@@ -165,7 +165,7 @@ internal abstract class GenerationWorkerHarness @Inject constructor(
     private val workerExecutor: WorkerExecutor
 ) : DefaultTask() {
     @get:Classpath
-    abstract val contractClasspath: ConfigurableFileCollection
+    abstract val apiDependencyClasspath: ConfigurableFileCollection
 
     @get:Classpath
     abstract val targetClasspath: ConfigurableFileCollection
@@ -180,8 +180,8 @@ internal abstract class GenerationWorkerHarness @Inject constructor(
                 isolation.classpath.from(targetClasspath)
             }
         queue.submit(GradleGenerationWorkAction::class.java) { parameters ->
-            parameters.contractClasspath.from(contractClasspath)
-            parameters.mode.set(Mode.COMPILED_CONTRACT)
+            parameters.apiDependencyClasspath.from(apiDependencyClasspath)
+            parameters.mode.set(Mode.COMPILED_API_DEPENDENCY)
             parameters.executions.set(
                 listOf(
                     GradleGenerationWorkExecution(
@@ -285,7 +285,7 @@ private fun workerPluginClasspath(): List<File> {
 private fun List<Path>.groovyFiles(): String =
     joinToString { path -> "'${path.toString().replace("'", "\\'")}'" }
 
-private val workerContractClasspath: List<Path> = workerClasspathProperty("tapik.generation-worker.contract-classpath")
+private val workerApiDependencyClasspath: List<Path> = workerClasspathProperty("tapik.generation-worker.api-dependency-classpath")
 private val workerTargetClasspath: List<Path> = workerClasspathProperty("tapik.generation-worker.target-classpath")
 
 private fun workerClasspathProperty(name: String): List<Path> =

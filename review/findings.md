@@ -10,12 +10,12 @@ The Gradle adapter is substantial and coherent. It preserves the compiler-genera
 architecture instead of reintroducing scanning or a Gradle-specific endpoint model. The important generation path is
 already shared correctly through `ApiCatalog`, `GenerationTargetCatalog`, `ApiSelection`, `GenerationEngine`,
 `TargetConfiguration`, `GenerationResult`, and `ArtifactWriter`. The single output-owning task, kind-based output
-routing, isolated contract classloader, aggregate-before-write behavior, typed built-in DSL, structural custom-target
+routing, isolated API dependency classloader, aggregate-before-write behavior, typed built-in DSL, structural custom-target
 configuration, configuration-cache support, publication metadata, and external-consumer rehearsal are all strong.
 
 The current Maven and Gradle examples generate byte-identical corresponding OpenAPI documents, Kotlin sources, and
 Spring WebMVC registration resources. The differences in root layout and ownership manifests are intentional host
-concerns. However, the issues below leave several documented contracts unenforced and create lifecycle behavior that
+concerns. However, the issues below leave several documented guarantees unenforced and create lifecycle behavior that
 does not yet match Maven in less common but valid builds.
 
 ## High priority
@@ -100,22 +100,22 @@ Location: `plugin-gradle/src/main/kotlin/plugin/gradle/TapikGenerateTask.kt:94-1
 
 All work items are submitted to one Worker API queue before one final `await`. Gradle may execute those items
 concurrently and does not promise FIFO invocation. Zipping result files afterward restores aggregation and reporting
-order, but it does not satisfy the public contract that targets are invoked in declaration order. Custom targets can
+order, but it does not satisfy the documented guarantee that targets are invoked in declaration order. Custom targets can
 observe the difference through shared services, external inputs, diagnostics, or other side effects.
 
 Submit one isolated work item containing the ordered execution snapshots and invoke them sequentially inside that
 worker, or await each item before submitting the next. The former also avoids rebuilding both service catalogs and the
-contract classloader for every execution. Test invocation order with a target whose calls are deliberately delayed;
+API dependency classloader for every execution. Test invocation order with a target whose calls are deliberately delayed;
 checking only result order is insufficient.
 
 ### 7. Same-project classpaths omit compile-only dependencies that Maven includes
 
 Location: `plugin-gradle/src/main/kotlin/plugin/gradle/SameProjectWiring.kt:21-31,69-73`
 
-Both contract loading and late generated-source compilation use main runtime dependencies. Gradle's runtime classpath
+Both API loading and late generated-source compilation use main runtime dependencies. Gradle's runtime classpath
 does not contain `compileOnly` dependencies, while Maven's `generationClasspath()` deliberately combines compile and
-runtime classpaths. A valid library project using compile-only API dependencies can compile its contract normally but
-fail when tapik instantiates that contract or compiles generated source referring to those APIs. The late compilation
+runtime classpaths. A valid library project using compile-only API dependencies can compile its API normally but
+fail when tapik instantiates that API or compiles generated source referring to those APIs. The late compilation
 should have at least the same compile visibility as ordinary main source.
 
 Build the generation/late-compilation classpath from the appropriate main compile and runtime classpaths, deduplicated
@@ -148,7 +148,7 @@ Locations:
 - `plugin-maven/src/main/kotlin/plugin/maven/MavenTargets.kt:13-19`
 - `plugin-gradle/src/main/kotlin/plugin/gradle/GradleGenerationLoader.kt:26-43,107-118`
 
-Gradle correctly hides `ApiRegistry` and `GenerationTargetRegistry` service resources from the contract
+Gradle correctly hides `ApiRegistry` and `GenerationTargetRegistry` service resources from the API dependency
 classloader's parent. Maven uses an ordinary parent-first project `URLClassLoader`. Consequently an `ApiRegistry`
 accidentally packaged in a Maven plugin dependency can be discovered as a project API, and the catalog inspected as
 the Maven "project" target side also includes parent plugin-realm providers. The two hosts therefore share catalog
@@ -166,23 +166,23 @@ The registry index and every source root are passed as ordinary `SubpluginOption
 Kotlin's Gradle plugin treats ordinary options as task inputs and explicitly provides file/internal option types for
 path-valued options. The current options therefore change when an otherwise identical project moves, preventing Kotlin
 compile cache relocation even though the underlying sources are already declared inputs. The existing relocation test
-uses a precompiled contract JAR and exercises `tapikGenerate`, so it cannot catch this compiler-task behavior.
+uses a precompiled API dependency JAR and exercises `tapikGenerate`, so it cannot catch this compiler-task behavior.
 
 Use path-aware/internal compiler options as appropriate and register the registry index as compilation-local state so
-Gradle understands its lifecycle. Add a relocated contract-compilation cache test, followed by a partial source change
+Gradle understands its lifecycle. Add a relocated API-compilation cache test, followed by a partial source change
 that verifies the complete registry remains intact.
 
-### 11. Unknown-target diagnosis suppresses malformed contract-side providers
+### 11. Unknown-target diagnosis suppresses malformed API-dependency-side providers
 
 Location: `plugin-gradle/src/main/kotlin/plugin/gradle/GradleGenerationLoader.kt:69-88`
 
-The misplaced-target probe wraps the entire contract-side target catalog load in `runCatching` and converts every
+The misplaced-target probe wraps the entire API-dependency-side target catalog load in `runCatching` and converts every
 failure to an empty catalog. A malformed service entry, linkage failure, or duplicate target ID on the wrong classpath
 is therefore hidden behind an ordinary "unknown target" message, discarding the contextual error and cause that
 `loadTargets` just created.
 
 Let catalog failures propagate; an absent provider already produces an empty catalog without throwing. Add failure
-coverage for malformed and duplicate target providers on `tapikContractClasspath`.
+coverage for malformed and duplicate target providers on `tapikApiDependencyClasspath`.
 
 ## Low priority
 

@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import java.nio.file.Files
 import java.nio.file.Path
 
-class ContractGenerationSpec : FunSpec({
+class ApiGenerationSpec : FunSpec({
     test("generate OpenAPI from APIs in the same Maven module") {
         listOf("Authors", "Books", "Catalog").forEach { api ->
             Files.isRegularFile(Path.of("target/generated/tapik/$api.openapi.yml")) shouldBe true

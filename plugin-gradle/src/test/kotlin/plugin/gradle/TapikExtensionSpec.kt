@@ -48,8 +48,8 @@ class TapikExtensionSpec : FunSpec({
         project.pluginManager.apply(TapikGradlePlugin::class.java)
         val extension = project.extensions.getByType(TapikExtension::class.java)
 
-        extension.outputRoot(project.layout.projectDirectory.dir("generated-contracts"))
-        extension.mode(Mode.COMPILED_CONTRACT)
+        extension.outputRoot(project.layout.projectDirectory.dir("generated-api"))
+        extension.mode(Mode.COMPILED_API_DEPENDENCY)
         extension.springWebMvc(
             "server",
             Action { execution ->
@@ -67,7 +67,7 @@ class TapikExtensionSpec : FunSpec({
                 execution.format(OpenApiFormat.JSON)
                 execution.pretty(false)
                 execution.componentNaming(OpenApiComponentNaming.QUALIFIED)
-                execution.output("contract.json")
+                execution.output("api.json")
             }
         )
         extension.target(
@@ -94,8 +94,8 @@ class TapikExtensionSpec : FunSpec({
             }
         )
 
-        extension.outputRoot.get().asFile shouldBe project.layout.projectDirectory.dir("generated-contracts").asFile
-        extension.mode.get() shouldBe Mode.COMPILED_CONTRACT
+        extension.outputRoot.get().asFile shouldBe project.layout.projectDirectory.dir("generated-api").asFile
+        extension.mode.get() shouldBe Mode.COMPILED_API_DEPENDENCY
         extension.orderedExecutions.get().map { execution -> execution.name } shouldContainExactly
             listOf("server", "docs", "company")
 
@@ -110,7 +110,7 @@ class TapikExtensionSpec : FunSpec({
         docs.format.get() shouldBe OpenApiFormat.JSON
         docs.pretty.get() shouldBe false
         docs.componentNaming.get() shouldBe OpenApiComponentNaming.QUALIFIED
-        docs.output.get() shouldBe "contract.json"
+        docs.output.get() shouldBe "api.json"
 
         val company = extension.orderedExecutions.get()[2] as CustomTargetExecution
         company.targetId shouldBe "company-docs"
@@ -175,8 +175,8 @@ class TapikExtensionSpec : FunSpec({
         extension.openApi("docs", Action { execution -> execution.version("1") })
         shouldThrow<IllegalArgumentException> { extension.springRestClient("docs", Action {}) }
 
-        extension.mode(Mode.COMPILED_CONTRACT)
-        extension.mode(Mode.COMPILED_CONTRACT)
+        extension.mode(Mode.COMPILED_API_DEPENDENCY)
+        extension.mode(Mode.COMPILED_API_DEPENDENCY)
         shouldThrow<IllegalArgumentException> { extension.mode(Mode.SAME_PROJECT) }
     }
 
@@ -245,7 +245,7 @@ class TapikExtensionSpec : FunSpec({
         val project = ProjectBuilder.builder().build()
         project.pluginManager.apply(TapikGradlePlugin::class.java)
         val extension = project.extensions.getByType(TapikExtension::class.java)
-        extension.mode(Mode.COMPILED_CONTRACT)
+        extension.mode(Mode.COMPILED_API_DEPENDENCY)
         extension.openApi("docs", Action { execution -> execution.version("1.0.0") })
         extension.springRestClient("client", Action {})
         extension.springWebMvc("server", Action {})

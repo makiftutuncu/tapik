@@ -53,18 +53,18 @@ class GradleGenerationAggregationSpec : FunSpec({
                     listOf(
                         GradleExecutionGeneration(
                             "first",
-                            GenerationResult(listOf(artifact("contract.txt", content = "first")))
+                            GenerationResult(listOf(artifact("api.txt", content = "first")))
                         ),
                         GradleExecutionGeneration(
                             "second",
-                            GenerationResult(listOf(artifact("contract.txt", content = "second")))
+                            GenerationResult(listOf(artifact("api.txt", content = "second")))
                         )
                     )
                 )
             }
 
         failure.message shouldBe
-            "tapik generated path 'sources/contract.txt' conflicts between executions 'first' and 'second'"
+            "tapik generated path 'sources/api.txt' conflicts between executions 'first' and 'second'"
     }
 
     test("reject divergent content hidden behind one sharing key") {

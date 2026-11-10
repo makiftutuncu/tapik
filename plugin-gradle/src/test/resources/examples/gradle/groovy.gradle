@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    tapikContract 'com.example:library-contract:1.0.0'
+    tapikApiDependency 'com.example:library-contract:1.0.0'
     tapikTarget 'com.example:company-tapik-target:1.2.0'
 }
 

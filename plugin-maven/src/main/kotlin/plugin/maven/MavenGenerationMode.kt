@@ -5,7 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 internal enum class MavenGenerationMode(val compileGeneratedSources: Boolean) {
-    COMPILED_CONTRACT(false),
+    COMPILED_API_DEPENDENCY(false),
     SAME_MODULE(true),
     DIRECT(true);
 
@@ -22,7 +22,7 @@ internal enum class MavenGenerationMode(val compileGeneratedSources: Boolean) {
         fun from(execution: MojoExecution): MavenGenerationMode {
             if (execution.source == MojoExecution.Source.CLI) return DIRECT
             return when (execution.lifecyclePhase) {
-                "generate-sources" -> COMPILED_CONTRACT
+                "generate-sources" -> COMPILED_API_DEPENDENCY
                 "process-classes" -> SAME_MODULE
                 else -> throw IllegalArgumentException(
                     "Unsupported tapik generation lifecycle phase '${execution.lifecyclePhase ?: "<missing>"}'. " +

@@ -17,7 +17,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
-    <!-- tag::contract-bom[] -->
+    <!-- tag::api-bom[] -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -29,10 +29,10 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <!-- end::contract-bom[] -->
+    <!-- end::api-bom[] -->
 
     <dependencies>
-        <!-- tag::contract-dependencies[] -->
+        <!-- tag::api-dependencies[] -->
         <dependency>
             <groupId>dev.akif</groupId>
             <artifactId>tapik-core</artifactId>
@@ -41,7 +41,7 @@
             <groupId>dev.akif</groupId>
             <artifactId>tapik-format-jackson</artifactId>
         </dependency>
-        <!-- end::contract-dependencies[] -->
+        <!-- end::api-dependencies[] -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>

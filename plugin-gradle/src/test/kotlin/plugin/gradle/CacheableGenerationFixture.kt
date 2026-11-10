@@ -27,8 +27,8 @@ internal class CacheableGenerationFixture private constructor(
         writeBuild()
     }
 
-    fun updateContractBytecode(value: String) {
-        rewriteJarWithMarker(root.resolve("inputs/contract.jar"), "ContractMarker", value)
+    fun updateApiBytecode(value: String) {
+        rewriteJarWithMarker(root.resolve("inputs/api.jar"), "ApiMarker", value)
     }
 
     fun updateRuntimeDependency(value: String) {
@@ -141,16 +141,16 @@ internal class CacheableGenerationFixture private constructor(
             }
 
             dependencies {
-                tapikContract files('inputs/contract.jar')
-                tapikContract files('inputs/runtime.jar')
-                tapikContract 'dev.akif:tapik-core:$cacheFixtureVersion'
-                tapikContract 'dev.akif:tapik-format-jackson:$cacheFixtureVersion'
+                tapikApiDependency files('inputs/api.jar')
+                tapikApiDependency files('inputs/runtime.jar')
+                tapikApiDependency 'dev.akif:tapik-core:$cacheFixtureVersion'
+                tapikApiDependency 'dev.akif:tapik-format-jackson:$cacheFixtureVersion'
                 tapikTarget files('inputs/target.jar')
                 tapikTarget files('${targetDescriptor.groovyPath()}', '${targetClasses.groovyPath()}')
             }
 
             tapik {
-                mode(Mode.COMPILED_CONTRACT)
+                mode(Mode.COMPILED_API_DEPENDENCY)
                 $outputRoot
             ${executions.prependIndent("    ")}
             }
@@ -192,8 +192,8 @@ internal class CacheableGenerationFixture private constructor(
             )
             val inputs = root.resolve("inputs")
             Files.createDirectories(inputs)
-            Files.copy(cacheFixtureContractJar, inputs.resolve("contract.jar"))
-            rewriteJarWithMarker(inputs.resolve("contract.jar"), "ContractMarker", "initial")
+            Files.copy(cacheFixtureApiJar, inputs.resolve("api.jar"))
+            rewriteJarWithMarker(inputs.resolve("api.jar"), "ApiMarker", "initial")
             rewriteJarWithMarker(inputs.resolve("runtime.jar"), "RuntimeMarker", "initial")
             rewriteJarWithMarker(inputs.resolve("target.jar"), "TargetMarker", "initial")
             return CacheableGenerationFixture(root, sharedBuildCache, descriptorRoot, testClasses).also {
@@ -262,7 +262,7 @@ private val cacheFixtureRepository: Path =
     Path.of(requireNotNull(System.getProperty("tapik.repository")) { "Missing tapik.repository" })
 private val cacheFixtureVersion: String =
     requireNotNull(System.getProperty("tapik.version")) { "Missing tapik.version" }
-private val cacheFixtureContractJar: Path =
+private val cacheFixtureApiJar: Path =
     cacheFixtureRepository.resolve(
         "dev/akif/tapik-example-contract/$cacheFixtureVersion/" +
             "tapik-example-contract-$cacheFixtureVersion.jar"

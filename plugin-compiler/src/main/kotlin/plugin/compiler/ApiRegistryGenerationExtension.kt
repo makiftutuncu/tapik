@@ -48,7 +48,7 @@ internal class ApiRegistryGenerationExtension(
         val apiTypesBySource =
             moduleFragment.files.associate { file -> file.sourcePath() to file.concreteApiTypes(apiClass) }
         val apiTypes = apiTypesBySource.values.flatten()
-        if (!validateContractProperties(apiTypes, apiClass, endpointClass, apiInclusionClass)) {
+        if (!validateApiProperties(apiTypes, apiClass, endpointClass, apiInclusionClass)) {
             RegistryClassWriter.synchronize(outputDirectory, emptyList())
             return
         }
@@ -85,7 +85,7 @@ internal class ApiRegistryGenerationExtension(
         RegistryClassWriter.synchronize(outputDirectory, registeredTypes)
     }
 
-    private fun validateContractProperties(
+    private fun validateApiProperties(
         apiTypes: List<IrClass>,
         apiClass: IrClass,
         endpointClass: IrClass,

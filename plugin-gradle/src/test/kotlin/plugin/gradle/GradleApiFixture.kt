@@ -10,13 +10,13 @@ import java.nio.file.Path
 import java.util.ServiceLoader
 import java.util.jar.JarFile
 
-internal class GradleContractFixture private constructor(
+internal class GradleApiFixture private constructor(
     private val project: Path
 ) {
-    private val source = project.resolve("src/main/kotlin/example/Contracts.kt")
+    private val source = project.resolve("src/main/kotlin/example/Apis.kt")
 
     val jar: Path
-        get() = project.resolve("build/libs/contract.jar")
+        get() = project.resolve("build/libs/api.jar")
 
     fun writeSource(content: String) {
         Files.createDirectories(source.parent)
@@ -54,8 +54,8 @@ internal class GradleContractFixture private constructor(
         }
 
     companion object {
-        fun create(): GradleContractFixture {
-            val project = Files.createTempDirectory("tapik-gradle-contract-")
+        fun create(): GradleApiFixture {
+            val project = Files.createTempDirectory("tapik-gradle-api-")
             val tapikRepository = Path.of(requiredProperty("tapik.repository")).toUri()
             val tapikVersion = requiredProperty("tapik.version")
 
@@ -79,7 +79,7 @@ internal class GradleContractFixture private constructor(
                     }
                 }
 
-                rootProject.name = "contract"
+                rootProject.name = "api"
                 """.trimIndent()
             )
             Files.writeString(
@@ -99,11 +99,11 @@ internal class GradleContractFixture private constructor(
                 }
 
                 tasks.jar {
-                    archiveFileName.set("contract.jar")
+                    archiveFileName.set("api.jar")
                 }
                 """.trimIndent()
             )
-            return GradleContractFixture(project)
+            return GradleApiFixture(project)
         }
     }
 }

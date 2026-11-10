@@ -8,13 +8,13 @@ package dev.akif.tapik.plugin.gradle
  */
 enum class Mode {
     /**
-     * Load APIs from compiled API dependencies on `tapikContract`.
+     * Load APIs from compiled API dependencies on `tapikApiDependency`.
      *
      * Generated Kotlin and resources become ordinary main inputs, so generation runs before main compilation and
      * resource processing. Add an API separately to an ordinary dependency configuration when application source
      * also imports its declarations.
      */
-    COMPILED_CONTRACT,
+    COMPILED_API_DEPENDENCY,
 
     /**
      * Load APIs from the current project's compiled main output plus compile and runtime classpaths.

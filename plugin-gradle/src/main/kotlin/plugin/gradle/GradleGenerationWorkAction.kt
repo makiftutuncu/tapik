@@ -9,7 +9,7 @@ import org.gradle.workers.WorkParameters
 import java.io.Serializable
 
 internal interface GradleGenerationWorkParameters : WorkParameters {
-    val contractClasspath: ConfigurableFileCollection
+    val apiDependencyClasspath: ConfigurableFileCollection
     val mode: Property<Mode>
     val executions: ListProperty<GradleGenerationWorkExecution>
     val resultDirectory: DirectoryProperty
@@ -21,7 +21,7 @@ internal abstract class GradleGenerationWorkAction : WorkAction<GradleGeneration
         val session =
             try {
                 GradleGenerationLoader.open(
-                    contractClasspath = parameters.contractClasspath.files.map { file -> file.toPath() },
+                    apiDependencyClasspath = parameters.apiDependencyClasspath.files.map { file -> file.toPath() },
                     mode = parameters.mode.get(),
                     targetClassLoader = javaClass.classLoader
                 )

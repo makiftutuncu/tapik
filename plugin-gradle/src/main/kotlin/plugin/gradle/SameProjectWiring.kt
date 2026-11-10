@@ -34,7 +34,7 @@ internal fun Project.wireSameProjectGeneration(
             }.orElse(emptyList())
 
         generation.configure { task ->
-            task.contractClasspath.from(
+            task.apiDependencyClasspath.from(
                 extension.classpathForMode(Mode.SAME_PROJECT, sameProjectClasspath, emptyClasspath)
             )
             task.tapikDependencyVersions.putAll(
@@ -87,7 +87,7 @@ internal fun Project.wireSameProjectGeneration(
                 if (sameProjectMode.get()) {
                     runningTask.logger.lifecycle(
                         "tapik same-project generated declarations are unavailable to ordinary main source; " +
-                            "move endpoint definitions to a separately compiled project and use Mode.COMPILED_CONTRACT"
+                            "move endpoint definitions to a separately compiled project and use Mode.COMPILED_API_DEPENDENCY"
                     )
                 }
             }

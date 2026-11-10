@@ -10,11 +10,11 @@ plugins {
 val tapikVersion = providers.gradleProperty("tapikVersion").get()
 
 dependencies {
-    tapikContract("dev.akif:tapik-example-contract:$tapikVersion")
+    tapikApiDependency("dev.akif:tapik-example-contract:$tapikVersion")
 }
 
 tapik {
-    mode(Mode.COMPILED_CONTRACT)
+    mode(Mode.COMPILED_API_DEPENDENCY)
     outputRoot(layout.buildDirectory.dir("gradle/raw"))
 
     openApi("openapi-default") {

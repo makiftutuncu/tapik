@@ -14,7 +14,7 @@ Fix the declaration named in the diagnostic; generation has not run yet.
 
 Maven loads registries from the project classpath and targets from its plugin realm. A custom target therefore belongs
 under `tapik-plugin-maven`'s `<dependencies>`, not ordinary project dependencies. Gradle loads registries from
-`tapikContractClasspath` or same-project main output and targets from `tapikTargetClasspath`; declare a custom provider
+`tapikApiDependencyClasspath` or same-project main output and targets from `tapikTargetClasspath`; declare a custom provider
 with `tapikTarget(...)`. Same-project registry loading uses main output plus compile and runtime dependencies.
 Unknown-target errors list visible targets and diagnose common wrong-side placement.
 
@@ -58,7 +58,7 @@ If generation succeeds during `process-classes` but late Kotlin compilation fail
 Maven error. Generated source uses the project's resolved classpath and Java 25 target; missing target runtime modules
 or incompatible dependency versions usually surface at this stage.
 
-With Gradle, use `Mode.COMPILED_CONTRACT` when ordinary main source imports generated declarations. In
+With Gradle, use `Mode.COMPILED_API_DEPENDENCY` when ordinary main source imports generated declarations. In
 `Mode.SAME_PROJECT`, `tapikGenerate` depends on `classes` and generated Kotlin belongs to the separate late
 `tapikGenerated` compilation; main compilation cannot see it by design.
 

@@ -9,8 +9,8 @@ import io.kotest.matchers.shouldBe
 import org.gradle.testkit.runner.TaskOutcome
 
 class CompilerPluginAttachmentSpec : FunSpec({
-    test("generate an API registry in a Kotlin JVM contract jar") {
-        val fixture = GradleContractFixture.create()
+    test("generate an API registry in a Kotlin JVM API jar") {
+        val fixture = GradleApiFixture.create()
         fixture.writeSource(
             """
             package example
@@ -31,7 +31,7 @@ class CompilerPluginAttachmentSpec : FunSpec({
     }
 
     test("leave no compiler-owned registry when a compilation has no APIs") {
-        val fixture = GradleContractFixture.create()
+        val fixture = GradleApiFixture.create()
         fixture.writeSource(
             """
             package example
@@ -48,7 +48,7 @@ class CompilerPluginAttachmentSpec : FunSpec({
     }
 
     test("synchronize the registry after non-clean source changes") {
-        val fixture = GradleContractFixture.create()
+        val fixture = GradleApiFixture.create()
         fixture.writeSource(
             """
             package example

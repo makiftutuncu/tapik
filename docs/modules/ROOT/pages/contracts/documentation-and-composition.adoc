@@ -6,7 +6,7 @@ its immutable modifiers preserve the endpoint's existing type.
 
 [source,kotlin]
 ----
-include::example$dsl/DocumentationExamples.kt[tag=contract-documentation]
+include::example$dsl/DocumentationExamples.kt[tag=endpoint-documentation]
 ----
 
 == Documentation fields

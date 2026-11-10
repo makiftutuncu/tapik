@@ -15,10 +15,10 @@ dependencies {
     implementation(platform("org.springframework.boot:spring-boot-dependencies:4.0.8"))
     testImplementation(platform("io.kotest:kotest-bom:6.2.4"))
 
-    // tag::compiled-contract-dependencies[]
+    // tag::compiled-api-dependencies[]
     implementation(project(":contract"))
-    tapikContract(project(":contract"))
-    // end::compiled-contract-dependencies[]
+    tapikApiDependency(project(":contract"))
+    // end::compiled-api-dependencies[]
 
     implementation("dev.akif:tapik-target-spring-restclient")
     implementation("dev.akif:tapik-target-spring-webmvc")
@@ -49,9 +49,9 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// tag::compiled-contract[]
+// tag::compiled-api-dependency[]
 tapik {
-    mode(Mode.COMPILED_CONTRACT)
+    mode(Mode.COMPILED_API_DEPENDENCY)
 
     openApi("public") {
         version(tapikVersion)
@@ -66,4 +66,4 @@ tapik {
         packageName("com.example.library.generated")
     }
 }
-// end::compiled-contract[]
+// end::compiled-api-dependency[]

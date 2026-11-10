@@ -35,7 +35,7 @@ class GenerationCachingSpec : FunSpec({
         val fixture = CacheableGenerationFixture.create()
         fixture.run()
 
-        fixture.updateContractBytecode("changed")
+        fixture.updateApiBytecode("changed")
         fixture.run().task(":tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
 
         fixture.updateRuntimeDependency("changed")

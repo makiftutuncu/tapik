@@ -23,7 +23,7 @@ Import the BOM to align tapik library versions:
 
 [source,xml]
 ----
-include::example$contract/pom.xml[tag=contract-bom]
+include::example$contract/pom.xml[tag=api-bom]
 ----
 
 Then add core and one format integration. The runnable example uses Jackson 3:
@@ -31,7 +31,7 @@ Then add core and one format integration. The runnable example uses Jackson 3:
 [source,xml]
 ----
 <dependencies>
-include::example$contract/pom.xml[tag=contract-dependencies,indent=4]
+include::example$contract/pom.xml[tag=api-dependencies,indent=4]
 </dependencies>
 ----
 
@@ -93,14 +93,14 @@ First, depend on the API artifact:
 
 [source,xml]
 ----
-include::example$application/pom.xml[tag=compiled-contract-dependency]
+include::example$application/pom.xml[tag=compiled-api-dependency]
 ----
 
 Then bind the target execution explicitly to `generate-sources`:
 
 [source,xml]
 ----
-include::example$application/pom.xml[tag=compiled-contract-openapi]
+include::example$application/pom.xml[tag=compiled-api-dependency-openapi]
 ----
 
 The runnable reactor example can be built with:

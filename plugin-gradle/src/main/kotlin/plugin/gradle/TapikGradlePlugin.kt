@@ -16,15 +16,16 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 /**
  * Entry point for tapik's Kotlin/JVM Gradle integration.
  *
- * Applying the plugin attaches the tapik compiler plugin, creates the `tapik` extension, adds the `tapikContract` and
- * `tapikTarget` dependency scopes, and registers the single `tapikGenerate` task. It does not apply Kotlin/JVM or run
- * generation merely because the plugin is present.
+ * Applying the plugin attaches the tapik compiler plugin, creates the `tapik` extension, adds the
+ * `tapikApiDependency` and `tapikTarget` dependency scopes, and registers the single `tapikGenerate` task. It does not
+ * apply Kotlin/JVM or run generation merely because the plugin is present.
  */
 class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
     /** Applies tapik to [target]. */
     override fun apply(target: Project) {
-        val contract = target.declarableConfiguration("tapikContract")
-        val contractClasspath = target.runtimeClasspathConfiguration("tapikContractClasspath", contract)
+        val apiDependency = target.declarableConfiguration("tapikApiDependency")
+        val apiDependencyClasspath =
+            target.runtimeClasspathConfiguration("tapikApiDependencyClasspath", apiDependency)
         val generationTargets = target.declarableConfiguration("tapikTarget")
         val targetClasspath = target.runtimeClasspathConfiguration("tapikTargetClasspath", generationTargets)
         listOf("openapi", "spring-restclient", "spring-webmvc").forEach { targetName ->
@@ -52,23 +53,23 @@ class TapikGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 )
                 task.tapikDependencyVersions.putAll(
                     extension.mode.flatMap { selected ->
-                        if (selected == Mode.COMPILED_CONTRACT) {
-                            contractClasspath.tapikDependencyVersions("tapikContractClasspath")
+                        if (selected == Mode.COMPILED_API_DEPENDENCY) {
+                            apiDependencyClasspath.tapikDependencyVersions("tapikApiDependencyClasspath")
                         } else {
                             target.providers.provider { emptyMap() }
                         }
                     }.orElse(target.providers.provider { emptyMap() })
                 )
                 task.executions.set(extension.orderedExecutions)
-                task.contractClasspath.from(
-                    extension.classpathForMode(Mode.COMPILED_CONTRACT, contractClasspath, emptyClasspath)
+                task.apiDependencyClasspath.from(
+                    extension.classpathForMode(Mode.COMPILED_API_DEPENDENCY, apiDependencyClasspath, emptyClasspath)
                 )
                 task.targetClasspath.from(targetClasspath)
                 task.outputRoot.set(extension.outputRoot)
                 task.projectDirectory.set(target.layout.projectDirectory)
             }
         target.configureTapikEnvironment(generation)
-        target.wireCompiledContractOutputs(extension, generation)
+        target.wireCompiledApiDependencyOutputs(extension, generation)
         target.wireSameProjectGeneration(extension, generation)
     }
 

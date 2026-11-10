@@ -32,7 +32,7 @@ class DocumentationFixturesSpec : FunSpec({
         (response.outputs.values.first() as Output<*, *, *>).documentation.description shouldBe "The created book."
     }
 
-    test("preserve contract documentation and tag set") {
+    test("preserve endpoint documentation and tag set") {
         val create = DocumentedBooks().create
 
         create.documentation.summary shouldBe "Create a book"

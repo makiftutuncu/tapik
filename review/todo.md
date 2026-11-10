@@ -78,17 +78,17 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   enforce an await boundary that guarantees invocation order.
 - [x] Preserve per-target artifact order, first-claim aggregation order, failure framing, atomic output preservation,
   configuration-cache compatibility, and parallel generation across distinct projects.
-- [x] Confirm the implementation does not rebuild the target catalog and contract classloader unnecessarily for every
+- [x] Confirm the implementation does not rebuild the target catalog and API dependency classloader unnecessarily for every
   execution.
 
 ### Same-project compile visibility
 
 - [x] Update the same-project classpath specification to define which main compile and runtime dependencies are
-  available during contract loading and late generated-source compilation.
-- [x] Add a failing TestKit fixture whose contract or generated source requires a dependency declared `compileOnly`.
+  available during API loading and late generated-source compilation.
+- [x] Add a failing TestKit fixture whose API or generated source requires a dependency declared `compileOnly`.
 - [x] Build the generation and late-compilation classpaths from the necessary main compile and runtime configurations,
   deduplicating entries without losing producing-task dependencies or declaration order where observable.
-- [x] Run tapik version validation over every classpath actually used for contract loading and late compilation.
+- [x] Run tapik version validation over every classpath actually used for API loading and late compilation.
 - [x] Verify Maven `provided`/compile visibility and Gradle `compileOnly` visibility now behave equivalently.
 
 ### Target-owned defaults and cross-host configuration parity
@@ -116,14 +116,14 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
   parallel endpoint metadata model or build-tool dependency.
 - [x] Use the shared isolation primitive from `ProjectApis`, `MavenTargets`, and `GradleGenerationLoader`, retaining each
   adapter's classpath labels, placement diagnostics, and lifecycle ownership.
-- [x] Verify target providers cannot become contract APIs, contract providers cannot become executable targets, context
+- [x] Verify target providers cannot register APIs, API providers cannot become executable targets, context
   classloaders are restored, and disposable classloaders close on every success/failure path.
 
 ### Relocatable compiler options and registry local state
 
 - [x] Specify how Gradle compiler-option paths and the registry index participate in task inputs, local state, clean
   builds, cache restoration, and relocation.
-- [x] Add a failing TestKit test that compiles a contract, restores or reuses compilation from cache in a relocated
+- [x] Add a failing TestKit test that compiles an API, restores or reuses compilation from cache in a relocated
   project, changes one source, and verifies the complete API registry remains present.
 - [x] Replace absolute path strings passed as ordinary `SubpluginOption`s with Kotlin Gradle path-aware/internal options
   as appropriate.
@@ -132,12 +132,12 @@ write tapik in lowercase in prose and diagnostics, preserve declaration order, a
 - [x] Verify source roots remain complete for incremental reconciliation and Kotlin compile cache reuse works across
   equivalent project locations.
 
-### Contract-side provider diagnostics
+### API-dependency-side provider diagnostics
 
-- [x] Clarify that malformed, duplicate, or linkage-broken target providers on the contract side must retain their
+- [x] Clarify that malformed, duplicate, or linkage-broken target providers on the API dependency side must retain their
   catalog-loading failure rather than degrading to an ordinary unknown-target diagnostic.
 - [x] Add failing Gradle loader tests for malformed service declarations, duplicate target IDs, and linkage failures on
-  `tapikContractClasspath` during an unknown-target request.
+  `tapikApiDependencyClasspath` during an unknown-target request.
 - [x] Remove the blanket `runCatching` fallback around the misplaced-target catalog load; treat an absent catalog as
   empty while allowing actual catalog failures to propagate with their cause.
 - [x] Verify the corrected errors still name the execution, target, classpath side, placement correction, and original

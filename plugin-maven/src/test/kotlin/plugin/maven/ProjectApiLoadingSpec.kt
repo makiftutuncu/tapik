@@ -134,12 +134,12 @@ class ConstructionFailureApiRegistry : ApiRegistry {
 
 class MissingDependencyApiRegistry : ApiRegistry {
     override val apis: List<Api>
-        get() = throw NoClassDefFoundError("example/ContractDependency")
+        get() = throw NoClassDefFoundError("example/ApiDependency")
 }
 
 class IncompatibleDependencyApiRegistry : ApiRegistry {
     override val apis: List<Api>
-        get() = throw NoSuchMethodError("example.ContractDependency.api()")
+        get() = throw NoSuchMethodError("example.ApiDependency.api()")
 }
 
 class AssertionFailureApiRegistry : ApiRegistry {

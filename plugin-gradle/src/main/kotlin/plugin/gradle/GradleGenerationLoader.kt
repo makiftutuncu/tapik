@@ -15,14 +15,14 @@ import java.util.ServiceConfigurationError
 
 internal object GradleGenerationLoader {
     fun open(
-        contractClasspath: List<Path>,
+        apiDependencyClasspath: List<Path>,
         mode: Mode,
         targetClassLoader: ClassLoader
     ): GradleGenerationSession =
-        GradleGenerationSession(contractClasspath, mode, targetClassLoader)
+        GradleGenerationSession(apiDependencyClasspath, mode, targetClassLoader)
 
     fun generate(
-        contractClasspath: List<Path>,
+        apiDependencyClasspath: List<Path>,
         mode: Mode,
         targetId: String,
         configuration: Map<String, GradleConfigurationValue>,
@@ -30,13 +30,13 @@ internal object GradleGenerationLoader {
         excludeApis: Set<String>,
         targetClassLoader: ClassLoader
     ): GenerationResult =
-        open(contractClasspath, mode, targetClassLoader).use { session ->
+        open(apiDependencyClasspath, mode, targetClassLoader).use { session ->
             session.generate(targetId, configuration, includeApis, excludeApis)
         }
 }
 
 internal class GradleGenerationSession(
-    contractClasspath: List<Path>,
+    apiDependencyClasspath: List<Path>,
     private val mode: Mode,
     targetClassLoader: ClassLoader
 ) : AutoCloseable {
@@ -45,20 +45,20 @@ internal class GradleGenerationSession(
             loadTargets(activeClassLoader, TARGET_CLASSPATH)
         }
     private val available = targets.map(GenerationTarget::id)
-    private val contractSession =
+    private val apiSession =
         ServiceProviderSession.open(
-            classpath = contractClasspath,
+            classpath = apiDependencyClasspath,
             parent = targetClassLoader,
             serviceTypes = setOf(ApiRegistry::class.java, GenerationTargetRegistry::class.java)
         )
     private val apis =
         try {
-            contractSession.run { contractClassLoader ->
-                loadApis(contractClassLoader, mode.apiClasspathName())
+            apiSession.run { apiClassLoader ->
+                loadApis(apiClassLoader, mode.apiClasspathName())
                     .also { loaded -> require(loaded.isNotEmpty()) { mode.emptyApiCatalogMessage() } }
             }
         } catch (failure: Exception) {
-            contractSession.close()
+            apiSession.close()
             throw failure
         }
     private val engine = GenerationEngine(targets)
@@ -69,9 +69,9 @@ internal class GradleGenerationSession(
         includeApis: Set<String>,
         excludeApis: Set<String>
     ): GenerationResult =
-        contractSession.run { contractClassLoader ->
+        apiSession.run { apiClassLoader ->
             if (targetId !in available) {
-                diagnoseUnknownTarget(targetId, available, contractClassLoader)
+                diagnoseUnknownTarget(targetId, available, apiClassLoader)
             }
             engine.generate(
                 targetId = targetId,
@@ -82,7 +82,7 @@ internal class GradleGenerationSession(
         }
 
     override fun close() {
-        contractSession.close()
+        apiSession.close()
     }
 }
 
@@ -114,15 +114,15 @@ private fun loadApis(classLoader: ClassLoader, classpath: String): List<Api> =
 private fun diagnoseUnknownTarget(
     targetId: String,
     available: List<String>,
-    contractClassLoader: ClassLoader
+    apiClassLoader: ClassLoader
 ): Nothing {
     val misplaced =
-        loadTargets(contractClassLoader, CONTRACT_CLASSPATH)
+        loadTargets(apiClassLoader, API_DEPENDENCY_CLASSPATH)
             .any { target -> target.id == targetId }
     if (misplaced) {
         error(
-            "Generation target '$targetId' was found on $CONTRACT_CLASSPATH, but target artifacts belong in " +
-                "tapikTarget rather than tapikContract or application dependencies."
+            "Generation target '$targetId' was found on $API_DEPENDENCY_CLASSPATH, but target artifacts belong in " +
+                "tapikTarget rather than tapikApiDependency or application dependencies."
         )
     }
     throw IllegalArgumentException(
@@ -141,8 +141,8 @@ private fun targetLoadingFailure(classpath: String, cause: Throwable): IllegalSt
     )
 
 private fun targetPlacementGuidance(classpath: String): String =
-    if (classpath == CONTRACT_CLASSPATH) {
-        " Generation target providers belong in tapikTarget rather than tapikContract or application dependencies."
+    if (classpath == API_DEPENDENCY_CLASSPATH) {
+        " Generation target providers belong in tapikTarget rather than tapikApiDependency or application dependencies."
     } else {
         ""
     }
@@ -157,20 +157,20 @@ private fun apiLoadingFailure(classpath: String, cause: Throwable): IllegalState
 
 private fun Mode.apiClasspathName(): String =
     when (this) {
-        Mode.COMPILED_CONTRACT -> CONTRACT_CLASSPATH
+        Mode.COMPILED_API_DEPENDENCY -> API_DEPENDENCY_CLASSPATH
         Mode.SAME_PROJECT -> SAME_PROJECT_CLASSPATH
     }
 
 private fun Mode.emptyApiCatalogMessage(): String =
     when (this) {
-        Mode.COMPILED_CONTRACT ->
-            "No APIs were discovered on $CONTRACT_CLASSPATH. Add an API compiled with the tapik compiler " +
-                "plugin to tapikContract."
+        Mode.COMPILED_API_DEPENDENCY ->
+            "No APIs were discovered on $API_DEPENDENCY_CLASSPATH. Add an API compiled with the tapik compiler " +
+                "plugin to tapikApiDependency."
         Mode.SAME_PROJECT ->
             "No APIs were discovered on $SAME_PROJECT_CLASSPATH. Ensure the main compilation contains eligible " +
                 "public concrete Api types and the tapik compiler plugin is active."
     }
 
 private const val TARGET_CLASSPATH: String = "tapikTargetClasspath"
-private const val CONTRACT_CLASSPATH: String = "tapikContractClasspath"
+private const val API_DEPENDENCY_CLASSPATH: String = "tapikApiDependencyClasspath"
 private const val SAME_PROJECT_CLASSPATH: String = "the same project's main compile and runtime classpaths"

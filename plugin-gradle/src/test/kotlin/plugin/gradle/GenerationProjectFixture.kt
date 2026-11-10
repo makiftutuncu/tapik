@@ -68,8 +68,8 @@ internal class GenerationProject(private val root: Path) {
     fun writeBuild(
         tapikBlock: String,
         additionalDependencies: String = "",
-        contractDependencies: String =
-            "tapikContract 'dev.akif:tapik-example-contract:$gradleTestTapikVersion'"
+        apiDependencies: String =
+            "tapikApiDependency 'dev.akif:tapik-example-contract:$gradleTestTapikVersion'"
     ) {
         Files.writeString(
             root.resolve("build.gradle"),
@@ -89,12 +89,12 @@ internal class GenerationProject(private val root: Path) {
             }
 
             dependencies {
-                $contractDependencies
+                $apiDependencies
                 $additionalDependencies
             }
 
             tapik {
-                mode(Mode.COMPILED_CONTRACT)
+                mode(Mode.COMPILED_API_DEPENDENCY)
                 $tapikBlock
             }
             """.trimIndent()

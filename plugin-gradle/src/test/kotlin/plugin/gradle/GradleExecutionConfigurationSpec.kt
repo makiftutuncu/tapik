@@ -31,7 +31,7 @@ class GradleExecutionConfigurationSpec : FunSpec({
                 execution.format(OpenApiFormat.JSON)
                 execution.pretty(false)
                 execution.componentNaming(OpenApiComponentNaming.QUALIFIED)
-                execution.output("contract.json")
+                execution.output("api.json")
             }
         )
         extension.springRestClient(
@@ -56,7 +56,7 @@ class GradleExecutionConfigurationSpec : FunSpec({
                 "format" to ScalarGradleConfigurationValue("json"),
                 "pretty" to ScalarGradleConfigurationValue("false"),
                 "componentNaming" to ScalarGradleConfigurationValue("qualified"),
-                "output" to ScalarGradleConfigurationValue("contract.json")
+                "output" to ScalarGradleConfigurationValue("api.json")
             )
         extension.orderedExecutions.get()[1].generationConfiguration() shouldContainExactly
             linkedMapOf(

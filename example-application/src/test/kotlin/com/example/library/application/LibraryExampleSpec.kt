@@ -17,7 +17,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class LibraryExampleSpec : FunSpec({
-    test("generate every documented target from the contract artifact") {
+    test("generate every documented target from the API artifact") {
         BooksClient::class.java.isInterface shouldBe true
         BooksServer::class.java.isInterface shouldBe true
         val openApi = Path.of("target/generated/tapik/Books.openapi.yml")
@@ -40,7 +40,7 @@ class LibraryExampleSpec : FunSpec({
             )
     }
 
-    test("call the contract through the generated RestClient") {
+    test("call the API through the generated RestClient") {
         val builder = RestClient.builder()
         val server = MockRestServiceServer.bindTo(builder).build()
         val client = BooksRestClient(builder, "https://library.example")

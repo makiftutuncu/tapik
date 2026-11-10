@@ -25,7 +25,7 @@ import javax.inject.Inject
  * Aggregates configured tapik generation executions behind one cacheable Gradle output owner.
  *
  * The task generates every execution before atomically materializing the merged result below [outputRoot]. In
- * [Mode.COMPILED_CONTRACT], main Kotlin and resource tasks consume its outputs. In [Mode.SAME_PROJECT], it depends on
+ * [Mode.COMPILED_API_DEPENDENCY], main Kotlin and resource tasks consume its outputs. In [Mode.SAME_PROJECT], it depends on
  * main classes; separate lifecycle wiring compiles and packages late source and resources when the corresponding
  * lifecycle tasks are requested. Invoking `tapikGenerate` directly does not compile those late sources.
  */
@@ -68,11 +68,11 @@ abstract class TapikGenerateTask @Inject constructor(
     /**
      * Resolved API artifacts and their runtime dependencies.
      *
-     * These come from `tapikContractClasspath` in compiled API dependency mode or from main output and its compile and
+     * These come from `tapikApiDependencyClasspath` in compiled API dependency mode or from main output and its compile and
      * runtime classpaths in same-project mode.
      */
     @get:Classpath
-    abstract val contractClasspath: ConfigurableFileCollection
+    abstract val apiDependencyClasspath: ConfigurableFileCollection
 
     /** Resolved generation targets and their runtime dependencies from `tapikTargetClasspath`. */
     @get:Classpath
@@ -113,7 +113,7 @@ abstract class TapikGenerateTask @Inject constructor(
         val resultFiles = workExecutions.map { execution -> resultDirectory.resolve(execution.resultFileName) }
         resultFiles.forEach(Files::deleteIfExists)
         queue.submit(GradleGenerationWorkAction::class.java) { parameters ->
-            parameters.contractClasspath.from(contractClasspath)
+            parameters.apiDependencyClasspath.from(apiDependencyClasspath)
             parameters.mode.set(mode)
             parameters.executions.set(workExecutions)
             parameters.resultDirectory.fileValue(resultDirectory.toFile())
@@ -161,7 +161,7 @@ abstract class TapikGenerateTask @Inject constructor(
         try {
             require(executions.get().isNotEmpty()) { "tapik generation requires at least one execution" }
             require(mode.isPresent) {
-                "tapik generation requires mode(Mode.COMPILED_CONTRACT) or mode(Mode.SAME_PROJECT)"
+                "tapik generation requires mode(Mode.COMPILED_API_DEPENDENCY) or mode(Mode.SAME_PROJECT)"
             }
             executions.get().forEach(TapikExecution::validateConfiguration)
             val incompatible =

@@ -8,7 +8,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class GenerationFailureSpec : FunSpec({
-    test("diagnose unknown targets empty contracts and empty selections") {
+    test("diagnose unknown targets empty API sets and empty selections") {
         val unknownTarget = generationProject()
         unknownTarget.writeBuild(
             """
@@ -21,20 +21,20 @@ class GenerationFailureSpec : FunSpec({
         unknown.output shouldContain "Unknown generation target 'missing' on tapikTargetClasspath"
         unknown.output shouldContain "tapikTarget"
 
-        val emptyContract = generationProject()
-        emptyContract.writeBuild(
+        val emptyApiProject = generationProject()
+        emptyApiProject.writeBuild(
             tapikBlock =
                 """
                 openApi('docs') {
                     version('1.0.0')
                 }
                 """.trimIndent(),
-            contractDependencies = ""
+            apiDependencies = ""
         )
-        val empty = emptyContract.runAndFail("tapikGenerate")
+        val empty = emptyApiProject.runAndFail("tapikGenerate")
         empty.output shouldContain "tapik execution 'docs' for target 'openapi' failed"
-        empty.output shouldContain "No APIs were discovered on tapikContractClasspath"
-        empty.output shouldContain "tapikContract"
+        empty.output shouldContain "No APIs were discovered on tapikApiDependencyClasspath"
+        empty.output shouldContain "tapikApiDependency"
 
         val emptySelection = generationProject()
         emptySelection.writeBuild(
@@ -62,7 +62,7 @@ class GenerationFailureSpec : FunSpec({
                 """.trimIndent(),
             additionalDependencies =
                 """
-                tapikContract 'dev.akif:tapik-incompatible:9.9.9'
+                tapikApiDependency 'dev.akif:tapik-incompatible:9.9.9'
                 ${linkageFailingTargetDependency()}
                 """.trimIndent()
         )
@@ -71,7 +71,7 @@ class GenerationFailureSpec : FunSpec({
 
         failure.output shouldContain
             "tapik Gradle plugin $gradleTestTapikVersion is incompatible with resolved dependencies"
-        failure.output shouldContain "tapikContractClasspath contains dev.akif:tapik-incompatible:9.9.9"
+        failure.output shouldContain "tapikApiDependencyClasspath contains dev.akif:tapik-incompatible:9.9.9"
         failure.output shouldContain "Align every dev.akif:tapik-* dependency with the plugin version"
     }
 
@@ -87,7 +87,7 @@ class GenerationFailureSpec : FunSpec({
                 """.trimIndent(),
             additionalDependencies =
                 """
-                tapikContract project(':tapik-incompatible')
+                tapikApiDependency project(':tapik-incompatible')
                 ${linkageFailingTargetDependency()}
                 """.trimIndent()
         )
@@ -96,7 +96,7 @@ class GenerationFailureSpec : FunSpec({
 
         failure.output shouldContain
             "tapik Gradle plugin $gradleTestTapikVersion is incompatible with resolved dependencies"
-        failure.output shouldContain "tapikContractClasspath"
+        failure.output shouldContain "tapikApiDependencyClasspath"
         failure.output shouldContain "dev.akif:tapik-incompatible:9.9.9"
         failure.output shouldContain "project :tapik-incompatible"
         project.generatedFiles() shouldBe emptyList()
@@ -114,7 +114,7 @@ class GenerationFailureSpec : FunSpec({
                 """.trimIndent(),
             additionalDependencies =
                 """
-                tapikContract 'dev.akif:tapik-incompatible:$gradleTestTapikVersion'
+                tapikApiDependency 'dev.akif:tapik-incompatible:$gradleTestTapikVersion'
                 ${linkageFailingTargetDependency()}
                 """.trimIndent()
         )
@@ -123,7 +123,7 @@ class GenerationFailureSpec : FunSpec({
 
         failure.output shouldContain
             "tapik Gradle plugin $gradleTestTapikVersion is incompatible with resolved dependencies"
-        failure.output shouldContain "tapikContractClasspath"
+        failure.output shouldContain "tapikApiDependencyClasspath"
         failure.output shouldContain "dev.akif:tapik-incompatible:9.9.9"
         failure.output shouldContain "included build"
         failure.output shouldContain "tapik-incompatible"
@@ -140,7 +140,7 @@ class GenerationFailureSpec : FunSpec({
                     version('1.0.0')
                 }
                 """.trimIndent(),
-            additionalDependencies = "tapikContract project(':tapik-compatible')"
+            additionalDependencies = "tapikApiDependency project(':tapik-compatible')"
         )
 
         project.run("tapikGenerate")
@@ -156,7 +156,7 @@ class GenerationFailureSpec : FunSpec({
                 }
                 """.trimIndent(),
             additionalDependencies =
-                "tapikContract 'dev.akif:tapik-compatible:$gradleTestTapikVersion'"
+                "tapikApiDependency 'dev.akif:tapik-compatible:$gradleTestTapikVersion'"
         )
 
         composite.run("tapikGenerate")
@@ -187,8 +187,8 @@ class GenerationFailureSpec : FunSpec({
         failure.output shouldContain "target failure"
     }
 
-    test("retain misplaced contract target failures through the worker frame") {
-        val descriptorRoot = Files.createTempDirectory("tapik-gradle-contract-target-failure-")
+    test("retain misplaced API dependency target failures through the worker frame") {
+        val descriptorRoot = Files.createTempDirectory("tapik-gradle-api-dependency-target-failure-")
         val descriptor =
             descriptorRoot.resolve("META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry")
         Files.createDirectories(descriptor.parent)
@@ -201,17 +201,17 @@ class GenerationFailureSpec : FunSpec({
                 target('misplaced', 'missing') {
                 }
                 """.trimIndent(),
-            contractDependencies =
+            apiDependencies =
                 """
-                tapikContract 'dev.akif:tapik-example-contract:$gradleTestTapikVersion'
-                tapikContract files('${descriptorRoot.gradleGroovyPath()}', '${testClasses.gradleGroovyPath()}')
+                tapikApiDependency 'dev.akif:tapik-example-contract:$gradleTestTapikVersion'
+                tapikApiDependency files('${descriptorRoot.gradleGroovyPath()}', '${testClasses.gradleGroovyPath()}')
                 """.trimIndent()
         )
 
         val failure = project.runAndFail("tapikGenerate")
 
         failure.output shouldContain "tapik execution 'misplaced' for target 'missing' failed"
-        failure.output shouldContain "Failed to load generation target providers from tapikContractClasspath"
+        failure.output shouldContain "Failed to load generation target providers from tapikApiDependencyClasspath"
         failure.output shouldContain "target providers belong in tapikTarget"
         failure.output shouldContain "missing target dependency"
     }

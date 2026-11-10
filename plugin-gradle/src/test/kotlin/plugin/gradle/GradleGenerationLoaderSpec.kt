@@ -11,13 +11,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class GradleGenerationLoaderSpec : FunSpec({
-    test("load contracts and targets from their isolated classpath sides") {
+    test("load APIs and targets from their isolated classpaths") {
         targetClassLoader().use { targetClassLoader ->
             val previous = Thread.currentThread().contextClassLoader
             val result =
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                     includeApis = emptySet(),
@@ -31,13 +31,13 @@ class GradleGenerationLoaderSpec : FunSpec({
         }
     }
 
-    test("diagnose targets placed on the contract classpath") {
+    test("diagnose targets placed on the API dependency classpath") {
         targetClassLoader(emptyList()).use { targetClassLoader ->
             val failure =
                 shouldThrow<IllegalStateException> {
                     GradleGenerationLoader.generate(
-                        contractClasspath = contractClasspath + targetClasspath,
-                        mode = Mode.COMPILED_CONTRACT,
+                        apiDependencyClasspath = apiDependencyClasspath + targetClasspath,
+                        mode = Mode.COMPILED_API_DEPENDENCY,
                         targetId = "openapi",
                         configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                         includeApis = emptySet(),
@@ -46,7 +46,7 @@ class GradleGenerationLoaderSpec : FunSpec({
                     )
                 }
 
-            failure.message shouldContain "Generation target 'openapi' was found on tapikContractClasspath"
+            failure.message shouldContain "Generation target 'openapi' was found on tapikApiDependencyClasspath"
             failure.message shouldContain "tapikTarget"
         }
     }
@@ -55,8 +55,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalArgumentException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "missing",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -71,13 +71,13 @@ class GradleGenerationLoaderSpec : FunSpec({
         }
     }
 
-    test("retain malformed target providers on the contract classpath during unknown-target diagnosis") {
+    test("retain malformed target providers on the API dependency classpath during unknown-target diagnosis") {
         val malformed = serviceDirectory(TARGET_SERVICE, "example.MissingTargetRegistry")
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath + listOf(malformed),
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath + listOf(malformed),
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "missing",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -86,14 +86,14 @@ class GradleGenerationLoaderSpec : FunSpec({
                 )
             }
 
-            failure.message shouldContain "tapikContractClasspath"
+            failure.message shouldContain "tapikApiDependencyClasspath"
             failure.message shouldContain "tapikTarget"
             failure.cause!!.javaClass.name shouldBe "java.util.ServiceConfigurationError"
             failure.cause!!.message shouldContain "example.MissingTargetRegistry"
         }
     }
 
-    test("retain duplicate target providers on the contract classpath during unknown-target diagnosis") {
+    test("retain duplicate target providers on the API dependency classpath during unknown-target diagnosis") {
         val duplicates =
             serviceDirectory(
                 TARGET_SERVICE,
@@ -103,8 +103,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath + listOf(duplicates),
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath + listOf(duplicates),
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "missing",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -113,7 +113,7 @@ class GradleGenerationLoaderSpec : FunSpec({
                 )
             }
 
-            failure.message shouldContain "Invalid generation target catalog on tapikContractClasspath"
+            failure.message shouldContain "Invalid generation target catalog on tapikApiDependencyClasspath"
             failure.message shouldContain "duplicate"
             failure.message shouldContain "tapikTarget"
             failure.cause!!.javaClass shouldBe IllegalArgumentException::class.java
@@ -121,13 +121,13 @@ class GradleGenerationLoaderSpec : FunSpec({
         }
     }
 
-    test("retain target linkage failures on the contract classpath during unknown-target diagnosis") {
+    test("retain target linkage failures on the API dependency classpath during unknown-target diagnosis") {
         val broken = serviceDirectory(TARGET_SERVICE, LinkageFailingTargetRegistry::class.qualifiedName!!)
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath + listOf(broken),
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath + listOf(broken),
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "missing",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -136,7 +136,7 @@ class GradleGenerationLoaderSpec : FunSpec({
                 )
             }
 
-            failure.message shouldContain "tapikContractClasspath"
+            failure.message shouldContain "tapikApiDependencyClasspath"
             failure.message shouldContain "tapikTarget"
             failure.cause!!.javaClass shouldBe NoClassDefFoundError::class.java
             failure.cause!!.message shouldContain "missing target dependency"
@@ -148,8 +148,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader(targetClasspath + misplaced).use { targetClassLoader ->
             val result =
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                     includeApis = emptySet(),
@@ -167,8 +167,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader(listOf(broken)).use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -190,8 +190,8 @@ class GradleGenerationLoaderSpec : FunSpec({
             val previous = Thread.currentThread().contextClassLoader
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = listOf(broken),
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = listOf(broken),
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                     includeApis = emptySet(),
@@ -200,7 +200,7 @@ class GradleGenerationLoaderSpec : FunSpec({
                 )
             }
 
-            failure.message shouldContain "tapikContractClasspath"
+            failure.message shouldContain "tapikApiDependencyClasspath"
             failure.message shouldContain "compiler-generated registry"
             failure.cause!!.javaClass.name shouldBe "java.util.ServiceConfigurationError"
             Thread.currentThread().contextClassLoader shouldBe previous
@@ -212,8 +212,8 @@ class GradleGenerationLoaderSpec : FunSpec({
             val previous = Thread.currentThread().contextClassLoader
             shouldThrow<IllegalArgumentException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -225,7 +225,7 @@ class GradleGenerationLoaderSpec : FunSpec({
         }
     }
 
-    test("diagnose duplicate API IDs on the contract classpath") {
+    test("diagnose duplicate API IDs on the API dependency classpath") {
         val duplicates =
             serviceDirectory(
                 API_SERVICE,
@@ -235,8 +235,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = listOf(duplicates),
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = listOf(duplicates),
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                     includeApis = emptySet(),
@@ -245,7 +245,7 @@ class GradleGenerationLoaderSpec : FunSpec({
                 )
             }
 
-            failure.message shouldContain "Invalid API catalog on tapikContractClasspath"
+            failure.message shouldContain "Invalid API catalog on tapikApiDependencyClasspath"
             failure.message shouldContain "Duplicate"
         }
     }
@@ -260,8 +260,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader(listOf(duplicates)).use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "duplicate",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -280,8 +280,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader(listOf(broken)).use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -295,13 +295,13 @@ class GradleGenerationLoaderSpec : FunSpec({
         }
     }
 
-    test("diagnose API linkage failures on the contract classpath") {
+    test("diagnose API linkage failures on the API dependency classpath") {
         val broken = serviceDirectory(API_SERVICE, LinkageFailingApiRegistry::class.qualifiedName!!)
         targetClassLoader().use { targetClassLoader ->
             val failure = shouldThrow<IllegalStateException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = listOf(broken),
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = listOf(broken),
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                     includeApis = emptySet(),
@@ -310,7 +310,7 @@ class GradleGenerationLoaderSpec : FunSpec({
                 )
             }
 
-            failure.message shouldContain "tapikContractClasspath"
+            failure.message shouldContain "tapikApiDependencyClasspath"
             failure.cause!!.javaClass shouldBe NoClassDefFoundError::class.java
         }
     }
@@ -319,8 +319,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val compiled = shouldThrow<IllegalArgumentException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = emptyList(),
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = emptyList(),
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                     includeApis = emptySet(),
@@ -328,12 +328,12 @@ class GradleGenerationLoaderSpec : FunSpec({
                     targetClassLoader = targetClassLoader
                 )
             }
-            compiled.message shouldContain "No APIs were discovered on tapikContractClasspath"
-            compiled.message shouldContain "tapikContract"
+            compiled.message shouldContain "No APIs were discovered on tapikApiDependencyClasspath"
+            compiled.message shouldContain "tapikApiDependency"
 
             val sameProject = shouldThrow<IllegalArgumentException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = emptyList(),
+                    apiDependencyClasspath = emptyList(),
                     mode = Mode.SAME_PROJECT,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
@@ -352,8 +352,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader().use { targetClassLoader ->
             val selectionFailure = shouldThrow<IllegalArgumentException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "openapi",
                     configuration = mapOf("version" to ScalarGradleConfigurationValue("1.0.0")),
                     includeApis = emptySet(),
@@ -367,8 +367,8 @@ class GradleGenerationLoaderSpec : FunSpec({
         targetClassLoader(listOf(throwing)).use { targetClassLoader ->
             val targetFailure = shouldThrow<IllegalArgumentException> {
                 GradleGenerationLoader.generate(
-                    contractClasspath = contractClasspath,
-                    mode = Mode.COMPILED_CONTRACT,
+                    apiDependencyClasspath = apiDependencyClasspath,
+                    mode = Mode.COMPILED_API_DEPENDENCY,
                     targetId = "throwing",
                     configuration = emptyMap(),
                     includeApis = emptySet(),
@@ -395,7 +395,7 @@ private fun serviceDirectory(serviceName: String, vararg providers: String): Pat
     return directory
 }
 
-private val contractClasspath: List<Path> = classpathProperty("tapik.generation-worker.contract-classpath")
+private val apiDependencyClasspath: List<Path> = classpathProperty("tapik.generation-worker.api-dependency-classpath")
 private val targetClasspath: List<Path> = classpathProperty("tapik.generation-worker.target-classpath")
 
 private fun classpathProperty(name: String): List<Path> =

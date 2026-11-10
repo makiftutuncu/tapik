@@ -11,23 +11,23 @@ import java.nio.file.Path
 import java.util.jar.JarFile
 import kotlin.io.path.exists
 
-class CompiledContractWiringSpec : FunSpec({
+class CompiledApiDependencyWiringSpec : FunSpec({
     test("compile main source against generated declarations and package generated resources only") {
-        val project = compiledContractProject()
+        val project = compiledApiProject()
 
         val (result, reused) = repeatWithConfigurationCache { project.run(":application:build") }
 
-        result.task(":contract:compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.task(":contract:jar")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.task(":contract:tapikGenerate") shouldBe null
+        result.task(":api:compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":api:jar")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":api:tapikGenerate") shouldBe null
         result.task(":custom-target:jar")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":application:tapikGenerate")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":application:compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":application:processResources")?.outcome shouldBe TaskOutcome.SUCCESS
         reused.task(":application:tapikGenerate")?.outcome shouldBe TaskOutcome.UP_TO_DATE
         project.path("application/build/classes/kotlin/main/com/example/application/CatalogHandler.class").exists() shouldBe true
-        project.path("application/build/classes/kotlin/main/com/example/generated/contract/Catalog/CatalogServer.class").exists() shouldBe true
-        project.path("application/build/classes/kotlin/main/com/example/generated/contract/Catalog/CatalogClient.class").exists() shouldBe true
+        project.path("application/build/classes/kotlin/main/com/example/generated/api/Catalog/CatalogServer.class").exists() shouldBe true
+        project.path("application/build/classes/kotlin/main/com/example/generated/api/Catalog/CatalogClient.class").exists() shouldBe true
         project.path("application/build/generated/tapik/documentation/Catalog.openapi.json").exists() shouldBe true
         project.path("application/build/generated/tapik/documentation/custom/Catalog.txt").exists() shouldBe true
 
@@ -35,17 +35,17 @@ class CompiledContractWiringSpec : FunSpec({
         JarFile(jar.toFile()).use { archive ->
             val entries = archive.entries().asSequence().map { entry -> entry.name }.toList()
             entries.joinToString("\n") shouldContain
-                "META-INF/tapik/spring/webmvc/com.example.generated.contract.Catalog.CatalogGeneratedController.properties"
+                "META-INF/tapik/spring/webmvc/com.example.generated.api.Catalog.CatalogGeneratedController.properties"
             entries.joinToString("\n") shouldNotContain "Catalog.openapi.json"
             entries.joinToString("\n") shouldNotContain "custom/Catalog.txt"
         }
     }
 })
 
-private fun compiledContractProject(): CompiledContractProject {
-    val root = Files.createTempDirectory("tapik-gradle-compiled-contract-")
-    val project = CompiledContractProject(root)
-    project.write("settings.gradle", "rootProject.name = 'fixture'\ninclude 'contract', 'custom-target', 'application'\n")
+private fun compiledApiProject(): CompiledApiProject {
+    val root = Files.createTempDirectory("tapik-gradle-compiled-api-dependency-")
+    val project = CompiledApiProject(root)
+    project.write("settings.gradle", "rootProject.name = 'fixture'\ninclude 'api', 'custom-target', 'application'\n")
     project.write(
         "build.gradle",
         """
@@ -58,7 +58,7 @@ private fun compiledContractProject(): CompiledContractProject {
         """.trimIndent()
     )
     project.write(
-        "contract/build.gradle",
+        "api/build.gradle",
         """
         plugins {
             id 'org.jetbrains.kotlin.jvm'
@@ -71,9 +71,9 @@ private fun compiledContractProject(): CompiledContractProject {
         """.trimIndent()
     )
     project.write(
-        "contract/src/main/kotlin/com/example/contract/Catalog.kt",
+        "api/src/main/kotlin/com/example/api/Catalog.kt",
         """
-        package com.example.contract
+        package com.example.api
 
         import dev.akif.tapik.*
 
@@ -143,15 +143,15 @@ private fun compiledContractProject(): CompiledContractProject {
         }
 
         dependencies {
-            implementation project(':contract')
+            implementation project(':api')
             implementation 'dev.akif:tapik-target-spring-restclient:$compiledFixtureVersion'
             implementation 'dev.akif:tapik-target-spring-webmvc:$compiledFixtureVersion'
-            tapikContract project(':contract')
+            tapikApiDependency project(':api')
             tapikTarget project(':custom-target')
         }
 
         tapik {
-            mode(Mode.COMPILED_CONTRACT)
+            mode(Mode.COMPILED_API_DEPENDENCY)
             openApi('docs') {
                 includeApis('Catalog')
                 version('1.0.0')
@@ -176,10 +176,10 @@ private fun compiledContractProject(): CompiledContractProject {
         """
         package com.example.application
 
-        import com.example.contract.Catalog
-        import com.example.generated.contract.Catalog.CatalogClient
-        import com.example.generated.contract.Catalog.CatalogServer
-        import com.example.generated.contract.Catalog.ListResponse
+        import com.example.api.Catalog
+        import com.example.generated.api.Catalog.CatalogClient
+        import com.example.generated.api.Catalog.CatalogServer
+        import com.example.generated.api.Catalog.ListResponse
 
         class CatalogHandler : CatalogServer {
             override val catalogApi = Catalog()
@@ -193,7 +193,7 @@ private fun compiledContractProject(): CompiledContractProject {
     return project
 }
 
-private class CompiledContractProject(private val root: Path) {
+private class CompiledApiProject(private val root: Path) {
     fun write(relativePath: String, content: String) {
         val path = root.resolve(relativePath)
         Files.createDirectories(path.parent)

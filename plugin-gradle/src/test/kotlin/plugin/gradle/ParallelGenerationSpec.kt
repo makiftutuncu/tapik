@@ -91,7 +91,7 @@ private class ParallelGenerationProject(
             }
 
             dependencies {
-                tapikContract 'dev.akif:tapik-example-contract:$parallelVersion'
+                tapikApiDependency 'dev.akif:tapik-example-contract:$parallelVersion'
                 tapikTarget files(
                     '${descriptorRoot.parallelGroovyPath()}',
                     '${testClasses.parallelGroovyPath()}'
@@ -99,7 +99,7 @@ private class ParallelGenerationProject(
             }
 
             tapik {
-                mode(Mode.COMPILED_CONTRACT)
+                mode(Mode.COMPILED_API_DEPENDENCY)
                 openApi('docs') {
                     includeApis('$apiId')
                     version('1.0.0')

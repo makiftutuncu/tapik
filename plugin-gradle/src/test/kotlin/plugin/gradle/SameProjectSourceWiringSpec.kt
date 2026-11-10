@@ -159,10 +159,10 @@ class SameProjectSourceWiringSpec : FunSpec({
         result.output shouldContain "Unresolved reference 'BooksClient'"
         result.output shouldContain
             "tapik same-project generated declarations are unavailable to ordinary main source; " +
-            "move endpoint definitions to a separately compiled project and use Mode.COMPILED_CONTRACT"
+            "move endpoint definitions to a separately compiled project and use Mode.COMPILED_API_DEPENDENCY"
     }
 
-    test("load contracts and compile generated source with compileOnly dependencies") {
+    test("load APIs and compile generated source with compileOnly dependencies") {
         val project = sameProjectSourceFixture(includeCompileOnlyModel = true)
 
         val result = project.run("jar")

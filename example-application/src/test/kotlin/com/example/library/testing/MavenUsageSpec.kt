@@ -89,7 +89,7 @@ class MavenUsageSpec : FunSpec({
         Files.exists(Path.of("target/generated/tapik/Books.openapi.json")) shouldBe false
     }
 
-    test("execute a client generated from a contract dependency") {
+    test("execute a client generated from a API dependency") {
         val builder = RestClient.builder().baseUrl("https://library.example")
         val server = MockRestServiceServer.bindTo(builder).build()
         val client =

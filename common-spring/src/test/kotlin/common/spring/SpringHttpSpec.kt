@@ -33,7 +33,7 @@ class SpringHttpSpec : FunSpec({
         mediaType.toSpringMediaType().toMediaType() shouldBe mediaType
     }
 
-    test("parse normalized contract media types without deferred syntax failures") {
+    test("parse normalized API media types without deferred syntax failures") {
         listOf(
             "Text/Plain ; Charset=\"UTF-8\"",
             "application/json;profile=\"bo\\ok\"",

@@ -14,7 +14,7 @@ import java.nio.file.Path
 import java.util.ServiceLoader
 
 class CompilerRegistryCachingSpec : FunSpec({
-    test("relocate cached contract compilation before an incremental source change") {
+    test("relocate cached API compilation before an incremental source change") {
         val fixture = CompilerRegistryCacheFixture.create()
 
         fixture.build().task(":compileKotlin")?.outcome shouldBe TaskOutcome.SUCCESS
@@ -86,7 +86,7 @@ private class CompilerRegistryCacheFixture private constructor(
     }
 
     fun apiIds(): List<String> {
-        val jar = root.resolve("build/libs/contract.jar")
+        val jar = root.resolve("build/libs/api.jar")
         return URLClassLoader(arrayOf(jar.toUri().toURL()), javaClass.classLoader).use { classLoader ->
             ServiceLoader
                 .load(ApiRegistry::class.java, classLoader)
@@ -151,7 +151,7 @@ private class CompilerRegistryCacheFixture private constructor(
                     }
                 }
 
-                rootProject.name = "contract"
+                rootProject.name = "api"
                 """.trimIndent() + "\n"
             )
             Files.writeString(
@@ -172,7 +172,7 @@ private class CompilerRegistryCacheFixture private constructor(
                     kotlin.srcDir("src/shared/kotlin")
                 }
 
-                tasks.jar { archiveFileName.set("contract.jar") }
+                tasks.jar { archiveFileName.set("api.jar") }
                 """.trimIndent() + "\n"
             )
             return CompilerRegistryCacheFixture(root, buildCache)

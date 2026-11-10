@@ -7,6 +7,10 @@ registries, explicit generation modes, and named target executions. Migrate one 
 build separately until the replacement behaves as expected. Once migrated, the rewrite follows the
 xref:compatibility.adoc[documented compatibility policy].
 
+If your project already uses an earlier rewrite build, update the Gradle dependency configuration from
+`tapikContract` to `tapikApiDependency`, its classpath name from `tapikContractClasspath` to
+`tapikApiDependencyClasspath`, and `Mode.COMPILED_CONTRACT` to `Mode.COMPILED_API_DEPENDENCY`.
+
 . Move to Java 25 and Kotlin 2.4. Use Maven 3.9+ or a supported Gradle 9.1-9.8 release. Start with the
   xref:getting-started.adoc[quickstart] or copy the xref:runnable-example.adoc[runnable example]'s layout.
 . Import `dev.akif:tapik-bom:0.6.0`. Replace old dependencies with the current `tapik-core`, chosen `tapik-format-*`,
@@ -22,7 +26,7 @@ xref:compatibility.adoc[documented compatibility policy].
   no compatibility alias, so an API may declare its own `id` resource definition without colliding with the base class.
 . Choose the lifecycle deliberately. Maven same-module output uses `process-classes`; Gradle uses
   `Mode.SAME_PROJECT`. Main source implementing generated interfaces should consume a compiled API dependency and use
-  Maven `generate-sources` or Gradle `Mode.COMPILED_CONTRACT`.
+  Maven `generate-sources` or Gradle `Mode.COMPILED_API_DEPENDENCY`.
 . Regenerate everything in a clean build. Implement generated `*Server` interfaces in handlers, let generated
   `*GeneratedController` classes handle Spring mappings, and use the generated client interfaces with a transport.
 . Compare generated OpenAPI documents and run request/response tests against the previous application. Check status

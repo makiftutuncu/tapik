@@ -39,8 +39,8 @@ activation remains valid.
 |===
 |Mode |Registry input |Task relationship |Can ordinary main source use generated Kotlin?
 
-|`Mode.COMPILED_CONTRACT`
-|Dependencies declared on `tapikContract`
+|`Mode.COMPILED_API_DEPENDENCY`
+|Dependencies declared on `tapikApiDependency`
 |`compileKotlin` and `processResources` consume `tapikGenerate`
 |Yes
 
@@ -50,12 +50,12 @@ activation remains valid.
 |No
 |===
 
-Use `Mode.COMPILED_CONTRACT` when application code imports generated types. Add the API dependency to both the ordinary
-dependencies and `tapikContract`; these configurations have different roles:
+Use `Mode.COMPILED_API_DEPENDENCY` when application code imports generated types. Add the API dependency to both the
+ordinary dependencies and `tapikApiDependency`; these configurations have different roles:
 
 [source,kotlin]
 ----
-include::example$gradle/application/build.gradle.kts[tag=compiled-contract-dependencies]
+include::example$gradle/application/build.gradle.kts[tag=compiled-api-dependencies]
 ----
 
 Use same-project mode for documentation or artifacts intended only for downstream consumers. The runnable API project
@@ -75,7 +75,7 @@ Declarations run in source order.
 
 [source,kotlin]
 ----
-include::example$gradle/application/build.gradle.kts[tag=compiled-contract]
+include::example$gradle/application/build.gradle.kts[tag=compiled-api-dependency]
 ----
 
 An empty include set selects every discovered API. `includeApis("Authors", "Books")` narrows that set by exact,
@@ -94,7 +94,7 @@ The xref:reference/generation-options.adoc[target reference] describes defaults 
 == Add a custom target
 
 Put a service-loaded custom target and its runtime dependencies on `tapikTarget`, not `implementation` or
-`tapikContract`. Register an execution with its stable target ID. The escape hatch supports scalar, ordered list, and
+`tapikApiDependency`. Register an execution with its stable target ID. The escape hatch supports scalar, ordered list, and
 nested object configuration--including lists containing other lists or objects--without exposing host-neutral
 implementation maps:
 
@@ -172,7 +172,7 @@ OpenAPI, generated client/server source, and WebMVC registration resources under
 
 == Troubleshooting
 
-`tapikGenerate` says no mode or executions are configured:: Call `mode(Mode.COMPILED_CONTRACT)` or
+`tapikGenerate` says no mode or executions are configured:: Call `mode(Mode.COMPILED_API_DEPENDENCY)` or
 `mode(Mode.SAME_PROJECT)` and declare at least one target block. Applying the plugin alone intentionally performs no
 generation.
 
@@ -181,7 +181,7 @@ Kotlin 2.4.10, and Gradle 9.1 through 9.8. The plugin may be applied before Kotl
 by the time Gradle finishes configuring the project. Android and Kotlin Multiplatform projects are not yet supported.
 
 No API registries are found in compiled API dependency mode:: Put an API artifact compiled with the tapik compiler
-plugin on `tapikContract`. Add it separately to `implementation` when source imports its declarations.
+plugin on `tapikApiDependency`. Add it separately to `implementation` when source imports its declarations.
 
 No API registries are found in same-project mode:: Ensure the project applies Kotlin/JVM and contains an eligible
 public concrete `Api`. Run `tapikGenerate`; it schedules main compilation itself.

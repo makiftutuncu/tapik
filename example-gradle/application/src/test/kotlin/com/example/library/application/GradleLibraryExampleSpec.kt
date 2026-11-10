@@ -31,7 +31,7 @@ class GradleLibraryExampleSpec : FunSpec({
             )
     }
 
-    test("call the contract through the generated RestClient") {
+    test("call the API through the generated RestClient") {
         val builder = RestClient.builder()
         val server = MockRestServiceServer.bindTo(builder).build()
         val client = BooksRestClient(builder, "https://library.example")

@@ -73,7 +73,7 @@ than string keys and stringly typed values:
 ```kotlin
 tapik {
     outputRoot(layout.buildDirectory.dir("generated/contracts"))
-    mode(Mode.COMPILED_CONTRACT)
+    mode(Mode.COMPILED_API_DEPENDENCY)
 
     openApi("public") {
         includeApis("Catalog")
@@ -94,7 +94,7 @@ tapik {
 }
 ```
 
-`mode(Mode.COMPILED_CONTRACT)` and `mode(Mode.SAME_PROJECT)` select where tapik loads APIs. No mode is
+`mode(Mode.COMPILED_API_DEPENDENCY)` and `mode(Mode.SAME_PROJECT)` select where tapik loads APIs. No mode is
 selected by default: applying the plugin without invoking generation remains valid, while invoking `tapikGenerate`
 without a mode fails. Repeating the same mode is harmless, but selecting a different mode after one has already been
 selected fails during configuration.
@@ -186,7 +186,7 @@ successful paths and preserve the last successful output tree.
 
 Every project using generation declares exactly one of two modes:
 
-- **Compiled API dependency** reads APIs from artifacts on the dedicated `tapikContract` configuration. It is intended
+- **Compiled API dependency** reads APIs from artifacts on the dedicated `tapikApiDependency` configuration. It is intended
   for consumers of a separately compiled API and can make generated declarations available to ordinary main
   source compilation.
 - **Same project** reads APIs from the current project's compiled Kotlin/JVM main output. It is intended for targets
@@ -206,12 +206,12 @@ relationship.
 
 | Mode | Registry input | Task relationship | Main-source visibility |
 | --- | --- | --- | --- |
-| Compiled API dependency | `tapikContract` configuration | `compileKotlin` and `processResources` consume `tapikGenerate` outputs | Main source can use generated Kotlin |
+| Compiled API dependency | `tapikApiDependency` configuration | `compileKotlin` and `processResources` consume `tapikGenerate` outputs | Main source can use generated Kotlin |
 | Same project | Compiled main output plus compile and runtime classpaths | `tapikGenerate` consumes the ordinary main compile and resource outputs; final main output also carries late producers | Main source cannot use generated Kotlin |
 
 ### Compiled API dependency mode
 
-The `tapikContract` configuration resolves compiled API artifacts and their runtime dependencies. Project
+The `tapikApiDependency` configuration resolves compiled API artifacts and their runtime dependencies. Project
 dependencies on API modules retain Gradle's normal producing-task dependencies, so generation never scans or
 executes uncompiled source. `tapikGenerate` loads compiler-produced registries only from that resolved API
 classpath.
@@ -316,14 +316,14 @@ direct mode, no reuse of unchecked stale main output, and no behavior branch bas
 
 ## Dependencies and compatibility
 
-The adapter keeps dependency declaration and resolution in separate Gradle configuration roles. `tapikContract` and
+The adapter keeps dependency declaration and resolution in separate Gradle configuration roles. `tapikApiDependency` and
 `tapikTarget` are declarable, non-resolvable, non-consumable dependency scopes. Their respective internal
-`tapikContractClasspath` and `tapikTargetClasspath` configurations are resolvable, non-consumable runtime classpaths.
+`tapikApiDependencyClasspath` and `tapikTargetClasspath` configurations are resolvable, non-consumable runtime classpaths.
 They are absent from published project variants, and none extends or is extended by the project's ordinary compile or
 runtime configurations:
 
-- `tapikContract` contains compiled API artifacts and their runtime dependencies. It has no default dependency;
-  `tapikContractClasspath` is the registry input only in compiled API dependency mode. A project dependency retains its
+- `tapikApiDependency` contains compiled API artifacts and their runtime dependencies. It has no default dependency;
+  `tapikApiDependencyClasspath` is the registry input only in compiled API dependency mode. A project dependency retains its
   producing task dependency.
 - `tapikTarget` contains generation-target providers and their runtime dependencies. The plugin adds
   `dev.akif:tapik-target-openapi`, `dev.akif:tapik-target-spring-restclient`, and
@@ -334,19 +334,19 @@ The public dependency syntax is ordinary Gradle dependency notation:
 
 ```kotlin
 dependencies {
-    tapikContract(project(":contract"))
+    tapikApiDependency(project(":contract"))
     tapikTarget("com.example:company-tapik-target:1.2.0")
 }
 ```
 
 The built-in target modules are not implementation dependencies of the Gradle plugin and are not visible to project
-source. API artifacts do not become ordinary application dependencies merely by being added to `tapikContract`; an
+source. API artifacts do not become ordinary application dependencies merely by being added to `tapikApiDependency`; an
 application that imports endpoint declarations adds the API to its normal dependencies too.
 The worker receives the two classpaths separately so API registries cannot implicitly contribute executable targets
 and target artifacts cannot become API inputs.
 
 Before loading any registry or target provider, the adapter inspects resolved components on every classpath used for
-generation. This includes `tapikContractClasspath` in compiled API dependency mode, the main compile and runtime
+generation. This includes `tapikApiDependencyClasspath` in compiled API dependency mode, the main compile and runtime
 classpaths in same-project mode, and `tapikTargetClasspath` in both modes. Every resolved external or project component
 whose group is `dev.akif` and whose module name starts with `tapik-` must have exactly the applied Gradle plugin version.
 The compiler-plugin
@@ -429,24 +429,24 @@ Target discovery uses only `tapikTargetClasspath`. Selecting an unknown ID repor
 and sorted IDs available from that configuration, then explains how to add a custom artifact with
 `tapikTarget(...)`. Before reporting an ordinary unknown target, the adapter checks the API classpath for that ID.
 Finding it there produces a placement diagnostic explaining that target artifacts belong in `tapikTarget`, not
-`tapikContract` or application dependencies.
+`tapikApiDependency` or application dependencies.
 
 The API-side target lookup used for that placement check treats a classpath with no target-registry provider as
 an empty catalog. Once a provider declaration is present, however, malformed service declarations, duplicate target
 IDs, and provider linkage failures remain catalog-loading failures. They identify the execution, requested target,
-and `tapikContractClasspath`, retain the original failure as their cause, and explain that target providers belong in
+and `tapikApiDependencyClasspath`, retain the original failure as their cause, and explain that target providers belong in
 `tapikTarget`; they never degrade to the ordinary unknown-target diagnostic.
 
 `ServiceConfigurationError` and `LinkageError` from target discovery identify `tapikTargetClasspath`, retain the
 original cause, and point to provider declarations, runtime dependencies, and tapik version alignment. The
-corresponding failures from API-registry discovery identify either `tapikContractClasspath` or the same project's main
+corresponding failures from API-registry discovery identify either `tapikApiDependencyClasspath` or the same project's main
 compile and runtime classpaths according to mode, retain the cause, and point to compiler-generated registries,
 API dependencies, and version alignment. Arbitrary target execution failures are not reclassified as loading
 failures.
 Every worker failure is additionally framed by the configured execution name and target ID.
 
 An empty API catalog has a mode-specific diagnostic. Compiled API dependency mode tells the user to add an API compiled
-with the tapik compiler plugin to `tapikContract`; same-project mode states that main compilation produced no eligible
+with the tapik compiler plugin to `tapikApiDependency`; same-project mode states that main compilation produced no eligible
 public concrete `Api` and points to compiler-plugin activation and the API eligibility rules. These failures, version
 failures, unknown or misplaced targets, and unsupported project types all occur before the output tree is changed and
 use lowercase `tapik` in their messages.
@@ -490,7 +490,7 @@ executions. From its 0.6 baseline, this public Gradle DSL follows tapik's docume
 The repository contains one runnable Gradle multi-project build with `contract` and `application` projects. It reuses
 the same ordinary Kotlin API and application sources as the Maven example: it does not translate endpoints into
 another model or maintain Gradle-specific endpoint definitions. The `contract` project demonstrates same-project OpenAPI
-generation; the application consumes that project through both its ordinary dependency and `tapikContract`, then
+generation; the application consumes that project through both its ordinary dependency and `tapikApiDependency`, then
 generates OpenAPI, Spring RestClient, and Spring WebMVC artifacts in compiled API dependency mode.
 
 Public Gradle documentation takes Kotlin and Groovy DSL fragments from files exercised by the Gradle test suite or the

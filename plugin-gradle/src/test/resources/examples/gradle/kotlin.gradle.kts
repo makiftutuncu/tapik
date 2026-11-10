@@ -11,14 +11,14 @@ plugins {
 
 // tag::dependency-configurations[]
 dependencies {
-    tapikContract("com.example:library-contract:1.0.0")
+    tapikApiDependency("com.example:library-contract:1.0.0")
     tapikTarget("com.example:company-tapik-target:1.2.0")
 }
 // end::dependency-configurations[]
 
 // tag::kotlin-configuration[]
 tapik {
-    mode(Mode.COMPILED_CONTRACT)
+    mode(Mode.COMPILED_API_DEPENDENCY)
     outputRoot(layout.buildDirectory.dir("generated/contracts"))
 
     openApi("public") {

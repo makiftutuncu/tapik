@@ -38,7 +38,7 @@ class LinkageFailingTargetRegistry : GenerationTargetRegistry {
 
 class LinkageFailingApiRegistry : ApiRegistry {
     override val apis: List<Api>
-        get() = throw NoClassDefFoundError("missing contract dependency")
+        get() = throw NoClassDefFoundError("missing API dependency")
 }
 
 private object ThrowingTarget : GenerationTarget {

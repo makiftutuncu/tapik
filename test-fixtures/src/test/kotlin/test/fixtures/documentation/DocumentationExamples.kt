@@ -5,7 +5,7 @@ import dev.akif.tapik.format.kotlinx.jsonBody
 import dev.akif.tapik.test.fixtures.library.Book
 import dev.akif.tapik.test.fixtures.library.CreateBook
 
-// tag::contract-documentation[]
+// tag::endpoint-documentation[]
 class DocumentedBooks : Api() {
     private val requestId =
         header.uuid("X-Request-Id")
@@ -32,4 +32,4 @@ class DocumentedBooks : Api() {
             )
     // end::complete-endpoint[]
 }
-// end::contract-documentation[]
+// end::endpoint-documentation[]
