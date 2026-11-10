@@ -245,8 +245,8 @@ Maven's CLI execution source identifies direct invocation, including `generate@e
 configured phase. Direct mode performs the same late compilation and synchronization as `process-classes`, but does
 not run user compilation or any preceding lifecycle phase. It requires an existing main output directory and at least
 one API visible through compiled registries before selection; dependency registries are supported too. Missing
-prerequisites fail before artifact writes and explain how to compile same-module APIs or use a compiled-contract
-`generate-sources` binding. Existing API selection validation remains unchanged in every mode.
+prerequisites fail before artifact writes and explain how to compile same-module APIs or use a compiled API dependency
+with a `generate-sources` binding. Existing API selection validation remains unchanged in every mode.
 Direct invocation logs that it reuses compiled output, which may be stale; users must compile changed endpoint definitions first.
 
 When an execution returns `RESOURCE` artifacts, the Maven adapter adds exactly those relative paths beneath the

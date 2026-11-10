@@ -116,7 +116,7 @@ name (including enclosing types). The prefix's parent is the fixed source root: 
 `AuthorsGeneratedController`. Only that exact parent plus its trailing dot is removed; the source root is never inferred
 from the selected APIs or from a varying longest-common-prefix calculation. API display names, selection order, other
 selected APIs, and build layout do not affect this identity. Independent same-module API artifacts use exactly
-the same policy as compiled-contract generation.
+the same policy as generation from a compiled API dependency.
 
 For a one-segment prefix such as `generated`, the source root is empty and the entire binary name is retained.
 APIs outside a nonempty source root use the reserved `_external` namespace followed by their entire encoded binary

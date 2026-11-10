@@ -93,7 +93,7 @@ from the local Maven cache, but the entire `dev/akif` subtree is excluded before
 from hiding missing release files.
 
 The consumer is a temporary copy of the runnable library API and application sources, with its own parent POM rather
-than tapik's parent. It exercises compiler registries, same-module OpenAPI, compiled-contract generation, generated
+than tapik's parent. It exercises compiler registries, same-module OpenAPI, compiled API dependency generation, generated
 server/client compilation, and Spring behavior. Only source/example assets are copied, never generated `target` output.
 The nested build uses the repository Maven Wrapper, an isolated local repository, and a bounded timeout. Its workspace,
 staged artifacts, and build log remain available for inspection after success or failure.
