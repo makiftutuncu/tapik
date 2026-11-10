@@ -129,7 +129,7 @@ by four lowercase hexadecimal digits; an invalid resulting Kotlin identifier get
 escape. API simple names and configured suffixes must remain valid Kotlin identifiers.
 
 Changing an API's qualified class name, `packageName`, or a suffix changes its generated public identity. Treat such
-changes as compatibility changes. The naming policy itself is also a compatibility contract. WebMVC server and
+changes as compatibility changes. The naming policy itself is part of tapik's compatibility policy. WebMVC server and
 controller suffixes must differ; different targets for the same API must also use distinct suffixes when sharing a
 prefix. Repeated API classes in one request are rejected. Local method and nested response-name collisions still use
 deterministic numeric suffixes.

@@ -141,7 +141,7 @@ generation, and logs each materialized path relative to the project when possibl
 uses a normalized absolute path instead; logging failure cannot invalidate already committed output. Any failed
 execution leaves the previous successful tree intact.
 
-Run `./gradlew tapikGenerate` when only generated artifacts are needed. In compiled-contract mode, ordinary
+Run `./gradlew tapikGenerate` when only generated artifacts are needed. In compiled API dependency mode, ordinary
 `./gradlew compileKotlin`, `classes`, `test`, or `build` also schedules generation because source and resource sets
 consume it. In same-project mode, `tapikGenerate` first runs `classes`; `jar`, `test`, and `build` additionally compile
 and package late generated Kotlin and resources. Generated documentation is never packaged automatically.
@@ -157,8 +157,8 @@ changing their ordinary Gradle publication or packaging semantics.
 
 == Runnable example
 
-The repository's `example-gradle` build maps `contract` and `application` onto the same Kotlin sources used by the
-Maven example. It therefore compares hosts without copying endpoint definitions or constructing metadata. Once the
+The repository's `example-gradle` build maps the `contract` and `application` projects onto the same Kotlin sources used
+by the Maven example. It therefore compares hosts without copying endpoint definitions or constructing metadata. Once the
 release artifacts and plugin marker are available, run:
 
 [,shell]
@@ -180,8 +180,8 @@ generation.
 Kotlin 2.4.10, and Gradle 9.1 through 9.8. The plugin may be applied before Kotlin/JVM, but that plugin must be present
 by the time Gradle finishes configuring the project. Android and Kotlin Multiplatform projects are not yet supported.
 
-No API registries are found in compiled-contract mode:: Put an API artifact compiled with the tapik compiler plugin on
-`tapikContract`. Add it separately to `implementation` when source imports its declarations.
+No API registries are found in compiled API dependency mode:: Put an API artifact compiled with the tapik compiler
+plugin on `tapikContract`. Add it separately to `implementation` when source imports its declarations.
 
 No API registries are found in same-project mode:: Ensure the project applies Kotlin/JVM and contains an eligible
 public concrete `Api`. Run `tapikGenerate`; it schedules main compilation itself.
@@ -189,7 +189,7 @@ public concrete `Api`. Run `tapikGenerate`; it schedules main compilation itself
 A custom target is unknown:: Put its provider artifact on `tapikTarget`. The diagnostic lists target IDs visible on
 `tapikTargetClasspath` and identifies a provider found on the API side.
 
-A generated type is unresolved:: Use compiled-contract mode. Same-project generation necessarily follows ordinary
+A generated type is unresolved:: Use compiled API dependency mode. Same-project generation necessarily follows ordinary
 main compilation, so only its separate late compilation and downstream projects can use generated Kotlin.
 
 Generation fails after a dependency upgrade:: Align the Gradle plugin, BOM, API dependency, format, runtime, and target

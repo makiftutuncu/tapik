@@ -49,7 +49,7 @@ clean build. Put endpoint definitions and application source in separate modules
 a generated server or client.
 
 Running Maven `tapik:generate` directly does not compile a same-module registry first. Use at least `process-classes` for
-same-module generation and at least `compile` for a compiled-contract execution bound to `generate-sources`.
+same-module generation and at least `compile` for compiled API dependency mode bound to `generate-sources`.
 Direct invocation fails before artifact writes if the main output directory is absent or no compiled API registry
 exposes APIs. An existing directory alone is insufficient; compile APIs with the tapik compiler plugin enabled or add
 a compiled API dependency. Recompile changed definitions before retrying, since old compiled output may be stale.
