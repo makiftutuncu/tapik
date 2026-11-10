@@ -30,7 +30,8 @@ particular client framework. Put framework details in that framework's guide, an
 behavior in the relevant reference. Link to those pages instead of repeating their detail elsewhere.
 
 Prefer `endpoint` for an individual HTTP operation and `API` for a named collection of endpoints. Do not use
-`contract` as a synonym for either; keep it only in exact names that identify API source modules and packages.
+`contract` as a synonym for either; keep it in exact identifiers such as API source module and package names, or when
+showing an older identifier that a migration renames.
 
 Treat existing documentation as material to review, not as proof that a statement is correct or useful. Check behavior
 and capability claims against current specifications, implementation, and runnable examples. Rewrite or remove claims

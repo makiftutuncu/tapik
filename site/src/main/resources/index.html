@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="tapik defines type-safe HTTP APIs as ordinary Kotlin values.">
+    <meta name="description" content="Define HTTP endpoints in Kotlin and generate documentation, clients, and servers with tapik.">
     <title>tapik — Type-safe APIs in Kotlin</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -22,9 +22,9 @@
         <p class="eyebrow">Type-safe APIs in Kotlin</p>
         <h1>Define endpoints once.<br>Let the build check the rest.</h1>
         <p class="introduction">
-            tapik represents HTTP endpoints as ordinary Kotlin values. Their structure stays in their types, and tapik
-            checks invalid definitions during compilation and generates outputs without making OpenAPI the
-            source of truth.
+            tapik represents HTTP endpoints as ordinary Kotlin values. Their structure stays in their types. tapik
+            checks invalid definitions during compilation and generates documentation, clients, and servers from the
+            same endpoints.
         </p>
         <div class="actions">
             <a class="primary" href="docs/getting-started.html">Get started</a>
@@ -46,7 +46,7 @@
         <article>
             <span>03</span>
             <h2>Generate many targets</h2>
-            <p>Produce OpenAPI, Spring RestClient clients, and Spring WebMVC servers from the same endpoints.</p>
+            <p>Generate documentation, clients, and servers from the same endpoints.</p>
         </article>
     </section>
 
@@ -55,8 +55,8 @@
             <p class="eyebrow">A small endpoint</p>
             <h2>Ordinary values, precise types</h2>
             <p>
-                Define an API in one artifact, then select targets in the consuming Maven build. tapik generates
-                source early enough for application code to implement servers or invoke clients.
+                Define an API in an API module, then choose what to generate in your build. tapik generates source for
+                application code to implement a server or call a client.
             </p>
             <a href="https://github.com/makiftutuncu/tapik/tree/main/example-application">Open the runnable example →</a>
         </div>
