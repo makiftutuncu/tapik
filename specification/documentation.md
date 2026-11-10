@@ -75,9 +75,11 @@ rejects multiline Kotlin or XML source blocks that duplicate executable source i
 signatures and other non-executable notation may remain inline.
 
 Dokka generates the Kotlin API reference. Because its Maven plugin does not aggregate Maven modules natively, the
-website build may present all production source roots as one documentation module with a complete installed-artifact
-classpath. The reference must include every production package and exclude examples, fixtures, and test sources.
-Public declarations should link to their matching repository source at the documented release when supported.
+website build may present the Maven production source roots as one documentation module with a complete
+installed-artifact classpath. This unified reference includes every production package built by Maven and excludes
+examples, fixtures, and test sources. The separately built Gradle plugin generates its own Dokka HTML reference and
+packages it in the plugin's `javadoc` archive. All public declarations in both references require KDoc. Public
+declarations should link to their matching repository source at the documented release when supported.
 
 The unified reference is generated at `/docs/api/` inside the same staged site Antora uses. Antora navigation links to
 the reference, and every Dokka HTML page provides a version-relative link back to the matching narrative documentation
