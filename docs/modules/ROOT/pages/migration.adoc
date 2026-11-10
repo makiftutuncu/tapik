@@ -1,13 +1,12 @@
 = Migrate to 0.6
-:description: Migrate an earlier tapik project to the Kotlin 2.4 rewrite with Maven or Gradle.
+:description: Move an earlier tapik project to version 0.6 with Maven or Gradle.
 
-The 0.6 rewrite is not source- or binary-compatible with earlier tapik releases. There is no automatic converter. Its
-Gradle plugin keeps the historical ID but replaces package scanning and the earlier generator DSL with compiler-owned
-registries, explicit generation modes, and named target executions. Migrate one small API first and retain the previous
-build separately until the replacement behaves as expected. Once migrated, the rewrite follows the
-xref:compatibility.adoc[documented compatibility policy].
+tapik 0.6 is not source- or binary-compatible with earlier releases. There is no automatic converter. The Gradle plugin
+keeps its historical ID but replaces package scanning and the earlier generator DSL with compiler-generated registries,
+explicit generation modes, and named target executions. Migrate one small API first and keep the previous build until
+the new setup works. After migration, follow the xref:compatibility.adoc[compatibility policy].
 
-If your project already uses an earlier rewrite build, update the Gradle dependency configuration from
+If your build uses the earlier Gradle configuration names, rename
 `tapikContract` to `tapikApiDependency`, its classpath name from `tapikContractClasspath` to
 `tapikApiDependencyClasspath`, and `Mode.COMPILED_CONTRACT` to `Mode.COMPILED_API_DEPENDENCY`.
 

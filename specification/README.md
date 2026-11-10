@@ -1,7 +1,7 @@
 # tapik specification
 
-These documents are the source of intent for the rewrite. They describe observable behavior before implementation
-details. When a design changes, update the relevant specification first and then drive implementation with tests.
+These documents describe tapik's intended behavior and design. Update the relevant specification before changing
+public behavior, then use tests to check the implementation against it.
 
 - [Product](product.md): purpose, users, promises, targets, and non-goals
 - [DSL](dsl.md): agreed authoring experience and type-level model

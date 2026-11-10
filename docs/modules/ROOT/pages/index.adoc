@@ -26,8 +26,8 @@ Learn how to define APIs, endpoints, URIs, inputs, outputs, formats, and composi
 Choose documentation, a client, or a server, and find the guide for it.
 |===
 
-NOTE: tapik 0.6.0 starts the rewrite and is incompatible with earlier versions. See the
-xref:compatibility.adoc[compatibility policy] before upgrading.
+NOTE: tapik 0.6.0 is incompatible with earlier versions. See the xref:compatibility.adoc[compatibility policy] before
+upgrading.
 
 == What you get
 

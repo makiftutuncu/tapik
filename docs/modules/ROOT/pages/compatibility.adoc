@@ -1,9 +1,8 @@
 = Versioning and compatibility
 :description: Understand tapik's compatibility baseline, pre-1.0 versioning, and currently supported surface.
 
-Version 0.6.0 is the compatibility baseline for the rewrite. It is not source- or binary-compatible with earlier
-versions because the build setup, DSL, and generated output changed. See the xref:migration.adoc[migration guide] when
-upgrading.
+Version 0.6.0 is tapik's first compatibility baseline. It is not source- or binary-compatible with earlier versions
+because the build setup, DSL, and generated output changed. See the xref:migration.adoc[migration guide] when upgrading.
 
 == Semantic Versioning before 1.0
 

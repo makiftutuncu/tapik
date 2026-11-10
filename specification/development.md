@@ -104,8 +104,8 @@ performed by the rehearsal.
 
 ## Modules
 
-The rewrite starts with one `dev.akif:tapik-core` artifact. New artifacts are introduced only when a specification
-needs an independently consumable boundary. Maven module folders are flat beneath the repository root and omit the
+tapik starts with one `dev.akif:tapik-core` artifact. Add another artifact only when a specification needs an
+independently consumable boundary. Maven module folders are flat beneath the repository root and omit the
 `tapik-` artifact prefix. Runtime and integration modules, except for `core`, begin with exactly one role prefix:
 `common-`, `example-`, `format-`, `plugin-`, `target-`, or `test-`. The structural `bom` module is the other unprefixed
 exception. Artifacts add `tapik-` before the complete module folder name. The Kotlin serialization

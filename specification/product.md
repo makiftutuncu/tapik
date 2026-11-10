@@ -54,8 +54,8 @@ the same registries, selection rules, configuration, and generation results.
 
 ## Versioning and compatibility
 
-Version 0.6.0 establishes the first compatibility baseline for the rewrite and is intentionally incompatible with
-earlier tapik implementations. From that baseline, tapik follows Semantic Versioning with an explicit pre-1.0
+Version 0.6.0 establishes the first compatibility baseline and is intentionally incompatible with earlier tapik
+implementations. From that baseline, tapik follows Semantic Versioning with an explicit pre-1.0
 convention: patch releases in one `0.y` line are backward-compatible, while an incompatible public change increments
 the minor version. After 1.0, incompatible changes increment the major version.
 
