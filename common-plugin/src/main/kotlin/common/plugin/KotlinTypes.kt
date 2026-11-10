@@ -4,7 +4,7 @@ package dev.akif.tapik.common.plugin
  * Returns the typed argument at [index].
  *
  * @param index zero-based generic argument index.
- * @param location contract location used in diagnostics.
+ * @param location endpoint location used in diagnostics.
  * @throws IllegalArgumentException when the argument is absent or star-projected.
  */
 fun KotlinType.argument(
@@ -21,7 +21,7 @@ fun KotlinType.argument(
 /**
  * Returns the value elements carried by a tapik tuple type.
  *
- * @param location contract location used in diagnostics.
+ * @param location endpoint location used in diagnostics.
  * @throws IllegalArgumentException when this is not a tapik tuple or an element is star-projected.
  */
 fun KotlinType.tupleElements(location: String): List<KotlinType> {

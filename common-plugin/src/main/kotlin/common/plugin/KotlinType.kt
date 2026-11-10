@@ -1,7 +1,7 @@
 package dev.akif.tapik.common.plugin
 
 /**
- * A Kotlin type retained in compiled contract metadata.
+ * A Kotlin type retained in compiled API metadata.
  *
  * @property classifier class, type-alias, or type-parameter identity.
  * @property arguments generic type projections in declaration order.

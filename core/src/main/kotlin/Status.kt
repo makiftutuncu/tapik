@@ -3,7 +3,7 @@ package dev.akif.tapik
 /**
  * An HTTP response status code.
  *
- * tapik accepts the complete HTTP status domain instead of limiting contracts to a closed enum of registered codes.
+ * tapik accepts the complete HTTP status domain instead of limiting endpoints to a closed enum of registered codes.
  * Named values in [Companion] provide the stable standard HTTP status catalog without preventing custom codes.
  *
  * @property code numeric status code between 100 and 599.

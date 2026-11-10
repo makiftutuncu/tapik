@@ -32,7 +32,7 @@ class ApiCatalog private constructor(
         /**
          * Loads registry providers visible to [classLoader].
          *
-         * @param classLoader class loader containing compiled contract artifacts.
+         * @param classLoader class loader containing compiled API artifacts.
          * @return a deterministic API catalog.
          * @throws IllegalArgumentException when two APIs have the same ID.
          */

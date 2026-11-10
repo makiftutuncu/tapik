@@ -11,7 +11,7 @@ import java.net.URI
 import java.nio.charset.StandardCharsets.UTF_8
 
 /**
- * Resolves a request URI while preserving already-encoded contract literals.
+ * Resolves a request URI while preserving already-encoded endpoint literals.
  *
  * @param builder the client's configured builder, used to resolve the base URI.
  * @param uri endpoint URI definition, including ordered literal and variable segments.
