@@ -15,7 +15,10 @@ data class DecodeError(
 
 /** The result of decoding a representation into a Kotlin value. */
 sealed interface DecodeResult<out Value : Any> {
-    /** A successfully decoded [value]. */
+    /** A successfully decoded [value].
+     *
+     * @property value decoded Kotlin value.
+     */
     data class Success<Value : Any>(
         val value: Value
     ) : DecodeResult<Value>
@@ -73,6 +76,8 @@ fun interface Encoder<in Value : Any, out Representation : Any> {
 /**
  * Bidirectional conversion between a Kotlin [Value] and serialized [Representation].
  *
+ * @param Value Kotlin value type.
+ * @param Representation serialized representation type.
  * @property decoder serialized-to-Kotlin conversion.
  * @property encoder Kotlin-to-serialized conversion.
  */

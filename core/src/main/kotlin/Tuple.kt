@@ -1,6 +1,10 @@
 package dev.akif.tapik
 
-/** An ordered, heterogeneous collection whose element types are retained in its concrete subtype. */
+/** An ordered, heterogeneous collection whose element types are retained in its concrete subtype.
+ *
+ * @param T shared element type for tuple values.
+ * @property values values in declaration order.
+ */
 sealed interface Tuple<out T> {
     /** Elements in declaration order, widened to their shared [T] type. */
     val values: List<T>
@@ -14,7 +18,10 @@ data object Tuple0 : Tuple<Nothing> {
     override val values: List<Nothing> = emptyList()
 }
 
-/** A tuple containing one value. */
+/** A tuple containing one value.
+ *
+ * @property _1 first tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple1<T, T1 : T> internal constructor(
     val _1: T1
@@ -23,7 +30,11 @@ data class Tuple1<T, T1 : T> internal constructor(
         get() = listOf(_1)
 }
 
-/** A tuple containing two values. */
+/** A tuple containing two values.
+ *
+ * @property _1 first tuple value.
+ * @property _2 second tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple2<T, T1 : T, T2 : T> internal constructor(
     val _1: T1,
@@ -33,7 +44,12 @@ data class Tuple2<T, T1 : T, T2 : T> internal constructor(
         get() = listOf(_1, _2)
 }
 
-/** A tuple containing three values. */
+/** A tuple containing three values.
+ *
+ * @property _1 first tuple value.
+ * @property _2 second tuple value.
+ * @property _3 third tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple3<T, T1 : T, T2 : T, T3 : T> internal constructor(
     val _1: T1,
@@ -44,7 +60,13 @@ data class Tuple3<T, T1 : T, T2 : T, T3 : T> internal constructor(
         get() = listOf(_1, _2, _3)
 }
 
-/** A tuple containing four values. */
+/** A tuple containing four values.
+ *
+ * @property _1 first tuple value.
+ * @property _2 second tuple value.
+ * @property _3 third tuple value.
+ * @property _4 fourth tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple4<T, T1 : T, T2 : T, T3 : T, T4 : T> internal constructor(
     val _1: T1,
@@ -56,7 +78,14 @@ data class Tuple4<T, T1 : T, T2 : T, T3 : T, T4 : T> internal constructor(
         get() = listOf(_1, _2, _3, _4)
 }
 
-/** A tuple containing five values. */
+/** A tuple containing five values.
+ *
+ * @property _1 first tuple value.
+ * @property _2 second tuple value.
+ * @property _3 third tuple value.
+ * @property _4 fourth tuple value.
+ * @property _5 fifth tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple5<T, T1 : T, T2 : T, T3 : T, T4 : T, T5 : T> internal constructor(
     val _1: T1,
@@ -69,7 +98,15 @@ data class Tuple5<T, T1 : T, T2 : T, T3 : T, T4 : T, T5 : T> internal constructo
         get() = listOf(_1, _2, _3, _4, _5)
 }
 
-/** A tuple containing six values. */
+/** A tuple containing six values.
+ *
+ * @property _1 first tuple value.
+ * @property _2 second tuple value.
+ * @property _3 third tuple value.
+ * @property _4 fourth tuple value.
+ * @property _5 fifth tuple value.
+ * @property _6 sixth tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple6<T, T1 : T, T2 : T, T3 : T, T4 : T, T5 : T, T6 : T> internal constructor(
     val _1: T1,
@@ -83,7 +120,16 @@ data class Tuple6<T, T1 : T, T2 : T, T3 : T, T4 : T, T5 : T, T6 : T> internal co
         get() = listOf(_1, _2, _3, _4, _5, _6)
 }
 
-/** A tuple containing seven values. */
+/** A tuple containing seven values.
+ *
+ * @property _1 first tuple value.
+ * @property _2 second tuple value.
+ * @property _3 third tuple value.
+ * @property _4 fourth tuple value.
+ * @property _5 fifth tuple value.
+ * @property _6 sixth tuple value.
+ * @property _7 seventh tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple7<
     T,
@@ -107,7 +153,17 @@ data class Tuple7<
         get() = listOf(_1, _2, _3, _4, _5, _6, _7)
 }
 
-/** A tuple containing eight values, the maximum supported arity. */
+/** A tuple containing eight values, the maximum supported arity.
+ *
+ * @property _1 first tuple value.
+ * @property _2 second tuple value.
+ * @property _3 third tuple value.
+ * @property _4 fourth tuple value.
+ * @property _5 fifth tuple value.
+ * @property _6 sixth tuple value.
+ * @property _7 seventh tuple value.
+ * @property _8 eighth tuple value.
+ */
 @ConsistentCopyVisibility
 data class Tuple8<
     T,

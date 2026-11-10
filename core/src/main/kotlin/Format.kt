@@ -5,6 +5,8 @@ package dev.akif.tapik
  *
  * @param Value Kotlin value type.
  * @param Representation serialized representation type.
+ * @property codec converts between Kotlin values and their serialized representation.
+ * @property schema describes the values for documentation formats.
  */
 data class Format<Value : Any, Representation : Any>(
     val codec: Codec<Value, Representation>,

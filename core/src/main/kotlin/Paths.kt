@@ -17,6 +17,7 @@ sealed interface PathSegment {
     /**
      * An already-encoded literal path [value].
      *
+     * @property value path segment in encoded form.
      * @throws IllegalArgumentException if [value] is empty or contains `/`.
      */
     @JvmInline

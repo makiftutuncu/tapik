@@ -1,6 +1,9 @@
 package dev.akif.tapik
 
-/** An untyped schema describing values accepted by a [Format]. */
+/** An untyped schema describing values accepted by a [Format].
+ *
+ * @property name optional reusable schema name.
+ */
 sealed interface Schema {
     /** Optional reusable schema name. */
     val name: String?
@@ -20,6 +23,9 @@ enum class SchemaType {
 /**
  * A scalar [type] with an optional OpenAPI [format] and reusable [name].
  *
+ * @property type kind of value described by this schema.
+ * @property format optional format hint for the scalar type.
+ * @property name optional reusable schema name.
  * @throws IllegalArgumentException when [format] or [name] is present but blank.
  */
 data class ScalarSchema(
@@ -38,6 +44,8 @@ data class ScalarSchema(
 /**
  * An array whose elements are described by [items], with an optional reusable [name].
  *
+ * @property items schema for each array element.
+ * @property name optional reusable schema name.
  * @throws IllegalArgumentException when [name] is present but blank.
  */
 data class ArraySchema(
@@ -54,6 +62,8 @@ data class ArraySchema(
 /**
  * A finite set of string [values].
  *
+ * @property values allowed string values in declaration order.
+ * @property name optional reusable schema name.
  * @throws IllegalArgumentException when [values] is empty, contains blanks or duplicates, or [name] is blank.
  */
 class EnumSchema(
@@ -104,6 +114,8 @@ data class SchemaProperty(
 /**
  * An object with named [properties].
  *
+ * @property properties object fields in declaration order.
+ * @property name optional reusable schema name.
  * @throws IllegalArgumentException when a property name or [name] is blank.
  */
 class ObjectSchema(
@@ -136,7 +148,12 @@ class ObjectSchema(
     override fun toString(): String = "ObjectSchema(properties=$properties, name=$name)"
 }
 
-/** A map whose keys and values use [keys] and [values] schemas. */
+/** A map whose keys and values use [keys] and [values] schemas.
+ *
+ * @property keys schema for map keys.
+ * @property values schema for map values.
+ * @property name optional reusable schema name.
+ */
 data class MapSchema(
     val keys: Schema,
     val values: Schema,
@@ -149,7 +166,11 @@ data class MapSchema(
     override fun named(name: String): MapSchema = copy(name = name)
 }
 
-/** A nullable form of [schema]. */
+/** A nullable form of [schema].
+ *
+ * @property schema schema for non-null values.
+ * @property name optional reusable schema name.
+ */
 data class NullableSchema(
     val schema: Schema,
     override val name: String? = null
@@ -164,6 +185,8 @@ data class NullableSchema(
 /**
  * A reference to a reusable schema identified by [reference].
  *
+ * @property reference schema identifier or URI.
+ * @property name optional reusable schema name.
  * @throws IllegalArgumentException when [reference] or [name] is blank.
  */
 data class ReferenceSchema(

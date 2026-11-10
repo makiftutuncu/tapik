@@ -23,7 +23,10 @@ data class Default<Value : Any>(
     val value: Value
 ) : Presence<Value>
 
-/** A value fixed by the API definition rather than supplied by a caller. */
+/** A value fixed by the API definition rather than supplied by a caller.
+ *
+ * @property value required value supplied by the endpoint definition.
+ */
 data class Fixed<Value : Any>(
     val value: Value
 ) : Presence<Value>
