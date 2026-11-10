@@ -22,8 +22,10 @@ class ListConfigurationValue(
 ) : ConfigurationValue {
     val values: List<ConfigurationValue> = values.snapshotList()
 
+    /** Returns [values] for destructuring. */
     operator fun component1(): List<ConfigurationValue> = values
 
+    /** Returns a copy, snapshotting [values]. */
     fun copy(values: List<ConfigurationValue> = this.values): ListConfigurationValue =
         ListConfigurationValue(values)
 
@@ -49,8 +51,10 @@ class ObjectConfigurationValue(
         require(values.keys.none(String::isBlank)) { "Configuration names must not be blank" }
     }
 
+    /** Returns [values] for destructuring. */
     operator fun component1(): Map<String, ConfigurationValue> = values
 
+    /** Returns a copy, snapshotting [values]. */
     fun copy(values: Map<String, ConfigurationValue> = this.values): ObjectConfigurationValue =
         ObjectConfigurationValue(values)
 
@@ -80,8 +84,10 @@ class TargetConfiguration(
     /** Returns the value named [name], or `null` when it is absent. */
     operator fun get(name: String): ConfigurationValue? = values[name]
 
+    /** Returns [values] for destructuring. */
     operator fun component1(): Map<String, ConfigurationValue> = values
 
+    /** Returns a copy, snapshotting [values]. */
     fun copy(values: Map<String, ConfigurationValue> = this.values): TargetConfiguration =
         TargetConfiguration(values)
 

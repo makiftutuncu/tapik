@@ -24,12 +24,16 @@ class SchemaDiscriminator(
         require(mapping.keys.none(String::isBlank)) { "Schema discriminator mapping values must not be blank" }
     }
 
+    /** Returns [propertyName] for destructuring. */
     operator fun component1(): String = propertyName
 
+    /** Returns [mapping] for destructuring. */
     operator fun component2(): Map<String, ReferenceSchema> = mapping
 
+    /** Returns [defaultMapping] for destructuring. */
     operator fun component3(): ReferenceSchema? = defaultMapping
 
+    /** Returns a copy with the supplied discriminator values. */
     fun copy(
         propertyName: String = this.propertyName,
         mapping: Map<String, ReferenceSchema> = this.mapping,
@@ -75,12 +79,16 @@ class UnionSchema(
 
     override fun named(name: String): UnionSchema = copy(name = name)
 
+    /** Returns [alternatives] for destructuring. */
     operator fun component1(): List<Schema> = alternatives
 
+    /** Returns [discriminator] for destructuring. */
     operator fun component2(): SchemaDiscriminator? = discriminator
 
+    /** Returns [name] for destructuring. */
     operator fun component3(): String? = name
 
+    /** Returns a copy with the supplied union values. */
     fun copy(
         alternatives: List<Schema> = this.alternatives,
         discriminator: SchemaDiscriminator? = this.discriminator,

@@ -81,10 +81,13 @@ class EnumSchema(
 
     override fun named(name: String): EnumSchema = copy(name = name)
 
+    /** Returns [values] for destructuring. */
     operator fun component1(): List<String> = values
 
+    /** Returns [name] for destructuring. */
     operator fun component2(): String? = name
 
+    /** Returns a copy with the supplied [values] or [name]. */
     fun copy(
         values: List<String> = this.values,
         name: String? = this.name
@@ -131,10 +134,13 @@ class ObjectSchema(
 
     override fun named(name: String): ObjectSchema = copy(name = name)
 
+    /** Returns [properties] for destructuring. */
     operator fun component1(): Map<String, SchemaProperty> = properties
 
+    /** Returns [name] for destructuring. */
     operator fun component2(): String? = name
 
+    /** Returns a copy with the supplied [properties] or [name]. */
     fun copy(
         properties: Map<String, SchemaProperty> = this.properties,
         name: String? = this.name

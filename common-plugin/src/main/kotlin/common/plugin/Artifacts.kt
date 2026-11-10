@@ -68,8 +68,10 @@ class GenerationResult(
         require(paths.distinct().size == paths.size) { "Generated artifact paths must be unique" }
     }
 
+    /** Returns [artifacts] for destructuring. */
     operator fun component1(): List<GeneratedArtifact> = artifacts
 
+    /** Returns a copy, snapshotting [artifacts]. */
     fun copy(artifacts: List<GeneratedArtifact> = this.artifacts): GenerationResult =
         GenerationResult(artifacts)
 

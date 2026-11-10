@@ -5,6 +5,9 @@ package dev.akif.tapik.common.plugin
  *
  * [source] preserves source-facing aliases and nesting. [expandedType] retains the compiler-expanded identity used by
  * generators for semantic decisions that must not depend on source spelling.
+ *
+ * @property source Kotlin spelling used in generated source.
+ * @property expandedType compiler-expanded type used for semantic checks.
  */
 data class KotlinSourceType(
     val source: String,

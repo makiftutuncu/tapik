@@ -7,6 +7,8 @@ import java.lang.ref.WeakReference
  *
  * Configuration keys always use identity because two equal serialization configurations can still behave differently.
  * [typeKeyEquality] lets an integration choose whether its type representation has identity or structural semantics.
+ *
+ * @param typeKeyEquality equality rule used when comparing type keys.
  */
 class WeakFormatCache<Configuration : Any, Type : Any, Value : Any>(
     private val typeKeyEquality: FormatCacheKeyEquality

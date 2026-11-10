@@ -6,6 +6,8 @@ import java.lang.ref.WeakReference
  * Adds a weak, identity-compared scope to [WeakFormatCache].
  *
  * Neither the scope nor the nested configuration, type, or value is retained solely by this cache.
+ *
+ * @param typeKeyEquality equality rule used when comparing type keys.
  */
 class WeakScopedFormatCache<Scope : Any, Configuration : Any, Type : Any, Value : Any>(
     private val typeKeyEquality: FormatCacheKeyEquality

@@ -19,10 +19,13 @@ class RestClientRequestBody(
     val bytes: ByteArray
         get() = byteSnapshot.copyOf()
 
+    /** Returns [mediaType] for destructuring. */
     operator fun component1(): MediaType = mediaType
 
+    /** Returns the encoded [bytes] for destructuring. */
     operator fun component2(): ByteArray = bytes
 
+    /** Returns a copy, snapshotting [bytes]. */
     fun copy(
         mediaType: MediaType = this.mediaType,
         bytes: ByteArray = this.bytes
@@ -60,14 +63,19 @@ class RestClientResponse(
     val body: ByteArray
         get() = bodySnapshot.copyOf()
 
+    /** Returns [status] for destructuring. */
     operator fun component1(): Status = status
 
+    /** Returns [headers] for destructuring. */
     operator fun component2(): Map<String, List<String>> = headers
 
+    /** Returns [mediaType] for destructuring. */
     operator fun component3(): MediaType? = mediaType
 
+    /** Returns a copy of [body] for destructuring. */
     operator fun component4(): ByteArray = body
 
+    /** Returns a copy, snapshotting [headers] and [body]. */
     fun copy(
         status: Status = this.status,
         headers: Map<String, List<String>> = this.headers,
