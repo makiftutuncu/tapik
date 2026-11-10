@@ -1,5 +1,6 @@
 = Response outputs
 :description: Define ordered, non-overlapping status and content alternatives in tapik.
+:page-aliases: contracts/responses.adoc
 
 Without an explicit output, an endpoint returns one empty `200 OK` response. The first `.output(...)` replaces that
 default; later calls append alternatives in declaration order.
@@ -54,4 +55,4 @@ may use their standard description for an exact status.
 Endpoints retain between one and eight explicit output alternatives. The concrete matcher, body group, and headers of
 every alternative remain available to generators.
 
-Next, xref:contracts/formats-and-schemas.adoc[connect Kotlin values to wire formats].
+Next, xref:endpoints/formats-and-schemas.adoc[connect Kotlin values to wire formats].

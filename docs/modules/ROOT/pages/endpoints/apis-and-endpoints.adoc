@@ -1,5 +1,6 @@
 = APIs and endpoints
 :description: Give tapik APIs and endpoints stable identities while retaining their complete inferred types.
+:page-aliases: contracts/apis-and-endpoints.adoc
 
 An `Api` is a named, ordered collection of endpoints. Define one with a Kotlin class or object:
 
@@ -58,4 +59,4 @@ builder and fails to compile.
 
 Generation reads these endpoint values and types directly. tapik does not create a second copy of their definitions.
 
-Next, xref:contracts/uris.adoc[build typed URIs].
+Next, xref:endpoints/uris.adoc[build typed URIs].

@@ -1,5 +1,6 @@
 = Formats and schemas
 :description: Connect Kotlin values to wire representations and neutral schemas with tapik formats.
+:page-aliases: contracts/formats-and-schemas.adoc
 
 A `Format<Value, Representation>` combines a codec with a schema. The codec handles values on the wire; the schema
 describes the same value to targets that need structural information.
@@ -119,4 +120,4 @@ cannot describe a type it must encode, rather than silently producing an incompl
 Names are optional. Use `.named(...)` for a type that should become a reusable component; target-specific naming policy
 decides the final external name and resolves unnamed derived types.
 
-Next, xref:contracts/documentation-and-composition.adoc[document and compose APIs].
+Next, xref:endpoints/documentation-and-composition.adoc[document and compose APIs].

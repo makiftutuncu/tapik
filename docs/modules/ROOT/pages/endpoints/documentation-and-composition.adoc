@@ -1,5 +1,6 @@
 = Documentation and composition
 :description: Attach OpenAPI-aligned documentation and compose tapik APIs without losing endpoint identity.
+:page-aliases: contracts/documentation-and-composition.adoc
 
 Documentation is stored on the API and endpoint values it describes. It does not add generic fields to `Endpoint`, and
 its immutable modifiers preserve the endpoint's existing type.

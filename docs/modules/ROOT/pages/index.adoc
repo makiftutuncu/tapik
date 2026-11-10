@@ -17,7 +17,7 @@ receives.
 
 Build the runnable Maven example and generate an OpenAPI document.
 
-|xref:contracts/index.adoc[Learn the DSL]
+|xref:endpoints/index.adoc[Learn the DSL]
 
 Learn how to define APIs, endpoints, URIs, inputs, outputs, formats, and composition.
 

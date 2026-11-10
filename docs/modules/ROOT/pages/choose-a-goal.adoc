@@ -6,7 +6,7 @@ Start with the result you need. First define endpoints in Kotlin, then choose wh
 
 == Define endpoints
 
-Read the xref:contracts/index.adoc[endpoint DSL guide]. To create API documentation or share an API definition with
+Read the xref:endpoints/index.adoc[endpoint DSL guide]. To create API documentation or share an API definition with
 other tools, follow the xref:documentation/openapi.adoc[OpenAPI guide].
 
 == Build an HTTP client

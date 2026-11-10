@@ -1,5 +1,6 @@
 = Request inputs
 :description: Define request headers and typed body media alternatives in tapik.
+:page-aliases: contracts/requests.adoc
 
 Request headers and body input are separate parts of an endpoint. This example exercises required, fixed, and optional
 headers plus two JSON media representations and an allowed bodyless request:
@@ -67,4 +68,4 @@ The body group is non-empty and preserves representation order. `noBody` may app
 request-body description belongs to the group as a whole, matching OpenAPI's model; set it in `.input(...,
 description = ...)` or replace it with `.requestBodyDescription(...)`.
 
-Next, xref:contracts/responses.adoc[define response outputs].
+Next, xref:endpoints/responses.adoc[define response outputs].

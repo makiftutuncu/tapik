@@ -10,8 +10,8 @@ and reason, before a body or target can use it.
 - Require non-empty ASCII HTTP tokens for type, subtype, and parameter names, and exactly one separating slash.
   Wildcards in type/subtype are rejected: media ranges belong to negotiation, not body definitions.
 - Accept token or double-quoted parameter values, including valid quoted-pair escapes and empty quoted values.
-  Quoted strings allow HTTP whitespace and Latin-1 octets, but reject CR, LF, other controls, DEL, and code points
-  beyond Latin-1. Charset values must themselves decode to a non-empty token.
+  Quoted strings allow HTAB, visible ASCII, and Latin-1 octets from `0x80` through `0xFF`, including the C1 range.
+  They reject CR, LF, DEL, and code points beyond Latin-1. Charset values must themselves decode to a non-empty token.
 - Allow spaces and tabs around semicolon separators and around the complete input, but not around `/` or `=`.
   Empty semicolon groups are accepted as permitted by the HTTP grammar and omitted from normalized output.
 - Reject duplicate parameter names case-insensitively, even when values agree, rather than choosing a winner.

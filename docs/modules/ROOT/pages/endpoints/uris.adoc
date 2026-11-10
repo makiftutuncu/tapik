@@ -1,5 +1,6 @@
 = URIs and parameters
 :description: Compose ordered URI paths and typed query parameters in tapik.
+:page-aliases: contracts/uris.adoc
 
 Every URI starts at `root`. Append literal path fragments and path values with `/`, then append query definitions with
 `+`:
@@ -75,4 +76,4 @@ for adding path literals or variables; the invalid HTTP ordering does not compil
 Path variables and queries support `.description(...)` and `.deprecated()` without losing their format or presence
 type.
 
-Next, xref:contracts/requests.adoc[define request inputs].
+Next, xref:endpoints/requests.adoc[define request inputs].

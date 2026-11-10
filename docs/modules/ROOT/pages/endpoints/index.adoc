@@ -1,0 +1,27 @@
+= Define endpoints
+:description: Define type-safe HTTP endpoints as ordinary Kotlin values with tapik.
+:page-aliases: user-guide.adoc, custom-types.adoc, project-layout-and-discovery.adoc, contracts/index.adoc
+
+Define each endpoint as an immutable Kotlin value. Kotlin infers a type that keeps the endpoint's structure for
+documentation, clients, and servers.
+
+The DSL follows the shape of an exchange:
+
+[source,kotlin]
+----
+include::example$dsl/DocumentationExamples.kt[tag=complete-endpoint]
+----
+
+You normally do not write an `Endpoint` type explicitly. Kotlin infers one that keeps the path and query values,
+headers, request body, response alternatives, and API property binding.
+
+== Learn the DSL
+
+* xref:endpoints/apis-and-endpoints.adoc[APIs and endpoints] — identity, methods, defaults, state, and inferred types
+* xref:endpoints/uris.adoc[URIs and parameters] — paths, query parameters, presence, repetition, and wildcard paths
+* xref:endpoints/requests.adoc[Request inputs] — headers, bodies, media alternatives, and optional bodies
+* xref:endpoints/responses.adoc[Response outputs] — statuses, bodies, headers, alternatives, and matching
+* xref:endpoints/formats-and-schemas.adoc[Formats and schemas] — codecs, wire representations, derivation, and names
+* xref:endpoints/documentation-and-composition.adoc[Documentation and composition] — descriptions, tags, and nested APIs
+
+The examples in these pages compile and run as part of `./mvnw verify`.

@@ -20,7 +20,7 @@ If your build uses the earlier Gradle configuration names, rename
   xref:reference/gradle.adoc[Gradle] reference.
 . Re-express endpoints as delegated properties of a public `Api` object or constructible class. Keep user-owned models
   and explicitly attach their formats. Review paths, parameter presence, body alternatives, and outputs against the
-  xref:contracts/index.adoc[DSL guide]; do not assume previous DSL spelling or generated names still apply.
+  xref:endpoints/index.adoc[DSL guide]; do not assume previous DSL spelling or generated names still apply.
 . Replace reads of `Api.id` with `Api.apiId`, and rename explicit constructor arguments from `id` to `apiId`. There is
   no compatibility alias, so an API may declare its own `id` resource definition without colliding with the base class.
 . Choose the lifecycle deliberately. Maven same-module output uses `process-classes`; Gradle uses
