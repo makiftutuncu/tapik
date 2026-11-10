@@ -12,7 +12,13 @@ import org.apache.maven.project.MavenProject
 import java.io.File
 import java.nio.file.Path
 
-/** Generates artifacts from the tapik APIs compiled by the current Maven project. */
+/**
+ * Runs one configured tapik generation execution against compiled API registries.
+ *
+ * The goal defaults to `process-classes`, after APIs declared by the current project have compiled. Bind it to
+ * `generate-sources` when generating from an already compiled contract dependency so generated Kotlin can be used by
+ * the current project's main sources. The goal does not scan packages or execute API declarations.
+ */
 @Mojo(
     name = "generate",
     defaultPhase = LifecyclePhase.PROCESS_CLASSES,

@@ -19,6 +19,24 @@ The project name is always written as lowercase `tapik` in public prose. This in
 documentation, KDoc, generated plugin descriptions, and user-facing diagnostics; Kotlin identifiers keep their normal
 declaration spelling.
 
+## Editorial voice
+
+Use concise, direct prose and simple English across the README, specifications, KDoc, and website. Explain what a reader
+can do and what tapik does; remove details that do not help with that purpose. Prefer familiar words, defining a
+technical term only when the reader needs it.
+
+Keep broad descriptions technology-neutral. An overview may say that tapik generates clients without explaining a
+particular client framework. Put framework details in that framework's guide, and put complete option lists and exact
+behavior in the relevant reference. Link to those pages instead of repeating their detail elsewhere.
+
+Prefer `endpoint` for an individual HTTP operation and `API` for a named collection of endpoints. Use `contract` when
+referring specifically to the shared agreement or to a contract module or artifact, rather than as a general synonym
+for an endpoint or API.
+
+Treat existing documentation as material to review, not as proof that a statement is correct or useful. Check behavior
+and capability claims against current specifications, implementation, and runnable examples. Rewrite or remove claims
+that those sources do not support.
+
 ## Site and URL structure
 
 The public site preserves the established Antora component path and uses these stable locations:
@@ -72,6 +90,12 @@ packaging it in that module's `javadoc` classifier. Website aggregation must not
 artifacts. A documentation-only Gradle build is not part of the architecture.
 
 ## Information architecture
+
+The repository root `README.md` is the project's entry point, not a second user manual. It states tapik's purpose and
+supported integrations, links to the versioned website, Kotlin API reference, migration guidance, and runnable examples,
+and gives the repository build command. It may show a short endpoint example, but build-tool setup, lifecycle details,
+and DSL explanations belong in the website guides and references. Example-module READMEs explain how to run their
+example and point back to the shared guides.
 
 The narrative documentation is organized around user goals rather than tapik's internal modules:
 
@@ -185,7 +209,9 @@ part of the normal reactor and are the executable proof behind the primary user 
 
 Rendered smoke tests cover navigation from the landing page to the quickstart and API reference, navigation back from
 the reference, versioned paths, search availability, and usable desktop and mobile layouts. Documentation coverage is
-grown with public behavior: stable public APIs require KDoc, and supported user workflows require narrative guidance.
+grown with public behavior: every stable public production type and member requires KDoc, and every supported user
+workflow requires narrative guidance. KDoc describes declaration-specific semantics and links related concepts where
+useful; it does not duplicate the complete guides.
 
 Every Antora build treats warnings as failures, including unresolved cross-references, missing include files, and
 missing source snippet tags. The staged-site check parses generated HTML and validates same-site page links, fragment

@@ -12,3 +12,7 @@ From a released checkout, run the build with the Gradle wrapper available in `pl
 
 During tapik development, first prepare the isolated repository described in the development guide, then pass it as
 `-PtapikRepository=/absolute/path/to/repository` together with the matching `-PtapikVersion`.
+
+For the shared user guides, see the [Gradle reference](../docs/modules/ROOT/pages/reference/gradle.adoc),
+[generation model](../docs/modules/ROOT/pages/generation/index.adoc), and
+[development guide](../docs/modules/ROOT/pages/development.adoc).

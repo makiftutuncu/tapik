@@ -52,3 +52,8 @@ Both Spring target executions share `BooksEndpoints.kt`, so a generated server i
 generated client and return its response without converting between target-specific types.
 The application selects Boot's dedicated WebMVC and RestClient starters so both generated integrations are
 auto-configurable at runtime.
+
+For the shared user guides, see the [Maven quickstart](../docs/modules/ROOT/pages/getting-started.adoc),
+[Maven reference](../docs/modules/ROOT/pages/reference/maven.adoc),
+[Spring RestClient guide](../docs/modules/ROOT/pages/clients/spring-restclient.adoc), and
+[Spring WebMVC guide](../docs/modules/ROOT/pages/servers/spring-webmvc.adoc).
