@@ -7,7 +7,7 @@ details. When a design changes, update the relevant specification first and then
 - [DSL](dsl.md): agreed authoring experience and type-level model
 - [HTTP media types](media-types.md): media type syntax, identity, common values, and target behavior
 - [OpenAPI](openapi.md): OpenAPI interpretation, naming, and rendering behavior
-- [Spring integrations](spring.md): generated RestClient and WebMVC contracts and runtime behavior
+- [Spring integrations](spring.md): RestClient and WebMVC generation and runtime behavior
 - [Generation](generation.md): host-neutral target execution and API registries
 - [Gradle](gradle.md): Gradle host identity, project scope, and execution DSL
 - [Validation](validation.md): compile-time, construction-time, and target compatibility failures

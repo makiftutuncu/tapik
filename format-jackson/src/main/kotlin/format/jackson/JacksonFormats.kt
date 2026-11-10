@@ -28,6 +28,10 @@ internal val DefaultObjectMapper: ObjectMapper = jacksonObjectMapper()
  * Builds or reuses a JSON byte-array format for [type], [format], and [registry].
  * An explicit [schema] bypasses derivation and caching; the caller owns its agreement with the mapper's wire shape.
  *
+ * @param format mapper used to encode and decode values.
+ * @param type Kotlin value type.
+ * @param schema optional caller-supplied schema for the value.
+ * @param registry custom schemas used during schema derivation.
  * @throws SchemaDerivationException when the Kotlin type or Jackson shape is unsupported.
  */
 @Suppress("UNCHECKED_CAST")
@@ -65,6 +69,10 @@ private fun <Value : Any> createJsonFormat(format: ObjectMapper, type: KType, sc
 
 /**
  * Builds a JSON format for [Value], deriving with [registry] unless a caller-owned root [schema] is supplied.
+ *
+ * @param format mapper used to encode and decode values.
+ * @param schema optional caller-supplied schema for the value.
+ * @param registry custom schemas used during schema derivation.
  */
 inline fun <reified Value : Any> jsonFormat(
     format: ObjectMapper = DefaultObjectMapper,

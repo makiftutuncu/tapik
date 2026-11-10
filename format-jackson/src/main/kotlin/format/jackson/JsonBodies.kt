@@ -8,6 +8,11 @@ import tools.jackson.databind.ObjectMapper
 
 /**
  * Builds a JSON body for [Value], deriving with [registry] unless a caller-owned root [schema] is supplied.
+ *
+ * @param format mapper used to encode and decode values.
+ * @param mediaType media type written in the endpoint definition.
+ * @param schema optional caller-supplied schema for the value.
+ * @param registry custom schemas used during schema derivation.
  */
 inline fun <reified Value : Any> jsonBody(
     format: ObjectMapper = DefaultObjectMapper,
