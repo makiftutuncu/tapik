@@ -68,8 +68,8 @@ abstract class TapikGenerateTask @Inject constructor(
     /**
      * Resolved API artifacts and their runtime dependencies.
      *
-     * These come from `tapikContractClasspath` in compiled-contract mode or main output and its compile and runtime
-     * classpaths in same-project mode.
+     * These come from `tapikContractClasspath` in compiled API dependency mode or from main output and its compile and
+     * runtime classpaths in same-project mode.
      */
     @get:Classpath
     abstract val contractClasspath: ConfigurableFileCollection

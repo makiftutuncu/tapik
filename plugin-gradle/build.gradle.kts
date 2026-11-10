@@ -72,7 +72,7 @@ gradlePlugin {
             id = "dev.akif.tapik.plugin.gradle"
             implementationClass = "dev.akif.tapik.plugin.gradle.TapikGradlePlugin"
             displayName = "tapik Gradle plugin"
-            description = "Generates artifacts from type-safe tapik API contracts"
+            description = "Generates artifacts from type-safe tapik APIs"
             tags.set(listOf("tapik", "code-generation", "kotlin"))
             compatibility {
                 features {
@@ -92,7 +92,7 @@ publishing {
     publications.withType<MavenPublication>().configureEach {
         pom {
             name.set("tapik Gradle plugin")
-            description.set("Generates artifacts from type-safe tapik API contracts")
+            description.set("Generates artifacts from type-safe tapik APIs")
             url.set("https://tapik.akif.dev")
             licenses {
                 license {

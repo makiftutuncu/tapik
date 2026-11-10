@@ -232,11 +232,11 @@ deterministically written build-state ownership.
 Lifecycle phase selection is part of the host configuration, not target behavior. Maven's default `process-classes`
 phase applies when the `generate` goal is bound as an execution and the build reaches that phase. Invoking the goal
 directly does not first execute the lifecycle phases needed to compile a same-module registry. A `compile` build reaches
-dependency-contract executions explicitly bound to `generate-sources`, but intentionally does not reach a same-module
+compiled-API dependency executions explicitly bound to `generate-sources`, but intentionally does not reach a same-module
 execution bound to `process-classes`.
 
 The Maven adapter resolves an explicit mode before inspecting APIs or changing output. Lifecycle-bound executions
-support exactly `generate-sources` (compiled-contract mode, registration for ordinary compilation) and
+support exactly `generate-sources` (compiled API dependency mode, registration for ordinary compilation) and
 `process-classes` (same-module mode, late compilation and synchronization). Other bindings, including
 `process-sources`, `compile`, `test-compile`, and `package`, fail with a diagnostic naming the unsupported phase and
 both supported alternatives. A missing phase on a lifecycle execution is invalid; it is not evidence of direct invocation.

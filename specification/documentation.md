@@ -121,9 +121,9 @@ modes using the runnable examples as executable source:
 - In same-module mode, the API module applies the tapik Kotlin compiler plugin and runs generation after its
   classes exist. The tapik Maven plugin's default `process-classes` phase is the safe lifecycle binding; invoking only
   `compile` cannot generate from the registry produced by that same compilation.
-- In compiled-contract mode, a consumer depends on an API artifact that has already compiled. Generation may therefore
-  run in `generate-sources`, before the consumer's Kotlin compilation, so generated client and server source can be
-  compiled as ordinary application source.
+- A consumer in compiled API dependency mode depends on an API artifact that has already compiled. Generation may run
+  in `generate-sources`, before the consumer's Kotlin compilation, so generated client and server source can be compiled
+  as ordinary application source.
 
 The guide must give exact Maven commands, lifecycle expectations, and generated OpenAPI and Kotlin source locations.
 Its Kotlin and Maven fragments must be collected from the tested `example-contract` and `example-application` source

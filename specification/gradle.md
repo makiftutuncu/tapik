@@ -323,7 +323,7 @@ They are absent from published project variants, and none extends or is extended
 runtime configurations:
 
 - `tapikContract` contains compiled API artifacts and their runtime dependencies. It has no default dependency;
-  `tapikContractClasspath` is the registry input only in compiled-contract mode. A project dependency retains its
+  `tapikContractClasspath` is the registry input only in compiled API dependency mode. A project dependency retains its
   producing task dependency.
 - `tapikTarget` contains generation-target providers and their runtime dependencies. The plugin adds
   `dev.akif:tapik-target-openapi`, `dev.akif:tapik-target-spring-restclient`, and
@@ -346,10 +346,10 @@ The worker receives the two classpaths separately so API registries cannot impli
 and target artifacts cannot become API inputs.
 
 Before loading any registry or target provider, the adapter inspects resolved components on every classpath used for
-generation. This includes `tapikContractClasspath` in compiled-contract mode, the main compile and runtime classpaths
-in same-project mode, and `tapikTargetClasspath` in both modes. Every resolved external or project component whose
-group is `dev.akif`
-and whose module name starts with `tapik-` must have exactly the applied Gradle plugin version. The compiler-plugin
+generation. This includes `tapikContractClasspath` in compiled API dependency mode, the main compile and runtime
+classpaths in same-project mode, and `tapikTargetClasspath` in both modes. Every resolved external or project component
+whose group is `dev.akif` and whose module name starts with `tapik-` must have exactly the applied Gradle plugin version.
+The compiler-plugin
 artifact is requested at that same version by construction. A mismatch fails before worker loading or output mutation
 and reports the configuration, every conflicting coordinate and resolved version, the plugin version, and the
 instruction to align the tapik platform and plugin declaration. Versions of third-party custom-target artifacts are
