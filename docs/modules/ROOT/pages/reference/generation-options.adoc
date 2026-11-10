@@ -1,7 +1,7 @@
 = Targets and generated output
 :description: Built-in target IDs, configuration keys, naming defaults, and artifact locations.
 
-Every Maven or Gradle execution selects one host-neutral target. Maven passes strings under `targetConfiguration`;
+Every Maven or Gradle execution selects a target that returns output files. Maven passes strings under `targetConfiguration`;
 Gradle exposes typed built-in options and a structured custom-target builder. A target rejects unknown keys and
 validates values before producing artifacts. Maven resolves relative artifact paths below each `outputDirectory`,
 which defaults to `target/generated/tapik`. Gradle routes them below the single `build/generated/tapik` root into
@@ -119,8 +119,8 @@ full class identity beneath a reserved `_external` namespace, so external `contr
 `com.example.library.contract.Authors`. A literal underscore in an API name is escaped, making that marker unambiguous.
 A one-segment `packageName` such as `generated` has no parent root and retains the full API identity below it.
 
-This policy is independent of API selection, declaration order, and whether generation runs in the contract module or
-a consuming module. Two contract artifacts with different qualified API classes cannot silently emit the same generated
+This policy is independent of API selection, declaration order, and whether generation runs in the API module or a
+consuming module. Two API artifacts with different qualified API classes cannot silently emit the same generated
 identity under the same prefix. Source paths, controller names, and WebMVC descriptor paths all use that namespace.
 
 Dot-separated class-name segments retain ASCII letters and digits. Every other UTF-16 code unit becomes `_` followed
@@ -135,7 +135,7 @@ prefix. Repeated API classes in one request are rejected. Local method and neste
 deterministic numeric suffixes.
 
 OpenAPI file templates use `Api.apiId`. API filters also use `Api.apiId`. This distinction lets a Kotlin type name
-determine source declarations while the contract's stable API identity determines selection and documentation filenames.
+determine source declarations while the API's stable ID determines selection and documentation filenames.
 
 == Artifact synchronization
 

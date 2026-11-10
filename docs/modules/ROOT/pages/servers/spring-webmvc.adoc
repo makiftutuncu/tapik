@@ -1,20 +1,19 @@
 = Generate a Spring WebMVC server
-:description: Generate pure server interfaces and automatically registered Spring WebMVC controllers from tapik contracts.
+:description: Generate Kotlin server interfaces and Spring WebMVC controllers from tapik endpoints.
 :page-aliases: generation/spring-webmvc.adoc, code-generation/server.adoc
 
-The `spring-webmvc` target turns each selected API into two deliberately separate responsibilities:
+For each selected API, the `spring-webmvc` target generates:
 
 * a pure Kotlin `Server` interface implemented by application handlers;
 * an internal generated Spring controller that owns mapping annotations, wire conversion, and delegation.
 
-This separation keeps user behavior free of Spring HTTP details and lets future server targets place another framework
-adapter around the same contract information.
+The handler interface contains application behavior. The controller handles Spring routes and HTTP conversion.
 
-== Use a compiled contract
+== Generate from a compiled API module
 
-The application must implement generated interfaces in its ordinary Kotlin source, so generate from an already
-compiled contract during `generate-sources`. Add the contract, WebMVC target runtime, and Spring Boot WebMVC starter.
-The example imports dependency versions through the tapik BOM:
+Application source must be able to implement the generated interface before it compiles. Put endpoints in an API module,
+then generate from that module during `generate-sources`. Add the API dependency, WebMVC runtime, and Spring Boot
+WebMVC starter. The example imports dependency versions through the tapik BOM:
 
 [source,xml]
 ----
@@ -42,7 +41,7 @@ For `Books`, generation writes `BooksEndpoints.kt` and `BooksServer.kt` below th
 descriptor below `META-INF/tapik/spring/webmvc/`. The first source owns the shared endpoint response types; the second
 contains the public `BooksServer` interface and internal `BooksGeneratedController` adapter.
 
-In Gradle, declare the contract on both `implementation` and `tapikContract`, choose
+In Gradle, declare the API dependency on both `implementation` and `tapikContract`, choose
 `Mode.COMPILED_CONTRACT`, and configure `springWebMvc { ... }`. The plugin adds generated source and registration
 resources to the ordinary main lifecycle. See xref:reference/gradle.adoc[Gradle reference] for the tested build.
 
@@ -90,7 +89,7 @@ rules. The annotation registers generated adapters only; it does not enable or c
 == Request and response boundary
 
 The internal controller owns routes and Spring mapping annotations. It decodes path, query, and header strings with the
-contract formats, validates required and fixed inputs, selects request-body media representations, and calls the
+endpoint formats, validates required and fixed inputs, selects request-body media representations, and calls the
 handler with Kotlin values. It converts decoding and media-type failures into the appropriate HTTP response before the
 handler is invoked.
 
@@ -116,7 +115,7 @@ return its response directly.
 
 The defaults are package prefix `dev.akif.tapik.generated`, suffix `Server`, and suffix `GeneratedController`; all three
 are configurable. Each API gets its own namespace under the prefix, relative to the prefix's parent package. See
-xref:reference/generation-options.adoc#_spring_webmvc[Spring WebMVC target options]. Use the compiled-contract layout
+xref:reference/generation-options.adoc#_spring_webmvc[Spring WebMVC target options]. Use the compiled API layout
 when the current application's handlers need to implement generated interfaces; same-module generation happens after
 its ordinary source compilation.
 

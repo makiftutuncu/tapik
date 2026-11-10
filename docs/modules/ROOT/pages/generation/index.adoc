@@ -1,70 +1,65 @@
 = Generation model
-:description: Follow an API from Kotlin compilation through a host-neutral target to generated artifacts.
+:description: Follow endpoints from Kotlin compilation to generated source, resources, or documentation.
 :page-aliases: code-generation/index.adoc
 
-tapik generation has three deliberately separate parts: Kotlin compilation records which APIs exist, a host-neutral
-target converts selected API values into artifacts, and a build-tool host writes those artifacts into a project.
+tapik generation has three steps. The Kotlin compiler records which APIs are available. A selected target turns their
+endpoint definitions into output files. Maven or Gradle writes those files into the project and connects generated
+source and resources to the build.
 
 [source,text]
 ----
-Kotlin Api values
-      │ compiler plugin
-      ▼
-ApiRegistry service providers
-      │ host loads and selects APIs
-      ▼
-GenerationTarget + target configuration
-      │ returns artifacts; performs no file I/O
-      ▼
-Maven, Gradle, or another host materializes them
+Kotlin API definitions
+        │ compiler records APIs
+        ▼
+     API registry
+        │ host selects APIs and target
+        ▼
+    output files
+        │ Maven or Gradle adds files to the build
+        ▼
+ generated sources, resources, or documentation
 ----
 
-The boundary matters. OpenAPI, Spring RestClient, and Spring WebMVC targets do not understand Maven projects, Gradle
-projects, or either host's lifecycle. Both supported plugins load the same registries, invoke the same targets, and
-materialize the same results.
+The targets do not depend on Maven or Gradle. Both build plugins use the same registry and targets, then connect the
+returned files to their own build.
 
 == Compilation records APIs
 
-The tapik compiler plugin generates an explicit xref:reference/compiler-registry.adoc[API registry] for each Kotlin
-module with eligible `Api` declarations. It does not run endpoint initializers, scan packages, or copy endpoints into a
-parallel metadata model. The contract remains the ordinary, immutable Kotlin values written by the user.
+The tapik compiler plugin writes an xref:reference/compiler-registry.adoc[API registry] for each Kotlin module with
+eligible `Api` declarations. It does not run endpoint code, search packages, or copy endpoints into another model. The
+registry points to the original Kotlin values.
 
-Registry service providers travel inside compiled contract artifacts. A consumer can therefore discover a dependency's
-APIs as if those definitions were on its own classpath. The host combines every visible registry, orders APIs
-canonically by exact `Api.apiId`, and rejects duplicate IDs.
+The registry is packaged in the compiled API artifact. A consuming project can use endpoints from that dependency. The
+build plugin combines visible registries, sorts APIs by `apiId`, and reports duplicate IDs.
 
 == The host selects APIs and a target
 
-One execution chooses a target by its stable ID and may narrow the catalog with exact include and exclude sets. An
-empty include set means every visible API. Exclusions are applied afterward and win; unknown IDs and a selection that
-retains no APIs are errors rather than silent empty builds.
+Each execution chooses a target and may select APIs by exact ID. An empty include list selects every visible API;
+exclusions then remove APIs from that selection. Unknown IDs or a selection with no APIs produce an error.
 
-Targets are discovered through Java service providers. They receive the selected APIs and a host-neutral configuration
-tree, validate their own options and representational limits, and return an ordered `GenerationResult`. This is where,
-for example, Spring targets read the endpoint property's compiled Kotlin type without deriving it from a schema or
-creating another endpoint representation.
+Targets are loaded through Java service providers. Each target checks its options and which endpoint features it
+supports, then returns an ordered list of files. For example, source generators use the endpoint property's Kotlin
+type directly.
 
 == Targets return artifacts
 
-Every result contains normalized relative paths and complete textual content. An artifact also declares its role:
+Every result contains relative file paths and file contents. Each file has one of three roles:
 
 `SOURCE`:: Source code which the host makes available for compilation.
 `RESOURCE`:: Runtime metadata which the host arranges to package with the application.
 `DOCUMENTATION`:: Documentation such as an OpenAPI document.
 
-Two artifacts in one result cannot use the same path. A target never writes files directly; ownership, cleanup,
-logging, source roots, resource registration, and lifecycle timing belong to the host.
+Two files in one result cannot have the same path. Targets return files but do not write them. The build plugin decides
+where files go, removes stale generated files, registers sources and resources, and selects when generation runs.
 
 == Maven and Gradle are hosts
 
-The Maven plugin exposes this model through one `generate` goal and any number of executions. In same-module mode,
-generation must wait for the current module's registry and therefore defaults to `process-classes`. In
-compiled-contract mode, an execution can run during `generate-sources` because its dependency's registry already
-exists.
+The Maven plugin exposes generation through its `generate` goal. By default, same-module generation runs at
+`process-classes`, after the current module compiles. When reading a compiled API dependency, bind generation to
+`generate-sources` so application code can use the generated source.
 
-The Gradle plugin exposes the same model through a typed `tapik` extension and one aggregated `tapikGenerate` task.
-`Mode.SAME_PROJECT` runs after main classes; `Mode.COMPILED_CONTRACT` reads the dedicated `tapikContract` dependency
-configuration early enough for ordinary main compilation to consume generated source.
+The Gradle plugin uses a `tapik` configuration block and one `tapikGenerate` task. Same-project generation runs after
+main classes. Compiled API mode runs early enough for the project's main source to use generated types.
 
 Continue with the xref:reference/compiler-registry.adoc[compiler registry reference],
 xref:reference/maven.adoc[Maven reference], xref:reference/gradle.adoc[Gradle reference], or

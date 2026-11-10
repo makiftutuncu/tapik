@@ -1,5 +1,5 @@
 = Migrate to 0.6
-:description: Move an earlier tapik contract to the Kotlin 2.4 rewrite with Maven or Gradle.
+:description: Migrate an earlier tapik project to the Kotlin 2.4 rewrite with Maven or Gradle.
 
 The 0.6 rewrite is not source- or binary-compatible with earlier tapik releases. There is no automatic converter. Its
 Gradle plugin keeps the historical ID but replaces package scanning and the earlier generator DSL with compiler-owned
@@ -21,13 +21,13 @@ xref:compatibility.adoc[documented compatibility policy].
 . Replace reads of `Api.id` with `Api.apiId`, and rename explicit constructor arguments from `id` to `apiId`. There is
   no compatibility alias, so an API may declare its own `id` resource definition without colliding with the base class.
 . Choose the lifecycle deliberately. Maven same-module output uses `process-classes`; Gradle uses
-  `Mode.SAME_PROJECT`. Main source implementing generated interfaces should consume a compiled contract and use
+  `Mode.SAME_PROJECT`. Main source implementing generated interfaces should consume a compiled API dependency and use
   Maven `generate-sources` or Gradle `Mode.COMPILED_CONTRACT`.
 . Regenerate everything in a clean build. Implement generated `*Server` interfaces in handlers, let generated
   `*GeneratedController` classes handle Spring mappings, and use the generated client interfaces with a transport.
 . Compare generated OpenAPI documents and run request/response tests against the previous application. Check status
   alternatives, headers, defaults, content negotiation, and wire serialization before switching consumers.
 
-Publish the new contract and update its consumers together. Compile-time feedback protects typed usage after
+Publish the new API artifact and update its consumers together. Compile-time feedback protects typed usage after
 regeneration; it is not a semantic compatibility check against a previously deployed API. API versioning and rollout
 remain application responsibilities.

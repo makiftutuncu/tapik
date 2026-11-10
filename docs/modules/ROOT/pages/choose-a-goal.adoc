@@ -1,27 +1,24 @@
 = Choose a goal
-:description: Find the tapik documentation path for defining a contract, producing OpenAPI, or generating Spring clients and servers.
+:description: Find the guide for defining endpoints, generating documentation, or building clients and servers.
 :page-aliases: capabilities.adoc
 
-Start with the result you need. Every path begins with the same Kotlin contract and explicit compiler-generated API
-registry.
+Start with the result you need. First define endpoints in Kotlin, then choose what to generate from them.
 
-== Describe an API
+== Define endpoints
 
-Read xref:contracts/index.adoc[Contract DSL] to learn the model and the guarantees provided while definitions compile.
-Use xref:documentation/openapi.adoc[OpenAPI] when the first useful artifact is documentation or a contract for another
-toolchain.
+Read the xref:contracts/index.adoc[endpoint DSL guide]. To create API documentation or share an API definition with
+other tools, follow the xref:documentation/openapi.adoc[OpenAPI guide].
 
 == Build an HTTP client
 
-Use xref:clients/spring-restclient.adoc[Spring RestClient]. A generated pure client interface keeps the endpoint
-surface typed while tapik's runtime transport handles the HTTP exchange.
+Use the xref:clients/spring-restclient.adoc[Spring RestClient guide] to generate a typed client from your endpoints.
 
 == Implement an HTTP server
 
-Use xref:servers/spring-webmvc.adoc[Spring WebMVC]. Application code implements a generated pure server interface;
-a separately generated controller owns Spring annotations and delegates to that handler.
+Use the xref:servers/spring-webmvc.adoc[Spring WebMVC guide] to generate a server interface and connect it to your
+application's handler.
 
 == Understand the build
 
-Read xref:generation/index.adoc[Generation model] for the contract registry and target boundary, then
-xref:reference/maven.adoc[Maven reference] for lifecycle placement and the two supported generation modes.
+Read the xref:generation/index.adoc[generation guide] for how outputs are produced, then see the
+xref:reference/maven.adoc[Maven reference] or xref:reference/gradle.adoc[Gradle reference] for build setup.

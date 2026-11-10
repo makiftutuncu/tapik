@@ -1,9 +1,9 @@
 = Versioning and compatibility
 :description: Understand tapik's compatibility baseline, pre-1.0 versioning, and currently supported surface.
 
-Version 0.6.0 is the first compatibility baseline for the rewritten tapik. It is intentionally incompatible with
-earlier implementations: the build integration, registry model, DSL spelling, and generated output were redesigned
-before tapik had production users.
+Version 0.6.0 is the compatibility baseline for the rewrite. It is not source- or binary-compatible with earlier
+versions because the build setup, DSL, and generated output changed. See the xref:migration.adoc[migration guide] when
+upgrading.
 
 == Semantic Versioning before 1.0
 
@@ -36,8 +36,9 @@ version; API versioning and rollout remain application responsibilities.
 == Current supported scope
 
 Maven and Gradle Kotlin/JVM are supported build hosts. Gradle support covers Java 25, Kotlin 2.4.10, and Gradle 9.1
-through 9.8. The built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC. The generation architecture
-is host-neutral so future hosts and targets can be added without redefining contracts.
+through 9.8. The built-in targets are OpenAPI 3.2.0, Spring RestClient, and Spring WebMVC. The generation design keeps
+build-tool details separate from endpoints, so other hosts and targets can be added without changing endpoint
+definitions.
 
 Same-module generation runs after ordinary main-source compilation. When main source implements or imports generated
 Kotlin, generate during `generate-sources` from a separately compiled contract.
@@ -46,8 +47,7 @@ Kotlin serialization and Jackson formats derive schemas for their documented sup
 changes the wire shape in a way tapik cannot derive, supply an explicit schema or schema-registry entry; the caller
 then owns agreement between that schema and the codec.
 
-These are supported-scope boundaries, not experimental disclaimers. Unsupported configurations fail visibly where
-tapik can detect them.
+Unsupported configurations fail where tapik can detect them.
 
 Continue with xref:migration.adoc[] when moving an older tapik project to 0.6, or choose the
 xref:reference/maven.adoc[Maven] or xref:reference/gradle.adoc[Gradle] host reference.

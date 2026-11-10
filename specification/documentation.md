@@ -92,15 +92,15 @@ artifacts. A documentation-only Gradle build is not part of the architecture.
 ## Information architecture
 
 The repository root `README.md` is the project's entry point, not a second user manual. It states tapik's purpose and
-supported integrations, links to the versioned website, Kotlin API reference, migration guidance, and runnable examples,
-and gives the repository build command. It may show a short endpoint example, but build-tool setup, lifecycle details,
+supported integrations, links to the website, Kotlin API reference, and runnable examples, and gives the repository build
+command. It may show a short endpoint example, but build-tool setup, lifecycle details,
 and DSL explanations belong in the website guides and references. Example-module READMEs explain how to run their
 example and point back to the shared guides.
 
 The narrative documentation is organized around user goals rather than tapik's internal modules:
 
 1. Start here: product overview, choose a goal, quickstart, and runnable example.
-2. Define contracts: APIs, endpoints, URIs, inputs, outputs, formats, schemas, documentation, tags, and composition.
+2. Define endpoints: APIs, URIs, inputs, outputs, formats, schemas, documentation, tags, and composition.
 3. Generate documentation: shared documentation-generation concepts followed by OpenAPI and future documentation
    integrations.
 4. Generate clients: shared generated-client concepts followed by Spring RestClient and future client integrations.
@@ -118,10 +118,10 @@ against the 0.6 Maven plugin, compiler-generated registry, DSL, formats, targets
 The primary quickstart must lead with the shortest working OpenAPI workflow and explain both supported Maven lifecycle
 modes using the runnable examples as executable source:
 
-- In same-module mode, the contract module applies the tapik Kotlin compiler plugin and runs generation after its
+- In same-module mode, the API module applies the tapik Kotlin compiler plugin and runs generation after its
   classes exist. The tapik Maven plugin's default `process-classes` phase is the safe lifecycle binding; invoking only
   `compile` cannot generate from the registry produced by that same compilation.
-- In compiled-contract mode, a consumer depends on an already compiled contract artifact. Generation may therefore
+- In compiled-contract mode, a consumer depends on an API artifact that has already compiled. Generation may therefore
   run in `generate-sources`, before the consumer's Kotlin compilation, so generated client and server source can be
   compiled as ordinary application source.
 
@@ -131,7 +131,7 @@ files rather than maintained as independent copies in the documentation.
 
 ## Core DSL guide requirements
 
-The contract guide is divided into focused pages for API and endpoint identity, URI parameters, request inputs,
+The endpoint guide is divided into focused pages for API and endpoint identity, URI parameters, request inputs,
 response outputs, formats and schemas, and documentation and composition. It teaches the public construction grammar
 before exposing the underlying generic types, while still explaining which structural information those types retain
 and which invalid states Kotlin prevents.
@@ -142,17 +142,17 @@ presence, media alternatives, status matching, and composition cannot silently d
 
 ## Generation reference requirements
 
-Generation documentation must separate tapik's host-neutral pipeline from Maven's responsibility as one build-tool
-host. It explains how compiler-generated registries, exact API selection, target discovery, target-owned validation,
+Generation documentation must explain how tapik's shared pipeline is separate from Maven's role as one build-tool host.
+It explains how compiler-generated registries, exact API selection, target discovery, target-owned validation,
 generated artifacts, and host materialization fit together without implying that a target depends on Maven.
 
 The compiler registry reference states which `Api` classes and objects are eligible, which endpoint and inclusion
 properties must be public, what compilation produces, and how incremental compilation synchronizes registry entries.
 It also states what registry generation deliberately does not do: execute endpoint expressions, scan packages,
-reflect over arbitrary user classes, or duplicate contracts into a metadata model.
+reflect over arbitrary user classes, or copy endpoint definitions into a metadata model.
 
 The Maven reference is the canonical catalogue for compiler activation and the `generate` goal. It documents every
-host parameter, the same-module and compiled-contract lifecycle matrix, exact include/exclude behavior, built-in target
+host parameter, the same-module and compiled API lifecycle matrix, exact include/exclude behavior, built-in target
 IDs and options, naming defaults, output locations, generated source/resource registration, and the meaning of direct
 goal invocation. Configuration fragments come from reactor-built example POMs wherever a runnable example exists.
 
@@ -163,9 +163,9 @@ preserving other executions' and user-owned files, and a failed execution leaves
 
 ## Integration guide requirements
 
-Each integration page is a task-oriented path from a compiled tapik contract to a usable result. OpenAPI documents the
-same-module and compiled-contract choices, generated document ownership, schema inputs, per-API output, configuration,
-and validation. Source integrations lead with compiled-contract generation during `generate-sources` so application
+Each integration page is a task-oriented path from a compiled API artifact to a usable result. OpenAPI documents the
+same-module and compiled API choices, generated document ownership, schema inputs, per-API output, configuration, and
+validation. Source integrations lead with compiled API generation during `generate-sources` so application
 source can compile against the generated types.
 
 The Spring RestClient guide distinguishes the generated client interface and wire implementation from the user-owned

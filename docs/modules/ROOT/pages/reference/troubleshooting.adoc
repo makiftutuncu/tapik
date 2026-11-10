@@ -4,7 +4,7 @@
 tapik fails at the boundary where information becomes invalid or unavailable. Maven wraps a failure as
 `tapik generation failed`; Gradle frames it with the named execution and target ID. The stage-specific cause follows.
 
-== Contract compilation fails
+== API compilation fails
 
 The compiler reports an ineligible `Api` declaration when it is non-public, generic, `inner`, or lacks the required
 public zero-argument constructor. It also rejects reachable endpoint or API inclusion properties that are not public.
@@ -18,9 +18,8 @@ under `tapik-plugin-maven`'s `<dependencies>`, not ordinary project dependencies
 with `tapikTarget(...)`. Same-project registry loading uses main output plus compile and runtime dependencies.
 Unknown-target errors list visible targets and diagnose common wrong-side placement.
 
-If no APIs are found, check that the contract enabled tapik inside `kotlin-maven-plugin`, the configured lifecycle phase
-actually runs for the command, and the execution sees either a compiled contract dependency or the current module's
-compiled output.
+If no APIs are found, check that the API module enabled tapik inside `kotlin-maven-plugin`, that the command reaches
+the configured phase, and that generation can read either a compiled API dependency or the current module's output.
 
 == Registry or target linkage fails
 
@@ -30,9 +29,9 @@ linkage errors identify the Maven project/plugin side or Gradle contract/target 
 can be checked correctly.
 
 `Failed to load API registries from the project classpath` means a compiled registry provider could not be loaded,
-constructed, or read. Check that the contract artifact includes its generated registry provider and that the project's
+constructed, or read. Check that the API artifact includes its generated registry provider and that the project's
 runtime dependencies include the types used by its APIs. Missing classes or incompatible method signatures may require
-dependency alignment and recompiling the contract. The original provider or linkage error remains in Maven's cause
+dependency alignment and recompiling the API module. The original provider or linkage error remains in Maven's cause
 chain; use `./mvnw -e process-classes` (or your usual lifecycle command with `-e`) to inspect it.
 
 == API selection fails
@@ -44,15 +43,16 @@ then applied and win, including when the same ID is explicitly present in both s
 [#a_generated_type_is_missing_during_kotlin_compilation]
 == A generated type is missing during Kotlin compilation
 
-Source generated from a compiled contract can run during `generate-sources`. Source generated from the current module
+Source generated from a compiled API dependency can run during `generate-sources`. Source generated from the current module
 cannot exist until that module has compiled its registry, so main source in that same module cannot reference it on a
-clean build. Split the contract and application when source needs to implement a generated server or client.
+clean build. Put endpoint definitions and application source in separate modules when the application needs to implement
+a generated server or client.
 
 Running Maven `tapik:generate` directly does not compile a same-module registry first. Use at least `process-classes` for
 same-module generation and at least `compile` for a compiled-contract execution bound to `generate-sources`.
 Direct invocation fails before artifact writes if the main output directory is absent or no compiled API registry
 exposes APIs. An existing directory alone is insufficient; compile APIs with the tapik compiler plugin enabled or add
-a compiled contract dependency. Recompile changed definitions before retrying, since old compiled output may be stale.
+a compiled API dependency. Recompile changed definitions before retrying, since old compiled output may be stale.
 
 If generation succeeds during `process-classes` but late Kotlin compilation fails, inspect the compiler output in the
 Maven error. Generated source uses the project's resolved classpath and Java 25 target; missing target runtime modules
@@ -64,7 +64,7 @@ With Gradle, use `Mode.COMPILED_CONTRACT` when ordinary main source imports gene
 
 == Unsupported generation lifecycle phase
 
-Bind `generate` to `generate-sources` for a compiled contract dependency or `process-classes` for APIs in the current
+Bind `generate` to `generate-sources` for a compiled API dependency or `process-classes` for APIs in the current
 module. Other bindings, including `process-sources`, `compile`, `test-compile`, and `package`, are rejected before output
 changes. Running `./mvnw package` is still supported: keep the execution bound to one of the two supported phases and
 let Maven reach it during the build.
@@ -81,7 +81,7 @@ packages do not need to be included in component scanning because descriptor reg
 == A target rejects an endpoint
 
 Targets validate their own representational limits. Diagnostics identify the API or endpoint and unsupported feature;
-change the contract or select a target that supports it rather than silently losing information.
+change the endpoint or select a target that supports it rather than silently losing information.
 
 Targets also reject missing, unknown, or malformed target configuration. Compare the accepted keys and defaults in
 xref:reference/generation-options.adoc[Targets and generated output].

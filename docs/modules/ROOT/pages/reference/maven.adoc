@@ -1,10 +1,9 @@
 = Maven reference
-:description: Configure tapik registry compilation and host-neutral target generation with Maven.
+:description: Set up API registries and generate outputs with the tapik Maven plugin.
 :page-aliases: reference/configuration.adoc
 
-`dev.akif:tapik-plugin-maven:0.6.0` is tapik's one Maven plugin. It has two roles: it activates the host-neutral tapik
-Kotlin compiler plugin, and its `generate` goal hosts any tapik generation target. Use separate Maven executions when a
-project needs multiple targets or configurations.
+`dev.akif:tapik-plugin-maven:0.6.0` is tapik's Maven plugin. It activates the Kotlin compiler plugin and runs targets
+through its `generate` goal. Add one Maven execution for each target or configuration.
 
 Import `dev.akif:tapik-bom:0.6.0` to align ordinary tapik dependencies. Maven build plugins and dependencies nested
 inside a build plugin still require explicit versions.
@@ -18,8 +17,8 @@ A module that declares APIs adds tapik as a dependency of `kotlin-maven-plugin` 
 include::example$contract/pom.xml[tag=compiler-plugin]
 ----
 
-This step compiles the xref:reference/compiler-registry.adoc[registry]. A module that only consumes a compiled contract
-dependency does not need to enable the compiler plugin unless it also declares APIs of its own.
+This step creates the xref:reference/compiler-registry.adoc[API registry]. A module that only consumes an API dependency
+with a compiled registry does not need the compiler plugin unless it declares APIs of its own.
 
 == Configure the `generate` goal
 
@@ -79,7 +78,7 @@ one from the catalog.
 
 [cols="2,2,2,2", options="header"]
 |===
-|Contract location |Execution phase |Minimum lifecycle command |Can main source use generated Kotlin?
+|API location |Execution phase |Minimum lifecycle command |Can main source use generated Kotlin?
 
 |Compiled dependency
 |`generate-sources` (explicit)
@@ -92,13 +91,13 @@ one from the catalog.
 |No; main compilation has already finished
 |===
 
-In compiled-contract mode, bind the execution to `generate-sources`. Its registry already exists in the dependency, so
+When generating from an API dependency, bind the execution to `generate-sources`. Its registry already exists, so
 generated client and server types are registered as source roots before ordinary Kotlin compilation.
 
 In same-module mode, leave the default `process-classes` phase or bind it explicitly. tapik first loads the registry
 from the current module, generates source, and compiles that late source into the main output. It does not recompile
 the module's earlier user source, so that source cannot refer to the late-generated declarations. Put implementations
-that need those types in a downstream module, or use a separately compiled contract.
+that need those types in a downstream module, or use a separate API module.
 
 Only these two lifecycle bindings are supported. Binding `generate` to `process-sources`, `compile`, `test-compile`,
 `package`, or any other phase fails before generation and lists the two alternatives. This restriction concerns the
@@ -113,12 +112,12 @@ Neither command runs user compilation or preceding lifecycle phases.
 Direct invocation is a separate mode, even if the selected execution is configured with `generate-sources`. It always
 performs late generated-source compilation and synchronizes generated classes and resources into the main output.
 It requires an existing main output directory (normally `target/classes`) and at least one API discoverable through
-compiled registries, either from that directory or a compiled contract dependency. Missing prerequisites fail before
+compiled registries, either from that directory or a compiled API dependency. Missing prerequisites fail before
 artifacts are written. API selection validation remains the same as in lifecycle-bound executions.
 
-tapik logs that direct invocation reuses compiled output, which may be stale. Compile changed contracts first; this
+tapik logs that direct invocation reuses compiled output, which may be stale. Recompile changed API definitions first; this
 mode does not establish that compiled definitions match current source. For a fresh same-module build, run
-`./mvnw process-classes`; for a compiled-contract application, use `./mvnw compile` with generation bound to
+`./mvnw process-classes`; for an application using a compiled API dependency, use `./mvnw compile` with generation bound to
 `generate-sources`.
 
 == Target discovery and versions
@@ -133,7 +132,7 @@ uses exactly the plugin's version. Version skew fails early; the BOM is the easi
 aligned.
 
 Registry service-provider and linkage failures are reported with project-classpath context and advice to check compiled
-contract artifacts, runtime dependencies, and compatible tapik versions. Maven preserves the original failure in the
+API artifacts, runtime dependencies, and compatible tapik versions. Maven preserves the original failure in the
 exception cause chain. Target-loading failures retain their separate plugin/project-classpath diagnostics.
 
 == Generated output and logs

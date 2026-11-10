@@ -1,10 +1,9 @@
-= Define contracts
-:description: Define type-safe HTTP contracts as ordinary Kotlin values with tapik.
+= Define endpoints
+:description: Define type-safe HTTP endpoints as ordinary Kotlin values with tapik.
 :page-aliases: user-guide.adoc, custom-types.adoc, project-layout-and-discovery.adoc
 
-tapik contracts are ordinary, immutable Kotlin values. You describe the structure of an HTTP API once, retain that
-structure in the inferred types, and let generation targets decide how to turn it into documentation, clients, or
-servers.
+Define each endpoint as an immutable Kotlin value. Kotlin infers a type that keeps the endpoint's structure for
+documentation, clients, and servers.
 
 The DSL follows the shape of an exchange:
 
@@ -13,8 +12,8 @@ The DSL follows the shape of an exchange:
 include::example$dsl/DocumentationExamples.kt[tag=complete-endpoint]
 ----
 
-You normally do not write an `Endpoint` type explicitly. Kotlin infers a type containing the path and query values,
-headers, request body, every response alternative, and whether the endpoint has been bound to an API property.
+You normally do not write an `Endpoint` type explicitly. Kotlin infers one that keeps the path and query values,
+headers, request body, response alternatives, and API property binding.
 
 == Learn the DSL
 

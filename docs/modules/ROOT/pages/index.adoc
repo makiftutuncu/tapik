@@ -1,15 +1,15 @@
 = Type-safe APIs in Kotlin
-:description: Define HTTP API contracts as ordinary, type-safe Kotlin values and generate OpenAPI, clients, and servers from them.
+:description: Define HTTP endpoints in Kotlin and generate documentation, clients, and servers from them.
 
-tapik lets you define an HTTP API once as ordinary Kotlin values, then use that contract to generate OpenAPI documents,
-Spring RestClient clients, and Spring WebMVC servers.
+tapik lets you define HTTP endpoints as ordinary Kotlin values, then generate API documentation, clients, and server
+interfaces from those endpoints.
 
-The Kotlin definition remains the source of truth. tapik's DSL retains contract structure in inferred types, the Kotlin
-compiler rejects invalid combinations, and every generation target checks whether it can faithfully implement the
-features it receives.
+Kotlin definitions remain the source of truth. Kotlin keeps each endpoint's request and response details in its type.
+Kotlin and tapik catch invalid combinations early, and each output checks that it supports the endpoint features it
+receives.
 
 [.cards]
-== Pick a starting point
+== Start here
 
 [cols="1,1,1", frame=none, grid=none]
 |===
@@ -19,23 +19,21 @@ Build the runnable Maven example and generate an OpenAPI document.
 
 |xref:contracts/index.adoc[Learn the DSL]
 
-Understand APIs, endpoints, URIs, inputs, outputs, formats, and composition.
+Learn how to define APIs, endpoints, URIs, inputs, outputs, formats, and composition.
 
 |xref:choose-a-goal.adoc[Choose an output]
 
-See how compiler-generated registries feed host-neutral generation targets.
+Choose documentation, a client, or a server, and find the guide for it.
 |===
 
-NOTE: tapik 0.6.0 is the first compatibility baseline for the rewrite and is intentionally incompatible with earlier
-implementations. Future changes follow xref:compatibility.adoc[tapik's Semantic Versioning policy].
+NOTE: tapik 0.6.0 starts the rewrite and is incompatible with earlier versions. See the
+xref:compatibility.adoc[compatibility policy] before upgrading.
 
-== What tapik optimizes for
+== What you get
 
-Compile-time feedback:: Invalid or incomplete definitions should fail while compiling or generating, not after an
+Catch mistakes early:: Kotlin and output generation report invalid or unsupported endpoint definitions before an
 application starts.
-Kotlin-first contracts:: Contracts are immutable Kotlin values that can be named, shared, and composed without a
-parallel metadata representation.
-One contract, several uses:: Documentation, clients, and servers are outputs selected by the consuming build rather
-than separate definitions that can drift.
+Keep one definition:: Define endpoints as Kotlin values and reuse them for documentation, clients, and servers.
+Compose APIs:: Name, share, and combine endpoints using ordinary Kotlin values.
 
 Continue with xref:choose-a-goal.adoc[] or inspect the link:{page-api-reference-url}[Kotlin API reference].

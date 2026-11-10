@@ -1,16 +1,15 @@
 = Generate a Spring RestClient client
-:description: Generate a typed Spring RestClient interface from a tapik contract.
+:description: Generate a typed Spring RestClient interface from tapik endpoints.
 :page-aliases: generation/spring-restclient.adoc, code-generation/client.adoc
 
-The `spring-restclient` target generates a Kotlin client interface for every selected API. Its endpoint methods accept
-the contract's Kotlin values, perform the HTTP exchange through Spring `RestClient`, and return typed response
-alternatives.
+The `spring-restclient` target generates a Kotlin client interface for each selected API. Each method takes the Kotlin
+values declared by an endpoint, sends an HTTP request through Spring `RestClient`, and returns a typed response.
 
-== Use a compiled contract
+== Generate from a compiled API module
 
-The application must see generated source before its Kotlin compilation, so put APIs in a compiled contract artifact
-and bind generation to `generate-sources`. Add that contract plus the generated client's runtime support and Spring
-starter. The example imports dependency versions through the tapik BOM:
+Application code must be able to import the generated client before it compiles. Put endpoints in an API module, then
+bind generation in the application to `generate-sources`. Add the API dependency, client runtime, and Spring starter.
+The example imports dependency versions through the tapik BOM:
 
 [source,xml]
 ----
@@ -38,7 +37,7 @@ The example writes `AuthorsClient.kt`, `BooksClient.kt`, and `CatalogClient.kt` 
 API below `target/generated-sources/tapik-spring/com/example/library/generated/` and registers that directory as a
 compile source root.
 
-In Gradle, declare the contract on both `implementation` and `tapikContract`, choose
+In Gradle, declare the API dependency on both `implementation` and `tapikContract`, choose
 `Mode.COMPILED_CONTRACT`, and configure `springRestClient { ... }`. Generated source under
 `build/generated/tapik/sources` is a main Kotlin source directory automatically. See
 xref:reference/gradle.adoc[Gradle reference] for the tested build.
@@ -47,7 +46,7 @@ xref:reference/gradle.adoc[Gradle reference] for the tested build.
 
 For `Books`, tapik generates a `BooksClient` interface with:
 
-* a `booksApi` property containing the contract value;
+* a `booksApi` property containing the API value;
 * a `restClientTransport` property containing the configured Spring transport;
 * a `list()` implementation that constructs, sends, and decodes the request;
 * a top-level shared `ListResponse` hierarchy containing `ListResponse.Ok(body: List<Book>)`.
@@ -61,7 +60,7 @@ include::example$application/BooksRestClient.kt[]
 ----
 
 Inject `BooksRestClient` and call `list()` like an ordinary typed function. The generated implementation encodes path,
-query, header, and body arguments with their contract formats; then it matches the response status, checks fixed
+query, header, and body arguments with their endpoint formats; then it matches the response status, checks fixed
 headers and media type, decodes values, and returns the corresponding sealed response. An undeclared status or invalid
 wire value fails at the client boundary rather than becoming an untyped response.
 
@@ -87,8 +86,8 @@ configures only `packageName`. See
 xref:reference/generation-options.adoc#_spring_restclient[Spring RestClient target options] for naming configuration.
 
 Same-module generation at `process-classes` can package generated clients for downstream consumers, but source in that
-same module has already compiled and cannot implement or call them. Use the compiled-contract layout above when the
-current application needs the generated client.
+same module has already compiled and cannot implement or call them. Use the compiled API layout above when the current
+application needs the generated client.
 
 Continue with xref:reference/troubleshooting.adoc#a_generated_type_is_missing_during_kotlin_compilation[generated type
 troubleshooting] if the interface is unavailable during compilation.

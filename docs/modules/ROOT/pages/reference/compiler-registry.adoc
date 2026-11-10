@@ -1,9 +1,8 @@
 = Compiler registry
 :description: Eligibility, visibility, generated service providers, and incremental behavior of tapik API registries.
 
-The tapik Kotlin compiler plugin turns a module's known `Api` declarations into an explicit Java service provider.
-Generation hosts load that provider; they do not discover contracts by scanning packages or reflecting over arbitrary
-classes.
+During compilation, the tapik compiler plugin writes an API registry for each module with eligible `Api` declarations.
+Maven and Gradle load the registry; they do not search packages or inspect arbitrary classes to find APIs.
 
 == Eligible API declarations
 
@@ -27,14 +26,14 @@ or statically nested, but not `inner`.
 Unsupported visibility, generic shape, or construction fails Kotlin compilation with a targeted diagnostic. A module
 without an eligible concrete API simply publishes no tapik registry.
 
-== Public contract properties
+== Public API and endpoint properties
 
 Every delegated endpoint property reachable from a registered API must be public. Delegated API inclusion properties
 must also be public because generation follows them when reading a composed API. Private, protected, and internal
 properties fail compilation, as do inaccessible model types exposed through Kotlin public signatures.
 
-The visibility requirement is not package scanning: generated targets need a stable property path that remains
-accessible from another package and, for a published contract, another module. For `Library.authors.list`, the path is
+Generated targets need a stable property path that remains accessible from another package and, for a published API
+artifact, another module. For `Library.authors.list`, the path is
 `authors`, then `list`, while the endpoint stays the original `Authors.list` value and keeps its exact declared type.
 
 == What compilation produces
@@ -43,7 +42,7 @@ A compiler output contains one deterministic, compiler-owned registry class and 
 API classes are instantiated once by that registry; objects are referenced directly. The registry holds the actual API
 values rather than a copied metadata representation.
 
-The service descriptor is compatible with ordinary Java `ServiceLoader`, so it is packaged in a contract JAR and can
+The service descriptor is compatible with ordinary Java `ServiceLoader`, so it is packaged in an API JAR and can
 coexist with manually supplied providers. Registry implementation names and provider order are internal details. A
 generation host combines all providers, sorts APIs by ID, and rejects duplicate IDs.
 

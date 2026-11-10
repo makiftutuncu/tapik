@@ -1,15 +1,15 @@
 = Generate OpenAPI
-:description: Produce OpenAPI 3.2 documents from tapik API values.
+:description: Produce OpenAPI 3.2 documents from tapik endpoints.
 :page-aliases: generation/openapi.adoc, code-generation/documentation.adoc
 
-The `openapi` target converts each selected API into one OpenAPI 3.2 document. OpenAPI is generated output, never the
-contract source: change the Kotlin API and regenerate rather than editing the document.
+The `openapi` target creates one OpenAPI 3.2 document for each selected API. OpenAPI is output: change endpoints in
+Kotlin, then generate the document again.
 
 == Before you start
 
-The module that declares an API must enable tapik's Kotlin compiler plugin so its compiled artifact contains an API
-registry. Body formats must provide schemas for values that OpenAPI needs to describe. The runnable contract uses the
-Jackson integration:
+The module that declares the APIs must enable tapik's Kotlin compiler plugin so the compiled artifact contains an API
+registry. Body formats must provide schemas for values that OpenAPI needs to describe. The example uses the Jackson
+integration:
 
 [source,kotlin]
 ----
@@ -19,11 +19,11 @@ include::example$contract/Books.kt[]
 This definition supplies the method, path, success status, JSON media type, and derived `Book` schema. The target uses
 the API ID as the document title and the endpoint ID as `operationId`.
 
-== Generate beside the contract
+== Generate in the API module
 
 Documentation does not need to be compiled into application source, so same-module generation is the shortest setup.
-Configure an `openapi` execution without a phase; the goal's default `process-classes` phase runs after the current
-module and its registry exist:
+Configure an `openapi` execution without a phase. The goal runs at `process-classes`, after the module and its registry
+have compiled:
 
 [source,xml]
 ----
@@ -48,12 +48,11 @@ example-contract/target/generated/tapik/Catalog.openapi.yml
 
 `compile` alone is too early in this mode. `package`, `verify`, and `install` also reach the configured execution.
 
-== Generate from a contract dependency
+== Generate from an API dependency
 
-An application can instead depend on an already compiled contract and bind the same target to `generate-sources`.
-This is useful when documentation belongs to a consuming or publishing module, although OpenAPI itself does not need
-the early phase. The xref:getting-started.adoc#_generate_from_a_compiled_contract[compiled-contract quickstart] shows
-the complete dependency and execution.
+An application can depend on an API module that has already compiled and bind generation to `generate-sources`. This
+lets the consuming project generate documentation alongside its other outputs. See the
+xref:getting-started.adoc#_generate_from_a_compiled_api_dependency[quickstart] for the full setup.
 
 == Select and name documents
 
@@ -72,7 +71,7 @@ See xref:reference/generation-options.adoc#_openapi[OpenAPI target options] for 
 
 == What the target translates
 
-The target preserves endpoint declaration order and interprets the contract's paths, methods, parameters, headers,
+The target preserves endpoint declaration order and interprets endpoint paths, methods, parameters, headers,
 request bodies, response alternatives, media representations, schemas, tags, and documentation. Schema references
 become reusable components. Optional and repeated query shapes, defaults, fixed values, unions, discriminators, and
 deprecation metadata are represented where OpenAPI supports them.

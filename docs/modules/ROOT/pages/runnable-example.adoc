@@ -1,21 +1,15 @@
 = Runnable example
-:description: Explore tapik's tested contract and Spring application example.
+:description: Run tapik's library API example with Maven or Gradle.
 
-The repository includes one complete library API split into contract and application projects. Maven and Gradle build
-the same Kotlin source, so their examples cannot disagree about the contract or generated application behavior:
+The example defines library endpoints in one project and uses them from a separate application project. The Maven and
+Gradle builds use the same Kotlin source:
 
-`example-contract`:: Defines authors, books, and catalog APIs with the Jackson format integration. It also demonstrates
-same-module OpenAPI generation.
-`example-application`:: Depends on the compiled contract, generates OpenAPI, RestClient, and WebMVC outputs during
-`generate-sources`, implements generated server interfaces, and calls a generated client.
+`example-contract`:: Defines author, book, and catalog endpoints. It also generates OpenAPI in the same project.
+`example-application`:: Uses those endpoints to generate OpenAPI, clients, and server interfaces. Its handlers implement
+the generated interfaces, and its tests call a generated client.
 
-The Maven modules are part of `./mvnw verify`. The `example-gradle` multi-project build maps its `contract` and
-`application` projects onto those same source directories and exercises same-project OpenAPI plus compiled-contract
-OpenAPI, RestClient, and WebMVC generation. Browse the
-https://github.com/makiftutuncu/tapik/tree/main/example-contract[contract module,window=_blank] and
-https://github.com/makiftutuncu/tapik/tree/main/example-application[application module,window=_blank], or inspect the
-https://github.com/makiftutuncu/tapik/tree/main/example-gradle[Gradle build,window=_blank].
+Build the Maven examples with `./mvnw verify`. The Gradle example uses the same sources and covers both same-project
+and compiled API generation.
 
-The xref:getting-started.adoc[quickstart] collects its Kotlin and Maven fragments directly from these modules. The
-xref:reference/gradle.adoc[Gradle reference] does the same for Gradle Kotlin and Groovy DSL. For complete application
-wiring, inspect the modules themselves.
+Start with the xref:getting-started.adoc[quickstart], then use the
+xref:reference/gradle.adoc[Gradle reference] for Gradle setup.

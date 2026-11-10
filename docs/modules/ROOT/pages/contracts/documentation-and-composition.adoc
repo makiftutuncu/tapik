@@ -1,8 +1,8 @@
 = Documentation and composition
 :description: Attach OpenAPI-aligned documentation and compose tapik APIs without losing endpoint identity.
 
-Documentation is stored on the contract values that own it. It does not add generic noise to `Endpoint`, but immutable
-modifiers preserve every existing structural type.
+Documentation is stored on the API and endpoint values it describes. It does not add generic fields to `Endpoint`, and
+its immutable modifiers preserve the endpoint's existing type.
 
 [source,kotlin]
 ----
@@ -19,8 +19,8 @@ Path variables, queries, and headers carry parameter descriptions and deprecatio
 documentation whether used on a request or response. Request-body documentation belongs to the complete input body
 group, while response documentation belongs to one output alternative.
 
-Present documentation strings must not be blank. This rejects unusable descriptions while constructing the contract,
-before a documentation target runs.
+Present documentation strings must not be blank. tapik checks this while the endpoint is defined, before generating
+documentation.
 
 == Tags
 

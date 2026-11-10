@@ -1,30 +1,29 @@
 = APIs and endpoints
 :description: Give tapik APIs and endpoints stable identities while retaining their complete inferred types.
 
-An `Api` is a named, ordered collection of endpoints. Both classes and objects can extend it:
+An `Api` is a named, ordered collection of endpoints. Define one with a Kotlin class or object:
 
 [source,kotlin]
 ----
 include::example$dsl/ApiAndUriExamples.kt[tag=api-and-endpoints]
 ----
 
-`Api()` uses the concrete type's simple name as its `apiId`. You may pass an explicit non-blank `apiId` to the
-constructor when the Kotlin type name is not the contract name you want. The API base class intentionally has no `id`
-member, leaving that natural name available for resource path variables and other contract definitions.
+`Api()` uses the type's simple name as its `apiId`. Pass a non-blank `apiId` when you want another API name. The base
+class has no `id` member, so endpoint definitions can use that name for a resource path variable.
 
 == Endpoint identity
 
-Endpoints are declared inside an API using delegated properties. The API ID and property name form the stable endpoint
-ID, so the example defines `AuthorRoutes.list` and `AuthorRoutes.get`.
+Declare endpoints inside an API using delegated properties. The API ID and property name form each endpoint's stable
+ID. The example defines `AuthorRoutes.list` and `AuthorRoutes.get`.
 
-Property delegation is the only endpoint-binding syntax. It registers the endpoint during API initialization, retains
-declaration order, and gives the property its precise inferred type. `Api.endpoints` exposes all ready endpoints as an
-ordered list for generation, while the property itself retains information hidden by that list's star projections.
+Property delegation registers each endpoint during API initialization and keeps declaration order. The property keeps
+its precise inferred type. `Api.endpoints` provides an ordered list for generation, but its broad element type does not
+show each endpoint's full type.
 
 [IMPORTANT]
 ====
-Contract APIs used by generation must be public. Keep endpoint properties public when generated source needs to follow
-them from an API instance.
+APIs selected for generation must be public. Keep endpoint properties public when generated source needs to reach them
+through the API instance.
 ====
 
 == Start with a method
@@ -42,22 +41,21 @@ That makes `val list by get(root / "authors")` complete. Add only the parts that
 
 == Draft and ready values
 
-Method builders produce an immutable draft endpoint. Every modifier returns another draft value, so ordinary Kotlin
-functions can receive and refine partial definitions. Delegating the final value creates a ready endpoint and records
-its ID; modifiers are no longer available after that boundary.
+Method builders produce an immutable draft endpoint. Each modifier returns another draft value, so Kotlin functions
+can share and refine partial definitions. Delegating the final value registers it as a ready endpoint and assigns its
+ID. Ready endpoints cannot be modified.
 
-Conceptually, Kotlin infers:
+The inferred type has this general shape:
 
 [source,kotlin]
 ----
 Endpoint<Paths, Queries, Headers, Input, Outputs, EndpointState>
 ----
 
-The concrete type arguments are more specific than these bounds. Ordered structures use arity-specific tuples from
-zero through eight, preserving each element's concrete type and declaration position. A ninth path value, query
-definition, header, body representation, or output alternative does not have a DSL overload and therefore does not
-compile.
+The actual type arguments are more specific. Ordered endpoint parts use tuples that preserve each element's type and
+position, up to eight elements. A ninth path value, query, header, body alternative, or response alternative has no DSL
+builder and fails to compile.
 
-These types are the contract tapik targets consume. There is no parallel metadata copy of the endpoint definition.
+Generation reads these endpoint values and types directly. tapik does not create a second copy of their definitions.
 
 Next, xref:contracts/uris.adoc[build typed URIs].

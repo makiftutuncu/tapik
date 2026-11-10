@@ -5,8 +5,8 @@
 ** xref:runnable-example.adoc[Runnable example]
 ** xref:compatibility.adoc[Versioning and compatibility]
 ** xref:migration.adoc[Migrate to 0.6]
-* Define contracts
-** xref:contracts/index.adoc[Contract DSL]
+* Define endpoints
+** xref:contracts/index.adoc[Endpoint DSL]
 ** xref:contracts/apis-and-endpoints.adoc[APIs and endpoints]
 ** xref:contracts/uris.adoc[URIs and parameters]
 ** xref:contracts/requests.adoc[Request inputs]

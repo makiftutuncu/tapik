@@ -1,12 +1,10 @@
-= Generate documentation
-:description: Generate documentation artifacts from tapik contracts.
+= Generate API documentation
+:description: Create API documentation from tapik endpoints.
 
-Documentation targets turn a tapik contract into a description that people and tools can consume without changing the
-Kotlin source of truth. Each integration decides which document model and formats it supports, and generation fails
-when it cannot represent a contract faithfully.
+tapik generates API documentation from the same Kotlin endpoints used for clients and servers. The generated document
+does not replace or change those endpoint definitions.
 
-The first documentation integration is xref:documentation/openapi.adoc[OpenAPI]. Future documentation formats belong
-alongside it in this section and can reuse the same compiler registry, API selection, lifecycle, and output controls.
+The supported documentation format is xref:documentation/openapi.adoc[OpenAPI]. That guide explains how to generate a
+document and which endpoint features it can describe.
 
-See xref:generation/index.adoc[Generation model] for the shared target boundary and
-xref:reference/maven.adoc[Maven reference] for execution configuration.
+See the xref:reference/maven.adoc[Maven reference] or xref:reference/gradle.adoc[Gradle reference] for build setup.

@@ -1,18 +1,17 @@
 = Type safety
-:description: Where tapik provides compile-time guarantees and where target generation validates a contract.
+:description: Learn how tapik keeps endpoint details in Kotlin types and checks definitions before runtime.
 
-tapik uses Kotlin types to preserve the structure accumulated by its DSL. Adding a path variable, query parameter,
-header, body, or output changes the endpoint's inferred type instead of erasing the definition into an untyped metadata
-record.
+tapik keeps each endpoint's path, query parameters, headers, request body, and responses in the Kotlin type inferred
+from its DSL. Adding one of these details changes the type; tapik does not flatten endpoint definitions into a separate
+metadata model.
 
-That structure supports three layers of early feedback:
+tapik checks definitions at three points:
 
-DSL construction:: State and tuple types make invalid or incomplete combinations unavailable or uncompilable.
-Contract compilation:: The compiler plugin validates discoverable public APIs and emits an explicit registry.
-Target generation:: Each target rejects contract features it cannot represent, with contextual diagnostics.
+Kotlin compilation:: The DSL's types reject invalid combinations and incomplete endpoints.
+Value creation:: tapik checks rules that depend on actual values, such as duplicate names.
+Output generation:: Each output generator rejects endpoint features it cannot represent and reports where the problem
+occurred.
 
-Not every rule needs a distinct type parameter. tapik deliberately balances strong inferred information with a usable
-Kotlin API, while keeping runtime-only surprises out of supported generation paths.
+You normally do not write these types yourself. Kotlin infers them from the endpoint definition.
 
-OpenAPI is never used to reconstruct the contract. The Kotlin values and their types are the source from which every
-target begins.
+OpenAPI is generated output. tapik does not use it to reconstruct endpoints.

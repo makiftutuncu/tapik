@@ -1,12 +1,10 @@
 = Implement servers
-:description: Implement typed HTTP servers from tapik contracts.
+:description: Implement typed HTTP servers from tapik endpoints.
 
-Server targets generate a typed interface for application-owned handlers and a framework-specific adapter that owns
-wire decoding, response encoding, and routing integration. The handler boundary should remain focused on Kotlin values
-even as additional server stacks are introduced.
+tapik generates a Kotlin interface for your server handler. The supported Spring WebMVC integration also generates an
+adapter that connects HTTP requests and responses to that handler.
 
-The first server integration is xref:servers/spring-webmvc.adoc[Spring WebMVC]. Future server stacks belong alongside
-it and can generate their own adapters around the same contract information.
+Read the xref:servers/spring-webmvc.adoc[Spring WebMVC guide] for setup, handler implementation, and request handling.
 
-Applications usually generate servers from a compiled contract dependency during `generate-sources`, allowing their
-ordinary Kotlin source to implement the generated handler interface.
+When application source needs to implement the generated interface, put the endpoints in a separate compiled API
+module. The integration guide explains this setup.

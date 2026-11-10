@@ -1,14 +1,10 @@
 = Quickstart
-:description: Generate OpenAPI from a tapik contract in the same module or from a compiled contract dependency.
+:description: Generate OpenAPI from endpoints in the current module or from a compiled API dependency.
 
-This guide takes the shortest Maven path from an ordinary Kotlin value to an OpenAPI document. For a Gradle build,
-start with the xref:reference/gradle.adoc[Gradle reference], which covers the same two generation modes with the typed
-Gradle DSL and runnable example.
+This guide shows how to generate an OpenAPI document with Maven. For Gradle, see the
+xref:reference/gradle.adoc[Gradle reference] and runnable example.
 
-The snippets below are collected from the repository's tested
-https://github.com/makiftutuncu/tapik/tree/main/example-contract[`example-contract`^] and
-https://github.com/makiftutuncu/tapik/tree/main/example-application[`example-application`^] modules. They cannot drift
-from the examples exercised by `./mvnw verify`.
+The examples use the `example-contract` and `example-application` modules in the tapik repository.
 
 == Requirements
 
@@ -16,12 +12,12 @@ from the examples exercised by `./mvnw verify`.
 * Kotlin 2.4 or newer
 * Maven 3.9+ or Gradle 9.1 through 9.8
 
-== Generate OpenAPI in the contract module
+== Generate OpenAPI in the API module
 
-Use this mode when the current Maven module owns the `Api` values. The compiler must first produce the module's API
-registry, so generation runs later in the same lifecycle at `process-classes`.
+Use this when the current Maven module defines the APIs. The compiler first records them in a registry, so generation
+runs later in the same lifecycle at `process-classes`.
 
-=== 1. Add the contract dependencies
+=== 1. Add tapik dependencies
 
 Import the BOM to align tapik library versions:
 
@@ -41,17 +37,17 @@ include::example$contract/pom.xml[tag=contract-dependencies,indent=4]
 
 === 2. Enable registry generation
 
-Add tapik to `kotlin-maven-plugin`. This compiler plugin records the module's public `Api` declarations in a
-deterministic registry; the generation plugin reads that registry rather than scanning classes.
+Add tapik to `kotlin-maven-plugin`. The compiler plugin records the module's public `Api` declarations in a registry.
+The generation plugin reads the registry; it does not search project classes for APIs.
 
 [source,xml]
 ----
 include::example$contract/pom.xml[tag=compiler-plugin]
 ----
 
-=== 3. Define an API
+=== 3. Define endpoints
 
-An API is an ordinary Kotlin value. The delegated property name gives this endpoint its stable ID, `list`.
+An API is an ordinary Kotlin value. The delegated property name gives the endpoint its stable ID, `Books.list`.
 
 [source,kotlin]
 ----
@@ -87,13 +83,13 @@ example-contract/target/generated/tapik/Books.openapi.yml
 In your own standalone project, run `./mvnw process-classes`. `./mvnw compile` is too early for a same-module
 execution, while `package`, `verify`, and `install` all include `process-classes` and therefore also generate the file.
 
-== Generate from a compiled contract
+== Generate from a compiled API dependency
 
-Use compiled-contract mode when an application consumes APIs from a separate Maven artifact. Because the dependency's
-registry already exists, the consumer can generate during `generate-sources`. This is the recommended mode when the
-consumer's ordinary Kotlin source needs to refer to generated client or server types.
+Use this workflow when an application depends on an API module that has already compiled. Its registry is available,
+so generation can run during `generate-sources`. Choose this when application code needs generated client or server
+types.
 
-First, depend directly on the contract:
+First, depend on the API artifact:
 
 [source,xml]
 ----
@@ -114,8 +110,8 @@ The runnable reactor example can be built with:
 ./mvnw -pl example-application -am compile
 ----
 
-`-am` builds the contract dependency first. Outside a reactor, publish the contract to a Maven repository or install it
-locally before compiling the consumer. The application document is written to:
+`-am` builds the API module first. Outside a reactor, publish the API artifact to a Maven repository or install it
+locally before compiling the application. The document is written to:
 
 [,text]
 ----
