@@ -72,7 +72,7 @@ than string keys and stringly typed values:
 
 ```kotlin
 tapik {
-    outputRoot(layout.buildDirectory.dir("generated/contracts"))
+    outputRoot(layout.buildDirectory.dir("generated/custom"))
     mode(Mode.COMPILED_API_DEPENDENCY)
 
     openApi("public") {

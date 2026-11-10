@@ -11,7 +11,7 @@ plugins {
 
 // tag::dependency-configurations[]
 dependencies {
-    tapikApiDependency("com.example:library-contract:1.0.0")
+    tapikApiDependency("com.example:library-api:1.0.0")
     tapikTarget("com.example:company-tapik-target:1.2.0")
 }
 // end::dependency-configurations[]
@@ -19,7 +19,7 @@ dependencies {
 // tag::kotlin-configuration[]
 tapik {
     mode(Mode.COMPILED_API_DEPENDENCY)
-    outputRoot(layout.buildDirectory.dir("generated/contracts"))
+    outputRoot(layout.buildDirectory.dir("generated/custom"))
 
     openApi("public") {
         includeApis("Catalog")

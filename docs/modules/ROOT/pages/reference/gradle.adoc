@@ -135,7 +135,7 @@ Both complete DSL files are exercised by Gradle TestKit, so their public syntax 
 |Documentation |`documentation/`
 |===
 
-Set another root with `outputRoot(layout.buildDirectory.dir("generated/contracts"))`. Targets return relative paths
+Set another root with `outputRoot(layout.buildDirectory.dir("generated/custom"))`. Targets return relative paths
 but cannot choose or escape this root. One task owns the complete tree, removes stale owned files after successful
 generation, and logs each materialized path relative to the project when possible. Output on another filesystem root
 uses a normalized absolute path instead; logging failure cannot invalidate already committed output. Any failed
