@@ -335,8 +335,10 @@ non-empty `Headers1` through `Headers8` value. After any headers have been initi
 header modifier and appends one definition at a time. Both modifiers retain exact header types; reaching a ninth
 header is a compilation failure. Ready endpoints expose neither modifier.
 
-Headers retain required, optional, defaulted, or fixed presence in separate header-presence types. Fixed queries may
-also be supported. Header names compare case-insensitively for uniqueness.
+Headers retain required, optional, defaulted, or fixed presence. Query builders expose required, optional, and defaulted
+presence, but no fixed modifier. Because queries use the shared `Presence` type, callers can construct a fixed query
+directly; OpenAPI renders it as required with a constant value, while Spring RestClient and WebMVC generation reject
+it. Header names compare case-insensitively for uniqueness.
 
 The scalar representation is `Header<Value, Presence>`. Generic and convenient builders coexist on
 `Header.Companion`:
