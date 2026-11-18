@@ -14,6 +14,7 @@ import javax.inject.Inject
  */
 abstract class TapikExecution @Inject constructor(
     private val executionName: String,
+    /** Exact identifier of the generation target. */
     @get:Input val targetId: String
 ) : Named {
     /** Stable name of this execution within the Gradle project. */

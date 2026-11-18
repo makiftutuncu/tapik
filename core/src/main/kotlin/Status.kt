@@ -10,6 +10,7 @@ package dev.akif.tapik
  * @throws IllegalArgumentException when [code] is outside the HTTP status domain.
  */
 data class Status(
+    /** Numeric status code between 100 and 599. */
     val code: Int
 ) {
     init {

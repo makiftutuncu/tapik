@@ -24,10 +24,15 @@ enum class ArtifactKind {
  * @throws IllegalArgumentException when [relativePath] is blank, absolute, or not normalized.
  */
 data class GeneratedArtifact(
+    /** Normalized, forward-slash path beneath the execution output directory. */
     val relativePath: String,
+    /** Media type of [content]. */
     val mediaType: String,
+    /** Role of the artifact in the host build. */
     val kind: ArtifactKind,
+    /** Complete textual content. */
     val content: String,
+    /** Stable identity allowing several executions to own the same path, or `null` for exclusive ownership. */
     val sharingKey: String? = null
 ) {
     init {

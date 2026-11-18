@@ -6,5 +6,6 @@ package dev.akif.tapik.target.openapi
  * @property schema schema of the complete representation.
  */
 data class OpenApiMediaType(
+    /** Schema of the complete representation. */
     val schema: OpenApiSchema
 )

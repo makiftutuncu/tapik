@@ -9,8 +9,12 @@ package dev.akif.tapik.target.openapi
  * @property schema header value schema.
  */
 data class OpenApiHeader(
+    /** Optional detailed description. */
     val description: String? = null,
+    /** Whether the response always contains the header. */
     val required: Boolean,
+    /** Whether consumers should avoid the header. */
     val deprecated: Boolean,
+    /** Header value schema. */
     val schema: OpenApiSchema
 )

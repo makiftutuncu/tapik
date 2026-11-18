@@ -11,6 +11,7 @@ import kotlin.reflect.KProperty
  * @property api API included in the containing API.
  */
 class ApiInclusion<out Included : Api> internal constructor(
+    /** API included in the containing API. */
     val api: Included
 ) {
     private var owner: Api? = null

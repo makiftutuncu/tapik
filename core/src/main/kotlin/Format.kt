@@ -9,7 +9,9 @@ package dev.akif.tapik
  * @property schema describes the values for documentation formats.
  */
 data class Format<Value : Any, Representation : Any>(
+    /** Converts between Kotlin values and their serialized representation. */
     val codec: Codec<Value, Representation>,
+    /** Describes the values for documentation formats. */
     val schema: Schema
 ) {
     /** Factory namespace for cached formats of common types. */

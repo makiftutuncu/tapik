@@ -11,12 +11,18 @@ package dev.akif.tapik.common.plugin
  * @property flexibleUpperBound upper bound when this is a flexible platform type.
  */
 class KotlinType(
+    /** Class, type-alias, or type-parameter identity. */
     val classifier: KotlinClassifier,
     arguments: List<KotlinTypeProjection> = emptyList(),
+    /** Whether the source type is nullable. */
     val nullable: Boolean = false,
+    /** Whether the source type is definitely non-null. */
     val definitelyNonNull: Boolean = false,
+    /** Source type-alias form when this type was expanded by the compiler. */
     val abbreviation: KotlinType? = null,
+    /** Containing type for an inner-class type. */
     val outerType: KotlinType? = null,
+    /** Upper bound when this is a flexible platform type. */
     val flexibleUpperBound: KotlinFlexibleTypeUpperBound? = null
 ) {
     /** Generic type projections in declaration order. */
@@ -89,6 +95,7 @@ sealed interface KotlinClassifier
  * @property name dot-separated Kotlin class name.
  */
 data class KotlinClassClassifier(
+    /** Dot-separated Kotlin class name. */
     val name: String
 ) : KotlinClassifier {
     init {
@@ -102,6 +109,7 @@ data class KotlinClassClassifier(
  * @property name dot-separated Kotlin type-alias name.
  */
 data class KotlinTypeAliasClassifier(
+    /** Dot-separated Kotlin type-alias name. */
     val name: String
 ) : KotlinClassifier {
     init {
@@ -115,6 +123,7 @@ data class KotlinTypeAliasClassifier(
  * @property id metadata-local type-parameter ID.
  */
 data class KotlinTypeParameterClassifier(
+    /** Metadata-local type-parameter ID. */
     val id: Int
 ) : KotlinClassifier {
     init {
@@ -135,7 +144,9 @@ data object KotlinStarProjection : KotlinTypeProjection
  * @property type projected type.
  */
 data class KotlinTypedProjection(
+    /** Use-site variance. */
     val variance: KotlinVariance,
+    /** Projected type. */
     val type: KotlinType
 ) : KotlinTypeProjection
 
@@ -158,6 +169,8 @@ enum class KotlinVariance {
  * @property flexibilityId compiler-defined flexibility category.
  */
 data class KotlinFlexibleTypeUpperBound(
+    /** Upper-bound type. */
     val type: KotlinType,
+    /** Compiler-defined flexibility category. */
     val flexibilityId: String?
 )

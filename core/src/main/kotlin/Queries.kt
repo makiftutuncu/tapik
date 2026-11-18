@@ -33,9 +33,13 @@ sealed interface Query {
  * @throws IllegalArgumentException if [name] is not a valid query parameter name.
  */
 data class QueryParameter<Value : Any, out P : Presence<Value>>(
+    /** Query-string parameter name. */
     override val name: String,
+    /** String format used on the wire. */
     val format: StringFormat<Value>,
+    /** Required, optional, or defaulted presence information. */
     val presence: P,
+    /** Human-readable parameter documentation. */
     override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : Query {
     init {
@@ -135,9 +139,13 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
  * @throws IllegalArgumentException if [name] is not a valid query parameter name.
  */
 data class RepeatedQueryParameter<Value : Any, out P : Presence<List<Value>>>(
+    /** Query-string parameter name. */
     override val name: String,
+    /** List format used for all wire occurrences. */
     val format: Format<List<Value>, List<String>>,
+    /** Required, optional, or defaulted presence information. */
     val presence: P,
+    /** Human-readable parameter documentation. */
     override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : Query {
     init {

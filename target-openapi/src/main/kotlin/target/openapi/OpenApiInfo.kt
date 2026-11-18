@@ -10,9 +10,13 @@ package dev.akif.tapik.target.openapi
  * @throws IllegalArgumentException when [title] or [version] is blank.
  */
 data class OpenApiInfo(
+    /** Human-readable API title. */
     val title: String,
+    /** Version of the API document, independent of [OpenApiDocument.specificationVersion]. */
     val version: String,
+    /** Optional short summary. */
     val summary: String? = null,
+    /** Optional detailed description. */
     val description: String? = null
 ) {
     init {

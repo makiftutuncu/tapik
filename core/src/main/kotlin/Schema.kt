@@ -36,8 +36,11 @@ enum class SchemaType {
  * @throws IllegalArgumentException when [format] or [name] is present but blank.
  */
 data class ScalarSchema(
+    /** Kind of value described by this schema. */
     val type: SchemaType,
+    /** Optional format hint for the scalar type. */
     val format: String? = null,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     init {
@@ -56,7 +59,9 @@ data class ScalarSchema(
  * @throws IllegalArgumentException when [name] is present but blank.
  */
 data class ArraySchema(
+    /** Schema for each array element. */
     val items: Schema,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     init {
@@ -74,6 +79,7 @@ data class ArraySchema(
  */
 class EnumSchema(
     values: List<String>,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     /** Allowed string values in declaration order. */
@@ -116,8 +122,11 @@ class EnumSchema(
  * @property deprecated whether consumers should avoid using this property.
  */
 data class SchemaProperty(
+    /** Property value schema. */
     val schema: Schema,
+    /** Whether the containing object requires this property. */
     val required: Boolean,
+    /** Whether consumers should avoid using this property. */
     val deprecated: Boolean = false
 )
 
@@ -129,6 +138,7 @@ data class SchemaProperty(
  */
 class ObjectSchema(
     properties: Map<String, SchemaProperty>,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     /** Object fields in declaration order. */
@@ -168,8 +178,11 @@ class ObjectSchema(
  * @property name optional reusable schema name.
  */
 data class MapSchema(
+    /** Schema for map keys. */
     val keys: Schema,
+    /** Schema for map values. */
     val values: Schema,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     init {
@@ -185,7 +198,9 @@ data class MapSchema(
  * @property name optional reusable schema name.
  */
 data class NullableSchema(
+    /** Schema for non-null values. */
     val schema: Schema,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     init {
@@ -203,7 +218,9 @@ data class NullableSchema(
  * @throws IllegalArgumentException when [reference] or [name] is blank.
  */
 data class ReferenceSchema(
+    /** Schema identifier or URI. */
     val reference: String,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     init {

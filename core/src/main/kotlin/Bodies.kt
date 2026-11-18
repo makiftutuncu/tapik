@@ -11,7 +11,9 @@ sealed interface BodyAlternative
  * @property format byte-array format used on the wire.
  */
 data class Body<Value : Any>(
+    /** HTTP media type. */
     val mediaType: MediaType,
+    /** Byte-array format used on the wire. */
     val format: ByteArrayFormat<Value>
 ) : BodyAlternative
 

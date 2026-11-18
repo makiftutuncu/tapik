@@ -16,6 +16,7 @@ data object Draft : EndpointState
  * @throws IllegalArgumentException when [id] is blank.
  */
 data class Ready(
+    /** Qualified API and property identifier. */
     val id: String
 ) : EndpointState {
     init {
@@ -48,13 +49,20 @@ class Endpoint<
     out O : Outputs,
     out S : EndpointState
 > internal constructor(
+    /** HTTP method. */
     val method: Method,
+    /** URI definition. */
     val uri: Uri<P, Q>,
+    /** Request headers. */
     val headers: H,
+    /** Request input. */
     val input: I,
+    /** Response alternatives. */
     val outputs: O,
+    /** Human-readable endpoint documentation. */
     val documentation: EndpointDocumentation,
     tags: Set<String>,
+    /** Binding state. */
     val state: S
 ) {
     /** Endpoint tags using set semantics. */

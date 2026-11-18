@@ -6,6 +6,7 @@ package dev.akif.tapik.target.openapi
  * @property value wire value used by OpenAPI.
  */
 enum class OpenApiParameterLocation(
+    /** Wire value used by OpenAPI. */
     val value: String
 ) {
     /** URI path-template parameter. */

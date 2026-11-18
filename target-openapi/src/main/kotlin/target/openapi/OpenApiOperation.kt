@@ -9,11 +9,15 @@ package dev.akif.tapik.target.openapi
  * @property requestBody optional request body.
  */
 class OpenApiOperation(
+    /** Unique identifier derived from the delegated endpoint property. */
     val operationId: String,
     tags: List<String>,
+    /** Optional short summary. */
     val summary: String?,
+    /** Optional detailed description. */
     val description: String?,
     parameters: List<OpenApiParameter>,
+    /** Optional request body. */
     val requestBody: OpenApiRequestBody?,
     responses: Map<String, OpenApiResponse>
 ) {

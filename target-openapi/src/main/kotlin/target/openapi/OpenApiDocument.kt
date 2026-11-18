@@ -8,9 +8,12 @@ package dev.akif.tapik.target.openapi
  * @property components reusable components referenced by operations.
  */
 class OpenApiDocument(
+    /** OpenAPI specification version used by the document. */
     val specificationVersion: String = "3.2.0",
+    /** Identifying information about the API document. */
     val info: OpenApiInfo,
     paths: Map<String, OpenApiPathItem>,
+    /** Reusable components referenced by operations. */
     val components: OpenApiComponents = OpenApiComponents()
 ) {
     /** Operations grouped by URI path template in declaration order. */

@@ -22,6 +22,7 @@ sealed interface PathSegment {
      */
     @JvmInline
     value class Literal(
+        /** Path segment in encoded form. */
         val value: String
     ) : PathSegment {
         init {
@@ -53,8 +54,11 @@ sealed interface PathValue<Value : Any> : PathSegment {
  * @throws IllegalArgumentException if [name] is not a valid URI-template variable name.
  */
 data class PathVariable<Value : Any>(
+    /** URI-template variable name. */
     override val name: String,
+    /** String format used on the wire. */
     override val format: StringFormat<Value>,
+    /** Human-readable parameter documentation. */
     override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : PathValue<Value> {
     init {
@@ -146,7 +150,9 @@ data class PathVariable<Value : Any>(
  */
 @ConsistentCopyVisibility
 data class RemainingPath internal constructor(
+    /** URI-template wildcard name used to capture the remaining path. */
     override val name: String,
+    /** Human-readable path-parameter documentation. */
     override val documentation: ParameterDocumentation = ParameterDocumentation()
 ) : PathValue<List<String>> {
     override val format: StringFormat<List<String>>

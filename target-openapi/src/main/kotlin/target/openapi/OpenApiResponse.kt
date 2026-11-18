@@ -6,6 +6,7 @@ package dev.akif.tapik.target.openapi
  * @property description response description, always supplied by tapik even though OpenAPI 3.2 permits omission.
  */
 class OpenApiResponse(
+    /** Response description, always supplied by tapik even though OpenAPI 3.2 permits omission. */
     val description: String,
     headers: Map<String, OpenApiHeader>,
     content: Map<String, OpenApiMediaType>

@@ -24,9 +24,13 @@ import java.util.UUID
  * @throws IllegalArgumentException if [name] is not a valid HTTP field name.
  */
 data class Header<Value : Any, out P : Presence<Value>>(
+    /** HTTP field name. */
     val name: String,
+    /** String format used on the wire. */
     val format: StringFormat<Value>,
+    /** Required, optional, defaulted, or fixed presence information. */
     val presence: P,
+    /** Human-readable parameter documentation. */
     val documentation: ParameterDocumentation = ParameterDocumentation()
 ) {
     init {

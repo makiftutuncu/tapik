@@ -9,7 +9,9 @@ import dev.akif.tapik.*
  * @property requestBody optional request-body choice sealed-interface name.
  */
 class EndpointTypeNames(
+    /** Response sealed-interface name. */
     val response: String,
+    /** Optional request-body choice sealed-interface name. */
     val requestBody: String?,
     requestBodyVariants: List<String>,
     responseVariants: List<String>

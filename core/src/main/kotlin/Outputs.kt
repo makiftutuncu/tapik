@@ -16,9 +16,13 @@ sealed interface OutputAlternative
  */
 @ConsistentCopyVisibility
 data class Output<out M : StatusMatcher, out B : Bodies, out H : Headers> internal constructor(
+    /** Statuses represented by this output. */
     val matcher: M,
+    /** Alternative body representations. */
     val bodies: B,
+    /** Headers produced with this output. */
     val headers: H,
+    /** Human-readable response documentation. */
     val documentation: ResponseDocumentation = ResponseDocumentation()
 ) : OutputAlternative {
     /** Replaces this response alternative's description. */

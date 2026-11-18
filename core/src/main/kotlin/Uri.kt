@@ -10,7 +10,9 @@ package dev.akif.tapik
  */
 class Uri<out P : Paths, out Q : Queries> internal constructor(
     segments: List<PathSegment>,
+    /** Path values in declaration order. */
     val paths: P,
+    /** Query parameters in declaration order. */
     val queries: Q
 ) {
     /** Normalized path segments, whose literal values are already encoded. */

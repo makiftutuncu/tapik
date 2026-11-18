@@ -10,6 +10,7 @@ import java.util.Collections
  * @property mediaType content type of [bytes].
  */
 class RestClientRequestBody(
+    /** Content type of [bytes]. */
     val mediaType: MediaType,
     bytes: ByteArray
 ) {
@@ -49,8 +50,10 @@ class RestClientRequestBody(
  * @property mediaType received content type, when present.
  */
 class RestClientResponse(
+    /** Received HTTP status. */
     val status: Status,
     headers: Map<String, List<String>>,
+    /** Received content type, when present. */
     val mediaType: MediaType?,
     body: ByteArray
 ) {

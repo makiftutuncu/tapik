@@ -10,6 +10,7 @@ import dev.akif.tapik.Ready
  * @property value runtime API value.
  */
 class CompiledApi(
+    /** Runtime API value. */
     val value: Api,
     endpoints: List<CompiledEndpoint>
 ) {
@@ -51,7 +52,9 @@ class CompiledApi(
  * @property type exact compiled property type.
  */
 class CompiledEndpoint internal constructor(
+    /** Runtime endpoint value. */
     val value: Endpoint<*, *, *, *, *, Ready>,
+    /** Exact compiled property type. */
     val type: KotlinType,
     sourcePropertyPath: List<String>
 ) {

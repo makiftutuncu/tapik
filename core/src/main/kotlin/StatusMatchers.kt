@@ -11,6 +11,7 @@ sealed interface StatusMatcher {
  * @property status only status accepted by this matcher.
  */
 data class ExactStatus(
+    /** Only status accepted by this matcher. */
     val status: Status
 ) : StatusMatcher {
     override fun matches(status: Status): Boolean = this.status == status
@@ -58,6 +59,7 @@ fun statusesOf(
  * @property range inclusive range of accepted status codes.
  */
 data class StatusRange(
+    /** Inclusive range of accepted status codes. */
     val range: IntRange
 ) : StatusMatcher {
     init {
@@ -83,7 +85,9 @@ fun statusesIn(range: IntRange): StatusRange = StatusRange(range)
  * @throws IllegalArgumentException when [description] is blank.
  */
 data class CustomStatus(
+    /** Stable label used in diagnostics. */
     val description: String,
+    /** Returns whether a status is accepted. */
     val predicate: (Status) -> Boolean
 ) : StatusMatcher {
     init {

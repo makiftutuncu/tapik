@@ -212,7 +212,8 @@ part of the normal reactor and are the executable proof behind the primary user 
 Rendered smoke tests cover navigation from the landing page to the quickstart and API reference, navigation back from
 the reference, versioned paths, search availability, and usable desktop and mobile layouts. Documentation coverage is
 grown with public behavior: every stable public production type and member requires KDoc, and every supported user
-workflow requires narrative guidance. Document primary-constructor properties with `@property` on their type. Put
+workflow requires narrative guidance. Document primary-constructor properties both with `@property` on their type and
+with KDoc on each property declaration, so the description appears on the type and the member's Dokka page. Put
 documentation for other members on the declaration so it appears on that member's Dokka page. KDoc describes
 declaration-specific semantics and links related concepts where useful; it does not duplicate the complete guides.
 

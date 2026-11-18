@@ -8,7 +8,9 @@ package dev.akif.tapik
  * @throws IllegalArgumentException when a present value is blank.
  */
 data class EndpointDocumentation(
+    /** Short endpoint summary. */
     val summary: String? = null,
+    /** Detailed endpoint description. */
     val description: String? = null
 ) {
     init {
@@ -25,7 +27,9 @@ data class EndpointDocumentation(
  * @throws IllegalArgumentException when [description] is present but blank.
  */
 data class ParameterDocumentation(
+    /** Optional detailed description. */
     val description: String? = null,
+    /** Whether consumers should avoid the parameter. */
     val deprecated: Boolean = false
 ) {
     init {
@@ -40,6 +44,7 @@ data class ParameterDocumentation(
  * @throws IllegalArgumentException when [description] is present but blank.
  */
 data class RequestBodyDocumentation(
+    /** Optional detailed description. */
     val description: String? = null
 ) {
     init {
@@ -54,6 +59,7 @@ data class RequestBodyDocumentation(
  * @throws IllegalArgumentException when [description] is present but blank.
  */
 data class ResponseDocumentation(
+    /** Optional detailed description overriding the target's status-derived fallback. */
     val description: String? = null
 ) {
     init {

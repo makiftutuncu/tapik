@@ -9,6 +9,7 @@ import dev.akif.tapik.Api
  */
 class GenerationRequest(
     apis: List<Api>,
+    /** Target-owned, host-neutral configuration. */
     val configuration: TargetConfiguration = TargetConfiguration()
 ) {
     /** Every API selected for this execution. */

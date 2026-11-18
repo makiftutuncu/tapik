@@ -17,6 +17,7 @@ import java.net.URI
  * @property client underlying Spring client.
  */
 class RestClientTransport(
+    /** Underlying Spring client. */
     val client: RestClient
 ) {
     /**

@@ -24,6 +24,7 @@ data object Tuple0 : Tuple<Nothing> {
  */
 @ConsistentCopyVisibility
 data class Tuple1<T, T1 : T> internal constructor(
+    /** First tuple value. */
     val _1: T1
 ) : NonEmptyTuple<T> {
     override val values: List<T>
@@ -37,7 +38,9 @@ data class Tuple1<T, T1 : T> internal constructor(
  */
 @ConsistentCopyVisibility
 data class Tuple2<T, T1 : T, T2 : T> internal constructor(
+    /** First tuple value. */
     val _1: T1,
+    /** Second tuple value. */
     val _2: T2
 ) : NonEmptyTuple<T> {
     override val values: List<T>
@@ -52,8 +55,11 @@ data class Tuple2<T, T1 : T, T2 : T> internal constructor(
  */
 @ConsistentCopyVisibility
 data class Tuple3<T, T1 : T, T2 : T, T3 : T> internal constructor(
+    /** First tuple value. */
     val _1: T1,
+    /** Second tuple value. */
     val _2: T2,
+    /** Third tuple value. */
     val _3: T3
 ) : NonEmptyTuple<T> {
     override val values: List<T>
@@ -69,9 +75,13 @@ data class Tuple3<T, T1 : T, T2 : T, T3 : T> internal constructor(
  */
 @ConsistentCopyVisibility
 data class Tuple4<T, T1 : T, T2 : T, T3 : T, T4 : T> internal constructor(
+    /** First tuple value. */
     val _1: T1,
+    /** Second tuple value. */
     val _2: T2,
+    /** Third tuple value. */
     val _3: T3,
+    /** Fourth tuple value. */
     val _4: T4
 ) : NonEmptyTuple<T> {
     override val values: List<T>
@@ -88,10 +98,15 @@ data class Tuple4<T, T1 : T, T2 : T, T3 : T, T4 : T> internal constructor(
  */
 @ConsistentCopyVisibility
 data class Tuple5<T, T1 : T, T2 : T, T3 : T, T4 : T, T5 : T> internal constructor(
+    /** First tuple value. */
     val _1: T1,
+    /** Second tuple value. */
     val _2: T2,
+    /** Third tuple value. */
     val _3: T3,
+    /** Fourth tuple value. */
     val _4: T4,
+    /** Fifth tuple value. */
     val _5: T5
 ) : NonEmptyTuple<T> {
     override val values: List<T>
@@ -109,11 +124,17 @@ data class Tuple5<T, T1 : T, T2 : T, T3 : T, T4 : T, T5 : T> internal constructo
  */
 @ConsistentCopyVisibility
 data class Tuple6<T, T1 : T, T2 : T, T3 : T, T4 : T, T5 : T, T6 : T> internal constructor(
+    /** First tuple value. */
     val _1: T1,
+    /** Second tuple value. */
     val _2: T2,
+    /** Third tuple value. */
     val _3: T3,
+    /** Fourth tuple value. */
     val _4: T4,
+    /** Fifth tuple value. */
     val _5: T5,
+    /** Sixth tuple value. */
     val _6: T6
 ) : NonEmptyTuple<T> {
     override val values: List<T>
@@ -141,12 +162,19 @@ data class Tuple7<
     T6 : T,
     T7 : T
 > internal constructor(
+    /** First tuple value. */
     val _1: T1,
+    /** Second tuple value. */
     val _2: T2,
+    /** Third tuple value. */
     val _3: T3,
+    /** Fourth tuple value. */
     val _4: T4,
+    /** Fifth tuple value. */
     val _5: T5,
+    /** Sixth tuple value. */
     val _6: T6,
+    /** Seventh tuple value. */
     val _7: T7
 ) : NonEmptyTuple<T> {
     override val values: List<T>
@@ -176,13 +204,21 @@ data class Tuple8<
     T7 : T,
     T8 : T
 > internal constructor(
+    /** First tuple value. */
     val _1: T1,
+    /** Second tuple value. */
     val _2: T2,
+    /** Third tuple value. */
     val _3: T3,
+    /** Fourth tuple value. */
     val _4: T4,
+    /** Fifth tuple value. */
     val _5: T5,
+    /** Sixth tuple value. */
     val _6: T6,
+    /** Seventh tuple value. */
     val _7: T7,
+    /** Eighth tuple value. */
     val _8: T8
 ) : NonEmptyTuple<T> {
     override val values: List<T>

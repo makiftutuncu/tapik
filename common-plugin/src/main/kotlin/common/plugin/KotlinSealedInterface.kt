@@ -8,8 +8,11 @@ package dev.akif.tapik.common.plugin
  * @property defaultExpression optional Kotlin expression rendered as the property's default value.
  */
 data class KotlinDataField(
+    /** Generated Kotlin property name. */
     val name: String,
+    /** Source-facing and expanded property type. */
     val type: KotlinSourceType,
+    /** Optional Kotlin expression rendered as the property's default value. */
     val defaultExpression: String? = null
 )
 
@@ -21,6 +24,7 @@ data class KotlinDataField(
  * @property name generated Kotlin variant name.
  */
 class KotlinSealedVariant(
+    /** Generated Kotlin variant name. */
     val name: String,
     fields: List<KotlinDataField> = emptyList()
 ) {

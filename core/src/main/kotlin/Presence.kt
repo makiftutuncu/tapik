@@ -20,6 +20,7 @@ data object Optional : Presence<Nothing>
  * @property value replacement used when the value is absent.
  */
 data class Default<Value : Any>(
+    /** Replacement used when the value is absent. */
     val value: Value
 ) : Presence<Value>
 
@@ -28,5 +29,6 @@ data class Default<Value : Any>(
  * @property value required value supplied by the endpoint definition.
  */
 data class Fixed<Value : Any>(
+    /** Required value supplied by the endpoint definition. */
     val value: Value
 ) : Presence<Value>

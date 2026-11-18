@@ -9,6 +9,7 @@ sealed interface ConfigurationValue
  * @property value textual value supplied by the host adapter.
  */
 data class ScalarConfigurationValue(
+    /** Textual value supplied by the host adapter. */
     val value: String
 ) : ConfigurationValue
 

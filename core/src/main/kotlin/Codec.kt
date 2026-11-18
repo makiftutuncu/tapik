@@ -8,8 +8,11 @@ package dev.akif.tapik
  * @property cause optional exception that caused the failure.
  */
 data class DecodeError(
+    /** Human-readable explanation of the failure. */
     val message: String,
+    /** Optional logical location of the invalid value. */
     val location: String? = null,
+    /** Optional exception that caused the failure. */
     val cause: Throwable? = null
 )
 
@@ -20,6 +23,7 @@ sealed interface DecodeResult<out Value : Any> {
      * @property value decoded Kotlin value.
      */
     data class Success<Value : Any>(
+        /** Decoded Kotlin value. */
         val value: Value
     ) : DecodeResult<Value>
 
@@ -82,7 +86,9 @@ fun interface Encoder<in Value : Any, out Representation : Any> {
  * @property encoder Kotlin-to-serialized conversion.
  */
 data class Codec<Value : Any, Representation : Any>(
+    /** Serialized-to-Kotlin conversion. */
     val decoder: Decoder<Representation, Value>,
+    /** Kotlin-to-serialized conversion. */
     val encoder: Encoder<Value, Representation>
 ) {
     /** Decodes [representation]. */

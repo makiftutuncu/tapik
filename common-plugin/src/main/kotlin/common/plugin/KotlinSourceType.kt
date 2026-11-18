@@ -10,7 +10,9 @@ package dev.akif.tapik.common.plugin
  * @property expandedType compiler-expanded type used for semantic checks.
  */
 data class KotlinSourceType(
+    /** Kotlin spelling used in generated source. */
     val source: String,
+    /** Compiler-expanded type used for semantic checks. */
     val expandedType: KotlinType
 ) {
     /** Whether the expanded type has the class classifier named [name]. */

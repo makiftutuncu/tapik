@@ -12,8 +12,10 @@ package dev.akif.tapik
  * @throws IllegalArgumentException when [propertyName] or a discriminating value in [mapping] is blank.
  */
 class SchemaDiscriminator(
+    /** Name of the wire property used to distinguish alternatives. */
     val propertyName: String,
     mapping: Map<String, ReferenceSchema> = emptyMap(),
+    /** Fallback schema when a wire value has no mapping. */
     val defaultMapping: ReferenceSchema? = null
 ) {
     /** Schema references in declaration order. */
@@ -63,7 +65,9 @@ class SchemaDiscriminator(
  */
 class UnionSchema(
     alternatives: List<Schema>,
+    /** Optional hint for identifying an alternative. */
     val discriminator: SchemaDiscriminator? = null,
+    /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
     /** Schemas accepted by this union in declaration order. */

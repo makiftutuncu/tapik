@@ -17,7 +17,9 @@ val noInput: NoInput = NoInput
  */
 @ConsistentCopyVisibility
 data class BodyInput<out B : Bodies> internal constructor(
+    /** Media representations in declaration order. */
     val bodies: B,
+    /** Human-readable request-body documentation. */
     val documentation: RequestBodyDocumentation = RequestBodyDocumentation()
 ) : Input
 

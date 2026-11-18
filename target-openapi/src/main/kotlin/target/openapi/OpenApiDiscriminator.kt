@@ -7,8 +7,10 @@ package dev.akif.tapik.target.openapi
  * @property defaultMapping schema reference URI used when no explicit or implicit mapping applies.
  */
 class OpenApiDiscriminator(
+    /** Wire property containing the discriminating value. */
     val propertyName: String,
     mapping: Map<String, String> = emptyMap(),
+    /** Schema reference URI used when no explicit or implicit mapping applies. */
     val defaultMapping: String? = null
 ) {
     /** Explicit discriminating values to schema reference URIs in declaration order. */

@@ -13,12 +13,20 @@ package dev.akif.tapik.target.openapi
  * @property explode optional OpenAPI serialization expansion behavior.
  */
 data class OpenApiParameter(
+    /** Parameter name. */
     val name: String,
+    /** Parameter location. */
     val location: OpenApiParameterLocation,
+    /** Optional detailed description. */
     val description: String? = null,
+    /** Whether callers must provide the parameter. */
     val required: Boolean,
+    /** Whether consumers should avoid the parameter. */
     val deprecated: Boolean,
+    /** Parameter value schema. */
     val schema: OpenApiSchema,
+    /** Optional OpenAPI serialization style. */
     val style: String? = null,
+    /** Optional OpenAPI serialization expansion behavior. */
     val explode: Boolean? = null
 )

@@ -16,18 +16,25 @@ import kotlinx.serialization.json.JsonElement
  * @property deprecated whether consumers should avoid the described value.
  */
 class OpenApiSchema(
+    /** Optional JSON Reference URI. */
     val reference: String? = null,
     types: List<String> = emptyList(),
+    /** Optional semantic format hint. */
     val format: String? = null,
     enumValues: List<String> = emptyList(),
+    /** Schema of array elements. */
     val items: OpenApiSchema? = null,
     properties: Map<String, OpenApiSchema> = emptyMap(),
     required: List<String> = emptyList(),
+    /** Schema constraining object property names. */
     val propertyNames: OpenApiSchema? = null,
+    /** Schema of dynamically named object properties. */
     val additionalProperties: OpenApiSchema? = null,
     anyOf: List<OpenApiSchema> = emptyList(),
     oneOf: List<OpenApiSchema> = emptyList(),
+    /** Optional hint for selecting a composed-schema alternative. */
     val discriminator: OpenApiDiscriminator? = null,
+    /** Whether consumers should avoid the described value. */
     val deprecated: Boolean = false,
     defaultValue: JsonElement? = null,
     constantValue: JsonElement? = null

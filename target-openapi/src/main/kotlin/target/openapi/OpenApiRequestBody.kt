@@ -7,7 +7,9 @@ package dev.akif.tapik.target.openapi
  * @property required whether callers must provide a body.
  */
 class OpenApiRequestBody(
+    /** Optional detailed description. */
     val description: String? = null,
+    /** Whether callers must provide a body. */
     val required: Boolean,
     content: Map<String, OpenApiMediaType>
 ) {
