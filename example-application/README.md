@@ -12,8 +12,9 @@ Build and verify both modules from the repository root:
 ./mvnw -pl example-application -am clean verify
 ```
 
-The build writes generated files under `example-application/target/generated/` and
-`example-application/target/generated-sources/`.
+The API module writes OpenAPI under `example-contract/target/generated/tapik/`. The application writes OpenAPI under
+`example-application/target/generated/tapik/`, with generated Spring source and registration resources under
+`example-application/target/generated-sources/tapik-spring/`.
 
 To run the application after the build:
 
