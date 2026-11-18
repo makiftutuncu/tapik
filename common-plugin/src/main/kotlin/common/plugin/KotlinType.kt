@@ -4,7 +4,6 @@ package dev.akif.tapik.common.plugin
  * A Kotlin type retained in compiled API metadata.
  *
  * @property classifier class, type-alias, or type-parameter identity.
- * @property arguments generic type projections in declaration order.
  * @property nullable whether the source type is nullable.
  * @property definitelyNonNull whether the source type is definitely non-null.
  * @property abbreviation source type-alias form when this type was expanded by the compiler.
@@ -20,6 +19,7 @@ class KotlinType(
     val outerType: KotlinType? = null,
     val flexibleUpperBound: KotlinFlexibleTypeUpperBound? = null
 ) {
+    /** Generic type projections in declaration order. */
     val arguments: List<KotlinTypeProjection> = arguments.snapshotList()
 
     /** Returns [classifier] for destructuring. */

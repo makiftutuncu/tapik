@@ -12,14 +12,11 @@ data class ScalarConfigurationValue(
     val value: String
 ) : ConfigurationValue
 
-/**
- * An ordered target configuration list.
- *
- * @property values list elements in declaration order.
- */
+/** An ordered target configuration list. */
 class ListConfigurationValue(
     values: List<ConfigurationValue>
 ) : ConfigurationValue {
+    /** List elements in declaration order. */
     val values: List<ConfigurationValue> = values.snapshotList()
 
     /** Returns [values] for destructuring. */
@@ -37,14 +34,11 @@ class ListConfigurationValue(
     override fun toString(): String = "ListConfigurationValue(values=$values)"
 }
 
-/**
- * A named target configuration object.
- *
- * @property values child values keyed by name in declaration order.
- */
+/** A named target configuration object. */
 class ObjectConfigurationValue(
     values: Map<String, ConfigurationValue>
 ) : ConfigurationValue {
+    /** Child values keyed by name in declaration order. */
     val values: Map<String, ConfigurationValue> = values.snapshotMap()
 
     init {
@@ -69,12 +63,12 @@ class ObjectConfigurationValue(
 /**
  * Host-neutral configuration supplied to one target execution.
  *
- * @property values root configuration values keyed by name.
  * @throws IllegalArgumentException when a configuration name is blank.
  */
 class TargetConfiguration(
     values: Map<String, ConfigurationValue> = emptyMap()
 ) {
+    /** Root configuration values keyed by name. */
     val values: Map<String, ConfigurationValue> = values.snapshotMap()
 
     init {

@@ -8,20 +8,12 @@ import kotlinx.serialization.json.JsonElement
  * Empty properties represent absent keywords rather than empty values in rendered output.
  *
  * @property reference optional JSON Reference URI.
- * @property types JSON Schema types accepted by the value.
  * @property format optional semantic format hint.
- * @property enumValues allowed string values.
  * @property items schema of array elements.
- * @property properties object properties in declaration order.
- * @property required required object property names in declaration order.
  * @property propertyNames schema constraining object property names.
  * @property additionalProperties schema of dynamically named object properties.
- * @property anyOf alternative schemas, at least one of which must match.
- * @property oneOf alternative schemas, exactly one of which must match.
  * @property discriminator optional hint for selecting a composed-schema alternative.
  * @property deprecated whether consumers should avoid the described value.
- * @property defaultValue documented receiver behavior when a value is absent.
- * @property constantValue the only accepted value.
  */
 class OpenApiSchema(
     val reference: String? = null,
@@ -40,20 +32,28 @@ class OpenApiSchema(
     defaultValue: JsonElement? = null,
     constantValue: JsonElement? = null
 ) {
+    /** JSON Schema types accepted by the value. */
     val types: List<String> = types.snapshotList()
 
+    /** Allowed string values. */
     val enumValues: List<String> = enumValues.snapshotList()
 
+    /** Object properties in declaration order. */
     val properties: Map<String, OpenApiSchema> = properties.snapshotMap()
 
+    /** Required object property names in declaration order. */
     val required: List<String> = required.snapshotList()
 
+    /** Alternative schemas, at least one of which must match. */
     val anyOf: List<OpenApiSchema> = anyOf.snapshotList()
 
+    /** Alternative schemas, exactly one of which must match. */
     val oneOf: List<OpenApiSchema> = oneOf.snapshotList()
 
+    /** Documented receiver behavior when a value is absent. */
     val defaultValue: JsonElement? = defaultValue?.snapshotJson()
 
+    /** The only accepted value. */
     val constantValue: JsonElement? = constantValue?.snapshotJson()
 
     /** Returns [reference] for destructuring. */

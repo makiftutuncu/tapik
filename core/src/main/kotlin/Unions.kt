@@ -8,7 +8,6 @@ package dev.akif.tapik
  *
  * @property propertyName name of the wire property used to distinguish alternatives.
  * @param mapping mapping from wire values to schema references.
- * @property mapping schema references in declaration order.
  * @property defaultMapping fallback schema when a wire value has no mapping.
  * @throws IllegalArgumentException when [propertyName] or a discriminating value in [mapping] is blank.
  */
@@ -17,6 +16,7 @@ class SchemaDiscriminator(
     mapping: Map<String, ReferenceSchema> = emptyMap(),
     val defaultMapping: ReferenceSchema? = null
 ) {
+    /** Schema references in declaration order. */
     val mapping: Map<String, ReferenceSchema> = mapping.snapshotMap()
 
     init {
@@ -57,7 +57,6 @@ class SchemaDiscriminator(
 /**
  * A schema matching exactly one of [alternatives], optionally aided by [discriminator].
  *
- * @property alternatives schemas accepted by this union in declaration order.
  * @property discriminator optional hint for identifying an alternative.
  * @property name optional reusable schema name.
  * @throws IllegalArgumentException when fewer than two distinct alternatives are supplied or [name] is blank.
@@ -67,6 +66,7 @@ class UnionSchema(
     val discriminator: SchemaDiscriminator? = null,
     override val name: String? = null
 ) : Schema {
+    /** Schemas accepted by this union in declaration order. */
     val alternatives: List<Schema> = alternatives.snapshotList()
 
     init {

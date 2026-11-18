@@ -5,12 +5,12 @@ package dev.akif.tapik
  *
  * @param apiId optional API identifier used to qualify endpoint property names. The concrete type's simple name is
  * used when omitted.
- * @property apiId resolved API identifier.
  * @throws IllegalArgumentException when [apiId] is blank or the concrete type has no simple name.
  */
 abstract class Api(
     apiId: String? = null
 ) {
+    /** Resolved API identifier. */
     val apiId: String = apiId ?: requireNotNull(this::class.simpleName) { "API type must have a simple name" }
 
     init {

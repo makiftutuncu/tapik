@@ -7,8 +7,6 @@ import dev.akif.tapik.*
  *
  * @property response response sealed-interface name.
  * @property requestBody optional request-body choice sealed-interface name.
- * @property requestBodyVariants request-body variant names in representation order.
- * @property responseVariants response variant names in output order.
  */
 class EndpointTypeNames(
     val response: String,
@@ -16,7 +14,9 @@ class EndpointTypeNames(
     requestBodyVariants: List<String>,
     responseVariants: List<String>
 ) {
+    /** Request-body variant names in representation order. */
     val requestBodyVariants: List<String> = requestBodyVariants.snapshotList()
+    /** Response variant names in output order. */
     val responseVariants: List<String> = responseVariants.snapshotList()
 }
 

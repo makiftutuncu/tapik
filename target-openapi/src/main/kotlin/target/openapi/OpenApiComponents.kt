@@ -3,11 +3,11 @@ package dev.akif.tapik.target.openapi
 /**
  * Reusable OpenAPI components.
  *
- * @property schemas schemas keyed by component name in first-use order.
  */
 class OpenApiComponents(
     schemas: Map<String, OpenApiSchema> = emptyMap()
 ) {
+    /** Schemas keyed by component name in first-use order. */
     val schemas: Map<String, OpenApiSchema> = schemas.snapshotMap()
 
     /** Returns [schemas] for destructuring. */

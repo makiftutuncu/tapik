@@ -55,12 +55,12 @@ private val WINDOWS_ABSOLUTE_PATH: Regex = Regex("^[A-Za-z]:/")
 /**
  * Artifacts returned by one target execution.
  *
- * @property artifacts generated artifacts in deterministic order.
  * @throws IllegalArgumentException when two artifacts have the same relative path.
  */
 class GenerationResult(
     artifacts: List<GeneratedArtifact>
 ) {
+    /** Generated artifacts in deterministic order. */
     val artifacts: List<GeneratedArtifact> = artifacts.snapshotList()
 
     init {

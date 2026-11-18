@@ -7,11 +7,11 @@ import java.util.ServiceLoader
 /**
  * A deterministic collection of APIs from every available [ApiRegistry].
  *
- * @property apis all registered APIs ordered by [Api.apiId].
  */
 class ApiCatalog private constructor(
     apis: List<Api>
 ) {
+    /** All registered APIs ordered by [Api.apiId]. */
     val apis: List<Api> = apis.snapshotList()
 
     /** Creates and discovers API catalogs. */

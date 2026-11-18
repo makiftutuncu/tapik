@@ -4,16 +4,16 @@ package dev.akif.tapik.target.openapi
  * A response with headers and media representations.
  *
  * @property description response description, always supplied by tapik even though OpenAPI 3.2 permits omission.
- * @property headers response headers keyed by name in declaration order.
- * @property content representations keyed by media type in declaration order.
  */
 class OpenApiResponse(
     val description: String,
     headers: Map<String, OpenApiHeader>,
     content: Map<String, OpenApiMediaType>
 ) {
+    /** Response headers keyed by name in declaration order. */
     val headers: Map<String, OpenApiHeader> = headers.snapshotMap()
 
+    /** Representations keyed by media type in declaration order. */
     val content: Map<String, OpenApiMediaType> = content.snapshotMap()
 
     /** Returns [description] for destructuring. */

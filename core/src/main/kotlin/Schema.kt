@@ -69,7 +69,6 @@ data class ArraySchema(
 /**
  * A finite set of string [values].
  *
- * @property values allowed string values in declaration order.
  * @property name optional reusable schema name.
  * @throws IllegalArgumentException when [values] is empty, contains blanks or duplicates, or [name] is blank.
  */
@@ -77,6 +76,7 @@ class EnumSchema(
     values: List<String>,
     override val name: String? = null
 ) : Schema {
+    /** Allowed string values in declaration order. */
     val values: List<String> = values.snapshotList()
 
     init {
@@ -124,7 +124,6 @@ data class SchemaProperty(
 /**
  * An object with named [properties].
  *
- * @property properties object fields in declaration order.
  * @property name optional reusable schema name.
  * @throws IllegalArgumentException when a property name or [name] is blank.
  */
@@ -132,6 +131,7 @@ class ObjectSchema(
     properties: Map<String, SchemaProperty>,
     override val name: String? = null
 ) : Schema {
+    /** Object fields in declaration order. */
     val properties: Map<String, SchemaProperty> = properties.snapshotMap()
 
     init {

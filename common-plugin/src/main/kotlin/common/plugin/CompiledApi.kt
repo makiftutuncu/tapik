@@ -8,12 +8,12 @@ import dev.akif.tapik.Ready
  * A runtime API paired with the compiled types of its endpoints.
  *
  * @property value runtime API value.
- * @property endpoints endpoints in runtime declaration order.
  */
 class CompiledApi(
     val value: Api,
     endpoints: List<CompiledEndpoint>
 ) {
+    /** Endpoints in runtime declaration order. */
     val endpoints: List<CompiledEndpoint> = endpoints.snapshotList()
 
     /** Returns [value] for destructuring. */
@@ -49,13 +49,13 @@ class CompiledApi(
  *
  * @property value runtime endpoint value.
  * @property type exact compiled property type.
- * @property propertyPath delegated property names leading from the selected root API to [value].
  */
 class CompiledEndpoint internal constructor(
     val value: Endpoint<*, *, *, *, *, Ready>,
     val type: KotlinType,
     sourcePropertyPath: List<String>
 ) {
+    /** Delegated property names leading from the selected root API to [value]. */
     val propertyPath: List<String> = sourcePropertyPath.snapshotList().also { path ->
         require(path.isNotEmpty()) { "Compiled endpoint property path must not be empty" }
     }

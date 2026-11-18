@@ -57,6 +57,7 @@ class KotlinxSchemaRegistry private constructor(
     internal fun schema(descriptor: SerialDescriptor): Schema? =
         registry.schema(descriptor.schemaKey, descriptor)
 
+    /** Default Kotlin serialization schema registry. */
     companion object {
         /** Empty registry used by Kotlin serialization format builders unless another registry is supplied. */
         @JvmField

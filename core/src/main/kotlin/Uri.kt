@@ -5,7 +5,6 @@ package dev.akif.tapik
  *
  * @param P path-value tuple type.
  * @param Q query-parameter tuple type.
- * @property segments normalized path segments, whose literal values are already encoded.
  * @property paths path values in declaration order.
  * @property queries query parameters in declaration order.
  */
@@ -14,6 +13,7 @@ class Uri<out P : Paths, out Q : Queries> internal constructor(
     val paths: P,
     val queries: Q
 ) {
+    /** Normalized path segments, whose literal values are already encoded. */
     val segments: List<PathSegment> = segments.snapshotList()
 
     /** Returns [segments] for destructuring. */

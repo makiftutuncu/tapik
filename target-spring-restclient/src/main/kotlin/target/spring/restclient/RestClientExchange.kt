@@ -8,7 +8,6 @@ import java.util.Collections
  * An encoded RestClient request body.
  *
  * @property mediaType content type of [bytes].
- * @property bytes encoded request bytes.
  */
 class RestClientRequestBody(
     val mediaType: MediaType,
@@ -16,6 +15,7 @@ class RestClientRequestBody(
 ) {
     private val byteSnapshot: ByteArray = bytes.copyOf()
 
+    /** Encoded request bytes, returned as a fresh copy on each access. */
     val bytes: ByteArray
         get() = byteSnapshot.copyOf()
 
@@ -46,9 +46,7 @@ class RestClientRequestBody(
  * A raw response received by [RestClientTransport].
  *
  * @property status received HTTP status.
- * @property headers all received header values.
  * @property mediaType received content type, when present.
- * @property body complete response bytes.
  */
 class RestClientResponse(
     val status: Status,
@@ -56,10 +54,12 @@ class RestClientResponse(
     val mediaType: MediaType?,
     body: ByteArray
 ) {
+    /** Received header values, copied into an immutable map. */
     val headers: Map<String, List<String>> = headers.snapshotHeaders()
 
     private val bodySnapshot: ByteArray = body.copyOf()
 
+    /** Complete response bytes, returned as a fresh copy on each access. */
     val body: ByteArray
         get() = bodySnapshot.copyOf()
 

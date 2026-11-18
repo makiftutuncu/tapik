@@ -38,7 +38,6 @@ data class Ready(
  * @property input request input.
  * @property outputs response alternatives.
  * @property documentation human-readable endpoint documentation.
- * @property tags endpoint tags using set semantics.
  * @property state binding state.
  */
 class Endpoint<
@@ -58,6 +57,7 @@ class Endpoint<
     tags: Set<String>,
     val state: S
 ) {
+    /** Endpoint tags using set semantics. */
     val tags: Set<String> = tags.snapshotSet()
 
     /** Returns [method] for destructuring. */

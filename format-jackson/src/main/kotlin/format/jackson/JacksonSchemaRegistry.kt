@@ -55,6 +55,7 @@ class JacksonSchemaRegistry private constructor(
 
     internal fun contains(type: JavaType): Boolean = registry.contains(type.rawClass)
 
+    /** Default Jackson schema registry. */
     companion object {
         /** Empty registry used by Jackson format builders unless another registry is supplied. */
         @JvmField

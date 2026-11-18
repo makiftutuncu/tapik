@@ -5,7 +5,6 @@ package dev.akif.tapik.target.openapi
  *
  * @property specificationVersion OpenAPI specification version used by the document.
  * @property info identifying information about the API document.
- * @property paths operations grouped by URI path template in declaration order.
  * @property components reusable components referenced by operations.
  */
 class OpenApiDocument(
@@ -14,6 +13,7 @@ class OpenApiDocument(
     paths: Map<String, OpenApiPathItem>,
     val components: OpenApiComponents = OpenApiComponents()
 ) {
+    /** Operations grouped by URI path template in declaration order. */
     val paths: Map<String, OpenApiPathItem> = paths.snapshotMap()
 
     /** Returns [specificationVersion] for destructuring. */

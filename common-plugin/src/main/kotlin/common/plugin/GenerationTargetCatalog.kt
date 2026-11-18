@@ -11,11 +11,11 @@ interface GenerationTargetRegistry {
 /**
  * A deterministic collection of targets from every available [GenerationTargetRegistry].
  *
- * @property targets all registered targets ordered by [GenerationTarget.id].
  */
 class GenerationTargetCatalog private constructor(
     targets: List<GenerationTarget>
 ) {
+    /** All registered targets ordered by [GenerationTarget.id]. */
     val targets: List<GenerationTarget> = targets.snapshotList()
 
     /** Creates and discovers target catalogs. */

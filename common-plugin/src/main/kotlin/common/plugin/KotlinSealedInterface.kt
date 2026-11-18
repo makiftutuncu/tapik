@@ -19,12 +19,12 @@ data class KotlinDataField(
  * A variant without [fields] is rendered as a data object; otherwise it is rendered as a data class.
  *
  * @property name generated Kotlin variant name.
- * @property fields constructor fields in declaration order.
  */
 class KotlinSealedVariant(
     val name: String,
     fields: List<KotlinDataField> = emptyList()
 ) {
+    /** Constructor fields in declaration order. */
     val fields: List<KotlinDataField> = fields.snapshotList()
 
     /** Returns [name] for destructuring. */

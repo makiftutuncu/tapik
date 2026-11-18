@@ -5,13 +5,13 @@ import dev.akif.tapik.Api
 /**
  * Input supplied to one [GenerationTarget].
  *
- * @property apis every API selected for this execution.
  * @property configuration target-owned, host-neutral configuration.
  */
 class GenerationRequest(
     apis: List<Api>,
     val configuration: TargetConfiguration = TargetConfiguration()
 ) {
+    /** Every API selected for this execution. */
     val apis: List<Api> = apis.snapshotList()
 
     /** Returns [apis] for destructuring. */

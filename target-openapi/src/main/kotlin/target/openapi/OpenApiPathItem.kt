@@ -5,11 +5,11 @@ import dev.akif.tapik.Method
 /**
  * Operations sharing one URI path template.
  *
- * @property operations operations keyed by HTTP method in declaration order.
  */
 class OpenApiPathItem(
     operations: Map<Method, OpenApiOperation>
 ) {
+    /** Operations keyed by HTTP method in declaration order. */
     val operations: Map<Method, OpenApiOperation> = operations.snapshotMap()
 
     /** Returns [operations] for destructuring. */

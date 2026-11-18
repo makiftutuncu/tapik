@@ -5,13 +5,13 @@ package dev.akif.tapik.target.openapi
  *
  * @property description optional detailed description.
  * @property required whether callers must provide a body.
- * @property content representations keyed by media type in declaration order.
  */
 class OpenApiRequestBody(
     val description: String? = null,
     val required: Boolean,
     content: Map<String, OpenApiMediaType>
 ) {
+    /** Representations keyed by media type in declaration order. */
     val content: Map<String, OpenApiMediaType> = content.snapshotMap()
 
     /** Returns [description] for destructuring. */

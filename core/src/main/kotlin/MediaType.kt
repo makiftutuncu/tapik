@@ -7,7 +7,6 @@ package dev.akif.tapik
  * case-sensitive. Parameter order and equivalent quoting do not affect equality or hashing.
  *
  * @param value complete HTTP media-type syntax, not an `Accept` range.
- * @property value normalized wire syntax, retaining parameter declaration order.
  * @throws IllegalArgumentException when syntax is invalid, parameter names repeat, or type/subtype contains a wildcard.
  */
 class MediaType(
@@ -15,6 +14,7 @@ class MediaType(
 ) {
     private val parsed: ParsedMediaType = parseMediaType(value)
 
+    /** Normalized wire syntax, retaining parameter declaration order. */
     val value: String = parsed.render()
 
     override fun equals(other: Any?): Boolean =

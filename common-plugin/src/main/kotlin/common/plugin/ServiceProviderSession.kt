@@ -22,6 +22,7 @@ class ServiceProviderSession private constructor(
         classLoader.close()
     }
 
+    /** Utilities for opening and using isolated service-provider sessions. */
     companion object {
         /** Runs [block] with [classLoader] as the thread context loader without taking ownership of it. */
         fun <Result> runWith(

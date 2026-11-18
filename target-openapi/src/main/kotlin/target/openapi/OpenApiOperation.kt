@@ -4,12 +4,9 @@ package dev.akif.tapik.target.openapi
  * One OpenAPI operation.
  *
  * @property operationId unique identifier derived from the delegated endpoint property.
- * @property tags endpoint tags.
  * @property summary optional short summary.
  * @property description optional detailed description.
- * @property parameters ordered path, query, and request-header parameters.
  * @property requestBody optional request body.
- * @property responses responses keyed by status matcher representation.
  */
 class OpenApiOperation(
     val operationId: String,
@@ -20,10 +17,13 @@ class OpenApiOperation(
     val requestBody: OpenApiRequestBody?,
     responses: Map<String, OpenApiResponse>
 ) {
+    /** Endpoint tags. */
     val tags: List<String> = tags.snapshotList()
 
+    /** Ordered path, query, and request-header parameters. */
     val parameters: List<OpenApiParameter> = parameters.snapshotList()
 
+    /** Responses keyed by status matcher representation. */
     val responses: Map<String, OpenApiResponse> = responses.snapshotMap()
 
     /** Returns [operationId] for destructuring. */
