@@ -5,6 +5,8 @@
 `dev.akif:tapik-plugin-maven:0.6.0` is tapik's Maven plugin. It activates the Kotlin compiler plugin and runs targets
 through its `generate` goal. Add one Maven execution for each target or configuration.
 
+See xref:reference/artifacts.adoc[Artifacts and the BOM] for the roles of API, target, runtime, and plugin dependencies.
+
 Import `dev.akif:tapik-bom:0.6.0` to align ordinary tapik dependencies. Maven build plugins and dependencies nested
 inside a build plugin still require explicit versions.
 

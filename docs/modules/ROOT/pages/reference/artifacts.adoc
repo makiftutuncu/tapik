@@ -1,0 +1,95 @@
+= Artifacts and the BOM
+:description: Choose tapik artifacts for API definitions, build plugins, and generated application code.
+:page-aliases: reference/artifacts-and-bom.adoc, reference/dependencies.adoc
+
+Most projects use `tapik-core`, a format integration when their API uses one, and a build plugin. Applications that use
+generated Spring code also add the matching Spring target runtime. The build plugin supplies the target for generation;
+the application dependency supplies the runtime classes referenced by generated code.
+
+== Choose artifacts by role
+
+[cols="2,3,3", options="header"]
+|===
+|Artifact |Use it for |Add it to
+
+|`dev.akif:tapik-core`
+|The API DSL, endpoint values, formats, and schemas.
+|The module that declares or consumes tapik APIs.
+
+|`dev.akif:tapik-format-kotlinx`
+|Kotlin serialization JSON formats and schema derivation.
+|An API module that uses Kotlin serialization.
+
+|`dev.akif:tapik-format-jackson`
+|Jackson 3 JSON formats and schema derivation.
+|An API module that uses Jackson.
+
+|`dev.akif:tapik-target-openapi`
+|The OpenAPI generation target.
+|The build host supplies it. Applications that only consume the generated document do not need it at runtime.
+
+|`dev.akif:tapik-target-spring-restclient`
+|The RestClient generation target and runtime support used by generated clients.
+|The build host supplies the target; the application also needs it on its compile and runtime classpaths.
+
+|`dev.akif:tapik-target-spring-webmvc`
+|The WebMVC generation target and runtime support used by generated servers.
+|The build host supplies the target; the application also needs it on its compile and runtime classpaths.
+
+|`dev.akif:tapik-plugin-maven`
+|The Maven `generate` goal and tapik compiler-plugin integration.
+|Maven build-plugin configuration and the Kotlin Maven plugin's compiler-plugin dependencies.
+
+|`dev.akif:tapik-plugin-gradle`
+|The Gradle plugin with ID `dev.akif.tapik.plugin.gradle`.
+|The Gradle `plugins` block. It attaches the compiler plugin and built-in generation targets automatically.
+
+|===
+
+For generation from a compiled API dependency, make the artifact visible to both application compilation and API
+discovery. Maven uses an ordinary project dependency. Gradle declares the API artifact both as an ordinary application
+dependency and on `tapikApiDependency`; see the xref:reference/gradle.adoc[Gradle reference].
+
+== Use the BOM
+
+The `dev.akif:tapik-bom` BOM manages versions for tapik's published production artifacts. Import it in Maven's
+`dependencyManagement` or as a Gradle platform, then omit versions from ordinary tapik dependencies. The runnable
+Maven API module uses:
+
+[source,xml]
+----
+include::example$contract/pom.xml[tag=api-bom]
+----
+
+The BOM does not set versions for build plugins. Give `tapik-plugin-maven` an explicit version in Maven plugin
+configuration, including where it is listed as a Kotlin compiler-plugin dependency. Set the Gradle plugin version in
+the `plugins` block. Keep those versions aligned with the BOM and every resolved `dev.akif:tapik-*` dependency;
+generation fails on version skew.
+
+== Build targets and application runtimes
+
+The Maven plugin includes the built-in targets in its plugin classpath. The Gradle plugin adds them to its internal
+`tapikTarget` configuration. Do not add `tapik-target-openapi` to an application just to generate an OpenAPI file.
+
+Spring targets have two roles. The build host loads their generation provider, while the generated Kotlin code also
+uses runtime classes from the same target artifact. Add the RestClient or WebMVC target artifact to the application
+dependencies when its generated source is compiled or its runtime support is used. The example application shows the
+Maven dependencies for both integrations:
+
+[source,xml]
+----
+include::example$application/pom.xml[tag=restclient-dependencies]
+include::example$application/pom.xml[tag=webmvc-dependencies]
+----
+
+== Integration authoring artifacts
+
+Ordinary API and application projects do not need these lower-level modules:
+
+* `dev.akif:tapik-common-plugin` contains the host-neutral target SPI for custom generation targets.
+* `dev.akif:tapik-common-format` contains shared schema-provider and format-authoring APIs.
+* `dev.akif:tapik-plugin-compiler` is attached by the Maven or Gradle integration; users do not configure it directly.
+
+The xref:generation/index.adoc[generation guide] explains how the build host, target provider, and generated artifacts
+fit together. See the xref:reference/maven.adoc[Maven] or xref:reference/gradle.adoc[Gradle] reference for complete
+configuration.

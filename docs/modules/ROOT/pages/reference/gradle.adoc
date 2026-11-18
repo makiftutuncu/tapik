@@ -5,6 +5,8 @@
 generation target behind one cacheable `tapikGenerate` task. The initial adapter supports Java 25, Kotlin 2.4.10, and
 Gradle 9.1 through 9.8 in Kotlin/JVM projects.
 
+See xref:reference/artifacts.adoc[Artifacts and the BOM] for dependency roles and version alignment.
+
 == Apply the plugin
 
 Declare the Kotlin/JVM and tapik plugins with the same tapik version used by project dependencies:
