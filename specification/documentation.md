@@ -157,6 +157,9 @@ Generation documentation must explain how tapik's shared pipeline is separate fr
 It explains how compiler-generated registries, exact API selection, target discovery, target-owned validation,
 generated artifacts, and host materialization fit together without implying that a target depends on Maven.
 
+The custom-target guide includes a compiling example, explains target configuration and artifact ownership, and shows
+how Maven and Gradle load the same provider through their separate target classpaths.
+
 The compiler registry reference states which `Api` classes and objects are eligible, which endpoint and inclusion
 properties must be public, what compilation produces, and how incremental compilation synchronizes registry entries.
 It also states what registry generation deliberately does not do: execute endpoint expressions, scan packages,

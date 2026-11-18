@@ -39,3 +39,6 @@ ext:
       - dir: test-fixtures/src/test/kotlin/test/fixtures/documentation
         files: '*Examples.kt'
         into: modules/ROOT/examples/dsl
+      - dir: common-plugin/src/test/kotlin/common/plugin
+        files: CustomTargetExamples.kt
+        into: modules/ROOT/examples/generation

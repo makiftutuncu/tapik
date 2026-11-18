@@ -10,6 +10,13 @@ Implement `GenerationTarget` with a stable, non-blank `id`. Its `generate` metho
 the selected API values and a `TargetConfiguration`, and returns a `GenerationResult` containing the output files.
 These types belong to tapik's host-neutral SPI; a target does not need Maven or Gradle APIs.
 
+This small target writes the selected API IDs to one documentation file:
+
+[source,kotlin]
+----
+include::example$generation/CustomTargetExamples.kt[tag=custom-target]
+----
+
 The request configuration preserves scalar values, ordered lists, and nested objects. Define the options your target
 accepts, validate their types and values, and report unknown options clearly. The build host selects APIs and the
 target; it does not interpret target-specific options.
