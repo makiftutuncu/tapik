@@ -189,8 +189,8 @@ Generated mapping methods encode handler responses through the selected output d
 values, including outputs with only one representation. The compatible representation with the highest effective
 quality is selected; a more specific media range wins ties, followed by body declaration order. A media range with
 quality zero excludes the representation when it is the most specific match. Non-quality parameters on an `Accept`
-range must match parameters offered by the representation. Missing or wildcard `Accept` values select the first
-representation, while an invalid header or no compatible representation produces `406 Not Acceptable`.
+range must match parameters offered by the representation. A missing or blank `Accept` value selects the first
+representation. An invalid header or no compatible representation produces `406 Not Acceptable`.
 
 Parameter names (including `q`) compare case-insensitively. Charset values compare case-insensitively; other
 parameter values remain case-sensitive. Double-quoted values and their equivalent tokens compare equally after
