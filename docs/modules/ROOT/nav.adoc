@@ -1,6 +1,7 @@
 * xref:index.adoc[Home]
 * Start here
 ** xref:getting-started.adoc[Quickstart]
+** xref:gradle-quickstart.adoc[Gradle quickstart]
 ** xref:choose-a-goal.adoc[Choose a goal]
 ** xref:runnable-example.adoc[Runnable example]
 ** xref:compatibility.adoc[Versioning and compatibility]

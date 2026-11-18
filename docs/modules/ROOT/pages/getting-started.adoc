@@ -2,7 +2,7 @@
 :description: Generate OpenAPI from endpoints in the current module or from a compiled API dependency.
 
 This guide shows how to generate an OpenAPI document with Maven. For Gradle, see the
-xref:reference/gradle.adoc[Gradle reference] and runnable example.
+xref:gradle-quickstart.adoc[Gradle quickstart].
 
 The examples use the `example-contract` and `example-application` modules in the tapik repository.
 

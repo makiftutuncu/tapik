@@ -127,6 +127,10 @@ modes using the runnable examples as executable source:
   in `generate-sources`, before the consumer's Kotlin compilation, so generated client and server source can be compiled
   as ordinary application source.
 
+The Gradle user journey has a separate short quickstart that runs the shared-source example, shows same-project and
+compiled API dependency modes, and links to the complete Gradle reference. It does not duplicate the full plugin
+configuration catalogue.
+
 The guide must give exact Maven commands, lifecycle expectations, and generated OpenAPI and Kotlin source locations.
 Its Kotlin and Maven fragments must be collected from the tested `example-contract` and `example-application` source
 files rather than maintained as independent copies in the documentation.

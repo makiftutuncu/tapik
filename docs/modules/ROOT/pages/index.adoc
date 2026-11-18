@@ -15,7 +15,8 @@ it receives.
 |===
 |xref:getting-started.adoc[Get a result]
 
-Build the runnable Maven example and generate an OpenAPI document.
+Build the Maven example and generate an OpenAPI document. Or start with the
+xref:gradle-quickstart.adoc[Gradle quickstart].
 
 |xref:endpoints/index.adoc[Learn the DSL]
 

@@ -56,8 +56,9 @@ order, so clients, servers, and documentation can use the same endpoints.
 - Kotlin 2.4
 - Maven 3.9+ or Gradle 9.1–9.8
 
-The [quickstart](https://tapik.akif.dev/docs/getting-started.html) shows the shortest working Maven path. For Gradle,
-follow the [Gradle guide](https://tapik.akif.dev/docs/reference/gradle.html).
+The [Maven quickstart](https://tapik.akif.dev/docs/getting-started.html) and
+[Gradle quickstart](https://tapik.akif.dev/docs/gradle-quickstart.html) show working paths. See the
+[Gradle reference](https://tapik.akif.dev/docs/reference/gradle.html) for complete configuration details.
 
 ## Build tapik for contributions
 

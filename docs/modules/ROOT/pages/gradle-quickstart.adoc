@@ -1,0 +1,80 @@
+= Gradle quickstart
+:description: Run tapik's Gradle example and generate OpenAPI from Kotlin endpoints.
+
+This quickstart uses the repository's Gradle example to generate an OpenAPI document from endpoints defined in
+Kotlin. It uses the same endpoint source as the Maven example. For a new project or the full Gradle configuration,
+continue with the xref:reference/gradle.adoc[Gradle reference].
+
+== Requirements
+
+* Java 25
+* Kotlin 2.4.10
+* Gradle 9.1 through 9.8
+
+== Run the example
+
+From the tapik repository root, run:
+
+[,shell]
+----
+./plugin-gradle/gradlew -p example-gradle clean check
+----
+
+The example has two projects. The API project (`contract`) defines the endpoints and generates OpenAPI after its
+Kotlin classes compile. Its `SAME_PROJECT` mode is shown here:
+
+[source,kotlin]
+----
+include::example$gradle/contract/build.gradle.kts[tag=same-project]
+----
+
+The generated document is written to:
+
+[,text]
+----
+example-contract/build/generated/tapik/documentation/Books.openapi.yml
+----
+
+The `application` project uses the already compiled API. It enables generation early enough for application source to
+use generated client and server types:
+
+[source,kotlin]
+----
+include::example$gradle/application/build.gradle.kts[tag=compiled-api-dependencies]
+----
+
+Its `tapik` configuration selects compiled API dependency mode and declares OpenAPI, Spring RestClient, and Spring
+WebMVC executions:
+
+[source,kotlin]
+----
+include::example$gradle/application/build.gradle.kts[tag=compiled-api-dependency]
+----
+
+Generated files are under `example-application/build/generated/tapik`. The
+xref:reference/gradle.adoc#_generated_output_and_tasks[Gradle reference] lists the output directories and explains
+how each mode connects generated files to the build.
+
+== Configure your project
+
+The Gradle plugin ID is `dev.akif.tapik.plugin.gradle`. Declare its version alongside the Kotlin plugin version in
+plugin management:
+
+[source,kotlin]
+----
+include::example$gradle/settings.gradle.kts[tag=plugin-versions]
+----
+
+Apply the tapik plugin to a Kotlin/JVM project:
+
+[source,kotlin]
+----
+include::example$gradle/dsl/kotlin.gradle.kts[tag=plugin-application]
+----
+
+The plugin attaches tapik's compiler plugin automatically, so eligible public `Api` declarations are recorded during
+compilation. The project then chooses a mode and configures one or more target executions. See the
+xref:reference/gradle.adoc[Gradle reference] for those choices and the
+xref:reference/artifacts.adoc[artifact guide] for dependency roles.
+
+For endpoint definitions, continue to the xref:endpoints/index.adoc[endpoint DSL guide].
