@@ -140,6 +140,9 @@ data class PathVariable<Value : Any>(
  * A required wildcard capturing one or more final URI path segments.
  *
  * Its endpoint value is a non-empty `List<String>` retaining segment boundaries.
+ *
+ * @property name URI-template wildcard name used to capture the remaining path.
+ * @property documentation human-readable path-parameter documentation.
  */
 @ConsistentCopyVisibility
 data class RemainingPath internal constructor(
