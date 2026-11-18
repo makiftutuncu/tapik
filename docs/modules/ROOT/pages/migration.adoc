@@ -11,7 +11,8 @@ If your build uses the earlier Gradle configuration names, rename
 `tapikApiDependencyClasspath`, and `Mode.COMPILED_CONTRACT` to `Mode.COMPILED_API_DEPENDENCY`.
 
 . Move to Java 25 and Kotlin 2.4. Use Maven 3.9+ or a supported Gradle 9.1-9.8 release. Start with the
-  xref:getting-started.adoc[quickstart] or copy the xref:runnable-example.adoc[runnable example]'s layout.
+  xref:getting-started.adoc[Maven quickstart], the xref:gradle-quickstart.adoc[Gradle quickstart], or copy the
+  xref:runnable-example.adoc[runnable example]'s layout.
 . Import `dev.akif:tapik-bom:0.6.0`. Replace old dependencies with the current `tapik-core`, chosen `tapik-format-*`,
   and required `tapik-target-*` artifacts. Build-plugin versions still need to be explicit.
 . With Maven, enable `tapik-plugin-maven` as the Kotlin compiler extension and configure its target executions. With
