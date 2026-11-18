@@ -107,10 +107,12 @@ The narrative documentation is organized around user goals rather than tapik's i
    integrations.
 4. Generate clients: shared generated-client concepts followed by Spring RestClient and future client integrations.
 5. Implement servers: shared generated-server concepts followed by Spring WebMVC and future server integrations.
-6. Reference: generation model, registry, artifacts and BOM, complete Maven configuration, lifecycle phases, target options, generated locations,
+6. Generation: explain the shared pipeline and how to implement a custom host-neutral target and register it with Maven
+   or Gradle.
+7. Reference: generation model, registry, artifacts and BOM, complete Maven configuration, lifecycle phases, target options, generated locations,
    naming, diagnostics, and troubleshooting.
-7. Understand tapik: type-level safety, compile-time boundaries, Kotlin as the source of truth, and target architecture.
-8. Contribute: repository layout, build workflow, documentation workflow, release process, and migration guidance.
+8. Understand tapik: type-level safety, compile-time boundaries, Kotlin as the source of truth, and target architecture.
+9. Contribute: repository layout, build workflow, documentation workflow, release process, and migration guidance.
 
 The 0.5 documentation on `main` is an information-architecture reference only. Pages must be rewritten and verified
 against the 0.6 Maven plugin, compiler-generated registry, DSL, formats, targets, generated code, and runnable examples.

@@ -2,8 +2,12 @@
 :description: Attach OpenAPI-aligned documentation and compose tapik APIs without losing endpoint identity.
 :page-aliases: contracts/documentation-and-composition.adoc
 
-Documentation is stored on the API and endpoint values it describes. It does not add generic fields to `Endpoint`, and
-its immutable modifiers preserve the endpoint's existing type.
+Endpoint documentation is part of the `Endpoint` value, and its immutable modifiers preserve the endpoint's inferred
+structural type. Parameters, the complete request body, and each response alternative also carry their own
+documentation values.
+
+An API has no separate summary or description. Its `apiId` identifies the API and supplies the OpenAPI document title;
+use endpoint summaries and descriptions to document operations. See the xref:documentation/openapi.adoc[OpenAPI guide].
 
 [source,kotlin]
 ----

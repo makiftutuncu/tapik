@@ -39,7 +39,7 @@ exclusions then remove APIs from that selection. Unknown IDs or a selection with
 
 Targets are loaded through Java service providers. Each target checks its options and which endpoint features it
 supports, then returns an ordered list of files. For example, source generators use the endpoint property's Kotlin
-type directly.
+type directly. See xref:generation/custom-targets.adoc[Create a generation target] to add another output provider.
 
 == Targets return artifacts
 

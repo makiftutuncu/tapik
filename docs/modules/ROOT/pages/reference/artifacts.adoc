@@ -86,7 +86,8 @@ include::example$application/pom.xml[tag=webmvc-dependencies]
 
 Ordinary API and application projects do not need these lower-level modules:
 
-* `dev.akif:tapik-common-plugin` contains the host-neutral target SPI for custom generation targets.
+* `dev.akif:tapik-common-plugin` contains the host-neutral target SPI for custom generation targets; see
+  xref:generation/custom-targets.adoc[Create a generation target].
 * `dev.akif:tapik-common-format` contains shared schema-provider and format-authoring APIs.
 * `dev.akif:tapik-plugin-compiler` is attached by the Maven or Gradle integration; users do not configure it directly.
 

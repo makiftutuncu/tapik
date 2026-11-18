@@ -111,7 +111,8 @@ include::example$gradle/dsl/kotlin.gradle.kts[tag=kotlin-configuration]
 ----
 
 Built-in target artifacts are added to `tapikTarget` automatically. A custom target still implements the neutral
-`GenerationTarget` SPI from `tapik-common-plugin`; it does not depend on Gradle APIs.
+`GenerationTarget` SPI from `tapik-common-plugin`; it does not depend on Gradle APIs. See
+xref:generation/custom-targets.adoc[Create a generation target] for its request, artifact, and provider model.
 
 == Groovy DSL
 

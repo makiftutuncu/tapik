@@ -127,7 +127,8 @@ mode does not establish that compiled definitions match current source. For a fr
 Built-in targets ship with `tapik-plugin-maven`. A custom target belongs in the tapik Maven plugin's
 `<dependencies>`, because targets are loaded from the plugin realm. An ordinary project dependency is intentionally not
 executable as a target. Unknown-target diagnostics list the target IDs visible to the plugin and identify a target
-found only on the project classpath as misplaced.
+found only on the project classpath as misplaced. See xref:generation/custom-targets.adoc[Create a generation target]
+for the target SPI and provider registration.
 
 Before loading registries and targets, the plugin verifies that every resolved `dev.akif:tapik-*` project dependency
 uses exactly the plugin's version. Version skew fails early; the BOM is the easiest way to keep project dependencies

@@ -25,8 +25,10 @@
 * Implement servers
 ** xref:servers/index.adoc[Overview]
 ** xref:servers/spring-webmvc.adoc[Spring WebMVC]
-* Reference
+* Generation
 ** xref:generation/index.adoc[Generation model]
+** xref:generation/custom-targets.adoc[Create a generation target]
+* Reference
 ** xref:reference/compiler-registry.adoc[Compiler registry]
 ** xref:reference/artifacts.adoc[Artifacts and BOM]
 ** xref:reference/maven.adoc[Maven reference]

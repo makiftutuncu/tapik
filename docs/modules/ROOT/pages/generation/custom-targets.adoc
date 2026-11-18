@@ -1,0 +1,70 @@
+= Create a generation target
+:description: Implement and register a host-neutral tapik generation target for Maven or Gradle.
+
+A custom target adds another output to tapik without changing endpoint definitions. Implement the public SPI from
+`dev.akif:tapik-common-plugin`, package its provider, then add it to Maven or Gradle's target classpath.
+
+== Implement the target
+
+Implement `GenerationTarget` with a stable, non-blank `id`. Its `generate` method receives a `GenerationRequest` with
+the selected API values and a `TargetConfiguration`, and returns a `GenerationResult` containing the output files.
+These types belong to tapik's host-neutral SPI; a target does not need Maven or Gradle APIs.
+
+The request configuration preserves scalar values, ordered lists, and nested objects. Define the options your target
+accepts, validate their types and values, and report unknown options clearly. The build host selects APIs and the
+target; it does not interpret target-specific options.
+
+Each `GeneratedArtifact` contains a normalized relative path, media type, artifact kind, and complete text content.
+Choose `SOURCE` for source the host should compile, `RESOURCE` for files the application should package, or
+`DOCUMENTATION` for output such as a schema or report. A target returns artifacts; the host writes them below its
+configured output directory. Paths must use forward slashes, cannot be absolute or escape the output directory, and
+must be unique within a result.
+
+If multiple executions intentionally produce the same file, give the artifact a stable, non-blank `sharingKey`. The
+executions must use the same key and should return identical content for that path. The host permits compatible owners
+to replace the file, so the last successful writer supplies its content. Otherwise keep paths exclusive. See
+xref:reference/generation-options.adoc#_artifact_synchronization[artifact synchronization] for ownership behavior.
+
+For the full public signatures, see the link:{page-api-reference-url}[Kotlin API reference] for
+`GenerationTarget`, `GenerationTargetRegistry`, `GenerationRequest`, `TargetConfiguration`, `GenerationResult`, and
+`GeneratedArtifact`.
+
+== Register the provider
+
+Implement a concrete `GenerationTargetRegistry` and return your target from its `targets` property. Give the registry
+a public no-argument constructor. Add a service-provider file to the target artifact at:
+
+[,text]
+----
+META-INF/services/dev.akif.tapik.common.plugin.GenerationTargetRegistry
+----
+
+Put the fully qualified name of your registry implementation in that file. tapik loads registries through Java's
+service-provider mechanism, combines their targets, and rejects blank or duplicate target IDs.
+
+== Add the target to Maven
+
+Add the target artifact as a dependency of `tapik-plugin-maven`. This places the provider and its runtime dependencies
+on the plugin classpath, where Maven loads targets. Configure each execution with the target's stable ID and its
+string-valued options under `targetConfiguration`.
+
+Do not add a custom target only as an ordinary project dependency: Maven uses the plugin classpath for targets and the
+project classpath for compiled API registries. See the xref:reference/maven.adoc[Maven reference] for execution
+configuration.
+
+== Add the target to Gradle
+
+Add the target artifact to `tapikTarget`; tapik resolves it with its runtime dependencies on
+`tapikTargetClasspath`. Register an execution with `target(name, targetId) { ... }` and configure scalar, list, or
+nested object values using the typed builder. The selected APIs still come from `tapikApiDependency` or same-project
+mode, not from `tapikTarget`.
+
+The xref:reference/gradle.adoc[Gradle reference] includes a complete structured configuration example and explains
+each mode.
+
+== Keep the target independent of its host
+
+Targets run through the same SPI in Maven and Gradle. Keep build-tool configuration in the host and keep target options
+and validation in the target. Align the target's `dev.akif:tapik-*` dependencies with the applied tapik plugin version.
+Gradle checks resolved API and target classpaths before loading providers. Maven checks the project's resolved
+dependencies; align tapik dependencies added to the Maven plugin realm explicitly as well.
