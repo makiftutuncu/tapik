@@ -127,8 +127,8 @@ loading, not arbitrary errors or failures from subsequent target execution. Targ
 and the thread context class loader is restored even when registry loading fails.
 
 Before generation, the Maven adapter compares the Maven plugin version with every resolved `dev.akif:tapik-*` project
-dependency. An empty project-side set is tolerated for hosts supplying APIs through the plugin realm, but every
-discovered project tapik version must equal the plugin version. Version skew fails before registry or target loading.
+dependency. An empty project-side set is tolerated; every discovered project tapik version must equal the plugin
+version. Version skew fails before registry or target loading.
 
 Generated registries travel with compiled API artifacts. A consuming Maven project discovers registries from
 its own output and its compile classpath, combines every API deterministically, and applies the configured target to
