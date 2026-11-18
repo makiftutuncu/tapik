@@ -13,10 +13,13 @@ import java.nio.file.Path
 /** Registers tapik's JVM API-registry generation with the Kotlin compiler. */
 @OptIn(ExperimentalCompilerApi::class)
 class TapikCompilerPluginRegistrar : CompilerPluginRegistrar() {
+    /** Compiler plug-in ID used by Kotlin builds to activate tapik. */
     override val pluginId: String = "dev.akif.tapik"
 
+    /** Whether this registrar supports Kotlin's K2 compiler. */
     override val supportsK2: Boolean = true
 
+    /** Registers API-registry generation for this compilation. */
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messages = configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
         val outputDirectory = configuration[JVMConfigurationKeys.OUTPUT_DIRECTORY] ?: return

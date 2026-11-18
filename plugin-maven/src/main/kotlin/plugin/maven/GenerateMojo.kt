@@ -51,6 +51,7 @@ class GenerateMojo : AbstractMojo() {
     @field:Parameter
     private var targetConfiguration: Map<String, String> = emptyMap()
 
+    /** Generates and materializes the artifacts for the configured target execution. */
     override fun execute() {
         try {
             val mode = MavenGenerationMode.from(mojoExecution)
