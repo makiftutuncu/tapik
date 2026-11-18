@@ -41,7 +41,7 @@ Targets are developed in this order:
 2. Spring RestClient clients
 3. Spring Web MVC servers
 
-Kotlin serialization is the default format integration. Jackson follows for the Spring ecosystem.
+Format integrations are opt-in. tapik supports Kotlin serialization and Jackson 3, and a project may use either or both.
 
 The OpenAPI target reads selected, compiled `Api` values. It runs after API compilation, reads their immutable endpoint
 values without reflective discovery, returns generated artifacts without writing them, and fails generation when a

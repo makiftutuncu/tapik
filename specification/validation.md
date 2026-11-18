@@ -30,5 +30,5 @@ deterministic; a predicate that throws produces a contextual construction failur
 - A serialization shape cannot be represented faithfully
 - A target cannot map an otherwise valid tapik feature
 
-A target requests schemas only when it needs them. An unavailable schema does not invalidate an endpoint for a target
-that does not consume schemas.
+A target validates schema features only when it needs schema information. A schema form that one target cannot
+represent does not invalidate the endpoint for a target that ignores schemas.
