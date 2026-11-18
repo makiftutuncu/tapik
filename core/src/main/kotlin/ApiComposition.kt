@@ -7,6 +7,8 @@ import kotlin.reflect.KProperty
  *
  * The delegated property evaluates to [api] with its concrete type. [propertyName] becomes available when this value
  * is bound by Kotlin's property-delegation protocol.
+ *
+ * @property api API included in the containing API.
  */
 class ApiInclusion<out Included : Api> internal constructor(
     val api: Included
