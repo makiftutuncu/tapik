@@ -31,7 +31,7 @@ The target produces one `DOCUMENTATION` artifact per selected API.
 
 |`componentNaming`
 |`simple`
-|`simple` uses an unqualified schema name; `qualified` derives the component name from its qualified schema name.
+|`simple` keeps the last dot-separated part of each schema name; `qualified` keeps the schema name unchanged.
 
 |`output`
 |`\{api}.openapi.yml` for YAML; `\{api}.openapi.json` for JSON
