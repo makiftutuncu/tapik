@@ -39,7 +39,7 @@ Targets are developed in this order:
 
 1. OpenAPI 3.2.0 output, with later specification upgrades handled as explicit product changes
 2. Spring RestClient clients
-3. Spring Web MVC servers
+3. Spring WebMVC servers
 
 Format integrations are opt-in. tapik supports Kotlin serialization and Jackson 3, and a project may use either or both.
 

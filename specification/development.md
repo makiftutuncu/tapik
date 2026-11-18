@@ -198,8 +198,8 @@ encoded.
 
 `core` exposes the API registry provider interface used by compiler-generated code. The `common-plugin` module defines
 host-neutral registry loading, target configuration, target execution, and generated artifact types.
-Target modules and adapters for Maven, Gradle, or command-line use depend on `common-plugin`; it must not depend on any
-build-tool API.
+Target modules and Maven or Gradle adapters depend on `common-plugin`; a future command-line adapter would depend on it
+as well. The module must not depend on any build-tool API.
 
 Shared Spring integration code lives in `common-spring` under `dev.akif.tapik.common.spring`. The
 `target-spring-restclient` and `target-spring-webmvc` packages are respectively

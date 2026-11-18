@@ -72,7 +72,7 @@ orders APIs canonically by ID across all artifacts and rejects duplicate API IDs
 declaration order within each API.
 
 Registry providers are generated during Kotlin compilation and exposed through a shared runtime discovery mechanism.
-Maven, Gradle, and command-line adapters consume the same providers.
+Maven and Gradle adapters consume these providers; a future command-line adapter can use the same providers.
 
 For Kotlin/JVM, `plugin-compiler` inspects resolved compiler IR and selects every concrete public named class or object
 whose type extends `Api`. Objects are referenced directly. API classes may be top-level or statically nested, must not
