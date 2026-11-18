@@ -13,6 +13,8 @@
 ** xref:endpoints/requests.adoc[Request inputs]
 ** xref:endpoints/responses.adoc[Response outputs]
 ** xref:endpoints/formats-and-schemas.adoc[Formats and schemas]
+*** xref:endpoints/formats/kotlin-serialization.adoc[Kotlin serialization]
+*** xref:endpoints/formats/jackson.adoc[Jackson]
 ** xref:endpoints/documentation-and-composition.adoc[Documentation and composition]
 * Generate documentation
 ** xref:documentation/index.adoc[Overview]

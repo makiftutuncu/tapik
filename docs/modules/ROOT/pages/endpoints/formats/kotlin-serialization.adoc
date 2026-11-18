@@ -1,0 +1,51 @@
+= Kotlin serialization
+:description: Configure tapik JSON formats and schema derivation for Kotlin serialization.
+
+The `dev.akif:tapik-format-kotlinx` artifact provides JSON formats backed by Kotlin serialization. Use
+`jsonBody<Value>()` from `dev.akif.tapik.format.kotlinx` for request and response bodies. Pass the configured
+`kotlinx.serialization.json.Json` instance as `format` when you need custom serializer settings.
+
+== Schema derivation
+
+tapik derives neutral schemas from serializer descriptors. The same built-in scalar catalog handles primitive values
+and standard Java time values wherever they appear. For example, `LocalDate` derives a `string` schema with `date`
+format, while `Instant`, `OffsetDateTime`, and `ZonedDateTime` use `date-time`, including in nullable properties,
+collections, and maps.
+
+Schema derivation does not create a codec. For Java time values, provide an actual serializer whose descriptor
+identifies the Java type.
+
+== Register schemas for custom types
+
+`KotlinxSchemaRegistry` matches serializer descriptor names and passes `SerialDescriptor` values to schema providers.
+Registrations apply recursively to matching root values, object properties, nullable values, collection elements, and
+map keys or values. Use `withSchemaProvider` when a schema depends on the resolved descriptor.
+
+[source,kotlin]
+----
+include::example$dsl/KotlinxFormatExamples.kt[tag=kotlinx-schema-registry]
+----
+
+Reuse one registry instance to reuse inferred formats. Format caches include registry identity, so formats derived
+with different registries remain separate.
+
+== Polymorphic values
+
+tapik derives a `UnionSchema` for sealed types and open polymorphic types with a finite list of registered subtypes.
+Each subtype must serialize as an object. tapik adds the configured discriminator as a required enum property to each
+subtype schema and records the discriminator mapping on the union. `@JsonClassDiscriminator` sets the discriminator
+for a sealed type; otherwise tapik uses `Json.classDiscriminator`.
+
+The JSON format must use object polymorphism with `ClassDiscriminatorMode.POLYMORPHIC`. Array polymorphism, another
+discriminator mode, a naming strategy on a polymorphic type, or a default provider for open polymorphism cannot be
+represented and causes schema derivation to fail. A subtype also cannot declare its own property with the discriminator
+name.
+
+== Supply a schema directly
+
+Pass `schema` to `jsonFormat` or `jsonBody` when an integration cannot derive the wire schema. The supplied schema
+describes the entire root value, including nested custom behavior. It bypasses derivation and the registry but does not
+configure or validate the codec. You are responsible for matching the schema to the serializer and deserializer.
+Formats with an explicit schema are not stored in inferred-format caches.
+
+See xref:endpoints/formats-and-schemas.adoc[Formats and schemas] for shared format behavior and neutral schema types.

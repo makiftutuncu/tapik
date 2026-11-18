@@ -21,7 +21,9 @@ headers, request body, response alternatives, and API property binding.
 * xref:endpoints/uris.adoc[URIs and parameters] — paths, query parameters, presence, repetition, and wildcard paths
 * xref:endpoints/requests.adoc[Request inputs] — headers, bodies, media alternatives, and optional bodies
 * xref:endpoints/responses.adoc[Response outputs] — statuses, bodies, headers, alternatives, and matching
-* xref:endpoints/formats-and-schemas.adoc[Formats and schemas] — codecs, wire representations, derivation, and names
+* xref:endpoints/formats-and-schemas.adoc[Formats and schemas] — codecs, wire representations, derivation, and names;
+  focused guides cover xref:endpoints/formats/kotlin-serialization.adoc[Kotlin serialization] and
+  xref:endpoints/formats/jackson.adoc[Jackson]
 * xref:endpoints/documentation-and-composition.adoc[Documentation and composition] — descriptions, tags, and nested APIs
 
 The examples in these pages compile and run as part of `./mvnw verify`.

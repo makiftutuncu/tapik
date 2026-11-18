@@ -1,0 +1,51 @@
+= Jackson
+:description: Configure tapik JSON formats and schema derivation for Jackson 3.
+
+The `dev.akif:tapik-format-jackson` artifact provides JSON formats backed by Jackson 3. Use `jsonBody<Value>()` from
+`dev.akif.tapik.format.jackson` for request and response bodies. Pass the configured Jackson `ObjectMapper` as
+`format` when you need custom mapper settings.
+
+== Schema derivation
+
+tapik derives neutral schemas from ordinary Kotlin structures using its recognized standard serializers. It preserves
+the mapper's property names, visibility, ignored properties, and ordering. It supports ordinary value-class unboxing
+and checks enum schemas against each constant's encoded string.
+
+The same built-in scalar catalog handles primitive values and standard Java time values wherever they appear. For
+example, `LocalDate` derives a `string` schema with `date` format, while `Instant`, `OffsetDateTime`, and
+`ZonedDateTime` use `date-time`, including in nullable properties, collections, and maps. Jackson supplies codecs for
+these types directly.
+
+Jackson schema derivation does not currently handle sealed Kotlin classes as polymorphic unions. Register a schema for
+the sealed type in `JacksonSchemaRegistry` or pass an explicit root schema when building its format.
+
+Custom serializers and converters can change the wire structure. tapik reports `SchemaDerivationException` for
+unsupported class, property, or module serializers, including overrides supplied by mix-ins. Ordinary `@JsonValue`
+wrappers also need an explicit schema. The error identifies the type or property; tapik does not execute sample objects
+to guess their shape.
+
+== Register schemas for custom types
+
+`JacksonSchemaRegistry` matches Kotlin or Java classes and passes Jackson `JavaType` values to providers. Registrations
+apply recursively to matching root values, object properties, nullable values, collection elements, and map keys or
+values. Use `withSchemaProvider` when a schema depends on the resolved `JavaType`.
+
+[source,kotlin]
+----
+include::example$dsl/JacksonFormatExamples.kt[tag=jackson-schema-registry]
+----
+
+Reuse one registry instance to reuse inferred formats. An entry is trusted for its matching value and bypasses
+serializer-shape validation there; unregistered values are checked normally.
+
+== Supply a schema directly
+
+For a `BookId` encoded as a JSON string, supply `ScalarSchema(SchemaType.STRING, name = "BookId")` as the root
+schema.
+
+Pass `schema` to `jsonFormat` or `jsonBody` to describe the entire root value, including nested custom behavior. The
+explicit schema bypasses derivation and the registry but does not configure or validate the codec. You are responsible
+for matching it to the serializer and deserializer. Formats with an explicit schema are not stored in inferred-format
+caches.
+
+See xref:endpoints/formats-and-schemas.adoc[Formats and schemas] for shared format behavior and neutral schema types.

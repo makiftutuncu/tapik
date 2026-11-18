@@ -5,6 +5,11 @@
 A `Format<Value, Representation>` combines a codec with a schema. The codec handles values on the wire; the schema
 describes the same value to targets that need structural information.
 
+== Formats for endpoint values
+
+Path variables, query parameters, and headers use `StringFormat<Value>`, an alias for `Format<Value, String>`. Bodies
+use `ByteArrayFormat<Value>` and carry their media type separately.
+
 == Transform a built-in format
 
 The default string formats cover booleans, numeric types, strings, UUIDs, and standard date and time types. The `format`
@@ -32,78 +37,11 @@ the allowed names. Convenience factories are also available as `path.enumValue<B
 `query.enumValue<BookState>("state")`, and `header.enumValue<BookState>("X-Book-State")`. Each retains `BookState` in
 the inferred endpoint type. Use `.named("BookState")` when the enum should become a reusable schema component.
 
-== Parameter and body formats
-
-Path variables, query parameters, and headers use `StringFormat<Value>`, an alias for `Format<Value, String>`. Bodies
-use `ByteArrayFormat<Value>` and carry their media type separately.
-
-Body integrations are opt-in:
-
-* `dev.akif:tapik-format-kotlinx` provides Kotlin serialization JSON codecs and schema derivation.
-* `dev.akif:tapik-format-jackson` provides Jackson 3 JSON codecs and schema derivation.
-
-Both expose `jsonBody<Value>()` from their integration package. Pass the integration's configured `Json` or
-`ObjectMapper` to its `format` parameter, and override `mediaType` for vendor JSON while retaining the same format
-behavior.
-
-Both integrations resolve primitives and standard Java time values through the same built-in scalar catalog wherever
-they occur. For example, `LocalDate` derives a
-`string` schema with `date` format, while `Instant`, `OffsetDateTime`, and `ZonedDateTime` use `date-time`. This also
-works through nullable properties, collections, and maps. Jackson supplies these codecs directly. Kotlin serialization
-requires an actual serializer whose descriptor identifies the Java type; tapik derives its schema but does not invent
-a codec.
-
-=== Recursive schema registries
-
-Each integration exposes an immutable schema registry for custom types. Their public shape is parallel while retaining
-the integration's useful type information:
-
-* `JacksonSchemaRegistry` matches Kotlin or Java classes and passes `JavaType` values to providers.
-* `KotlinxSchemaRegistry` matches serializer descriptor names and passes `SerialDescriptor` values to providers.
-
-[source,kotlin]
-----
-include::example$dsl/KotlinxFormatExamples.kt[tag=kotlinx-schema-registry]
-----
-
-The Jackson form uses the same names and can also register a Java `Class` directly:
-
-[source,kotlin]
-----
-include::example$dsl/JacksonFormatExamples.kt[tag=jackson-schema-registry]
-----
-
-Registrations apply recursively to matching root values, object properties, nullable values, collection elements, and
-map keys or values. `withSchemaProvider` handles schemas that depend on the resolved integration type. Reuse the same
-registry instance to reuse inferred formats. Format caches include registry identity, so different registries cannot
-leak schemas into one another.
-
-=== Custom Jackson serialization
-
-Jackson schema derivation supports ordinary Kotlin structures using the integration's recognized standard
-serializers. It preserves the mapper's property names, visibility, ignored properties, and ordering. Ordinary
-value-class unboxing is supported, and enum schemas are checked against every constant's encoded string.
-
-Custom serializers and converters can change that structure. tapik fails format construction with
-`SchemaDerivationException` for unsupported class, property, or module serializers, including overrides supplied by
-mix-ins. Ordinary `@JsonValue` wrappers also require an explicit schema for now. The error identifies the type or
-property; tapik does not execute sample user objects to guess their shape.
-
-An entry in `JacksonSchemaRegistry` is trusted for its matching value and bypasses serializer-shape validation there;
-all unregistered values are still validated normally.
-
-Supply a schema describing the actual wire value to bypass derivation. For a `BookId` serialized as a JSON string,
-use `ScalarSchema` and `SchemaType` from `dev.akif.tapik`, with `jsonBody` from `dev.akif.tapik.format.jackson`:
-
-[source,kotlin]
-----
-val idBody = jsonBody<BookId>(format = mapper, schema = ScalarSchema(SchemaType.STRING, name = "BookId"))
-----
-
-Both integrations support the same `schema` parameter on `jsonFormat` and `jsonBody`. The schema describes the entire
-root value, including nested custom behavior, and bypasses derivation and the registry. It does not configure or
-validate the codec. You own its accuracy and any matching serializer or deserializer. Explicit-schema formats are kept
-out of inferred-format caches.
+Body formats are opt-in. tapik provides JSON integrations for Kotlin serialization and Jackson 3. Each exposes
+`jsonBody<Value>()`; pass its configured JSON instance as `format` and set `mediaType` when the body uses a vendor media
+type. Their schema rules and customization options are described in the
+xref:endpoints/formats/kotlin-serialization.adoc[Kotlin serialization guide] and
+xref:endpoints/formats/jackson.adoc[Jackson guide].
 
 == Neutral schemas
 
