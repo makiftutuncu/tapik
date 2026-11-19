@@ -31,6 +31,28 @@ schema. `.named("BookId")` gives schema-aware targets a stable reusable componen
 Every format also has `.repeated()`, which produces a list format, preserves element order, and accumulates decoding
 errors. Repeated query parameters use this operation internally.
 
+== Define a custom codec
+
+When a built-in format or `transform` is not enough, create a `Format` from a `Codec` and a schema. The codec decodes
+the wire representation into a Kotlin value and encodes it back; the schema describes that wire value to documentation
+targets. For a body, use a byte-array format and choose a media type that matches the bytes:
+
+[source,kotlin]
+----
+include::example$dsl/CustomFormatExamples.kt[tag=custom-byte-format]
+----
+
+Attach the format to a body as usual:
+
+[source,kotlin]
+----
+include::example$dsl/CustomFormatExamples.kt[tag=custom-byte-body]
+----
+
+Return `DecodeResult.Failure` for invalid input so callers receive a structured decode error. Keep the schema aligned
+with the encoded representation; tapik does not infer or verify a custom codec's wire shape. See the
+link:{page-api-reference-url}tapik/dev.akif.tapik/-format/index.html[`Format` API reference] for the full API.
+
 For a Kotlin enum, use `format.enumValue<BookState>()`. The resulting format writes and reads exact constant names and
 publishes the same ordered names through `EnumSchema`; an unknown value becomes a structured decode failure listing
 the allowed names. Convenience factories are also available as `path.enumValue<BookState>("state")`,

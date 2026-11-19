@@ -148,7 +148,8 @@ before exposing the underlying generic types, while still explaining which struc
 and which invalid states Kotlin prevents.
 
 The shared formats page explains codecs, wire representations, and neutral schemas. Detailed schema derivation and
-customization behavior belongs on separate pages for each supported serialization integration.
+customization behavior belongs on separate pages for each supported serialization integration. It also shows how to
+define a custom codec and attach it to a body when the built-in formats do not fit.
 
 Examples must compile in the normal Maven reactor. Pages should collect complete or tagged fragments from the shared
 library fixture and its documentation-specific test sources so endpoint syntax, inferred types, ordering, defaults,
