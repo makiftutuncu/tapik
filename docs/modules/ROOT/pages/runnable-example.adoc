@@ -4,7 +4,7 @@
 The example defines library endpoints in one project and uses them from a separate application project. The Maven and
 Gradle builds use the same Kotlin source:
 
-`example-contract`:: Defines author, book, and catalog endpoints. It also generates OpenAPI in the same project.
+`example-contract` (API module):: Defines author, book, and catalog endpoints. It also generates OpenAPI in the same project.
 `example-application`:: Uses those endpoints to generate OpenAPI, clients, and server interfaces. Its handlers implement
 the generated interfaces, and its tests call a generated client.
 
@@ -22,8 +22,8 @@ Build the Gradle example with:
 ./plugin-gradle/gradlew -p example-gradle clean check
 ----
 
-The Gradle build maps its `contract` and `application` projects to the Maven example's Kotlin sources. It exercises
-both same-project generation and generation from a compiled API dependency. See the
+The Gradle example has an API project named `contract` and an `application` project. They reuse the Maven example's
+Kotlin sources and demonstrate same-project generation and generation from a compiled API dependency. See the
 xref:gradle-quickstart.adoc[Gradle quickstart] for the generated OpenAPI location and a walkthrough of both modes.
 
 Start with the xref:getting-started.adoc[quickstart], then use the

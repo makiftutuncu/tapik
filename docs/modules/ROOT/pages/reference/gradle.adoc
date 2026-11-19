@@ -160,9 +160,9 @@ changing their ordinary Gradle publication or packaging semantics.
 
 == Runnable example
 
-The repository's `example-gradle` build maps the `contract` and `application` projects onto the same Kotlin sources used
-by the Maven example. It therefore compares hosts without copying endpoint definitions or constructing metadata. Once the
-release artifacts and plugin marker are available, run:
+The repository's `example-gradle` build has an API project named `contract` and an application project. They reuse the
+same Kotlin sources as the Maven example, so the hosts are compared without copying endpoint definitions or constructing
+metadata. Once the release artifacts and plugin marker are available, run:
 
 [,shell]
 ----

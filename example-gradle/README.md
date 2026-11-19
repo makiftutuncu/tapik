@@ -1,8 +1,8 @@
 # tapik Gradle example
 
-This build reuses the API and application sources from the Maven example. The `contract` project defines endpoints and
-generates OpenAPI; the `application` project uses the compiled API to generate documentation, a Spring client, and a
-Spring server.
+This build reuses the API and application sources from the Maven example. Its API project is named `contract`; it
+defines endpoints and generates OpenAPI. The `application` project uses the compiled API to generate documentation, a
+Spring client, and a Spring server.
 
 From the tapik repository root, run:
 

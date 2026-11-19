@@ -2,7 +2,7 @@
 
 The example has two modules:
 
-- `example-contract` defines the library APIs and generates OpenAPI documentation.
+- `example-contract` is the API module. It defines library endpoints and generates OpenAPI documentation.
 - `example-application` uses the compiled APIs to generate OpenAPI, a Spring client, and a Spring server. It includes an
   implementation of the generated server.
 

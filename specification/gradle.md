@@ -487,11 +487,12 @@ executions. From its 0.6 baseline, this public Gradle DSL follows tapik's docume
 
 ## Examples and documentation
 
-The repository contains one runnable Gradle multi-project build with `contract` and `application` projects. It reuses
-the same ordinary Kotlin API and application sources as the Maven example: it does not translate endpoints into
-another model or maintain Gradle-specific endpoint definitions. The `contract` project demonstrates same-project OpenAPI
-generation; the application consumes that project through both its ordinary dependency and `tapikApiDependency`, then
-generates OpenAPI, Spring RestClient, and Spring WebMVC artifacts in compiled API dependency mode.
+The repository contains one runnable Gradle multi-project build with an API project named `contract` and an application
+project. It reuses the same ordinary Kotlin API and application sources as the Maven example: it does not translate
+endpoints into another model or maintain Gradle-specific endpoint definitions. The API project demonstrates same-project
+OpenAPI generation; the application consumes that project through both its ordinary dependency and
+`tapikApiDependency`, then generates OpenAPI, Spring RestClient, and Spring WebMVC artifacts in compiled API dependency
+mode.
 
 Public Gradle documentation takes Kotlin and Groovy DSL fragments from files exercised by the Gradle test suite or the
 runnable example. It documents automatic compiler-plugin activation, explicit modes, dependency configurations,
