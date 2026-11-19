@@ -70,6 +70,11 @@ The generic forms are `path("bookId", bookIdFormat)` and `query("authorId", auth
 use extra tuple positions. Query names remain unique within a URI even though a repeated parameter may occur multiple
 times on the wire.
 
+These presence choices also shape generated methods. An optional query becomes a nullable parameter with `null` as
+its default. A defaulted query stays non-null and uses the configured value when omitted. For repeated queries, the
+parameter is a list; making it optional makes the list parameter nullable. OpenAPI marks required queries as required
+and includes configured default values.
+
 Paths and queries preserve declaration order. Once a query has been appended, Kotlin no longer offers `/` overloads
 for adding path literals or variables; the invalid HTTP ordering does not compile.
 

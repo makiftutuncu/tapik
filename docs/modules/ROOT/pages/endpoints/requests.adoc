@@ -26,6 +26,11 @@ The generic `header("X-Request-Id", requestIdFormat)` constructor accepts option
 arguments. The resulting documentation is preserved by optional, defaulted, and fixed presence modifiers and is used
 for request parameters and response headers in generated OpenAPI.
 
+Header presence also shapes generated code. Required headers are method parameters, optional headers are nullable
+parameters that default to `null`, and defaulted headers use their configured value when omitted. A fixed header is
+not a caller or handler parameter: the generated client sends its configured value, and the generated server checks
+that incoming requests match it.
+
 Common fields are available directly from `Header`, for example `Header.Authorization`, `Header.Accept`,
 `Header.ContentType`, and `Header.UserAgent`. They are required by default and support the same modifiers, so an
 optional credential field is `Header.Authorization.optional()`. `Header.ContentLength` has type `Long`; other
@@ -63,6 +68,9 @@ Wildcards are not catalogued because a body has one concrete representation rath
 `bodiesOf(...)` groups alternative media representations of one logical Kotlin type. Their media types must be
 distinct. Adding `noBody` as the final alternative makes the complete request body optional; an endpoint with only
 `noInput` has no request-body definition at all.
+
+When `noBody` follows one or more body representations, generated client and handler methods take a nullable body
+value. With multiple representations, the client also selects which media type to send.
 
 The body group is non-empty and preserves representation order. `noBody` may appear at most once and only last. The
 request-body description belongs to the group as a whole, matching OpenAPI's model; set it in `.input(...,

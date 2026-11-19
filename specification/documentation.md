@@ -144,8 +144,8 @@ files rather than maintained as independent copies in the documentation.
 
 The endpoint guide is divided into focused pages for API and endpoint identity, URI parameters, request inputs,
 response outputs, formats and schemas, and documentation and composition. It teaches the public construction grammar
-before exposing the underlying generic types, while still explaining which structural information those types retain
-and which invalid states Kotlin prevents.
+before exposing the underlying generic types, while still explaining which structural information those types retain,
+which invalid states Kotlin prevents, and how presence choices affect generated method parameters and OpenAPI.
 
 The shared formats page explains codecs, wire representations, and neutral schemas. Detailed schema derivation and
 customization behavior belongs on separate pages for each supported serialization integration. It also shows how to
