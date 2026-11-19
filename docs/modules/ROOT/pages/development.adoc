@@ -1,7 +1,7 @@
 = Development guide
 :description: Build, test, and document tapik itself.
 
-tapik is built with Java 25, Kotlin 2.4, Maven, Gradle, and Kotest. The documentation toolchain additionally requires
+tapik is built with Java 25, Kotlin 2.4.10, Maven, Gradle, and Kotest. The documentation toolchain additionally requires
 Node.js 20 or newer. Use the Maven Wrapper for the Maven reactor:
 
 [source,shell]

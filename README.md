@@ -53,7 +53,7 @@ order, so clients, servers, and documentation can use the same endpoints.
 ## Requirements
 
 - Java 25
-- Kotlin 2.4
+- Kotlin 2.4.10
 - Maven 3.9+ or Gradle 9.1–9.8
 
 The [Maven quickstart](https://tapik.akif.dev/docs/getting-started.html) and
