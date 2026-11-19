@@ -14,7 +14,7 @@ During tapik development, prepare the isolated repository described in the
 [development guide](../docs/modules/ROOT/pages/development.adoc), then pass its path as `-PtapikRepository` and the
 matching version as `-PtapikVersion`.
 
-For a short walkthrough, see the [Gradle quickstart](../docs/modules/ROOT/pages/gradle-quickstart.adoc). For complete
-configuration, see the [Gradle reference](../docs/modules/ROOT/pages/reference/gradle.adoc),
-[generation model](../docs/modules/ROOT/pages/generation/index.adoc), and
+For a short walkthrough, see the [Gradle quickstart](https://tapik.akif.dev/docs/gradle-quickstart.html). For complete
+configuration, see the [Gradle reference](https://tapik.akif.dev/docs/reference/gradle.html) and
+[generation model](https://tapik.akif.dev/docs/generation/index.html). For repository development, see the local
 [development guide](../docs/modules/ROOT/pages/development.adoc).

@@ -28,7 +28,7 @@ Then request the books endpoint:
 curl http://localhost:8080/books
 ```
 
-For the shared guides, see the [Maven quickstart](../docs/modules/ROOT/pages/getting-started.adoc),
-[Maven reference](../docs/modules/ROOT/pages/reference/maven.adoc),
-[Spring RestClient guide](../docs/modules/ROOT/pages/clients/spring-restclient.adoc), and
-[Spring WebMVC guide](../docs/modules/ROOT/pages/servers/spring-webmvc.adoc).
+For the shared guides, see the [Maven quickstart](https://tapik.akif.dev/docs/getting-started.html),
+[Maven reference](https://tapik.akif.dev/docs/reference/maven.html),
+[Spring RestClient guide](https://tapik.akif.dev/docs/clients/spring-restclient.html), and
+[Spring WebMVC guide](https://tapik.akif.dev/docs/servers/spring-webmvc.html).
