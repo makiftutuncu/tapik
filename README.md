@@ -66,6 +66,12 @@ The [Maven quickstart](https://tapik.akif.dev/docs/getting-started.html) and
 ./mvnw verify
 ```
 
+The standalone Gradle plugin has its own verification command:
+
+```shell
+./scripts/verify-gradle.sh
+```
+
 The repository contains the [behavioral specifications](specification/README.md),
 [source-backed documentation](docs/modules/ROOT/pages/index.adoc), and runnable examples. Start with the
 [development guide](https://tapik.akif.dev/docs/development.html) before changing public behavior.

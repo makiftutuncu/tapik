@@ -94,9 +94,11 @@ artifacts. A documentation-only Gradle build is not part of the architecture.
 ## Information architecture
 
 The repository root `README.md` is the project's entry point, not a second user manual. It states tapik's purpose and
-command. It may show a short endpoint example, but build-tool setup, lifecycle details, and DSL explanations belong in
-the website guides and references. Example-module READMEs explain how to run their example and link to the published
-shared guides; repository development instructions may link to local source documentation.
+supported integrations, links to the website, Kotlin API reference, and runnable examples, and gives the Maven reactor
+and standalone Gradle verification commands. It may show a short endpoint example, but build-tool setup, lifecycle
+details, and DSL explanations belong in the website guides and references. Example-module READMEs explain how to run
+their example and link to the published shared guides; repository development instructions may link to local source
+documentation.
 
 The narrative documentation is organized around user goals rather than tapik's internal modules:
 
