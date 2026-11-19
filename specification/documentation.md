@@ -184,8 +184,8 @@ preserving other executions' and user-owned files, and a failed execution leaves
 
 Each integration page is a task-oriented path from a compiled API artifact to a usable result. OpenAPI documents the
 same-module and compiled API choices, generated document ownership, schema inputs, per-API output, configuration, and
-validation. Source integrations lead with compiled API generation during `generate-sources` so application
-source can compile against the generated types.
+validation, including how status matcher kinds map to response codes or fail. Source integrations lead with compiled API
+generation during `generate-sources` so application source can compile against the generated types.
 
 The Spring RestClient guide distinguishes the generated client interface and wire implementation from the user-owned
 Spring component, API instance, transport, base URL, authentication, and other runtime policy. The Spring WebMVC guide

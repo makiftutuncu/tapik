@@ -80,6 +80,11 @@ Generation fails for unsupported mappings—for example, when schema references 
 two endpoints become the same OpenAPI path and method, or a wildcard remaining path has no faithful representation.
 The diagnostic identifies the relevant path, component, or endpoint.
 
+Exact statuses and status sets become exact response-code entries. A range covering one full status class, such as
+`400..499`, becomes an OpenAPI `4XX` entry; other ranges expand into separate codes. Custom status predicates cannot
+be represented and fail generation with the endpoint ID and matcher description. See the
+xref:endpoints/responses.adoc[response guide] for the matcher forms.
+
 Named reference aliases remain separate components when their normalized names differ. Discriminated unions must
 provide `defaultMapping` if any alternative does not require the discriminator property; the target checks this after
 resolving schema references. Discriminators are selection hints: the underlying schemas must still distinguish the
