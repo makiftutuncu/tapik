@@ -114,6 +114,9 @@ The narrative documentation is organized around user goals rather than tapik's i
 8. Understand tapik: type-level safety, compile-time boundaries, Kotlin as the source of truth, and target architecture.
 9. Contribute: repository layout, build workflow, documentation workflow, release process, and migration guidance.
 
+The type-safety page distinguishes compilation failures, endpoint-construction failures, and target compatibility
+failures with concrete examples and links to the relevant guides.
+
 The 0.5 documentation on `main` is an information-architecture reference only. Pages must be rewritten and verified
 against the 0.6 Maven plugin, compiler-generated registry, DSL, formats, targets, generated code, and runnable examples.
 

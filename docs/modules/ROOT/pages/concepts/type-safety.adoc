@@ -5,13 +5,20 @@ tapik keeps each endpoint's path, query parameters, headers, request body, and r
 from its DSL. Adding one of these details changes the type; tapik does not flatten endpoint definitions into a separate
 metadata model.
 
-tapik checks definitions at three points:
+== Where checks happen
 
-Kotlin compilation:: The DSL's types reject invalid combinations and incomplete endpoints.
-Value creation:: tapik checks rules that depend on actual values, such as duplicate names.
-Output generation:: Each output generator rejects endpoint features it cannot represent and reports where the problem
-occurred.
+Kotlin compilation:: The DSL does not let you make a path value optional, add a second request body, or add a path
+after query parameters. The Kotlin compiler rejects these definitions.
+Endpoint creation:: tapik rejects duplicate parameter names and overlapping response status matchers when it creates the
+endpoint value.
+Output generation:: An endpoint with a remaining-path wildcard is valid, but OpenAPI cannot represent it. Spring
+WebMVC also cannot map `CONNECT` or `QUERY`. The selected target reports the unsupported endpoint feature.
 
 You normally do not write these types yourself. Kotlin infers them from the endpoint definition.
 
-OpenAPI is generated output. tapik does not use it to reconstruct endpoints.
+See the xref:endpoints/uris.adoc[URI guide], xref:endpoints/requests.adoc[request guide],
+xref:endpoints/responses.adoc[response guide], xref:documentation/openapi.adoc[OpenAPI guide], and
+xref:servers/spring-webmvc.adoc[Spring WebMVC guide] for these rules in context.
+
+An endpoint that passes Kotlin and tapik validation may still use a feature unsupported by a selected target. OpenAPI
+is generated output; tapik does not use it to reconstruct endpoints.
