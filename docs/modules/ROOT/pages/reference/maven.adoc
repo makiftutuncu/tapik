@@ -56,7 +56,8 @@ The execution-level parameters are:
 
 |`targetConfiguration`
 |Empty
-|String options parsed and validated by the selected target. Unknown options fail generation.
+|Flat string options parsed and validated by the selected target. Each value becomes a scalar configuration value;
+  Maven cannot pass structured lists or objects through this parameter. Unknown options fail generation.
 |===
 
 `target` and `outputDirectory` can also be supplied as the `tapik.target` and `tapik.outputDirectory` Maven properties.

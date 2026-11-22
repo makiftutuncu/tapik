@@ -181,6 +181,9 @@ generation. Each execution exposes `includeApis` and `excludeApis` collections o
 are translated to the host-neutral API selection while target configuration remains target-owned. With neither
 collection configured, every discovered API is generated.
 
+Maven's `targetConfiguration` is a flat map of strings, and each entry becomes a scalar configuration value. The Gradle
+adapter converts its typed scalar, ordered-list, and nested-object values to the same host-neutral configuration tree.
+
 `outputDirectory` defaults to `${project.build.directory}/generated/tapik`. Target artifact paths are resolved below
 that directory and written as UTF-8. Each Maven execution owns the paths it generated there. A later invocation of the
 same execution removes its previously owned paths that are absent from the new result, while paths owned by other
