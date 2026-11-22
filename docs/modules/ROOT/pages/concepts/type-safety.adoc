@@ -12,13 +12,15 @@ after query parameters. The Kotlin compiler rejects these definitions.
 Endpoint creation:: tapik rejects duplicate parameter names and overlapping response status matchers when it creates the
 endpoint value.
 Output generation:: An endpoint with a remaining-path wildcard is valid, but OpenAPI cannot represent it. Spring
-WebMVC also cannot map `CONNECT` or `QUERY`. The selected target reports the unsupported endpoint feature.
+WebMVC cannot map `CONNECT` or `QUERY`; the RestClient target accepts both, subject to the configured transport. The
+selected target reports unsupported endpoint features.
 
 You normally do not write these types yourself. Kotlin infers them from the endpoint definition.
 
 See the xref:endpoints/uris.adoc[URI guide], xref:endpoints/requests.adoc[request guide],
 xref:endpoints/responses.adoc[response guide], xref:documentation/openapi.adoc[OpenAPI guide], and
-xref:servers/spring-webmvc.adoc[Spring WebMVC guide] for these rules in context.
+xref:servers/spring-webmvc.adoc[Spring WebMVC guide] for these rules in context. See the
+xref:clients/spring-restclient.adoc[Spring RestClient guide] for client behavior.
 
 An endpoint that passes Kotlin and tapik validation may still use a feature unsupported by a selected target. OpenAPI
 is generated output; tapik does not use it to reconstruct endpoints.
