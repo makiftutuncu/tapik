@@ -1,14 +1,45 @@
 = Migrate to 0.6
 :description: Move an earlier tapik project to version 0.6 with Maven or Gradle.
 
-tapik 0.6 is not source- or binary-compatible with earlier releases. There is no automatic converter. The Gradle plugin
-keeps its historical ID but replaces package scanning and the earlier generator DSL with compiler-generated registries,
-explicit generation modes, and named target executions. Migrate one small API first and keep the previous build until
-the new setup works. After migration, follow the xref:compatibility.adoc[compatibility policy].
+tapik 0.6 is not source- or binary-compatible with earlier releases. The 0.5 repository supported Gradle only; 0.6
+adds Maven support. There is no automatic converter. The Gradle plugin keeps its historical ID but replaces package
+scanning and the earlier generator DSL with compiler-generated registries, explicit generation modes, and named target
+executions. Migrate one small API first and keep the previous build until the new setup works. After migration, follow
+the xref:compatibility.adoc[compatibility policy].
 
-If your build uses the earlier Gradle configuration names, rename
+The names below appeared in an early 0.6 preview, not in the released 0.5 Gradle plugin. If you used that preview, rename
 `tapikContract` to `tapikApiDependency`, its classpath name from `tapikContractClasspath` to
 `tapikApiDependencyClasspath`, and `Mode.COMPILED_CONTRACT` to `Mode.COMPILED_API_DEPENDENCY`.
+
+== Move from the previous Gradle DSL
+
+The plugin ID remains `dev.akif.tapik.plugin.gradle`, but the old scanner configuration is not supported. Apply the
+current plugin and migrate its settings as follows:
+
+[cols="2,4", options="header"]
+|===
+|Previous setting |0.6 migration
+
+|`basePackage(...)`
+|Remove it. Declare eligible `Api` values in compiled source. Use `includeApis(...)` or `excludeApis(...)` on a named
+  execution when you need to select API IDs.
+
+|`generatedPackageName(...)`
+|Set `packageName(...)` inside each target execution. The old value was appended to the source package; the new value
+  is the complete package prefix, for example `packageName("com.example.library.generated")`.
+
+|`endpointsSuffix(...)`
+|Remove it. The 0.6 targets do not expose this option; shared endpoint type names are derived from the API structure.
+
+|`springRestClient { ... }` and `springWebMvc { ... }`
+|Register named executions, for example `springRestClient("client") { ... }`. Move `clientSuffix(...)` and
+  `serverSuffix(...)` into the matching execution. Set `controllerSuffix(...)` there if you want to customize the
+  generated controller name.
+
+|`markdownDocumentation { ... }`
+|There is no built-in Markdown target in 0.6. Use a named `openApi` execution when OpenAPI meets your needs, and set its
+  required version. Otherwise, implement a custom target.
+|===
 
 . Move to Java 25 and Kotlin 2.4.10. Use Maven 3.9+ or a supported Gradle 9.1-9.8 release. Start with the
   xref:getting-started.adoc[Maven quickstart], the xref:gradle-quickstart.adoc[Gradle quickstart], or copy the
