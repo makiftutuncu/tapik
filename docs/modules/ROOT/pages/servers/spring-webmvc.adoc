@@ -97,6 +97,9 @@ endpoint formats, validates required and fixed inputs, selects request-body medi
 handler with Kotlin values. It converts decoding and media-type failures into the appropriate HTTP response before the
 handler is invoked.
 
+`MediaType(...)` checks syntax but not charset support. An unknown charset in an incoming `Content-Type` is treated as
+incompatible. An unknown charset in a declared response body can fail when Spring builds the response.
+
 After the handler returns, the controller matches the selected response alternative, encodes its body and headers,
 negotiates the response representation, and constructs the Spring response. The handler cannot return a status or body
 shape outside the generated sealed hierarchy.

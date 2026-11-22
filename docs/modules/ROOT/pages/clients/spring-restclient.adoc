@@ -67,6 +67,9 @@ query, header, and body arguments with their endpoint formats; then it matches t
 headers and media type, decodes values, and returns the corresponding sealed response. An undeclared status or invalid
 wire value fails at the client boundary rather than becoming an untyped response.
 
+`MediaType(...)` checks syntax but does not verify that a named charset is supported. Spring parses request media types
+before sending and response media types while matching, so an unknown charset can fail at either point.
+
 Literal URI fragments in the DSL are already encoded: `root / "a%20b"` requests `/a%20b`. Pass ordinary Kotlin
 values for path and query arguments; the client applies their formats and percent-encodes the resulting data once.
 For example, a path-variable value `%20` is sent as `%2520`, because its percent sign is part of the value. Remaining

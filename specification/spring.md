@@ -68,6 +68,10 @@ alternative is declared. Bytes without `Content-Type`, a `Content-Type` on a bod
 alternative, or an incompatible media type fail response decoding. Empty bytes with a compatible `Content-Type` are
 passed to the selected format because an empty encoded value may be valid for that format.
 
+Core media-type validation checks syntax but not Spring charset support. Spring parses request media types before
+exchange and parses received and declared response media types during compatibility matching, so an unknown charset may
+be rejected at either point.
+
 Generated method inputs are derived from the endpoint's compiled Kotlin type. Required path variables, queries,
 headers, and request bodies precede optional or defaulted values. Runtime endpoint values supply names, formats,
 defaults, media types, matchers, and codecs. Generated code performs URI construction, request encoding, output
@@ -183,6 +187,9 @@ Repeated query parameters preserve raw query occurrences independently of Spring
 Request body alternatives are selected by a compatible request `Content-Type` in declaration order. Every encoded
 alternative remains supported; an unmatched content type produces `415 Unsupported Media Type`. When `noBody` is an
 alternative, an absent request body is decoded as `null`.
+
+Core media-type validation checks syntax but not Spring charset support. An unknown charset in the incoming `Content-Type`
+is treated as incompatible; an unknown charset in a declared response body can fail when Spring constructs the response.
 
 Generated mapping methods encode handler responses through the selected output definition and return Spring
 `ResponseEntity<ByteArray>`. Every selected output containing a body is negotiated against the request's `Accept`
