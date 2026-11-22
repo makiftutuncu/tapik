@@ -190,7 +190,8 @@ generation during `generate-sources` so application source can compile against t
 The Spring RestClient guide distinguishes the generated client interface and wire implementation from the user-owned
 Spring component, API instance, transport, base URL, authentication, and other runtime policy. The Spring WebMVC guide
 distinguishes the generated pure server interface and internal controller from user-owned handler behavior, and
-explains both Spring Boot auto-configuration and explicit plain Spring registration, including handler bean selection.
+explains both Spring Boot auto-configuration and explicit plain Spring registration, including handler bean selection
+and which HTTP methods the target cannot map.
 
 Runnable configuration and application snippets are collected from the reactor-built example modules. Every guide
 links to the shared Maven and target-option references rather than silently redefining lifecycle, selection, naming,

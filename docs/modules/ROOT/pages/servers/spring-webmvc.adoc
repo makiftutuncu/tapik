@@ -9,6 +9,9 @@ For each selected API, the `spring-webmvc` target generates:
 
 The handler interface contains application behavior. The controller handles Spring routes and HTTP conversion.
 
+Spring WebMVC cannot map the `CONNECT` and `QUERY` methods. An API that contains either method fails target generation;
+the other HTTP methods in the DSL are supported.
+
 == Generate from a compiled API module
 
 Application source must be able to implement the generated interface before it compiles. Put endpoints in an API module,
