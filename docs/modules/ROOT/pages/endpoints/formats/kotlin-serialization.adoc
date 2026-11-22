@@ -5,6 +5,13 @@ The `dev.akif:tapik-format-kotlinx` artifact provides JSON formats backed by Kot
 `jsonBody<Value>()` from `dev.akif.tapik.format.kotlinx` for request and response bodies. Pass the configured
 `kotlinx.serialization.json.Json` instance as `format` when you need custom serializer settings.
 
+If your models use `@Serializable`, apply Kotlin's serialization compiler plugin at the same version as Kotlin. In
+Maven, add `kotlin-maven-serialization` to `kotlin-maven-plugin` and enable its `kotlinx-serialization` compiler
+plugin. Keep tapik's `tapik` compiler plugin enabled in the same project. In Gradle, apply
+`org.jetbrains.kotlin.plugin.serialization` alongside Kotlin/JVM. These plugins generate serializers; tapik uses them
+to encode values and derive schemas. See the xref:reference/maven.adoc[Maven] and xref:reference/gradle.adoc[Gradle]
+references for tapik's compiler-plugin setup.
+
 == Schema derivation
 
 tapik derives neutral schemas from serializer descriptors. The same built-in scalar catalog handles primitive values
