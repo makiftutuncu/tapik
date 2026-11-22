@@ -5,6 +5,13 @@ The `dev.akif:tapik-format-kotlinx` artifact provides JSON formats backed by Kot
 `jsonBody<Value>()` from `dev.akif.tapik.format.kotlinx` for request and response bodies. Pass the configured
 `kotlinx.serialization.json.Json` instance as `format` when you need custom serializer settings.
 
+Mark ordinary model classes with `@Serializable` to generate their serializers:
+
+[source,kotlin]
+----
+include::example$dsl/KotlinxFormatExamples.kt[tag=serializable-model]
+----
+
 If your models use `@Serializable`, apply Kotlin's serialization compiler plugin at the same version as Kotlin. In
 Maven, add `kotlin-maven-serialization` to `kotlin-maven-plugin` and enable its `kotlinx-serialization` compiler
 plugin. Keep tapik's `tapik` compiler plugin enabled in the same project. In Gradle, apply

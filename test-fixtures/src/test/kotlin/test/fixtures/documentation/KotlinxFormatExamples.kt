@@ -10,7 +10,13 @@ import dev.akif.tapik.test.fixtures.library.BookId
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+
+// tag::serializable-model[]
+@Serializable
+internal data class BookMessage(val text: String)
+// end::serializable-model[]
 
 class KotlinxFormatExamplesSpec : FunSpec({
     test("configure recursive Kotlin serialization schemas") {
