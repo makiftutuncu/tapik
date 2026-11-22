@@ -9,6 +9,8 @@ describes the same value to targets that need structural information.
 
 Path variables, query parameters, and headers use `StringFormat<Value>`, an alias for `Format<Value, String>`. Bodies
 use `ByteArrayFormat<Value>` and carry their media type separately.
+Media types are validated for syntax, but this does not check whether a target supports the media type or a charset it
+names.
 
 == Transform a built-in format
 
