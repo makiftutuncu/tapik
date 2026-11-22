@@ -9,16 +9,25 @@ sealed interface GradleConfigurationValue : Serializable
  *
  * @property value configured text value.
  */
-data class ScalarGradleConfigurationValue(val value: String) : GradleConfigurationValue
+data class ScalarGradleConfigurationValue(
+    /** Configured text value. */
+    val value: String
+) : GradleConfigurationValue
 
 /** An ordered custom-target configuration list.
  *
  * @property values list items in declaration order.
  */
-data class ListGradleConfigurationValue(val values: List<GradleConfigurationValue>) : GradleConfigurationValue
+data class ListGradleConfigurationValue(
+    /** List items in declaration order. */
+    val values: List<GradleConfigurationValue>
+) : GradleConfigurationValue
 
 /** An ordered custom-target configuration object.
  *
  * @property values named fields in declaration order.
  */
-data class ObjectGradleConfigurationValue(val values: Map<String, GradleConfigurationValue>) : GradleConfigurationValue
+data class ObjectGradleConfigurationValue(
+    /** Named fields in declaration order. */
+    val values: Map<String, GradleConfigurationValue>
+) : GradleConfigurationValue
