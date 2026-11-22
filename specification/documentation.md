@@ -87,6 +87,8 @@ root. Local and CI preview workflows fail when the unified reference has not bee
 publishing an Antora site with a dead API link. Navigation integration is idempotent so rebuilding Antora does not
 duplicate links or assets.
 
+The Gradle reference page points to the separate Dokka archive for the standalone Gradle plugin's public Kotlin API.
+
 The Maven `release` profile continues generating standard Dokka HTML independently for each published module and
 packaging it in that module's `javadoc` classifier. Website aggregation must not change or replace those Maven Central
 artifacts. A documentation-only Gradle build is not part of the architecture.
