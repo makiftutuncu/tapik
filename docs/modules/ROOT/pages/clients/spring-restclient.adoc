@@ -19,6 +19,9 @@ include::example$application/pom.xml[tag=restclient-dependencies,indent=4]
 </dependencies>
 ----
 
+The RestClient target accepts every HTTP method in tapik's DSL, including `CONNECT` and `QUERY`. Sending either method
+still depends on the configured Spring request transport.
+
 Configure the target in `tapik-plugin-maven`:
 
 [source,xml]

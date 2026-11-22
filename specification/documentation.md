@@ -188,7 +188,8 @@ validation, including how status matcher kinds map to response codes or fail. So
 generation during `generate-sources` so application source can compile against the generated types.
 
 The Spring RestClient guide distinguishes the generated client interface and wire implementation from the user-owned
-Spring component, API instance, transport, base URL, authentication, and other runtime policy. The Spring WebMVC guide
+Spring component, API instance, transport, base URL, authentication, and other runtime policy. It states that sending
+less common methods depends on the configured transport. The Spring WebMVC guide
 distinguishes the generated pure server interface and internal controller from user-owned handler behavior, and
 explains both Spring Boot auto-configuration and explicit plain Spring registration, including handler bean selection
 and which HTTP methods the target cannot map.
