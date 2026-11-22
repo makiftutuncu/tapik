@@ -34,10 +34,12 @@ import dev.akif.tapik.format.jackson.jsonBody
 data class Book(val isbn: String, val title: String)
 
 object Books : Api() {
-    val list by get(root / "books", summary = "List books")
+    val list by get(root / "books")
         .output(Status.Ok with jsonBody<List<Book>>())
 }
 ```
+
+This endpoint comes from the [runnable API source](example-contract/src/main/kotlin/com/example/library/contract/Books.kt).
 
 Endpoints are ordinary values. Their inferred types retain paths, inputs, outputs, formats, presence, and declaration
 order, so clients, servers, and documentation can use the same endpoints.
