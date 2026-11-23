@@ -1,3 +1,4 @@
+import java.net.URI
 import org.gradle.api.tasks.WriteProperties
 import org.gradle.plugin.compatibility.compatibility
 import org.gradle.jvm.tasks.Jar
@@ -60,6 +61,18 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
         javaParameters.set(true)
+    }
+}
+
+dokka {
+    dokkaSourceSets.configureEach {
+        sourceLink {
+            localDirectory.set(projectDir.resolve("src/main/kotlin"))
+            remoteUrl.set(
+                URI("https://github.com/makiftutuncu/tapik/blob/v$tapikVersion/plugin-gradle/src/main/kotlin")
+            )
+            remoteLineSuffix.set("#L")
+        }
     }
 }
 

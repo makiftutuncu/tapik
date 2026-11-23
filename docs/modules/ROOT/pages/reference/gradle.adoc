@@ -8,7 +8,8 @@ Gradle 9.1 through 9.8 in Kotlin/JVM projects.
 See xref:reference/artifacts.adoc[Artifacts and the BOM] for dependency roles and version alignment.
 
 The Kotlin API reference linked in the site navigation covers Maven-built modules. The standalone Gradle plugin's
-public Kotlin API has its own Dokka HTML reference in the `javadoc` classifier of `dev.akif:tapik-plugin-gradle`.
+public Kotlin API has its own Dokka HTML reference in the `javadoc` classifier of `dev.akif:tapik-plugin-gradle`. Its
+declaration links point to the matching tapik release source on GitHub.
 
 == Apply the plugin
 
