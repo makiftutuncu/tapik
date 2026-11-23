@@ -100,7 +100,8 @@ include::example$application/pom.xml[tag=webmvc-execution]
 
 With the example configuration, Kotlin sources begin below
 `target/generated-sources/tapik-spring/com/example/library/generated/`. Registration descriptors use
-`META-INF/tapik/spring/webmvc/` beneath the execution output and are packaged as runtime resources by the Maven host.
+`META-INF/tapik/spring/webmvc/` beneath the execution output. Maven registers them as project resources. Gradle writes
+them under `resources/` below `outputRoot` and adds that directory to the main output.
 
 When both Spring targets use the same `packageName`, they must also use the same output directory. Both executions then
 claim one shareable `BooksEndpoints.kt` path instead of placing duplicate declarations on separate compile roots.
