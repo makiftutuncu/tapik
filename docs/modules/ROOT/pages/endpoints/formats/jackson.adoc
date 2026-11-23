@@ -19,10 +19,11 @@ these types directly.
 Jackson schema derivation does not currently handle sealed Kotlin classes as polymorphic unions. Register a schema for
 the sealed type in `JacksonSchemaRegistry` or pass an explicit root schema when building its format.
 
-Custom serializers and converters can change the wire structure. tapik reports `SchemaDerivationException` for
-unsupported class, property, or module serializers, including overrides supplied by mix-ins. Ordinary `@JsonValue`
-wrappers also need an explicit schema. The error identifies the type or property; tapik does not execute sample objects
-to guess their shape.
+Custom serializers, converters, and non-natural `@JsonFormat` shapes can change the wire structure. tapik reports
+`SchemaDerivationException` for unsupported class, property, or module serializers, including overrides supplied by
+mix-ins. Ordinary `@JsonValue` wrappers also need an explicit schema. `@JsonUnwrapped` fields are flattened on the wire
+but remain nested in inferred schemas; supply an explicit schema for the enclosing value. The error identifies the type
+or property; tapik does not execute sample objects to guess their shape.
 
 == Register schemas for custom types
 

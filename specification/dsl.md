@@ -293,6 +293,8 @@ Standard Java time values are built-in scalar types and derive their string wire
 Jackson's effective serialization properties, including configured names, ignored properties, and order. Polymorphic
 and sealed types still fail format construction until Jackson-specific derivation is implemented against the neutral
 union algebra and shared conformance cases.
+`@JsonUnwrapped` fields are a known exception: Jackson flattens them on the wire, while derived schemas retain them as
+nested properties. The enclosing value needs an explicit schema.
 
 `JacksonSchemaRegistry` is an immutable set of schema registrations, separate from the `ObjectMapper`. A caller may
 register either a fixed `Schema` or a `JacksonSchemaProvider` for a Kotlin or Java class. Providers receive Jackson's
