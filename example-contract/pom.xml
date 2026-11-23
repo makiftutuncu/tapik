@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>tapik-example-contract</artifactId>
-    <name>tapik library example contract</name>
+    <name>tapik library API example</name>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
