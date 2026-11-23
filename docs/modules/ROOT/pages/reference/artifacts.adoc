@@ -82,13 +82,15 @@ include::example$application/pom.xml[tag=restclient-dependencies]
 include::example$application/pom.xml[tag=webmvc-dependencies]
 ----
 
-== Integration authoring artifacts
+== Lower-level modules
 
-Ordinary API and application projects do not need these lower-level modules:
+API and application projects do not need to add these modules directly unless they implement an integration:
 
 * `dev.akif:tapik-common-plugin` contains the host-neutral target SPI for custom generation targets; see
   xref:generation/custom-targets.adoc[Create a generation target].
 * `dev.akif:tapik-common-format` contains shared schema-provider and format-authoring APIs.
+* `dev.akif:tapik-common-spring` contains shared Spring HTTP conversions used by tapik's Spring targets. Applications
+  receive it through those target dependencies.
 * `dev.akif:tapik-plugin-compiler` is attached by the Maven or Gradle integration; users do not configure it directly.
 
 The xref:generation/index.adoc[generation guide] explains how the build host, target provider, and generated artifacts
