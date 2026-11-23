@@ -104,6 +104,7 @@ class Endpoint<
         state: @UnsafeVariance S = this.state
     ): Endpoint<P, Q, H, I, O, S> = Endpoint(method, uri, headers, input, outputs, documentation, tags, state)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is Endpoint<*, *, *, *, *, *> &&
@@ -116,6 +117,7 @@ class Endpoint<
                 tags == other.tags &&
                 state == other.state)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = method.hashCode()
         result = 31 * result + uri.hashCode()
@@ -128,6 +130,7 @@ class Endpoint<
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "Endpoint(method=$method, uri=$uri, headers=$headers, input=$input, outputs=$outputs, documentation=$documentation, tags=$tags, state=$state)"
 }

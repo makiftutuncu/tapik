@@ -36,13 +36,16 @@ class StatusSet internal constructor(
         statuses: Set<Status> = this.statuses
     ): StatusSet = StatusSet(statuses)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is StatusSet &&
                 statuses == other.statuses)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = statuses.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "StatusSet(statuses=$statuses)"
     override fun matches(status: Status): Boolean = status in statuses

@@ -40,11 +40,14 @@ class ApiSelection(
         return selected
     }
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is ApiSelection && includes == other.includes && excludes == other.excludes
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = 31 * includes.hashCode() + excludes.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "ApiSelection(includes=$includes, excludes=$excludes)"
 }
 

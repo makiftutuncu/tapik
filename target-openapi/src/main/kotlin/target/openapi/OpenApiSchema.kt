@@ -127,6 +127,7 @@ class OpenApiSchema(
         constantValue: JsonElement? = this.constantValue
     ): OpenApiSchema = OpenApiSchema(reference, types, format, enumValues, items, properties, required, propertyNames, additionalProperties, anyOf, oneOf, discriminator, deprecated, defaultValue, constantValue)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is OpenApiSchema &&
@@ -146,6 +147,7 @@ class OpenApiSchema(
                 defaultValue == other.defaultValue &&
                 constantValue == other.constantValue)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = reference.hashCode()
         result = 31 * result + types.hashCode()
@@ -165,6 +167,7 @@ class OpenApiSchema(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "OpenApiSchema(reference=$reference, types=$types, format=$format, enumValues=$enumValues, items=$items, properties=$properties, required=$required, propertyNames=$propertyNames, additionalProperties=$additionalProperties, anyOf=$anyOf, oneOf=$oneOf, discriminator=$discriminator, deprecated=$deprecated, defaultValue=$defaultValue, constantValue=$constantValue)"
 }

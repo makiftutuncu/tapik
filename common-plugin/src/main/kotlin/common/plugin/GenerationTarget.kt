@@ -27,18 +27,21 @@ class GenerationRequest(
         configuration: TargetConfiguration = this.configuration
     ): GenerationRequest = GenerationRequest(apis, configuration)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is GenerationRequest &&
                 apis == other.apis &&
                 configuration == other.configuration)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = apis.hashCode()
         result = 31 * result + configuration.hashCode()
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "GenerationRequest(apis=$apis, configuration=$configuration)"
 }

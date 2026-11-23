@@ -34,6 +34,7 @@ class Uri<out P : Paths, out Q : Queries> internal constructor(
         queries: @UnsafeVariance Q = this.queries
     ): Uri<P, Q> = Uri(segments, paths, queries)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is Uri<*, *> &&
@@ -41,6 +42,7 @@ class Uri<out P : Paths, out Q : Queries> internal constructor(
                 paths == other.paths &&
                 queries == other.queries)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = segments.hashCode()
         result = 31 * result + paths.hashCode()

@@ -32,6 +32,7 @@ class OpenApiRequestBody(
         content: Map<String, OpenApiMediaType> = this.content
     ): OpenApiRequestBody = OpenApiRequestBody(description, required, content)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is OpenApiRequestBody &&
@@ -39,6 +40,7 @@ class OpenApiRequestBody(
                 required == other.required &&
                 content == other.content)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = description.hashCode()
         result = 31 * result + required.hashCode()
@@ -46,6 +48,7 @@ class OpenApiRequestBody(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "OpenApiRequestBody(description=$description, required=$required, content=$content)"
 }

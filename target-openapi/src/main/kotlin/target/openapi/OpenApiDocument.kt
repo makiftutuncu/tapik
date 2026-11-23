@@ -39,6 +39,7 @@ class OpenApiDocument(
         components: OpenApiComponents = this.components
     ): OpenApiDocument = OpenApiDocument(specificationVersion, info, paths, components)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is OpenApiDocument &&
@@ -47,6 +48,7 @@ class OpenApiDocument(
                 paths == other.paths &&
                 components == other.components)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = specificationVersion.hashCode()
         result = 31 * result + info.hashCode()
@@ -55,6 +57,7 @@ class OpenApiDocument(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "OpenApiDocument(specificationVersion=$specificationVersion, info=$info, paths=$paths, components=$components)"
 }

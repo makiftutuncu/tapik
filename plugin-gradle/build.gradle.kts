@@ -66,6 +66,7 @@ kotlin {
 
 dokka {
     dokkaSourceSets.configureEach {
+        reportUndocumented.set(true)
         sourceLink {
             localDirectory.set(projectDir.resolve("src/main/kotlin"))
             remoteUrl.set(

@@ -138,6 +138,7 @@
                     <jdkVersion>${jvm.version}</jdkVersion>
                     <suppressObviousFunctions>true</suppressObviousFunctions>
                     <suppressInheritedMembers>true</suppressInheritedMembers>
+                    <reportUndocumented>true</reportUndocumented>
                     <includes>
                         <include>${project.basedir}/Module.md</include>
                     </includes>

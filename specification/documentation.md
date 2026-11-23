@@ -240,6 +240,8 @@ workflow requires narrative guidance. Document primary-constructor properties bo
 with KDoc on each property declaration, so the description appears on the type and the member's Dokka page. Put
 documentation for other members on the declaration so it appears on that member's Dokka page. KDoc describes
 declaration-specific semantics and links related concepts where useful; it does not duplicate the complete guides.
+Dokka's undocumented-declaration reporting is enabled for both API references. Warnings for compiler-generated enum
+helpers (`values`, `valueOf`, and `entries`) are expected because they have no source declarations to document.
 
 Every Antora build treats warnings as failures, including unresolved cross-references, missing include files, and
 missing source snippet tags. The staged-site check parses generated HTML and validates same-site page links, fragment

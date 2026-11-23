@@ -17,11 +17,14 @@ class MediaType(
     /** Normalized wire syntax, retaining parameter declaration order. */
     val value: String = parsed.render()
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is MediaType && parsed == other.parsed
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = parsed.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = value
 
     /** Common media types used by body builders. */

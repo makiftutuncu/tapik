@@ -42,6 +42,7 @@ class SchemaDiscriminator(
         defaultMapping: ReferenceSchema? = this.defaultMapping
     ): SchemaDiscriminator = SchemaDiscriminator(propertyName, mapping, defaultMapping)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             other is SchemaDiscriminator &&
@@ -49,9 +50,11 @@ class SchemaDiscriminator(
             mapping == other.mapping &&
             defaultMapping == other.defaultMapping
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int =
         31 * (31 * propertyName.hashCode() + mapping.hashCode()) + defaultMapping.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "SchemaDiscriminator(propertyName=$propertyName, mapping=$mapping, defaultMapping=$defaultMapping)"
 }
@@ -99,6 +102,7 @@ class UnionSchema(
         name: String? = this.name
     ): UnionSchema = UnionSchema(alternatives, discriminator, name)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             other is UnionSchema &&
@@ -106,9 +110,11 @@ class UnionSchema(
             discriminator == other.discriminator &&
             name == other.name
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int =
         31 * (31 * alternatives.hashCode() + discriminator.hashCode()) + name.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "UnionSchema(alternatives=$alternatives, discriminator=$discriminator, name=$name)"
 }

@@ -43,18 +43,21 @@ class KotlinSealedVariant(
         fields: List<KotlinDataField> = this.fields
     ): KotlinSealedVariant = KotlinSealedVariant(name, fields)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is KotlinSealedVariant &&
                 name == other.name &&
                 fields == other.fields)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + fields.hashCode()
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "KotlinSealedVariant(name=$name, fields=$fields)"
 }

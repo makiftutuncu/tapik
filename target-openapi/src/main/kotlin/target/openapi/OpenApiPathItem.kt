@@ -20,13 +20,16 @@ class OpenApiPathItem(
         operations: Map<Method, OpenApiOperation> = this.operations
     ): OpenApiPathItem = OpenApiPathItem(operations)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is OpenApiPathItem &&
                 operations == other.operations)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = operations.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "OpenApiPathItem(operations=$operations)"
 }

@@ -33,6 +33,7 @@ class OpenApiResponse(
         content: Map<String, OpenApiMediaType> = this.content
     ): OpenApiResponse = OpenApiResponse(description, headers, content)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is OpenApiResponse &&
@@ -40,6 +41,7 @@ class OpenApiResponse(
                 headers == other.headers &&
                 content == other.content)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = description.hashCode()
         result = 31 * result + headers.hashCode()
@@ -47,6 +49,7 @@ class OpenApiResponse(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "OpenApiResponse(description=$description, headers=$headers, content=$content)"
 }

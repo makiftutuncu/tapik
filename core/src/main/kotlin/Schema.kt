@@ -106,11 +106,14 @@ class EnumSchema(
         name: String? = this.name
     ): EnumSchema = EnumSchema(values, name)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is EnumSchema && values == other.values && name == other.name
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = 31 * values.hashCode() + name.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "EnumSchema(values=$values, name=$name)"
 }
 
@@ -163,11 +166,14 @@ class ObjectSchema(
         name: String? = this.name
     ): ObjectSchema = ObjectSchema(properties, name)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is ObjectSchema && properties == other.properties && name == other.name
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = 31 * properties.hashCode() + name.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "ObjectSchema(properties=$properties, name=$name)"
 }
 

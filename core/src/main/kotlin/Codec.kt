@@ -53,13 +53,16 @@ sealed interface DecodeResult<out Value : Any> {
             errors: List<DecodeError> = this.errors
         ): Failure = Failure(errors)
 
+        /** Compares this value with [other]. */
         override fun equals(other: Any?): Boolean =
             this === other ||
                 (other is Failure &&
                     errors == other.errors)
 
+        /** Returns a hash code consistent with [equals]. */
         override fun hashCode(): Int = errors.hashCode()
 
+        /** Returns a string representation of this value. */
         override fun toString(): String =
             "Failure(errors=$errors)"
     }

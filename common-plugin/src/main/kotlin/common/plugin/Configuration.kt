@@ -27,11 +27,14 @@ class ListConfigurationValue(
     fun copy(values: List<ConfigurationValue> = this.values): ListConfigurationValue =
         ListConfigurationValue(values)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is ListConfigurationValue && values == other.values
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = values.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "ListConfigurationValue(values=$values)"
 }
 
@@ -53,11 +56,14 @@ class ObjectConfigurationValue(
     fun copy(values: Map<String, ConfigurationValue> = this.values): ObjectConfigurationValue =
         ObjectConfigurationValue(values)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is ObjectConfigurationValue && values == other.values
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = values.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "ObjectConfigurationValue(values=$values)"
 }
 
@@ -86,11 +92,14 @@ class TargetConfiguration(
     fun copy(values: Map<String, ConfigurationValue> = this.values): TargetConfiguration =
         TargetConfiguration(values)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is TargetConfiguration && values == other.values
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = values.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "TargetConfiguration(values=$values)"
 }
 

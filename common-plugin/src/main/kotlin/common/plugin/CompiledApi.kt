@@ -29,18 +29,21 @@ class CompiledApi(
         endpoints: List<CompiledEndpoint> = this.endpoints
     ): CompiledApi = CompiledApi(value, endpoints)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is CompiledApi &&
                 value == other.value &&
                 endpoints == other.endpoints)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = value.hashCode()
         result = 31 * result + endpoints.hashCode()
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "CompiledApi(value=$value, endpoints=$endpoints)"
 }
@@ -76,6 +79,7 @@ class CompiledEndpoint internal constructor(
         sourcePropertyPath: List<String> = this.propertyPath
     ): CompiledEndpoint = CompiledEndpoint(value, type, sourcePropertyPath)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is CompiledEndpoint &&
@@ -83,6 +87,7 @@ class CompiledEndpoint internal constructor(
                 type == other.type &&
                 propertyPath == other.propertyPath)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = value.hashCode()
         result = 31 * result + type.hashCode()
@@ -90,6 +95,7 @@ class CompiledEndpoint internal constructor(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "CompiledEndpoint(value=$value, type=$type, sourcePropertyPath=$propertyPath)"
 }

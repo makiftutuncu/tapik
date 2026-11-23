@@ -60,6 +60,7 @@ class KotlinType(
         flexibleUpperBound: KotlinFlexibleTypeUpperBound? = this.flexibleUpperBound
     ): KotlinType = KotlinType(classifier, arguments, nullable, definitelyNonNull, abbreviation, outerType, flexibleUpperBound)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is KotlinType &&
@@ -71,6 +72,7 @@ class KotlinType(
                 outerType == other.outerType &&
                 flexibleUpperBound == other.flexibleUpperBound)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = classifier.hashCode()
         result = 31 * result + arguments.hashCode()
@@ -82,6 +84,7 @@ class KotlinType(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "KotlinType(classifier=$classifier, arguments=$arguments, nullable=$nullable, definitelyNonNull=$definitelyNonNull, abbreviation=$abbreviation, outerType=$outerType, flexibleUpperBound=$flexibleUpperBound)"
 }

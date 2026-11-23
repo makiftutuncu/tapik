@@ -80,10 +80,13 @@ class GenerationResult(
     fun copy(artifacts: List<GeneratedArtifact> = this.artifacts): GenerationResult =
         GenerationResult(artifacts)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other || other is GenerationResult && artifacts == other.artifacts
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = artifacts.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "GenerationResult(artifacts=$artifacts)"
 }

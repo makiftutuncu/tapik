@@ -32,14 +32,17 @@ class RestClientRequestBody(
         bytes: ByteArray = this.bytes
     ): RestClientRequestBody = RestClientRequestBody(mediaType, bytes)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             other is RestClientRequestBody &&
             mediaType == other.mediaType &&
             byteSnapshot.contentEquals(other.byteSnapshot)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = 31 * mediaType.hashCode() + byteSnapshot.contentHashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String = "RestClientRequestBody(mediaType=$mediaType, bytes=${byteSnapshot.contentToString()})"
 }
 
@@ -86,6 +89,7 @@ class RestClientResponse(
         body: ByteArray = this.body
     ): RestClientResponse = RestClientResponse(status, headers, mediaType, body)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             other is RestClientResponse &&
@@ -94,6 +98,7 @@ class RestClientResponse(
             mediaType == other.mediaType &&
             bodySnapshot.contentEquals(other.bodySnapshot)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = status.hashCode()
         result = 31 * result + headers.hashCode()
@@ -102,6 +107,7 @@ class RestClientResponse(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "RestClientResponse(status=$status, headers=$headers, mediaType=$mediaType, body=${bodySnapshot.contentToString()})"
 }

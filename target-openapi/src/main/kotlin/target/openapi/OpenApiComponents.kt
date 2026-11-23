@@ -18,13 +18,16 @@ class OpenApiComponents(
         schemas: Map<String, OpenApiSchema> = this.schemas
     ): OpenApiComponents = OpenApiComponents(schemas)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is OpenApiComponents &&
                 schemas == other.schemas)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int = schemas.hashCode()
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "OpenApiComponents(schemas=$schemas)"
 }

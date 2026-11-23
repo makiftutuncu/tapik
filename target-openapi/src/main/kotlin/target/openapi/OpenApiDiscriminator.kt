@@ -32,6 +32,7 @@ class OpenApiDiscriminator(
         defaultMapping: String? = this.defaultMapping
     ): OpenApiDiscriminator = OpenApiDiscriminator(propertyName, mapping, defaultMapping)
 
+    /** Compares this value with [other]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is OpenApiDiscriminator &&
@@ -39,6 +40,7 @@ class OpenApiDiscriminator(
                 mapping == other.mapping &&
                 defaultMapping == other.defaultMapping)
 
+    /** Returns a hash code consistent with [equals]. */
     override fun hashCode(): Int {
         var result = propertyName.hashCode()
         result = 31 * result + mapping.hashCode()
@@ -46,6 +48,7 @@ class OpenApiDiscriminator(
         return result
     }
 
+    /** Returns a string representation of this value. */
     override fun toString(): String =
         "OpenApiDiscriminator(propertyName=$propertyName, mapping=$mapping, defaultMapping=$defaultMapping)"
 }
