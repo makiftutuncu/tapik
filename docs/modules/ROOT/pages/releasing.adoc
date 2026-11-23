@@ -90,7 +90,7 @@ and `GRADLE_PUBLISH_SECRET` and validate the already rehearsed plugin version wi
 [source,shell]
 ----
 GRADLE_USER_HOME=target/gradle-release-home ./plugin-gradle/gradlew -p plugin-gradle publishPlugins --validate-only \
-  -PtapikRepository=/absolute/path/to/staged-repository \
+  -PtapikRepository="$(pwd)/target/gradle-verification/repository" \
   -PtapikVersion=0.6.0
 ----
 
