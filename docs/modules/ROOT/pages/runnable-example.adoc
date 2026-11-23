@@ -12,7 +12,7 @@ Build the Maven examples with:
 
 [,shell]
 ----
-./mvnw verify
+./mvnw -pl example-application -am clean verify
 ----
 
 Build the Gradle example with:

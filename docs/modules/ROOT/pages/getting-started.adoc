@@ -10,7 +10,7 @@ The examples use the `example-contract` and `example-application` modules in the
 
 * Java 25
 * Kotlin 2.4.10
-* Maven 3.9+ or Gradle 9.1 through 9.8
+* Maven 3.9+
 
 == Generate OpenAPI in the API module
 
