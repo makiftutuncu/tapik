@@ -28,6 +28,8 @@ collections, and maps.
 
 Schema derivation does not create a codec. For Java time values, provide an actual serializer whose descriptor
 identifies the Java type.
+Contextual descriptors do not derive automatically; register a schema for the descriptor or supply an explicit root
+schema.
 
 == Register schemas for custom types
 
@@ -53,7 +55,7 @@ for a sealed type; otherwise tapik uses `Json.classDiscriminator`.
 The JSON format must use object polymorphism with `ClassDiscriminatorMode.POLYMORPHIC`. Array polymorphism, another
 discriminator mode, a naming strategy on a polymorphic type, or a default provider for open polymorphism cannot be
 represented and causes schema derivation to fail. A subtype also cannot declare its own property with the discriminator
-name.
+name. `ClassDiscriminatorMode.ALL_JSON_OBJECTS` also prevents derivation of ordinary object schemas.
 
 == Supply a schema directly
 
