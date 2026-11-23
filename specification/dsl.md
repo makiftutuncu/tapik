@@ -108,6 +108,10 @@ required. `Paths` and `Queries` alias tuples of path values and query definition
 aliases are `Paths0` through `Paths8` and `Queries0` through `Queries8`. Domain APIs use these aliases instead of
 exposing the underlying tuple types.
 
+Literal path fragments are stored as already-encoded URI text. Typed path and query values remain separate from those
+fragments and are converted to wire text by their formats; percent-encoding of dynamic values belongs to the client or
+server target that handles the URI.
+
 `Uri.segments` is a list of `PathSegment` values. A literal fragment contributes one literal segment per `/`-separated
 part; a `PathVariable<Value>` is both a path segment and the exact value stored in the URI's `Paths` tuple. Variable
 names are non-blank URI-template names and unique within a URI. `Uri.toString()` joins literal segments and variable

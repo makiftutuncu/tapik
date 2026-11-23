@@ -41,6 +41,10 @@ include::example$dsl/ApiAndUriExamples.kt[tag=custom-path-builder,indent=0]
 The provided `StringFormat` determines how the wire string becomes the Kotlin value. Variable names must be valid and
 unique within the URI.
 
+Formats convert typed values to and from wire text; they do not percent-encode URI values. Client and server targets
+handle URI escaping at the transport boundary. For the exact behavior of tapik's Spring RestClient client, see
+xref:clients/spring-restclient.adoc[the Spring RestClient guide].
+
 `path.remaining("path")` is a distinct required wildcard value. It captures one or more final segments as a
 `List<String>` and must be the last path definition, although query parameters may follow it.
 
