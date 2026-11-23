@@ -69,6 +69,10 @@ YAML with a `.yml` extension is the default. Set `format` to `json` for JSON, us
 and choose `simple` or `qualified` component naming. The `version` option is required and becomes `info.version`.
 See xref:reference/generation-options.adoc#_openapi[OpenAPI target options] for the complete table.
 
+The default `simple` naming keeps only the final part of each schema name, so different names can map to one component.
+Matching schemas share a component; different shapes fail with a conflict report instead of overwriting one. Choose
+`qualified` to keep the full schema names.
+
 == What the target translates
 
 The target preserves endpoint declaration order and interprets endpoint paths, methods, parameters, headers,
