@@ -458,6 +458,9 @@ The output grammar is status matcher, body or bodies, then optional headers:
 )
 ```
 
+`NoBody` may follow one or more body alternatives. The Spring targets expose that output's logical body as a nullable
+`body` field defaulting to `null`; an output containing only `NoBody` has no body field.
+
 Output headers preserve declaration order. Multiple `.output(...)` calls append distinct response alternatives.
 Matcher kind, concrete headers, and concrete body formats remain in the output's generic type.
 

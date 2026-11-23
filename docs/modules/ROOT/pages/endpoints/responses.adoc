@@ -41,6 +41,9 @@ matcher kind.
 Use `noBody`, one `Body<Value>`, or `bodiesOf(...)` after the matcher. Multiple bodies are media alternatives for the
 same logical shape, and duplicate media types are rejected. A distinct shape for the same media type is a separate
 output alternative with a non-overlapping status matcher.
+Put `noBody` last after one or more body alternatives to make the response body optional. Spring response and handler
+types expose that body's value as nullable, defaulting to `null`. Use `Status.NoContent with noBody` when the response
+has no body at all.
 
 Output headers follow the body group with another `with`, as in `Status.Created with jsonBody<Book>() with
 headersOf(location)`. Header types and order remain part of that output's inferred type.
