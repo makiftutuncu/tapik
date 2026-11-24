@@ -22,35 +22,71 @@ class KotlinxSchemaRegistry private constructor(
     /** Creates an empty schema registry. */
     constructor() : this(SchemaRegistry())
 
-    /** Returns a registry that uses [schema] whenever [descriptor] is encountered. */
+    /**
+     * Returns a registry that uses [schema] whenever [descriptor] is encountered.
+     *
+     * @param descriptor serialization descriptor matched by its serial name.
+     * @param schema caller-supplied schema.
+     * @return a new registry with this registration.
+     */
     fun withSchema(
         descriptor: SerialDescriptor,
         schema: Schema
     ): KotlinxSchemaRegistry = withSchemaProvider(descriptor) { schema }
 
-    /** Returns a registry that uses [schema] whenever [serializer]'s descriptor is encountered. */
+    /**
+     * Returns a registry that uses [schema] whenever [serializer]'s descriptor is encountered.
+     *
+     * @param serializer serializer whose descriptor is matched by its serial name.
+     * @param schema caller-supplied schema.
+     * @return a new registry with this registration.
+     */
     fun <Value : Any> withSchema(
         serializer: KSerializer<Value>,
         schema: Schema
     ): KotlinxSchemaRegistry = withSchema(serializer.descriptor, schema)
 
-    /** Returns a registry that invokes [provider] whenever [descriptor] is encountered. */
+    /**
+     * Returns a registry that invokes [provider] whenever [descriptor] is encountered.
+     *
+     * @param descriptor serialization descriptor matched by its serial name.
+     * @param provider derives a schema from the resolved descriptor.
+     * @return a new registry with this registration.
+     */
     fun withSchemaProvider(
         descriptor: SerialDescriptor,
         provider: KotlinxSchemaProvider
     ): KotlinxSchemaRegistry = KotlinxSchemaRegistry(registry.withProvider(descriptor.schemaKey, provider))
 
-    /** Returns a registry that invokes [provider] whenever [serializer]'s descriptor is encountered. */
+    /**
+     * Returns a registry that invokes [provider] whenever [serializer]'s descriptor is encountered.
+     *
+     * @param serializer serializer whose descriptor is matched by its serial name.
+     * @param provider derives a schema from the resolved descriptor.
+     * @return a new registry with this registration.
+     */
     fun <Value : Any> withSchemaProvider(
         serializer: KSerializer<Value>,
         provider: KotlinxSchemaProvider
     ): KotlinxSchemaRegistry = withSchemaProvider(serializer.descriptor, provider)
 
-    /** Returns a registry that uses [schema] whenever [Value] is encountered. */
+    /**
+     * Returns a registry that uses [schema] whenever [Value] is encountered.
+     *
+     * @param Value Kotlin type whose descriptor is matched by its serial name.
+     * @param schema caller-supplied schema.
+     * @return a new registry with this registration.
+     */
     inline fun <reified Value : Any> withSchema(schema: Schema): KotlinxSchemaRegistry =
         withSchema(serializer<Value>(), schema)
 
-    /** Returns a registry that invokes [provider] whenever [Value] is encountered. */
+    /**
+     * Returns a registry that invokes [provider] whenever [Value] is encountered.
+     *
+     * @param Value Kotlin type whose descriptor is matched by its serial name.
+     * @param provider derives a schema from the resolved descriptor.
+     * @return a new registry with this registration.
+     */
     inline fun <reified Value : Any> withSchemaProvider(provider: KotlinxSchemaProvider): KotlinxSchemaRegistry =
         withSchemaProvider(serializer<Value>(), provider)
 
