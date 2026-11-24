@@ -36,41 +36,94 @@ abstract class TapikExtension @Inject constructor(private val objects: ObjectFac
     internal val orderedExecutions: ListProperty<TapikExecution> =
         objects.listProperty(TapikExecution::class.java).convention(emptyList())
 
-    /** Selects the explicit [mode] used to load compiled APIs. */
+    /**
+     * Selects the source of compiled APIs for generation.
+     *
+     * @param mode selected API source.
+     * @throws IllegalArgumentException when a different mode was already selected.
+     */
     fun mode(mode: Mode) = selectMode(mode)
 
-    /** Sets the generated artifact root to [directory]. */
+    /**
+     * Sets the generated artifact root to [directory].
+     *
+     * @param directory root directory for generated artifacts.
+     */
     fun outputRoot(directory: Directory) = outputRoot.set(directory)
 
-    /** Sets the generated artifact root from a lazy [directory] provider. */
+    /**
+     * Sets the generated artifact root from a lazy [directory] provider.
+     *
+     * @param directory provider of the root directory for generated artifacts.
+     */
     fun outputRoot(directory: Provider<Directory>) = outputRoot.set(directory)
 
-    /** Registers an OpenAPI execution named `openapi`. */
+    /**
+     * Registers an OpenAPI execution named `openapi`.
+     *
+     * @param action configures the OpenAPI execution.
+     * @throws IllegalArgumentException when the execution name is blank or already registered.
+     */
     fun openApi(action: Action<in OpenApiExecution>) = openApi("openapi", action)
 
-    /** Registers an OpenAPI execution named [name]. */
+    /**
+     * Registers an OpenAPI execution named [name].
+     *
+     * @param name unique name used to identify this execution.
+     * @param action configures the OpenAPI execution.
+     * @throws IllegalArgumentException when [name] is blank or already registered.
+     */
     fun openApi(name: String, action: Action<in OpenApiExecution>) {
         register(name, objects.newInstance(OpenApiExecution::class.java, name), action)
     }
 
-    /** Registers a Spring RestClient execution named `spring-restclient`. */
+    /**
+     * Registers a Spring RestClient execution named `spring-restclient`.
+     *
+     * @param action configures the Spring RestClient execution.
+     * @throws IllegalArgumentException when the execution name is blank or already registered.
+     */
     fun springRestClient(action: Action<in SpringRestClientExecution>) =
         springRestClient("spring-restclient", action)
 
-    /** Registers a Spring RestClient execution named [name]. */
+    /**
+     * Registers a Spring RestClient execution named [name].
+     *
+     * @param name unique name used to identify this execution.
+     * @param action configures the Spring RestClient execution.
+     * @throws IllegalArgumentException when [name] is blank or already registered.
+     */
     fun springRestClient(name: String, action: Action<in SpringRestClientExecution>) {
         register(name, objects.newInstance(SpringRestClientExecution::class.java, name), action)
     }
 
-    /** Registers a Spring WebMVC execution named `spring-webmvc`. */
+    /**
+     * Registers a Spring WebMVC execution named `spring-webmvc`.
+     *
+     * @param action configures the Spring WebMVC execution.
+     * @throws IllegalArgumentException when the execution name is blank or already registered.
+     */
     fun springWebMvc(action: Action<in SpringWebMvcExecution>) = springWebMvc("spring-webmvc", action)
 
-    /** Registers a Spring WebMVC execution named [name]. */
+    /**
+     * Registers a Spring WebMVC execution named [name].
+     *
+     * @param name unique name used to identify this execution.
+     * @param action configures the Spring WebMVC execution.
+     * @throws IllegalArgumentException when [name] is blank or already registered.
+     */
     fun springWebMvc(name: String, action: Action<in SpringWebMvcExecution>) {
         register(name, objects.newInstance(SpringWebMvcExecution::class.java, name), action)
     }
 
-    /** Registers a custom service-loaded [targetId] under the execution [name]. */
+    /**
+     * Registers a custom service-loaded [targetId] under the execution [name].
+     *
+     * @param name unique name used to identify this execution.
+     * @param targetId ID of a generation target available through service loading.
+     * @param action configures the target execution.
+     * @throws IllegalArgumentException when [name] or [targetId] is blank, or [name] is already registered.
+     */
     fun target(name: String, targetId: String, action: Action<in CustomTargetExecution>) {
         require(targetId.isNotBlank()) { "tapik target IDs must not be blank" }
         register(name, objects.newInstance(CustomTargetExecution::class.java, name, targetId), action)
