@@ -8,7 +8,13 @@ sealed interface Schema {
     /** Optional reusable schema name. */
     val name: String?
 
-    /** Returns this schema with [name]. */
+    /**
+     * Returns this schema with the reusable name [name].
+     *
+     * @param name non-blank name for the schema.
+     * @return a copy of this schema with the supplied name.
+     * @throws IllegalArgumentException when [name] is blank.
+     */
     fun named(name: String): Schema
 }
 
@@ -177,11 +183,13 @@ class ObjectSchema(
     override fun toString(): String = "ObjectSchema(properties=$properties, name=$name)"
 }
 
-/** A map whose keys and values use [keys] and [values] schemas.
+/**
+ * A map whose keys and values use [keys] and [values] schemas.
  *
  * @property keys schema for map keys.
  * @property values schema for map values.
  * @property name optional reusable schema name.
+ * @throws IllegalArgumentException when [name] is present but blank.
  */
 data class MapSchema(
     /** Schema for map keys. */
@@ -198,10 +206,12 @@ data class MapSchema(
     override fun named(name: String): MapSchema = copy(name = name)
 }
 
-/** A nullable form of [schema].
+/**
+ * A nullable form of [schema].
  *
  * @property schema schema for non-null values.
  * @property name optional reusable schema name.
+ * @throws IllegalArgumentException when [name] is present but blank.
  */
 data class NullableSchema(
     /** Schema for non-null values. */

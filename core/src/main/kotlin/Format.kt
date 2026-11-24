@@ -26,7 +26,11 @@ data class Format<Value : Any, Representation : Any>(
     /**
      * Transforms this format to [TransformedValue], converting exceptions from [decode] into structured failures.
      *
-     * The serialized representation and schema remain unchanged.
+     * The serialized representation and schema remain unchanged. Exceptions thrown by [encode] are not converted.
+     *
+     * @param decode converts a successfully decoded value.
+     * @param encode converts a value before passing it to this format's encoder.
+     * @return a format for [TransformedValue] using this format's representation and schema.
      */
     fun <TransformedValue : Any> transform(
         decode: (Value) -> TransformedValue,
@@ -61,7 +65,11 @@ data class Format<Value : Any, Representation : Any>(
     /**
      * Transforms this format to [TransformedValue] while allowing exceptions from [decode] to propagate.
      *
-     * The serialized representation and schema remain unchanged.
+     * Existing decoding failures remain unchanged. The serialized representation and schema remain unchanged.
+     *
+     * @param decode converts a successfully decoded value.
+     * @param encode converts a value before passing it to this format's encoder.
+     * @return a format for [TransformedValue] using this format's representation and schema.
      */
     fun <TransformedValue : Any> transformOrThrow(
         decode: (Value) -> TransformedValue,
@@ -82,7 +90,13 @@ data class Format<Value : Any, Representation : Any>(
             schema = schema
         )
 
-    /** Returns this format with a schema [name]. */
+    /**
+     * Returns this format with a schema [name].
+     *
+     * @param name non-blank reusable schema name.
+     * @return a copy of this format with the named schema.
+     * @throws IllegalArgumentException when [name] is blank.
+     */
     fun named(name: String): Format<Value, Representation> = copy(schema = schema.named(name))
 }
 
@@ -100,6 +114,8 @@ val format: Format.Companion
  * Lifts this element format into a format for ordered lists.
  *
  * Decoding preserves input order and accumulates every element failure.
+ *
+ * @return a format for ordered lists of values and representations.
  */
 fun <Value : Any, Representation : Any> Format<Value, Representation>.repeated(): Format<List<Value>, List<Representation>> =
     Format(
