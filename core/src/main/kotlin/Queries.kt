@@ -87,9 +87,12 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
         /**
          * Builds a required scalar query parameter named [name] using [format].
          *
+         * @param name valid query-string parameter name.
+         * @param format format used to encode and decode the query value.
          * @param description optional human-readable description.
          * @param deprecated whether consumers should avoid this query parameter.
-         * @throws IllegalArgumentException when [description] is present but blank.
+         * @return a required scalar query parameter.
+         * @throws IllegalArgumentException when [name] is invalid or [description] is blank.
          */
         operator fun <Value : Any> invoke(
             name: String,
@@ -99,7 +102,13 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
         ): QueryParameter<Value, Required> =
             QueryParameter(name, format, Required, ParameterDocumentation(description, deprecated))
 
-        /** Builds a required query parameter for enum [Value] using exact constant names. */
+        /**
+         * Builds a required query parameter for enum [Value] using exact constant names.
+         *
+         * @param name valid query-string parameter name.
+         * @return a required enum query parameter.
+         * @throws IllegalArgumentException when [name] is invalid.
+         */
         inline fun <reified Value : Enum<Value>> enumValue(name: String): QueryParameter<Value, Required> =
             invoke(name, format.enumValue())
 

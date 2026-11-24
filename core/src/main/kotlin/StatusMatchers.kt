@@ -2,11 +2,17 @@ package dev.akif.tapik
 
 /** A matcher selecting the HTTP statuses represented by an output. */
 sealed interface StatusMatcher {
-    /** Returns whether this matcher accepts [status]. */
+    /**
+     * Returns whether this matcher accepts [status].
+     *
+     * @param status status to check.
+     * @return `true` when the status matches.
+     */
     fun matches(status: Status): Boolean
 }
 
-/** A matcher selecting exactly [status].
+/**
+ * A matcher selecting exactly [status].
  *
  * @property status only status accepted by this matcher.
  */
@@ -51,15 +57,25 @@ class StatusSet internal constructor(
     override fun matches(status: Status): Boolean = status in statuses
 }
 
-/** Builds a matcher for [first] and every status in [rest]. */
+/**
+ * Builds a matcher for [first] and every status in [rest].
+ *
+ * Duplicate values have set semantics.
+ *
+ * @param first first accepted status.
+ * @param rest additional accepted statuses.
+ * @return a matcher for the supplied statuses.
+ */
 fun statusesOf(
     first: Status,
     vararg rest: Status
 ): StatusSet = StatusSet(setOf(first, *rest))
 
-/** A matcher selecting statuses whose numeric codes belong to [range].
+/**
+ * A matcher selecting statuses whose numeric codes belong to [range].
  *
  * @property range inclusive range of accepted status codes.
+ * @throws IllegalArgumentException when [range] is empty or includes a code outside 100 through 599.
  */
 data class StatusRange(
     /** Inclusive range of accepted status codes. */
@@ -74,7 +90,13 @@ data class StatusRange(
     override fun matches(status: Status): Boolean = status.code in range
 }
 
-/** Builds a matcher for the HTTP status codes in [range]. */
+/**
+ * Builds a matcher for the HTTP status codes in [range].
+ *
+ * @param range inclusive range of status codes.
+ * @return a matcher for every status in the range.
+ * @throws IllegalArgumentException when [range] is empty or includes a code outside 100 through 599.
+ */
 fun statusesIn(range: IntRange): StatusRange = StatusRange(range)
 
 /**
@@ -82,6 +104,7 @@ fun statusesIn(range: IntRange): StatusRange = StatusRange(range)
  *
  * The [predicate] must be pure and deterministic because tapik evaluates it during endpoint validation and generation
  * may evaluate it again at runtime.
+ * Exceptions raised by [predicate] propagate from [matches].
  *
  * @property description stable label used in diagnostics.
  * @property predicate returns whether a status is accepted.
@@ -100,7 +123,14 @@ data class CustomStatus(
     override fun matches(status: Status): Boolean = predicate(status)
 }
 
-/** Builds a custom status matcher from its stable [description] and runtime [predicate]. */
+/**
+ * Builds a custom status matcher from its stable [description] and runtime [predicate].
+ *
+ * @param description stable label used in diagnostics.
+ * @param predicate returns whether a status is accepted.
+ * @return a matcher that calls [predicate] to test statuses.
+ * @throws IllegalArgumentException when [description] is blank.
+ */
 fun statusMatching(
     description: String,
     predicate: (Status) -> Boolean

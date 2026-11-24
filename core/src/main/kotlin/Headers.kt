@@ -82,9 +82,12 @@ data class Header<Value : Any, out P : Presence<Value>>(
         /**
          * Builds a required header named [name] using [format].
          *
+         * @param name valid HTTP field name.
+         * @param format format used to encode and decode the header value.
          * @param description optional human-readable description.
          * @param deprecated whether consumers should avoid this header.
-         * @throws IllegalArgumentException when [description] is present but blank.
+         * @return a required header definition.
+         * @throws IllegalArgumentException when [name] is invalid or [description] is blank.
          */
         operator fun <Value : Any> invoke(
             name: String,
@@ -94,7 +97,13 @@ data class Header<Value : Any, out P : Presence<Value>>(
         ): Header<Value, Required> =
             Header(name, format, Required, ParameterDocumentation(description, deprecated))
 
-        /** Builds a required header for enum [Value] using exact constant names. */
+        /**
+         * Builds a required header for enum [Value] using exact constant names.
+         *
+         * @param name valid HTTP field name.
+         * @return a required enum header.
+         * @throws IllegalArgumentException when [name] is invalid.
+         */
         inline fun <reified Value : Enum<Value>> enumValue(name: String): Header<Value, Required> =
             invoke(name, format.enumValue())
 
@@ -292,24 +301,39 @@ internal fun <H : Headers> validatedHeaders(headers: H): H {
     return headers
 }
 
-/** Groups one [header1]. */
+/** Groups one [header1].
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <Header1 : Header<*, *>> headersOf(header1: Header1): Headers1<Header1> =
     validatedHeaders(Headers1(header1))
 
-/** Groups [header1] and [header2]. */
+/**
+ * Groups [header1] and [header2] in declaration order.
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <Header1 : Header<*, *>, Header2 : Header<*, *>> headersOf(
     header1: Header1,
     header2: Header2
 ): Headers2<Header1, Header2> = validatedHeaders(Headers2(header1, header2))
 
-/** Groups three headers in declaration order. */
+/**
+ * Groups three headers in declaration order.
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <Header1 : Header<*, *>, Header2 : Header<*, *>, Header3 : Header<*, *>> headersOf(
     header1: Header1,
     header2: Header2,
     header3: Header3
 ): Headers3<Header1, Header2, Header3> = validatedHeaders(Headers3(header1, header2, header3))
 
-/** Groups four headers in declaration order. */
+/**
+ * Groups four headers in declaration order.
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <Header1 : Header<*, *>, Header2 : Header<*, *>, Header3 : Header<*, *>, Header4 : Header<*, *>> headersOf(
     header1: Header1,
     header2: Header2,
@@ -317,7 +341,11 @@ fun <Header1 : Header<*, *>, Header2 : Header<*, *>, Header3 : Header<*, *>, Hea
     header4: Header4
 ): Headers4<Header1, Header2, Header3, Header4> = validatedHeaders(Headers4(header1, header2, header3, header4))
 
-/** Groups five headers in declaration order. */
+/**
+ * Groups five headers in declaration order.
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <
     Header1 : Header<*, *>,
     Header2 : Header<*, *>,
@@ -333,7 +361,11 @@ fun <
 ): Headers5<Header1, Header2, Header3, Header4, Header5> =
     validatedHeaders(Headers5(header1, header2, header3, header4, header5))
 
-/** Groups six headers in declaration order. */
+/**
+ * Groups six headers in declaration order.
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <
     Header1 : Header<*, *>,
     Header2 : Header<*, *>,
@@ -351,7 +383,11 @@ fun <
 ): Headers6<Header1, Header2, Header3, Header4, Header5, Header6> =
     validatedHeaders(Headers6(header1, header2, header3, header4, header5, header6))
 
-/** Groups seven headers in declaration order. */
+/**
+ * Groups seven headers in declaration order.
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <
     Header1 : Header<*, *>,
     Header2 : Header<*, *>,
@@ -371,7 +407,11 @@ fun <
 ): Headers7<Header1, Header2, Header3, Header4, Header5, Header6, Header7> =
     validatedHeaders(Headers7(header1, header2, header3, header4, header5, header6, header7))
 
-/** Groups eight headers in declaration order. */
+/**
+ * Groups eight headers in declaration order.
+ *
+ * @throws IllegalArgumentException when header names are duplicated ignoring case.
+ */
 fun <
     Header1 : Header<*, *>,
     Header2 : Header<*, *>,

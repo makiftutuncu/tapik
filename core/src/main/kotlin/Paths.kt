@@ -99,9 +99,12 @@ data class PathVariable<Value : Any>(
         /**
          * Builds a required path variable named [name] using [format].
          *
+         * @param name valid URI-template variable name.
+         * @param format format used to encode and decode the path value.
          * @param description optional human-readable description.
          * @param deprecated whether consumers should avoid this path variable.
-         * @throws IllegalArgumentException when [description] is present but blank.
+         * @return a required path variable definition.
+         * @throws IllegalArgumentException when [name] is invalid or [description] is blank.
          */
         operator fun <Value : Any> invoke(
             name: String,
@@ -111,7 +114,13 @@ data class PathVariable<Value : Any>(
         ): PathVariable<Value> =
             PathVariable(name, format, ParameterDocumentation(description, deprecated))
 
-        /** Builds a required path variable for enum [Value] using exact constant names. */
+        /**
+         * Builds a required path variable for enum [Value] using exact constant names.
+         *
+         * @param name valid URI-template variable name.
+         * @return a required enum path variable.
+         * @throws IllegalArgumentException when [name] is invalid.
+         */
         inline fun <reified Value : Enum<Value>> enumValue(name: String): PathVariable<Value> =
             invoke(name, format.enumValue())
 
@@ -135,7 +144,13 @@ data class PathVariable<Value : Any>(
         override fun duration(name: String): PathVariable<Duration> = invoke(name, format.duration)
         override fun period(name: String): PathVariable<Period> = invoke(name, format.period)
 
-        /** Builds a required wildcard capturing one or more final path segments. */
+        /**
+         * Builds a required wildcard capturing one or more final path segments.
+         *
+         * @param name valid URI-template variable name.
+         * @return a remaining-path value for the final URI segments.
+         * @throws IllegalArgumentException when [name] is invalid.
+         */
         fun remaining(name: String): RemainingPath = RemainingPath(name)
     }
 }
