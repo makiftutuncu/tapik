@@ -33,10 +33,24 @@ abstract class Api(
     val includedApis: List<ApiInclusion<*>>
         get() = registeredEntries.filterIsInstance<InclusionEntry>().map(InclusionEntry::inclusion)
 
-    /** Starts a delegated inclusion of [api] at the property's declaration position. */
+    /**
+     * Starts a delegated inclusion of [api] at the property's declaration position.
+     *
+     * @param api API value to include.
+     * @return a delegate that registers the inclusion when assigned to an API property.
+     */
     protected fun <Included : Api> including(api: Included): ApiInclusion<Included> = ApiInclusion(api)
 
-    /** Starts a draft `GET` endpoint for [uri]. */
+    /**
+     * Starts a draft `GET` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `GET`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> get(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -44,7 +58,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.GET, uri, summary, description, tags)
 
-    /** Starts a draft `HEAD` endpoint for [uri]. */
+    /**
+     * Starts a draft `HEAD` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `HEAD`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> head(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -52,7 +75,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.HEAD, uri, summary, description, tags)
 
-    /** Starts a draft `POST` endpoint for [uri]. */
+    /**
+     * Starts a draft `POST` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `POST`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> post(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -60,7 +92,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.POST, uri, summary, description, tags)
 
-    /** Starts a draft `PUT` endpoint for [uri]. */
+    /**
+     * Starts a draft `PUT` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `PUT`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> put(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -68,7 +109,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.PUT, uri, summary, description, tags)
 
-    /** Starts a draft `PATCH` endpoint for [uri]. */
+    /**
+     * Starts a draft `PATCH` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `PATCH`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> patch(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -76,7 +126,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.PATCH, uri, summary, description, tags)
 
-    /** Starts a draft `DELETE` endpoint for [uri]. */
+    /**
+     * Starts a draft `DELETE` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `DELETE`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> delete(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -84,7 +143,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.DELETE, uri, summary, description, tags)
 
-    /** Starts a draft `CONNECT` endpoint for [uri]. */
+    /**
+     * Starts a draft `CONNECT` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `CONNECT`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> connect(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -92,7 +160,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.CONNECT, uri, summary, description, tags)
 
-    /** Starts a draft `OPTIONS` endpoint for [uri]. */
+    /**
+     * Starts a draft `OPTIONS` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `OPTIONS`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> options(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -100,7 +177,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.OPTIONS, uri, summary, description, tags)
 
-    /** Starts a draft `TRACE` endpoint for [uri]. */
+    /**
+     * Starts a draft `TRACE` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `TRACE`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> trace(
         uri: Uri<P, Q>,
         summary: String? = null,
@@ -108,7 +194,16 @@ abstract class Api(
         tags: Set<String> = noTags
     ) = endpoint(Method.TRACE, uri, summary, description, tags)
 
-    /** Starts a draft `QUERY` endpoint for [uri]. */
+    /**
+     * Starts a draft `QUERY` endpoint at [uri].
+     *
+     * @param uri path and query definition for the endpoint.
+     * @param summary optional short summary for generated documentation.
+     * @param description optional detailed description for generated documentation.
+     * @param tags endpoint tags for generated documentation.
+     * @return a draft endpoint using `QUERY`.
+     * @throws IllegalArgumentException when a supplied summary, description, or tag is blank.
+     */
     protected fun <P : Paths, Q : Queries> query(
         uri: Uri<P, Q>,
         summary: String? = null,
