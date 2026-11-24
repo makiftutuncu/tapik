@@ -17,7 +17,13 @@ data class Body<Value : Any>(
     val format: ByteArrayFormat<Value>
 ) : BodyAlternative
 
-/** Builds a required body using [mediaType] and [format]. */
+/**
+ * Builds a required body using [mediaType] and [format].
+ *
+ * @param mediaType concrete HTTP media type for the representation.
+ * @param format format that encodes and decodes the body value.
+ * @return a required body representation.
+ */
 fun <Value : Any> body(
     mediaType: MediaType,
     format: ByteArrayFormat<Value>
@@ -29,7 +35,11 @@ data object NoBody : BodyAlternative
 /** The bodyless DSL value. */
 val noBody: NoBody = NoBody
 
-/** An ordered, non-empty heterogeneous tuple of body alternatives. */
+/**
+ * An ordered, non-empty heterogeneous tuple of body alternatives.
+ *
+ * Use [bodiesOf] to build a group with unique media types. [noBody] may occur once, only as the final alternative.
+ */
 typealias Bodies = NonEmptyTuple<BodyAlternative>
 
 /** A body tuple with one alternative. */

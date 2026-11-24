@@ -4,7 +4,8 @@ package dev.akif.tapik
 sealed interface OutputAlternative
 
 /**
- * One endpoint output alternative.
+ * One endpoint output alternative. Its status matcher must not overlap the matchers of other outputs on the same
+ * endpoint.
  *
  * @param M status-matcher type.
  * @param B body-alternative tuple type.
@@ -147,13 +148,24 @@ private fun StatusMatcher.validationDescription(): String =
         is CustomStatus -> description
     }
 
-/** Replaces the implicit default with the first explicit [output]. */
+/**
+ * Replaces the implicit default with the first explicit [output].
+ *
+ * @param output first explicit response alternative.
+ * @return this endpoint with the explicit output.
+ */
 fun <P : Paths, Q : Queries, H : Headers, I : Input, OutputType : Output<*, *, *>>
     Endpoint<P, Q, H, I, DefaultOutput, Draft>.output(
         output: OutputType
     ): Endpoint<P, Q, H, I, Outputs1<OutputType>, Draft> = withOutputs(Outputs1(output))
 
-/** Appends a second explicit [output]. */
+/**
+ * Appends a second explicit [output] after the first.
+ *
+ * @param output response alternative to append.
+ * @return this endpoint with both outputs in declaration order.
+ * @throws IllegalArgumentException when [output]'s status matcher overlaps the existing output.
+ */
 @JvmName("endpointWithOneOutputOutput")
 fun <P : Paths, Q : Queries, H : Headers, I : Input, Output1 : Output<*, *, *>, OutputType : Output<*, *, *>>
     Endpoint<P, Q, H, I, Outputs1<Output1>, Draft>.output(
@@ -163,7 +175,13 @@ fun <P : Paths, Q : Queries, H : Headers, I : Input, Output1 : Output<*, *, *>, 
         return withOutputs(Outputs2(outputs._1, output))
     }
 
-/** Appends a third explicit [output]. */
+/**
+ * Appends a third explicit [output] after the existing alternatives.
+ *
+ * @param output response alternative to append.
+ * @return this endpoint with all outputs in declaration order.
+ * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ */
 @JvmName("endpointWithTwoOutputsOutput")
 fun <
     P : Paths,
@@ -180,7 +198,13 @@ fun <
     return withOutputs(Outputs3(outputs._1, outputs._2, output))
 }
 
-/** Appends a fourth explicit [output]. */
+/**
+ * Appends a fourth explicit [output] after the existing alternatives.
+ *
+ * @param output response alternative to append.
+ * @return this endpoint with all outputs in declaration order.
+ * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ */
 @JvmName("endpointWithThreeOutputsOutput")
 fun <
     P : Paths,
@@ -198,7 +222,13 @@ fun <
     return withOutputs(Outputs4(outputs._1, outputs._2, outputs._3, output))
 }
 
-/** Appends a fifth explicit [output]. */
+/**
+ * Appends a fifth explicit [output] after the existing alternatives.
+ *
+ * @param output response alternative to append.
+ * @return this endpoint with all outputs in declaration order.
+ * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ */
 @JvmName("endpointWithFourOutputsOutput")
 fun <
     P : Paths,
@@ -217,7 +247,13 @@ fun <
     return withOutputs(Outputs5(outputs._1, outputs._2, outputs._3, outputs._4, output))
 }
 
-/** Appends a sixth explicit [output]. */
+/**
+ * Appends a sixth explicit [output] after the existing alternatives.
+ *
+ * @param output response alternative to append.
+ * @return this endpoint with all outputs in declaration order.
+ * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ */
 @JvmName("endpointWithFiveOutputsOutput")
 fun <
     P : Paths,
@@ -237,7 +273,13 @@ fun <
     return withOutputs(Outputs6(outputs._1, outputs._2, outputs._3, outputs._4, outputs._5, output))
 }
 
-/** Appends a seventh explicit [output]. */
+/**
+ * Appends a seventh explicit [output] after the existing alternatives.
+ *
+ * @param output response alternative to append.
+ * @return this endpoint with all outputs in declaration order.
+ * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ */
 @JvmName("endpointWithSixOutputsOutput")
 fun <
     P : Paths,
@@ -260,7 +302,13 @@ fun <
     )
 }
 
-/** Appends an eighth explicit [output]. */
+/**
+ * Appends an eighth explicit [output] after the existing alternatives.
+ *
+ * @param output response alternative to append.
+ * @return this endpoint with all outputs in declaration order.
+ * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ */
 @JvmName("endpointWithSevenOutputsOutput")
 fun <
     P : Paths,
