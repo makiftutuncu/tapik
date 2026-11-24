@@ -13,6 +13,8 @@ import org.springframework.http.MediaType as SpringMediaType
  * Parameter names and charset values compare case-insensitively; other values remain case-sensitive after
  * double-quoted values and quoted-pair escapes are decoded.
  *
+ * @param accept request `Accept` header, if present.
+ * @param offered response media types in endpoint declaration order.
  * @return the selected representation, or `null` when none is acceptable or [accept] is invalid.
  */
 fun selectResponseMediaType(
