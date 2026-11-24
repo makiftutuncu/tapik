@@ -21,6 +21,7 @@ data class KotlinDataField(
  *
  * A variant without [fields] is rendered as a data object; otherwise it is rendered as a data class.
  *
+ * @param fields constructor fields rendered in declaration order.
  * @property name generated Kotlin variant name.
  */
 class KotlinSealedVariant(
@@ -67,6 +68,10 @@ class KotlinSealedVariant(
  *
  * Data variants containing byte arrays receive content-based `equals` and `hashCode` implementations, including when
  * the source type is an alias of `ByteArray`.
+ *
+ * @param name generated interface name.
+ * @param variants generated variants in declaration order.
+ * @param indentation text prepended to each top-level line.
  */
 fun StringBuilder.appendSealedInterface(
     name: String,

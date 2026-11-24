@@ -15,7 +15,12 @@ data class KotlinSourceType(
     /** Compiler-expanded type used for semantic checks. */
     val expandedType: KotlinType
 ) {
-    /** Whether the expanded type has the class classifier named [name]. */
+    /**
+     * Returns whether the expanded type has the class name [name].
+     *
+     * @param name fully qualified Kotlin class name.
+     * @return `true` when the expanded type refers to this class.
+     */
     fun expandsTo(name: String): Boolean =
         (expandedType.classifier as? KotlinClassClassifier)?.name == name
 
@@ -31,6 +36,8 @@ data class KotlinSourceType(
 /**
  * Converts this compiled type to a lossless source-generation view at [location].
  *
+ * @param location endpoint or field location used in any error message.
+ * @return source spelling and expanded type information for generated code.
  * @throws IllegalArgumentException when this type contains a shape tapik cannot reproduce in Kotlin source.
  */
 fun KotlinType.toKotlinSourceType(location: String): KotlinSourceType {

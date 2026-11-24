@@ -9,6 +9,8 @@ import java.util.LinkedHashSet
  *
  * An empty [includes] set selects every available API. [excludes] are applied afterward.
  *
+ * @param includes exact API IDs to include, or empty to include all.
+ * @param excludes exact API IDs to exclude after includes are applied.
  * @throws IllegalArgumentException when either set contains a blank ID.
  */
 class ApiSelection(
@@ -24,6 +26,8 @@ class ApiSelection(
     /**
      * Applies this selection without changing [apis] order.
      *
+     * @param apis available APIs to select from.
+     * @return selected APIs in their original order.
      * @throws IllegalArgumentException when a configured ID is unknown or no API remains.
      */
     fun select(apis: List<Api>): List<Api> {

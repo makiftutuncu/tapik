@@ -5,6 +5,8 @@ import dev.akif.tapik.*
 /**
  * Stable generated type names for one endpoint.
  *
+ * @param requestBodyVariants generated request-body variant names in representation order.
+ * @param responseVariants generated response variant names in output order.
  * @property response response sealed-interface name.
  * @property requestBody optional request-body choice sealed-interface name.
  */
@@ -26,6 +28,9 @@ class EndpointTypeNames(
  * Allocates target-neutral endpoint type names for [compiled] in endpoint declaration order.
  *
  * The returned names depend only on the compiled API and may be shared by client and server generators.
+ *
+ * @param compiled API and exact compiled endpoint types.
+ * @return one set of generated names for each endpoint, in declaration order.
  */
 fun endpointTypeNames(compiled: CompiledApi): List<EndpointTypeNames> {
     val typeNames = mutableSetOf<String>()
@@ -52,6 +57,7 @@ fun endpointTypeNames(compiled: CompiledApi): List<EndpointTypeNames> {
  * @param compiled API and exact compiled endpoint types.
  * @param packageName stable generated package for the API.
  * @return one Kotlin source artifact containing all endpoint-owned types.
+ * @throws IllegalArgumentException when an endpoint type cannot be represented as Kotlin source.
  */
 fun endpointTypesArtifact(
     compiled: CompiledApi,
