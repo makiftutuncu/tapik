@@ -14,7 +14,7 @@ class CompiledApi(
     val value: Api,
     endpoints: List<CompiledEndpoint>
 ) {
-    /** Endpoints in runtime declaration order. */
+    /** Unmodifiable snapshot of endpoints in runtime declaration order. */
     val endpoints: List<CompiledEndpoint> = endpoints.snapshotList()
 
     /** Returns [value] for destructuring. */
@@ -61,7 +61,7 @@ class CompiledEndpoint internal constructor(
     val type: KotlinType,
     sourcePropertyPath: List<String>
 ) {
-    /** Delegated property names leading from the selected root API to [value]. */
+    /** Unmodifiable snapshot of delegated property names leading from the selected root API to [value]. */
     val propertyPath: List<String> = sourcePropertyPath.snapshotList().also { path ->
         require(path.isNotEmpty()) { "Compiled endpoint property path must not be empty" }
     }

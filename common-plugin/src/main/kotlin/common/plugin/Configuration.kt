@@ -17,7 +17,7 @@ data class ScalarConfigurationValue(
 class ListConfigurationValue(
     values: List<ConfigurationValue>
 ) : ConfigurationValue {
-    /** List elements in declaration order. */
+    /** Unmodifiable snapshot of list elements in declaration order. */
     val values: List<ConfigurationValue> = values.snapshotList()
 
     /** Returns [values] for destructuring. */
@@ -42,7 +42,7 @@ class ListConfigurationValue(
 class ObjectConfigurationValue(
     values: Map<String, ConfigurationValue>
 ) : ConfigurationValue {
-    /** Child values keyed by name in declaration order. */
+    /** Unmodifiable snapshot of child values keyed by name in declaration order. */
     val values: Map<String, ConfigurationValue> = values.snapshotMap()
 
     init {
@@ -75,7 +75,7 @@ class ObjectConfigurationValue(
 class TargetConfiguration(
     values: Map<String, ConfigurationValue> = emptyMap()
 ) {
-    /** Root configuration values keyed by name. */
+    /** Unmodifiable snapshot of root configuration values keyed by name. */
     val values: Map<String, ConfigurationValue> = values.snapshotMap()
 
     init {

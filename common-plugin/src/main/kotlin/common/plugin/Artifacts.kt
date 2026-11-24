@@ -65,7 +65,7 @@ private val WINDOWS_ABSOLUTE_PATH: Regex = Regex("^[A-Za-z]:/")
 class GenerationResult(
     artifacts: List<GeneratedArtifact>
 ) {
-    /** Generated artifacts in deterministic order. */
+    /** Unmodifiable snapshot of generated artifacts in deterministic order. */
     val artifacts: List<GeneratedArtifact> = artifacts.snapshotList()
 
     init {

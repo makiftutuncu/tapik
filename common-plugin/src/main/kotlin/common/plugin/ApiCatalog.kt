@@ -11,7 +11,7 @@ import java.util.ServiceLoader
 class ApiCatalog private constructor(
     apis: List<Api>
 ) {
-    /** All registered APIs ordered by [Api.apiId]. */
+    /** Unmodifiable snapshot of registered APIs ordered by [Api.apiId]. */
     val apis: List<Api> = apis.snapshotList()
 
     /** Creates and discovers API catalogs. */

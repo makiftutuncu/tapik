@@ -15,7 +15,7 @@ interface GenerationTargetRegistry {
 class GenerationTargetCatalog private constructor(
     targets: List<GenerationTarget>
 ) {
-    /** All registered targets ordered by [GenerationTarget.id]. */
+    /** Unmodifiable snapshot of registered targets ordered by [GenerationTarget.id]. */
     val targets: List<GenerationTarget> = targets.snapshotList()
 
     /** Creates and discovers target catalogs. */

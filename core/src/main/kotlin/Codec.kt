@@ -35,7 +35,7 @@ sealed interface DecodeResult<out Value : Any> {
     class Failure(
         errors: List<DecodeError>
     ) : DecodeResult<Nothing> {
-        /** Errors in decoding order, protected from caller mutation. */
+        /** Unmodifiable snapshot of errors in decoding order. */
         val errors: List<DecodeError> = errors.snapshotList()
 
         init {

@@ -21,7 +21,7 @@ data class ExactStatus(
 class StatusSet internal constructor(
     statuses: Set<Status>
 ) : StatusMatcher {
-    /** Accepted statuses, protected from caller mutation. */
+    /** Unmodifiable snapshot of accepted statuses. */
     val statuses: Set<Status> = statuses.snapshotSet()
 
     init {

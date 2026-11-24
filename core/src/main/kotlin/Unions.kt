@@ -18,7 +18,7 @@ class SchemaDiscriminator(
     /** Fallback schema when a wire value has no mapping. */
     val defaultMapping: ReferenceSchema? = null
 ) {
-    /** Schema references in declaration order. */
+    /** Unmodifiable snapshot of schema references in declaration order. */
     val mapping: Map<String, ReferenceSchema> = mapping.snapshotMap()
 
     init {
@@ -73,7 +73,7 @@ class UnionSchema(
     /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
-    /** Schemas accepted by this union in declaration order. */
+    /** Unmodifiable snapshot of schemas accepted by this union, in declaration order. */
     val alternatives: List<Schema> = alternatives.snapshotList()
 
     init {

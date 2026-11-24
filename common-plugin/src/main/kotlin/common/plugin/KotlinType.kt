@@ -25,7 +25,7 @@ class KotlinType(
     /** Upper bound when this is a flexible platform type. */
     val flexibleUpperBound: KotlinFlexibleTypeUpperBound? = null
 ) {
-    /** Generic type projections in declaration order. */
+    /** Unmodifiable snapshot of generic type projections in declaration order. */
     val arguments: List<KotlinTypeProjection> = arguments.snapshotList()
 
     /** Returns [classifier] for destructuring. */

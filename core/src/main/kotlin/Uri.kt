@@ -15,7 +15,7 @@ class Uri<out P : Paths, out Q : Queries> internal constructor(
     /** Query parameters in declaration order. */
     val queries: Q
 ) {
-    /** Normalized path segments, whose literal values are already encoded. */
+    /** Unmodifiable snapshot of normalized path segments, whose literal values are already encoded. */
     val segments: List<PathSegment> = segments.snapshotList()
 
     /** Returns [segments] for destructuring. */

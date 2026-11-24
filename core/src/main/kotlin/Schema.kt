@@ -82,7 +82,7 @@ class EnumSchema(
     /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
-    /** Allowed string values in declaration order. */
+    /** Unmodifiable snapshot of allowed string values in declaration order. */
     val values: List<String> = values.snapshotList()
 
     init {
@@ -144,7 +144,7 @@ class ObjectSchema(
     /** Optional reusable schema name. */
     override val name: String? = null
 ) : Schema {
-    /** Object fields in declaration order. */
+    /** Unmodifiable snapshot of object fields in declaration order. */
     val properties: Map<String, SchemaProperty> = properties.snapshotMap()
 
     init {

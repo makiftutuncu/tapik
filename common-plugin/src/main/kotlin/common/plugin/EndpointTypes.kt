@@ -16,9 +16,9 @@ class EndpointTypeNames(
     requestBodyVariants: List<String>,
     responseVariants: List<String>
 ) {
-    /** Request-body variant names in representation order. */
+    /** Unmodifiable snapshot of request-body variant names in representation order. */
     val requestBodyVariants: List<String> = requestBodyVariants.snapshotList()
-    /** Response variant names in output order. */
+    /** Unmodifiable snapshot of response variant names in output order. */
     val responseVariants: List<String> = responseVariants.snapshotList()
 }
 

@@ -65,7 +65,7 @@ class Endpoint<
     /** Binding state. */
     val state: S
 ) {
-    /** Endpoint tags using set semantics. */
+    /** Unmodifiable snapshot of endpoint tags, using set semantics. */
     val tags: Set<String> = tags.snapshotSet()
 
     /** Returns [method] for destructuring. */

@@ -28,7 +28,7 @@ class KotlinSealedVariant(
     val name: String,
     fields: List<KotlinDataField> = emptyList()
 ) {
-    /** Constructor fields in declaration order. */
+    /** Unmodifiable snapshot of constructor fields in declaration order. */
     val fields: List<KotlinDataField> = fields.snapshotList()
 
     /** Returns [name] for destructuring. */

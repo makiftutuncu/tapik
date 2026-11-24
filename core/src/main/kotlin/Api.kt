@@ -19,7 +19,7 @@ abstract class Api(
 
     private val registeredEntries: MutableList<ApiEntry> = mutableListOf()
 
-    /** Ready endpoints flattened recursively in declaration order. */
+    /** A fresh list of ready endpoints, recursively flattened in declaration order. */
     val endpoints: List<Endpoint<*, *, *, *, *, Ready>>
         get() =
             registeredEntries.flatMap { entry ->
@@ -29,7 +29,7 @@ abstract class Api(
                 }
             }.also(::requireUniqueEndpointIds)
 
-    /** Direct API inclusions in inclusion declaration order. */
+    /** A fresh list of direct API inclusions in inclusion declaration order. */
     val includedApis: List<ApiInclusion<*>>
         get() = registeredEntries.filterIsInstance<InclusionEntry>().map(InclusionEntry::inclusion)
 

@@ -12,7 +12,7 @@ class GenerationRequest(
     /** Target-owned, host-neutral configuration. */
     val configuration: TargetConfiguration = TargetConfiguration()
 ) {
-    /** Every API selected for this execution. */
+    /** Unmodifiable snapshot of APIs selected for this execution. */
     val apis: List<Api> = apis.snapshotList()
 
     /** Returns [apis] for destructuring. */
