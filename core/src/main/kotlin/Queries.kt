@@ -191,7 +191,11 @@ private fun requireValidQueryParameterName(name: String) {
 val query: QueryParameter.Companion
     get() = QueryParameter.Companion
 
-/** An ordered, heterogeneous tuple of query parameters. */
+/**
+ * An ordered, heterogeneous tuple of query parameters.
+ *
+ * Names must be unique within a URI.
+ */
 typealias Queries = Tuple<Query>
 
 /** A query-parameter tuple with no values. */

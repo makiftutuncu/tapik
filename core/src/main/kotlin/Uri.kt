@@ -3,10 +3,16 @@ package dev.akif.tapik
 /**
  * An immutable URI definition with exact path-value and query-parameter tuple types.
  *
+ * Path variable names must be unique among paths, and query parameter names must be unique among queries. A remaining
+ * path, when present, is the final path value.
+ *
+ * Literal path fragments use already-encoded text. Leading and trailing slashes are removed; empty fragments and
+ * repeated internal separators are rejected.
+ *
  * @param P path-value tuple type.
  * @param Q query-parameter tuple type.
- * @property paths path values in declaration order.
- * @property queries query parameters in declaration order.
+ * @property paths path values in declaration order, with unique names.
+ * @property queries query parameters in declaration order, with unique names.
  */
 class Uri<out P : Paths, out Q : Queries> internal constructor(
     segments: List<PathSegment>,

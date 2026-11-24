@@ -243,7 +243,11 @@ private fun isHttpTokenCharacter(character: Char): Boolean =
 val header: Header.Companion
     get() = Header.Companion
 
-/** An ordered, heterogeneous tuple of headers. */
+/**
+ * An ordered, heterogeneous tuple of headers.
+ *
+ * Names must be unique ignoring case when the headers are grouped or added to an endpoint.
+ */
 typealias Headers = Tuple<Header<*, *>>
 
 /** A header tuple with no values. */
