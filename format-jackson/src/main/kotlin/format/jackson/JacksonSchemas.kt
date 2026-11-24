@@ -16,7 +16,15 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.javaType
 
-/** Derives a tapik schema from Jackson [format], Kotlin [type], and custom [registry]. */
+/**
+ * Derives a tapik schema from Jackson [format], Kotlin [type], and custom [registry].
+ *
+ * @param format mapper whose serialization settings determine the wire shape.
+ * @param type Kotlin type to describe.
+ * @param registry custom schemas for types encountered during derivation.
+ * @return the schema for [type].
+ * @throws SchemaDerivationException when the type or its Jackson wire shape is unsupported.
+ */
 fun deriveSchema(
     format: ObjectMapper,
     type: KType,

@@ -13,26 +13,56 @@ import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.json.ClassDiscriminatorMode
 import kotlinx.serialization.json.Json
 
-/** Derives a tapik schema from [serializer] and [registry] using [Json.Default]. */
+/**
+ * Derives a tapik schema from [serializer] and [registry] using [Json.Default].
+ *
+ * @param serializer serializer whose descriptor describes the value.
+ * @param registry custom schemas for types encountered during derivation.
+ * @return the schema for the serialized value.
+ * @throws SchemaDerivationException when the descriptor cannot be represented by tapik's schema types.
+ */
 fun deriveSchema(
     serializer: KSerializer<*>,
     registry: KotlinxSchemaRegistry = KotlinxSchemaRegistry.Default
 ): Schema = deriveSchema(Json.Default, serializer, registry)
 
-/** Derives a tapik schema from [descriptor] and [registry] using [Json.Default]. */
+/**
+ * Derives a tapik schema from [descriptor] and [registry] using [Json.Default].
+ *
+ * @param descriptor descriptor that describes the value.
+ * @param registry custom schemas for types encountered during derivation.
+ * @return the schema for the described value.
+ * @throws SchemaDerivationException when the descriptor cannot be represented by tapik's schema types.
+ */
 fun deriveSchema(
     descriptor: SerialDescriptor,
     registry: KotlinxSchemaRegistry = KotlinxSchemaRegistry.Default
 ): Schema = deriveSchema(Json.Default, descriptor, registry)
 
-/** Derives a tapik schema from [serializer], the selected JSON [format], and [registry]. */
+/**
+ * Derives a tapik schema from [serializer], the selected JSON [format], and [registry].
+ *
+ * @param format JSON settings that affect the serialized shape.
+ * @param serializer serializer whose descriptor describes the value.
+ * @param registry custom schemas for types encountered during derivation.
+ * @return the schema for the serialized value.
+ * @throws SchemaDerivationException when the descriptor cannot be represented by tapik's schema types.
+ */
 fun deriveSchema(
     format: Json,
     serializer: KSerializer<*>,
     registry: KotlinxSchemaRegistry = KotlinxSchemaRegistry.Default
 ): Schema = deriveSchema(format, serializer.descriptor, registry)
 
-/** Derives a tapik schema from [descriptor], the selected JSON [format], and [registry]. */
+/**
+ * Derives a tapik schema from [descriptor], the selected JSON [format], and [registry].
+ *
+ * @param format JSON settings that affect the serialized shape.
+ * @param descriptor descriptor that describes the value.
+ * @param registry custom schemas for types encountered during derivation.
+ * @return the schema for the described value.
+ * @throws SchemaDerivationException when the descriptor cannot be represented by tapik's schema types.
+ */
 fun deriveSchema(
     format: Json,
     descriptor: SerialDescriptor,
