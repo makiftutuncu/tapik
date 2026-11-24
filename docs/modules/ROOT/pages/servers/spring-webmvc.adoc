@@ -94,15 +94,19 @@ rules. The annotation registers generated adapters only; it does not enable or c
 
 The internal controller owns routes and Spring mapping annotations. It decodes path, query, and header strings with the
 endpoint formats, validates required and fixed inputs, selects request-body media representations, and calls the
-handler with Kotlin values. It converts decoding and media-type failures into the appropriate HTTP response before the
-handler is invoked.
+handler with Kotlin values. Missing required query or header values, decoding failures, and fixed-value mismatches return
+`400 Bad Request`. An unsupported request `Content-Type` returns `415 Unsupported Media Type`. If no response
+representation matches `Accept`, the target returns `406 Not Acceptable`.
 
 `MediaType(...)` checks syntax but not charset support. An unknown charset in an incoming `Content-Type` is treated as
 incompatible. An unknown charset in a declared response body can fail when Spring builds the response.
 
 After the handler returns, the controller matches the selected response alternative, encodes its body and headers,
-negotiates the response representation, and constructs the Spring response. The handler cannot return a status or body
-shape outside the generated sealed hierarchy.
+negotiates the response representation, and constructs the Spring response. Every output that carries a body is checked
+against the request's `Accept` header, even when it has one representation. A selected bodyless output does not depend
+on `Accept`; when an endpoint can return no body, its route has no aggregate `produces` condition that could reject the
+request before the handler chooses an output. The handler cannot return a status or body shape outside the generated
+sealed hierarchy.
 
 Response negotiation matches `Accept` parameter names and charset values case-insensitively, so
 `text/plain;charset=UTF-8` matches a body declared as `text/plain;charset=utf-8`. Other parameter values remain
