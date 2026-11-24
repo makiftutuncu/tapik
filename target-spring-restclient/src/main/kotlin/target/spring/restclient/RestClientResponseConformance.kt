@@ -9,6 +9,11 @@ import dev.akif.tapik.common.spring.toSpringMediaType
  * Declared media types are considered in order. `null` is returned only when [allowsNoBody] is true and [response]
  * contains neither a media type nor bytes.
  *
+ * @param response raw response to inspect.
+ * @param offered declared body media types, in preference order.
+ * @param allowsNoBody whether the endpoint accepts a response without a body.
+ * @param endpointId endpoint identifier included in an error message.
+ * @return the first compatible declared media type, or `null` for an allowed bodyless response.
  * @throws IllegalStateException when the response does not conform to the declared body alternatives.
  */
 fun selectResponseBodyMediaType(

@@ -5,7 +5,16 @@ import dev.akif.tapik.common.spring.toSpringMediaType
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 
-/** Builds a Spring response from encoded tapik status, headers, and optional body values. */
+/**
+ * Builds a Spring response from an encoded status, headers, and optional body.
+ *
+ * The body media type becomes the response `Content-Type`. A missing body leaves it unset.
+ *
+ * @param status HTTP status code.
+ * @param headers encoded response headers.
+ * @param body optional media type and encoded body bytes.
+ * @return the Spring response with the supplied status, headers, and body.
+ */
 fun webMvcResponse(
     status: Int,
     headers: Map<String, List<String>>,

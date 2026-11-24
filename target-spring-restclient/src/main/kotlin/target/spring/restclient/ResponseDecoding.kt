@@ -4,14 +4,30 @@ import dev.akif.tapik.ByteArrayFormat
 import dev.akif.tapik.DecodeResult
 import dev.akif.tapik.StringFormat
 
-/** Decodes a response [bytes] value or fails with its [endpointId] and body location. */
+/**
+ * Decodes response [bytes] with [format].
+ *
+ * @param format format for the response body.
+ * @param bytes encoded response body.
+ * @param endpointId endpoint identifier included in an error message.
+ * @return the decoded body value.
+ * @throws IllegalStateException when decoding fails.
+ */
 fun <Value : Any> decodeResponseBody(
     format: ByteArrayFormat<Value>,
     bytes: ByteArray,
     endpointId: String
 ): Value = decodeResponse(format.decode(bytes), endpointId, "body")
 
-/** Decodes a response header [value] or fails with its [endpointId] and header location. */
+/**
+ * Decodes response header [value] with [format].
+ *
+ * @param format format for the response header.
+ * @param value encoded header value.
+ * @param endpointId endpoint identifier included in an error message.
+ * @return the decoded header value.
+ * @throws IllegalStateException when decoding fails.
+ */
 fun <Value : Any> decodeResponseHeader(
     format: StringFormat<Value>,
     value: String,

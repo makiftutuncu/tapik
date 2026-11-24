@@ -27,7 +27,7 @@ class RestClientTransport(
      * @param uri resolves the request URI using the client's configured URI builder.
      * @param headers encoded request headers.
      * @param body optional encoded request body.
-     * @return raw response status, headers, media type, and bytes.
+     * @return raw response status, headers, media type when present, and body bytes.
      * @throws RestClientException when Spring cannot complete the exchange.
      */
     fun exchange(

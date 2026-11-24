@@ -6,6 +6,13 @@ import dev.akif.tapik.StringFormat
  * Requires [response] to contain exactly one [name] header equal to the encoded [expected] value.
  *
  * Header-name comparison is case-insensitive.
+ *
+ * @param response response whose headers are checked.
+ * @param name expected header name.
+ * @param format format used to encode [expected].
+ * @param expected expected header value.
+ * @param endpointId endpoint identifier included in an error message.
+ * @throws IllegalStateException when the header is missing, repeated, or has a different value.
  */
 fun <Value : Any> requireFixedResponseHeader(
     response: RestClientResponse,
