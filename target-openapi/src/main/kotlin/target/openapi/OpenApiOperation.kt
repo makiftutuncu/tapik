@@ -21,13 +21,13 @@ class OpenApiOperation(
     val requestBody: OpenApiRequestBody?,
     responses: Map<String, OpenApiResponse>
 ) {
-    /** Endpoint tags. */
+    /** Unmodifiable snapshot of endpoint tags. */
     val tags: List<String> = tags.snapshotList()
 
-    /** Ordered path, query, and request-header parameters. */
+    /** Unmodifiable snapshot of ordered path, query, and request-header parameters. */
     val parameters: List<OpenApiParameter> = parameters.snapshotList()
 
-    /** Responses keyed by status matcher representation. */
+    /** Unmodifiable snapshot of responses keyed by status matcher representation. */
     val responses: Map<String, OpenApiResponse> = responses.snapshotMap()
 
     /** Returns [operationId] for destructuring. */

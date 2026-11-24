@@ -11,10 +11,10 @@ class OpenApiResponse(
     headers: Map<String, OpenApiHeader>,
     content: Map<String, OpenApiMediaType>
 ) {
-    /** Response headers keyed by name in declaration order. */
+    /** Unmodifiable snapshot of response headers keyed by name in declaration order. */
     val headers: Map<String, OpenApiHeader> = headers.snapshotMap()
 
-    /** Representations keyed by media type in declaration order. */
+    /** Unmodifiable snapshot of representations keyed by media type in declaration order. */
     val content: Map<String, OpenApiMediaType> = content.snapshotMap()
 
     /** Returns [description] for destructuring. */

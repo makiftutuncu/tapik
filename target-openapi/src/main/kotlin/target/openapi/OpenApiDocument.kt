@@ -16,7 +16,7 @@ class OpenApiDocument(
     /** Reusable components referenced by operations. */
     val components: OpenApiComponents = OpenApiComponents()
 ) {
-    /** Operations grouped by URI path template in declaration order. */
+    /** Unmodifiable snapshot of operations grouped by URI path template in declaration order. */
     val paths: Map<String, OpenApiPathItem> = paths.snapshotMap()
 
     /** Returns [specificationVersion] for destructuring. */

@@ -39,25 +39,25 @@ class OpenApiSchema(
     defaultValue: JsonElement? = null,
     constantValue: JsonElement? = null
 ) {
-    /** JSON Schema types accepted by the value. */
+    /** Unmodifiable snapshot of JSON Schema types accepted by the value. */
     val types: List<String> = types.snapshotList()
 
-    /** Allowed string values. */
+    /** Unmodifiable snapshot of allowed string values. */
     val enumValues: List<String> = enumValues.snapshotList()
 
-    /** Object properties in declaration order. */
+    /** Unmodifiable snapshot of object properties in declaration order. */
     val properties: Map<String, OpenApiSchema> = properties.snapshotMap()
 
-    /** Required object property names in declaration order. */
+    /** Unmodifiable snapshot of required object property names in declaration order. */
     val required: List<String> = required.snapshotList()
 
-    /** Alternative schemas, at least one of which must match. */
+    /** Unmodifiable snapshot of alternative schemas, at least one of which must match. */
     val anyOf: List<OpenApiSchema> = anyOf.snapshotList()
 
-    /** Alternative schemas, exactly one of which must match. */
+    /** Unmodifiable snapshot of alternative schemas, exactly one of which must match. */
     val oneOf: List<OpenApiSchema> = oneOf.snapshotList()
 
-    /** Documented receiver behavior when a value is absent. */
+    /** A value consumers may use when the property is absent; this annotation does not apply the value. */
     val defaultValue: JsonElement? = defaultValue?.snapshotJson()
 
     /** The only accepted value. */

@@ -13,7 +13,7 @@ class OpenApiDiscriminator(
     /** Schema reference URI used when no explicit or implicit mapping applies. */
     val defaultMapping: String? = null
 ) {
-    /** Explicit discriminating values to schema reference URIs in declaration order. */
+    /** Unmodifiable snapshot mapping explicit discriminating values to schema reference URIs in declaration order. */
     val mapping: Map<String, String> = mapping.snapshotMap()
 
     /** Returns [propertyName] for destructuring. */

@@ -13,7 +13,7 @@ class OpenApiRequestBody(
     val required: Boolean,
     content: Map<String, OpenApiMediaType>
 ) {
-    /** Representations keyed by media type in declaration order. */
+    /** Unmodifiable snapshot of representations keyed by media type in declaration order. */
     val content: Map<String, OpenApiMediaType> = content.snapshotMap()
 
     /** Returns [description] for destructuring. */
