@@ -30,7 +30,8 @@ class GenerationEngine(
      * @param configuration host-neutral target configuration.
      * @param selection exact API-ID filters applied before target execution.
      * @return artifacts returned by the selected target.
-     * @throws IllegalArgumentException when the target is unknown, no APIs are supplied, or API IDs are duplicated.
+     * @throws IllegalArgumentException when the target is unknown, no APIs are supplied, API IDs are duplicated, or
+     * the selection references unknown IDs or leaves no APIs.
      */
     fun generate(
         targetId: String,

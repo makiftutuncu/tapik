@@ -38,7 +38,11 @@ class ListConfigurationValue(
     override fun toString(): String = "ListConfigurationValue(values=$values)"
 }
 
-/** A named target configuration object. */
+/**
+ * A named target configuration object.
+ *
+ * @throws IllegalArgumentException when a child name is blank.
+ */
 class ObjectConfigurationValue(
     values: Map<String, ConfigurationValue>
 ) : ConfigurationValue {
@@ -106,6 +110,8 @@ class TargetConfiguration(
 /**
  * Builds scalar target configuration from [values].
  *
+ * @param values configuration names and text values.
+ * @return a target configuration containing the supplied scalar values.
  * @throws IllegalArgumentException when a name is blank or duplicated.
  */
 fun targetConfigurationOf(vararg values: Pair<String, String>): TargetConfiguration {

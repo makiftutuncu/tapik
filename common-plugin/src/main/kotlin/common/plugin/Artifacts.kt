@@ -21,7 +21,8 @@ enum class ArtifactKind {
  * @property content complete textual content.
  * @property sharingKey stable identity allowing several executions to own the same path, or `null` for exclusive
  * ownership.
- * @throws IllegalArgumentException when [relativePath] is blank, absolute, or not normalized.
+ * @throws IllegalArgumentException when [relativePath] is blank, absolute, or not normalized, or when [mediaType] or
+ * [sharingKey] is blank.
  */
 data class GeneratedArtifact(
     /** Normalized, forward-slash path beneath the execution output directory. */
@@ -65,7 +66,7 @@ private val WINDOWS_ABSOLUTE_PATH: Regex = Regex("^[A-Za-z]:/")
 class GenerationResult(
     artifacts: List<GeneratedArtifact>
 ) {
-    /** Unmodifiable snapshot of generated artifacts in deterministic order. */
+    /** Unmodifiable snapshot of generated artifacts in the order returned by the target. */
     val artifacts: List<GeneratedArtifact> = artifacts.snapshotList()
 
     init {

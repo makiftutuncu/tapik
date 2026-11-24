@@ -5,6 +5,7 @@ import dev.akif.tapik.Api
 /**
  * Input supplied to one [GenerationTarget].
  *
+ * @param apis APIs selected for this execution.
  * @property configuration target-owned, host-neutral configuration.
  */
 class GenerationRequest(

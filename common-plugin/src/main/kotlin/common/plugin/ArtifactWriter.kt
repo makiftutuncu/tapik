@@ -25,7 +25,8 @@ object ArtifactWriter {
      * @param owner stable identity of the host execution writing these artifacts.
      * @return written paths in artifact order.
      * @throws java.io.IOException when a directory or file cannot be written.
-     * @throws IllegalArgumentException when an artifact resolves outside [outputDirectory].
+     * @throws IllegalArgumentException when [owner] is blank, an artifact uses the reserved ownership path, or an
+     * artifact resolves outside [outputDirectory].
      * @throws IllegalStateException when another execution owns a generated path without the same nonblank sharing key,
      * or that path exists without tapik ownership.
      */
