@@ -8,6 +8,9 @@ import java.lang.ref.WeakReference
  * Configuration keys always use identity because two equal serialization configurations can still behave differently.
  * [typeKeyEquality] lets an integration choose whether its type representation has identity or structural semantics.
  *
+ * Cached values are weakly held and may be collected when callers no longer retain them. Dead entries are removed on
+ * the next cache access.
+ *
  * @param typeKeyEquality equality rule used when comparing type keys.
  */
 class WeakFormatCache<Configuration : Any, Type : Any, Value : Any>(
@@ -16,14 +19,24 @@ class WeakFormatCache<Configuration : Any, Type : Any, Value : Any>(
     private val lock: Any = Any()
     private val entries: MutableMap<WeakFormatCacheKey<Configuration, Type>, WeakReference<Value>> = HashMap()
 
-    /** Number of live entries currently held by this cache. */
+    /** Number of entries whose keys and values are still reachable. Stale entries are removed before counting. */
     val size: Int
         get() = synchronized(lock) {
             removeStaleEntries()
             entries.size
         }
 
-    /** Returns the live value for [configuration] and [type], or atomically creates and caches it. */
+    /**
+     * Returns a live cached value or atomically creates and caches one.
+     *
+     * [create] runs while this cache is locked and only when no live value matches both keys.
+     *
+     * @param configuration configuration compared by identity.
+     * @param type type key compared using [typeKeyEquality].
+     * @param create creates the value when the cache has no live match.
+     * @return the cached or newly created value.
+     * @throws Exception when [create] throws; the exception is passed through and no value is cached.
+     */
     fun getOrPut(
         configuration: Configuration,
         type: Type,

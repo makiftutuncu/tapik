@@ -6,6 +6,7 @@ import java.lang.ref.WeakReference
  * Adds a weak, identity-compared scope to [WeakFormatCache].
  *
  * Neither the scope nor the nested configuration, type, or value is retained solely by this cache.
+ * Cached scopes and values may be collected when callers no longer retain them.
  *
  * @param typeKeyEquality equality rule used when comparing type keys.
  */
@@ -16,7 +17,16 @@ class WeakScopedFormatCache<Scope : Any, Configuration : Any, Type : Any, Value 
     private val caches:
         MutableMap<WeakScopeKey<Scope>, WeakFormatCache<Configuration, Type, Value>> = HashMap()
 
-    /** Returns the live value for [scope], [configuration], and [type], or atomically creates and caches it. */
+    /**
+     * Returns a live cached value or atomically creates and caches one.
+     *
+     * @param scope cache scope compared by identity.
+     * @param configuration configuration compared by identity.
+     * @param type type key compared using [typeKeyEquality].
+     * @param create creates the value when no live match exists.
+     * @return the cached or newly created value.
+     * @throws Exception when [create] throws; the exception is passed through and no value is cached.
+     */
     fun getOrPut(
         scope: Scope,
         configuration: Configuration,

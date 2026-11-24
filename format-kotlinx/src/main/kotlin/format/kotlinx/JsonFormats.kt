@@ -22,6 +22,7 @@ private object JsonFormatCache {
  * @param serializer serializer for the Kotlin value.
  * @param schema optional caller-supplied schema for the value.
  * @param registry custom schemas used during schema derivation.
+ * @return a JSON format backed by Kotlin serialization.
  * @throws SchemaDerivationException when the serializer's descriptor is unsupported.
  */
 @Suppress("UNCHECKED_CAST")
@@ -56,11 +57,13 @@ private fun <Value : Any> createJsonFormat(
         schema = schema
     )
 
-/** Builds or reuses a JSON byte-array format for [Value], [format], and [registry].
+/**
+ * Builds or reuses a JSON byte-array format for [Value], [format], and [registry].
  *
  * @param format JSON settings used to encode and decode values.
  * @param schema optional caller-supplied schema for the value.
  * @param registry custom schemas used during schema derivation.
+ * @return a JSON format backed by Kotlin serialization.
  */
 inline fun <reified Value : Any> jsonFormat(
     format: Json = Json.Default,
