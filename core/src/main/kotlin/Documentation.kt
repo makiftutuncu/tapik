@@ -71,19 +71,37 @@ private fun requireNonBlankDocumentation(value: String?, name: String) {
     require(value == null || value.isNotBlank()) { "$name must not be blank" }
 }
 
-/** Replaces this draft endpoint's summary. */
+/** Replaces this draft endpoint's summary while retaining its description.
+ *
+ * @param summary new nonblank endpoint summary.
+ * @return this endpoint with the updated summary.
+ * @throws IllegalArgumentException when [summary] is blank.
+ */
 fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
     Endpoint<P, Q, H, I, O, Draft>.summary(
         summary: String
     ): Endpoint<P, Q, H, I, O, Draft> = document(summary = summary)
 
-/** Replaces this draft endpoint's description. */
+/** Replaces this draft endpoint's description while retaining its summary.
+ *
+ * @param description new nonblank endpoint description.
+ * @return this endpoint with the updated description.
+ * @throws IllegalArgumentException when [description] is blank.
+ */
 fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
     Endpoint<P, Q, H, I, O, Draft>.description(
         description: String
     ): Endpoint<P, Q, H, I, O, Draft> = document(description = description)
 
-/** Replaces the supplied documentation values while retaining omitted values. */
+/** Replaces the supplied documentation values while retaining omitted values.
+ *
+ * Pass `null` to remove a value.
+ *
+ * @param summary new endpoint summary, or the current summary when omitted.
+ * @param description new endpoint description, or the current description when omitted.
+ * @return this endpoint with the updated documentation.
+ * @throws IllegalArgumentException when either supplied value is blank.
+ */
 fun <P : Paths, Q : Queries, H : Headers, I : Input, O : Outputs>
     Endpoint<P, Q, H, I, O, Draft>.document(
         summary: String? = documentation.summary,

@@ -24,9 +24,11 @@ data class Format<Value : Any, Representation : Any>(
     fun encode(value: Value): Representation = codec.encode(value)
 
     /**
-     * Transforms this format to [TransformedValue], converting exceptions from [decode] into structured failures.
+     * Transforms this format to [TransformedValue], converting exceptions from the decode transformation into
+     * structured failures.
      *
-     * The serialized representation and schema remain unchanged. Exceptions thrown by [encode] are not converted.
+     * The serialized representation and schema remain unchanged. Exceptions from the encode transformation or
+     * encoder propagate to the caller.
      *
      * @param decode converts a successfully decoded value.
      * @param encode converts a value before passing it to this format's encoder.
@@ -63,9 +65,11 @@ data class Format<Value : Any, Representation : Any>(
         )
 
     /**
-     * Transforms this format to [TransformedValue] while allowing exceptions from [decode] to propagate.
+     * Transforms this format to [TransformedValue] while allowing exceptions from the decode transformation to
+     * propagate.
      *
-     * Existing decoding failures remain unchanged. The serialized representation and schema remain unchanged.
+     * Existing decoding failures remain unchanged. Exceptions from the encode transformation or encoder also
+     * propagate. The serialized representation and schema remain unchanged.
      *
      * @param decode converts a successfully decoded value.
      * @param encode converts a value before passing it to this format's encoder.

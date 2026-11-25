@@ -9,7 +9,7 @@ package dev.akif.tapik
  * @property propertyName name of the wire property used to distinguish alternatives.
  * @param mapping mapping from wire values to schema references.
  * @property defaultMapping fallback schema when a wire value has no mapping.
- * @throws IllegalArgumentException when [propertyName] or a discriminating value in [mapping] is blank.
+ * @throws IllegalArgumentException when [propertyName] or a wire value used as a [mapping] key is blank.
  */
 class SchemaDiscriminator(
     /** Name of the wire property used to distinguish alternatives. */
