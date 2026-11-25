@@ -144,6 +144,10 @@ All artifact paths are normalized relative paths; absolute paths, `.` or `..` se
 and duplicate result paths are rejected. The Maven host writes them below `outputDirectory`, records execution
 ownership outside packaged output, and logs each path.
 
+Artifacts are exclusive by default. Executions may share a path only when each declares the same non-blank `sharingKey`.
+Maven lets a later successful execution replace a shared path; Gradle accepts a shared path only when every execution
+returns identical content. Keep shared content identical when a target supports both hosts.
+
 After a successful regeneration, files no longer returned by a Maven execution or the aggregated Gradle task are
 removed, including generated nested
 classes and registration descriptors after a package or suffix change. A failed generation keeps the previous

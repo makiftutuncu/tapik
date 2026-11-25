@@ -28,10 +28,11 @@ Choose `SOURCE` for source the host should compile, `RESOURCE` for files the app
 configured output directory. Paths must use forward slashes, cannot be absolute or escape the output directory, and
 must be unique within a result.
 
-If multiple executions intentionally produce the same file, give the artifact a stable, non-blank `sharingKey`. The
-executions must use the same key and should return identical content for that path. The host permits compatible owners
-to replace the file, so the last successful writer supplies its content. Otherwise keep paths exclusive. See
-xref:reference/generation-options.adoc#_artifact_synchronization[artifact synchronization] for ownership behavior.
+If multiple executions intentionally produce the same file, give each artifact a stable, non-blank `sharingKey`. The
+executions must use the same key. Gradle also requires their content to be identical; Maven lets a later successful
+execution replace a shared path. Keep the content identical for the same result in both hosts. Otherwise keep paths
+exclusive. See xref:reference/generation-options.adoc#_artifact_synchronization[artifact synchronization] for ownership
+behavior.
 
 For the full public signatures, see the link:{page-api-reference-url}[Kotlin API reference] for
 `GenerationTarget`, `GenerationTargetRegistry`, `GenerationRequest`, `TargetConfiguration`, `GenerationResult`, and
