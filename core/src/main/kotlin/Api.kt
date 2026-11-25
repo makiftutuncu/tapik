@@ -40,10 +40,10 @@ abstract class Api(
         get() = registeredEntries.filterIsInstance<InclusionEntry>().map(InclusionEntry::inclusion)
 
     /**
-     * Starts a delegated inclusion of [api] at the property's declaration position.
+     * Starts including [api] as a property of this API.
      *
      * @param api API value to include.
-     * @return a delegate that registers the inclusion when assigned to an API property.
+     * @return an inclusion registered when assigned to an API property.
      */
     protected fun <Included : Api> including(api: Included): ApiInclusion<Included> = ApiInclusion(api)
 

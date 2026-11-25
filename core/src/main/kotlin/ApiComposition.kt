@@ -3,12 +3,12 @@ package dev.akif.tapik
 import kotlin.reflect.KProperty
 
 /**
- * A direct, property-delegated inclusion of [api] in another API.
+ * An API included as a property of another API.
  *
- * The delegated property evaluates to [api] with its concrete type. [propertyName] becomes available when this value
- * is bound by Kotlin's property-delegation protocol.
+ * The property keeps the concrete type of [api], and its declaration position determines where the included endpoints
+ * appear in the containing API.
  *
- * @param Included concrete API type retained by the delegated property.
+ * @param Included concrete type of the included API.
  * @property api API included in the containing API.
  */
 class ApiInclusion<out Included : Api> internal constructor(
@@ -19,7 +19,7 @@ class ApiInclusion<out Included : Api> internal constructor(
     private var name: String? = null
 
     /**
-     * Property name locating [api] from its containing API.
+     * Name of the property that includes [api].
      *
      * @throws IllegalArgumentException before the inclusion is assigned to a property.
      */
@@ -27,10 +27,10 @@ class ApiInclusion<out Included : Api> internal constructor(
         get() = requireNotNull(name) { "API inclusion has not been delegated" }
 
     /**
-     * Registers this inclusion at the delegated property's declaration position.
+     * Registers [api] in [thisRef] using [property]'s name and declaration position.
      *
      * @param thisRef API that contains this inclusion.
-     * @param property delegated property that defines the inclusion's position and name.
+     * @param property property that defines the inclusion's position and name.
      * @return this inclusion, bound to the containing API.
      * @throws IllegalArgumentException when the inclusion creates a cycle, repeats an API, reuses a property name, or
      * introduces a duplicate API ID.
@@ -45,10 +45,10 @@ class ApiInclusion<out Included : Api> internal constructor(
     }
 
     /**
-     * Returns the original included API value.
+     * Returns the API assigned to the inclusion property.
      *
      * @param thisRef API that contains this inclusion.
-     * @param property delegated property that defines this inclusion.
+     * @param property property that defines this inclusion.
      * @return the API supplied when this inclusion was created.
      * @throws IllegalStateException when this inclusion is not bound to [thisRef] and [property].
      */
