@@ -158,7 +158,8 @@ data class PathVariable<Value : Any>(
 /**
  * A required wildcard capturing one or more final URI path segments.
  *
- * Its endpoint value is a non-empty `List<String>` retaining segment boundaries.
+ * Its endpoint value is a non-empty `List<String>` retaining segment boundaries. Each segment must be non-empty and
+ * must not contain `/`.
  *
  * @property name URI-template wildcard name used to capture the remaining path.
  * @property documentation human-readable path-parameter documentation.

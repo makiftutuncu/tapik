@@ -9,6 +9,9 @@ package dev.akif.tapik
  * Literal path fragments use already-encoded text. Leading and trailing slashes are removed; empty fragments and
  * repeated internal separators are rejected.
  *
+ * Add path fragments and variables before query parameters. The DSL supports up to eight path values and eight query
+ * parameters.
+ *
  * @param P path-value tuple type.
  * @param Q query-parameter tuple type.
  * @property paths path values in declaration order, with unique names.
