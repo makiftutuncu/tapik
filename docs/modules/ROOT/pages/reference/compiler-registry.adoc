@@ -24,7 +24,8 @@ or statically nested, but not `inner`.
 |===
 
 Unsupported visibility, generic shape, or construction fails Kotlin compilation with a targeted diagnostic. A module
-without an eligible concrete API simply publishes no tapik registry.
+without an eligible concrete API gets no compiler-generated registry; any manually supplied registry providers remain
+unaffected.
 
 == Public API and endpoint properties
 
