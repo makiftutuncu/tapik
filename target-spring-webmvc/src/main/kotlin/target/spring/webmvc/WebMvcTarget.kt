@@ -2,7 +2,13 @@ package dev.akif.tapik.target.spring.webmvc
 
 import dev.akif.tapik.common.plugin.*
 
-/** Generates Spring WebMVC Kotlin server interfaces from compiled tapik APIs. */
+/**
+ * Generates a Spring WebMVC server interface, endpoint types, and a registration descriptor for each compiled tapik
+ * API.
+ *
+ * The scalar `packageName` option defaults to `dev.akif.tapik.generated`, `serverSuffix` defaults to `Server`, and
+ * `controllerSuffix` defaults to `GeneratedController`.
+ */
 object WebMvcTarget : GenerationTarget {
     override val id: String = "spring-webmvc"
 

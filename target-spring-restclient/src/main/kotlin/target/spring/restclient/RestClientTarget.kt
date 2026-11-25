@@ -2,7 +2,12 @@ package dev.akif.tapik.target.spring.restclient
 
 import dev.akif.tapik.common.plugin.*
 
-/** Generates Spring RestClient Kotlin clients from compiled tapik APIs. */
+/**
+ * Generates a Spring `RestClient` client interface and endpoint types for each compiled tapik API.
+ *
+ * The scalar `packageName` option sets the generated package prefix and defaults to `dev.akif.tapik.generated`. The
+ * scalar `clientSuffix` option defaults to `Client`.
+ */
 object RestClientTarget : GenerationTarget {
     override val id: String = "spring-restclient"
 
