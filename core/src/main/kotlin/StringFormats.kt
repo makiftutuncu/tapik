@@ -12,7 +12,12 @@ import java.time.OffsetTime
 import java.time.Period
 import java.util.UUID
 
-/** Default formats whose serialized representation is [String]. */
+/**
+ * Default formats whose serialized representation is [String].
+ *
+ * Strings pass through unchanged. Booleans accept only `true` and `false`. Other formats use their standard Kotlin or
+ * JDK parsers and encoders; parse failures return [DecodeResult.Failure].
+ */
 object StringFormats : FormatDefaults<String> {
     override val boolean: StringFormat<Boolean> =
         parsingFormat("Boolean", ScalarSchema(SchemaType.BOOLEAN), String::toBooleanStrict, Boolean::toString)
