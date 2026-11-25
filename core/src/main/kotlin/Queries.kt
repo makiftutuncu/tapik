@@ -139,6 +139,8 @@ data class QueryParameter<Value : Any, out P : Presence<Value>>(
 /**
  * A typed query parameter accepting repeated wire values as a list.
  *
+ * Values keep their wire order. Decoding reports failures from all occurrences together.
+ *
  * @param Value decoded element type.
  * @param P list presence type.
  * @property name query-string parameter name.
@@ -178,11 +180,15 @@ data class RepeatedQueryParameter<Value : Any, out P : Presence<List<Value>>>(
         copy(documentation = documentation.copy(deprecated = deprecated))
 }
 
-/** Returns this required scalar query parameter as a required repeated parameter. */
+/**
+ * Treats repeated occurrences of this query name as an ordered list, keeping the parameter required.
+ */
 fun <Value : Any> QueryParameter<Value, Required>.repeated(): RepeatedQueryParameter<Value, Required> =
     RepeatedQueryParameter(name, format.repeated(), Required, documentation)
 
-/** Returns this optional scalar query parameter as an optional repeated parameter. */
+/**
+ * Treats repeated occurrences of this query name as an ordered list, keeping the parameter optional.
+ */
 @JvmName("optionalQueryRepeated")
 fun <Value : Any> QueryParameter<Value, Optional>.repeated(): RepeatedQueryParameter<Value, Optional> =
     RepeatedQueryParameter(name, format.repeated(), Optional, documentation)
