@@ -82,7 +82,7 @@ generated registry. The provider retains these instances and is exposed through 
 mechanism; consumers do not rely on their internal order. Abstract API base classes are ignored. Unsupported API
 visibility, generic shape, or construction fails compilation with a targeted diagnostic. The plugin does not execute
 endpoint expressions, discover APIs reflectively, or create a second endpoint model. Compilations without a
-concrete API type do not publish a registry.
+concrete API type do not publish a compiler-generated registry provider.
 
 Every delegated endpoint property reachable from a registered API, including properties declared by API base classes,
 must be public. The same requirement applies to delegated API inclusion properties because generated targets follow

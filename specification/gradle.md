@@ -40,12 +40,12 @@ stable and injective even on case-insensitive filesystems, prevents separators a
 escaping their segment, and keeps ordinary lowercase Gradle identities readable.
 
 A compilation containing eligible APIs writes one compiler-owned registry class and its
-`META-INF/services/dev.akif.tapik.ApiRegistry` provider; a compilation without eligible APIs leaves neither artifact
-behind. On non-clean compilation, adding or changing APIs replaces the generated registry and removing the last API
-removes the generated class and service entry. The adapter supplies only that compilation's index and complete source
-roots to the compiler integration. The compiler reconciles and updates them without reading, pruning, or rewriting any
-other target or compilation's state. Gradle never synthesizes registries or duplicates endpoint definitions into its
-own metadata model.
+`META-INF/services/dev.akif.tapik.ApiRegistry` provider; a compilation without eligible APIs leaves no compiler-owned
+registry class or service entry. On non-clean compilation, adding or changing APIs replaces the generated registry and
+removing the last API removes the generated class and its entry while preserving other providers. The adapter supplies
+only that compilation's index and complete source roots to the compiler integration. The compiler reconciles and
+updates them without reading, pruning, or rewriting any other target or compilation's state. Gradle never synthesizes
+registries or duplicates endpoint definitions into its own metadata model.
 
 ## Configuration model
 
