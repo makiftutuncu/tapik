@@ -9,8 +9,16 @@ describes the same value to targets that need structural information.
 
 Path variables, query parameters, and headers use `StringFormat<Value>`, an alias for `Format<Value, String>`. Bodies
 use `ByteArrayFormat<Value>` and carry their media type separately.
-Media types are validated for syntax, but this does not check whether a target supports the media type or a charset it
-names.
+
+=== Media types
+
+`MediaType` requires a concrete `type/subtype` value, not an `Accept` range; wildcards are rejected. It normalizes the
+type, subtype, parameter names, and charset values to lowercase. Parameter order and equivalent quoting do not affect
+equality, though normalized output retains parameter declaration order. Other parameter values remain case-sensitive.
+For example, `Text/Plain;Charset="UTF-8"` equals `text/plain;charset=utf-8`.
+
+Duplicate parameter names are rejected without regard to case. Syntax validation does not check whether a target
+supports a media type or its charset.
 
 == Transform a built-in format
 
