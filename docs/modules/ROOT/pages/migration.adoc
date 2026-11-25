@@ -31,6 +31,12 @@ current plugin and migrate its settings as follows:
 |`endpointsSuffix(...)`
 |Remove it. The 0.6 targets do not expose this option; shared endpoint type names are derived from the API structure.
 
+|Generated output directories
+|The old plugin wrote output under `build/generated` and Kotlin sources under
+  `build/generated/sources/tapik/main/kotlin`. The new default root is `build/generated/tapik`, with `sources/`,
+  `resources/`, and `documentation/` subdirectories. Use `outputRoot(...)` to change it. Remove manual source
+  registration; the plugin wires generated Kotlin for the selected mode.
+
 |`springRestClient { ... }` and `springWebMvc { ... }`
 |Register named executions, for example `springRestClient("client") { ... }`. Move `clientSuffix(...)` and
   `serverSuffix(...)` into the matching execution. Set `controllerSuffix(...)` there if you want to customize the
