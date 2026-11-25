@@ -34,12 +34,21 @@ abstract class TapikExecution @Inject constructor(
         excludeApis.convention(emptySet())
     }
 
-    /** Appends [apiIds] to the exact API-ID include set. */
+    /**
+     * Adds exact, case-sensitive API IDs to the include set. With no included IDs, this execution selects every
+     * discovered API.
+     *
+     * @param apiIds API IDs to include.
+     */
     fun includeApis(vararg apiIds: String) {
         includeApis.addAll(apiIds.toList())
     }
 
-    /** Appends [apiIds] to the exact API-ID exclude set. */
+    /**
+     * Adds exact, case-sensitive API IDs to the exclude set. Excluded IDs are removed after inclusion is evaluated.
+     *
+     * @param apiIds API IDs to exclude.
+     */
     fun excludeApis(vararg apiIds: String) {
         excludeApis.addAll(apiIds.toList())
     }

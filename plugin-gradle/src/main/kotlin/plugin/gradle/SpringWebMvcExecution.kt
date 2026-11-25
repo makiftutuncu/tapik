@@ -5,7 +5,12 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import javax.inject.Inject
 
-/** Typed configuration for one Spring WebMVC generation execution. */
+/**
+ * Typed configuration for one Spring WebMVC generation execution.
+ *
+ * The package prefix defaults to `dev.akif.tapik.generated`, the server interface suffix to `Server`, and the
+ * controller suffix to `GeneratedController`.
+ */
 abstract class SpringWebMvcExecution @Inject constructor(name: String) :
     TapikExecution(name, "spring-webmvc") {
     /** Package prefix for generated server declarations. */

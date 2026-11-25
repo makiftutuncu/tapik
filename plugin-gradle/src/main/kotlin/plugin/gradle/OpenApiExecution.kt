@@ -23,7 +23,12 @@ enum class OpenApiComponentNaming {
     QUALIFIED
 }
 
-/** Typed configuration for one OpenAPI generation execution. */
+/**
+ * Typed configuration for one OpenAPI generation execution.
+ *
+ * A non-blank [version] is required. YAML output, pretty printing, and simple component names are the defaults. Without
+ * a custom [output], YAML uses `{api}.openapi.yml` and JSON uses `{api}.openapi.json`.
+ */
 abstract class OpenApiExecution @Inject constructor(name: String) : TapikExecution(name, "openapi") {
     /** Version written into the generated OpenAPI document. */
     @get:Input
