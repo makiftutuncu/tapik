@@ -1,7 +1,10 @@
 package dev.akif.tapik
 
 /**
- * A named, ordered collection of delegated endpoint definitions.
+ * Defines endpoints as properties of an API.
+ *
+ * Each endpoint property name is combined with [apiId] to form its ID. Included APIs contribute their endpoints where
+ * their inclusion property is declared, so [endpoints] follows property declaration order recursively.
  *
  * @param apiId optional API identifier used to qualify endpoint property names. The concrete type's simple name is
  * used when omitted.
@@ -10,7 +13,7 @@ package dev.akif.tapik
 abstract class Api(
     apiId: String? = null
 ) {
-    /** Resolved API identifier. */
+    /** Resolved API identifier, used to qualify endpoint property names. IDs must be unique within a composition. */
     val apiId: String = apiId ?: requireNotNull(this::class.simpleName) { "API type must have a simple name" }
 
     init {
@@ -19,7 +22,10 @@ abstract class Api(
 
     private val registeredEntries: MutableList<ApiEntry> = mutableListOf()
 
-    /** A fresh list of ready endpoints, recursively flattened in declaration order. */
+    /**
+     * A fresh list of ready endpoints in property declaration order. Endpoints from an included API appear where its
+     * inclusion property is declared.
+     */
     val endpoints: List<Endpoint<*, *, *, *, *, Ready>>
         get() =
             registeredEntries.flatMap { entry ->
@@ -29,7 +35,7 @@ abstract class Api(
                 }
             }.also(::requireUniqueEndpointIds)
 
-    /** A fresh list of direct API inclusions in inclusion declaration order. */
+    /** A fresh list of APIs included directly by this API, in property declaration order. */
     val includedApis: List<ApiInclusion<*>>
         get() = registeredEntries.filterIsInstance<InclusionEntry>().map(InclusionEntry::inclusion)
 
