@@ -26,7 +26,12 @@ data class Output<out M : StatusMatcher, out B : Bodies, out H : Headers> intern
     /** Human-readable response documentation. */
     val documentation: ResponseDocumentation = ResponseDocumentation()
 ) : OutputAlternative {
-    /** Replaces this response alternative's description. */
+    /** Replaces this response alternative's description.
+     *
+     * @param description nonblank response description.
+     * @return this output with the updated documentation.
+     * @throws IllegalArgumentException when [description] is blank.
+     */
     fun description(description: String): Output<M, B, H> =
         copy(documentation = documentation.copy(description = description))
 }
@@ -34,32 +39,32 @@ data class Output<out M : StatusMatcher, out B : Bodies, out H : Headers> intern
 /** An ordered, non-empty heterogeneous tuple of endpoint output alternatives. */
 typealias Outputs = NonEmptyTuple<OutputAlternative>
 
-/** An output tuple with one alternative. */
+/** An output tuple with one ordered alternative. */
 typealias Outputs1<Output1> = Tuple1<OutputAlternative, Output1>
 
-/** An output tuple with two alternatives. */
+/** An output tuple with two ordered alternatives. */
 typealias Outputs2<Output1, Output2> = Tuple2<OutputAlternative, Output1, Output2>
 
-/** An output tuple with three alternatives. */
+/** An output tuple with three ordered alternatives. */
 typealias Outputs3<Output1, Output2, Output3> = Tuple3<OutputAlternative, Output1, Output2, Output3>
 
-/** An output tuple with four alternatives. */
+/** An output tuple with four ordered alternatives. */
 typealias Outputs4<Output1, Output2, Output3, Output4> =
     Tuple4<OutputAlternative, Output1, Output2, Output3, Output4>
 
-/** An output tuple with five alternatives. */
+/** An output tuple with five ordered alternatives. */
 typealias Outputs5<Output1, Output2, Output3, Output4, Output5> =
     Tuple5<OutputAlternative, Output1, Output2, Output3, Output4, Output5>
 
-/** An output tuple with six alternatives. */
+/** An output tuple with six ordered alternatives. */
 typealias Outputs6<Output1, Output2, Output3, Output4, Output5, Output6> =
     Tuple6<OutputAlternative, Output1, Output2, Output3, Output4, Output5, Output6>
 
-/** An output tuple with seven alternatives. */
+/** An output tuple with seven ordered alternatives. */
 typealias Outputs7<Output1, Output2, Output3, Output4, Output5, Output6, Output7> =
     Tuple7<OutputAlternative, Output1, Output2, Output3, Output4, Output5, Output6, Output7>
 
-/** An output tuple with eight alternatives. */
+/** An output tuple with eight ordered alternatives. */
 typealias Outputs8<Output1, Output2, Output3, Output4, Output5, Output6, Output7, Output8> =
     Tuple8<OutputAlternative, Output1, Output2, Output3, Output4, Output5, Output6, Output7, Output8>
 
@@ -71,33 +76,68 @@ data object DefaultOutput : Outputs {
     override val values: List<OutputAlternative> = listOf(emptyOkOutput)
 }
 
-/** Combines this exact status with one required [body]. */
+/** Combines this exact status with one required [body].
+ *
+ * @param body required response body.
+ * @return an output for this status and body.
+ */
 infix fun <Value : Any> Status.with(
     body: Body<Value>
 ): Output<ExactStatus, Bodies1<Body<Value>>, Headers0> = ExactStatus(this) with body
 
-/** Combines this exact status with an explicitly absent body. */
+/** Combines this exact status with an explicitly absent body.
+ *
+ * @param noBody marker for a response without a body.
+ * @return an output for this status without a body.
+ */
 infix fun Status.with(noBody: NoBody): Output<ExactStatus, Bodies1<NoBody>, Headers0> =
     ExactStatus(this) with noBody
 
-/** Combines this exact status with alternative [bodies]. */
+/** Combines this exact status with alternative [bodies].
+ *
+ * The alternatives keep their argument order and must use unique media types.
+ *
+ * @param bodies response body alternatives.
+ * @return an output for this status and body group.
+ * @throws IllegalArgumentException when typed body media types repeat or [noBody] is not last.
+ */
 infix fun <B : Bodies> Status.with(bodies: B): Output<ExactStatus, B, Headers0> =
     ExactStatus(this) with bodies
 
-/** Combines this status matcher with one required [body]. */
+/** Combines this status matcher with one required [body].
+ *
+ * @param body required response body.
+ * @return an output for this matcher and body.
+ */
 infix fun <M : StatusMatcher, Value : Any> M.with(
     body: Body<Value>
 ): Output<M, Bodies1<Body<Value>>, Headers0> = with(bodiesOf(body))
 
-/** Combines this status matcher with an explicitly absent body. */
+/** Combines this status matcher with an explicitly absent body.
+ *
+ * @param noBody marker for a response without a body.
+ * @return an output for this matcher without a body.
+ */
 infix fun <M : StatusMatcher> M.with(noBody: NoBody): Output<M, Bodies1<NoBody>, Headers0> =
     with(Bodies1(noBody))
 
-/** Combines this status matcher with alternative [bodies]. */
+/** Combines this status matcher with alternative [bodies].
+ *
+ * The alternatives keep their argument order and must use unique media types.
+ *
+ * @param bodies response body alternatives.
+ * @return an output for this matcher and body group.
+ * @throws IllegalArgumentException when typed body media types repeat or [noBody] is not last.
+ */
 infix fun <M : StatusMatcher, B : Bodies> M.with(bodies: B): Output<M, B, Headers0> =
     Output(this, validatedBodies(bodies), noHeaders)
 
-/** Attaches [headers] after this output's status and bodies. */
+/** Attaches [headers] after this output's status and bodies.
+ *
+ * @param headers response headers in declaration order.
+ * @return this output with the supplied headers.
+ * @throws IllegalArgumentException when header names are duplicated without regard to case.
+ */
 infix fun <M : StatusMatcher, B : Bodies, H : NonEmptyTuple<Header<*, *>>> Output<M, B, Headers0>.with(
     headers: H
 ): Output<M, B, H> = Output(matcher, bodies, validatedHeaders(headers), documentation)
@@ -164,7 +204,7 @@ fun <P : Paths, Q : Queries, H : Headers, I : Input, OutputType : Output<*, *, *
  *
  * @param output response alternative to append.
  * @return this endpoint with both outputs in declaration order.
- * @throws IllegalArgumentException when [output]'s status matcher overlaps the existing output.
+ * @throws IllegalArgumentException when [output]'s matcher overlaps an existing matcher or throws during validation.
  */
 @JvmName("endpointWithOneOutputOutput")
 fun <P : Paths, Q : Queries, H : Headers, I : Input, Output1 : Output<*, *, *>, OutputType : Output<*, *, *>>
@@ -180,7 +220,7 @@ fun <P : Paths, Q : Queries, H : Headers, I : Input, Output1 : Output<*, *, *>, 
  *
  * @param output response alternative to append.
  * @return this endpoint with all outputs in declaration order.
- * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ * @throws IllegalArgumentException when [output]'s matcher overlaps an existing matcher or throws during validation.
  */
 @JvmName("endpointWithTwoOutputsOutput")
 fun <
@@ -203,7 +243,7 @@ fun <
  *
  * @param output response alternative to append.
  * @return this endpoint with all outputs in declaration order.
- * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ * @throws IllegalArgumentException when [output]'s matcher overlaps an existing matcher or throws during validation.
  */
 @JvmName("endpointWithThreeOutputsOutput")
 fun <
@@ -227,7 +267,7 @@ fun <
  *
  * @param output response alternative to append.
  * @return this endpoint with all outputs in declaration order.
- * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ * @throws IllegalArgumentException when [output]'s matcher overlaps an existing matcher or throws during validation.
  */
 @JvmName("endpointWithFourOutputsOutput")
 fun <
@@ -252,7 +292,7 @@ fun <
  *
  * @param output response alternative to append.
  * @return this endpoint with all outputs in declaration order.
- * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ * @throws IllegalArgumentException when [output]'s matcher overlaps an existing matcher or throws during validation.
  */
 @JvmName("endpointWithFiveOutputsOutput")
 fun <
@@ -278,7 +318,7 @@ fun <
  *
  * @param output response alternative to append.
  * @return this endpoint with all outputs in declaration order.
- * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ * @throws IllegalArgumentException when [output]'s matcher overlaps an existing matcher or throws during validation.
  */
 @JvmName("endpointWithSixOutputsOutput")
 fun <
@@ -307,7 +347,7 @@ fun <
  *
  * @param output response alternative to append.
  * @return this endpoint with all outputs in declaration order.
- * @throws IllegalArgumentException when [output]'s status matcher overlaps an existing output.
+ * @throws IllegalArgumentException when [output]'s matcher overlaps an existing matcher or throws during validation.
  */
 @JvmName("endpointWithSevenOutputsOutput")
 fun <
