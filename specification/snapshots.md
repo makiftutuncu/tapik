@@ -4,13 +4,6 @@ The shallow-snapshot rule in `product.md` applies to tapik-owned structure, not 
 `copy` accepts ordinary Kotlin collections, stores an ordered defensive copy, and never exposes mutable stored
 containers. Destructuring has the same boundary as property access. Value equality and hashing use the snapshots.
 
-Kotlin 2.4 explicit backing fields may hide mutable implementation types behind read-only properties in internal
-builders, such as the OpenAPI schema registry. They expose the same object and do not protect against mutable casts,
-so public snapshot boundaries still require defensive copies and unmodifiable containers. Explicit backing fields
-cannot have custom getters or be declared on primary-constructor parameters; they do not replace copying byte-array
-getters or snapshot-safe value operations. Prefer them where the narrower internal type is useful, not where a plain
-property already stores an immutable snapshot of its declared type.
-
 ## Audited boundaries
 
 | Area | Protected structure |
