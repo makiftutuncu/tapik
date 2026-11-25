@@ -75,6 +75,8 @@ private fun <Value : Any> createJsonFormat(format: ObjectMapper, type: KType, sc
  * @param schema optional caller-supplied schema for the value.
  * @param registry custom schemas used during schema derivation.
  * @return a JSON format backed by Jackson.
+ * @throws SchemaDerivationException when schema derivation is required but the Kotlin type or Jackson shape is
+ * unsupported.
  */
 inline fun <reified Value : Any> jsonFormat(
     format: ObjectMapper = DefaultObjectMapper,

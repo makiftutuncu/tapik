@@ -64,6 +64,7 @@ private fun <Value : Any> createJsonFormat(
  * @param schema optional caller-supplied schema for the value.
  * @param registry custom schemas used during schema derivation.
  * @return a JSON format backed by Kotlin serialization.
+ * @throws SchemaDerivationException when schema derivation is required but the serializer descriptor is unsupported.
  */
 inline fun <reified Value : Any> jsonFormat(
     format: Json = Json.Default,

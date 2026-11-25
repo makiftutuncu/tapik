@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
  * @param schema optional caller-supplied schema for the value.
  * @param registry custom schemas used during schema derivation.
  * @return a body whose format encodes values as JSON.
+ * @throws dev.akif.tapik.common.format.SchemaDerivationException when schema derivation is required but unsupported.
  */
 inline fun <reified Value : Any> jsonBody(
     format: Json = Json.Default,
