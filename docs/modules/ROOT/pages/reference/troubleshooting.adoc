@@ -112,9 +112,11 @@ evidence that the failed run succeeded; use the Maven result and the `INFO` log 
 
 == Nothing is logged
 
-A successful execution logs every generated path relative to the project when possible, with a normalized absolute
-fallback for output on another filesystem root. A display failure cannot turn committed generation into a failed
-build. In Maven, verify the command reaches the configured phase and has not been run with `-q`; same-module `compile`
-is too early for `process-classes`. In Gradle, verify a target block exists and the graph includes `tapikGenerate`;
-applying the plugin only for compiler activation performs no generation. Use `./gradlew tapikGenerate --info` to
-inspect task selection and up-to-date behavior.
+When Maven's `generate` goal runs, it logs every written path relative to the project when possible, with a normalized
+absolute fallback for output on another filesystem root. When Gradle's `tapikGenerate` task runs, it logs each
+materialized path. Gradle may skip the task action when outputs are up-to-date or restored from cache, so those runs do
+not repeat the path lines. A display failure cannot turn committed generation into a failed build. In Maven, verify the
+command reaches the configured phase and has not been run with `-q`; same-module `compile` is too early for
+`process-classes`. In Gradle, verify a target block exists and the graph includes `tapikGenerate`; applying the plugin
+only for compiler activation performs no generation. Use `./gradlew tapikGenerate --info` to inspect task selection,
+up-to-date checks, and cache use.

@@ -145,8 +145,9 @@ Both complete DSL files are exercised by Gradle TestKit, so their public syntax 
 Set another root with `outputRoot(layout.buildDirectory.dir("generated/custom"))`. Targets return relative paths
 but cannot choose or escape this root. One task owns the complete tree, removes stale owned files after successful
 generation, and logs each materialized path relative to the project when possible. Output on another filesystem root
-uses a normalized absolute path instead; logging failure cannot invalidate already committed output. Any failed
-execution leaves the previous successful tree intact.
+uses a normalized absolute path instead; logging failure cannot invalidate already committed output. A task skipped as
+up-to-date or restored from cache does not repeat the generated-path lines. Any failed execution leaves the previous
+successful tree intact.
 
 Run `./gradlew tapikGenerate` when only generated artifacts are needed. In compiled API dependency mode, ordinary
 `./gradlew compileKotlin`, `classes`, `test`, or `build` also schedules generation because source and resource sets

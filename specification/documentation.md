@@ -182,8 +182,9 @@ goal invocation. Configuration fragments come from reactor-built example POMs wh
 
 Failure behavior is documented by stage, including compiler eligibility diagnostics, version alignment, registry and
 target discovery, API selection, target compatibility, conflicting output ownership, and late Kotlin compilation.
-Successful executions log every generated path. Regeneration removes stale paths owned by the same execution while
-preserving other executions' and user-owned files, and a failed execution leaves its last successful artifacts intact.
+Every Maven generation run logs its written paths. Gradle logs paths when `tapikGenerate` runs, but an up-to-date or
+cache-restored task does not repeat them. Regeneration removes stale paths owned by the same execution while preserving
+other executions' and user-owned files, and a failed execution leaves its last successful artifacts intact.
 
 ## Integration guide requirements
 
