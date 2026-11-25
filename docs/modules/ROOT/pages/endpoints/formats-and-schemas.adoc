@@ -10,6 +10,7 @@ describes the same value to targets that need structural information.
 Path variables, query parameters, and headers use `StringFormat<Value>`, an alias for `Format<Value, String>`. Bodies
 use `ByteArrayFormat<Value>` and carry their media type separately.
 
+[[media-types]]
 === Media types
 
 `MediaType` requires a concrete `type/subtype` value, not an `Accept` range; wildcards are rejected. It normalizes the

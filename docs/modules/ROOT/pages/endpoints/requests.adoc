@@ -53,11 +53,9 @@ One `Body<Value>` combines:
 Format integrations supply builders such as `jsonBody<CreateBook>()`. The generic `body(mediaType, format)` builder is
 available when defining another representation.
 
-`MediaType(...)` validates a concrete HTTP media type immediately. Malformed syntax, duplicate parameter names, and
-wildcards such as `application/*` are rejected. Its `value` and string representation use normalized spelling:
-`MediaType("Text/Plain;Charset=\"UTF-8\"")` becomes `text/plain;charset=utf-8`. Type/subtype, parameter-name, and charset
-casing do not affect equality; neither does parameter order or equivalent quoting. Other parameter values remain
-case-sensitive, so multipart boundaries `A` and `a` are different. Parameter order is retained in rendered output.
+`MediaType(...)` validates a concrete media type immediately. It rejects malformed syntax, duplicate parameter names,
+and wildcards such as `application/*`. See xref:endpoints/formats-and-schemas.adoc#media-types[media type syntax and
+normalization] for details.
 
 Common values are available from `MediaType`, including JSON, XML, CBOR, Protocol Buffers, YAML, PDF, form data,
 problem details, common images, multipart variants, HTML, Markdown, plain text, and event streams. For example, use
