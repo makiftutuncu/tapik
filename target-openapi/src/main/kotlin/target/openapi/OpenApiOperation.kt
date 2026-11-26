@@ -6,7 +6,10 @@ package dev.akif.tapik.target.openapi
  * @property operationId unique identifier derived from the delegated endpoint property.
  * @property summary optional short summary.
  * @property description optional detailed description.
+ * @param tags endpoint tags in supplied order.
+ * @param parameters path, query, and request-header parameters in declaration order.
  * @property requestBody optional request body.
+ * @param responses response alternatives keyed by OpenAPI response code or status class in declaration order.
  */
 class OpenApiOperation(
     /** Unique identifier derived from the delegated endpoint property. */

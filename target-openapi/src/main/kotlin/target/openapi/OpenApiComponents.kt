@@ -2,6 +2,8 @@ package dev.akif.tapik.target.openapi
 
 /**
  * Reusable OpenAPI components.
+ *
+ * @param schemas schemas keyed by component name in first-use order.
  */
 class OpenApiComponents(
     schemas: Map<String, OpenApiSchema> = emptyMap()

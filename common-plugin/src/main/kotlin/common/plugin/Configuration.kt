@@ -13,7 +13,11 @@ data class ScalarConfigurationValue(
     val value: String
 ) : ConfigurationValue
 
-/** An ordered target configuration list. */
+/**
+ * An ordered target configuration list.
+ *
+ * @param values child configuration values in declaration order.
+ */
 class ListConfigurationValue(
     values: List<ConfigurationValue>
 ) : ConfigurationValue {
@@ -41,6 +45,7 @@ class ListConfigurationValue(
 /**
  * A named target configuration object.
  *
+ * @param values child configuration values keyed by name in declaration order.
  * @throws IllegalArgumentException when a child name is blank.
  */
 class ObjectConfigurationValue(
@@ -74,6 +79,7 @@ class ObjectConfigurationValue(
 /**
  * Host-neutral configuration supplied to one target execution.
  *
+ * @param values root configuration values keyed by name in declaration order.
  * @throws IllegalArgumentException when a configuration name is blank.
  */
 class TargetConfiguration(

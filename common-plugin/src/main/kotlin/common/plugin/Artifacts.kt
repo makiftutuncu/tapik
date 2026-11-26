@@ -61,6 +61,7 @@ private val WINDOWS_ABSOLUTE_PATH: Regex = Regex("^[A-Za-z]:/")
 /**
  * Artifacts returned by one target execution.
  *
+ * @param artifacts generated files in target return order.
  * @throws IllegalArgumentException when two artifacts have the same relative path.
  */
 class GenerationResult(

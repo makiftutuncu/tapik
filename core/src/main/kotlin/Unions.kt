@@ -62,6 +62,7 @@ class SchemaDiscriminator(
 /**
  * A schema matching exactly one of [alternatives], optionally aided by [discriminator].
  *
+ * @param alternatives schemas in declaration order; at least two distinct alternatives are required.
  * @property discriminator optional hint for identifying an alternative.
  * @property name optional reusable schema name.
  * @throws IllegalArgumentException when fewer than two distinct alternatives are supplied or [name] is blank.

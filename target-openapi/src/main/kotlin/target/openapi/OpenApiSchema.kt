@@ -8,12 +8,20 @@ import kotlinx.serialization.json.JsonElement
  * Empty properties represent absent keywords rather than empty values in rendered output.
  *
  * @property reference optional JSON Reference URI.
+ * @param types JSON Schema types accepted by the value.
  * @property format optional semantic format hint.
+ * @param enumValues allowed string values in declaration order.
  * @property items schema of array elements.
+ * @param properties object properties keyed by name in declaration order.
+ * @param required required object property names in declaration order.
  * @property propertyNames schema constraining object property names.
  * @property additionalProperties schema of dynamically named object properties.
+ * @param anyOf alternative schemas, at least one of which must match.
+ * @param oneOf alternative schemas, exactly one of which must match.
  * @property discriminator optional hint for selecting a composed-schema alternative.
  * @property deprecated whether consumers should avoid the described value.
+ * @param defaultValue default JSON value; it does not apply the value to an instance.
+ * @param constantValue the only JSON value accepted by this schema.
  */
 class OpenApiSchema(
     /** Optional JSON Reference URI. */

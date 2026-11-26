@@ -5,6 +5,7 @@ package dev.akif.tapik.target.openapi
  *
  * @property description optional detailed description.
  * @property required whether callers must provide a body.
+ * @param content media representations keyed by media type in declaration order.
  */
 class OpenApiRequestBody(
     /** Optional detailed description. */

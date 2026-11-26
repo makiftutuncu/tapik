@@ -4,6 +4,8 @@ import dev.akif.tapik.Method
 
 /**
  * Operations sharing one URI path template.
+ *
+ * @param operations operations keyed by HTTP method in declaration order.
  */
 class OpenApiPathItem(
     operations: Map<Method, OpenApiOperation>

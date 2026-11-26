@@ -80,6 +80,7 @@ data class ArraySchema(
 /**
  * A finite set of string [values].
  *
+ * @param values allowed string values in declaration order.
  * @property name optional reusable schema name.
  * @throws IllegalArgumentException when [values] is empty, contains blanks or duplicates, or [name] is blank.
  */
@@ -142,6 +143,7 @@ data class SchemaProperty(
 /**
  * An object with named [properties].
  *
+ * @param properties object fields keyed by name in declaration order.
  * @property name optional reusable schema name.
  * @throws IllegalArgumentException when a property name or [name] is blank.
  */

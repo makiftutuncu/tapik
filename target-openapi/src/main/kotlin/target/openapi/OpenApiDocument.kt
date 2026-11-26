@@ -5,6 +5,7 @@ package dev.akif.tapik.target.openapi
  *
  * @property specificationVersion OpenAPI specification version used by the document.
  * @property info identifying information about the API document.
+ * @param paths operations grouped by URI path template in declaration order.
  * @property components reusable components referenced by operations.
  */
 class OpenApiDocument(

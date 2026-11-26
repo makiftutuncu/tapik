@@ -4,6 +4,7 @@ package dev.akif.tapik.target.openapi
  * OpenAPI hint for selecting one alternative of a composed schema.
  *
  * @property propertyName wire property containing the discriminating value.
+ * @param mapping explicit values keyed to schema reference URIs in declaration order.
  * @property defaultMapping schema reference URI used when no explicit or implicit mapping applies.
  */
 class OpenApiDiscriminator(

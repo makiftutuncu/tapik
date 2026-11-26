@@ -8,6 +8,7 @@ import dev.akif.tapik.Ready
  * A runtime API paired with the compiled types of its endpoints.
  *
  * @property value runtime API value.
+ * @param endpoints compiled endpoint types in runtime declaration order.
  */
 class CompiledApi(
     /** Runtime API value. */
@@ -53,6 +54,7 @@ class CompiledApi(
  *
  * @property value runtime endpoint value.
  * @property type exact compiled property type.
+ * @param sourcePropertyPath delegated property names from the selected API to [value].
  */
 class CompiledEndpoint internal constructor(
     /** Runtime endpoint value. */

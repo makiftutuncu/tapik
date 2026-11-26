@@ -4,6 +4,8 @@ package dev.akif.tapik.target.openapi
  * A response with headers and media representations.
  *
  * @property description response description, always supplied by tapik even though OpenAPI 3.2 permits omission.
+ * @param headers response headers keyed by name in declaration order.
+ * @param content media representations keyed by media type in declaration order.
  */
 class OpenApiResponse(
     /** Response description, always supplied by tapik even though OpenAPI 3.2 permits omission. */
