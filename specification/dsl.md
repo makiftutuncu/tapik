@@ -250,12 +250,17 @@ Primitive Kotlin values and standard Java time values are resolved through the s
 The catalog is independent of either serialization integration so their corresponding schema types and formats cannot
 drift.
 
-Kotlin serialization object property names come from the serializer descriptor. The derived ordinary object schema
-does not apply `Json.namingStrategy`; when the strategy changes wire names, callers must supply an explicit root schema
-that describes those names. `Json.explicitNulls = false` changes null-property encoding and decoding, but derived
-`required` flags still follow descriptor defaults; callers needing flags that describe that setting must supply an
-explicit root schema. Polymorphic derivation separately rejects a configured naming strategy because it cannot derive
-discriminator names faithfully.
+Kotlin serialization derivation uses serializer descriptors and does not fully mirror every `Json` setting that can
+change the wire shape:
+
+- `Json.namingStrategy` changes object property names, but derived ordinary object schemas retain descriptor names.
+- `Json.explicitNulls = false` changes null-property encoding and decoding, but derived `required` flags still follow
+  descriptor defaults.
+- `Json.allowStructuredMapKeys = true` encodes maps with structured keys as flat arrays of key-value pairs, while the
+  deriver still produces a `MapSchema`.
+
+Callers who need schemas to describe these configured wire shapes must supply an explicit root schema. Polymorphic
+derivation separately rejects a configured naming strategy because it cannot derive discriminator names faithfully.
 
 `KotlinxSchemaRegistry` is an immutable set of schema registrations matched after removing a trailing `?` from each
 serializer descriptor name. A caller may register either a fixed `Schema` or a

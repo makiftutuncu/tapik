@@ -26,13 +26,16 @@ and standard Java time values wherever they appear. For example, `LocalDate` der
 format, while `Instant`, `OffsetDateTime`, and `ZonedDateTime` use `date-time`, including in nullable properties,
 collections, and maps.
 
-Object property names come from the serializer descriptor. tapik does not apply `Json.namingStrategy` when deriving an
-ordinary object schema. If that strategy changes the names written on the wire, supply an explicit schema to
-`jsonFormat` or `jsonBody` so documentation uses those wire names.
+Some `Json` settings change the wire shape without changing the derived schema:
 
-`Json.explicitNulls = false` also changes property presence: the codec omits null-valued properties and accepts absent
-nullable properties without defaults. Derived `required` flags still follow descriptor defaults, so supply an explicit
-schema when those flags must match this setting.
+* `Json.namingStrategy` changes object property names, but tapik uses the names in the serializer descriptor.
+* `Json.explicitNulls = false` omits null-valued properties and accepts absent nullable properties without defaults,
+  but derived `required` flags still follow descriptor defaults.
+* `Json.allowStructuredMapKeys = true` encodes maps with structured keys as arrays of key-value pairs, but tapik still
+  derives a map schema.
+
+For these cases, supply an explicit schema to `jsonFormat` or `jsonBody` when generated documentation must describe the
+wire shape.
 
 Schema derivation does not create a codec. For Java time values, provide an actual serializer whose descriptor
 identifies the Java type.
