@@ -10,6 +10,8 @@ import javax.inject.Inject
  *
  * The package prefix defaults to `dev.akif.tapik.generated`, the server interface suffix to `Server`, and the
  * controller suffix to `GeneratedController`.
+ *
+ * @param name unique execution name in the Gradle project.
  */
 abstract class SpringWebMvcExecution @Inject constructor(name: String) :
     TapikExecution(name, "spring-webmvc") {

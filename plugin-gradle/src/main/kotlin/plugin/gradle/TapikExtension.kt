@@ -16,6 +16,8 @@ import javax.inject.Inject
  * Each target method registers one declaration-ordered execution behind the single `tapikGenerate` task. Target
  * methods that are not called do not run, and differently named executions may select the same target. Generation
  * requires an explicit [mode], while applying the plugin only for compiler-plugin activation does not.
+ *
+ * @param objects Gradle factory used to create execution configuration objects.
  */
 abstract class TapikExtension @Inject constructor(private val objects: ObjectFactory) {
     /**

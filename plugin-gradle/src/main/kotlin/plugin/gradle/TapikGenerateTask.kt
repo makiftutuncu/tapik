@@ -28,6 +28,8 @@ import javax.inject.Inject
  * [Mode.COMPILED_API_DEPENDENCY], main Kotlin and resource tasks consume its outputs. In [Mode.SAME_PROJECT], it depends on
  * main classes; separate lifecycle wiring compiles and packages late source and resources when the corresponding
  * lifecycle tasks are requested. Invoking `tapikGenerate` directly does not compile those late sources.
+ *
+ * @param workerExecutor Gradle executor used to isolate target-generation work.
  */
 @CacheableTask
 abstract class TapikGenerateTask @Inject constructor(

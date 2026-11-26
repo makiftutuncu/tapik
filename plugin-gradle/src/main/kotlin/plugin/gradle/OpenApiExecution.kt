@@ -28,6 +28,8 @@ enum class OpenApiComponentNaming {
  *
  * A non-blank [version] is required. YAML output, pretty printing, and simple component names are the defaults. Without
  * a custom [output], YAML uses `{api}.openapi.yml` and JSON uses `{api}.openapi.json`.
+ *
+ * @param name unique execution name in the Gradle project.
  */
 abstract class OpenApiExecution @Inject constructor(name: String) : TapikExecution(name, "openapi") {
     /** Version written into the generated OpenAPI document. */

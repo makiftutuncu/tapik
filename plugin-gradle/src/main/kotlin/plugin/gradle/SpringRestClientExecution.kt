@@ -9,6 +9,8 @@ import javax.inject.Inject
  * Typed configuration for one Spring RestClient generation execution.
  *
  * The package prefix defaults to `dev.akif.tapik.generated`, and the client interface suffix defaults to `Client`.
+ *
+ * @param name unique execution name in the Gradle project.
  */
 abstract class SpringRestClientExecution @Inject constructor(name: String) :
     TapikExecution(name, "spring-restclient") {

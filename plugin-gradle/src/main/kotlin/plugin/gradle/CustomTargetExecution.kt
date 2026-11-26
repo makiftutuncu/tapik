@@ -5,7 +5,12 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.Input
 import javax.inject.Inject
 
-/** Configuration for a service-loaded custom tapik generation target. */
+/**
+ * Configuration for a service-loaded custom tapik generation target.
+ *
+ * @param name unique execution name in the Gradle project.
+ * @param targetId stable ID of the service-loaded generation target.
+ */
 abstract class CustomTargetExecution @Inject constructor(name: String, targetId: String) :
     TapikExecution(name, targetId) {
     /** Target-owned configuration values keyed in declaration order. */

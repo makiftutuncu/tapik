@@ -10,6 +10,7 @@ import javax.inject.Inject
  *
  * The execution `name` is a unique diagnostic identity; [targetId] independently selects the service-loaded target.
  *
+ * @param executionName unique name for this execution in the Gradle project.
  * @property targetId exact identifier of the generation target.
  */
 abstract class TapikExecution @Inject constructor(
