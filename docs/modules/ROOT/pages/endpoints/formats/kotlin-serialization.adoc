@@ -48,10 +48,12 @@ with different registries remain separate.
 
 == Polymorphic values
 
-tapik derives a `UnionSchema` for sealed types and open polymorphic types with a finite list of registered subtypes.
-Each subtype must serialize as an object. tapik adds the configured discriminator as a required enum property to each
-subtype schema and records the discriminator mapping on the union. `@JsonClassDiscriminator` sets the discriminator
-for a sealed type; otherwise tapik uses `Json.classDiscriminator`.
+tapik derives a `UnionSchema` for sealed and open polymorphic types with at least two alternatives. Sealed alternatives
+come from the serializer and keep its declaration order. Open alternatives come from the finite list of registered
+subtypes and are sorted by serialized name so generated schemas remain stable, regardless of registration order. Each
+subtype must serialize as an object. tapik adds the configured discriminator as a required enum property to each
+subtype schema and records the discriminator mapping on the union. `@JsonClassDiscriminator` sets the discriminator for
+a sealed type; otherwise tapik uses `Json.classDiscriminator`.
 
 The JSON format must use object polymorphism with `ClassDiscriminatorMode.POLYMORPHIC`. Array polymorphism, another
 discriminator mode, a naming strategy on a polymorphic type, or a default provider for open polymorphism cannot be

@@ -257,18 +257,19 @@ values. Nullability wraps the registered schema. Built-in Java time descriptor n
 Kotlin serialization callers must still supply actual
 serializers for those Java types; tapik does not invent codecs.
 
-JSON polymorphism is derived from both the serializer and the selected `Json` instance. Sealed alternatives retain
-their serializer declaration order. Kotlin serialization does not expose open serializer-module registration order,
-so open alternatives are ordered by serialized type name to keep generated schemas deterministic. Each alternative is
-a named object schema containing the required discriminator property with its exact serialized type name, and the
-enclosing `UnionSchema` maps those values to the alternatives. `@JsonClassDiscriminator` overrides the selected `Json`
-instance's global discriminator name just as it does for the codec.
+JSON polymorphism is derived from both the serializer and the selected `Json` instance, and requires at least two
+alternatives. Sealed alternatives retain their serializer declaration order. Kotlin serialization does not expose open
+serializer-module registration order, so open alternatives are ordered by serialized type name to keep generated
+schemas deterministic. Each alternative is a named object schema containing the required discriminator property with
+its exact serialized type name, and the enclosing `UnionSchema` maps those values to the alternatives.
+`@JsonClassDiscriminator` overrides the selected `Json` instance's global discriminator name just as it does for the
+codec.
 
-Format construction fails when a polymorphic descriptor has no finite alternatives, uses a default polymorphic
-provider, has a non-object alternative, conflicts with the discriminator property, disables discriminators, or uses
-array polymorphism. `ClassDiscriminatorMode.ALL_JSON_OBJECTS` also fails until ordinary object schemas can represent
-that mode faithfully. Descriptor-only schema derivation uses `Json.Default`; callers needing configured polymorphism
-must provide their `Json` instance.
+Format construction fails when a polymorphic descriptor has fewer than two finite alternatives, uses a default
+polymorphic provider, has a non-object alternative, conflicts with the discriminator property, disables discriminators,
+or uses array polymorphism. `ClassDiscriminatorMode.ALL_JSON_OBJECTS` also fails until ordinary object schemas can
+represent that mode faithfully. Descriptor-only schema derivation uses `Json.Default`; callers needing configured
+polymorphism must provide their `Json` instance.
 
 `jsonFormat`, `jsonBody`, and `deriveSchema` accept a `KotlinxSchemaRegistry` through a `registry` parameter. They
 default to `KotlinxSchemaRegistry.Default`. A caller-owned root `schema` bypasses derivation and the registry. Derived
