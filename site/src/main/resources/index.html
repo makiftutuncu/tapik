@@ -22,9 +22,9 @@
         <p class="eyebrow">Type-safe APIs in Kotlin</p>
         <h1>Define endpoints once.<br>Let the build check the rest.</h1>
         <p class="introduction">
-            tapik represents HTTP endpoints as ordinary Kotlin values. Their structure stays in their types. tapik
-            checks invalid definitions during compilation and generates documentation, clients, and servers from the
-            same endpoints. Generation reports when an integration does not support an endpoint feature.
+            Define HTTP endpoints as Kotlin values. tapik checks definitions as they are built and generates API
+            documentation, clients, and server interfaces from the same endpoints. Generation reports when a selected
+            integration cannot support an endpoint feature.
         </p>
         <div class="actions">
             <a class="primary" href="docs/getting-started.html">Get started</a>
@@ -35,28 +35,28 @@
     <section class="principles" aria-label="tapik principles">
         <article>
             <span>01</span>
-            <h2>Kotlin first</h2>
-            <p>Endpoints read like Kotlin, compose like Kotlin values, and keep their useful information in Kotlin types.</p>
+            <h2>Define in Kotlin</h2>
+            <p>Endpoints are ordinary values. Their inferred types keep the details needed by each output.</p>
         </article>
         <article>
             <span>02</span>
-            <h2>Fail during the build</h2>
-            <p>Invalid endpoints and unsupported integration features stop compilation or generation before runtime.</p>
+            <h2>Catch problems early</h2>
+            <p>tapik checks endpoint rules when values are created and checks integration support during generation.</p>
         </article>
         <article>
             <span>03</span>
-            <h2>Generate many outputs</h2>
-            <p>Generate documentation, clients, and servers from the same endpoints.</p>
+            <h2>Reuse one definition</h2>
+            <p>Generate documentation, clients, and server interfaces from the same endpoint values.</p>
         </article>
     </section>
 
     <section class="example">
         <div>
             <p class="eyebrow">A small endpoint</p>
-            <h2>Ordinary values, precise types</h2>
+            <h2>Choose what to generate</h2>
             <p>
-                Define an API in Kotlin, then choose what to generate in your build. tapik generates source for
-                application code to implement a server or call a client.
+                Define an API in Kotlin, then choose an output in your build. Use generated server interfaces in your
+                handlers or generated clients in your application.
             </p>
             <a href="https://github.com/makiftutuncu/tapik/tree/main/example-application">Open the runnable example →</a>
         </div>
