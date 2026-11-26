@@ -2,9 +2,10 @@
 
 ## Interpretation
 
-`OpenApi.from(api, ...)` interprets the ready endpoints of an explicitly supplied, compiled `Api` value. It returns a
-public OpenAPI 3.2 document value without scanning the classpath, using reflection, or copying endpoint definitions
-into another structure.
+`OpenApi.from(api, ...)` interprets the ready endpoints of an explicitly supplied `Api` value. It returns a public
+OpenAPI 3.2 document value without scanning the classpath, using reflection, or copying endpoint definitions into
+another structure. Direct interpretation does not require the compiler-generated API registry; build plugins use that
+registry to discover API values for generation.
 
 Endpoint, parameter, response, media-type, and schema discovery order is preserved. Request headers and response
 headers are translated literally from the tapik endpoint; the interpreter does not silently discard names that

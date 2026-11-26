@@ -190,8 +190,10 @@ other executions' and user-owned files, and a failed execution leaves its last s
 
 Each integration page is a task-oriented path from a compiled API artifact to a usable result. OpenAPI documents the
 same-module and compiled API choices, generated document ownership, schema inputs, per-API output, configuration, and
-validation, including how status matcher kinds map to response codes or fail. Source integrations lead with compiled API
-generation during `generate-sources` so application source can compile against the generated types.
+validation, including how status matcher kinds map to response codes or fail. It also explains the public in-process
+interpreter, its JSON and YAML renderers, and how direct interpretation differs from build-plugin registry discovery.
+Source integrations lead with compiled API generation during `generate-sources` so application source can compile
+against the generated types.
 
 The Kotlin serialization guide explains when the serialization compiler plugin is needed and how to enable it for Maven
 and Gradle, separately from tapik's compiler plugin. It includes a compiling `@Serializable` model example.
