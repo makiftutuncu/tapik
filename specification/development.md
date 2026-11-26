@@ -230,6 +230,6 @@ BOM coverage, generated-source compilation, Spring runtime behavior, and golden 
 rather than in parallel Maven-only fixture modules. The example is built and tested in the normal reactor so its
 documented configuration cannot drift from supported behavior.
 
-The `target-openapi` module interprets compiled `Api` values directly. It does not scan the classpath or make a second
-copy of API definitions. Its public types describe the OpenAPI output itself, and deterministic JSON and YAML renderers
-expose those same document values.
+The `target-openapi` module interprets explicitly supplied `Api` values directly. It does not require a
+compiler-generated registry, scan the classpath, or make a second copy of API definitions. Its public types describe
+the OpenAPI output itself, and deterministic JSON and YAML renderers expose those same document values.
