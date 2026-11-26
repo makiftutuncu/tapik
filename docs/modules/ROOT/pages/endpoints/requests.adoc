@@ -67,8 +67,10 @@ Wildcards are not catalogued because a body has one concrete representation rath
 distinct. Adding `noBody` as the final alternative makes the complete request body optional; an endpoint with only
 `noInput` has no request-body definition at all.
 
-When `noBody` follows one or more body representations, generated client and handler methods take a nullable body
-value. With multiple representations, the client also selects which media type to send.
+When `noBody` follows one or more body representations, the request body is optional. With one representation, the
+client takes its logical Kotlin value, nullable when the body is optional. With multiple representations, it takes a
+generated sealed choice with one variant per media type; that parameter is nullable when the body is optional. Server
+handlers receive the decoded logical value, nullable when the body is optional.
 
 The body group is non-empty and preserves representation order. `noBody` may appear at most once and only last. The
 request-body description belongs to the group as a whole, matching OpenAPI's model; set it in `.input(...,
