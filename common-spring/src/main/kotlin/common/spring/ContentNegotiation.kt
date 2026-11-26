@@ -9,9 +9,9 @@ import org.springframework.http.MediaType as SpringMediaType
  *
  * The most specific matching range determines each representation's effective quality. Representations are then
  * ordered by quality, matching-range specificity, and declaration order. A missing or blank [accept] selects the first
- * representation.
- * Parameter names and charset values compare case-insensitively; other values remain case-sensitive after
- * double-quoted values and quoted-pair escapes are decoded.
+ * representation. Parameter names and charset values compare case-insensitively; other values remain case-sensitive
+ * after double-quoted values and quoted-pair escapes are decoded. Every non-quality parameter on a matching range must
+ * be present on the offered representation with a matching value.
  *
  * @param accept request `Accept` header, if present.
  * @param offered response media types in endpoint declaration order.

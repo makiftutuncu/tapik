@@ -109,11 +109,15 @@ on `Accept`; when an endpoint can return no body, its route has no aggregate `pr
 request before the handler chooses an output. The handler cannot return a status or body shape outside the generated
 sealed hierarchy.
 
-Response negotiation matches `Accept` parameter names and charset values case-insensitively, so
-`text/plain;charset=UTF-8` matches a body declared as `text/plain;charset=utf-8`. Other parameter values remain
-case-sensitive; equivalent double-quoted and unquoted values match. The most specific matching range determines a
-representation's quality, including `q=0` exclusions. Equal-quality, equally specific matches follow body declaration
-order.
+Each body representation uses its most specific matching `Accept` range for its effective quality. The highest quality
+wins; ties go to greater specificity, then body declaration order. A most-specific `q=0` range excludes that
+representation. A missing or blank `Accept` uses the first declared representation; an invalid header or no compatible
+representation returns `406 Not Acceptable`.
+
+Every non-`q` parameter in an `Accept` range must be present and match on the offered media type. Parameter names and
+charset values compare case-insensitively, so `text/plain;charset=UTF-8` matches a body declared as
+`text/plain;charset=utf-8`. Other parameter values remain case-sensitive; equivalent double-quoted and unquoted values
+match.
 
 == Ownership and naming
 
