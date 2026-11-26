@@ -25,8 +25,9 @@ the application dependency supplies the runtime classes referenced by generated 
 |An API module that uses Jackson.
 
 |`dev.akif:tapik-target-openapi`
-|The OpenAPI generation target.
-|The build host supplies it. Applications that only consume the generated document do not need it at runtime.
+|The OpenAPI generation target and programmatic document API.
+|The build host supplies it for generation. Add it to application code only when calling the programmatic API; projects
+  that only consume the generated document do not need it at runtime.
 
 |`dev.akif:tapik-target-spring-restclient`
 |The RestClient generation target and runtime support used by generated clients.
