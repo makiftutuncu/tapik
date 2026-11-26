@@ -40,8 +40,8 @@ opposite side can support a placement diagnostic, but it can never become part o
 allocating and sanitizing Kotlin declaration names, escaping Kotlin string literals, deriving HTTP path templates and
 status variant names, and rendering sealed data hierarchies with correct byte-array value semantics. Source-generating
 targets use these shared rules rather than maintaining target-specific copies. Target compatibility, compiled-API
-interpretation, wire decoding and encoding, and target-specific model decisions remain inside each target instead of
-introducing a parallel neutral metadata model.
+interpretation, wire decoding and encoding, and target-specific decisions remain inside each target instead of
+creating another shared representation of every endpoint.
 
 Generated Kotlin files shorten qualified declarations and add deterministic, lexicographically ordered imports.
 The package directive is never treated as a type reference or shortened, including when namespace segments begin
@@ -141,7 +141,7 @@ Targets that generate typed source use a compiled view pairing each runtime `Api
 endpoint property's actual Kotlin return type and its property path from the selected root API. The type is read from
 Kotlin class metadata, including classifiers, generic projections, nullability, type-alias abbreviations, outer types,
 flexible upper bounds, and definitely non-null types. tapik does not infer model types from schemas, execute reflective
-endpoint discovery, or serialize a second endpoint metadata model.
+endpoint discovery, or create a second copy of endpoint definitions.
 
 Runtime endpoint order remains authoritative. Declared properties from the concrete API and its API base classes are
 matched to those endpoint values by their delegated property names. A composed API is traversed only through its

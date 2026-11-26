@@ -26,8 +26,8 @@ returned files to their own build.
 == Compilation records APIs
 
 The tapik compiler plugin writes an xref:reference/compiler-registry.adoc[API registry] for each Kotlin module with
-eligible `Api` declarations. It does not run endpoint code, search packages, or copy endpoints into another model. The
-registry points to the original Kotlin values.
+eligible `Api` declarations. It does not run endpoint code, search packages, or make copies of endpoint definitions.
+The registry refers to the original Kotlin values.
 
 The registry is packaged in the compiled API artifact. A consuming project can use endpoints from that dependency. The
 build plugin combines visible registries, sorts APIs by `apiId`, and reports duplicate IDs.

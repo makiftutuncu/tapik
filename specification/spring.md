@@ -75,7 +75,7 @@ be rejected at either point.
 Generated method inputs are derived from the endpoint's compiled Kotlin type. Required path variables, queries,
 headers, and request bodies precede optional or defaulted values. Runtime endpoint values supply names, formats,
 defaults, media types, matchers, and codecs. Generated code performs URI construction, request encoding, output
-matching, and response decoding without a parallel endpoint model.
+matching, and response decoding without creating a second set of endpoint definitions.
 
 WebMVC parameter decoder expressions are rendered structurally from the definition access and an explicit raw-value
 expression. Optional and defaulted parameters decode the lambda-local `raw` value without rewriting endpoint IDs,

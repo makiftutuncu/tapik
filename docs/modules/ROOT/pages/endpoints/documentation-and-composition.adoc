@@ -41,8 +41,8 @@ An API includes another API through a delegated property:
 include::example$dsl/library/Library.kt[tag=api-composition]
 ----
 
-`Library.authors` is the original `Authors` value with its concrete Kotlin type, not a copied metadata representation.
-Its endpoints therefore keep IDs such as `Authors.list` instead of becoming `Library.authors.list`.
+`Library.authors` is the original `Authors` value with its concrete Kotlin type. tapik does not make a second copy of
+its definition, so endpoints keep IDs such as `Authors.list` instead of becoming `Library.authors.list`.
 
 `Library.endpoints` recursively flattens each inclusion at its declaration position. In the example, all author
 endpoints come before all book endpoints, which come before rental endpoints. Nested composition follows the same rule,

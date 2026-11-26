@@ -173,7 +173,7 @@ through their separate target classpaths.
 The compiler registry reference states which `Api` classes and objects are eligible, which endpoint and inclusion
 properties must be public, what compilation produces, and how incremental compilation synchronizes registry entries.
 It also states what registry generation deliberately does not do: execute endpoint expressions, scan packages,
-reflect over arbitrary user classes, or copy endpoint definitions into a metadata model.
+reflect over arbitrary user classes, or copy endpoint definitions into a second structure.
 
 The Maven reference is the canonical catalogue for compiler activation and the `generate` goal. It documents every
 host parameter, the same-module and compiled API lifecycle matrix, exact include/exclude behavior, built-in target

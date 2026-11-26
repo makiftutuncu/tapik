@@ -2,8 +2,8 @@
 :description: Learn how tapik keeps endpoint details in Kotlin types and checks definitions before runtime.
 
 tapik keeps each endpoint's path, query parameters, headers, request body, and responses in the Kotlin type inferred
-from its DSL. Adding one of these details changes the type; tapik does not flatten endpoint definitions into a separate
-metadata model.
+from its DSL. Adding one of these details changes the inferred type. Each endpoint remains the Kotlin value you defined;
+tapik does not make a second copy of its definition.
 
 == Where checks happen
 

@@ -40,8 +40,8 @@ artifact, another module. For `Library.authors.list`, the path is
 == What compilation produces
 
 A compiler output contains one deterministic, compiler-owned registry class and one provider entry for `ApiRegistry`.
-API classes are instantiated once by that registry; objects are referenced directly. The registry holds the actual API
-values rather than a copied metadata representation.
+API classes are instantiated once by that registry; objects are referenced directly. The registry holds the original
+API values instead of making a second copy of their definitions.
 
 The service descriptor is compatible with ordinary Java `ServiceLoader`, so it is packaged in an API JAR and can
 coexist with manually supplied providers. Registry implementation names and provider order are internal details. A
@@ -63,7 +63,7 @@ Registry compilation does not:
 
 * execute endpoint expressions;
 * scan packages or reflect over arbitrary classes;
-* serialize endpoints or duplicate them into a metadata model;
+* copy endpoint definitions into another structure;
 * choose a generation target or write target output.
 
 Typed source targets later pair each runtime endpoint value with the exact return type of its delegated Kotlin

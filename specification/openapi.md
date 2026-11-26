@@ -3,8 +3,8 @@
 ## Interpretation
 
 `OpenApi.from(api, ...)` interprets the ready endpoints of an explicitly supplied, compiled `Api` value. It returns a
-public OpenAPI 3.2 document model without scanning the classpath, using reflection, or copying endpoints into a
-target-neutral metadata model.
+public OpenAPI 3.2 document value without scanning the classpath, using reflection, or copying endpoint definitions
+into another structure.
 
 Endpoint, parameter, response, media-type, and schema discovery order is preserved. Request headers and response
 headers are translated literally from the tapik endpoint; the interpreter does not silently discard names that
@@ -46,8 +46,8 @@ resolving to the same name fail generation instead of allowing one definition to
 diagnostics identify the normalized component name and the first structural difference in a deterministic traversal.
 They report its schema path plus concise existing and candidate values. The original tapik schema names are retained
 as provenance, making collisions introduced by component-name normalization explicit. When interpretation knows the
-owning endpoint location, the diagnostic also identifies where the existing and candidate definitions were used;
-this provenance is diagnostic state, not a parallel schema or endpoint metadata model.
+owning endpoint location, the diagnostic also identifies where the existing and candidate definitions were used. This
+context is kept for error messages; it does not create another schema or endpoint definition.
 
 A named reference with a distinct component name creates an alias component containing `$ref`; it does not lose its
 name. If both names normalize to the same component, the reference addresses that component directly. Alias targets

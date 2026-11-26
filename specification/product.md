@@ -79,5 +79,5 @@ rollout remain application responsibilities.
 - Kotlin Multiplatform
 - TypeScript generation
 - API compatibility analysis beyond ordinary Kotlin/build breakage
-- Package scanning, reflective endpoint discovery, or a duplicate metadata universe
+- Package scanning, reflective endpoint discovery, or a second set of endpoint definitions for generated targets
 - User data-model generation or ownership

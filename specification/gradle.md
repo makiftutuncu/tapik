@@ -19,7 +19,7 @@ Applying the tapik Gradle plugin also attaches `dev.akif:tapik-plugin-compiler` 
 `KotlinCompilerPluginSupportPlugin` API. Its artifact version is exactly the applied tapik Gradle plugin version and its
 compiler plugin ID is `dev.akif.tapik`. This attachment is automatic and has no user-facing compiler options: endpoint
 definitions remain ordinary Kotlin values and API discovery remains the compiler-generated `ApiRegistry` service
-provider rather than a second Gradle metadata model.
+provider rather than a second Gradle-specific description of the endpoints.
 
 The compiler plugin is applicable to every compilation whose Kotlin platform type is JVM. It is not attached to
 common, JavaScript, Android JVM, Native, or Wasm compilations. Project-type diagnostics remain separate from compiler
@@ -45,7 +45,7 @@ registry class or service entry. On non-clean compilation, adding or changing AP
 removing the last API removes the generated class and its entry while preserving other providers. The adapter supplies
 only that compilation's index and complete source roots to the compiler integration. The compiler reconciles and
 updates them without reading, pruning, or rewriting any other target or compilation's state. Gradle never synthesizes
-registries or duplicates endpoint definitions into its own metadata model.
+registries or makes its own copy of endpoint definitions.
 
 ## Configuration model
 
