@@ -88,7 +88,8 @@ Schemas themselves are untyped; the enclosing `Format<Value, Representation>` es
 Format integrations derive these neutral values from user-owned models. Derivation fails when the chosen integration
 cannot describe a type it must encode, rather than silently producing an incomplete schema.
 
-Names are optional. Use `.named(...)` for a type that should become a reusable component; target-specific naming policy
-decides the final external name and resolves unnamed derived types.
+Names are optional. Use `.named(...)` when a schema-aware target should reuse a schema; the target decides how to turn
+that name into an external one. In OpenAPI, named schemas become components and unnamed structural schemas stay inline.
+Reference schemas remain references.
 
 Next, xref:endpoints/documentation-and-composition.adoc[document and compose APIs].

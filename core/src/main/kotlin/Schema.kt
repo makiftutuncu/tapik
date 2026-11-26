@@ -34,7 +34,7 @@ enum class SchemaType {
 }
 
 /**
- * A scalar [type] with an optional OpenAPI [format] and reusable [name].
+ * A scalar [type] with an optional representation hint [format] and reusable [name].
  *
  * @property type kind of value described by this schema.
  * @property format optional format hint for the scalar type.

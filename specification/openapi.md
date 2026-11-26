@@ -37,7 +37,8 @@ undocumented response retains that standard fallback.
 ## Schema components
 
 Every named tapik schema becomes an OpenAPI schema component and every reference follows the same component-naming
-policy. The default `OpenApiComponentNaming.Simple` policy keeps the final dot-separated part of a schema name.
+policy. Unnamed structural schemas are emitted inline, while reference schemas remain references. The default
+`OpenApiComponentNaming.Simple` policy keeps the final dot-separated part of a schema name.
 `OpenApiComponentNaming.Qualified` keeps the provided name unchanged, and callers may supply their own policy.
 
 Schemas that resolve to the same component name and the same OpenAPI shape share one component. Different shapes

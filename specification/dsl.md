@@ -186,8 +186,8 @@ The cached string defaults live on `Format.Companion`; `format` is an ergonomic 
 `FormatDefaults<Representation>` describes the common scalar-format shape for any representation, and
 `StringFormats` implements it for `String`. Defaults are named after their Kotlin types: `boolean`, `byte`,
 `short`, `int`, `long`, `float`, `double`, `bigInteger`, `bigDecimal`, `string`, `uuid`, `localDate`, `localTime`,
-`localDateTime`, `offsetTime`, `offsetDateTime`, `instant`, `duration`, and `period`. Their scalar schemas use the
-corresponding OpenAPI format when one exists. A failed parse produces a structured decode failure and retains the
+`localDateTime`, `offsetTime`, `offsetDateTime`, `instant`, `duration`, and `period`. Their scalar schemas use a
+standard format hint where one exists. A failed parse produces a structured decode failure and retains the
 parsing exception as its cause.
 
 Enum defaults use exact Kotlin constant names on the wire:
