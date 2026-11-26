@@ -27,7 +27,7 @@ class OpenApiOperation(
     /** Unmodifiable snapshot of ordered path, query, and request-header parameters. */
     val parameters: List<OpenApiParameter> = parameters.snapshotList()
 
-    /** Unmodifiable snapshot of responses keyed by status matcher representation. */
+    /** Unmodifiable snapshot of responses keyed by OpenAPI response code or status class, such as `4XX`. */
     val responses: Map<String, OpenApiResponse> = responses.snapshotMap()
 
     /** Returns [operationId] for destructuring. */
