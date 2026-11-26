@@ -22,9 +22,9 @@
         <p class="eyebrow">Type-safe APIs in Kotlin</p>
         <h1>Define endpoints once.<br>Let the build check the rest.</h1>
         <p class="introduction">
-            Define HTTP endpoints as Kotlin values. tapik checks definitions as they are built and generates API
-            documentation, clients, and server interfaces from the same endpoints. Generation reports when a selected
-            integration cannot support an endpoint feature.
+            Define HTTP endpoints as Kotlin values. Use the same definitions to generate API documentation, clients,
+            and server interfaces. Their inferred types retain the details each output needs. Generation reports when a
+            selected integration cannot support an endpoint feature.
         </p>
         <div class="actions">
             <a class="primary" href="docs/getting-started.html">Get started</a>
@@ -36,12 +36,15 @@
         <article>
             <span>01</span>
             <h2>Define in Kotlin</h2>
-            <p>Endpoints are ordinary values. Their inferred types keep the details needed by each output.</p>
+            <p>Endpoints are ordinary values you can name, share, and compose.</p>
         </article>
         <article>
             <span>02</span>
             <h2>Catch problems early</h2>
-            <p>tapik checks endpoint rules when values are created and checks integration support during generation.</p>
+            <p>
+                Kotlin rejects invalid combinations at compile time. tapik checks endpoint values as they are created,
+                then reports unsupported features during generation.
+            </p>
         </article>
         <article>
             <span>03</span>
