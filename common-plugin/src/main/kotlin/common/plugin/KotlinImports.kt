@@ -5,6 +5,10 @@ package dev.akif.tapik.common.plugin
  *
  * Existing explicit imports are retained. References in [packageName] and Kotlin/JVM default-import packages do not
  * produce imports. Conflicting references remain qualified, and literals and comments are preserved verbatim.
+ *
+ * @param packageName package declared by the generated source.
+ * @return source with unambiguous references shortened and imports ordered.
+ * @throws IllegalArgumentException when [packageName] is blank or the source has no package declaration.
  */
 fun String.optimizeKotlinImports(packageName: String): String {
     require(packageName.isNotBlank()) { "Generated Kotlin package name must not be blank" }

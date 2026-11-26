@@ -9,6 +9,11 @@ package dev.akif.tapik.common.plugin
  * Invalid resulting Kotlin identifiers receive `_k_`. Encoding underscores prevents collisions with escape sequences;
  * preserving binary nesting separators distinguishes nested classes from similarly named top-level classes.
  * This mapping is independent of API selection and is part of generated-source compatibility.
+ *
+ * @param packagePrefix configured generated package prefix.
+ * @param apiBinaryName fully qualified JVM binary name of the API type.
+ * @return stable package for the API's generated declarations.
+ * @throws IllegalArgumentException when [packagePrefix] is invalid or [apiBinaryName] has an empty segment.
  */
 fun generatedApiPackage(packagePrefix: String, apiBinaryName: String): String {
     require(packagePrefix.split('.').all(String::isKotlinIdentifier)) { "Invalid generated package prefix '$packagePrefix'" }
