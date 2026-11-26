@@ -33,9 +33,10 @@ schema.
 
 == Register schemas for custom types
 
-`KotlinxSchemaRegistry` matches serializer descriptor names and passes `SerialDescriptor` values to schema providers.
-Registrations apply recursively to matching root values, object properties, nullable values, collection elements, and
-map keys or values. Use `withSchemaProvider` when a schema depends on the resolved descriptor.
+`KotlinxSchemaRegistry` removes a trailing `?` from descriptor names before matching registrations. It passes the
+resolved `SerialDescriptor` to schema providers. Registrations apply recursively to matching root values, object
+properties, nullable values, collection elements, and map keys or values. For nullable values, tapik wraps the
+registered schema in a nullable schema. Use `withSchemaProvider` when a schema depends on the resolved descriptor.
 
 [source,kotlin]
 ----

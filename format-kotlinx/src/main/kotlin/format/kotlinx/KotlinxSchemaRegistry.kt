@@ -13,8 +13,9 @@ typealias KotlinxSchemaProvider = SchemaProvider<SerialDescriptor>
 /**
  * Immutable custom-schema registrations used during recursive Kotlin serialization schema derivation.
  *
- * Registrations match descriptor serial names. Adding another registration for the same serial name replaces the
- * earlier registration in the returned registry.
+ * Lookup removes a trailing `?` from each descriptor serial name. This lets nullable values use the registered schema
+ * before tapik wraps it in a nullable schema. Adding another registration for the same normalized serial name replaces
+ * the earlier registration in the returned registry.
  */
 class KotlinxSchemaRegistry private constructor(
     private val registry: SchemaRegistry<String, SerialDescriptor>

@@ -249,11 +249,12 @@ Primitive Kotlin values and standard Java time values are resolved through the s
 The catalog is independent of either serialization integration so their corresponding schema types and formats cannot
 drift.
 
-`KotlinxSchemaRegistry` is an immutable set of schema registrations matched by serializer descriptor name. A caller
-may register either a fixed `Schema` or a `KotlinxSchemaProvider` using a serializer or descriptor. Providers receive
-the resolved `SerialDescriptor`. Registrations apply recursively to roots, object properties, nullable values,
-collection elements, and map keys or values. Nullability wraps the registered schema. Built-in Java time descriptor
-names map to their string formats, but Kotlin serialization callers must still supply actual
+`KotlinxSchemaRegistry` is an immutable set of schema registrations matched after removing a trailing `?` from each
+serializer descriptor name. A caller may register either a fixed `Schema` or a
+`KotlinxSchemaProvider` using a serializer or descriptor. Providers receive the resolved `SerialDescriptor`.
+Registrations apply recursively to roots, object properties, nullable values, collection elements, and map keys or
+values. Nullability wraps the registered schema. Built-in Java time descriptor names map to their string formats, but
+Kotlin serialization callers must still supply actual
 serializers for those Java types; tapik does not invent codecs.
 
 JSON polymorphism is derived from both the serializer and the selected `Json` instance. Sealed alternatives retain
