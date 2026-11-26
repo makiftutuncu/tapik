@@ -69,7 +69,8 @@ private fun <Value : Any> createJsonFormat(format: ObjectMapper, type: KType, sc
 }
 
 /**
- * Builds a JSON format for [Value], deriving with [registry] unless a caller-owned root [schema] is supplied.
+ * Builds a JSON format for [Value]. Without a caller-supplied root [schema], its schema is derived with [registry].
+ * Supplying a root schema bypasses derivation and format caching.
  *
  * @param format mapper used to encode and decode values.
  * @param schema optional caller-supplied schema for the value.

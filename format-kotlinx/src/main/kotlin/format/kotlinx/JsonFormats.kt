@@ -58,7 +58,8 @@ private fun <Value : Any> createJsonFormat(
     )
 
 /**
- * Builds or reuses a JSON byte-array format for [Value], [format], and [registry].
+ * Builds or reuses a JSON byte-array format for [Value], [format], and [registry]. A supplied root [schema] bypasses
+ * derivation and format caching.
  *
  * @param format JSON settings used to encode and decode values.
  * @param schema optional caller-supplied schema for the value.
