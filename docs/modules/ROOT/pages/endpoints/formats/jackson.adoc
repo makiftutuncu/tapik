@@ -16,8 +16,8 @@ example, `LocalDate` derives a `string` schema with `date` format, while `Instan
 `ZonedDateTime` use `date-time`, including in nullable properties, collections, and maps. Jackson supplies codecs for
 these types directly.
 
-Jackson schema derivation does not currently handle sealed Kotlin classes as polymorphic unions. Register a schema for
-the sealed type in `JacksonSchemaRegistry` or pass an explicit root schema when building its format.
+Jackson schema derivation does not currently support polymorphic types, including sealed Kotlin classes. Register a
+schema for the type in `JacksonSchemaRegistry` or pass an explicit root schema when building its format.
 
 Custom serializers, converters, and non-natural `@JsonFormat` shapes can change the wire structure. tapik reports
 `SchemaDerivationException` for unsupported class, property, or module serializers, including overrides supplied by
