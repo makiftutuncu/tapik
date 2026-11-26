@@ -12,7 +12,8 @@ include::example$dsl/ApiAndUriExamples.kt[tag=uri-parameters]
 
 The examples render as `/assets?name=\{name}&page=\{page}&ownerId=\{ownerId}` and `/assets/\{*path}`. A `Uri` retains its
 literal segments, path values, and query definitions separately, so generators do not have to parse the rendered
-string.
+string. The DSL supports up to eight path values and eight query definitions. Literal path fragments do not count
+toward the path-value limit.
 
 == Literal paths
 
@@ -46,7 +47,8 @@ handle URI escaping at the transport boundary. For the exact behavior of tapik's
 xref:clients/spring-restclient.adoc[the Spring RestClient guide].
 
 `path.remaining("path")` is a distinct required wildcard value. It captures one or more final segments as a
-`List<String>` and must be the last path definition, although query parameters may follow it.
+`List<String>` and must be the last path definition, although query parameters may follow it. Each captured segment must
+be non-empty and must not contain `/`.
 
 == Query presence and repetition
 
@@ -60,7 +62,7 @@ A query parameter begins as required. Presence modifiers change both its value s
 |`String`
 
 |`query.string("term").optional()`
-|optional `String`
+|`String?`
 
 |`query.int("page").optional(default = 1)`
 |`Int`, using `1` when absent
