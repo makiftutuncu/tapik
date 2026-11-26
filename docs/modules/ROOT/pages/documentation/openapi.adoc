@@ -21,9 +21,11 @@ the API ID as the document title and the endpoint ID as `operationId`.
 
 == Create a document in Kotlin
 
-Code that already has a compiled `Api` value can call `OpenApi.from(...)` directly. It returns an `OpenApiDocument`,
-which you can render with `toJson()` or `toYaml()`. The `version` argument sets the API document version in `info`; it
-does not change the OpenAPI specification version. The `openapi` build target uses this same interpreter.
+Pass an `Api` value to `OpenApi.from(...)` to create a document in Kotlin code. This direct call does not need the
+compiler-generated registry; the registry is used when a build plugin discovers APIs for generation. The function
+returns an `OpenApiDocument`, which you can render with `toJson()` or `toYaml()`. The `version` argument sets the API
+document version in `info`; it does not change the OpenAPI specification version. The `openapi` build target uses the
+same interpreter.
 
 Add `dev.akif:tapik-target-openapi` as an application dependency when your code calls this API. The build plugin
 supplies the target when you generate a document through Maven or Gradle; a project that only consumes a generated

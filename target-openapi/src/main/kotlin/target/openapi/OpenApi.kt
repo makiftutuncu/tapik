@@ -2,12 +2,12 @@ package dev.akif.tapik.target.openapi
 
 import dev.akif.tapik.*
 
-/** Programmatic OpenAPI 3.2 interpreter for compiled tapik API values. */
+/** Programmatic OpenAPI 3.2 interpreter for tapik API values. */
 object OpenApi {
     /**
      * Interprets [api] using explicit document [info].
      *
-     * @param api compiled tapik API value to interpret.
+     * @param api tapik API value to interpret.
      * @param info identifying information for the generated document.
      * @param componentNaming policy for converting schema names to component names.
      * @return an OpenAPI document preserving endpoint declaration order.
@@ -22,7 +22,7 @@ object OpenApi {
     /**
      * Interprets [api], using its ID as the title and [version] as the document version.
      *
-     * @param api compiled tapik API value to interpret.
+     * @param api tapik API value to interpret.
      * @param version version of the API document.
      * @param title human-readable API title, defaulting to [Api.apiId].
      * @param componentNaming policy for converting schema names to component names.
