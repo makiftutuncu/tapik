@@ -12,7 +12,8 @@ import dev.akif.tapik.StringFormat
  * @param raw encoded request value.
  * @param location human-readable request location included in an error message.
  * @return the decoded value.
- * @throws org.springframework.web.server.ResponseStatusException with `400 Bad Request` when decoding fails.
+ * @throws org.springframework.web.server.ResponseStatusException with `400 Bad Request` when [format] returns a
+ * decoding failure. Exceptions thrown by the format decoder propagate unchanged.
  */
 fun <Value : Any> decodeRequest(
     format: StringFormat<Value>,
@@ -27,7 +28,8 @@ fun <Value : Any> decodeRequest(
  * @param raw encoded request values in received order.
  * @param location human-readable request location included in an error message.
  * @return the decoded value.
- * @throws org.springframework.web.server.ResponseStatusException with `400 Bad Request` when decoding fails.
+ * @throws org.springframework.web.server.ResponseStatusException with `400 Bad Request` when [format] returns a
+ * decoding failure. Exceptions thrown by the format decoder propagate unchanged.
  */
 fun <Value : Any> decodeRequest(
     format: Format<Value, List<String>>,
@@ -42,7 +44,8 @@ fun <Value : Any> decodeRequest(
  * @param raw encoded request body.
  * @param location human-readable request location included in an error message.
  * @return the decoded value.
- * @throws org.springframework.web.server.ResponseStatusException with `400 Bad Request` when decoding fails.
+ * @throws org.springframework.web.server.ResponseStatusException with `400 Bad Request` when [format] returns a
+ * decoding failure. Exceptions thrown by the format decoder propagate unchanged.
  */
 fun <Value : Any> decodeRequest(
     format: ByteArrayFormat<Value>,

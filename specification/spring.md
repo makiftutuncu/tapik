@@ -174,9 +174,9 @@ adopt framework types or annotations. The WebMVC target currently emits both typ
 shared handler generator is deferred until another server target needs to reuse it.
 
 Generated Spring adapter methods receive wire values rather than asking Spring to convert endpoint values. They decode
-path variables, query parameters, headers, and bodies through the formats attached to the endpoint. Decode failures and
-fixed-header mismatches produce `400 Bad Request`. `CONNECT` and `QUERY` fail generation because Spring WebMVC cannot
-map them.
+path variables, query parameters, headers, and bodies through the formats attached to the endpoint. A decoder's
+`DecodeResult.Failure` and fixed-header mismatches produce `400 Bad Request`. Exceptions thrown directly by custom
+decoders propagate through Spring. `CONNECT` and `QUERY` fail generation because Spring WebMVC cannot map them.
 
 A remaining path uses Spring's terminal `{*name}` mapping and is exposed to handlers as `List<String>`. Its one-or-more
 and segment-shape rules are decoded through the format attached to `RemainingPath`, like every ordinary path value.

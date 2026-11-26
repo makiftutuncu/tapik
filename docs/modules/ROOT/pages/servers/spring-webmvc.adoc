@@ -94,8 +94,9 @@ rules. The annotation registers generated adapters only; it does not enable or c
 
 The internal controller owns routes and Spring mapping annotations. It decodes path, query, and header strings with the
 endpoint formats, validates required and fixed inputs, selects request-body media representations, and calls the
-handler with Kotlin values. Missing required query or header values, decoding failures, and fixed-value mismatches return
-`400 Bad Request`. An unsupported request `Content-Type` returns `415 Unsupported Media Type`. If no response
+handler with Kotlin values. Missing required query or header values, returned decode failures, and fixed-value
+mismatches return `400 Bad Request`. Exceptions thrown directly by custom decoders propagate through Spring. An
+unsupported request `Content-Type` returns `415 Unsupported Media Type`. If no response
 representation matches `Accept`, the target returns `406 Not Acceptable`.
 
 `MediaType(...)` checks syntax but not charset support. An unknown charset in an incoming `Content-Type` is treated as
