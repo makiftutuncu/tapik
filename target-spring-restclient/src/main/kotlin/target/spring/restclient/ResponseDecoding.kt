@@ -11,7 +11,8 @@ import dev.akif.tapik.StringFormat
  * @param bytes encoded response body.
  * @param endpointId endpoint identifier included in an error message.
  * @return the decoded body value.
- * @throws IllegalStateException when decoding fails.
+ * @throws IllegalStateException when [format] returns a decoding failure. Exceptions thrown by the format decoder
+ * propagate unchanged.
  */
 fun <Value : Any> decodeResponseBody(
     format: ByteArrayFormat<Value>,
@@ -26,7 +27,8 @@ fun <Value : Any> decodeResponseBody(
  * @param value encoded header value.
  * @param endpointId endpoint identifier included in an error message.
  * @return the decoded header value.
- * @throws IllegalStateException when decoding fails.
+ * @throws IllegalStateException when [format] returns a decoding failure. Exceptions thrown by the format decoder
+ * propagate unchanged.
  */
 fun <Value : Any> decodeResponseHeader(
     format: StringFormat<Value>,
