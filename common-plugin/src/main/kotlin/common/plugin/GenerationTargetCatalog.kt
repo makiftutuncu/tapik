@@ -2,15 +2,18 @@ package dev.akif.tapik.common.plugin
 
 import java.util.ServiceLoader
 
-/** A provider of generation targets made available to host adapters. */
+/**
+ * Supplies generation targets to host adapters through Java's service-provider mechanism.
+ *
+ * Implementations loaded as providers must have a public no-argument constructor.
+ */
 interface GenerationTargetRegistry {
-    /** Targets contributed by this registry. */
+    /** Targets contributed by this registry; catalogs order them by ID. */
     val targets: List<GenerationTarget>
 }
 
 /**
  * A deterministic collection of targets from every available [GenerationTargetRegistry].
- *
  */
 class GenerationTargetCatalog private constructor(
     targets: List<GenerationTarget>
@@ -45,7 +48,7 @@ class GenerationTargetCatalog private constructor(
         }
 
         /**
-         * Loads target registries visible to [classLoader].
+         * Loads target registries visible to [classLoader] through Java's service-provider mechanism.
          *
          * @param classLoader class loader containing generation target providers.
          * @return a deterministic target catalog.

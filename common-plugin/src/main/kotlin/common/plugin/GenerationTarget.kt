@@ -49,7 +49,7 @@ class GenerationRequest(
 
 /** A host-neutral generation target. */
 interface GenerationTarget {
-    /** Stable ID selected by build-tool and command-line adapters. */
+    /** Stable, non-blank ID selected by host adapters; IDs must be unique across available targets. */
     val id: String
 
     /**
