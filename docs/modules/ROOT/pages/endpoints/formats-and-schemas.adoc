@@ -89,7 +89,7 @@ Format integrations derive these neutral values from user-owned models. Derivati
 cannot describe a type it must encode, rather than silently producing an incomplete schema.
 
 Names are optional. Use `.named(...)` when a schema-aware target should reuse a schema; the target decides how to turn
-that name into an external one. In OpenAPI, named schemas become components and unnamed structural schemas stay inline.
-Reference schemas remain references.
+that name into an external one. In OpenAPI, named structural schemas become components and unnamed structural schemas
+stay inline. Reference schemas continue to point to their targets.
 
 Next, xref:endpoints/documentation-and-composition.adoc[document and compose APIs].
