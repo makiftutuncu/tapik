@@ -27,9 +27,16 @@ returns an `OpenApiDocument`, which you can render with `toJson()` or `toYaml()`
 document version in `info`; it does not change the OpenAPI specification version. The `openapi` build target uses the
 same interpreter.
 
+[source,kotlin]
+----
+include::example$openapi/OpenApiExamples.kt[tag=direct-api]
+----
+
 Add `dev.akif:tapik-target-openapi` as an application dependency when your code calls this API. The build plugin
 supplies the target when you generate a document through Maven or Gradle; a project that only consumes a generated
-document does not need the target at runtime. See xref:reference/artifacts.adoc[Artifacts and the BOM].
+document does not need the target at runtime. See the
+link:{page-api-reference-url}tapik/dev.akif.tapik.target.openapi/index.html[OpenAPI Kotlin API reference] for the
+complete model and function signatures, and xref:reference/artifacts.adoc[Artifacts and the BOM] for dependency roles.
 
 == Generate in the API module
 

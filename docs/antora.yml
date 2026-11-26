@@ -42,3 +42,6 @@ ext:
       - dir: common-plugin/src/test/kotlin/common/plugin
         files: CustomTargetExamples.kt
         into: modules/ROOT/examples/generation
+      - dir: target-openapi/src/test/kotlin/target/openapi
+        files: OpenApiExamples.kt
+        into: modules/ROOT/examples/openapi
