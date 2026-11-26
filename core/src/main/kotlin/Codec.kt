@@ -70,13 +70,16 @@ sealed interface DecodeResult<out Value : Any> {
 
 /** Decodes a serialized [Representation] into a [Value]. */
 fun interface Decoder<in Representation : Any, out Value : Any> {
-    /** Decodes [representation]. */
+    /**
+     * Decodes [representation]. Return [DecodeResult.Failure] for invalid input; exceptions thrown by this decoder
+     * propagate to the caller.
+     */
     fun decode(representation: Representation): DecodeResult<Value>
 }
 
 /** Encodes a [Value] into its serialized [Representation]. */
 fun interface Encoder<in Value : Any, out Representation : Any> {
-    /** Encodes [value]. */
+    /** Encodes [value]. Exceptions thrown by this encoder propagate to the caller. */
     fun encode(value: Value): Representation
 }
 
@@ -94,9 +97,9 @@ data class Codec<Value : Any, Representation : Any>(
     /** Kotlin-to-serialized conversion. */
     val encoder: Encoder<Value, Representation>
 ) {
-    /** Decodes [representation]. */
+    /** Decodes [representation]; exceptions thrown by [decoder] propagate to the caller. */
     fun decode(representation: Representation): DecodeResult<Value> = decoder.decode(representation)
 
-    /** Encodes [value]. */
+    /** Encodes [value]; exceptions thrown by [encoder] propagate to the caller. */
     fun encode(value: Value): Representation = encoder.encode(value)
 }

@@ -171,8 +171,9 @@ Format<Value, Representation>
 ```
 
 Both types are non-null. A codec uses tapik's dependency-free `DecodeResult`, whose failure contains one or more
-`DecodeError` values. A decode error has a message and may retain a cause and a string location. Schemas are untyped;
-the enclosing `Format<Value, Representation>` establishes their relationship to the Kotlin type.
+`DecodeError` values. A decode error has a message and may retain a cause and a string location. Custom decoders return
+failures for invalid input; exceptions thrown by custom decoders or encoders propagate to the caller. Schemas are
+untyped; the enclosing `Format<Value, Representation>` establishes their relationship to the Kotlin type.
 
 Every format can be lifted to repeated values. `Format<Value, Representation>.repeated()` returns
 `Format<List<Value>, List<Representation>>`, decodes every representation while accumulating failures, encodes each

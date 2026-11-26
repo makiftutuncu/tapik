@@ -37,7 +37,7 @@ include::example$dsl/library/Identifiers.kt[tag=book-id-format]
 
 `transform` catches exceptions thrown while converting the decoded value and returns a structured `DecodeResult`
 failure. `transformOrThrow` is the explicit propagating variant. Both retain the original wire representation and
-schema. `.named("BookId")` gives schema-aware targets a stable reusable component name.
+schema. `.named("BookId")` gives schema-aware targets a stable name they can reuse.
 
 Every format also has `.repeated()`, which produces a list format, preserves element order, and accumulates decoding
 errors. Repeated query parameters use this operation internally.
@@ -60,15 +60,16 @@ Attach the format to a body as usual:
 include::example$dsl/CustomFormatExamples.kt[tag=custom-byte-body]
 ----
 
-Return `DecodeResult.Failure` for invalid input so callers receive a structured decode error. Keep the schema aligned
-with the encoded representation; tapik does not infer or verify a custom codec's wire shape. See the
+Return `DecodeResult.Failure` for invalid input so callers receive a structured decode error. Exceptions thrown by a
+custom decoder or encoder propagate to the caller. Keep the schema aligned with the encoded representation; tapik does
+not infer or verify a custom codec's wire shape. See the
 link:{page-api-reference-url}tapik/dev.akif.tapik/-format/index.html[`Format` API reference] for the full API.
 
 For a Kotlin enum, use `format.enumValue<BookState>()`. The resulting format writes and reads exact constant names and
 publishes the same ordered names through `EnumSchema`; an unknown value becomes a structured decode failure listing
 the allowed names. Convenience factories are also available as `path.enumValue<BookState>("state")`,
 `query.enumValue<BookState>("state")`, and `header.enumValue<BookState>("X-Book-State")`. Each retains `BookState` in
-the inferred endpoint type. Use `.named("BookState")` when the enum should become a reusable schema component.
+the inferred endpoint type. Use `.named("BookState")` when targets should reuse the enum schema by name.
 
 Body formats are opt-in. tapik provides JSON integrations for Kotlin serialization and Jackson 3. Each exposes
 `jsonBody<Value>()`; pass its configured JSON instance as `format` and set `mediaType` when the body uses a vendor media

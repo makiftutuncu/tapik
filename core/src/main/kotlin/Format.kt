@@ -17,10 +17,10 @@ data class Format<Value : Any, Representation : Any>(
     /** Factory namespace for cached formats of common types. */
     companion object : FormatDefaults<String> by StringFormats
 
-    /** Decodes [representation]. */
+    /** Decodes [representation]; exceptions thrown by the decoder propagate to the caller. */
     fun decode(representation: Representation): DecodeResult<Value> = codec.decode(representation)
 
-    /** Encodes [value]. */
+    /** Encodes [value]; exceptions thrown by the encoder propagate to the caller. */
     fun encode(value: Value): Representation = codec.encode(value)
 
     /**
