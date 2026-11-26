@@ -19,8 +19,9 @@ include::example$generation/CustomTargetExamples.kt[tag=custom-target]
 
 The request configuration supports scalar values, ordered lists, and nested objects. Maven exposes only scalar strings;
 Gradle can configure all three shapes. Define the options your target accepts, validate their types and values, and
-report unknown options clearly. The build host selects APIs and the target; it does not interpret target-specific
-options.
+report unknown options clearly. In Gradle, setting a top-level name again replaces its previous value; names inside a
+nested object must be non-blank and unique. The build host selects APIs and the target; it does not interpret
+target-specific options.
 
 Each `GeneratedArtifact` contains a normalized relative path, media type, artifact kind, and complete text content.
 Choose `SOURCE` for source the host should compile, `RESOURCE` for files the application should package, or
