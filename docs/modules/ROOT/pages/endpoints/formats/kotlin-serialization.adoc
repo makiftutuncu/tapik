@@ -26,6 +26,10 @@ and standard Java time values wherever they appear. For example, `LocalDate` der
 format, while `Instant`, `OffsetDateTime`, and `ZonedDateTime` use `date-time`, including in nullable properties,
 collections, and maps.
 
+Object property names come from the serializer descriptor. tapik does not apply `Json.namingStrategy` when deriving an
+ordinary object schema. If that strategy changes the names written on the wire, supply an explicit schema to
+`jsonFormat` or `jsonBody` so documentation uses those wire names.
+
 Schema derivation does not create a codec. For Java time values, provide an actual serializer whose descriptor
 identifies the Java type.
 Contextual descriptors do not derive automatically; register a schema for the descriptor or supply an explicit root
