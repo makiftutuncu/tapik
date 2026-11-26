@@ -30,6 +30,10 @@ Object property names come from the serializer descriptor. tapik does not apply 
 ordinary object schema. If that strategy changes the names written on the wire, supply an explicit schema to
 `jsonFormat` or `jsonBody` so documentation uses those wire names.
 
+`Json.explicitNulls = false` also changes property presence: the codec omits null-valued properties and accepts absent
+nullable properties without defaults. Derived `required` flags still follow descriptor defaults, so supply an explicit
+schema when those flags must match this setting.
+
 Schema derivation does not create a codec. For Java time values, provide an actual serializer whose descriptor
 identifies the Java type.
 Contextual descriptors do not derive automatically; register a schema for the descriptor or supply an explicit root
