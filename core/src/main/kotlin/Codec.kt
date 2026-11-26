@@ -30,6 +30,7 @@ sealed interface DecodeResult<out Value : Any> {
     /**
      * One or more errors encountered while decoding.
      *
+     * @param errors decoding errors, copied in their original order.
      * @throws IllegalArgumentException when [errors] is empty.
      */
     class Failure(
@@ -42,7 +43,11 @@ sealed interface DecodeResult<out Value : Any> {
             require(this.errors.isNotEmpty()) { "A decode failure must contain at least one error" }
         }
 
-        /** Creates a failure containing one [error]. */
+        /**
+         * Creates a failure containing one [error].
+         *
+         * @param error decoding error to include.
+         */
         constructor(error: DecodeError) : this(listOf(error))
 
         /** Returns [errors] for destructuring. */
