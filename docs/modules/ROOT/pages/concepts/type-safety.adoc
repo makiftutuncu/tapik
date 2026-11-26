@@ -15,15 +15,15 @@ tapik does not make a second copy of its definition.
 |A second `.input(...)` call, an optional path value, or a path added after query parameters.
 |The Kotlin compiler rejects the definition before it produces an endpoint value.
 
-|Endpoint creation
-|The same path-variable name used twice, or two output alternatives with matchers `Status.Ok` and
-`statusesIn(200..299)`. Both match status 200.
-|tapik rejects the duplicate or overlap while building the endpoint value.
-
 |Format creation
 |A JSON serializer shape that a format integration cannot describe.
 |The integration reports the unsupported shape when `jsonBody(...)` creates the format. Supply an explicit schema when
 the codec's wire shape is known.
+
+|Endpoint creation
+|The same path-variable name used twice, or two output alternatives with matchers `Status.Ok` and
+`statusesIn(200..299)`. Both match status 200.
+|tapik rejects the duplicate or overlap while building the endpoint value.
 
 |Target generation
 |A path ending in `remaining("tail")` passed to OpenAPI. Spring WebMVC also cannot map `CONNECT` or `QUERY`.
