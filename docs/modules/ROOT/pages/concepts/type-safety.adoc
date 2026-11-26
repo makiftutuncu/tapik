@@ -20,6 +20,11 @@ tapik does not make a second copy of its definition.
 `statusesIn(200..299)`. Both match status 200.
 |tapik rejects the duplicate or overlap while building the endpoint value.
 
+|Format creation
+|A JSON serializer shape that a format integration cannot describe.
+|The integration reports the unsupported shape when `jsonBody(...)` creates the format. Supply an explicit schema when
+the codec's wire shape is known.
+
 |Target generation
 |A path ending in `remaining("tail")` passed to OpenAPI. Spring WebMVC also cannot map `CONNECT` or `QUERY`.
 |The selected target reports the unsupported feature. The RestClient target accepts `CONNECT` and `QUERY`, subject to

@@ -23,11 +23,19 @@ tapik provides feedback at the earliest layer capable of expressing a rule.
 Matcher overlap is checked over the complete valid HTTP status domain. Custom predicates must be pure and
 deterministic; a predicate that throws produces a contextual construction failure.
 
+## Format-creation failures
+
+- A format integration cannot derive a required schema for its wire type
+
+Schema derivation happens when the format is created, not when a target later reads it. Supplying an explicit schema
+lets the caller describe a wire shape the integration cannot derive; the caller is responsible for keeping it aligned
+with the codec.
+
 ## Target compatibility failures
 
-- A required codec or schema cannot be derived
 - A runtime-only status predicate lacks a representation understood by the target
 - A serialization shape cannot be represented faithfully
+- A schema feature required by the target cannot be represented
 - A target cannot map an otherwise valid tapik feature
 
 A target validates schema features only when it needs schema information. A schema form that one target cannot
