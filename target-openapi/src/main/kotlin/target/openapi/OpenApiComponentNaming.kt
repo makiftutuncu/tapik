@@ -3,6 +3,10 @@ package dev.akif.tapik.target.openapi
 /**
  * Maps format-provided schema names to OpenAPI component names.
  *
+ * Custom policies should return a stable name for each input. Names must contain only ASCII letters, digits, `.`, `_`,
+ * or `-`. Different schema names may map to the same component only when their schemas are identical; otherwise
+ * generation fails with [OpenApiGenerationException].
+ *
  * @see Simple
  * @see Qualified
  */
