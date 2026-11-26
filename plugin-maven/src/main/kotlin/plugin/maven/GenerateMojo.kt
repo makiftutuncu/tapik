@@ -18,6 +18,9 @@ import java.nio.file.Path
  * The goal defaults to `process-classes`, after APIs declared by the current project have compiled. Bind it to
  * `generate-sources` when generating from an already compiled API dependency so generated Kotlin can be used by
  * the current project's main sources. The goal does not scan packages or execute API declarations.
+ *
+ * API filters use exact, case-sensitive IDs. An empty include set selects every visible API; exclusions are applied
+ * afterward.
  */
 @Mojo(
     name = "generate",

@@ -7,7 +7,7 @@ import java.util.LinkedHashSet
 /**
  * Exact API-ID filters applied before target execution.
  *
- * An empty [includes] set selects every available API. [excludes] are applied afterward.
+ * IDs match case-sensitively. An empty [includes] set selects every available API. [excludes] are applied afterward.
  *
  * @param includes exact API IDs to include, or empty to include all.
  * @param excludes exact API IDs to exclude after includes are applied.
